@@ -37,7 +37,6 @@
     "vercel:up": "pnpm up -r \"@vercel/*\""
   },
   "resolutions": {
-    "@babel/core": "7.26.9",
     "clipboardy": "4.0.0",
     "colorjs.io": "^0.5.2",
     "cookie": "0.7.0",
@@ -45,6 +44,7 @@
     "elliptic": "6.6.1",
     "esbuild": "0.25.0",
     "jsonpath-plus": "10.3.0",
+    "katex": "0.16.21",
     "markdown-to-jsx": "7.4.0",
     "micromatch": "4.0.8",
     "react": "19.0.0",
