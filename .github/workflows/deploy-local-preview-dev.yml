@@ -40,7 +40,7 @@ jobs:
         run: find .next -depth -mindepth 1 -not -path ".next/standalone*" -exec rm -rf {} \;
       - name: Remove esbuild dependency
         working-directory: packages/fern-docs/bundle
-        run: rm -rf .next/standalone/node_modules/.pnpm/esbuild@0.25.0
+        run: rm -rf .next/standalone/node_modules/.pnpm/esbuild@0.25.0 && rm -rf .next/standalone/node_modules/.pnpm/@esbuild+linux-x64@0.25.0
       - name: Synthesize local preview bundle
         run: pnpm --filter=@fern-platform/cdk run deploy-app:dev2
         
