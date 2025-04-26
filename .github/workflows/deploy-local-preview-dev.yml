@@ -35,6 +35,9 @@ jobs:
       - name: Copy static and public files
         working-directory: packages/fern-docs/bundle
         run: cp -r .next/static .next/standalone/packages/fern-docs/bundle/.next && cp -r public .next/standalone/packages/fern-docs/bundle
+      - name: Remove unnecessary files
+        working-directory: packages/fern-docs/bundle
+        run: find .next -depth -mindepth 1 -not -path ".next/standalone*" -exec rm -rf {} \;
       - name: Synthesize local preview bundle
         run: pnpm --filter=@fern-platform/cdk run deploy-app:dev2
         
@@ -57,5 +60,8 @@ jobs:
       - name: Copy static and public files
         working-directory: packages/fern-docs/bundle
         run: cp -r .next/static .next/standalone/packages/fern-docs/bundle/.next && cp -r public .next/standalone/packages/fern-docs/bundle
+      - name: Remove unnecessary files
+        working-directory: packages/fern-docs/bundle
+        run: find .next -depth -mindepth 1 -not -path ".next/standalone*" -exec rm -rf {} \;
       - name: Synthesize local preview bundle
         run: pnpm --filter=@fern-platform/cdk run deploy-app:prod
