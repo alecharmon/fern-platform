@@ -193,9 +193,14 @@ export const middleware: NextMiddleware = async (request) => {
   if (isLocal()) {
     // serve local files directly
     if (pathname.startsWith("/_local/")) {
-      return NextResponse.next({
-        request: { headers },
-      });
+      const origin = process.env.NEXT_PUBLIC_FDR_ORIGIN;
+      if (!origin) {
+        throw new Error(
+          "NEXT_PUBLIC_FDR_ORIGIN is required for local file handling"
+        );
+      }
+      const absoluteUrl = new URL(pathname, origin);
+      return NextResponse.redirect(absoluteUrl);
     }
 
     const getResponse = () => {

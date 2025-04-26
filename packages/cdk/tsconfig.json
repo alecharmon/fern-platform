@@ -1,6 +1,11 @@
 {
   "extends": "@fern-platform/configs/tsconfig/cli.json",
-  "compilerOptions": { "outDir": "./dist", "rootDir": "./src" },
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
+  },
   "include": ["./src/**/*"],
   "exclude": ["cdk.out"]
 }

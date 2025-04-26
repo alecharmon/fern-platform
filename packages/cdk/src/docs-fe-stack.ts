@@ -11,7 +11,7 @@ import { EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 
 const LOCAL_PREVIEW_BUNDLE_OUT_DIR = path.resolve(
   __dirname,
-  "../../fern-docs/local-preview-bundle/out"
+  "../../fern-docs/bundle/.next"
 );
 
 export class DocsFeStack extends Stack {
@@ -22,8 +22,8 @@ export class DocsFeStack extends Stack {
     props?: StackProps
   ) {
     super(scope, id, props);
-    const bucket = new Bucket(this, "local-preview-bundle2", {
-      bucketName: `${environmentType.toLowerCase()}-local-preview-bundle2`,
+    const bucket = new Bucket(this, "local-preview-bundle3", {
+      bucketName: `${environmentType.toLowerCase()}-local-preview-bundle3`,
       removalPolicy: RemovalPolicy.RETAIN,
       cors: [
         {
@@ -51,7 +51,7 @@ export class DocsFeStack extends Stack {
 
     const local_preview_bundle_dist_zip = path.resolve(
       __dirname,
-      "../../fern-docs/local-preview-bundle/dist/out.zip"
+      "../../fern-docs/bundle/next.zip"
     );
     if (
       !fs.existsSync(LOCAL_PREVIEW_BUNDLE_OUT_DIR) ||
@@ -66,7 +66,7 @@ export class DocsFeStack extends Stack {
       LOCAL_PREVIEW_BUNDLE_OUT_DIR,
       local_preview_bundle_dist_zip
     ).then(() => {
-      new BucketDeployment(this, "deploy-local-preview-bundle2", {
+      new BucketDeployment(this, "deploy-local-preview-bundle3", {
         sources: [Source.asset(local_preview_bundle_dist_zip)],
         destinationBucket: bucket,
         extract: false,
@@ -90,7 +90,7 @@ async function zipFolder(sourceFolder: string, zipFilePath: string) {
     const archive = archiver("zip");
 
     archive.on("error", (err: unknown) => {
-      reject(err);
+      reject(err instanceof Error ? err : new Error(String(err)));
     });
 
     output.on("close", function () {

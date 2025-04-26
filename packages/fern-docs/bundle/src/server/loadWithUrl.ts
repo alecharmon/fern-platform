@@ -2,7 +2,6 @@ import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { Url } from "@fern-api/fdr-sdk/api-definition";
 import { APIResponse, FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { isPreviewDomain, withoutStaging } from "@fern-docs/utils";
 
@@ -32,7 +31,7 @@ export const loadWithUrl = cache(
         if (isLocal()) {
           const response =
             await provideRegistryService().docs.v2.read.getDocsForUrl({
-              url: Url(""),
+              url: FdrAPI.Url("/"),
             });
           if (response.ok) {
             return response.body;

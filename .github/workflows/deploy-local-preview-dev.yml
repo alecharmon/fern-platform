@@ -1,0 +1,61 @@
+name: Deploy Local Preview (DEV)
+
+on:
+  push:
+    branches:
+      - app
+  release:
+    types: [created]
+    tags:
+      - "docs@*"
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: "buildwithfern"
+  FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+
+jobs:
+  dev:
+    if: github.event_name == 'push'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Install
+        uses: ./.github/actions/install
+      - name: Compile
+        run: pnpm compile
+      - name: Build local preview bundle
+        run: pnpm --filter=@fern-docs/bundle run docs:build:local
+      - name: Copy static and public files
+        working-directory: packages/fern-docs/bundle
+        run: cp -r .next/static .next/standalone/packages/fern-docs/bundle/.next && cp -r public .next/standalone/packages/fern-docs/bundle
+      - name: Synthesize local preview bundle
+        run: pnpm --filter=@fern-platform/cdk run deploy-app:dev2
+        
+  prod:
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'docs@')
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Install
+        uses: ./.github/actions/install
+      - name: Compile
+        run: pnpm compile
+      - name: Build local preview bundle
+        run: pnpm --filter=@fern-docs/bundle run docs:build:local
+      - name: Copy static and public files
+        working-directory: packages/fern-docs/bundle
+        run: cp -r .next/static .next/standalone/packages/fern-docs/bundle/.next && cp -r public .next/standalone/packages/fern-docs/bundle
+      - name: Synthesize local preview bundle
+        run: pnpm --filter=@fern-platform/cdk run deploy-app:prod

@@ -24,7 +24,7 @@ async function main() {
       case EnvironmentType.Prod:
         new DocsFeStack(
           app,
-          `local-preview-bundle2-${environmentType.toLowerCase()}`,
+          `local-preview-bundle3-${environmentType.toLowerCase()}`,
           environmentType,
           {
             env: { account: "985111089818", region: "us-east-1" },
@@ -43,9 +43,10 @@ async function getEnvironments(): Promise<Environments> {
     {
       method: "GET",
       headers: {
-        Authorization: "Bearer " + process.env["GITHUB_TOKEN"],
+        /* eslint-disable turbo/no-undeclared-env-vars */
+        Authorization: "Bearer " + process.env.GITHUB_TOKEN,
       },
     }
   );
-  return (await response.json()) as any as Environments;
+  return (await response.json()) as Environments;
 }

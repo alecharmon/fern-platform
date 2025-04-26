@@ -4,6 +4,8 @@ import { experimental_taintUniqueValue } from "react";
 import { ConsoleMessage } from "@/components/console-message";
 import { FERN_DOCS_ID } from "@/components/constants";
 import { ScrollToTop } from "@/components/layouts/ScrollToTop";
+import { WebSocketRefresh } from "@/components/websocket-refresh";
+import { isLocal } from "@/server/isLocal";
 
 import "./globals.css";
 import { Providers } from "./providers";
@@ -55,6 +57,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body className="antialiased" id={FERN_DOCS_ID}>
         <ConsoleMessage />
         <ScrollToTop />
+        {isLocal() && <WebSocketRefresh />}
         <Providers>{children}</Providers>
       </body>
     </html>

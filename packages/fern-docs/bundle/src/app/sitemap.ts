@@ -8,11 +8,16 @@ import { getCanonicalUrl } from "@fern-docs/edge-config";
 import { conformTrailingSlash } from "@fern-docs/utils";
 
 import { createCachedDocsLoader } from "@/server/docs-loader";
+import { isLocal } from "@/server/isLocal";
 import { getDocsDomainApp, getDocsHostApp } from "@/server/xfernhost/app";
 
 import { getFernToken } from "./fern-token";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (isLocal()) {
+    return [];
+  }
+
   const host = await getDocsHostApp();
   const domain = await getDocsDomainApp();
   const canonicalUrl = await getCanonicalUrl(domain);

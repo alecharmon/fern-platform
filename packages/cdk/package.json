@@ -17,8 +17,11 @@
   ],
   "scripts": {
     "cdk": "cdk",
+    "deploy-app:dev2": "cdk deploy local-preview-bundle3-dev2 --require-approval never --progress events",
+    "deploy-app:prod": "cdk deploy local-preview-bundle3-prod --require-approval never --progress events",
     "deploy:dev2": "cdk deploy local-preview-bundle2-dev2 --require-approval never --progress events",
     "deploy:prod": "cdk deploy local-preview-bundle2-prod --require-approval never --progress events",
+    "synth-app:dev2": "cdk synth local-preview-bundle3-dev2",
     "synth:dev2": "cdk synth local-preview-bundle2-dev2"
   },
   "dependencies": {
