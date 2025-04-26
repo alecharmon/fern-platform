@@ -62,17 +62,31 @@ export class DocsFeStack extends Stack {
       );
     }
 
-    void zipFolder(
-      LOCAL_PREVIEW_BUNDLE_OUT_DIR,
-      local_preview_bundle_dist_zip
-    ).then(() => {
-      new BucketDeployment(this, "deploy-local-preview-bundle3", {
-        sources: [Source.asset(local_preview_bundle_dist_zip)],
-        destinationBucket: bucket,
-        extract: false,
-        memoryLimit: 1024,
+    // Copy install-esbuild.js into the .next folder
+    fs.promises
+      .copyFile(
+        path.resolve(__dirname, "../utilities/install-esbuild.js"),
+        path.join(LOCAL_PREVIEW_BUNDLE_OUT_DIR, "install-esbuild.js")
+      )
+      .then(() => {
+        return zipFolder(
+          LOCAL_PREVIEW_BUNDLE_OUT_DIR,
+          local_preview_bundle_dist_zip
+        );
+      })
+      .then(() => {
+        new BucketDeployment(this, "deploy-local-preview-bundle3", {
+          sources: [Source.asset(local_preview_bundle_dist_zip)],
+          destinationBucket: bucket,
+          extract: false,
+          memoryLimit: 1024,
+        });
+      })
+      .catch((error: unknown) => {
+        throw new Error(
+          `Failed to prepare and deploy bundle: ${error instanceof Error ? error.message : String(error)}`
+        );
       });
-    });
   }
 }
 
