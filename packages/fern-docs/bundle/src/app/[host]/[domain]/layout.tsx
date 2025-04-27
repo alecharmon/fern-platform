@@ -81,7 +81,9 @@ export default async function Layout({
 
   const { VERCEL_ENV } = getEnv();
 
-  const jsConfig = withJsConfig(config.js, files);
+  const jsConfig = isLocalEnvironment
+    ? undefined
+    : withJsConfig(config.js, files);
 
   // this creates a safe id mapping, so we can send it to the client:
   const sidebarRootNodes = getAllSidebarRootNodes(unsafe_fullRoot);
