@@ -24,7 +24,9 @@ export function MarkdownContent({
   cleanedContent = cleanedContent.replace(
     /\[\^(\d+)\]:\s+(.*?)(?=\n\n|\n[^\n]|$)/g,
     (match, footnoteNumber, link) => {
-      footnoteDefinitions.push(`[^${footnoteNumber}]: ${link.trim()}`);
+      footnoteDefinitions.push(
+        `[^${footnoteNumber}]: ${link.startsWith("http") ? link.trim() : `https://${link.trim()}`}`
+      );
       return `[^${footnoteNumber}]\n`;
     }
   );
