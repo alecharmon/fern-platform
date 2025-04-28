@@ -90,7 +90,7 @@ From the fern-platform repository, link vercel to the Fern project:
 
 Then, run `vercel pull`, which will create `/fern-platform/.vercel/.env.development.local`
 Then, copy that file (creating if necessary) to `/fern-platform/packages/fern-docs/bundle/.env.local`
-Finally, to run the dev server, `cd /packages/fern-docs/bundle` and run `pnpm docs:dev`, which should begin running on `localhost:3000`
+Finally, to run the dev server, `cd packages/fern-docs/bundle` and run `pnpm docs:dev`, which should begin running on `localhost:3000`
 
 To set a dev docs domain, add a `NEXT_PUBLIC_DOCS_DOMAIN` to `.env.local`. For instance:
 
