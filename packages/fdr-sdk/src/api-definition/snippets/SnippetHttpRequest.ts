@@ -120,6 +120,11 @@ export function toSnippetHttpRequest(
     }
   }
 
+  // If endpoint is OpenRPC, ensure Content-Type is application/json
+  if (endpoint.protocol?.type === "openrpc") {
+    headers["Content-Type"] = "application/json";
+  }
+
   return {
     method: endpoint.method,
     url,
