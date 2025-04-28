@@ -7,8 +7,9 @@ import { TabChild, hasRedirect } from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components";
 import { slugToHref } from "@fern-docs/utils";
 
-import { FernLink } from "@/components/FernLink";
 import { FaIconServer } from "@/components/fa-icon-server";
+
+import { FernLinkTab } from "../FernLinkTab";
 
 export function HeaderTabsList({
   tabs,
@@ -21,7 +22,7 @@ export function HeaderTabsList({
     <Tabs.TabsList>
       {tabs.map((tab) => (
         <Tabs.TabsTrigger key={tab.id} value={tab.id} asChild>
-          <FernLink
+          <FernLinkTab
             className={cn({ "opacity-50": tab.type !== "link" && tab.hidden })}
             href={
               tab.type === "link"
@@ -29,6 +30,7 @@ export function HeaderTabsList({
                 : slugToHref(hasRedirect(tab) ? tab.pointsTo : tab.slug)
             }
             scroll={true}
+            id={tab.id}
           >
             {tab.type !== "link" && tab.authed ? (
               <Lock />
@@ -36,7 +38,7 @@ export function HeaderTabsList({
               tab.icon && <FaIconServer icon={tab.icon} />
             )}
             <span className="truncate">{tab.title}</span>
-          </FernLink>
+          </FernLinkTab>
         </Tabs.TabsTrigger>
       ))}
       {children}

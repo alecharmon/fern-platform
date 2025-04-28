@@ -7,7 +7,7 @@ import { TabChild, hasRedirect } from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components";
 import { slugToHref } from "@fern-docs/utils";
 
-import { FernLink } from "@/components/FernLink";
+import { FernLinkTab } from "@/components/FernLinkTab";
 import { FaIconServer } from "@/components/fa-icon-server";
 
 export function SidebarTabsList({
@@ -21,7 +21,7 @@ export function SidebarTabsList({
     <Tabs.TabsList className="-my-2">
       {tabs.map((tab) => (
         <Tabs.TabsTrigger key={tab.id} value={tab.id} asChild>
-          <FernLink
+          <FernLinkTab
             className={cn(
               "min-h-8 lg:min-h-9",
               "hover:text-(color:--accent) rounded-2 group flex min-w-0 flex-1 select-none items-center justify-start py-2 text-base lg:px-3 lg:text-sm",
@@ -51,7 +51,7 @@ export function SidebarTabsList({
             <span className="truncate font-medium group-data-[state=active]:font-semibold">
               {tab.title}
             </span>
-          </FernLink>
+          </FernLinkTab>
         </Tabs.TabsTrigger>
       ))}
       {children}
