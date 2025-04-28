@@ -141,6 +141,7 @@ export const PlaygroundEndpoint = ({
           shape: endpoint.requests?.[0]?.body,
           body: formState.body,
           usesApplicationJsonInFormDataValue,
+          protocol: endpoint.protocol,
         }),
       };
       if (endpoint.responses?.[0]?.body.type === "stream") {
