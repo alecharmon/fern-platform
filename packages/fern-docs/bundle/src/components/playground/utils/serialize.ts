@@ -3,6 +3,8 @@ import { compact, flatten } from "es-toolkit/array";
 import {
   FormDataField,
   HttpRequestBodyShape,
+  Protocol,
+  wrapOpenRPCRequest,
 } from "@fern-api/fdr-sdk/api-definition";
 import { assertNever, isNonNullish } from "@fern-api/ui-core-utils";
 
@@ -14,18 +16,32 @@ import {
   SerializableFormDataEntryValue,
 } from "../types";
 
-export async function serializeFormStateBody(
-  shape: HttpRequestBodyShape | undefined,
-  body: PlaygroundFormStateBody | undefined,
-  usesApplicationJsonInFormDataValue: boolean
-): Promise<ProxyRequest.SerializableBody | undefined> {
+export const serializeFormStateBody = async ({
+  shape,
+  body,
+  usesApplicationJsonInFormDataValue,
+  protocol,
+}: {
+  shape: HttpRequestBodyShape | undefined;
+  body: PlaygroundFormStateBody | undefined;
+  usesApplicationJsonInFormDataValue: boolean;
+  protocol?: Protocol;
+}): Promise<ProxyRequest.SerializableBody | undefined> => {
   if (shape == null || body == null) {
     return undefined;
   }
 
   switch (body.type) {
-    case "json":
+    case "json": {
+      if (protocol?.type === "openrpc") {
+        // Wrap the request body in OpenRPC format
+        return {
+          type: "json",
+          value: wrapOpenRPCRequest(body.value, protocol.methodName),
+        };
+      }
       return { type: "json", value: body.value };
+    }
     case "form-data": {
       const formDataValue: Record<string, SerializableFormDataEntryValue> = {};
       for (const [key, value] of Object.entries(body.value)) {
@@ -109,7 +125,7 @@ export async function serializeFormStateBody(
     default:
       assertNever(body);
   }
-}
+};
 
 async function serializeFile(
   file: File | undefined

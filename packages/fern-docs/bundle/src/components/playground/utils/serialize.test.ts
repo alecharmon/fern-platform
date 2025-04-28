@@ -51,7 +51,11 @@ describe("serializeFormStateBody", () => {
       },
     };
 
-    const result = await serializeFormStateBody(shape, body, true);
+    const result = await serializeFormStateBody({
+      shape,
+      body,
+      usesApplicationJsonInFormDataValue: true,
+    });
 
     expect(result).toEqual({
       type: "form-data",
@@ -93,7 +97,11 @@ describe("serializeFormStateBody", () => {
       },
     };
 
-    const result = await serializeFormStateBody(shape, body, true);
+    const result = await serializeFormStateBody({
+      shape,
+      body,
+      usesApplicationJsonInFormDataValue: true,
+    });
 
     expect(result).toEqual({
       type: "form-data",

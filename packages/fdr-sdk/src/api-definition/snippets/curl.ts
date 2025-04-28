@@ -9,6 +9,7 @@ import {
 } from "@fern-api/ui-core-utils";
 
 import type * as Latest from "../latest";
+import { wrapOpenRPCRequest } from "../wrapOpenRPCRequest";
 import {
   SnippetHttpRequest,
   SnippetHttpRequestBodyFormValue,
@@ -91,16 +92,7 @@ function getBodyJsonString(
   protocol?: Latest.Protocol
 ): string[] {
   if (protocol?.type === "openrpc") {
-    let params = [];
-    if (value && typeof value === "object") {
-      params = Object.values(value);
-    }
-    const payload = {
-      id: 1,
-      jsonrpc: "2.0",
-      method: protocol.methodName,
-      params: params,
-    };
+    const payload = wrapOpenRPCRequest(value, protocol.methodName);
     const stringifiedValue = JSON.stringify(payload, null, 2).replace(
       /'/g,
       "\\'"

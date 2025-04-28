@@ -1,5 +1,8 @@
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
-import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
+import {
+  buildEndpointUrl,
+  wrapOpenRPCRequest,
+} from "@fern-api/fdr-sdk/api-definition";
 
 import {
   PlaygroundAuthState,
@@ -26,16 +29,10 @@ export abstract class PlaygroundCodeSnippetBuilder {
 
   protected maybeWrapJsonBody(body: unknown): unknown {
     if (this.context.endpoint.protocol?.type === "openrpc") {
-      let params = [];
-      if (body && typeof body === "object") {
-        params = Object.values(body);
-      }
-      return {
-        jsonrpc: "2.0",
-        method: this.context.endpoint.protocol.methodName,
-        params,
-        id: 1,
-      };
+      return wrapOpenRPCRequest(
+        body,
+        this.context.endpoint.protocol.methodName
+      );
     }
     return body;
   }

@@ -137,11 +137,11 @@ export const PlaygroundEndpoint = ({
         }),
         method: endpoint.method,
         headers,
-        body: await serializeFormStateBody(
-          endpoint.requests?.[0]?.body,
-          formState.body,
-          usesApplicationJsonInFormDataValue
-        ),
+        body: await serializeFormStateBody({
+          shape: endpoint.requests?.[0]?.body,
+          body: formState.body,
+          usesApplicationJsonInFormDataValue,
+        }),
       };
       if (endpoint.responses?.[0]?.body.type === "stream") {
         const [res, stream] = await executeProxyStream(req, isProxyDisabled);
