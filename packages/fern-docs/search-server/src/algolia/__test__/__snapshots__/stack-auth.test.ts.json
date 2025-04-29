@@ -11261,7 +11261,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.endpoint_.apiV1",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/api-v-1",
+    "canonicalPathname": "/rest-api/server/api-v-1",
     "pathname": "/rest-api/server/api-v-1",
     "title": "/api/v1",
     "breadcrumb": [
@@ -11310,7 +11310,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.listContactChannels",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/list-contact-channels",
+    "canonicalPathname": "/rest-api/server/contact-channels/list-contact-channels",
     "pathname": "/rest-api/server/contact-channels/list-contact-channels",
     "title": "List contact channels",
     "breadcrumb": [
@@ -11364,7 +11364,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.createAContactChannel",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/create-a-contact-channel",
+    "canonicalPathname": "/rest-api/server/contact-channels/create-a-contact-channel",
     "pathname": "/rest-api/server/contact-channels/create-a-contact-channel",
     "title": "Create a contact channel",
     "breadcrumb": [
@@ -11418,7 +11418,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.verifyAnEmail",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/verify-an-email",
+    "canonicalPathname": "/rest-api/server/contact-channels/verify-an-email",
     "pathname": "/rest-api/server/contact-channels/verify-an-email",
     "title": "Verify an email",
     "breadcrumb": [
@@ -11473,7 +11473,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.checkEmailVerificationCode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/check-email-verification-code",
+    "canonicalPathname": "/rest-api/server/contact-channels/check-email-verification-code",
     "pathname": "/rest-api/server/contact-channels/check-email-verification-code",
     "title": "Check email verification code",
     "breadcrumb": [
@@ -11528,7 +11528,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.getAContactChannel",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/get-a-contact-channel",
+    "canonicalPathname": "/rest-api/server/contact-channels/get-a-contact-channel",
     "pathname": "/rest-api/server/contact-channels/get-a-contact-channel",
     "title": "Get a contact channel",
     "breadcrumb": [
@@ -11582,7 +11582,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.deleteAContactChannel",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/delete-a-contact-channel",
+    "canonicalPathname": "/rest-api/server/contact-channels/delete-a-contact-channel",
     "pathname": "/rest-api/server/contact-channels/delete-a-contact-channel",
     "title": "Delete a contact channel",
     "breadcrumb": [
@@ -11636,7 +11636,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.updateAContactChannel",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/update-a-contact-channel",
+    "canonicalPathname": "/rest-api/server/contact-channels/update-a-contact-channel",
     "pathname": "/rest-api/server/contact-channels/update-a-contact-channel",
     "title": "Update a contact channel",
     "breadcrumb": [
@@ -11690,7 +11690,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.sendContactChannelVerificationCode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/contact-channels/send-contact-channel-verification-code",
+    "canonicalPathname": "/rest-api/server/contact-channels/send-contact-channel-verification-code",
     "pathname": "/rest-api/server/contact-channels/send-contact-channel-verification-code",
     "title": "Send contact channel verification code",
     "breadcrumb": [
@@ -11745,7 +11745,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_oauth.endpoint_oauth.oAuthTokenEndpoints",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/oauth/o-auth-token-endpoints",
+    "canonicalPathname": "/rest-api/server/oauth/o-auth-token-endpoints",
     "pathname": "/rest-api/server/oauth/o-auth-token-endpoints",
     "title": "OAuth token endpoints",
     "breadcrumb": [
@@ -11800,7 +11800,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_oauth.endpoint_oauth.oAuthAuthorizeEndpoint",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/oauth/o-auth-authorize-endpoint",
+    "canonicalPathname": "/rest-api/server/oauth/o-auth-authorize-endpoint",
     "pathname": "/rest-api/server/oauth/o-auth-authorize-endpoint",
     "title": "OAuth authorize endpoint",
     "breadcrumb": [
@@ -11853,7 +11853,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.signInWithACode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/otp/sign-in-with-a-code",
+    "canonicalPathname": "/rest-api/server/otp/sign-in-with-a-code",
     "pathname": "/rest-api/server/otp/sign-in-with-a-code",
     "title": "Sign in with a code",
     "breadcrumb": [
@@ -11908,7 +11908,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.sendSignInCode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/otp/send-sign-in-code",
+    "canonicalPathname": "/rest-api/server/otp/send-sign-in-code",
     "pathname": "/rest-api/server/otp/send-sign-in-code",
     "title": "Send sign-in code",
     "breadcrumb": [
@@ -11963,7 +11963,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.mfaSignIn",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/otp/mfa-sign-in",
+    "canonicalPathname": "/rest-api/server/otp/mfa-sign-in",
     "pathname": "/rest-api/server/otp/mfa-sign-in",
     "title": "MFA sign in",
     "breadcrumb": [
@@ -12018,7 +12018,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.checkSignInCode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/otp/check-sign-in-code",
+    "canonicalPathname": "/rest-api/server/otp/check-sign-in-code",
     "pathname": "/rest-api/server/otp/check-sign-in-code",
     "title": "Check sign in code",
     "breadcrumb": [
@@ -12073,7 +12073,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.updatePassword",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/password/update-password",
+    "canonicalPathname": "/rest-api/server/password/update-password",
     "pathname": "/rest-api/server/password/update-password",
     "title": "Update password",
     "breadcrumb": [
@@ -12128,7 +12128,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.signUpWithEmailAndPassword",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/password/sign-up-with-email-and-password",
+    "canonicalPathname": "/rest-api/server/password/sign-up-with-email-and-password",
     "pathname": "/rest-api/server/password/sign-up-with-email-and-password",
     "title": "Sign up with email and password",
     "breadcrumb": [
@@ -12183,7 +12183,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.signInWithEmailAndPassword",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/password/sign-in-with-email-and-password",
+    "canonicalPathname": "/rest-api/server/password/sign-in-with-email-and-password",
     "pathname": "/rest-api/server/password/sign-in-with-email-and-password",
     "title": "Sign in with email and password",
     "breadcrumb": [
@@ -12238,7 +12238,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.setPassword",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/password/set-password",
+    "canonicalPathname": "/rest-api/server/password/set-password",
     "pathname": "/rest-api/server/password/set-password",
     "title": "Set password",
     "breadcrumb": [
@@ -12293,7 +12293,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.sendResetPasswordCode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/password/send-reset-password-code",
+    "canonicalPathname": "/rest-api/server/password/send-reset-password-code",
     "pathname": "/rest-api/server/password/send-reset-password-code",
     "title": "Send reset password code",
     "breadcrumb": [
@@ -12348,7 +12348,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.resetPasswordWithACode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/password/reset-password-with-a-code",
+    "canonicalPathname": "/rest-api/server/password/reset-password-with-a-code",
     "pathname": "/rest-api/server/password/reset-password-with-a-code",
     "title": "Reset password with a code",
     "breadcrumb": [
@@ -12403,7 +12403,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.checkResetPasswordCode",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/password/check-reset-password-code",
+    "canonicalPathname": "/rest-api/server/password/check-reset-password-code",
     "pathname": "/rest-api/server/password/check-reset-password-code",
     "title": "Check reset password code",
     "breadcrumb": [
@@ -12623,7 +12623,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_projects.endpoint_projects.getTheCurrentProject",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/projects/get-the-current-project",
+    "canonicalPathname": "/rest-api/server/projects/get-the-current-project",
     "pathname": "/rest-api/server/projects/get-the-current-project",
     "title": "Get the current project",
     "breadcrumb": [
@@ -12733,7 +12733,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_sessions.endpoint_sessions.signOutOfTheCurrentSession",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/sessions/sign-out-of-the-current-session",
+    "canonicalPathname": "/rest-api/server/sessions/sign-out-of-the-current-session",
     "pathname": "/rest-api/server/sessions/sign-out-of-the-current-session",
     "title": "Sign out of the current session",
     "breadcrumb": [
@@ -12788,7 +12788,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_sessions.endpoint_sessions.refreshAccessToken",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/sessions/refresh-access-token",
+    "canonicalPathname": "/rest-api/server/sessions/refresh-access-token",
     "pathname": "/rest-api/server/sessions/refresh-access-token",
     "title": "Refresh access token",
     "breadcrumb": [
@@ -12843,7 +12843,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.listTeams",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/list-teams",
+    "canonicalPathname": "/rest-api/server/teams/list-teams",
     "pathname": "/rest-api/server/teams/list-teams",
     "title": "List teams",
     "breadcrumb": [
@@ -12898,7 +12898,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.createATeam",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/create-a-team",
+    "canonicalPathname": "/rest-api/server/teams/create-a-team",
     "pathname": "/rest-api/server/teams/create-a-team",
     "title": "Create a team",
     "breadcrumb": [
@@ -12953,7 +12953,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.listTeamMembersProfiles",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/list-team-members-profiles",
+    "canonicalPathname": "/rest-api/server/teams/list-team-members-profiles",
     "pathname": "/rest-api/server/teams/list-team-members-profiles",
     "title": "List team members profiles",
     "breadcrumb": [
@@ -13008,7 +13008,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.getATeam",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/get-a-team",
+    "canonicalPathname": "/rest-api/server/teams/get-a-team",
     "pathname": "/rest-api/server/teams/get-a-team",
     "title": "Get a team",
     "breadcrumb": [
@@ -13063,7 +13063,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.deleteATeam",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/delete-a-team",
+    "canonicalPathname": "/rest-api/server/teams/delete-a-team",
     "pathname": "/rest-api/server/teams/delete-a-team",
     "title": "Delete a team",
     "breadcrumb": [
@@ -13118,7 +13118,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.updateATeam",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/update-a-team",
+    "canonicalPathname": "/rest-api/server/teams/update-a-team",
     "pathname": "/rest-api/server/teams/update-a-team",
     "title": "Update a team",
     "breadcrumb": [
@@ -13173,7 +13173,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.sendAnEmailToInviteAUserToATeam",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/send-an-email-to-invite-a-user-to-a-team",
+    "canonicalPathname": "/rest-api/server/teams/send-an-email-to-invite-a-user-to-a-team",
     "pathname": "/rest-api/server/teams/send-an-email-to-invite-a-user-to-a-team",
     "title": "Send an email to invite a user to a team",
     "breadcrumb": [
@@ -13228,7 +13228,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.inviteAUserToATeam",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/invite-a-user-to-a-team",
+    "canonicalPathname": "/rest-api/server/teams/invite-a-user-to-a-team",
     "pathname": "/rest-api/server/teams/invite-a-user-to-a-team",
     "title": "Invite a user to a team",
     "breadcrumb": [
@@ -13337,7 +13337,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.removeAUserFromATeam",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/remove-a-user-from-a-team",
+    "canonicalPathname": "/rest-api/server/teams/remove-a-user-from-a-team",
     "pathname": "/rest-api/server/teams/remove-a-user-from-a-team",
     "title": "Remove a user from a team",
     "breadcrumb": [
@@ -13391,7 +13391,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.getATeamMemberProfile",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/get-a-team-member-profile",
+    "canonicalPathname": "/rest-api/server/teams/get-a-team-member-profile",
     "pathname": "/rest-api/server/teams/get-a-team-member-profile",
     "title": "Get a team member profile",
     "breadcrumb": [
@@ -13501,7 +13501,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.getTeamInvitationDetails",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/get-team-invitation-details",
+    "canonicalPathname": "/rest-api/server/teams/get-team-invitation-details",
     "pathname": "/rest-api/server/teams/get-team-invitation-details",
     "title": "Get team invitation details",
     "breadcrumb": [
@@ -13556,7 +13556,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.checkIfATeamInvitationCodeIsValid",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/teams/check-if-a-team-invitation-code-is-valid",
+    "canonicalPathname": "/rest-api/server/teams/check-if-a-team-invitation-code-is-valid",
     "pathname": "/rest-api/server/teams/check-if-a-team-invitation-code-is-valid",
     "title": "Check if a team invitation code is valid",
     "breadcrumb": [
@@ -13721,7 +13721,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_users.endpoint_users.getCurrentUser",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/users/get-current-user",
+    "canonicalPathname": "/rest-api/server/users/get-current-user",
     "pathname": "/rest-api/server/users/get-current-user",
     "title": "Get current user",
     "breadcrumb": [
@@ -13776,7 +13776,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_users.endpoint_users.deleteCurrentUser",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/users/delete-current-user",
+    "canonicalPathname": "/rest-api/server/users/delete-current-user",
     "pathname": "/rest-api/server/users/delete-current-user",
     "title": "Delete current user",
     "breadcrumb": [
@@ -13831,7 +13831,7 @@
     "objectID": "test:test.com:root.uv.rest-api.rest-api.server.subpackage_users.endpoint_users.updateCurrentUser",
     "org_id": "test",
     "domain": "test.com",
-    "canonicalPathname": "/rest-api/client/users/update-current-user",
+    "canonicalPathname": "/rest-api/server/users/update-current-user",
     "pathname": "/rest-api/server/users/update-current-user",
     "title": "Update current user",
     "breadcrumb": [

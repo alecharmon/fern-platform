@@ -17,6 +17,18 @@ export class CurlSnippetBuilder extends PlaygroundCodeSnippetBuilder {
   }
 
   public override build(): string {
+    // If the endpoint protocol is OpenRPC, ensure we add the application/json Content-Type header
+    if (this.context.endpoint.protocol?.type === "openrpc") {
+      // Create a copy of the headers to avoid mutating the original object
+      const headers = { ...this.formState.headers };
+      // Add or override the Content-Type header
+      headers["Content-Type"] = "application/json";
+      this.formState = {
+        ...this.formState,
+        headers,
+      };
+    }
+
     return convertToCurl(
       {
         method: this.context.endpoint.method,

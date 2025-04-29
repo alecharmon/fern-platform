@@ -52,7 +52,8 @@
     "lint:eslint:fix": "pnpm lint:eslint --fix",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "test:update": "vitest --run -u --passWithNoTests --globals"
   },
   "dependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
