@@ -27,19 +27,23 @@ export const serializeFormStateBody = async ({
   usesApplicationJsonInFormDataValue: boolean;
   protocol?: Protocol;
 }): Promise<ProxyRequest.SerializableBody | undefined> => {
+  if (protocol?.type === "openrpc") {
+    // Wrap the request body in OpenRPC format
+    return {
+      type: "json",
+      value: wrapOpenRPCRequest(
+        body == null ? {} : body.value,
+        protocol.methodName
+      ),
+    };
+  }
+
   if (shape == null || body == null) {
     return undefined;
   }
 
   switch (body.type) {
     case "json": {
-      if (protocol?.type === "openrpc") {
-        // Wrap the request body in OpenRPC format
-        return {
-          type: "json",
-          value: wrapOpenRPCRequest(body.value, protocol.methodName),
-        };
-      }
       return { type: "json", value: body.value };
     }
     case "form-data": {

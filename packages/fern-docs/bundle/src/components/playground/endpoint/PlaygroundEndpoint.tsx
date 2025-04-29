@@ -128,6 +128,11 @@ export const PlaygroundEndpoint = ({
         headers["Content-Type"] = endpoint.requests[0].contentType;
       }
 
+      // Add application/json content type for OpenRPC endpoints
+      if (endpoint.protocol?.type === "openrpc") {
+        headers["Content-Type"] = "application/json";
+      }
+
       const req: ProxyRequest = {
         url: buildEndpointUrl({
           endpoint,
