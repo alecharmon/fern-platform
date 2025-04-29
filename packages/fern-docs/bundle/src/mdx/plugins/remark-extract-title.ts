@@ -14,6 +14,12 @@ import { type Mdast, Unified, mdastToString } from "@fern-docs/mdx";
  */
 export const remarkExtractTitle: Unified.Plugin<[], Mdast.Root> = () => {
   return (tree: Mdast.Root) => {
+    const yaml = tree.children.find((child) => child.type === "yaml");
+
+    if (yaml && parseYaml(yaml.value).title) {
+      return;
+    }
+
     const firstHeadingIndex = tree.children.findIndex(
       (child) => child.type !== "mdxjsEsm" && child.type !== "yaml"
     );
@@ -30,7 +36,6 @@ export const remarkExtractTitle: Unified.Plugin<[], Mdast.Root> = () => {
       }
       tree.children.splice(firstHeadingIndex, 1);
 
-      const yaml = tree.children.find((child) => child.type === "yaml");
       if (yaml == null) {
         tree.children.unshift({
           type: "yaml",
