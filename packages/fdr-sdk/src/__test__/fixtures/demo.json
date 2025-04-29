@@ -1,0 +1,404 @@
+{
+  "orgId": "catherine-deskur",
+  "baseUrl": {
+    "domain": "minimum-repro.docs.buildwithfern.com",
+    "basePath": "/subpath"
+  },
+  "definition": {
+    "pages": {
+      "pages/overview.mdx": {
+        "markdown": "---\ntitle: Overview\n---\n\n## Tuna\n\nOverview\n"
+      },
+      "pages/apple.mdx": {
+        "markdown": "---\ntitle: Overview\n---\n\n## Apple \n\nOverview\n"
+      },
+      "pages/banana.mdx": {
+        "markdown": "---\ntitle: Overview\n---\n\n## Banana \n\nOverview\n"
+      }
+    },
+    "apis": {
+      "1504329f-2ebc-4695-be7a-95793adc10b8": {
+        "id": "1504329f-2ebc-4695-be7a-95793adc10b8",
+        "rootPackage": {
+          "endpoints": [],
+          "subpackages": [],
+          "types": [
+            "Pet",
+            "Pet"
+          ],
+          "webhooks": [
+            {
+              "urlSlug": "create-pet",
+              "method": "POST",
+              "id": "createPet",
+              "name": "Create Pet",
+              "path": [],
+              "headers": [],
+              "payload": {
+                "type": {
+                  "type": "reference",
+                  "value": {
+                    "type": "id",
+                    "value": "Pet"
+                  }
+                },
+                "description": "Information about a new pet in the system"
+              },
+              "examples": [
+                {
+                  "payload": {
+                    "id": 99999,
+                    "name": "string",
+                    "tag": "string"
+                  }
+                }
+              ]
+            }
+          ],
+          "websockets": []
+        },
+        "types": {
+          "Pet": {
+            "name": "Pet",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "key": "id",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "long"
+                    }
+                  }
+                },
+                {
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "key": "tag",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "subpackages": {},
+        "hasMultipleBaseUrls": false,
+        "globalHeaders": []
+      },
+      "d18f1aa9-487e-443f-8604-ac65bc48f280": {
+        "id": "d18f1aa9-487e-443f-8604-ac65bc48f280",
+        "rootPackage": {
+          "endpoints": [],
+          "subpackages": [],
+          "types": [
+            "Pet",
+            "Pet"
+          ],
+          "webhooks": [
+            {
+              "urlSlug": "create-pet",
+              "method": "POST",
+              "id": "createPet",
+              "name": "Create Pet",
+              "path": [],
+              "headers": [],
+              "payload": {
+                "type": {
+                  "type": "reference",
+                  "value": {
+                    "type": "id",
+                    "value": "Pet"
+                  }
+                },
+                "description": "Information about a new pet in the system"
+              },
+              "examples": [
+                {
+                  "payload": {
+                    "id": 99999,
+                    "name": "string",
+                    "tag": "string"
+                  }
+                }
+              ]
+            }
+          ],
+          "websockets": []
+        },
+        "types": {
+          "Pet": {
+            "name": "Pet",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "key": "id",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "long"
+                    }
+                  }
+                },
+                {
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "key": "tag",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "subpackages": {},
+        "hasMultipleBaseUrls": false,
+        "globalHeaders": []
+      }
+    },
+    "apisV2": {},
+    "files": {},
+    "filesV2": {},
+    "jsFiles": {},
+    "id": "docs_definition_c8f2cc78-c158-4649-9b2d-7c1a173d0e3b",
+    "config": {
+      "root": {
+        "type": "root",
+        "version": "v1",
+        "id": "d0b6b951d313294318002dfa2c33f529a0d58113d36dc35e0a83bb1e0f8638ec",
+        "child": {
+          "id": "298b9fd8c9bc0e05e8704d61a7aff24bc96bfbd2794d48f2bc6428e01b90efb0",
+          "type": "versioned",
+          "children": [
+            {
+              "type": "version",
+              "id": "c00eece51ebef3362376bde4956e51bdb829a94e2cce394fe37bc2b2ec937f7e",
+              "versionId": "v2",
+              "title": "v2",
+              "slug": "subpath/v2",
+              "child": {
+                "type": "tabbed",
+                "id": "5ea7b7a443a1be643c7a45f9ae4b7e3ebd298d442b610ac20380bbd7eddd3da2",
+                "children": [
+                  {
+                    "type": "tab",
+                    "id": "e10bd79b1d1b174ed5d0ed58614a1131f41cff4647076071825ef24868b0b931",
+                    "title": "API",
+                    "slug": "subpath/v2/api",
+                    "child": {
+                      "type": "sidebarRoot",
+                      "id": "d1f2bbf1d431f8e8bceb4d72b2c28e7431fe9b2489c8b458af18893b3de8df9d",
+                      "children": [
+                        {
+                          "id": "27084caa872920c04f114aa0b978f99a4894f5ef38e691eac583a0f6e85bdee2",
+                          "type": "sidebarGroup",
+                          "children": [
+                            {
+                              "id": "98be4aef6362fdfe8d85deb74d853d72a80d02ea12b07fdb33b800ed9967fcce",
+                              "type": "page",
+                              "slug": "subpath/v2/api/overview",
+                              "title": "Overview",
+                              "pageId": "pages/overview.mdx"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "05a67abeb838721fb477e6a333220563912b7b6ad9ea6f75e0c2ca100eede6d7",
+                          "type": "section",
+                          "slug": "subpath/v2/api/apple",
+                          "title": "Apple",
+                          "children": [
+                            {
+                              "id": "47810535e98923e0b5ad47c87f961a7a425d1d3f0078aab983c5f2f9b3a4cbbc",
+                              "type": "page",
+                              "slug": "subpath/v2/api/apple/overview",
+                              "title": "Overview",
+                              "pageId": "pages/apple.mdx"
+                            },
+                            {
+                              "id": "8d8e4fbe630f35ef57b1000c9aea8677c6b75ccec775a16074b34ed4144cb70a",
+                              "type": "apiReference",
+                              "title": "Webhooks 1",
+                              "apiDefinitionId": "d18f1aa9-487e-443f-8604-ac65bc48f280",
+                              "paginated": false,
+                              "slug": "subpath/v2/api/apple/webhooks-1",
+                              "hideTitle": false,
+                              "showErrors": true,
+                              "children": [
+                                {
+                                  "id": "d18f1aa9-487e-443f-8604-ac65bc48f280:__package__.createPet",
+                                  "type": "webhook",
+                                  "webhookId": "__package__.createPet",
+                                  "method": "POST",
+                                  "title": "Create Pet",
+                                  "slug": "subpath/v2/api/apple/webhooks-1/create-pet",
+                                  "apiDefinitionId": "d18f1aa9-487e-443f-8604-ac65bc48f280"
+                                }
+                              ],
+                              "pointsTo": "subpath/v2/api/apple/webhooks-1/create-pet"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "a43e80dc278254786f40dd57b25eda5aadfcda931b1185188f51e9a6a9e95be4",
+                          "type": "section",
+                          "slug": "subpath/v2/api/banana",
+                          "title": "Banana",
+                          "children": [
+                            {
+                              "id": "ac8a13964f38160e4541c86647d4ba81bb386dfe2360df0d28056386498ed090",
+                              "type": "page",
+                              "slug": "subpath/v2/api/banana/overview",
+                              "title": "Overview",
+                              "pageId": "pages/banana.mdx"
+                            },
+                            {
+                              "id": "ca21b218657c27037e46be4bcf2ff6ef67db1f19a96c10387ffe12f3ea054762",
+                              "type": "apiReference",
+                              "title": "Webhooks 2",
+                              "apiDefinitionId": "1504329f-2ebc-4695-be7a-95793adc10b8",
+                              "paginated": false,
+                              "slug": "subpath/v2/api/banana/webhooks-2",
+                              "hideTitle": false,
+                              "showErrors": true,
+                              "children": [
+                                {
+                                  "id": "1504329f-2ebc-4695-be7a-95793adc10b8:__package__.createPet",
+                                  "type": "webhook",
+                                  "webhookId": "__package__.createPet",
+                                  "method": "POST",
+                                  "title": "Create Pet",
+                                  "slug": "subpath/v2/api/banana/webhooks-2/create-pet",
+                                  "apiDefinitionId": "1504329f-2ebc-4695-be7a-95793adc10b8"
+                                }
+                              ],
+                              "pointsTo": "subpath/v2/api/banana/webhooks-2/create-pet"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "default": true
+            }
+          ]
+        },
+        "slug": "subpath",
+        "title": "Minimum Repro Demo",
+        "hidden": false
+      },
+      "colorsV3": {
+        "type": "darkAndLight",
+        "light": {
+          "accentPrimary": {
+            "r": 32,
+            "g": 157,
+            "b": 99,
+            "a": 1
+          },
+          "background": {
+            "type": "solid",
+            "r": 255,
+            "g": 255,
+            "b": 255,
+            "a": 1
+          }
+        },
+        "dark": {
+          "accentPrimary": {
+            "r": 255,
+            "g": 255,
+            "b": 255,
+            "a": 1
+          },
+          "background": {
+            "type": "solid",
+            "r": 18,
+            "g": 18,
+            "b": 18,
+            "a": 1
+          }
+        }
+      },
+      "navbarLinks": [
+        {
+          "type": "filled",
+          "text": "Not Rounded",
+          "url": "https://www.google.com",
+          "rounded": false
+        },
+        {
+          "type": "filled",
+          "text": "Rounded",
+          "url": "https://www.google.com",
+          "rounded": true
+        }
+      ],
+      "title": "Minimum Repro Demo",
+      "layout": {
+        "searchbarPlacement": "SIDEBAR",
+        "tabsPlacement": "HEADER",
+        "contentAlignment": "CENTER",
+        "headerPosition": "FIXED",
+        "disableHeader": false
+      },
+      "css": {
+        "inline": [
+          ".container {\n  display: flex;\n  position: relative;\n}\n.left-div {\n  width: 200px;\n  height: 200px;\n  background-color: #3498db;\n  border-top-right-radius: -100px; /* Creates the curve */\n  z-index: 1;\n  position: relative;\n}\n.right-div {\n  width: 200px;\n  height: 200px;\n  background-color: #e74c3c;\n  position: relative;\n  left: -100px; /* Adjusts the position to align with the curve */\n}\n\n.left-div:after {\n  content: \"\";\n  position: absolute;\n  top: 0px;\n  right: -40px;\n  height: 40px;\n  width: 40px;\n  background: transparent;\n\n  border-bottom-left-radius: 50%;\n\n  box-shadow: 0 20px 0 0 blue;\n  transform: rotate(90deg);\n}\n\n#fern-footer:before {\n  content: \"© 2025 Catamorphic Co.\";\n  position: relative;\n  top: 0px;\n  right: 0px;\n  height: 40px;\n  width: 100%;\n  padding: 10px;\n  background: transparent;\n}\n\n.prose {\n  font-size: 14px !important;\n}\n\nh1,\nh2,\nh3,\nh4,\nh5,\nh6 {\n  font-weight: 600 !important;\n}\n\n\n#fern-footer:before {\n  color: var(--grayscale-a11);\n  content: \"© 2025 Catamorphic Co.\";\n  position: relative;\n  top: 0px;\n  right: 0px;\n  height: 40px;\n  width: 100%;\n  padding: 10px;\n  background: transparent;\n}\n\n\n.small-image-width img {\n  width: 100px;\n}\n\n.no-break {\n  white-space: nowrap;\n}\n"
+        ]
+      },
+      "js": {
+        "files": []
+      },
+      "integrations": {},
+      "analyticsConfig": {}
+    },
+    "search": {
+      "type": "singleAlgoliaIndex",
+      "value": {
+        "type": "versioned",
+        "indexSegmentsByVersionId": {
+          "v2": {
+            "id": "seg_minimum-repro.docs.buildwithfern.com/subpath_v-2_dc4dce8b-dcf9-4738-9601-821d99fe7f42",
+            "searchApiKey": "YmM1ODZiZmIyODM5ZjI4NDFiNWE2YTI3YzZlODVhYzA0OGY2ZGM4ZjgxYjg0MWE0YzgyYjhkZGY1ZjhkNDUwMmZpbHRlcnM9aW5kZXhTZWdtZW50SWQlM0FzZWdfbWluaW11bS1yZXByby5kb2NzLmJ1aWxkd2l0aGZlcm4uY29tJTJGc3VicGF0aF92LTJfZGM0ZGNlOGItZGNmOS00NzM4LTk2MDEtODIxZDk5ZmU3ZjQyJnZhbGlkVW50aWw9MTc0NTk2OTU3OA=="
+          }
+        }
+      }
+    }
+  },
+  "lightModeEnabled": true
+}

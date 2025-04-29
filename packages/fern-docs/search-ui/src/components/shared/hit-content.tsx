@@ -21,7 +21,13 @@ import {
 
 const headingLevels = ["h0", "h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
-function Breadcrumb({ breadcrumb }: { breadcrumb: string[] }): ReactNode {
+function Breadcrumb({
+  breadcrumb,
+  endingArrow,
+}: {
+  breadcrumb: string[];
+  endingArrow?: boolean;
+}): ReactNode {
   if (breadcrumb.length === 0) {
     return false;
   }
@@ -37,6 +43,7 @@ function Breadcrumb({ breadcrumb }: { breadcrumb: string[] }): ReactNode {
             )}
           </Fragment>
         ))}
+        {endingArrow && <ChevronRight className="-mb-px size-3 shrink-0" />}
       </span>
     </div>
   );
@@ -147,6 +154,10 @@ function ApiReferenceHitContent({
   return (
     <HitContentWithTitle hit={hit}>
       <div className="inline-flex max-w-full items-baseline gap-1">
+        <Breadcrumb
+          breadcrumb={hit.breadcrumb.map((crumb) => crumb.title)}
+          endingArrow
+        />
         <HttpMethodBadge
           method={hit.method}
           size="sm"
@@ -200,7 +211,6 @@ export function HitContent({
     case "parameter":
       return false;
     default:
-      // eslint-disable-next-line no-console
       console.error(new UnreachableCaseError(hit));
       return false;
   }

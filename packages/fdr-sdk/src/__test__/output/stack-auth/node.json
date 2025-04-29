@@ -1077,7 +1077,6 @@
                 "children": [
                   {
                     "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                    "canonicalSlug": "rest-api/client/api-v-1",
                     "endpointId": "endpoint_.apiV1",
                     "id": "root.uv.rest-api.rest-api.server.endpoint_.apiV1",
                     "isResponseStream": false,
@@ -1091,7 +1090,6 @@
                     "children": [
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/list-contact-channels",
                         "endpointId": "endpoint_contactChannels.listContactChannels",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.listContactChannels",
                         "isResponseStream": false,
@@ -1102,7 +1100,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/create-a-contact-channel",
                         "endpointId": "endpoint_contactChannels.createAContactChannel",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.createAContactChannel",
                         "isResponseStream": false,
@@ -1113,7 +1110,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/verify-an-email",
                         "endpointId": "endpoint_contactChannels.verifyAnEmail",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.verifyAnEmail",
                         "isResponseStream": false,
@@ -1124,7 +1120,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/check-email-verification-code",
                         "endpointId": "endpoint_contactChannels.checkEmailVerificationCode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.checkEmailVerificationCode",
                         "isResponseStream": false,
@@ -1135,7 +1130,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/get-a-contact-channel",
                         "endpointId": "endpoint_contactChannels.getAContactChannel",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.getAContactChannel",
                         "isResponseStream": false,
@@ -1146,7 +1140,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/delete-a-contact-channel",
                         "endpointId": "endpoint_contactChannels.deleteAContactChannel",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.deleteAContactChannel",
                         "isResponseStream": false,
@@ -1157,7 +1150,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/update-a-contact-channel",
                         "endpointId": "endpoint_contactChannels.updateAContactChannel",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.updateAContactChannel",
                         "isResponseStream": false,
@@ -1168,7 +1160,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/contact-channels/send-contact-channel-verification-code",
                         "endpointId": "endpoint_contactChannels.sendContactChannelVerificationCode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_contactChannels.endpoint_contactChannels.sendContactChannelVerificationCode",
                         "isResponseStream": false,
@@ -1189,7 +1180,6 @@
                     "children": [
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/oauth/o-auth-token-endpoints",
                         "endpointId": "endpoint_oauth.oAuthTokenEndpoints",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_oauth.endpoint_oauth.oAuthTokenEndpoints",
                         "isResponseStream": false,
@@ -1200,7 +1190,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/oauth/o-auth-authorize-endpoint",
                         "endpointId": "endpoint_oauth.oAuthAuthorizeEndpoint",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_oauth.endpoint_oauth.oAuthAuthorizeEndpoint",
                         "isResponseStream": false,
@@ -1221,7 +1210,6 @@
                     "children": [
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/otp/sign-in-with-a-code",
                         "endpointId": "endpoint_otp.signInWithACode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.signInWithACode",
                         "isResponseStream": false,
@@ -1232,7 +1220,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/otp/send-sign-in-code",
                         "endpointId": "endpoint_otp.sendSignInCode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.sendSignInCode",
                         "isResponseStream": false,
@@ -1243,7 +1230,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/otp/mfa-sign-in",
                         "endpointId": "endpoint_otp.mfaSignIn",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.mfaSignIn",
                         "isResponseStream": false,
@@ -1254,7 +1240,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/otp/check-sign-in-code",
                         "endpointId": "endpoint_otp.checkSignInCode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_otp.endpoint_otp.checkSignInCode",
                         "isResponseStream": false,
@@ -1275,7 +1260,6 @@
                     "children": [
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/password/update-password",
                         "endpointId": "endpoint_password.updatePassword",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.updatePassword",
                         "isResponseStream": false,
@@ -1286,7 +1270,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/password/sign-up-with-email-and-password",
                         "endpointId": "endpoint_password.signUpWithEmailAndPassword",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.signUpWithEmailAndPassword",
                         "isResponseStream": false,
@@ -1297,7 +1280,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/password/sign-in-with-email-and-password",
                         "endpointId": "endpoint_password.signInWithEmailAndPassword",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.signInWithEmailAndPassword",
                         "isResponseStream": false,
@@ -1308,7 +1290,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/password/set-password",
                         "endpointId": "endpoint_password.setPassword",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.setPassword",
                         "isResponseStream": false,
@@ -1319,7 +1300,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/password/send-reset-password-code",
                         "endpointId": "endpoint_password.sendResetPasswordCode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.sendResetPasswordCode",
                         "isResponseStream": false,
@@ -1330,7 +1310,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/password/reset-password-with-a-code",
                         "endpointId": "endpoint_password.resetPasswordWithACode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.resetPasswordWithACode",
                         "isResponseStream": false,
@@ -1341,7 +1320,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/password/check-reset-password-code",
                         "endpointId": "endpoint_password.checkResetPasswordCode",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_password.endpoint_password.checkResetPasswordCode",
                         "isResponseStream": false,
@@ -1402,7 +1380,6 @@
                     "children": [
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/projects/get-the-current-project",
                         "endpointId": "endpoint_projects.getTheCurrentProject",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_projects.endpoint_projects.getTheCurrentProject",
                         "isResponseStream": false,
@@ -1433,7 +1410,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/sessions/sign-out-of-the-current-session",
                         "endpointId": "endpoint_sessions.signOutOfTheCurrentSession",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_sessions.endpoint_sessions.signOutOfTheCurrentSession",
                         "isResponseStream": false,
@@ -1444,7 +1420,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/sessions/refresh-access-token",
                         "endpointId": "endpoint_sessions.refreshAccessToken",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_sessions.endpoint_sessions.refreshAccessToken",
                         "isResponseStream": false,
@@ -1465,7 +1440,6 @@
                     "children": [
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/list-teams",
                         "endpointId": "endpoint_teams.listTeams",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.listTeams",
                         "isResponseStream": false,
@@ -1476,7 +1450,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/create-a-team",
                         "endpointId": "endpoint_teams.createATeam",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.createATeam",
                         "isResponseStream": false,
@@ -1487,7 +1460,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/list-team-members-profiles",
                         "endpointId": "endpoint_teams.listTeamMembersProfiles",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.listTeamMembersProfiles",
                         "isResponseStream": false,
@@ -1498,7 +1470,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/get-a-team",
                         "endpointId": "endpoint_teams.getATeam",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.getATeam",
                         "isResponseStream": false,
@@ -1509,7 +1480,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/delete-a-team",
                         "endpointId": "endpoint_teams.deleteATeam",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.deleteATeam",
                         "isResponseStream": false,
@@ -1520,7 +1490,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/update-a-team",
                         "endpointId": "endpoint_teams.updateATeam",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.updateATeam",
                         "isResponseStream": false,
@@ -1531,7 +1500,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/send-an-email-to-invite-a-user-to-a-team",
                         "endpointId": "endpoint_teams.sendAnEmailToInviteAUserToATeam",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.sendAnEmailToInviteAUserToATeam",
                         "isResponseStream": false,
@@ -1542,7 +1510,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/invite-a-user-to-a-team",
                         "endpointId": "endpoint_teams.inviteAUserToATeam",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.inviteAUserToATeam",
                         "isResponseStream": false,
@@ -1563,7 +1530,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/remove-a-user-from-a-team",
                         "endpointId": "endpoint_teams.removeAUserFromATeam",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.removeAUserFromATeam",
                         "isResponseStream": false,
@@ -1574,7 +1540,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/get-a-team-member-profile",
                         "endpointId": "endpoint_teams.getATeamMemberProfile",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.getATeamMemberProfile",
                         "isResponseStream": false,
@@ -1595,7 +1560,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/get-team-invitation-details",
                         "endpointId": "endpoint_teams.getTeamInvitationDetails",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.getTeamInvitationDetails",
                         "isResponseStream": false,
@@ -1606,7 +1570,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/teams/check-if-a-team-invitation-code-is-valid",
                         "endpointId": "endpoint_teams.checkIfATeamInvitationCodeIsValid",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_teams.endpoint_teams.checkIfATeamInvitationCodeIsValid",
                         "isResponseStream": false,
@@ -1647,7 +1610,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/users/get-current-user",
                         "endpointId": "endpoint_users.getCurrentUser",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_users.endpoint_users.getCurrentUser",
                         "isResponseStream": false,
@@ -1658,7 +1620,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/users/delete-current-user",
                         "endpointId": "endpoint_users.deleteCurrentUser",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_users.endpoint_users.deleteCurrentUser",
                         "isResponseStream": false,
@@ -1669,7 +1630,6 @@
                       },
                       {
                         "apiDefinitionId": "e3e3def3-a1a3-4749-a69a-fa4dbe581533",
-                        "canonicalSlug": "rest-api/client/users/update-current-user",
                         "endpointId": "endpoint_users.updateCurrentUser",
                         "id": "root.uv.rest-api.rest-api.server.subpackage_users.endpoint_users.updateCurrentUser",
                         "isResponseStream": false,

@@ -605,10 +605,11 @@ export class FernNavigationV1ToLatest {
     node: FernNavigation.V1.EndpointNode,
     parents: FernNavigation.V1.NavigationNode[]
   ): FernNavigation.EndpointNode => {
+    const apiDisambiguation = this.#createApiDisambiguationKey(parents);
     const slug = FernNavigation.Slug(node.slug);
     const canonicalSlug = this.#getAndSetCanonicalSlug(
       [
-        `:api:endpoint:${node.method}:${node.endpointId}`,
+        `${apiDisambiguation}:api:endpoint:${node.method}:${node.endpointId}`,
         this.#createTitleDisambiguationKey(node, parents),
       ],
       slug
@@ -652,10 +653,11 @@ export class FernNavigationV1ToLatest {
     node: FernNavigation.V1.WebSocketNode,
     parents: FernNavigation.V1.NavigationNode[]
   ): FernNavigation.WebSocketNode => {
+    const apiDisambiguation = this.#createApiDisambiguationKey(parents);
     const slug = FernNavigation.Slug(node.slug);
     const canonicalSlug = this.#getAndSetCanonicalSlug(
       [
-        `:api:websocket:${node.webSocketId}`,
+        `${apiDisambiguation}:api:websocket:${node.webSocketId}`,
         this.#createTitleDisambiguationKey(node, parents),
       ],
       slug
@@ -684,10 +686,11 @@ export class FernNavigationV1ToLatest {
     node: FernNavigation.V1.WebhookNode,
     parents: FernNavigation.V1.NavigationNode[]
   ): FernNavigation.WebhookNode => {
+    const apiDisambiguation = this.#createApiDisambiguationKey(parents);
     const slug = FernNavigation.Slug(node.slug);
     const canonicalSlug = this.#getAndSetCanonicalSlug(
       [
-        `:api:webhook:${node.method}:${node.webhookId}`,
+        `${apiDisambiguation}:api:webhook:${node.method}:${node.webhookId}`,
         this.#createTitleDisambiguationKey(node, parents),
       ],
       slug
@@ -800,12 +803,29 @@ export class FernNavigationV1ToLatest {
     node: FernNavigation.V1.NavigationNodeWithMetadata,
     parents: FernNavigation.V1.NavigationNode[]
   ): string => {
-    const versionIdx = parents.findIndex((parent) => parent.type === "version");
-    const unversionedParents =
-      versionIdx >= 0 ? parents.slice(versionIdx + 1) : parents;
+    const unversionedParents = this.#findUnversionedParents(parents);
     const unversionedParentTitles = unversionedParents
       .filter(FernNavigation.V1.hasMetadata)
       .map((parent) => parent.title);
     return [...unversionedParentTitles, node.title].join("###");
+  };
+
+  #createApiDisambiguationKey = (
+    parents: FernNavigation.V1.NavigationNode[]
+  ): string => {
+    const unversionedParents = this.#findUnversionedParents(parents);
+    const unversionedParentIds = unversionedParents
+      .filter((parent) => parent.type === "apiReference")
+      .map((parent) => parent.title.replaceAll(" ", ""));
+    return [...unversionedParentIds].join(":");
+  };
+
+  #findUnversionedParents = (
+    parents: FernNavigation.V1.NavigationNode[]
+  ): FernNavigation.V1.NavigationNode[] => {
+    const versionIdx = parents.findIndex((parent) => parent.type === "version");
+    const unversionedParents =
+      versionIdx >= 0 ? parents.slice(versionIdx + 1) : parents;
+    return unversionedParents;
   };
 }

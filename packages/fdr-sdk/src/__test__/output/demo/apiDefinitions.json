@@ -1,0 +1,184 @@
+[
+  {
+    "id": "1504329f-2ebc-4695-be7a-95793adc10b8",
+    "endpoints": {},
+    "websockets": {},
+    "webhooks": {
+      "__package__.createPet": {
+        "id": "__package__.createPet",
+        "namespace": [],
+        "displayName": "Create Pet",
+        "operationId": "create-pet",
+        "method": "POST",
+        "path": [],
+        "payloads": [
+          {
+            "description": "Information about a new pet in the system",
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Pet"
+              }
+            }
+          }
+        ],
+        "examples": [
+          {
+            "payload": {
+              "id": 99999,
+              "name": "string",
+              "tag": "string"
+            }
+          }
+        ]
+      }
+    },
+    "types": {
+      "Pet": {
+        "name": "Pet",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "id",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "long"
+                  }
+                }
+              }
+            },
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            {
+              "key": "tag",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "subpackages": {},
+    "auths": {}
+  },
+  {
+    "id": "d18f1aa9-487e-443f-8604-ac65bc48f280",
+    "endpoints": {},
+    "websockets": {},
+    "webhooks": {
+      "__package__.createPet": {
+        "id": "__package__.createPet",
+        "namespace": [],
+        "displayName": "Create Pet",
+        "operationId": "create-pet",
+        "method": "POST",
+        "path": [],
+        "payloads": [
+          {
+            "description": "Information about a new pet in the system",
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Pet"
+              }
+            }
+          }
+        ],
+        "examples": [
+          {
+            "payload": {
+              "id": 99999,
+              "name": "string",
+              "tag": "string"
+            }
+          }
+        ]
+      }
+    },
+    "types": {
+      "Pet": {
+        "name": "Pet",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "id",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "long"
+                  }
+                }
+              }
+            },
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            {
+              "key": "tag",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "subpackages": {},
+    "auths": {}
+  }
+]
