@@ -72,7 +72,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     // TODO: need to support docs instances with subpaths (forward-proxied from the origin).
-    const destination = new URL(domain, url.origin);
+    const destination = new URL(
+      `${req.nextUrl.pathname}${req.nextUrl.search}`,
+      url.origin
+    );
     destination.searchParams.set(FORWARDED_HOST_QUERY, req.nextUrl.host);
     const allowedDestinations = [withDefaultProtocol(getDocsDomainEdge(req))];
 
