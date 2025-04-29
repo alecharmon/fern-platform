@@ -298,25 +298,40 @@ export async function generateMetadata({
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: frontmatter?.["og:title"],
-      description: frontmatter?.["og:description"],
-      locale: frontmatter?.["og:locale"],
-      url: frontmatter?.["og:url"],
-      siteName: frontmatter?.["og:site_name"],
+      title: frontmatter?.["og:title"] ?? config.metadata?.["og:title"],
+      description:
+        frontmatter?.["og:description"] ?? config.metadata?.["og:description"],
+      locale: frontmatter?.["og:locale"] ?? config.metadata?.["og:locale"],
+      url: frontmatter?.["og:url"] ?? config.metadata?.["og:url"],
+      siteName:
+        frontmatter?.["og:site_name"] ?? config.metadata?.["og:site_name"],
       images:
         toImageDescriptor(
           files,
           frontmatter?.["og:image"],
           frontmatter?.["og:image:width"],
           frontmatter?.["og:image:height"]
-        ) ?? toImageDescriptor(files, frontmatter?.image),
+        ) ??
+        toImageDescriptor(files, frontmatter?.image) ??
+        toImageDescriptor(
+          files,
+          config.metadata?.["og:image"],
+          config.metadata?.["og:image:width"],
+          config.metadata?.["og:image:height"]
+        ),
     },
     twitter: {
-      site: frontmatter?.["twitter:site"],
-      creator: frontmatter?.["twitter:handle"],
-      title: frontmatter?.["twitter:title"],
-      description: frontmatter?.["twitter:description"],
-      images: toImageDescriptor(files, frontmatter?.["twitter:image"]),
+      site: frontmatter?.["twitter:site"] ?? config.metadata?.["twitter:site"],
+      creator:
+        frontmatter?.["twitter:handle"] ?? config.metadata?.["twitter:handle"],
+      title:
+        frontmatter?.["twitter:title"] ?? config.metadata?.["twitter:title"],
+      description:
+        frontmatter?.["twitter:description"] ??
+        config.metadata?.["twitter:description"],
+      images:
+        toImageDescriptor(files, frontmatter?.["twitter:image"]) ??
+        toImageDescriptor(files, config.metadata?.["twitter:image"]),
     },
     icons: {
       icon: config.favicon
