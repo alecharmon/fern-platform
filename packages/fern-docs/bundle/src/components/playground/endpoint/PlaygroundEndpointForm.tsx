@@ -11,6 +11,7 @@ import { EMPTY_ARRAY, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { PlaygroundFileUploadForm } from "../form/PlaygroundFileUploadForm";
 import { PlaygroundObjectForm } from "../form/PlaygroundObjectForm";
 import { PlaygroundObjectPropertiesForm } from "../form/PlaygroundObjectPropertyForm";
+import { PlaygroundOpenRPCParamsForm } from "../form/PlaygroundOpenRPCParamsForm";
 import {
   PlaygroundEndpointRequestFormState,
   PlaygroundFormStateBody,
@@ -180,6 +181,24 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
         )}
 
       {endpoint.requests?.[0]?.body != null &&
+        endpoint.requests?.[0]?.body.type === "object" &&
+        endpoint.protocol?.type === "openrpc" && (
+          <PlaygroundEndpointFormSection
+            ignoreHeaders={ignoreHeaders}
+            title="Parameters"
+          >
+            <PlaygroundOpenRPCParamsForm
+              id="body"
+              shape={endpoint.requests?.[0]?.body}
+              onChange={setBodyJson}
+              value={formState?.body?.value}
+              types={types}
+            />
+          </PlaygroundEndpointFormSection>
+        )}
+
+      {endpoint.requests?.[0]?.body != null &&
+        endpoint.protocol?.type !== "openrpc" &&
         visitDiscriminatedUnion(endpoint.requests[0]?.body)._visit({
           formData: (formData) => (
             <PlaygroundEndpointFormSection

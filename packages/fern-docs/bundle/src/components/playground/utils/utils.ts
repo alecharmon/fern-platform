@@ -13,6 +13,37 @@ import {
   visitDiscriminatedUnion,
 } from "@fern-api/ui-core-utils";
 
+export function castToArray(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  // Handle objects with numeric keys as arrays
+  if (isPlainObject(value)) {
+    const obj = castToRecord(value);
+    const keys = Object.keys(obj);
+
+    // Check if all keys are numeric indices
+    const allNumericKeys = keys.every((key) => /^\d+$/.test(key));
+
+    if (allNumericKeys && keys.length > 0) {
+      // Convert to array by creating an array of the right length
+      // and filling it with values at the correct indices
+      const maxIndex = Math.max(...keys.map((k) => parseInt(k, 10)));
+      const result = new Array(maxIndex + 1);
+
+      for (const key of keys) {
+        const index = parseInt(key, 10);
+        result[index] = obj[key];
+      }
+
+      return result;
+    }
+  }
+
+  return [];
+}
+
 export function castToRecord(value: unknown): Record<string, unknown> {
   if (!isPlainObject(value)) {
     return {};
