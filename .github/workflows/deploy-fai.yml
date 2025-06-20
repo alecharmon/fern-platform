@@ -1,0 +1,74 @@
+name: Test and Deploy
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: fern-dev
+    env:
+      TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Setup poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+          cd servers/fai
+          poetry install
+      - name: test
+        run: poetry run pytest -sv
+
+  deploy-dev2:
+    # Run only on app/eden/askfern-deploy-fernai branch
+    if: github.ref == 'refs/heads/app/eden/askfern-deploy-fernai'
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    environment: fern-dev
+    env:
+      TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Deploy to Dev
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          cd servers/fai
+          ./create_docker.sh "${git_version}"
+          cd deploy
+          npm install
+          VERSION="${git_version}" npm run cdk deploy fai-dev --require-approval never --progress events
+
+  deploy-prod:
+    # Run only when tagged
+    if: contains(github.ref, 'refs/tags/')
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    environment: fern-prod
+    env:
+      TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Deploy to prod
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          cd servers/fai
+          ./create_docker.sh "${git_version}"
+          cd deploy
+          npm install
+          VERSION="${git_version}" npm run cdk deploy fai-prod --require-approval never --progress events

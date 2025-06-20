@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "fern-ai"
+version = "0.1.0"
+description = ""
+authors = []
+
+packages = [
+    { include = "fern-ai", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+fastapi = "^0.115.2"
+pydantic = "^2.8.0"
+requests = "^2.31.0"
+types-requests = "^2.28.11"
+PyJWT = "^2.6.0"
+posthog = "^2.3.0"
+pyyaml = "^6.0.1"
+cachetools = "^5.3.3"
+types-cachetools = "^5.3.0.7"
+uvicorn = "^0.34.3"
+
+[tool.poetry.scripts]
+start = "fern-ai.main:start"
+
+
+[tool.poetry.dev-dependencies]
+mypy = "1.0.1"
+pytest = "^7.1.3"
+black = "^24.3.0"
+flake8 = "^5.0.4"
+pre-commit = "^2.20.0"
+pytest-env = "^0.6.2"
+pytest-docker = "^2.0.1"
+urllib3 = "^1.26.18"
+
+[tool.black]
+line-length = 79
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.isort]
+line_length = 79
+force_single_line = true
+combine_as_imports = true
+lines_between_types = 1
+lines_after_imports = 2
+src_paths = ["src", "tests"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
