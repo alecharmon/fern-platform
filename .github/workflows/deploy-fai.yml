@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 0
       - name: Deploy to Dev
         run: |
-          git_version="$(scripts/git-version.sh)"
+          git_version="$(scripts/fai-version.sh)"
           cd servers/fai
           ./create_docker.sh "${git_version}"
           cd deploy
@@ -68,7 +68,7 @@ jobs:
           fetch-depth: 0
       - name: Deploy to prod
         run: |
-          git_version="$(scripts/git-version.sh)"
+          git_version="$(scripts/fai-version.sh)"
           cd servers/fai
           ./create_docker.sh "${git_version}"
           cd deploy
