@@ -1,4 +1,4 @@
-name: Test and Deploy
+name: FernAI - Test and Deploy
 
 on:
   push:
@@ -25,7 +25,9 @@ jobs:
           cd servers/fai
           poetry install
       - name: test
-        run: poetry run pytest -sv
+        run: |
+          cd servers/fai
+          poetry run pytest -sv
 
   deploy-dev2:
     # Run only on app/eden/askfern-deploy-fernai branch
