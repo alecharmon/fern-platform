@@ -31,7 +31,7 @@ jobs:
 
   deploy-dev2:
     # Run only on app/eden/askfern-deploy-fernai branch
-    if: github.ref == 'refs/heads/app/eden/askfern-deploy-fernai'
+    if: github.ref == 'refs/heads/eden/askfern-deploy-fernai'
     needs:
       - test
     runs-on: ubuntu-latest
