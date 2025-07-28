@@ -14,7 +14,11 @@ export function useGithubSourceRepo(docsUrl: DocsUrl) {
   return convertQueryResultToLoadable(
     useQuery({
       queryKey: queryKey,
-      queryFn: () => DashboardApiClient.getDocsGithubSource({ url: docsUrl }),
+      queryFn: () =>
+        DashboardApiClient.getDocsGithubSource({
+          url: docsUrl,
+          skipCache: true,
+        }),
     })
   );
 }

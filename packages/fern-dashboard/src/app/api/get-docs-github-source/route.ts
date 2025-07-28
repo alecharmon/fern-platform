@@ -15,6 +15,7 @@ export declare namespace getDocsGithubSource {
 
 const GetDocsGithubSourceRequest = z.object({
   url: z.string(),
+  skipCache: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -31,9 +32,9 @@ export async function POST(req: NextRequest) {
   if (parsedBody.errorResponse != null) {
     return parsedBody.errorResponse;
   }
-  const { url } = parsedBody.data;
+  const { url, skipCache } = parsedBody.data;
 
-  const response = await handler({ token, url, userId });
+  const response = await handler({ token, url, userId, skipCache });
 
   // TODO: we should check if the user has access to the github repo
   // if (response.url != null) {

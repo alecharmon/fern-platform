@@ -106,12 +106,13 @@ export function SetGithubSourcePopover({
           githubUrl: repoUrl,
         });
 
-        SuccessfulEditSourceToast();
-
         // Invalidate the github source repo query so that we can see the new repo
         await queryClient.invalidateQueries({
           queryKey: ReactQueryKey.githubSourceRepo(docsUrl),
         });
+
+        SuccessfulEditSourceToast();
+
         setSearchQuery("");
       } catch (e) {
         ErrorEditSourceToast();

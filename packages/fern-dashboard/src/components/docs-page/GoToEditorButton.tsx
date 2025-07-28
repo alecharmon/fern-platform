@@ -87,19 +87,27 @@ export function GoToEditorButton({
       return;
     }
 
-    // do not await -- we can let this run in the background
+    // Very important - the branch creation needs to be finished before navigation
+    // TODO: Move the branch creation logic into the editor page
     DashboardApiClient.postCreateBranch({
       owner: sourceRepo.owner,
       repo: sourceRepo.repo,
       branch: newBranchName,
       baseBranch: sourceRepo.baseBranch,
-    }).then((response) => {
-      if (!response.success) {
+    })
+      .then((response) => {
+        if (response.success) {
+          // TODO: client-side nav results in infinite loop, just use browser nav for now
+          window.location.href = editorSlug;
+          // router.push(editorSlug);
+        } else {
+          throw new Error();
+        }
+      })
+      .catch(() => {
         ErrorCreateBranchToast();
-        return;
-      }
-    });
-  }, [sourceRepo, newBranchName]);
+      });
+  }, [sourceRepo, newBranchName, editorSlug]);
 
   return (
     <FernTooltipProvider>
@@ -121,7 +129,7 @@ export function GoToEditorButton({
             disabled={isLoading || disabled}
             asChild={!disabled}
           >
-            <a href={editorSlug} className="flex flex-row items-center gap-1">
+            <div className="flex flex-row items-center gap-1">
               {isLoading ? (
                 <Loader2 className="animate-spin" />
               ) : (
@@ -130,7 +138,7 @@ export function GoToEditorButton({
                   Go to Editor
                 </>
               )}
-            </a>
+            </div>
           </Button>
           {disabled && disabledReason && (
             <ExclamationCircleIcon className="h-4 w-4 text-red-600" />
