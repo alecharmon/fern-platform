@@ -23,7 +23,7 @@ export default async function getDocsGithubSourceHandler({
   token: string;
   userId: Auth0UserID;
 }): Promise<GithubSourceRepo> {
-  // Cache the result for 5 minutes to avoid repeated API calls
+  // Only cache successful responses; do not cache failures
   return unstable_cache(
     async () => {
       const docsUrlMetadata = await getDocsUrlMetadata({
@@ -34,7 +34,8 @@ export default async function getDocsGithubSourceHandler({
         // the docs url is user-supplied (parsed from the page url) so it's ok if it
         // doesn't exist
         if (docsUrlMetadata.error.error === "DomainNotRegisteredError") {
-          return EMPTY_RESPONSE;
+          // Don't cache this failure, so throw to skip cache
+          throw new Error("DomainNotRegisteredError");
         }
 
         console.error(
@@ -49,17 +50,20 @@ export default async function getDocsGithubSourceHandler({
       }
 
       if (docsUrlMetadata.body.gitUrl == null) {
-        return EMPTY_RESPONSE;
+        // Don't cache this failure, so throw to skip cache
+        throw new Error("NoGitUrl");
       }
 
       const octokit = await getOctokit(userId);
       if (octokit == null) {
-        return EMPTY_RESPONSE;
+        // Don't cache this failure, so throw to skip cache
+        throw new Error("NoOctokit");
       }
 
       const [owner, repo] = docsUrlMetadata.body.gitUrl.split("/").slice(-2);
       if (owner == null || repo == null) {
-        return EMPTY_RESPONSE;
+        // Don't cache this failure, so throw to skip cache
+        throw new Error("InvalidGitUrl");
       }
 
       try {
@@ -76,7 +80,8 @@ export default async function getDocsGithubSourceHandler({
         };
       } catch (error) {
         console.error("Failed to get repo info", error);
-        return EMPTY_RESPONSE;
+        // Don't cache this failure, so throw to skip cache
+        throw new Error("FailedToGetRepoInfo");
       }
     },
     [`github-source-${url}-${userId}`],
@@ -84,5 +89,8 @@ export default async function getDocsGithubSourceHandler({
       revalidate: 300, // 5 minutes
       tags: [`github-source-${url}`],
     }
-  )();
+  )().catch(() => {
+    // On any error, return EMPTY_RESPONSE (but don't cache the error)
+    return EMPTY_RESPONSE;
+  });
 }
