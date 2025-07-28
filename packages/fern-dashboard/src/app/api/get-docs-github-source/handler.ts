@@ -1,5 +1,7 @@
 import { unstable_cache } from "next/cache";
 
+import { fernToken_admin } from "@fern-api/docs-server";
+
 import { getOctokit } from "@/app/services/auth0/octokit";
 import { Auth0UserID } from "@/app/services/auth0/types";
 import { GithubSourceRepo } from "@/app/services/github/types";
@@ -28,7 +30,7 @@ export default async function getDocsGithubSourceHandler({
     async () => {
       const docsUrlMetadata = await getDocsUrlMetadata({
         url: decodeURIComponent(url),
-        token,
+        token: fernToken_admin() ?? token,
       });
       if (!docsUrlMetadata.ok) {
         // the docs url is user-supplied (parsed from the page url) so it's ok if it
