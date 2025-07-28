@@ -51,7 +51,7 @@ export function GoToEditorButton({
     return (
       new Date().toISOString().split("T")[0] +
       "-" +
-      session.user.name?.toLowerCase().replaceAll(" ", "_") +
+      sanitizeGitHubUsername(session.user.name ?? "") +
       "-" +
       randomHexString
     );
@@ -161,4 +161,9 @@ export function GoToEditorButton({
     //   Create a Branch
     // </Button>
   );
+}
+
+// Ensures branch name is url encodable
+function sanitizeGitHubUsername(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
 }

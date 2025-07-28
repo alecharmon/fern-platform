@@ -11,6 +11,7 @@
     "clean": "turbo clean",
     "codegen": "turbo codegen",
     "compile": "turbo compile",
+    "dashboard:dev": "turbo dashboard:dev",
     "depcheck": "turbo depcheck",
     "docs:build": "turbo docs:build",
     "docs:dev": "turbo docs:dev",
