@@ -106,7 +106,7 @@ export default async function Page({
           versionIsDefault={foundNode.isCurrentVersionDefault}
           productIsDefault={foundNode.isCurrentProductDefault}
         />
-        {foundNode.node.type !== "page" ? (
+        {foundNode.node.type !== "page" && foundNode.node.type !== "section" ? (
           <UnsupportedContent>
             This page is not visible in the editor.
           </UnsupportedContent>
