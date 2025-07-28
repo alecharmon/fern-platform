@@ -331,6 +331,11 @@ const resolveEnvironmentUrlInCodeSnippet = (
   const urlToReplace = endpoint.environments?.find((env) =>
     requestCodeSnippet.includes(env.baseUrl)
   )?.baseUrl;
+
+  if (baseUrl?.endsWith("/")) {
+    baseUrl = baseUrl.replace(/\/$/, "");
+  }
+
   return urlToReplace && baseUrl
     ? requestCodeSnippet.replace(urlToReplace, baseUrl)
     : requestCodeSnippet;
