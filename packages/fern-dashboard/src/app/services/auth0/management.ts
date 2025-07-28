@@ -135,12 +135,25 @@ export async function getOrgIdFromName(orgName: Auth0OrgName) {
 }
 
 export async function getMyOrganizations(userId: Auth0UserID) {
-  const { data: organizations } =
-    await getAuth0ManagementClient().users.getUserOrganizations({
-      id: userId,
-    });
+  const auth0 = getAuth0ManagementClient();
+  const allOrganizations: Auth0Organization[] = [];
+  let page = 0;
+  const per_page = 50;
 
-  return organizations as Auth0Organization[];
+  while (true) {
+    const { data: organizations } = await auth0.users.getUserOrganizations({
+      id: userId,
+      page,
+      per_page,
+    });
+    allOrganizations.push(...(organizations as Auth0Organization[]));
+    page++;
+    if (organizations.length < per_page) {
+      break;
+    }
+  }
+
+  return allOrganizations;
 }
 
 export async function getOrgMembers(
