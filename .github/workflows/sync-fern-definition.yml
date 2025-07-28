@@ -1,0 +1,57 @@
+name: Sync Fern Definition
+
+on:
+  push:
+    branches:
+      - app
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  sync-fern-definition:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch of fern-platform repo
+        uses: actions/checkout@v4
+        with:
+          ref: app
+
+      - name: Checkout main branch of docs repo
+        uses: actions/checkout@v4
+        with:
+          repository: fern-api/docs
+          ref: main
+          path: docs
+
+      - name: update fern definition
+        run: rsync -avu --delete "fern/apis/fai/" "docs/fern/apis/fai"
+
+      - name: create PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          commit-message: "update fern definition"
+          title: "Update fern definition"
+          branch: update-fern-definition
+          delete-branch: true
+          path: docs
+
+      - name: Enable Pull Request Automerge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          repository: fern-api/docs
+          merge-method: squash
+
+      - name: Approve PR
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        env:
+          GH_TOKEN: ${{ secrets.PR_BOT_GH_PAT }}
+        run: gh pr review ${{ steps.cpr.outputs.pull-request-number }} --repo fern-api/docs --approve
+        
