@@ -95,16 +95,20 @@ export async function POST(req: NextRequest) {
     baseUrl: getFaiOrigin(),
     token: () => "",
   });
-  await faiClient.queries.createQuery({
-    query_id: queryId,
-    conversation_id: conversationId,
-    domain,
-    text: lastUserMessage,
-    role: "USER",
-    source: chatSource.toUpperCase(),
-    created_at: createdAt.toISOString(),
-    time_to_first_token: undefined,
-  });
+  try {
+    await faiClient.queries.createQuery({
+      query_id: queryId,
+      conversation_id: conversationId,
+      domain,
+      text: lastUserMessage,
+      role: "USER",
+      source: chatSource.toUpperCase(),
+      created_at: createdAt.toISOString(),
+      time_to_first_token: undefined,
+    });
+  } catch (error) {
+    console.log("Error creating query", error);
+  }
 
   if (modelProvider === "anthropic") {
     return runRouteForAnthropic({

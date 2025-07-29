@@ -216,16 +216,20 @@ export async function runRouteForAnthropic({
             baseUrl: getFaiOrigin(),
             token: () => "",
           });
-          await faiClient.queries.createQuery({
-            query_id: queryId,
-            conversation_id: conversationId,
-            domain,
-            text: responseText,
-            role: "ASSISTANT",
-            source: chatSource.toUpperCase(),
-            created_at: new Date(end).toISOString(),
-            time_to_first_token: timeToFirstToken,
-          });
+          try {
+            await faiClient.queries.createQuery({
+              query_id: queryId,
+              conversation_id: conversationId,
+              domain,
+              text: responseText,
+              role: "ASSISTANT",
+              source: chatSource.toUpperCase(),
+              created_at: new Date(end).toISOString(),
+              time_to_first_token: timeToFirstToken,
+            });
+          } catch (error) {
+            console.log("Error creating query", error);
+          }
           track("ask_ai", {
             languageModel: languageModel.valueOf().toString(),
             embeddingModel: embeddingModel.modelId,
