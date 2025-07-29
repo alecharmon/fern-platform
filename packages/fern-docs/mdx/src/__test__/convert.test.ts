@@ -161,6 +161,8 @@ describe("Fixture files", () => {
   let complexOverviewMdx: string;
   let advancedFeaturesMdx: string;
   let openApiServerMdx: string;
+  let useCasesMdx: string;
+  let eventHandlerFunctionsMdx: string;
 
   beforeAll(async () => {
     const fs = await import("fs/promises");
@@ -182,6 +184,14 @@ describe("Fixture files", () => {
     );
     openApiServerMdx = await fs.readFile(
       path.join(__dirname, "fixtures/openapi-server.mdx"),
+      "utf-8"
+    );
+    useCasesMdx = await fs.readFile(
+      path.join(__dirname, "fixtures/use-cases.mdx"),
+      "utf-8"
+    );
+    eventHandlerFunctionsMdx = await fs.readFile(
+      path.join(__dirname, "fixtures/event-handler-functions.md"),
       "utf-8"
     );
   });
@@ -644,6 +654,40 @@ describe("Fixture files", () => {
         changedNodes
       );
       expect(mdxResult.mdx).toBe(openApiServerMdx);
+    });
+  });
+
+  describe("use-cases.mdx", () => {
+    it("round-trip conversion preserves structure", () => {
+      const { html, frontmatter, originalElements } = mdxToHtml(useCasesMdx);
+      const changedNodes = Object.fromEntries(
+        Object.entries(originalElements).map(([key, _]) => [key, false])
+      );
+      const mdxResult = htmlToMdx(
+        html,
+        frontmatter,
+        originalElements,
+        changedNodes
+      );
+      expect(mdxResult.mdx).toBe(useCasesMdx);
+    });
+  });
+
+  describe("event-handler-functions.md", () => {
+    it("round-trip conversion preserves structure", () => {
+      const { html, frontmatter, originalElements } = mdxToHtml(
+        eventHandlerFunctionsMdx
+      );
+      const changedNodes = Object.fromEntries(
+        Object.entries(originalElements).map(([key, _]) => [key, false])
+      );
+      const mdxResult = htmlToMdx(
+        html,
+        frontmatter,
+        originalElements,
+        changedNodes
+      );
+      expect(mdxResult.mdx).toBe(eventHandlerFunctionsMdx);
     });
   });
 });

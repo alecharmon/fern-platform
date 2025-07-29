@@ -491,8 +491,8 @@ export function htmlToMdx(
     // By doubling the $ ($$), we insert a literal $ character
     const escapedContent = content.replace(/\$/g, "$$$$");
 
-    // Replace placeholder with escaped content
-    finalMdx = finalMdx.replace(placeholder, escapedContent);
+    // Replace placeholder with escaped content, using replaceAll for cases where there are repeats
+    finalMdx = finalMdx.replaceAll(placeholder, escapedContent);
   });
 
   return { mdx: finalMdx };
@@ -650,7 +650,7 @@ function mdxBaseElementNode(
     case "object": {
       if (Array.isArray(defaultNode)) {
         // Expects defaultNode: ElementContent[]
-        return defaultNode.map(() => null);
+        return defaultNode;
       } else if (defaultNode.type === "element") {
         // Expects defaultNode: Element
         // Note: we add a data-hash property to the element for the client's reference
