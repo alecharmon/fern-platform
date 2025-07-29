@@ -7,6 +7,8 @@ import { addLeadingSlash, slugToHref } from "@fern-api/docs-utils";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { getEdgeFlags } from "@fern-docs/edge-config";
 
 import { generateHtml } from "@/app/utils";
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
@@ -38,6 +40,17 @@ export async function GET(
   props: { params: Promise<{ host: string; domain: string }> }
 ): Promise<NextResponse> {
   const { host, domain } = await props.params;
+
+  const [_, edgeFlags] = await Promise.all([
+    getAuthEdgeConfig(domain),
+    getEdgeFlags(domain),
+  ]);
+
+  if (edgeFlags.isLlmsTxtDisabled) {
+    return NextResponse.json("llms.txt is not enabled for this domain", {
+      status: 404,
+    });
+  }
 
   const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
   const content = await getLlmsTxt(host, domain, path);

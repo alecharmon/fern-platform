@@ -51,6 +51,7 @@ const EDGE_FLAGS = [
   "changelog-redirects" as const,
   "posthog-disabled" as const,
   "next-mdx-ref" as const,
+  "llms-txt-disabled" as const,
 ];
 
 type EdgeFlag = (typeof EDGE_FLAGS)[number];
@@ -210,7 +211,10 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
       domain,
       config["next-mdx-ref"]
     );
-
+    const isLlmsTxtDisabled = checkDomainMatchesCustomers(
+      domain,
+      config["llms-txt-disabled"]
+    );
     return {
       isApiPlaygroundEnabled: isDevelopment(domain) || isApiPlaygroundEnabled,
       isApiScrollingDisabled,
@@ -248,6 +252,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
       isChangelogRedirects,
       isPosthogDisabled,
       isNextMdxRef,
+      isLlmsTxtDisabled,
     };
   } catch (e) {
     console.error(`[get-edge-flags] ${JSON.stringify(e)}`);
@@ -286,6 +291,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
       isChangelogRedirects: false,
       isPosthogDisabled: false,
       isNextMdxRef: false,
+      isLlmsTxtDisabled: false,
     };
   }
 }
