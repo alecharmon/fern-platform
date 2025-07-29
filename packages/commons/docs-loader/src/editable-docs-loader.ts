@@ -61,7 +61,7 @@ class EditableDocsLoaderImpl implements EditableDocsLoader {
   }
 
   async getAuthConfig(): Promise<AuthEdgeConfig | undefined> {
-    return this.readOnlyDocsLoader.getAuthConfig();
+    return undefined;
   }
 
   async getMetadata(): Promise<{
