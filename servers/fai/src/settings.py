@@ -6,10 +6,7 @@ from typing import Any
 from typing import Dict
 from typing import Optional
 
-from anthropic import Anthropic
 from dotenv import load_dotenv
-from openai import OpenAI
-from turbopuffer import Turbopuffer
 
 from src.enums.embedding_models import EmbeddingModels
 from src.types.model import EmbeddingModel
@@ -56,10 +53,3 @@ class SingletonFactory:
 VARIABLES = SingletonFactory.get_instance(Variables)
 CONFIG = SingletonFactory.get_instance(Config)
 VARIABLES.validate_env_variables()
-
-openai_client = OpenAI(api_key=VARIABLES.OPENAI_API_KEY)
-anthropic_client = Anthropic(api_key=VARIABLES.ANTHROPIC_API_KEY)
-tbuf_client = Turbopuffer(
-    region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
-    api_key=VARIABLES.TURBOPUFFER_API_KEY,
-)

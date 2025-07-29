@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from openai import AsyncOpenAI
 from sklearn.cluster import KMeans
 
 from src.fai.api_models.insights import InsightApi
@@ -8,12 +9,12 @@ from src.fai.api_models.insights import InsightsApi
 from src.fai.api_models.query import QueryApi
 from src.fai.utils.insights.summarize_cluster import summarize_clusters_parallel
 from src.settings import CONFIG
-from src.settings import openai_client
+from src.settings import VARIABLES
 
 
-def get_insights_from_queries(domain: str, queries: list[QueryApi]) -> InsightsApi:
+async def get_insights_from_queries(domain: str, queries: list[QueryApi]) -> InsightsApi:
     df = pd.DataFrame([{"text": query.text} for query in queries])
-    df["embedding"] = get_embeddings(df["text"].tolist())
+    df["embedding"] = await get_embeddings(df["text"].tolist())
     df["cluster"], kmeans = cluster_embeddings(df["embedding"].tolist())
 
     top_cluster_ids = select_top_clusters(df, kmeans)
@@ -30,13 +31,14 @@ def get_insights_from_queries(domain: str, queries: list[QueryApi]) -> InsightsA
     return InsightsApi(insights=insights)
 
 
-def get_embeddings(texts: list[str]) -> list[list[float]]:
-    embeddings = []
-    for i in range(0, len(texts), CONFIG.EMBEDDING_BATCH_SIZE):
-        batch = texts[i : i + CONFIG.EMBEDDING_BATCH_SIZE]
-        response = openai_client.embeddings.create(model="text-embedding-3-large", input=batch)
-        embeddings.extend([e.embedding for e in response.data])
-    return embeddings
+async def get_embeddings(texts: list[str]) -> list[list[float]]:
+    async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
+        embeddings = []
+        for i in range(0, len(texts), CONFIG.EMBEDDING_BATCH_SIZE):
+            batch = texts[i : i + CONFIG.EMBEDDING_BATCH_SIZE]
+            response = await openai_client.embeddings.create(model="text-embedding-3-large", input=batch)
+            embeddings.extend([e.embedding for e in response.data])
+        return embeddings
 
 
 def cluster_embeddings(embeddings: list[list[float]]) -> tuple[np.ndarray, KMeans]:

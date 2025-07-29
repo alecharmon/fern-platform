@@ -3,16 +3,20 @@ from concurrent.futures import as_completed
 
 import pandas as pd
 
+from openai import OpenAI
+
 from src.fai.api_models.insights import InsightResponse
 from src.settings import CONFIG
-from src.settings import openai_client
+from src.settings import LOGGER
+from src.settings import VARIABLES
 
 
 MAX_EXAMPLES = 25
 
 
 def summarize_cluster(cluster_id: int, domain: str, filtered_df: pd.DataFrame) -> tuple[int, InsightResponse]:
-    print(f"Processing cluster {cluster_id}...")
+    LOGGER.info(f"Processing cluster {cluster_id}...")
+    openai_client = OpenAI(api_key=VARIABLES.OPENAI_API_KEY)
     try:
         inputs = filtered_df[filtered_df["cluster"] == cluster_id]["text"].head(MAX_EXAMPLES).tolist()
         cluster_text = "\n".join(f"{i+1}. {x}" for i, x in enumerate(inputs))

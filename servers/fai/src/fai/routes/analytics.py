@@ -71,7 +71,7 @@ async def get_insights_analytics(
         queries = result.scalars().all()
 
         api_queries: List[QueryApi] = [query.to_api() for query in queries]
-        insights = get_insights_from_queries(domain, api_queries)
+        insights = await get_insights_from_queries(domain, api_queries)
 
         return JSONResponse(content=jsonable_encoder(insights))
 
