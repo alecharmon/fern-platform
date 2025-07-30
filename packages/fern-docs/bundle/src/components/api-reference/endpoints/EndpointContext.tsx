@@ -7,6 +7,7 @@ import { noop } from "ts-essentials";
 import {
   EndpointDefinition,
   ErrorResponse,
+  HttpRequest,
   HttpResponse,
   Protocol,
 } from "@fern-api/fdr-sdk/api-definition";
@@ -24,6 +25,8 @@ export const EndpointContext = React.createContext<
     setSelectedResponseByStatusCode: (
       statusCode: number | string | undefined
     ) => void;
+    selectedRequest: HttpRequest | undefined;
+    setSelectedRequest: (request: HttpRequest | undefined) => void;
     endpointProtocol: Protocol | undefined;
   } & Omit<ReturnType<typeof useExampleSelection>, "defaultLanguage">
 >({
@@ -32,6 +35,8 @@ export const EndpointContext = React.createContext<
   selectedResponse: undefined,
   setSelectedResponse: noop,
   setSelectedResponseByStatusCode: noop,
+  selectedRequest: undefined,
+  setSelectedRequest: noop,
   selectedExample: undefined,
   examplesByStatusCode: {},
   examplesByKeyAndStatusCode: {},
@@ -65,6 +70,10 @@ export function EndpointContextProvider({
   const [selectedResponse, setSelectedResponse] = React.useState<
     HttpResponse | undefined
   >(endpoint.responses?.[0]);
+
+  const [selectedRequest, setSelectedRequest] = React.useState<
+    HttpRequest | undefined
+  >(endpoint.requests?.[0]);
 
   const responseByStatusCode = React.useMemo(() => {
     const map: Record<string, HttpResponse> = {};
@@ -141,6 +150,8 @@ export function EndpointContextProvider({
       selectedResponse,
       setSelectedResponse,
       setSelectedResponseByStatusCode,
+      selectedRequest,
+      setSelectedRequest,
       selectedExample,
       examplesByStatusCode,
       examplesByKeyAndStatusCode,
@@ -155,6 +166,8 @@ export function EndpointContextProvider({
       selectedResponse,
       setSelectedResponse,
       setSelectedResponseByStatusCode,
+      selectedRequest,
+      setSelectedRequest,
       selectedExample,
       examplesByStatusCode,
       examplesByKeyAndStatusCode,
