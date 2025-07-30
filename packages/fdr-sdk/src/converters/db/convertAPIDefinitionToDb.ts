@@ -500,7 +500,7 @@ function transformHttpRequestToDb({
       };
     case "bytes":
       return {
-        contentType: "application/octet-stream",
+        contentType: writeShape.type.contentType ?? "application/octet-stream",
         description: writeShape.description,
         type: {
           type: "bytes",
