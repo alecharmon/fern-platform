@@ -4,17 +4,18 @@
   "globalEnv": [],
   "tasks": {
     "build": {
-      "env": ["NEXT_RUNTIME", "SENTRY_AUTH_TOKEN"]
+      "env": ["NEXT_RUNTIME", "SENTRY_AUTH_TOKEN", "FERN_SUPPORT_GITHUB_TOKEN"]
     },
     "compile": {
       "outputs": ["tsconfig.tsbuildinfo"],
-      "dependsOn": ["^build", "^compile", "codegen"]
+      "dependsOn": ["^build", "^compile", "codegen"],
+      "env": ["FERN_SUPPORT_GITHUB_TOKEN"]
     },
     "dashboard:build": {
       "dependsOn": ["compile"],
       "outputs": [".next/**", "!.next/cache/**"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["SENTRY_AUTH_TOKEN"]
+      "env": ["SENTRY_AUTH_TOKEN", "FERN_SUPPORT_GITHUB_TOKEN"]
     },
     "dashboard:dev": {
       "dependsOn": ["^build", "^compile"]
