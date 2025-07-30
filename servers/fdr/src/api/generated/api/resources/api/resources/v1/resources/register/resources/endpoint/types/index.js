@@ -5,6 +5,7 @@ export * from "./PathParameter";
 export * from "./QueryParameter";
 export * from "./Header";
 export * from "./HttpRequest";
+export * from "./HttpRequestsV2";
 export * from "./HttpRequestBodyShape";
 export * from "./JsonRequestBody";
 export * from "./JsonBodyShape";

@@ -17,6 +17,7 @@ export interface EndpointDefinition extends FernRegistry.api.v1.WithDescription,
     queryParameters: FernRegistry.api.v1.read.QueryParameter[];
     headers: FernRegistry.api.v1.read.Header[];
     request: FernRegistry.api.v1.read.HttpRequest | undefined;
+    requestsV2: FernRegistry.api.v1.read.HttpRequestsV2 | undefined;
     response: FernRegistry.api.v1.read.HttpResponse | undefined;
     responsesV2: FernRegistry.api.v1.read.HttpResponsesV2 | undefined;
     errors: FernRegistry.api.v1.read.ErrorDeclaration[];

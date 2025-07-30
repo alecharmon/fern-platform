@@ -248,6 +248,7 @@ the current organization_id of the authenticated user
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -354,6 +355,7 @@ authenticated user, then response code of 403 will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -459,6 +461,7 @@ the current organization_id of the auathenticated user. Otherwise, response code
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -578,6 +581,7 @@ current organization_id, then a response code of \`403\` will be returned.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -675,6 +679,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -883,6 +888,7 @@ current organization_id, then a response code of \`403\` will be returned.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -1014,6 +1020,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -1108,6 +1115,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -1263,6 +1271,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -1391,6 +1400,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -1537,6 +1547,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -1630,6 +1641,7 @@ current organization_id, then a response code of \`403\` will be returned.
               },
             },
           },
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -2269,6 +2281,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -2546,6 +2559,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -2798,6 +2812,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -3530,6 +3545,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -3632,6 +3648,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -3824,6 +3841,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -4415,6 +4433,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -4584,6 +4603,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -4963,6 +4983,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -5208,6 +5229,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -5679,6 +5701,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -5774,6 +5797,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -5970,6 +5994,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -6479,6 +6504,7 @@ current organization_id, then a response code of \`403\` will be returned.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -6724,6 +6750,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -6849,6 +6876,7 @@ current organization_id, then a response code of \`403\` will be returned.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -7058,6 +7086,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -7316,6 +7345,7 @@ current organization_id, then a response code of \`403\` will be returned.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -7545,6 +7575,7 @@ Max items is 100.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -7639,6 +7670,7 @@ Max items is 100.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -7900,6 +7932,7 @@ value, overriding what was set before.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -8043,6 +8076,7 @@ value, overriding what was set before.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -8169,6 +8203,7 @@ value, overriding what was set before.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -8332,6 +8367,7 @@ Must obey the ICD-10 format if an ICD-10 code_type is provided, specifically:
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -8426,6 +8462,7 @@ Must obey the ICD-10 format if an ICD-10 code_type is provided, specifically:
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -8657,6 +8694,7 @@ Must obey the ICD-10 format if an ICD-10 code_type is provided, specifically:
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -9299,6 +9337,7 @@ or encounter external id.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -9539,6 +9578,7 @@ or encounter external id.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -9813,6 +9853,7 @@ or encounter external id.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -10132,6 +10173,7 @@ or encounter external id.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -10324,6 +10366,7 @@ or encounter external id.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -11032,6 +11075,7 @@ or encounter external id.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -11545,6 +11589,7 @@ or encounter external id.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -12855,6 +12900,7 @@ in bounds of the diagnoses list field
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -13884,6 +13930,7 @@ submitted to the payor.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -13992,6 +14039,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -14096,6 +14144,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -14290,6 +14339,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -14393,6 +14443,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -14587,6 +14638,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -14827,6 +14879,7 @@ submitted to the payor.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -14921,6 +14974,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -15101,6 +15155,7 @@ submitted to the payor.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -15343,6 +15398,7 @@ submitted to the payor.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -15424,6 +15480,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -15539,6 +15596,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -15643,6 +15701,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -15743,6 +15802,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -15853,6 +15913,7 @@ submitted to the payor.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -16320,6 +16381,7 @@ submitted to the payor.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -16536,6 +16598,7 @@ submitted to the payor.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -17055,6 +17118,7 @@ Must be within 30 days of start_date.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -17382,6 +17446,7 @@ Must be within 30 days of start_date.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -17489,6 +17554,7 @@ Must be within 30 days of start_date.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -17758,6 +17824,7 @@ doesn't data wrangle the modeling into the presentation shape.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -17904,6 +17971,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -18174,6 +18242,7 @@ doesn't data wrangle the modeling into the presentation shape.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -18294,6 +18363,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -18531,6 +18601,7 @@ doesn't data wrangle the modeling into the presentation shape.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -18825,6 +18896,7 @@ doesn't data wrangle the modeling into the presentation shape.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -19111,6 +19183,7 @@ doesn't data wrangle the modeling into the presentation shape.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -19350,6 +19423,7 @@ doesn't data wrangle the modeling into the presentation shape.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -19540,6 +19614,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -19747,6 +19822,7 @@ doesn't data wrangle the modeling into the presentation shape.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -19847,6 +19923,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -20070,6 +20147,7 @@ doesn't data wrangle the modeling into the presentation shape.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -20250,6 +20328,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -20538,6 +20617,7 @@ identified by the id, then 403 response will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -20756,6 +20836,7 @@ will be limited to only those invoices that belong to the patient_external_id
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -21039,6 +21120,7 @@ upon creation of the invoice.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -21269,6 +21351,7 @@ upon creation of the invoice.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -21484,6 +21567,7 @@ upon creation of the invoice.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -21688,6 +21772,7 @@ upon creation of the invoice.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -21890,6 +21975,7 @@ upon creation of the invoice.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -22059,6 +22145,7 @@ upon creation of the invoice.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -22186,6 +22273,7 @@ upon creation of the invoice.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -22321,6 +22409,7 @@ upon creation of the invoice.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -22424,6 +22513,7 @@ upon creation of the invoice.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -22592,6 +22682,7 @@ upon creation of the invoice.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -22803,6 +22894,7 @@ upon creation of the invoice.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -22943,6 +23035,7 @@ upon creation of the invoice.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -23250,6 +23343,7 @@ upon creation of the invoice.
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -23344,6 +23438,7 @@ upon creation of the invoice.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -23501,6 +23596,7 @@ upon creation of the invoice.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -23724,6 +23820,7 @@ upon creation of the invoice.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -23967,6 +24064,7 @@ upon creation of the invoice.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -24198,6 +24296,7 @@ upon creation of the invoice.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -24410,6 +24509,7 @@ upon creation of the invoice.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -24669,6 +24769,7 @@ upon creation of the invoice.
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -24911,6 +25012,7 @@ upon creation of the invoice.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -25020,6 +25122,7 @@ upon creation of the invoice.
               },
             },
           },
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -25290,6 +25393,7 @@ identified by the id, then 403 response will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -25443,6 +25547,7 @@ identified by the id, then 403 response will be returned
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -25632,6 +25737,7 @@ identified by the id, then 403 response will be returned
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -25908,6 +26014,7 @@ If the authenticated user does not have the permission to update the PatientPaym
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -26155,6 +26262,7 @@ by the id, then 403 will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -26451,6 +26559,7 @@ by the id, then 403 will be returned
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -26710,6 +26819,7 @@ by the id, then 403 will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -26902,6 +27012,7 @@ by the id, then 403 will be returned
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -27313,6 +27424,7 @@ by the id, then 403 will be returned
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -27629,6 +27741,7 @@ by the id, then 403 will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -27932,6 +28045,7 @@ the current organization_id of the authenticated user.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -28193,6 +28307,7 @@ authenticated user, then response code of 403 will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -28546,6 +28661,7 @@ The order of specificity from the most specific to least specific is \`service_l
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -28993,6 +29109,7 @@ The order of specificity from the most specific to least specific is \`service_l
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -29311,6 +29428,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -29502,6 +29620,7 @@ current organization_id, then a response code of \`403\` will be returned.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -29870,6 +29989,7 @@ slashes.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -29996,6 +30116,7 @@ slashes.
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -30127,6 +30248,7 @@ slashes.
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -30418,6 +30540,7 @@ identified by the id, then 403 response will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -30510,6 +30633,7 @@ identified by the id, then 403 response will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -30875,6 +30999,7 @@ If there already exists a PaymentAccountConfig for the organization with the sam
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -31318,6 +31443,7 @@ If there already exists a PaymentAccountConfig for the organization with the sam
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -31565,6 +31691,7 @@ by the id, then 403 will be returned
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -31747,6 +31874,7 @@ and the third party payment processor's customer can be identified by the patien
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -31841,6 +31969,7 @@ Verification includes that the provided token has all of the appropriate permiss
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -31965,6 +32094,7 @@ customer page will be returned (this generally is a page listing the existing cu
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -32150,6 +32280,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -32492,6 +32623,7 @@ customer page will be returned (this generally is a page listing the existing cu
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -32718,6 +32850,7 @@ customer page will be returned (this generally is a page listing the existing cu
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -33072,6 +33205,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -33358,6 +33492,7 @@ customer page will be returned (this generally is a page listing the existing cu
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -33534,6 +33669,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -33717,6 +33853,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -33883,6 +34020,7 @@ customer page will be returned (this generally is a page listing the existing cu
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -34181,6 +34319,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -34424,6 +34563,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -34540,6 +34680,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -34644,6 +34785,7 @@ customer page will be returned (this generally is a page listing the existing cu
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -34804,6 +34946,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -34969,6 +35112,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -35172,6 +35316,7 @@ customer page will be returned (this generally is a page listing the existing cu
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -35375,6 +35520,7 @@ customer page will be returned (this generally is a page listing the existing cu
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -35472,6 +35618,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -35665,6 +35812,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -35896,6 +36044,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -35995,6 +36144,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -79437,6 +79587,7 @@ exports[`transformApiDefinitionToDb > {"name":"cyclical-1"} 1`] = `
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -79924,6 +80075,7 @@ exports[`transformApiDefinitionToDb > {"name":"string"} 1`] = `
               },
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -80891,6 +81043,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
             "type": "object",
           },
         },
+        "requestsV2": undefined,
         "response": undefined,
         "responsesV2": undefined,
         "snippetTemplates": undefined,
@@ -81275,6 +81428,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
             "type": "object",
           },
         },
+        "requestsV2": undefined,
         "response": {
           "type": {
             "type": "reference",
@@ -81631,6 +81785,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
             "type": "object",
           },
         },
+        "requestsV2": undefined,
         "response": undefined,
         "responsesV2": undefined,
         "snippetTemplates": undefined,
@@ -81919,6 +82074,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
             "type": "object",
           },
         },
+        "requestsV2": undefined,
         "response": {
           "type": {
             "type": "reference",
@@ -82192,6 +82348,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
             "type": "object",
           },
         },
+        "requestsV2": undefined,
         "response": undefined,
         "responsesV2": undefined,
         "snippetTemplates": undefined,
@@ -82313,6 +82470,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
             "type": "object",
           },
         },
+        "requestsV2": undefined,
         "response": undefined,
         "responsesV2": undefined,
         "snippetTemplates": undefined,
@@ -82576,6 +82734,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -82772,6 +82931,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -82948,6 +83108,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
             },
           ],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -83120,6 +83281,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -83213,6 +83375,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -83427,6 +83590,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
               "type": "fileUpload",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -83602,6 +83766,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -83735,6 +83900,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -84051,6 +84217,7 @@ Under the hood, this endpoint creates a new sandbox, a new model version, and a 
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -84253,6 +84420,7 @@ or overwritten with default values.",
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -84365,6 +84533,7 @@ or overwritten with default values.",
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,
@@ -84550,6 +84719,7 @@ or overwritten with default values.",
               "type": "object",
             },
           },
+          "requestsV2": undefined,
           "response": {
             "type": {
               "type": "reference",
@@ -84663,6 +84833,7 @@ or overwritten with default values.",
           "protocol": undefined,
           "queryParameters": [],
           "request": undefined,
+          "requestsV2": undefined,
           "response": undefined,
           "responsesV2": undefined,
           "snippetTemplates": undefined,

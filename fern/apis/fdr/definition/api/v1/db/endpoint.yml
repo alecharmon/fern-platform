@@ -24,6 +24,7 @@ types:
       queryParameters: list<readEndpoint.QueryParameter>
       headers: list<readEndpoint.Header>
       request: optional<DbHttpRequest>
+      requestsV2: optional<DbHttpRequestsV2>
       response: optional<readEndpoint.HttpResponse>
       responsesV2: optional<readEndpoint.HttpResponsesV2>
       errors: optional<list<readEndpoint.ErrorDeclaration>>
@@ -37,3 +38,7 @@ types:
     properties:
       contentType: optional<string>
       type: readEndpoint.HttpRequestBodyShape
+
+  DbHttpRequestsV2:
+    properties:
+      requests: optional<list<DbHttpRequest>>

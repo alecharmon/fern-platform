@@ -5,6 +5,7 @@ export * from "./PathParameter.js";
 export * from "./QueryParameter.js";
 export * from "./Header.js";
 export * from "./HttpRequest.js";
+export * from "./HttpRequestsV2.js";
 export * from "./HttpRequestBodyShape.js";
 export * from "./JsonRequestBody.js";
 export * from "./JsonBodyShape.js";

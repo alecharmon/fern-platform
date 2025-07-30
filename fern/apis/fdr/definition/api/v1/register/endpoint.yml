@@ -32,6 +32,7 @@ types:
       queryParameters: list<QueryParameter>
       headers: list<Header>
       request: optional<HttpRequest>
+      requestsV2: optional<HttpRequestsV2>
       response: optional<HttpResponse>
       responsesV2: optional<HttpResponsesV2>
       errors:
@@ -79,6 +80,10 @@ types:
     extends: commons.WithDescription
     properties:
       type: HttpRequestBodyShape
+  
+  HttpRequestsV2:
+    properties:
+      requests: optional<list<HttpRequest>>
 
   HttpRequestBodyShape:
     union:
