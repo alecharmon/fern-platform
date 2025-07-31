@@ -6,6 +6,7 @@ import { ResolvedReturnType } from "@/utils/types";
 
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
+import { orgNameValidator } from "../utils/validators";
 import handler from "./handler";
 
 export declare namespace validateGithubBranch {
@@ -17,6 +18,7 @@ const ValidateGithubBranchRequest = z.object({
   owner: z.string(),
   repo: z.string(),
   branchName: z.string(),
+  orgName: orgNameValidator,
 });
 
 export async function POST(req: NextRequest) {
@@ -33,9 +35,9 @@ export async function POST(req: NextRequest) {
   if (parsedBody.errorResponse != null) {
     return parsedBody.errorResponse;
   }
-  const { owner, repo, branchName } = parsedBody.data;
+  const { owner, repo, branchName, orgName } = parsedBody.data;
 
-  const response = await handler({ owner, repo, branchName, userId });
+  const response = await handler({ owner, repo, branchName, userId, orgName });
 
   return NextResponse.json(response);
 }

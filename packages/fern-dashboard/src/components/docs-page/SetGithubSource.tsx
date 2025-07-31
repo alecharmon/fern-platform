@@ -7,6 +7,7 @@ import { truncateString } from "@fern-api/docs-utils";
 import { FernImage } from "@fern-docs/components/FernImage";
 import { useDebouncedCallback } from "@fern-ui/react-commons";
 
+import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { ReactQueryKey } from "@/state/queryKeys";
 import { usePaginatedUserGithubRepos } from "@/state/usePaginatedUserGithubRepos";
@@ -23,16 +24,18 @@ export function SetGithubSourcePopover({
   docsUrl,
   children,
   setIsSaving,
+  orgName,
 }: {
   docsUrl: DocsUrl;
   children: React.ReactNode;
+  orgName: Auth0OrgName;
   setIsSaving: (isSaving: boolean) => void;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { repos, isLoading, hasMore, loadNextPage } =
-    usePaginatedUserGithubRepos();
+    usePaginatedUserGithubRepos(orgName);
   const queryClient = useQueryClient();
 
   // Note: this was vibe-coded until the search felt about right in terms of responsiveness

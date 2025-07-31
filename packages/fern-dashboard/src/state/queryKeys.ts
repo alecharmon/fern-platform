@@ -41,9 +41,10 @@ export const ReactQueryKey = {
   docsUrlOwner: (docsUrl: DocsUrl) =>
     queryKey<getDocsUrlOwner.Response>("docs-url-owner", docsUrl),
   orgSvgLogo: (svgUrl: string) => queryKey<string>("org-svg", svgUrl),
-  userGithubRepos: (page?: number) =>
+  userGithubRepos: (orgName: Auth0OrgName, page?: number) =>
     queryKey<getUserGithubRepos.Response>(
       "get-user-git-repos",
+      orgName,
       page?.toString() ?? ""
     ),
   githubSourceRepo: (docsUrl: DocsUrl) =>

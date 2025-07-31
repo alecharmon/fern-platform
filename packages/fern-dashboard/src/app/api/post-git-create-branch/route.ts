@@ -6,6 +6,7 @@ import { ResolvedReturnType } from "@/utils/types";
 
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
+import { orgNameValidator } from "../utils/validators";
 import handler from "./handler";
 
 export declare namespace postCreateBranch {
@@ -18,6 +19,7 @@ export const PostCreateBranchRequest = z.object({
   repo: z.string(),
   branch: z.string(),
   baseBranch: z.string(),
+  orgName: orgNameValidator,
 });
 
 export async function POST(req: NextRequest) {
@@ -30,9 +32,9 @@ export async function POST(req: NextRequest) {
   if (parsedBody.errorResponse != null) {
     return parsedBody.errorResponse;
   }
-  const { owner, repo, branch, baseBranch } = parsedBody.data;
+  const { owner, repo, branch, baseBranch, orgName } = parsedBody.data;
 
   return NextResponse.json(
-    await handler(userId, { owner, repo, branch, baseBranch })
+    await handler(userId, orgName, { owner, repo, branch, baseBranch })
   );
 }

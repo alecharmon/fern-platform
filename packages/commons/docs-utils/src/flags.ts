@@ -78,3 +78,11 @@ export const DEFAULT_SELF_HOSTED_EDGE_FLAGS: EdgeFlags = {
   ...DEFAULT_EDGE_FLAGS,
   isWhitelabeled: true,
 };
+
+export interface OrgEdgeFlags {
+  bypassExtendedGithubAuth: boolean;
+}
+
+export const DEFAULT_ORG_EDGE_FLAGS: OrgEdgeFlags = {
+  bypassExtendedGithubAuth: false,
+};

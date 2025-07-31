@@ -46,6 +46,7 @@ async function DynamicEditorContent({
     url: docsUrl,
     token: session.accessToken,
     userId: session.user.sub,
+    orgName,
   });
 
   if (sourceRepo.owner == null || sourceRepo.repo == null) {

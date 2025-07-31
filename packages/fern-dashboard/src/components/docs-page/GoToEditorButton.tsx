@@ -90,6 +90,7 @@ export function GoToEditorButton({
     // Very important - the branch creation needs to be finished before navigation
     // TODO: Move the branch creation logic into the editor page
     DashboardApiClient.postCreateBranch({
+      orgName,
       owner: sourceRepo.owner,
       repo: sourceRepo.repo,
       branch: newBranchName,
@@ -107,7 +108,7 @@ export function GoToEditorButton({
       .catch(() => {
         ErrorCreateBranchToast();
       });
-  }, [sourceRepo, newBranchName, editorSlug]);
+  }, [sourceRepo, newBranchName, editorSlug, orgName]);
 
   return (
     <FernTooltipProvider>

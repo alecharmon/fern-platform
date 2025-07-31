@@ -23,6 +23,7 @@ export default async function Page(props: {
   }
 
   const sourceRepo = await getDocsGithubSourceHandler({
+    orgName,
     url: encodedDocsUrl,
     token: session.accessToken,
     userId: session.user.sub,
@@ -39,7 +40,7 @@ export default async function Page(props: {
         githubProtectedArea={
           <div className="flex w-fit flex-col gap-2">
             <p>Source</p>
-            <GithubProtectedArea sourceRepo={sourceRepo}>
+            <GithubProtectedArea sourceRepo={sourceRepo} orgName={orgName}>
               <GithubSource
                 docsUrl={docsUrl}
                 orgName={orgName}

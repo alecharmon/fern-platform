@@ -6,6 +6,7 @@ import { ResolvedReturnType } from "@/utils/types";
 
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
+import { orgNameValidator } from "../utils/validators";
 import handler from "./handler";
 
 export declare namespace postCreatePr {
@@ -21,6 +22,7 @@ export const PostCreatePrRequest = z.object({
   title: z.string(),
   body: z.string().optional(),
   draft: z.boolean().optional(),
+  orgName: orgNameValidator,
 });
 
 export async function POST(req: NextRequest) {
@@ -33,9 +35,18 @@ export async function POST(req: NextRequest) {
   if (parsedBody.errorResponse != null) {
     return parsedBody.errorResponse;
   }
-  const { owner, repo, head, base, title, body, draft } = parsedBody.data;
+  const { owner, repo, head, base, title, body, draft, orgName } =
+    parsedBody.data;
 
   return NextResponse.json(
-    await handler(userId, { owner, repo, head, base, title, body, draft })
+    await handler(userId, orgName, {
+      owner,
+      repo,
+      head,
+      base,
+      title,
+      body,
+      draft,
+    })
   );
 }

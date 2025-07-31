@@ -10,6 +10,7 @@ import { FernTooltip } from "@fern-docs/components";
 import { getLoadableValue } from "@fern-ui/loadable";
 
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { handleCreatePr } from "@/app/services/github/github";
 import { useBranch } from "@/providers/BranchContext";
@@ -36,7 +37,7 @@ export function HeaderToolbar({
   session,
   docsUrl,
 }: {
-  orgName: string;
+  orgName: Auth0OrgName;
   session: Auth0SessionData;
   docsUrl: DocsUrl;
 }) {
@@ -45,7 +46,7 @@ export function HeaderToolbar({
   // NOTE: useGitPrUrl is not fully in use because the Provider keeps unmounting, but this is in the right direction we want to go in
   const { gitPrUrl, setPrUrl } = useGitPrUrl();
   const { branch } = useBranch();
-  const githubSource = getLoadableValue(useGithubSourceRepo(docsUrl));
+  const githubSource = getLoadableValue(useGithubSourceRepo(docsUrl, orgName));
 
   // If the github source is not found, redirect to the docs page.
   if (!!githubSource && githubSource.githubUrl == null) {
@@ -82,6 +83,7 @@ export function HeaderToolbar({
     setIsCommitting(true);
     try {
       const response = await DashboardApiClient.postGitCommit({
+        orgName,
         owner: githubSource.owner,
         repo: githubSource.repo,
         branch,
@@ -104,6 +106,7 @@ export function HeaderToolbar({
           return;
         }
         const newPrUrl = await handleCreatePr({
+          orgName,
           branch,
           owner: githubSource.owner,
           repo: githubSource.repo,
@@ -121,6 +124,7 @@ export function HeaderToolbar({
       setIsCommitting(false);
     }
   }, [
+    orgName,
     githubSource,
     branch,
     changedMdxFiles,

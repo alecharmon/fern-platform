@@ -1,5 +1,5 @@
 import { getOctokit } from "@/app/services/auth0/octokit";
-import { Auth0UserID } from "@/app/services/auth0/types";
+import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 
 export interface GitHubPermissionsResponse {
   hasRepoAccess: boolean;
@@ -8,9 +8,10 @@ export interface GitHubPermissionsResponse {
 const REQUIRED_SCOPES = ["repo", "read:user", "read:org"];
 
 export default async function checkGitHubPermissions(
-  userId: Auth0UserID
+  userId: Auth0UserID,
+  orgName?: Auth0OrgName
 ): Promise<GitHubPermissionsResponse> {
-  const octokit = await getOctokit(userId);
+  const octokit = await getOctokit(userId, orgName);
   if (octokit == null) {
     return {
       hasRepoAccess: false,
@@ -42,10 +43,11 @@ export default async function checkGitHubPermissions(
 
 export async function checkWritePermissionToRepo(
   userId: Auth0UserID,
+  orgName: Auth0OrgName,
   owner: string,
   repo: string
 ) {
-  const octokit = await getOctokit(userId);
+  const octokit = await getOctokit(userId, orgName);
   if (octokit == null) {
     return false;
   }

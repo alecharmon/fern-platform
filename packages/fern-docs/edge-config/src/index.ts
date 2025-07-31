@@ -12,3 +12,4 @@ export {
 } from "./getPreviewUrlAuthConfig";
 export { getSeoDisabled } from "./getSeoConfig";
 export { getCanonicalUrl } from "./getCanonicalUrl";
+export { getEdgeFlagsForOrg } from "./getEdgeFlagsForOrg";

@@ -33,7 +33,7 @@ export function GithubSource({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const githubSource = getLoadableValue(useGithubSourceRepo(docsUrl));
+  const githubSource = getLoadableValue(useGithubSourceRepo(docsUrl, orgName));
   const { writePermission } = useGithubPermissions();
 
   useEffect(() => {
@@ -69,6 +69,7 @@ export function GithubSource({
                     <SetGithubSourcePopover
                       docsUrl={docsUrl}
                       setIsSaving={setIsSaving}
+                      orgName={orgName}
                     >
                       <Button
                         size="iconSm"
@@ -85,6 +86,7 @@ export function GithubSource({
                 <SetGithubSourcePopover
                   docsUrl={docsUrl}
                   setIsSaving={setIsSaving}
+                  orgName={orgName}
                 >
                   <Button size="sm" className="w-fit" disabled={isSaving}>
                     <GithubLogo />

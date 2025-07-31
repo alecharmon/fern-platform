@@ -6,6 +6,7 @@ import { ResolvedReturnType } from "@/utils/types";
 
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
+import { orgNameValidator } from "../utils/validators";
 import handler from "./handler";
 
 export declare namespace getDocsGithubSource {
@@ -16,6 +17,7 @@ export declare namespace getDocsGithubSource {
 const GetDocsGithubSourceRequest = z.object({
   url: z.string(),
   skipCache: z.boolean().optional(),
+  orgName: orgNameValidator,
 });
 
 export async function POST(req: NextRequest) {
@@ -32,9 +34,9 @@ export async function POST(req: NextRequest) {
   if (parsedBody.errorResponse != null) {
     return parsedBody.errorResponse;
   }
-  const { url, skipCache } = parsedBody.data;
+  const { url, skipCache, orgName } = parsedBody.data;
 
-  const response = await handler({ token, url, userId, skipCache });
+  const response = await handler({ token, url, userId, orgName, skipCache });
 
   // TODO: we should check if the user has access to the github repo
   // if (response.url != null) {
