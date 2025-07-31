@@ -4,7 +4,6 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { UIMessage } from "ai";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { createGetAuthStateEdge } from "@fern-api/docs-server";
 import {
   getFaiOrigin,
   openaiApiKey,
@@ -38,16 +37,6 @@ export async function POST(req: NextRequest) {
   const createdAt = new Date();
   const host = req.nextUrl.host;
   const domain = getDocsDomainEdge(req);
-
-  const { getAuthState } = await createGetAuthStateEdge(req);
-
-  const pathname = req.nextUrl.pathname;
-  const authState = await getAuthState(pathname);
-
-  if (!authState.authed) {
-    return NextResponse.json("Unauthorized", { status: 401 });
-  }
-
   const loader = await createCachedDocsLoader(host, domain);
   const metadata = await loader.getMetadata();
   if (metadata == null) {
