@@ -237,6 +237,11 @@ export const JwksSchema = z.object({
 export const ApiKeySchema = z.object({
   apiKey: z.string(),
   secret: z.string(),
+  payload: z
+    .object({
+      fern: FernUserSchema,
+    })
+    .optional(),
 });
 
 export type ApiKeyDemo = z.infer<typeof ApiKeySchema>;

@@ -12,6 +12,7 @@ import { FernButton, FernCard } from "@fern-docs/components";
 import { Callout } from "@/mdx/components/callout";
 import {
   PLAYGROUND_AUTH_STATE_ATOM,
+  PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM,
   PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
 } from "@/state/playground";
 
@@ -41,16 +42,30 @@ export function PlaygroundCardTriggerApiKeyInjected({
 
   const apiKey = config.authenticated ? config.access_token : null;
   const setBearerAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
+  const setBasicAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM);
 
   // TODO change this to on-login
   useEffect(() => {
-    if (apiKey != null) {
+    if (
+      apiKey != null &&
+      (auth.type === "bearerAuth" || auth.type === "oAuth")
+    ) {
       setBearerAuth({ token: apiKey });
     }
-  }, [apiKey, setBearerAuth]);
+    if (apiKey != null && auth.type === "basicAuth") {
+      setBasicAuth({
+        username: apiKey.split(":")[0],
+        password: apiKey.split(":")[1],
+      });
+    }
+  }, [apiKey, setBearerAuth, setBasicAuth, auth]);
 
-  const handleResetBearerAuth = () => {
+  const handleResetAuth = () => {
     setBearerAuth({ token: apiKey ?? "" });
+    setBasicAuth({
+      username: apiKey?.split(":")[0] ?? "",
+      password: apiKey?.split(":")[1] ?? "",
+    });
   };
 
   const redirectOrOpenAuthForm = () => {
@@ -99,7 +114,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                 text="Reset token to default"
                 intent="none"
                 icon={<Key />}
-                onClick={handleResetBearerAuth}
+                onClick={handleResetAuth}
                 size="normal"
                 variant="outlined"
               />

@@ -60,7 +60,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
 
   // mint the jwt using the secret key
-  const fern_token = await mintJwtToken(config.secret, apiKey);
+  const fern_token = await mintJwtToken({
+    secret: config.secret,
+    apiKey,
+    payload: config.payload,
+  });
 
   // if the token isn't set properly, redirect as necessary
   if (!fern_token) {
@@ -92,18 +96,28 @@ function getJwtTokenSecret(secret?: string): Uint8Array {
   return encoder.encode(secret ?? getJwtSecretKey());
 }
 
-async function mintJwtToken(secret: string, apiKey: string) {
-  return await new SignJWT({
-    fern: {
-      playground: {
-        initial_state: {
-          auth: {
-            bearer_token: apiKey,
+async function mintJwtToken({
+  secret,
+  apiKey,
+  payload,
+}: {
+  secret: string;
+  apiKey: string;
+  payload?: any;
+}) {
+  return await new SignJWT(
+    payload ?? {
+      fern: {
+        playground: {
+          initial_state: {
+            auth: {
+              bearer_token: apiKey,
+            },
           },
         },
       },
-    },
-  })
+    }
+  )
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt()
     .setExpirationTime("1d") // set to any value

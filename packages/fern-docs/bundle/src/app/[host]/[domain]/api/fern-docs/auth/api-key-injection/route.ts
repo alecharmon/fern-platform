@@ -82,6 +82,15 @@ export async function GET(
     });
   }
 
+  if (fernUser?.playground?.initial_state?.auth?.basic) {
+    return NextResponse.json({
+      enabled: true,
+      authenticated: true,
+      access_token: `${fernUser.playground.initial_state.auth.basic.username}:${fernUser.playground.initial_state.auth.basic.password}`,
+      returnToQueryParam,
+    });
+  }
+
   if (!edgeConfig) {
     return NextResponse.json({
       enabled: false,
