@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
-import { useRouter } from "@bprogress/next/app";
+import { ChevronDown } from "lucide-react";
 
 import { Auth0OrgName, Auth0Organization } from "@/app/services/auth0/types";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
+import { Button } from "@/components/ui/button";
+import { getOrgDisplayName } from "@/utils/getOrgDisplayName";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 
@@ -28,12 +25,22 @@ export const OrgSwitcherSelect = ({
 }: OrgSwitcherSelect.Props) => {
   const orgName = useOrgNameFromPathname();
   const [localOrgName, setLocalOrgName] = useState(orgName);
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     setLocalOrgName(orgName);
   }, [orgName]);
 
   const pathname = usePathnameWithoutOrgName();
   const router = useRouter();
+
+  // Filter organizations by search term
+  const filteredOrganizations = useMemo(() => {
+    return organizations.filter((org) => {
+      const displayName = getOrgDisplayName(org) ?? "";
+      return displayName.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+  }, [organizations, searchTerm]);
 
   const getPathnameForOrg = (newOrgName: Auth0OrgName) => {
     return `/${newOrgName}${getRedirectPathname(pathname)}`;
@@ -50,33 +57,45 @@ export const OrgSwitcherSelect = ({
     router.prefetch(getPathnameForOrg(hoveredOrgName));
   };
 
-  return (
-    <Select
-      value={localOrgName}
-      onValueChange={(value) => {
-        onClickOrg(Auth0OrgName(value));
-      }}
-      disabled={organizations.length === 0}
-    >
-      <SelectTrigger className="shrink-0 md:min-w-[200px]">
-        <SelectValue placeholder="Organization" />
-      </SelectTrigger>
-      <SelectContent>
-        {organizations.map((organization) => (
-          <SelectItem
-            key={organization.id}
-            value={organization.name}
-            onMouseOver={() => {
-              onHoverOrg(organization.name);
-            }}
-          >
-            <OrgLogo organization={organization} />
+  const currentOrg = organizations.find((org) => org.name === localOrgName);
 
-            {organization.display_name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+  return (
+    <SearchableDropdown
+      items={filteredOrganizations}
+      searchTerm={searchTerm}
+      onSearchChange={setSearchTerm}
+      onSelect={(org) => onClickOrg(org.name)}
+      searchPlaceholder="Search organizations..."
+      emptyMessage="No organizations found"
+      getItemKey={(org) => org.id}
+      shouldShowSearch={organizations.length > 10}
+      renderItem={(organization, onSelect) => (
+        <div
+          className="flex w-full cursor-pointer justify-between px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+          onClick={onSelect}
+          onMouseOver={() => {
+            onHoverOrg(organization.name);
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <OrgLogo organization={organization} />
+            {getOrgDisplayName(organization)}
+          </div>
+        </div>
+      )}
+    >
+      <Button
+        variant="outline"
+        className="shrink-0 justify-between md:min-w-[200px]"
+        disabled={organizations.length === 0}
+      >
+        <div className="flex items-center gap-2">
+          {currentOrg && <OrgLogo organization={currentOrg} />}
+          {currentOrg ? getOrgDisplayName(currentOrg) : "Organization"}
+        </div>
+        <ChevronDown className="h-4 w-4 opacity-50" />
+      </Button>
+    </SearchableDropdown>
   );
 };
 
