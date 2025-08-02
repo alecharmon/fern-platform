@@ -292,4 +292,102 @@ describe("toc", () => {
       },
     ]);
   });
+
+  describe("role-based filtering", () => {
+    it("should include role requirements for headings within If components", () => {
+      const mdx = `
+# Main Title
+
+<If roles={["beta-users"]}>
+  # Beta Feature
+</If>
+
+<If roles={["admin"]} not={true}>
+  # Admin Only Feature
+</If>
+
+<If loggedIn={true}>
+  # Logged In Feature
+</If>
+`;
+
+      const { hast } = toTree(mdx);
+      const toc = makeToc(hast);
+
+      expect(toc).toHaveLength(4);
+
+      expect(toc[0]?.simpleString).toBe("Main Title");
+      expect(toc[0]?.roleRequirements).toBeUndefined();
+
+      expect(toc[1]?.simpleString).toBe("Beta Feature");
+      expect(toc[1]?.roleRequirements).toEqual([
+        {
+          roles: ["beta-users"],
+          not: undefined,
+          loggedIn: undefined,
+        },
+      ]);
+
+      expect(toc[2]?.simpleString).toBe("Admin Only Feature");
+      expect(toc[2]?.roleRequirements).toEqual([
+        {
+          roles: ["admin"],
+          not: true,
+          loggedIn: undefined,
+        },
+      ]);
+
+      expect(toc[3]?.simpleString).toBe("Logged In Feature");
+      expect(toc[3]?.roleRequirements).toEqual([
+        {
+          roles: undefined,
+          not: undefined,
+          loggedIn: true,
+        },
+      ]);
+    });
+
+    it("should handle nested If components", () => {
+      const mdx = `
+<If roles={["admin"]}>
+  <If roles={["beta-users"]}>
+    # Nested Feature
+  </If>
+</If>
+`;
+
+      const { hast } = toTree(mdx);
+      const toc = makeToc(hast);
+
+      expect(toc).toHaveLength(1);
+      expect(toc[0]?.simpleString).toBe("Nested Feature");
+      expect(toc[0]?.roleRequirements).toEqual([
+        {
+          roles: ["admin"],
+          not: undefined,
+          loggedIn: undefined,
+        },
+        {
+          roles: ["beta-users"],
+          not: undefined,
+          loggedIn: undefined,
+        },
+      ]);
+    });
+
+    it("should handle If components without role attributes", () => {
+      const mdx = `
+<If>
+  # No Role Requirements
+</If>
+`;
+
+      const { hast } = toTree(mdx);
+      const toc = makeToc(hast);
+
+      expect(toc).toHaveLength(1);
+      expect(toc[0]?.simpleString).toBe("No Role Requirements");
+      expect(toc[0]?.roleRequirements).toBeUndefined();
+    });
+  });
 });

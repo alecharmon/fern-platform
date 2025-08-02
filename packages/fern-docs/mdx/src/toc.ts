@@ -10,7 +10,10 @@ import { Hast } from "@fern-docs/mdx";
 import { hastToString } from "./hast-utils";
 import { hastGetBooleanValue } from "./hast-utils/hast-get-boolean-value";
 import { isHastElement } from "./hast-utils/is-hast-element";
-import { extractAttributeValueLiteral } from "./mdx-utils/extract-literal";
+import {
+  extractAttributeArrayLiteral,
+  extractAttributeValueLiteral,
+} from "./mdx-utils/extract-literal";
 import { isMdxJsxElementHast } from "./mdx-utils/is-mdx-element";
 import { isMdxJsxAttribute } from "./mdx-utils/is-mdx-jsx-attr";
 
@@ -20,11 +23,18 @@ interface FeatureProps {
   match: unknown | undefined;
 }
 
+interface RoleProps {
+  roles?: string[];
+  not?: boolean;
+  loggedIn?: boolean;
+}
+
 interface FoundHeading {
   depth: number;
   title: string;
   id: string;
   featureFlags?: FeatureProps[];
+  roleRequirements?: RoleProps[];
 }
 
 interface AccordionItemProps {
@@ -39,6 +49,7 @@ export interface TableOfContentsItem {
   anchorString: string;
   children: TableOfContentsItem[];
   featureFlags?: FeatureProps[];
+  roleRequirements?: RoleProps[];
 }
 
 type HastNode = Hast.RootContent | Hast.Root | Hast.Doctype;
@@ -88,6 +99,7 @@ export function makeToc(
               id,
               title,
               featureFlags: findFlag(parents),
+              roleRequirements: findRoleRequirements(parents),
             });
 
             visitParents(child, visitor);
@@ -112,6 +124,7 @@ export function makeToc(
         id,
         title,
         featureFlags: findFlag(parents),
+        roleRequirements: findRoleRequirements(parents),
       });
     }
 
@@ -135,7 +148,13 @@ export function makeToc(
       }
 
       const title = hastToString(node);
-      headings.push({ depth, id, title, featureFlags: findFlag(parents) });
+      headings.push({
+        depth,
+        id,
+        title,
+        featureFlags: findFlag(parents),
+        roleRequirements: findRoleRequirements(parents),
+      });
     }
 
     if (isMdxJsxElementHast(node) && node.name === "TabGroup") {
@@ -161,6 +180,7 @@ export function makeToc(
             id: slug(item.title),
             title: item.title,
             featureFlags: findFlag(parents),
+            roleRequirements: findRoleRequirements(parents),
           });
         });
       } catch (e) {
@@ -191,6 +211,7 @@ export function makeToc(
             id: slug(item.title),
             title: item.title,
             featureFlags: findFlag(parents),
+            roleRequirements: findRoleRequirements(parents),
           });
         });
       } catch (e) {
@@ -229,6 +250,7 @@ export function makeToc(
         id: idAttr,
         title: titleAttr,
         featureFlags: findFlag(parents),
+        roleRequirements: findRoleRequirements(parents),
       });
     }
 
@@ -272,6 +294,7 @@ function makeTree(
           anchorString: token.id.trim(),
           children: makeTree(filteredHeadings, depth + 1),
           featureFlags: token.featureFlags,
+          roleRequirements: token.roleRequirements,
         });
       }
     } else {
@@ -310,6 +333,20 @@ function findFlag(parents: HastNode[]): FeatureProps[] | undefined {
   return feature;
 }
 
+function findRoleRequirements(parents: HastNode[]): RoleProps[] | undefined {
+  const roleRequirements = parents
+    .filter(isMdxJsxElementHast)
+    .filter((parent) => parent.name === "If")
+    .map(extractRoleProps)
+    .filter(isNonNullish);
+
+  if (roleRequirements.length === 0) {
+    return undefined;
+  }
+
+  return roleRequirements;
+}
+
 function extractFeatureProps(
   feature: Hast.MdxJsxElement
 ): FeatureProps | undefined {
@@ -332,5 +369,31 @@ function extractFeatureProps(
     flag,
     fallbackValue,
     match,
+  };
+}
+
+function extractRoleProps(
+  ifElement: Hast.MdxJsxElement
+): RoleProps | undefined {
+  const attributes = ifElement.attributes.filter(isMdxJsxAttribute);
+  const roles = extractAttributeArrayLiteral(
+    attributes.find((attr) => attr.name === "roles")?.value
+  );
+  const not = extractAttributeValueLiteral(
+    attributes.find((attr) => attr.name === "not")?.value
+  );
+  const loggedIn = extractAttributeValueLiteral(
+    attributes.find((attr) => attr.name === "loggedIn")?.value
+  );
+
+  // empty if should be ignored
+  if (roles == null && not == null && loggedIn == null) {
+    return undefined;
+  }
+
+  return {
+    roles: roles?.filter((r): r is string => typeof r === "string"),
+    not: typeof not === "boolean" ? not : undefined,
+    loggedIn: typeof loggedIn === "boolean" ? loggedIn : undefined,
   };
 }
