@@ -10,6 +10,7 @@ import { compact } from "es-toolkit/array";
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
+import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk/client/types";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FeatureFlagProvider } from "@fern-docs/components/feature-flags/FeatureFlagProvider";
@@ -101,6 +102,20 @@ export default async function Layout({
       >
         <Domain value={domain} />
         <SetBasePath value={basePath || "/"} />
+        {!isSelfHosted() && (
+          <>
+            <script
+              data-endpoint={`${basePath ?? ""}/_vercel/insights`}
+              src={`${basePath ?? ""}/_vercel/insights/script.js`}
+              defer
+            />
+            <script
+              data-endpoint={`${basePath ?? ""}/_vercel/speed-insights/vitals`}
+              src={`${basePath ?? ""}/_vercel/speed-insights/script.js`}
+              defer
+            />
+          </>
+        )}
         {/** HACKHACK: this is a hack to set the logo text to "Docs" for Cohere, this needs to be moved into docs.yml */}
         <SetLogoText text={domain.includes("cohere") ? "Docs" : undefined} />
         {config.defaultLanguage != null && (
