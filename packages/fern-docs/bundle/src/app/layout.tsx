@@ -2,6 +2,7 @@ import { Metadata, Viewport } from "next/types";
 import { experimental_taintUniqueValue } from "react";
 
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
@@ -67,6 +68,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {isLocal() && <WebSocketRefresh />}
         <Providers>
           {!isSelfHosted() && <Analytics />}
+          {!isSelfHosted() && <SpeedInsights />}
           {children}
         </Providers>
       </body>

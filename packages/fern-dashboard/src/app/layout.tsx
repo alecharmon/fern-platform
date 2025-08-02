@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { PylonScript } from "@/components/pylon/PylonScript";
@@ -37,6 +38,7 @@ export default async function RootLayout({
           HIDE_PYLON_CLASS_NAME
         )}
       >
+        <Analytics />
         <SpeedInsights />
 
         <ReactQueryProvider>
