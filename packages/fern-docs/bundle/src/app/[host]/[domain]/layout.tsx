@@ -1,5 +1,6 @@
 import "server-only";
 
+import Script from "next/script";
 import { Metadata } from "next/types";
 import React from "react";
 import { preload } from "react-dom";
@@ -104,12 +105,12 @@ export default async function Layout({
         <SetBasePath value={basePath || "/"} />
         {!isSelfHosted() && (
           <>
-            <script
+            <Script
               data-endpoint={`${basePath ?? ""}/_vercel/insights`}
               src={`${basePath ?? ""}/_vercel/insights/script.js`}
               defer
             />
-            <script
+            <Script
               data-endpoint={`${basePath ?? ""}/_vercel/speed-insights/vitals`}
               src={`${basePath ?? ""}/_vercel/speed-insights/script.js`}
               defer
