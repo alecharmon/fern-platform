@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { createFileResolver } from "@fern-api/docs-server/file-resolver";
+import { getProducts } from "@fern-api/docs-server/handle-node-fallbacks";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 
 import { processIcon } from "../processIcon";
@@ -28,9 +29,14 @@ export async function ProductDropdown({
     return null;
   }
 
-  const products = root.child.children;
+  const showHiddenNodes = (await loader.getEdgeFlags())
+    .isAuthenticatedPagesDiscoverable;
+  const authState = await loader.getAuthState();
+  const roles = authState.authed ? (authState.user.roles ?? []) : [];
 
-  if (products.length === 0) {
+  const products = getProducts(root, showHiddenNodes, roles);
+
+  if (products?.length === 0) {
     return null;
   }
 
@@ -38,32 +44,34 @@ export async function ProductDropdown({
 
   const resolveFileSrc = createFileResolver(files);
 
-  const productOptions = products.map((product): ProductDropdownItem => {
-    const slug = product.slug ?? product.pointsTo;
-    const image = resolveFileSrc(product.image);
-    return {
-      productId: product.productId,
-      title: product.title,
-      slug,
-      defaultSlug: product.default ? slug : undefined,
-      icon: processIcon(product),
-      subtitle: product.subtitle,
-      default: product.default,
-      image: image ? (
-        <Image
-          src={image.src}
-          alt={product.title}
-          objectFit="cover"
-          width={image.width}
-          height={image.height}
-        />
-      ) : undefined,
-    };
-  });
+  const productOptions = products?.map(
+    (product: FernNavigation.ProductNode): ProductDropdownItem => {
+      const slug = product.slug ?? product.pointsTo;
+      const image = resolveFileSrc(product.image);
+      return {
+        productId: product.productId,
+        title: product.title,
+        slug,
+        defaultSlug: product.default ? slug : undefined,
+        icon: processIcon(product),
+        subtitle: product.subtitle,
+        default: product.default,
+        image: image ? (
+          <Image
+            src={image.src}
+            alt={product.title}
+            objectFit="cover"
+            width={image.width}
+            height={image.height}
+          />
+        ) : undefined,
+      };
+    }
+  );
 
   return (
     <ProductDropdownClient
-      products={productOptions}
+      products={productOptions ?? []}
       fallbackProduct={fallbackProduct}
       useDenseLayout={useDenseLayout}
     />

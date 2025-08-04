@@ -1,5 +1,6 @@
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import {
+  RoleId,
   isProductGroupNode,
   isProductNode,
   isTabbedNode,
@@ -150,11 +151,57 @@ export const getTabs = (
         return false;
       }
 
-      if (!tab.viewers || tab.viewers.length === 0) {
+      if (
+        !tab.viewers ||
+        tab.viewers.length === 0 ||
+        tab.viewers.includes(RoleId("everyone"))
+      ) {
         return true;
       }
 
-      return tab.viewers.some((viewerRole) => roles.includes(viewerRole));
+      return tab.viewers.some((viewerRole: RoleId) =>
+        roles.includes(viewerRole as string)
+      );
+    }) ?? null
+  );
+};
+
+export const getProducts = (
+  root: FernNavigation.RootNode,
+  showHiddenNodes: boolean,
+  roles: string[]
+): FernNavigation.ProductNode[] | null => {
+  if (root.child.type !== "productgroup") {
+    return null;
+  }
+
+  const products = root.child.children;
+
+  if (showHiddenNodes) {
+    return products;
+  }
+
+  return (
+    products?.filter((product) => {
+      if (product.type !== "product") {
+        return true;
+      }
+
+      if (product.authed) {
+        return false;
+      }
+
+      if (
+        !product.viewers ||
+        product.viewers.length === 0 ||
+        product.viewers.includes(RoleId("everyone"))
+      ) {
+        return true;
+      }
+
+      return product.viewers.some((viewerRole: RoleId) =>
+        roles.includes(viewerRole as string)
+      );
     }) ?? null
   );
 };
