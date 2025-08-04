@@ -43,6 +43,13 @@ export function withVersionSwitcherInfo({
   versions,
   slugMap,
 }: WithVersionSwitcherInfoArgs): VersionSwitcherInfo[] {
+  let defaultVersionIdx = versions.findIndex((child) => child.default);
+  if (defaultVersionIdx === -1) {
+    defaultVersionIdx = 0;
+  }
+
+  const defaultVersion = versions[defaultVersionIdx];
+
   const { version: currentVersion, nodes } =
     getNodesUnderCurrentVersionAscending(node, parents);
 
@@ -59,6 +66,23 @@ export function withVersionSwitcherInfo({
   return versions
     .filter((version) => !version.hidden)
     .map((version, index) => {
+      // for the default version, use the canonical slugs, if available
+      if (version.id === defaultVersion?.id) {
+        return {
+          title: version.title,
+          id: version.versionId,
+          slug: version.slug,
+          landingPage:
+            version.landingPage?.canonicalSlug ?? version.landingPage?.slug,
+          // the default version should always point to the canonical node
+          pointsTo: node.canonicalSlug ?? node.slug,
+          index,
+          availability: version.availability,
+          hidden: version.hidden,
+          authed: version.authed,
+        } satisfies VersionSwitcherInfo;
+      }
+
       if (version.id === currentVersion?.id) {
         return {
           title: version.title,
