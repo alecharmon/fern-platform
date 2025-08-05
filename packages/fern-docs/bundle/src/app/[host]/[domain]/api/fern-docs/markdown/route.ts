@@ -45,23 +45,35 @@ export async function GET(
 
   const loader = await createCachedDocsLoader(host, domain);
   const node = getPageNodeForPath(await loader.getRoot(), cleanSlug);
+  const authState = await loader.getAuthState();
 
   if (node == null) {
     console.error(`[${domain}] Node not found: ${path}`);
     notFound();
   }
 
-  // if the page is authed, but the user is not authed, return a 403
-  if ((node.authed && !fernUser) || !fernUser?.roles) {
-    return new NextResponse(null, { status: 403 });
-  }
+  // if the page is authed
+  if (node.authed || authState.authed) {
+    // if the user isn't authed, return 403
+    if (!fernUser) {
+      return new NextResponse("User is not logged in", { status: 403 });
+    }
 
-  // if the page is authed and user has insufficient permissions, return a 403
-  if (
-    node.authed &&
-    !canView({ userRoles: fernUser.roles, pageViewers: node.viewers })
-  ) {
-    return new NextResponse(null, { status: 403 });
+    // if the user has no roles defined, return 403
+    if (!fernUser.roles) {
+      return new NextResponse(
+        "User does not have proper authentication to view this content",
+        { status: 403 }
+      );
+    }
+
+    // if the user has insufficient roles, return 403
+    if (!canView({ userRoles: fernUser.roles, pageViewers: node.viewers })) {
+      return new NextResponse(
+        "User has insufficient authentication roles to view this content",
+        { status: 403 }
+      );
+    }
   }
 
   const markdown = await getMarkdownForPath(node, loader);
