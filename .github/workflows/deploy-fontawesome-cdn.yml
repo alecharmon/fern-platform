@@ -33,6 +33,9 @@ jobs:
     env:
       VERCEL_PROJECT_ID: prj_MO0ayWSAeIoBYh8Cd13oigkd9knl
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # This helps turbo resolve changes faster
       - name: Install
         uses: ./.github/actions/install
       - name: Install Vercel CLI
