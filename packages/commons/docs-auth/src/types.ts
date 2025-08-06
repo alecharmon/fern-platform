@@ -1,5 +1,35 @@
 import { z } from "zod";
 
+export const PlaygroundStateSchema = z.object({
+  auth: z
+    .object({
+      bearer_token: z
+        .string()
+        .optional()
+        .describe("Bearer token to set in the request"),
+      basic: z
+        .object({
+          username: z.string(),
+          password: z.string(),
+        })
+        .optional(),
+    })
+    .optional(),
+  headers: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe("Headers to set in the request"),
+  path_parameters: z
+    .record(z.string(), z.any())
+    .optional()
+    .describe("Path parameters to set in the request"),
+  query_parameters: z
+    .record(z.string(), z.any())
+    .optional()
+    .describe("Query parameters to set in the request"),
+  // TODO: support body injection (potentially leveraging jsonpath?) — need a way to support different content types, and different spec types
+});
+
 export const FernUserSchema = z.object({
   name: z.string().optional(),
   email: z.string().optional(),
@@ -14,8 +44,8 @@ export const FernUserSchema = z.object({
   api_key: z.string().optional().describe("For API Playground key injection"),
 
   /**
-   * when the user logs in, there may be some initial state in the API playground that we can replace
-   * with the user's information (i.e. api key, organization, project id, etc.)
+   * when the user logs in, there may be some initial state in the API playground that we can replace with the user's information (i.e. api key, organization, project id, etc.)
+   *
    * the initial state will be merged into each request if it's compatible with the api endpoint's spec.
    *
    * Example claim:
@@ -29,40 +59,33 @@ export const FernUserSchema = z.object({
    *         }
    *     }
    * }
+   *
+   * there is an environment-specific state that will be merged into a request
+   * if the selected environment matches the key of the env_state record
+   *
+   *    * Example claim:
+   * ```
+   * {
+   *     "playground": {
+   *         "env_state": {
+   *             "prod.example.api": {
+   *                "auth": {
+   *                  "bearer_token": "abc123"
+   *                }
+   *             },
+   *             "dev.example.api": {
+   *                "auth": {
+   *                  "bearer_token": "123abc"
+   *                }
+   *             }
+   *         }
+   *     }
+   * }
    */
   playground: z
     .object({
-      initial_state: z
-        .object({
-          auth: z
-            .object({
-              bearer_token: z
-                .string()
-                .optional()
-                .describe("Bearer token to set in the request"),
-              basic: z
-                .object({
-                  username: z.string(),
-                  password: z.string(),
-                })
-                .optional(),
-            })
-            .optional(),
-          headers: z
-            .record(z.string(), z.string())
-            .optional()
-            .describe("Headers to set in the request"),
-          path_parameters: z
-            .record(z.string(), z.any())
-            .optional()
-            .describe("Path parameters to set in the request"),
-          query_parameters: z
-            .record(z.string(), z.any())
-            .optional()
-            .describe("Query parameters to set in the request"),
-          // TODO: support body injection (potentially leveraging jsonpath?) — need a way to support different content types, and different spec types
-        })
-        .optional(),
+      initial_state: PlaygroundStateSchema.optional(),
+      env_state: z.record(z.string(), PlaygroundStateSchema).optional(),
     })
     .optional(),
 });
