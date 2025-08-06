@@ -1,5 +1,7 @@
 name: Deploy @fern-docs/icons-cdn
-
+env:
+  VERCEL_ORG_ID: team_6FKOM5nw037hv8g2mTk3gaH7
+  VERCEL_PROJECT_ID: prj_MO0ayWSAeIoBYh8Cd13oigkd9knl
 on:
   push:
     branches:
@@ -30,8 +32,6 @@ jobs:
     needs: ignore
     if: needs.ignore.outputs.continue == 'true'
     runs-on: ubuntu-latest
-    env:
-      VERCEL_PROJECT_ID: prj_MO0ayWSAeIoBYh8Cd13oigkd9knl
     steps:
       - uses: actions/checkout@v4
         with:
