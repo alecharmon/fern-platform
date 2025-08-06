@@ -97,6 +97,15 @@ describe("sanitizeUrl", () => {
       );
     });
 
+    it("handles websocket protocol", () => {
+      expect(sanitizeUrl("wss://streaming.assemblyai.com")).toBe(
+        "wss://streaming.assemblyai.com/"
+      );
+      expect(sanitizeUrl("ws://streaming.assemblyai.com")).toBe(
+        "ws://streaming.assemblyai.com/"
+      );
+    });
+
     it("handles IP addresses", () => {
       expect(sanitizeUrl("https://192.168.1.1")).toBe("https://192.168.1.1/");
       expect(sanitizeUrl("192.168.1.1")).toBe("https://192.168.1.1/");

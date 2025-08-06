@@ -18,7 +18,12 @@ export function sanitizeUrl(url: string | undefined): string | undefined {
   }
 
   // handle URLs without protocol
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+  if (
+    !url.startsWith("http://") &&
+    !url.startsWith("https://") &&
+    !url.startsWith("wss://") &&
+    !url.startsWith("ws://")
+  ) {
     try {
       const parsedUrl = new URL(`https://${url}`);
       return parsedUrl.toString();
