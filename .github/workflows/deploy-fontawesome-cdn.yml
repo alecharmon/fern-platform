@@ -3,9 +3,11 @@ name: Deploy @fern-docs/icons-cdn
 on:
   push:
     branches:
-      - main
+      - app
+  workflow_dispatch:
+  # allow manual run
 
-# Cancel previous workflows on previous push so we don't have deploys overwriting eachother here
+# cancel previous workflows on previous push so we don't have deploys overwriting each other here
 concurrency:
   group: icons.ferndocs.com
   cancel-in-progress: true
