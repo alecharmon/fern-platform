@@ -304,12 +304,14 @@
   }
 
   #fern-search-desktop-command {
-    .fern-copy-button {
+    .fern-copy-button,
+    .fern-expand-button {
       top: 0.1rem !important;
     }
   }
 
-  .fern-copy-button {
+  .fern-copy-button,
+  .fern-expand-button {
     @apply size-fit backdrop-blur;
   }
 }

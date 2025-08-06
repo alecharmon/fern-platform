@@ -1,7 +1,11 @@
 import React from "react";
 
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
-import { CopyToClipboardButton, cn } from "@fern-docs/components";
+import {
+  CopyToClipboardButton,
+  ExpandCodeButton,
+  cn,
+} from "@fern-docs/components";
 import {
   CodeBlockWithClipboardButton,
   FernSyntaxHighlighter,
@@ -57,6 +61,9 @@ export function CodeBlock(props: {
     tooltips: tooltipsProp,
   } = props;
   const isDarkCode = useIsDarkCode();
+  // TODO: once this is in beta, we can add expandable logic for any code block greater than 20 lines
+  // const expandable = props.maxLines != null || code.split("\n").length > 20;
+  const expandable = props.maxLines != null;
 
   // merge context templates with the ones passed in
   const template = { ...useTemplate().template, ...templateProp };
@@ -83,6 +90,13 @@ export function CodeBlock(props: {
                 </span>
               </div>
             </div>
+            {expandable && (
+              <ExpandCodeButton
+                className={cn("fern-expand-button absolute right-9 z-20")}
+                content={code}
+                language={language}
+              />
+            )}
             <CopyToClipboardButton
               className="ml-2 mr-1"
               content={() => applyTemplates(code, template)}
@@ -101,6 +115,8 @@ export function CodeBlock(props: {
     <CodeBlockWithClipboardButton
       code={() => applyTemplates(code, template)}
       className={cn({ "bg-card-solid dark": isDarkCode }, className)}
+      expandable={expandable}
+      language={language}
     >
       <FernSyntaxHighlighter
         {...toSyntaxHighlighterProps({ ...props, template, tooltips })}
