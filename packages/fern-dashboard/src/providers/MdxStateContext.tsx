@@ -40,12 +40,16 @@ interface MdxDependencies {
 
 export const MdxStateContext = createContext<{
   changedMdxFiles: Record<Filename, Markdown>;
+  allMdxFiles: Record<Filename, Markdown>;
+  frontmatterData: Record<Filename, MdxToHtmlResponse["frontmatter"]>;
   mdxSyncedStatus: Record<Filename, SyncedStatus>;
   updateDependencies: (filename: Filename, state: MdxDependencies) => void;
   stageChanges: (filename: Filename, state: MdxDependencies) => void;
   syncChanges: (filename: Filename) => Promise<void>;
 }>({
   changedMdxFiles: {},
+  allMdxFiles: {},
+  frontmatterData: {},
   mdxSyncedStatus: {},
   updateDependencies: () => undefined,
   stageChanges: () => undefined,
@@ -77,12 +81,24 @@ export function MdxStateProvider({
         ...prev,
         [filename]: {
           html: state.html ?? prev[filename]?.html,
-          frontmatter: {
-            // Merge existing frontmatter with new frontmatter
-            ...prev[filename]?.frontmatter,
-            // Only override frontmatter properties that are newly provided
-            ...state.frontmatter,
-          },
+          frontmatter: (() => {
+            const existingFrontmatter = prev[filename]?.frontmatter || {};
+            const newFrontmatter = state.frontmatter || {};
+            const mergedFrontmatter = {
+              ...existingFrontmatter,
+            };
+
+            // Apply new frontmatter changes, removing fields with undefined values
+            Object.entries(newFrontmatter).forEach(([key, value]) => {
+              if (value == null) {
+                mergedFrontmatter[key] = key === "title" ? "" : undefined; // Always keep title field
+              } else {
+                mergedFrontmatter[key] = value;
+              }
+            });
+
+            return mergedFrontmatter;
+          })(),
           originalElements:
             state.originalElements ?? prev[filename]?.originalElements,
           changed: state.changed ?? prev[filename]?.changed,
@@ -132,6 +148,36 @@ export function MdxStateProvider({
     );
   }, [mdxDepsStore]);
 
+  // Build a map of all files (both initial and changed) and their markdown contents
+  const allMdxFiles = useMemo(() => {
+    return Object.entries(mdxDepsStore).reduce<Record<Filename, Markdown>>(
+      (acc, [filename, state]) => {
+        if (state.html && state.frontmatter && state.originalElements) {
+          acc[filename] = htmlToMdx(
+            state.html,
+            state.frontmatter,
+            state.originalElements,
+            state.changedNodes
+          ).mdx;
+        }
+        return acc;
+      },
+      {}
+    );
+  }, [mdxDepsStore]);
+
+  // Build a map of frontmatter data for all files
+  const frontmatterData = useMemo(() => {
+    return Object.entries(mdxDepsStore).reduce<
+      Record<Filename, MdxToHtmlResponse["frontmatter"]>
+    >((acc, [filename, state]) => {
+      if (state.frontmatter) {
+        acc[filename] = state.frontmatter;
+      }
+      return acc;
+    }, {});
+  }, [mdxDepsStore]);
+
   // Sync changes to the server via debounced setMdxFile server action
   const syncChanges = useCallback(
     async (filename: Filename) => {
@@ -177,6 +223,8 @@ export function MdxStateProvider({
     <MdxStateContext.Provider
       value={{
         changedMdxFiles,
+        allMdxFiles,
+        frontmatterData,
         mdxSyncedStatus,
         updateDependencies,
         stageChanges,

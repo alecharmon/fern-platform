@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useMdxState } from "@/providers/MdxStateContext";
 
@@ -19,12 +19,27 @@ export default function PageTitle({
 }: PageTitle.Props) {
   const [text, setText] = useState(initialText ?? "");
 
-  const { stageChanges } = useMdxState();
+  const { stageChanges, frontmatterData } = useMdxState();
+
+  // Watch for frontmatter changes from dev panel and update text accordingly
+  useEffect(() => {
+    const currentFrontmatter = frontmatterData[filename];
+    if (currentFrontmatter?.title) {
+      const newTitle = String(currentFrontmatter.title);
+      if (newTitle !== text) {
+        setText(newTitle);
+      }
+    } else if (text) {
+      setText("");
+    }
+  }, [frontmatterData, filename, text]);
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     const nextText = e.target.value;
     setText(nextText);
-    stageChanges(filename, { frontmatter: { title: nextText } });
+    stageChanges(filename, {
+      frontmatter: { title: nextText },
+    });
   }
 
   return (

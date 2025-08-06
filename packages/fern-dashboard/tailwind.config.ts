@@ -11,6 +11,16 @@ const em = (px: number, base: number): string => `${round(px / base)}em`;
 
 const config: Config = {
   theme: {
+    container: {
+      queries: {
+        xs: "20rem",
+        sm: "24rem",
+        md: "28rem",
+        lg: "32rem",
+        xl: "36rem",
+        "2xl": "42rem",
+      },
+    },
     extend: {
       keyframes: {
         "slide-down": {
@@ -92,7 +102,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [typography],
+  plugins: [typography, require("@tailwindcss/container-queries")],
   future: {
     hoverOnlyWhenSupported: true,
   },

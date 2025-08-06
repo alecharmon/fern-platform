@@ -15,6 +15,7 @@
 }
 #preview-container {
   @apply relative;
+  container-type: inline-size;
   @import "../../../../../../../../../fern-docs/bundle/src/components/css/base.scss";
   @import "../../../../../../../../../fern-docs/bundle/src/components/css/components.scss";
 

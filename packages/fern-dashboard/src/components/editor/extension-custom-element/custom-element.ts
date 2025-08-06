@@ -90,9 +90,22 @@ export const CustomElement = Node.create<CustomElementOptions>({
         key: new PluginKey(TAG),
         /**
          * This plugin is used to prevent the custom element node from being replaced (deleted).
+         * However, it allows setContent operations (full document replacements) to proceed.
          * @see https://github.com/ueberdosis/tiptap/issues/181#issuecomment-1213455982
          */
         filterTransaction(transaction, state) {
+          // Allow transactions that replace the entire document (setContent operations)
+          if (
+            transaction.steps.length === 1 &&
+            transaction.steps[0] instanceof ReplaceStep
+          ) {
+            const step = transaction.steps[0] as ReplaceStep;
+            // If the step replaces from position 0 to the end of the document, it's likely a setContent
+            if (step.from === 0 && step.to === state.doc.content.size) {
+              return true;
+            }
+          }
+
           let result = true; // true for keep, false for stop transaction
           const replaceSteps: number[] = [];
           transaction.steps.forEach((step, index) => {

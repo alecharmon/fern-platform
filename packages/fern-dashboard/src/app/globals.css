@@ -40,6 +40,10 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
+  /* monaco editor */
+  --monaco-blue: #0969da;
+  --monaco-purple: #7e1399;
+
   /* design system */
   --gray-100: #fcfcfd;
   --gray-200: #f9f9fb;
@@ -135,6 +139,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* monaco editor */
+  --monaco-blue: #1d86ff;
+  --monaco-purple: #cc00ff;
 
   /* design system */
   --gray-100: #111113;
@@ -325,4 +333,29 @@
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* The following CSS helps style our monaco editor HTML tags.
+<Tag ATTR="VALUE"></Tag>
+
+mtk4 = ATTR
+mtk6 = VALUE
+
+why? who knows. thanks monaco:)
+*/
+
+/* attr= */
+.monaco-editor .mtk4,
+.monaco-editor .mtk11 {
+  @apply text-[var(--monaco-blue)];
+}
+
+/* "value" */
+
+.monaco-editor .mtk6 {
+  @apply text-[var(--primary)];
+}
+
+.monaco-editor .mtk1 {
+  @apply text-gray-1200;
 }

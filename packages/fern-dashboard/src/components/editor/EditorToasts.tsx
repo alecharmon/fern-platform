@@ -49,3 +49,7 @@ export function ErrorStillSyncingToast() {
 export function ErrorCreateBranchToast() {
   toast.error("Failed to create branch. Please try again.");
 }
+
+export function WarningValidationToast(validationError: string) {
+  toast.warning("Markdown validation failed: " + validationError);
+}

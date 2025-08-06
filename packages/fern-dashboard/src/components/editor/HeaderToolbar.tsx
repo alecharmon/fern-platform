@@ -22,6 +22,7 @@ import { DocsUrl } from "@/utils/types";
 import { GithubLogo } from "../auth/GithubLogo";
 import { ProfileImage } from "../layout/ProfileImage";
 import { Button } from "../ui/button";
+import { DevModeSwitcher } from "./DevModeSwitcher";
 import {
   ErrorNoBaseBranchToast,
   ErrorNoBranchToast,
@@ -200,6 +201,17 @@ export function HeaderToolbar({
         </div> 
       </div> */}
       <div className="flex flex-1 shrink-0 items-center justify-between gap-3 lg:justify-end">
+        <FernTooltipProvider>
+          <FernTooltip
+            content={"Enable dev mode to edit the source code"}
+            delayDuration={400}
+            variant="dashboard"
+          >
+            <div className="pointer-events-auto mr-3 flex items-center justify-center">
+              <DevModeSwitcher />
+            </div>
+          </FernTooltip>
+        </FernTooltipProvider>
         {/* TODO: Add preview button functionality */}
         {/* <Button
           variant="ghost"

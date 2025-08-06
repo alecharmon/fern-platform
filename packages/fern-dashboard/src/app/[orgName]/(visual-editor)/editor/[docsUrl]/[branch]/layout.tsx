@@ -11,6 +11,7 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { GithubExtendedAccessProtectedRoute } from "@/components/auth/GithubExtendedAccessProtectedRoute";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { BranchProvider } from "@/providers/BranchContext";
+import { DevModeProvider } from "@/providers/DevModeProvider";
 import { GitPRUrlProvider } from "@/providers/GitPRUrlContext";
 import { MdxStateProvider } from "@/providers/MdxStateContext";
 import { throwDigestibleError } from "@/utils/errors";
@@ -75,18 +76,20 @@ async function DynamicEditorContent({
         enableSystem={false}
         disableTransitionOnChange
       >
-        <MdxStateProvider docsUrl={docsUrl}>
-          <BranchProvider branch={branch}>
-            <GitPRUrlProvider>
-              <HeaderToolbar
-                orgName={orgName}
-                session={session}
-                docsUrl={docsUrl}
-              />
-              {children}
-            </GitPRUrlProvider>
-          </BranchProvider>
-        </MdxStateProvider>
+        <DevModeProvider>
+          <MdxStateProvider docsUrl={docsUrl}>
+            <BranchProvider branch={branch}>
+              <GitPRUrlProvider>
+                <HeaderToolbar
+                  orgName={orgName}
+                  session={session}
+                  docsUrl={docsUrl}
+                />
+                {children}
+              </GitPRUrlProvider>
+            </BranchProvider>
+          </MdxStateProvider>
+        </DevModeProvider>
       </ThemeProvider>
     </GithubExtendedAccessProtectedRoute>
   );
