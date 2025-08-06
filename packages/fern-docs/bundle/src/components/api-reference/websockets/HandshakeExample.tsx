@@ -1,5 +1,6 @@
 "use client";
 
+import { removeTrailingSlash } from "@fern-api/docs-utils";
 import {
   ExampleWebSocketSession,
   WebSocketChannel,
@@ -16,6 +17,7 @@ export function HandshakeExample({
   example: ExampleWebSocketSession | undefined;
 }) {
   const [baseUrl] = usePlaygroundBaseUrl(channel);
+
   return (
     <div className="flex px-1 py-3">
       <table className="text-body min-w-0 flex-1 shrink table-fixed border-separate border-spacing-x-2 whitespace-normal break-words font-mono text-sm">
@@ -23,7 +25,7 @@ export function HandshakeExample({
           <tr>
             <td className="text-left align-top">URL</td>
             <td className="text-left align-top">
-              {`${baseUrl ?? ""}${example?.path ?? toColonEndpointPathLiteral(channel.path)}`}
+              {`${removeTrailingSlash(baseUrl ?? "")}${example?.path ?? toColonEndpointPathLiteral(channel.path)}`}
             </td>
           </tr>
           <tr>

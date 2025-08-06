@@ -1,5 +1,6 @@
 "use client";
 
+import { removeTrailingSlash } from "@fern-api/docs-utils";
 import {
   WebSocketChannel,
   toColonEndpointPathLiteral,
@@ -14,7 +15,7 @@ export function CopyWithBaseUrl({ channel }: { channel: WebSocketChannel }) {
     <CopyToClipboardButton
       className="-mr-1"
       content={() =>
-        `${baseUrl ?? ""}${toColonEndpointPathLiteral(channel.path)}`
+        `${removeTrailingSlash(baseUrl ?? "")}${toColonEndpointPathLiteral(channel.path)}`
       }
     />
   );
