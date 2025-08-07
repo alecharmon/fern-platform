@@ -10,6 +10,9 @@ const CSP_HEADER = `
   style-src 'self' 'unsafe-inline' *.usepylon.com *.posthog.com cdn.jsdelivr.net;
   font-src 'self' pylon-avatars.s3.us-west-1.amazonaws.com *.usepylon.com *.buildwithfern.com;
   img-src 'self' *;
+  frame-src 'self' *;
+  object-src 'self' *;
+  media-src 'self' *;
 `.replace(/\n/g, "");
 
 const nextConfig: NextConfig = {

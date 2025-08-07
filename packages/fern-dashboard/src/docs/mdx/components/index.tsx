@@ -17,6 +17,17 @@ import { Availability } from "./availability";
 import { Badge } from "./badge";
 import { Bleed } from "./bleed";
 import { Button, ButtonGroup } from "./button";
+import {
+  Callout,
+  CheckCallout,
+  ErrorCallout,
+  InfoCallout,
+  LaunchNoteCallout,
+  NoteCallout,
+  SuccessCallout,
+  TipCallout,
+  WarningCallout,
+} from "./callout";
 import { Card, CardGroup } from "./card";
 import { ClientLibraries } from "./client-libraries";
 import { CodeBlock } from "./code/CodeBlock";
@@ -51,7 +62,7 @@ const FERN_COMPONENTS = {
   Bleed,
   Button,
   ButtonGroup,
-  // Callout,
+  Callout,
   Card,
   CardGroup,
   ClientLibraries,
@@ -78,14 +89,14 @@ const FERN_COMPONENTS = {
   // Tooltip,
   // TwoSlash,
   // callout aliases
-  // Info: InfoCallout,
-  // Warning: WarningCallout,
-  // Success: SuccessCallout,
-  // Error: ErrorCallout,
-  // Note: NoteCallout,
-  // Tip: TipCallout,
-  // Check: CheckCallout,
-  // LaunchNote: LaunchNoteCallout,
+  Info: InfoCallout,
+  Warning: WarningCallout,
+  Success: SuccessCallout,
+  Error: ErrorCallout,
+  Note: NoteCallout,
+  Tip: TipCallout,
+  Check: CheckCallout,
+  LaunchNote: LaunchNoteCallout,
 };
 
 // internal-use only
@@ -121,34 +132,11 @@ const HTML_COMPONENTS = {
   strong: Strong,
   table: Table,
   ul: Ul,
-  video: () => (
-    <NodeViewWrapper>
-      <UnsupportedContent>
-        Video is not supported in the editor.
-      </UnsupportedContent>
-    </NodeViewWrapper>
-  ),
-  iframe: () => (
-    <NodeViewWrapper>
-      <UnsupportedContent>
-        IFrame is not supported in the editor.
-      </UnsupportedContent>
-    </NodeViewWrapper>
-  ),
-  canvas: () => (
-    <NodeViewWrapper>
-      <UnsupportedContent>
-        Canvas is not supported in the editor.
-      </UnsupportedContent>
-    </NodeViewWrapper>
-  ),
-  embed: () => (
-    <NodeViewWrapper>
-      <UnsupportedContent>
-        Embed is not supported in the editor.
-      </UnsupportedContent>
-    </NodeViewWrapper>
-  ),
+  video: "video",
+  iframe: "iframe",
+  canvas: "canvas",
+  embed: "embed",
+  br: "br",
 };
 
 const ALIASED_HTML_COMPONENTS = {
