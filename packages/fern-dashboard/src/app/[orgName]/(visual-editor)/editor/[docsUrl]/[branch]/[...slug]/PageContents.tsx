@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
+import { NodeId } from "@fern-api/fdr-sdk/navigation";
+import { usePageSync } from "@fern-docs/components";
 import { MdxToHtmlResponse } from "@fern-docs/mdx";
 
+import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useMdxState } from "@/providers/MdxStateContext";
 import { useOriginalElements } from "@/providers/OriginalElementsContext";
 
@@ -19,6 +22,12 @@ export declare namespace PageContents {
     initialFrontmatter: MdxToHtmlResponse["frontmatter"];
     initialOriginalElements: MdxToHtmlResponse["originalElements"];
     initialOriginalFrontmatter: MdxToHtmlResponse["originalFrontmatter"];
+    clientNodeId?: NodeId;
+    serverData?: {
+      html: string;
+      frontmatter: Record<string, any>;
+      originalElements: any;
+    };
   }
 }
 
@@ -28,20 +37,89 @@ export default function PageContents({
   initialFrontmatter,
   initialOriginalElements,
   initialOriginalFrontmatter,
+  clientNodeId,
+  serverData,
 }: PageContents.Props) {
   const { title, subtitle } = initialFrontmatter ?? {};
 
-  const { updateDependencies, changedMdxFiles, syncChanges } = useMdxState();
+  const { setCurrentFilename } = useCurrentPage();
+  const {
+    updateDependencies,
+    changedMdxFiles,
+    syncChanges,
+    mdxDepsStore,
+    stageChanges,
+  } = useMdxState();
+
+  // Sync page changes to localStorage and staging (works for both client and server pages)
+  const pageData = useMemo(() => {
+    const currentPageData = mdxDepsStore[filename];
+    return {
+      html: currentPageData?.html,
+      frontmatter: currentPageData?.frontmatter,
+      originalElements: currentPageData?.originalElements,
+    };
+  }, [mdxDepsStore, filename]);
+  usePageSync(filename, pageData, clientNodeId, serverData, stageChanges);
 
   const { originalElements, setOriginalElements } = useOriginalElements();
 
+  // Track what we've already bundled to prevent infinite loops
+  const bundledElementsRef = useRef<string>("");
+
   useEffect(() => {
-    void bundleOriginalElements(originalElements).then((bundled) => {
-      setOriginalElements(bundled);
-    });
+    // Create a stable hash of the original elements to detect actual changes
+    const elementsHash = JSON.stringify(
+      Object.entries(originalElements).map(([key, element]) => [
+        key,
+        element.content,
+      ])
+    );
+
+    // Only bundle if content has actually changed and elements need bundling
+    const needsBundling = Object.values(originalElements).some(
+      (element) => !element.code
+    );
+
+    if (needsBundling && bundledElementsRef.current !== elementsHash) {
+      bundledElementsRef.current = elementsHash;
+      // IMPORTANT: This fix prevents async state updates from triggering
+      // during error boundary recovery by:
+
+      // 1. Adding cancellation token to track if the
+      // component/effect should still update state
+      // 2. Cleanup function that cancels pending async
+      // operations when effect dependencies change (including
+      // during error boundary recovery)
+      // 3. Conditional state update that only proceeds if not
+      // cancelled
+
+      // Now when an error boundary recovers and triggers
+      // re-renders, any pending bundleOriginalElements promises
+      //  won't cause state updates that could interfere with
+      // React's hook reconciliation.
+      let cancelled = false;
+
+      void bundleOriginalElements(originalElements).then((bundled) => {
+        // Prevent state updates after component unmounts or error boundary recovery
+        if (!cancelled) {
+          setOriginalElements(bundled);
+        }
+      });
+
+      // Cleanup function to prevent state updates during error boundary recovery
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    // Return undefined when no bundling is needed
+    return undefined;
   }, [originalElements, setOriginalElements]);
 
   useEffect(() => {
+    // Set this as the current active page
+    setCurrentFilename(filename);
     updateDependencies(filename, {
       html: initialHtml,
       frontmatter: initialFrontmatter,
@@ -55,13 +133,18 @@ export default function PageContents({
     initialOriginalElements,
     initialOriginalFrontmatter,
     updateDependencies,
+    setCurrentFilename,
   ]);
 
   const changedMdxFile = changedMdxFiles[filename];
+  const lastSyncedContent = useRef<string | undefined>(undefined);
 
-  // Watch for changes and sync to server
+  // Watch for changes and sync to server - only sync if content actually changed
   useEffect(() => {
-    syncChanges(filename);
+    if (changedMdxFile && changedMdxFile !== lastSyncedContent.current) {
+      lastSyncedContent.current = changedMdxFile;
+      syncChanges(filename);
+    }
   }, [changedMdxFile, filename, syncChanges]);
 
   return (

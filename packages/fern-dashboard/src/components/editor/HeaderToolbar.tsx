@@ -5,8 +5,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ArrowLeftIcon, GitBranch, Globe } from "lucide-react";
 
-import { FernTooltipProvider } from "@fern-docs/components";
-import { FernTooltip } from "@fern-docs/components";
+import {
+  ClientPageStorage,
+  FernTooltip,
+  FernTooltipProvider,
+  PageStorage,
+  getPageFilename,
+  pageDataToMdx,
+} from "@fern-docs/components";
 import { getLoadableValue } from "@fern-ui/loadable";
 
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -32,6 +38,84 @@ import {
   WarningNoChangesToast,
 } from "./EditorToasts";
 import { ErrorFullCommitToast } from "./EditorToasts";
+
+/**
+ * Collects all changes from various sources into a single record
+ * @param changedMdxFiles - Files changed in MDX state
+ * @param branch - Current branch name
+ * @returns Record of all changes keyed by filename
+ */
+function collectAllChanges(
+  changedMdxFiles: Record<string, string>,
+  branch: string | null
+): Record<string, string> {
+  const allChanges: Record<string, string> = { ...changedMdxFiles };
+
+  if (!branch) return allChanges;
+
+  // Add client pages from localStorage
+  const clientPages = ClientPageStorage.loadClientPages(branch);
+  Object.entries(clientPages).forEach(([_clientNodeId, clientPageData]) => {
+    if (clientPageData.pageData && clientPageData.fullSlug?.trim()) {
+      const filename = getPageFilename(clientPageData.fullSlug);
+      if (!allChanges[filename]) {
+        allChanges[filename] = pageDataToMdx(clientPageData.pageData);
+      }
+    }
+  });
+
+  // Add server pages with localStorage changes
+  const serverPages = PageStorage.loadPages(branch);
+  Object.entries(serverPages).forEach(([filename, pageData]) => {
+    if (pageData.pageType === "server" && filename?.trim()) {
+      if (!allChanges[filename]) {
+        allChanges[filename] = pageDataToMdx(pageData);
+      }
+    }
+  });
+
+  return allChanges;
+}
+
+/**
+ * Generates a hash from file content with consistent key ordering
+ * @param content - Record of file content keyed by filename
+ * @returns Hash string representing the content
+ */
+function generateSimpleHash(content: Record<string, string>): string {
+  // Create a simple hash from the changes with consistent key ordering
+  const sortedKeys = Object.keys(content).sort();
+  const sortedChanges: Record<string, string> = {};
+  sortedKeys.forEach((key) => {
+    const value = content[key];
+    if (value !== undefined) {
+      sortedChanges[key] = value;
+    }
+  });
+
+  const changeString = JSON.stringify(sortedChanges);
+  let hash = 0;
+  for (let i = 0; i < changeString.length; i++) {
+    const char = changeString.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash.toString();
+}
+
+/**
+ * Generates a hash from the changes for tracking committed state
+ * @param changedMdxFiles - Files changed in MDX state
+ * @param branch - Current branch name
+ * @returns Hash string representing all changes
+ */
+function generateChangesHash(
+  changedMdxFiles: Record<string, string>,
+  branch: string | null
+): string {
+  const allChanges = collectAllChanges(changedMdxFiles, branch);
+  return generateSimpleHash(allChanges);
+}
 
 export function HeaderToolbar({
   orgName,
@@ -63,6 +147,31 @@ export function HeaderToolbar({
   }, [branch, setPrUrl]);
 
   const [isCommitting, setIsCommitting] = useState(false);
+  const [changesCommitted, setChangesCommitted] = useState(false);
+
+  // Initialize changesCommitted state by comparing current changes with last committed hash
+  useEffect(() => {
+    if (!branch) return;
+
+    const currentHash = generateChangesHash(changedMdxFiles, branch);
+    const lastCommittedHash = localStorage.getItem(
+      `lastCommittedHash-${branch}`
+    );
+
+    // Only set changesCommitted to true if:
+    // 1. We have a stored committed hash
+    // 2. Current changes hash matches the committed hash
+    // 3. There are actually some changes (hash is not for empty state)
+    if (
+      lastCommittedHash &&
+      currentHash === lastCommittedHash &&
+      currentHash !== "0"
+    ) {
+      setChangesCommitted(true);
+    } else {
+      setChangesCommitted(false);
+    }
+  }, [changedMdxFiles, branch, mdxSyncedStatus]); // Added mdxSyncedStatus to ensure we wait for data to load
 
   const handleCommitPress = useCallback(async () => {
     if (githubSource?.owner == null || githubSource.repo == null) {
@@ -73,7 +182,11 @@ export function HeaderToolbar({
       ErrorNoBranchToast();
       return;
     }
-    if (Object.keys(changedMdxFiles).length === 0) {
+
+    // Collect all files to commit using the utility function
+    const allFilesToCommit = collectAllChanges(changedMdxFiles, branch);
+
+    if (Object.keys(allFilesToCommit).length === 0) {
       WarningNoChangesToast();
       return;
     }
@@ -89,7 +202,7 @@ export function HeaderToolbar({
         repo: githubSource.repo,
         branch,
         message: "Visual Editor: Update",
-        files: Object.entries(changedMdxFiles).map(([filePath, content]) => ({
+        files: Object.entries(allFilesToCommit).map(([filePath, content]) => ({
           path: `fern/${filePath}`,
           content,
           mode: "100644",
@@ -97,6 +210,12 @@ export function HeaderToolbar({
       });
       if (response.success) {
         SuccessfulCommitToast();
+        setChangesCommitted(true);
+
+        // Store the hash of ALL committed changes (same as what we actually committed)
+        // Use the exact same content that was committed to generate the hash
+        const committedHash = generateSimpleHash(allFilesToCommit);
+        localStorage.setItem(`lastCommittedHash-${branch}`, committedHash);
       } else {
         ErrorFullCommitToast();
       }
@@ -120,7 +239,8 @@ export function HeaderToolbar({
       }
     } catch (error) {
       ErrorFullCommitToast();
-      console.error("Error committing changes:", error); // TODO: errors should be logged to Sentry, not to console
+      // TODO: Integrate with proper error reporting service (e.g., Sentry)
+      console.error("Error committing changes:", error);
     } finally {
       setIsCommitting(false);
     }
@@ -138,14 +258,43 @@ export function HeaderToolbar({
     if (isCommitting) {
       return "Disabled while committing";
     }
-    if (Object.keys(changedMdxFiles)?.length === 0) {
+
+    // Check if there are any changes to commit (current changes + localStorage)
+    let hasAnyChanges = Object.keys(changedMdxFiles)?.length > 0;
+
+    if (!hasAnyChanges && branch) {
+      // Check localStorage for client pages
+      const clientPages = ClientPageStorage.loadClientPages(branch);
+      hasAnyChanges = Object.keys(clientPages).length > 0;
+
+      // Check localStorage for server pages with changes
+      if (!hasAnyChanges) {
+        const serverPages = PageStorage.loadPages(branch);
+        hasAnyChanges = Object.values(serverPages).some(
+          (page) => page.pageType === "server"
+        );
+      }
+    }
+
+    if (!hasAnyChanges) {
       return "No changes to commit";
     }
+
+    if (changesCommitted) {
+      return "Latest changes have been committed";
+    }
+
     if (Object.values(mdxSyncedStatus).some((status) => status !== "SYNCED")) {
       return "Commit disabled while changes are syncing";
     }
     return null;
-  }, [isCommitting, changedMdxFiles, mdxSyncedStatus]);
+  }, [
+    isCommitting,
+    changedMdxFiles,
+    mdxSyncedStatus,
+    branch,
+    changesCommitted,
+  ]);
 
   return (
     <div className="bg-background flex h-[var(--header-toolbar-height)] flex-wrap items-center justify-center gap-2 border-b border-gray-500 px-2 py-2 shadow-sm md:py-1">

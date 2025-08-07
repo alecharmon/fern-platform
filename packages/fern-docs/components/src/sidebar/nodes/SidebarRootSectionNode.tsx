@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
+import { SidebarClientNavigationChildInjector } from "./SidebarClientNavigationChildInjector";
 import { SidebarNavigationChild } from "./SidebarNavigationChild";
 import { SidebarPageNode } from "./SidebarPageNode";
 import { SidebarRootHeading } from "./SidebarRootHeading";
@@ -39,6 +40,11 @@ export function SidebarRootSectionNode({
       <SidebarRootHeading node={node} className={className} icon={icon} />
 
       <ul className="fern-sidebar-group">
+        {/* Depends on SidebarClientNavigationProvider for client nodes, no-op when provider isn't available */}
+        <SidebarClientNavigationChildInjector
+          parentNodeId={node.id}
+          childDepth={1}
+        />
         {node.children.map((child) => (
           <li key={child.id}>
             <SidebarNavigationChild node={child} depth={1} />

@@ -34,3 +34,4 @@ export * from "./util/shared-component-types";
 export * from "./syntax-highlighter";
 export * from "./theme";
 export * from "./FernLinkButton";
+export * from "./sidebar/nodes";

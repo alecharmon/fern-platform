@@ -11,6 +11,7 @@ import { mdxToHtml } from "@fern-docs/mdx";
 import { WarningValidationToast } from "@/components/editor/EditorToasts";
 import { defineAppTheme } from "@/components/editor/theme-utils";
 import { Button } from "@/components/ui/button";
+import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
 import { useMdxState } from "@/providers/MdxStateContext";
 import { useOriginalElements } from "@/providers/OriginalElementsContext";
@@ -18,6 +19,7 @@ import { cn } from "@/utils/utils";
 
 export default function DevPanel() {
   const { panelOpen } = useDevMode();
+  const { currentFilename } = useCurrentPage();
   const { allMdxFiles, stageChanges, frontmatterData } = useMdxState();
   const { setOriginalElements } = useOriginalElements();
   const editorRef = useRef<any>(null);
@@ -28,10 +30,10 @@ export default function DevPanel() {
   const [editedContent, setEditedContent] = useState("");
   const [shouldShake, setShouldShake] = useState(false);
 
-  // Get the current file's markdown content and filename - show the first available file
-  const currentFilename = Object.keys(allMdxFiles)[0] || "";
+  // Get the current file's markdown content
+  const activeFilename = currentFilename || Object.keys(allMdxFiles)[0] || "";
   const currentMarkdown =
-    allMdxFiles[currentFilename] || "// Loading content...";
+    allMdxFiles[activeFilename] || "// Loading content...";
 
   useEffect(() => {
     // Update Monaco editor content when markdown changes (only in read-only mode)
@@ -90,7 +92,7 @@ export default function DevPanel() {
       });
 
       const mergedFrontmatter = {
-        ...frontmatterData[currentFilename],
+        ...frontmatterData[activeFilename],
         ...frontmatter,
       };
 
@@ -108,7 +110,7 @@ export default function DevPanel() {
       setOriginalElements(originalElements);
 
       // Then update the tiptap editor by staging changes with new HTML and originalElements
-      stageChanges(currentFilename, {
+      stageChanges(activeFilename, {
         html,
         frontmatter: mergedFrontmatter,
         originalElements,

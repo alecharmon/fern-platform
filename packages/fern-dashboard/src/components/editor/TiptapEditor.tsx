@@ -49,6 +49,7 @@ const extensions = [
 ] as Extension[];
 export declare namespace TiptapEditor {
   export interface Props {
+    autofocus?: boolean;
     className?: string;
     disableFloatingMenu?: boolean;
     disableBubbleMenu?: boolean;
@@ -60,6 +61,7 @@ export declare namespace TiptapEditor {
 
 // SEE: https://tiptap.dev/docs/editor/getting-started/install/react
 export default function TiptapEditor({
+  autofocus,
   className,
   disableFloatingMenu,
   disableBubbleMenu,
@@ -69,6 +71,7 @@ export default function TiptapEditor({
 }: TiptapEditor.Props) {
   return (
     <EditorProvider
+      autofocus={autofocus}
       extensions={extensions}
       content={content}
       editorProps={{

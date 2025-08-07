@@ -84,13 +84,12 @@ export default function PageEditor({
 
   // TODO: add a loading state, possibly as a Suspense boundary
   return (
-    currentHtmlRef.current != null && (
-      <TiptapEditor
-        className={className}
-        content={currentHtmlRef.current}
-        onCreate={onTiptapEditorCreate}
-        onUpdate={onTiptapEditorUpdate}
-      />
-    )
+    <TiptapEditor
+      autofocus={true}
+      className={className}
+      content={currentHtmlRef.current || ""}
+      onCreate={onTiptapEditorCreate}
+      onUpdate={onTiptapEditorUpdate}
+    />
   );
 }

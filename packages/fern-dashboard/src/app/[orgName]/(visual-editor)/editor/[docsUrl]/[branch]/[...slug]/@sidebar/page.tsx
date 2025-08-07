@@ -32,7 +32,11 @@ export default async function SidebarPage({
     loader.getRoot(),
   ]);
 
-  const found = FernNavigation.utils.findNode(root, slugjoin(slug));
+  let found = FernNavigation.utils.findNode(root, slugjoin(slug));
+  if (found.type !== "found") {
+    // TODO: this is a placeholder, replace with real logic
+    found = FernNavigation.utils.findNode(root, slugjoin(["welcome"]));
+  }
   if (found.type !== "found") {
     return null;
   }
@@ -54,11 +58,19 @@ export default async function SidebarPage({
       {isSingleOverviewPage && !isSidebarFixed ? (
         <HiddenSidebar />
       ) : (
-        <SidebarRootNode
-          root={found.sidebar}
-          visibleNodeIds={visibleNodeIds}
-          loader={loader}
-        />
+        <>
+          {/* TODO: bring this back once we have a way to update docs.yml as a part of the commit */}
+          {/* <CreateClientPage root={found.sidebar}>
+            <Button className="mb-2 w-full cursor-pointer" variant="outline">
+              <Icon variant="Plus" /> Create new page
+            </Button>
+          </CreateClientPage> */}
+          <SidebarRootNode
+            root={found.sidebar}
+            visibleNodeIds={visibleNodeIds}
+            loader={loader}
+          />
+        </>
       )}
     </>
   );

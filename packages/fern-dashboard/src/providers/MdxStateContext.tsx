@@ -13,6 +13,7 @@ import {
 import { ChangedNodes, MdxToHtmlResponse, htmlToMdx } from "@fern-docs/mdx";
 
 import { setMdxFile } from "@/app/actions/setMdxFile";
+import { createMdxFrontmatter } from "@/utils/createMdxFrontmatter";
 import { DocsUrl } from "@/utils/types";
 
 type Filename = string;
@@ -49,6 +50,7 @@ export const MdxStateContext = createContext<{
   allMdxFiles: Record<Filename, Markdown>;
   frontmatterData: Record<Filename, MdxToHtmlResponse["frontmatter"]>;
   mdxSyncedStatus: Record<Filename, SyncedStatus>;
+  mdxDepsStore: Record<Filename, MdxDependencies>;
   updateDependencies: (filename: Filename, state: MdxDependencies) => void;
   stageChanges: (filename: Filename, state: MdxDependencies) => void;
   syncChanges: (filename: Filename) => Promise<void>;
@@ -57,6 +59,7 @@ export const MdxStateContext = createContext<{
   allMdxFiles: {},
   frontmatterData: {},
   mdxSyncedStatus: {},
+  mdxDepsStore: {},
   updateDependencies: () => undefined,
   stageChanges: () => undefined,
   syncChanges: () => Promise.resolve(),
@@ -188,6 +191,17 @@ export function MdxStateProvider({
             // state.changedFrontmatter
             true // TODO: re-enable (force true for now, there's a bug in the loader/FDR that provides malformed frontmatter)
           ).mdx;
+        } else if (state.html || state.frontmatter || state.originalElements) {
+          // Generate minimal markdown when page data is incomplete
+          // Prevents dev panel from showing "// Loading content..." for partial data
+          const title = state.frontmatter?.title;
+          const subtitle = state.frontmatter?.subtitle;
+          const slug = state.frontmatter?.slug;
+          acc[filename] = createMdxFrontmatter({
+            title: typeof title === "string" ? title : "Untitled",
+            subtitle: typeof subtitle === "string" ? subtitle : undefined,
+            slug: typeof slug === "string" ? slug : undefined,
+          });
         }
         return acc;
       },
@@ -255,6 +269,7 @@ export function MdxStateProvider({
         allMdxFiles,
         frontmatterData,
         mdxSyncedStatus,
+        mdxDepsStore,
         updateDependencies,
         stageChanges,
         syncChanges,

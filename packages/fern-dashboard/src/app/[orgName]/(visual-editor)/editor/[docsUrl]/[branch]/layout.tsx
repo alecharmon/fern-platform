@@ -2,6 +2,9 @@ import { ThemeProvider } from "next-themes";
 import { redirect } from "next/navigation";
 import type React from "react";
 
+import { ClientPageManager } from "@fern-docs/components/sidebar/nodes/ClientPageManager";
+import { SidebarClientNavigationProvider } from "@fern-docs/components/sidebar/nodes/SidebarClientNavigationProvider";
+
 import getDocsGithubSourceHandler from "@/app/api/get-docs-github-source/handler";
 import {
   Auth0SessionData,
@@ -11,6 +14,7 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { GithubExtendedAccessProtectedRoute } from "@/components/auth/GithubExtendedAccessProtectedRoute";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { BranchProvider } from "@/providers/BranchContext";
+import { CurrentPageProvider } from "@/providers/CurrentPageContext";
 import { DevModeProvider } from "@/providers/DevModeProvider";
 import { GitPRUrlProvider } from "@/providers/GitPRUrlContext";
 import { MdxStateProvider } from "@/providers/MdxStateContext";
@@ -76,20 +80,25 @@ async function DynamicEditorContent({
         enableSystem={false}
         disableTransitionOnChange
       >
-        <DevModeProvider>
-          <MdxStateProvider docsUrl={docsUrl}>
-            <BranchProvider branch={branch}>
-              <GitPRUrlProvider>
-                <HeaderToolbar
-                  orgName={orgName}
-                  session={session}
-                  docsUrl={docsUrl}
-                />
-                {children}
-              </GitPRUrlProvider>
-            </BranchProvider>
-          </MdxStateProvider>
-        </DevModeProvider>
+        <SidebarClientNavigationProvider branchName={branch}>
+          <ClientPageManager branchName={branch} />
+          <DevModeProvider>
+            <MdxStateProvider docsUrl={docsUrl}>
+              <CurrentPageProvider>
+                <BranchProvider branch={branch}>
+                  <GitPRUrlProvider>
+                    <HeaderToolbar
+                      orgName={orgName}
+                      session={session}
+                      docsUrl={docsUrl}
+                    />
+                    {children}
+                  </GitPRUrlProvider>
+                </BranchProvider>
+              </CurrentPageProvider>
+            </MdxStateProvider>
+          </DevModeProvider>
+        </SidebarClientNavigationProvider>
       </ThemeProvider>
     </GithubExtendedAccessProtectedRoute>
   );

@@ -72,6 +72,9 @@ export function ErrorBoundary({
   return (
     <ReactErrorBoundary
       onReset={onResetAction}
+      onError={(error) => {
+        console.error(`[error-boundary]: ${error.message}`);
+      }}
       FallbackComponent={ErrorBoundaryFallback}
     >
       {children}
