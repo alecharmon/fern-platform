@@ -269,6 +269,7 @@ export const ApiKeySchema = z.object({
 
 export type ApiKeyDemo = z.infer<typeof ApiKeySchema>;
 export type FernUser = z.infer<typeof FernUserSchema>;
+export type PlaygroundState = z.infer<typeof PlaygroundStateSchema>;
 export type AuthEdgeConfig = z.infer<typeof AuthEdgeConfigSchema>;
 export type SSOWorkOS = z.infer<typeof SSOWorkOSSchema>;
 export type OAuth2Ory = z.infer<typeof OAuth2OrySchema>;

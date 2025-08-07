@@ -14,8 +14,10 @@ import {
 } from "@fern-docs/components";
 import { useBooleanState } from "@fern-ui/react-commons";
 
-import { SELECTED_ENVIRONMENT_ATOM } from "@/state/environment";
-import { PLAYGROUND_ENVIRONMENT_ATOM } from "@/state/playground";
+import {
+  SELECTED_ENVIRONMENT_ID_ATOM,
+  SELECTED_ENVIRONMENT_URL_ATOM,
+} from "@/state/environment";
 
 interface MaybeEnvironmentDropdownProps {
   baseUrl?: string;
@@ -39,21 +41,26 @@ export function MaybeEnvironmentDropdown({
   editable,
   isEditingEnvironment,
 }: MaybeEnvironmentDropdownProps): ReactElement<any> | null {
-  // const [allEnvironmentIds] = useAtom(ALL_ENVIRONMENTS_ATOM);
   const [selectedEnvironmentId, setSelectedEnvironmentId] = useAtom(
-    SELECTED_ENVIRONMENT_ATOM
+    SELECTED_ENVIRONMENT_ID_ATOM
   );
-  const [playgroundEnvironment, setPlaygroundEnvironment] = useAtom(
-    PLAYGROUND_ENVIRONMENT_ATOM
+  const [selectedEnvironmentUrl, setSelectedEnvironmentUrl] = useAtom(
+    SELECTED_ENVIRONMENT_URL_ATOM
   );
   const [inputValue, setInputValue] = useState<string | undefined>(undefined);
   const [initialState, setInitialState] = useState<string | undefined>(
     undefined
   );
 
-  const selectedEnvironment =
-    options?.find((option) => option.id === selectedEnvironmentId) ??
-    options?.[0];
+  // if we have selected a new environment id, update the selected url to match
+  useEffect(() => {
+    if (selectedEnvironmentId) {
+      const envBaseUrl =
+        options?.find((option) => option.id === selectedEnvironmentId)
+          ?.baseUrl ?? undefined;
+      setSelectedEnvironmentUrl(envBaseUrl);
+    }
+  }, [selectedEnvironmentId, options, setSelectedEnvironmentUrl]);
 
   // const environmentIds = environmentFilters
   //     ? environmentFilters.filter((environmentFilter) => allEnvironmentIds.includes(environmentFilter))
@@ -65,9 +72,7 @@ export function MaybeEnvironmentDropdown({
   //     }
   // }, [environmentFilters, environmentId, setSelectedEnvironmentId]);
 
-  // TODO: revisit the order of precedence for the baseUrl... this is a temporary fix
-  const preParsedUrl =
-    playgroundEnvironment ?? selectedEnvironment?.baseUrl ?? baseUrl;
+  const preParsedUrl = selectedEnvironmentUrl ?? baseUrl;
   const url = preParsedUrl && parse(sanitizeUrl(preParsedUrl) ?? "");
 
   // TODO: clean up this component
@@ -82,7 +87,7 @@ export function MaybeEnvironmentDropdown({
       setInputValue(preParsedUrl);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playgroundEnvironment]);
+  }, [selectedEnvironmentUrl]);
 
   const isValidInput =
     inputValue != null &&
@@ -114,15 +119,14 @@ export function MaybeEnvironmentDropdown({
             }}
             onBlur={(e) => {
               if (isValidInput) {
-                if (playgroundEnvironment) {
-                  setInputValue(playgroundEnvironment);
+                if (selectedEnvironmentUrl) {
+                  setInputValue(selectedEnvironmentUrl);
                 }
                 isEditingEnvironment.setFalse();
               } else {
                 e.preventDefault();
                 e.stopPropagation();
                 setInputValue(initialState);
-                setPlaygroundEnvironment(initialState);
                 isEditingEnvironment.setFalse();
               }
             }}
@@ -136,20 +140,18 @@ export function MaybeEnvironmentDropdown({
                 setInputValue(value);
               } else {
                 setInputValue(value);
-                setPlaygroundEnvironment(value);
               }
             }}
             onKeyDownCapture={(e) => {
               if (e.key === "Enter" && isValidInput) {
-                if (playgroundEnvironment) {
-                  setInputValue(playgroundEnvironment);
+                if (selectedEnvironmentUrl) {
+                  setInputValue(selectedEnvironmentUrl);
                 }
                 isEditingEnvironment.setFalse();
               } else if (e.key === "Escape") {
                 e.preventDefault();
                 e.stopPropagation();
                 setInputValue(initialState);
-                setPlaygroundEnvironment(initialState);
                 isEditingEnvironment.setFalse();
               }
             }}
@@ -180,10 +182,10 @@ export function MaybeEnvironmentDropdown({
                   type: "value",
                 }))}
                 onValueChange={(value) => {
-                  setPlaygroundEnvironment(undefined);
                   setSelectedEnvironmentId(value);
+                  // useEffect updates the URL
                 }}
-                value={selectedEnvironment?.id ?? environmentId}
+                value={selectedEnvironmentId ?? environmentId}
               >
                 <FernButton
                   style={{ pointerEvents: "auto" }}

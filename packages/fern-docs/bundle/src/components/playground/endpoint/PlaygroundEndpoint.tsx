@@ -10,7 +10,6 @@ import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
 import { FernTooltipProvider } from "@fern-docs/components";
-import { fernUserAtom } from "@fern-docs/components/state/fern-user";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import {
   Loadable,
@@ -29,6 +28,7 @@ import {
   PLAYGROUND_AUTH_STATE_ATOM,
   PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
   usePlaygroundEndpointFormState,
+  useResolvedPlaygroundState,
 } from "@/state/playground";
 
 import { track } from "../../analytics";
@@ -54,7 +54,7 @@ export const PlaygroundEndpoint = ({
   context: EndpointContext;
   authForm: React.ReactNode;
 }) => {
-  const user = useAtomValue(fernUserAtom);
+  const resolvedPlaygroundState = useResolvedPlaygroundState();
   const { node, endpoint, auth } = context;
 
   const [formState, setFormState] = usePlaygroundEndpointFormState(context);
@@ -64,7 +64,7 @@ export const PlaygroundEndpoint = ({
       getInitialEndpointRequestFormStateWithExample(
         context,
         context.endpoint.examples?.[0],
-        user?.playground?.initial_state
+        resolvedPlaygroundState
       )
     );
   });
@@ -74,7 +74,7 @@ export const PlaygroundEndpoint = ({
       getInitialEndpointRequestFormStateWithExample(
         context,
         undefined,
-        user?.playground?.initial_state
+        resolvedPlaygroundState
       )
     );
   });

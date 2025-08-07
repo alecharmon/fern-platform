@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 
 import { useAtom, useAtomValue } from "jotai/react";
 import { RESET } from "jotai/utils";
@@ -14,6 +14,7 @@ import {
   PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_IS_RESETTABLE_ATOM,
   PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_ATOM,
   PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_IS_RESETTABLE_ATOM,
+  useResolvedPlaygroundState,
 } from "@/state/playground";
 
 import { PasswordInputGroup } from "../PasswordInputGroup";
@@ -37,6 +38,20 @@ export function PlaygroundBasicAuthForm({
   const isPasswordResettable = useAtomValue(
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_IS_RESETTABLE_ATOM
   );
+
+  const resolvedState = useResolvedPlaygroundState();
+
+  // if the resolved state changes (on env update), update the auth state
+  useEffect(() => {
+    setUsername(resolvedState?.auth?.basic?.username ?? "");
+    setPassword(resolvedState?.auth?.basic?.password ?? "");
+  }, [
+    resolvedState?.auth?.basic?.username,
+    resolvedState?.auth?.basic?.password,
+    setUsername,
+    setPassword,
+  ]);
+
   return (
     <>
       <li className="-mx-4 space-y-2 p-4">

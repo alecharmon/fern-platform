@@ -1,7 +1,7 @@
 import { compact } from "es-toolkit/array";
 import { mapValues, omitBy, pick } from "es-toolkit/object";
 
-import { FernUser } from "@fern-api/docs-auth";
+import { FernUser, PlaygroundState } from "@fern-api/docs-auth";
 import type {
   EndpointContext,
   ObjectProperty,
@@ -18,12 +18,61 @@ import {
   getEmptyValueForObjectProperties,
 } from "./default-values";
 
+// returns a merged state of the environment-specific variables
+// overlayed onto the intial state
+// will be undefined if the initial and environment states are undefined
+export function resolveEndpointEnvironmentState({
+  currentEnvironment,
+  initialState,
+  envState,
+}: {
+  currentEnvironment: string | undefined;
+  initialState:
+    | NonNullable<FernUser["playground"]>["initial_state"]
+    | undefined;
+  envState: NonNullable<FernUser["playground"]>["env_state"] | undefined;
+}): PlaygroundState | undefined {
+  // if no environment present, fallback to initial
+  if (!currentEnvironment) {
+    return initialState;
+  }
+
+  // env_state key can match any part of the environment string
+  // env_state: prod === environment_url: prod.example.com
+  // env_state: company_a === environment: api.company_a.com
+
+  // iterate over envState keys to find a match
+  if (envState) {
+    for (const [envKey, envStateValue] of Object.entries(envState)) {
+      if (envKey && currentEnvironment.includes(envKey)) {
+        // override or add any values in the initial state with the state defined in the env_state
+        return {
+          auth: envStateValue.auth ?? initialState?.auth,
+          headers: {
+            ...(initialState?.headers ?? {}),
+            ...(envStateValue.headers ?? {}),
+          },
+          path_parameters: {
+            ...(initialState?.path_parameters ?? {}),
+            ...(envStateValue.path_parameters ?? {}),
+          },
+          query_parameters: {
+            ...(initialState?.query_parameters ?? {}),
+            ...(envStateValue.query_parameters ?? {}),
+          },
+        };
+      }
+    }
+  }
+
+  // if no match, fallback to initial
+  return initialState;
+}
+
 export function getInitialEndpointRequestFormStateWithExample(
   context: EndpointContext | undefined,
   exampleCall: ExampleEndpointCall | undefined,
-  playgroundInitialState:
-    | NonNullable<FernUser["playground"]>["initial_state"]
-    | undefined
+  playgroundState: NonNullable<PlaygroundState> | undefined
 ): PlaygroundEndpointRequestFormState {
   return {
     type: "endpoint",
@@ -37,7 +86,7 @@ export function getInitialEndpointRequestFormStateWithExample(
       ),
       ...(exampleCall?.headers ?? {}),
       ...filterParams(
-        playgroundInitialState?.headers ?? {},
+        playgroundState?.headers ?? {},
         compact([
           context?.globalHeaders,
           context?.endpoint.requestHeaders,
@@ -51,7 +100,7 @@ export function getInitialEndpointRequestFormStateWithExample(
       ),
       ...exampleCall?.pathParameters,
       ...filterParams(
-        playgroundInitialState?.path_parameters ?? {},
+        playgroundState?.path_parameters ?? {},
         context?.endpoint.pathParameters ?? []
       ),
     },
@@ -62,7 +111,7 @@ export function getInitialEndpointRequestFormStateWithExample(
       ),
       ...exampleCall?.queryParameters,
       ...filterParams(
-        playgroundInitialState?.query_parameters ?? {},
+        playgroundState?.query_parameters ?? {},
         context?.endpoint.queryParameters ?? []
       ),
     },

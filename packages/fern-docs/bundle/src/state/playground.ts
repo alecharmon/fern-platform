@@ -37,8 +37,28 @@ import {
 import {
   getInitialEndpointRequestFormStateWithExample,
   getInitialWebSocketRequestFormState,
+  resolveEndpointEnvironmentState,
 } from "../components/playground/utils";
+import { SELECTED_ENVIRONMENT_URL_ATOM } from "./environment";
 import { atomWithStorageValidation } from "./utils/atomWithStorageValidation";
+
+// initial state + env state based on current environment
+export const PLAYGROUND_RESOLVED_STATE_ATOM = atom((get) => {
+  const environment = get(SELECTED_ENVIRONMENT_URL_ATOM);
+  const initialState = get(PLAYGROUND_INITIAL_STATE_ATOM);
+  const envState = get(PLAYGROUND_ENV_STATE_ATOM);
+
+  let resolvedState = initialState;
+  if (envState && environment) {
+    resolvedState = resolveEndpointEnvironmentState({
+      currentEnvironment: environment,
+      initialState,
+      envState,
+    });
+  }
+
+  return resolvedState;
+});
 
 export const PLAYGROUND_AUTH_STATE_ATOM =
   atomWithStorageValidation<PlaygroundAuthState>(
@@ -55,7 +75,7 @@ export const PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM = atom(
   (get) => ({
     token:
       get(PLAYGROUND_AUTH_STATE_ATOM).bearerAuth?.token ??
-      get(fernUserAtom)?.playground?.initial_state?.auth?.bearer_token ??
+      get(PLAYGROUND_RESOLVED_STATE_ATOM)?.auth?.bearer_token ??
       "",
   }),
   (
@@ -89,8 +109,8 @@ export const PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM = atom(
 export const PLAYGROUND_AUTH_STATE_BEARER_TOKEN_IS_RESETTABLE_ATOM = atom(
   (get) => {
     const inputBearerAuth = get(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM).token;
-    const injectedBearerAuth =
-      get(fernUserAtom)?.playground?.initial_state?.auth?.bearer_token;
+    const injectedBearerAuth = get(PLAYGROUND_RESOLVED_STATE_ATOM)?.auth
+      ?.bearer_token;
     return injectedBearerAuth != null && inputBearerAuth !== injectedBearerAuth;
   }
 );
@@ -99,7 +119,7 @@ export const PLAYGROUND_AUTH_STATE_HEADER_ATOM = atom(
   (get) => ({
     headers: {
       ...(get(PLAYGROUND_AUTH_STATE_ATOM).header?.headers ??
-        get(fernUserAtom)?.playground?.initial_state?.headers),
+        get(PLAYGROUND_RESOLVED_STATE_ATOM)?.headers),
     },
   }),
   (
@@ -126,10 +146,10 @@ export const PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM = atom(
   (get) => ({
     username:
       get(PLAYGROUND_AUTH_STATE_ATOM).basicAuth?.username ??
-      get(fernUserAtom)?.playground?.initial_state?.auth?.basic?.username,
+      get(PLAYGROUND_RESOLVED_STATE_ATOM)?.auth?.basic?.username,
     password:
       get(PLAYGROUND_AUTH_STATE_ATOM).basicAuth?.password ??
-      get(fernUserAtom)?.playground?.initial_state?.auth?.basic?.password,
+      get(PLAYGROUND_RESOLVED_STATE_ATOM)?.auth?.basic?.password,
   }),
   (
     _get,
@@ -206,8 +226,7 @@ export const PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_ATOM = atom(
 export const PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_IS_RESETTABLE_ATOM =
   atom((get) => {
     const inputBasicAuth = get(PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM);
-    const injectedBasicAuth =
-      get(fernUserAtom)?.playground?.initial_state?.auth?.basic;
+    const injectedBasicAuth = get(PLAYGROUND_RESOLVED_STATE_ATOM)?.auth?.basic;
     return (
       injectedBasicAuth != null &&
       inputBasicAuth.username !== injectedBasicAuth.username
@@ -217,8 +236,7 @@ export const PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_IS_RESETTABLE_ATOM =
 export const PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_IS_RESETTABLE_ATOM =
   atom((get) => {
     const inputBasicAuth = get(PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM);
-    const injectedBasicAuth =
-      get(fernUserAtom)?.playground?.initial_state?.auth?.basic;
+    const injectedBasicAuth = get(PLAYGROUND_RESOLVED_STATE_ATOM)?.auth?.basic;
     return (
       injectedBasicAuth != null &&
       inputBasicAuth.password !== injectedBasicAuth.password
@@ -287,8 +305,9 @@ export function usePlaygroundEndpointFormState(
 ] {
   const formStateAtom = playgroundFormStateFamily(ctx.node.id);
   const formState = useAtomValue(formStateAtom);
-  const user = useAtomValue(fernUserAtom);
   const domain = useDomain();
+
+  const fernUserPlaygroundState = useResolvedPlaygroundState();
 
   const firstExample =
     domain.includes("twelvelabs") || domain.includes("spscommerce")
@@ -301,7 +320,7 @@ export function usePlaygroundEndpointFormState(
       : getInitialEndpointRequestFormStateWithExample(
           ctx,
           firstExample,
-          user?.playground?.initial_state
+          fernUserPlaygroundState
         ),
     useAtomCallback(
       useCallbackOne(
@@ -319,13 +338,13 @@ export function usePlaygroundEndpointFormState(
                     : getInitialEndpointRequestFormStateWithExample(
                         ctx,
                         firstExample,
-                        user?.playground?.initial_state
+                        fernUserPlaygroundState
                       )
                 )
               : update;
           set(formStateAtom, newFormState);
         },
-        [formStateAtom, ctx, user?.playground?.initial_state, firstExample]
+        [formStateAtom, ctx, fernUserPlaygroundState, firstExample]
       )
     ),
   ];
@@ -339,15 +358,13 @@ export function usePlaygroundWebsocketFormState(
 ] {
   const formStateAtom = playgroundFormStateFamily(context.node.id);
   const formState = useAtomValue(playgroundFormStateFamily(context.node.id));
-  const user = useAtomValue(fernUserAtom);
+
+  const fernUserPlaygroundState = useResolvedPlaygroundState();
 
   return [
     formState?.type === "websocket"
       ? formState
-      : getInitialWebSocketRequestFormState(
-          context,
-          user?.playground?.initial_state
-        ),
+      : getInitialWebSocketRequestFormState(context, fernUserPlaygroundState),
     useAtomCallback(
       useCallbackOne(
         (
@@ -363,20 +380,28 @@ export function usePlaygroundWebsocketFormState(
                     ? currentFormState
                     : getInitialWebSocketRequestFormState(
                         context,
-                        user?.playground?.initial_state
+                        fernUserPlaygroundState
                       )
                 )
               : update;
           set(formStateAtom, newFormState);
         },
-        [formStateAtom, context, user?.playground?.initial_state]
+        [formStateAtom, context, fernUserPlaygroundState]
       )
     ),
   ];
 }
 
-export const PLAYGROUND_ENVIRONMENT_ATOM = atom<string | undefined>(undefined);
+export function useResolvedPlaygroundState() {
+  return useAtomValue(PLAYGROUND_RESOLVED_STATE_ATOM);
+}
 
-export const usePlaygroundEnvironment = (): string | undefined => {
-  return useAtomValue(PLAYGROUND_ENVIRONMENT_ATOM);
-};
+export const PLAYGROUND_INITIAL_STATE_ATOM = atom((get) => {
+  const user = get(fernUserAtom);
+  return user?.playground?.initial_state;
+});
+
+export const PLAYGROUND_ENV_STATE_ATOM = atom((get) => {
+  const user = get(fernUserAtom);
+  return user?.playground?.env_state;
+});

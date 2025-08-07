@@ -16,6 +16,7 @@ import {
 import {
   PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
   PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
+  useResolvedPlaygroundState,
 } from "@/state/playground";
 
 import { PlaygroundCardTriggerApiKeyInjected } from "./PlaygroundCardTriggerApiKeyInjected";
@@ -45,8 +46,9 @@ export function PlaygroundAuthorizationFormCardRoot({
   const setBearerAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
   const setOAuth = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
   const apiKey = useInjectedApiKey();
+  const resolvedState = useResolvedPlaygroundState();
   const handleResetBearerAuth = () => {
-    setBearerAuth({ token: apiKey ?? "" });
+    setBearerAuth({ token: resolvedState?.auth?.bearer_token ?? apiKey ?? "" });
     setOAuth((prev) => ({ ...prev, userSuppliedAccessToken: "" }));
   };
 
@@ -57,7 +59,7 @@ export function PlaygroundAuthorizationFormCardRoot({
         setOpen: openState.setValue,
         toggleOpen: openState.toggleValue,
         resetForm: handleResetBearerAuth,
-        apiKey,
+        apiKey: resolvedState?.auth?.bearer_token ?? apiKey ?? "",
       }}
     >
       <div className="relative">{children}</div>

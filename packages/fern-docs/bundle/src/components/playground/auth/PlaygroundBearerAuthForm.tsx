@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 
 import { useAtom, useAtomValue } from "jotai/react";
 import { RESET } from "jotai/utils";
@@ -10,6 +10,7 @@ import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import {
   PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
   PLAYGROUND_AUTH_STATE_BEARER_TOKEN_IS_RESETTABLE_ATOM,
+  useResolvedPlaygroundState,
 } from "@/state/playground";
 
 import { PasswordInputGroup } from "../PasswordInputGroup";
@@ -25,6 +26,12 @@ export function PlaygroundBearerAuthForm({
   const isBearerTokenResettable = useAtomValue(
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_IS_RESETTABLE_ATOM
   );
+  const resolvedState = useResolvedPlaygroundState();
+
+  // if the resolved state changes (on env update), update the auth state
+  useEffect(() => {
+    setValue({ token: resolvedState?.auth?.bearer_token ?? "" });
+  }, [resolvedState?.auth?.bearer_token, setValue]);
 
   return (
     <li className="-mx-4 space-y-2 p-4">
