@@ -46,7 +46,7 @@ for domain in project_domains:
 
 
 # Skip domains in the list below
-skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","fern-docs.skyflow.dev","docs.pinnacle.sh","docs.staging.paradex.trade","developers.ada.cx","developer.doc.spscommerce.com","next-remote.ferndocs.com","api-docs.workato.com"]
+skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","fern-docs.skyflow.dev","docs.pinnacle.sh","docs.staging.paradex.trade","developers.ada.cx","developer.doc.spscommerce.com","next-remote.ferndocs.com"]
 
 # Write domains out to file
 print(f"Found {len(domains)} domains to check.")
