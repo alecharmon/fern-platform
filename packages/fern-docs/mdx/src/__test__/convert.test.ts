@@ -225,7 +225,8 @@ describe("Fixture files", () => {
     });
 
     it("htmlToMdx: round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalElements } = mdxToHtml(faqMdx);
+      const { html, frontmatter, originalElements, originalFrontmatter } =
+        mdxToHtml(faqMdx);
       const changedNodes = Object.fromEntries(
         Object.entries(originalElements).map(([key, _]) => [key, false])
       );
@@ -233,6 +234,7 @@ describe("Fixture files", () => {
         html,
         frontmatter,
         originalElements,
+        originalFrontmatter,
         changedNodes
       );
 
@@ -270,7 +272,8 @@ describe("Fixture files", () => {
     });
 
     it("htmlToMdx: round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalElements } = mdxToHtml(landingPageMdx);
+      const { html, frontmatter, originalElements, originalFrontmatter } =
+        mdxToHtml(landingPageMdx);
       const changedNodes = Object.fromEntries(
         Object.entries(originalElements).map(([key, _]) => [key, false])
       );
@@ -278,6 +281,7 @@ describe("Fixture files", () => {
         html,
         frontmatter,
         originalElements,
+        originalFrontmatter,
         changedNodes
       );
 
@@ -325,7 +329,7 @@ describe("Fixture files", () => {
 
   describe("complex-overview.mdx", () => {
     it("htmlToMdx: round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalElements } =
+      const { html, frontmatter, originalElements, originalFrontmatter } =
         mdxToHtml(complexOverviewMdx);
       const changedNodes = Object.fromEntries(
         Object.entries(originalElements).map(([key, _]) => [key, false])
@@ -334,6 +338,7 @@ describe("Fixture files", () => {
         html,
         frontmatter,
         originalElements,
+        originalFrontmatter,
         changedNodes
       );
 
@@ -442,7 +447,7 @@ describe("Fixture files", () => {
     });
 
     it("htmlToMdx: round-trip conversion preserves advanced features", () => {
-      const { html, frontmatter, originalElements } =
+      const { html, frontmatter, originalElements, originalFrontmatter } =
         mdxToHtml(advancedFeaturesMdx);
       const changedNodes = Object.fromEntries(
         Object.entries(originalElements).map(([key, _]) => [key, false])
@@ -451,6 +456,7 @@ describe("Fixture files", () => {
         html,
         frontmatter,
         originalElements,
+        originalFrontmatter,
         changedNodes
       );
 
@@ -642,7 +648,7 @@ describe("Fixture files", () => {
 
   describe("openapi-server.mdx", () => {
     it("round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalElements } =
+      const { html, frontmatter, originalElements, originalFrontmatter } =
         mdxToHtml(openApiServerMdx);
       const changedNodes = Object.fromEntries(
         Object.entries(originalElements).map(([key, _]) => [key, false])
@@ -651,6 +657,7 @@ describe("Fixture files", () => {
         html,
         frontmatter,
         originalElements,
+        originalFrontmatter,
         changedNodes
       );
       expect(mdxResult.mdx).toBe(openApiServerMdx);
@@ -659,7 +666,8 @@ describe("Fixture files", () => {
 
   describe("use-cases.mdx", () => {
     it("round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalElements } = mdxToHtml(useCasesMdx);
+      const { html, frontmatter, originalElements, originalFrontmatter } =
+        mdxToHtml(useCasesMdx);
       const changedNodes = Object.fromEntries(
         Object.entries(originalElements).map(([key, _]) => [key, false])
       );
@@ -667,6 +675,7 @@ describe("Fixture files", () => {
         html,
         frontmatter,
         originalElements,
+        originalFrontmatter,
         changedNodes
       );
       expect(mdxResult.mdx).toBe(useCasesMdx);
@@ -675,9 +684,8 @@ describe("Fixture files", () => {
 
   describe("event-handler-functions.md", () => {
     it("round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalElements } = mdxToHtml(
-        eventHandlerFunctionsMdx
-      );
+      const { html, frontmatter, originalElements, originalFrontmatter } =
+        mdxToHtml(eventHandlerFunctionsMdx);
       const changedNodes = Object.fromEntries(
         Object.entries(originalElements).map(([key, _]) => [key, false])
       );
@@ -685,6 +693,7 @@ describe("Fixture files", () => {
         html,
         frontmatter,
         originalElements,
+        originalFrontmatter,
         changedNodes
       );
       expect(mdxResult.mdx).toBe(eventHandlerFunctionsMdx);

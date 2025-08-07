@@ -26,6 +26,7 @@ interface MdxDependencies {
   html?: MdxToHtmlResponse["html"];
   frontmatter?: MdxToHtmlResponse["frontmatter"];
   originalElements?: MdxToHtmlResponse["originalElements"];
+  originalFrontmatter?: MdxToHtmlResponse["originalFrontmatter"];
   /**
    * Flag if the file should be considered changed.
    * This is used to determine if content changes should be committed to repo.
@@ -36,6 +37,11 @@ interface MdxDependencies {
    * This is used to determine if we should use the original MDX content formatting from originalElements.
    */
   changedNodes?: ChangedNodes;
+  /**
+   * Flag if the frontmatter has changed.
+   * This is used to determine if we should use the original frontmatter formatting from originalFrontmatter.
+   */
+  changedFrontmatter?: boolean;
 }
 
 export const MdxStateContext = createContext<{
@@ -71,43 +77,60 @@ export function MdxStateProvider({
     Record<Filename, SyncedStatus>
   >({});
 
+  const initialFrontmatter = useRef<
+    Record<string, MdxToHtmlResponse["frontmatter"]>
+  >({});
+
   // Track debounce timeouts for each file to prevent excessive syncs
   const debounceTimeouts = useRef<Record<string, NodeJS.Timeout | null>>({});
 
   // Stablilize updateDependencies identity to prevent unnecessary re-renders
   const updateDependencies = useCallback(
     (filename: Filename, state: MdxDependencies) => {
-      setMdxDepsStore((prev) => ({
-        ...prev,
-        [filename]: {
-          html: state.html ?? prev[filename]?.html,
-          frontmatter: (() => {
-            const existingFrontmatter = prev[filename]?.frontmatter || {};
-            const newFrontmatter = state.frontmatter || {};
-            const mergedFrontmatter = {
-              ...existingFrontmatter,
-            };
+      setMdxDepsStore((prev) => {
+        if (state.frontmatter && !initialFrontmatter.current[filename]) {
+          // Store reference to initial frontmatter for changedFrontmatter comparison
+          initialFrontmatter.current[filename] = state.frontmatter;
+        }
+        return {
+          ...prev,
+          [filename]: {
+            html: state.html ?? prev[filename]?.html,
+            frontmatter: (() => {
+              const existingFrontmatter = prev[filename]?.frontmatter || {};
+              const newFrontmatter = state.frontmatter || {};
+              const mergedFrontmatter = {
+                ...existingFrontmatter,
+              };
 
-            // Apply new frontmatter changes, removing fields with undefined values
-            Object.entries(newFrontmatter).forEach(([key, value]) => {
-              if (value == null) {
-                mergedFrontmatter[key] = key === "title" ? "" : undefined; // Always keep title field
-              } else {
-                mergedFrontmatter[key] = value;
-              }
-            });
+              // Apply new frontmatter changes, removing fields with undefined values
+              Object.entries(newFrontmatter).forEach(([key, value]) => {
+                if (value == null) {
+                  mergedFrontmatter[key] = key === "title" ? "" : undefined; // Always keep title field
+                } else {
+                  mergedFrontmatter[key] = value;
+                }
+              });
 
-            return mergedFrontmatter;
-          })(),
-          originalElements:
-            state.originalElements ?? prev[filename]?.originalElements,
-          changed: state.changed ?? prev[filename]?.changed,
-          changedNodes: {
-            ...prev[filename]?.changedNodes,
-            ...state.changedNodes,
+              return mergedFrontmatter;
+            })(),
+            originalElements:
+              state.originalElements ?? prev[filename]?.originalElements,
+            originalFrontmatter:
+              state.originalFrontmatter ?? prev[filename]?.originalFrontmatter,
+            changed: state.changed ?? prev[filename]?.changed,
+            changedNodes: {
+              ...prev[filename]?.changedNodes,
+              ...state.changedNodes,
+            },
+            // If we're setting frontmatter, check if it's different from the initial frontmatter, otherwise use the previous value
+            changedFrontmatter: state.frontmatter
+              ? JSON.stringify(state.frontmatter) !==
+                JSON.stringify(initialFrontmatter.current[filename])
+              : (prev[filename]?.changedFrontmatter ?? false),
           },
-        },
-      }));
+        };
+      });
     },
     [setMdxDepsStore]
   );
@@ -139,7 +162,10 @@ export function MdxStateProvider({
             state.html,
             state.frontmatter,
             state.originalElements,
-            state.changedNodes
+            state.originalFrontmatter,
+            state.changedNodes,
+            // state.changedFrontmatter
+            true //  TODO: re-enable (force true for now, there's a bug in the loader/FDR that provides malformed frontmatter)
           ).mdx;
         }
         return acc;
@@ -157,7 +183,10 @@ export function MdxStateProvider({
             state.html,
             state.frontmatter,
             state.originalElements,
-            state.changedNodes
+            state.originalFrontmatter,
+            state.changedNodes,
+            // state.changedFrontmatter
+            true // TODO: re-enable (force true for now, there's a bug in the loader/FDR that provides malformed frontmatter)
           ).mdx;
         }
         return acc;

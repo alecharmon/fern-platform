@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import Placeholder from "@tiptap/extension-placeholder";
+import UniqueID from "@tiptap/extension-unique-id";
 import {
   EditorProvider,
   EditorProviderProps,
@@ -16,11 +17,30 @@ import FloatingMenu from "./FloatingMenu";
 import CustomElement from "./extension-custom-element";
 import GlobalDataHashAttribute from "./extension-global-data-hash-attribute";
 
+// These node types are the ones that will have data attributes set on them
+const dataAttributeNodeTypes = [
+  "doc",
+  "paragraph",
+  "heading",
+  "blockquote",
+  "codeBlock",
+  "hardBreak",
+  "horizontalRule",
+  "bulletList",
+  "orderedList",
+  "listItem",
+];
+
 // Configure Tiptap extensions
 const extensions = [
   StarterKit,
   CustomElement,
-  GlobalDataHashAttribute,
+  UniqueID.configure({
+    types: dataAttributeNodeTypes,
+  }),
+  GlobalDataHashAttribute.configure({
+    types: dataAttributeNodeTypes,
+  }),
   Placeholder.configure({
     placeholder: "Write or press `/` for components",
     emptyEditorClass: "is-empty",

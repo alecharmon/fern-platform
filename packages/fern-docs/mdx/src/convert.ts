@@ -133,6 +133,7 @@ export interface MdxToHtmlResponse {
   html: string;
   frontmatter: Frontmatter;
   originalElements: OriginalElements;
+  originalFrontmatter?: string;
 }
 
 interface MdxToHtmlOptions {
@@ -166,9 +167,11 @@ export function mdxToHtml(
 
   // Get frontmatter from mdast (expects only one frontmatter node)
   const frontmatterNode = mdast.children.find((node) => node.type === "yaml");
+  const originalFrontmatter = frontmatterNode?.value;
 
   // Parse frontmatter from yaml
-  const parsedFrontmatter = frontmatterNode && yaml.load(frontmatterNode.value);
+  const parsedFrontmatter =
+    originalFrontmatter && yaml.load(originalFrontmatter);
   const frontmatter = isValidFrontmatter(parsedFrontmatter)
     ? parsedFrontmatter
     : {};
@@ -267,7 +270,7 @@ export function mdxToHtml(
   // Get html from hast
   const html = toHtml(hast);
 
-  return { html, frontmatter, originalElements };
+  return { html, frontmatter, originalFrontmatter, originalElements };
 }
 
 // Response from htmlToMdx
@@ -281,7 +284,9 @@ export function htmlToMdx(
   html: string,
   frontmatter: Frontmatter,
   originalElements: OriginalElements,
-  changedNodes?: ChangedNodes
+  originalFrontmatter?: string,
+  changedNodes?: ChangedNodes,
+  changedFrontmatter?: boolean
 ): HtmlToMdxResponse {
   // Get hast from html
   const hast = fromHtml(html);
@@ -472,7 +477,9 @@ export function htmlToMdx(
 
   // Reinject frontmatter if it exists
   let finalMdx = mdx;
-  if (frontmatter && Object.keys(frontmatter).length > 0) {
+  if (changedFrontmatter === false && originalFrontmatter) {
+    finalMdx = `---\n${originalFrontmatter}---\n\n${mdx}`;
+  } else if (frontmatter && Object.keys(frontmatter).length > 0) {
     const frontmatterYaml = yaml.dump(frontmatter, FRONTMATTER_YAML_OPTIONS);
     finalMdx = `---\n${frontmatterYaml}---\n\n${mdx}`;
   }
@@ -502,11 +509,14 @@ export function htmlToMdx(
 function isValidFrontmatter(
   frontmatter: unknown
 ): frontmatter is Record<string, unknown> {
-  return (
+  const isValid =
     !!frontmatter &&
     typeof frontmatter === "object" &&
-    !Array.isArray(frontmatter)
-  );
+    !Array.isArray(frontmatter);
+  if (!isValid) {
+    console.warn("Invalid or missing frontmatter", frontmatter);
+  }
+  return isValid;
 }
 
 // Get node info in a type-safe way

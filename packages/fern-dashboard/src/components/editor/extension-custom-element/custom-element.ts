@@ -25,8 +25,6 @@ export interface CustomElementOptions {
 export const CustomElement = Node.create<CustomElementOptions>({
   name: TAG,
 
-  priority: 1000,
-
   group: "block",
 
   content: "text*",

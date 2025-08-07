@@ -916,6 +916,9 @@ importers:
       '@tiptap/extension-placeholder':
         specifier: ^3.0.5
         version: 3.0.5(@tiptap/extensions@3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))
+      '@tiptap/extension-unique-id':
+        specifier: ^3.0.9
+        version: 3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)
       '@tiptap/pm':
         specifier: 3.0.5
         version: 3.0.5
@@ -8923,6 +8926,12 @@ packages:
     resolution: {integrity: sha512-drGhilo2iT86DXqcMx7txNoZQjLdomzt/chkOBMDdaHevr7IYYg8HwECT+XDYusKRfMJde5gDDiyTGj4UMsKyA==}
     peerDependencies:
       '@tiptap/core': ^3.0.5
+
+  '@tiptap/extension-unique-id@3.0.9':
+    resolution: {integrity: sha512-eb4JLRUPI0Hd0kvLwJ2p2bMrg3JrXXfYthxM3p+toBgUiqju2Tunb6HyQsNvgyy8JhgQEYKpZOEvqyTOUTxJ5g==}
+    peerDependencies:
+      '@tiptap/core': ^3.0.9
+      '@tiptap/pm': ^3.0.9
 
   '@tiptap/extensions@3.0.5':
     resolution: {integrity: sha512-NJWqSI8oCWyFdOmmeDugxsTflbU7t/qNmO+x8ytQhrGV592iFzA5tyZgFwpT3oxzILxtHZAkmMS+PYRMnHi8eQ==}
@@ -19833,6 +19842,10 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
+  uuid@10.0.0:
+    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
   uuid@11.1.0:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
@@ -29177,6 +29190,12 @@ snapshots:
   '@tiptap/extension-underline@3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))':
     dependencies:
       '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
+
+  '@tiptap/extension-unique-id@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)':
+    dependencies:
+      '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
+      '@tiptap/pm': 3.0.5
+      uuid: 10.0.0
 
   '@tiptap/extensions@3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)':
     dependencies:
@@ -44013,6 +44032,8 @@ snapshots:
   utility-types@3.11.0: {}
 
   utils-merge@1.0.1: {}
+
+  uuid@10.0.0: {}
 
   uuid@11.1.0: {}
 

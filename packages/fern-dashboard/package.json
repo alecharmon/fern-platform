@@ -76,6 +76,7 @@
     "@testing-library/react": "^16.3.0",
     "@tiptap/core": "3.0.5",
     "@tiptap/extension-placeholder": "^3.0.5",
+    "@tiptap/extension-unique-id": "^3.0.9",
     "@tiptap/pm": "3.0.5",
     "@tiptap/react": "3.0.5",
     "@tiptap/starter-kit": "3.0.5",
