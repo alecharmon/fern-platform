@@ -1,14 +1,14 @@
 import { camelCase, upperFirst } from "es-toolkit/string";
-import fs from "fs";
+import type fs from "fs";
 
 import { cloneRepository } from "@fern-api/github";
 
 import { FernGeneratorCli } from "../configuration/generated";
-import { ReadmeFeature } from "../configuration/generated/api";
-import { StreamWriter, StringWriter, Writer } from "../utils/Writer";
+import type { ReadmeFeature } from "../configuration/generated/api";
+import { StreamWriter, StringWriter, type Writer } from "../utils/Writer";
 import { Block } from "./Block";
 import { BlockMerger } from "./BlockMerger";
-import { ReadmeParser } from "./ReadmeParser";
+import type { ReadmeParser } from "./ReadmeParser";
 
 export class ReadmeGenerator {
   private ADVANCED_FEATURE_ID = "ADVANCED";
@@ -43,48 +43,46 @@ export class ReadmeGenerator {
   public async generateReadme({
     output,
   }: {
-    output: fs.WriteStream;
+    output: fs.WriteStream | NodeJS.Process["stdout"];
   }): Promise<void> {
-    const blocks = this.generateBlocks();
+    const blocks = await this.generateBlocks();
 
     const writer = new StreamWriter(output);
-    this.writeHeader({ writer });
-    this.writeBlocks({
+    await this.writeHeader({ writer });
+    await this.writeBlocks({
       writer,
       blocks: await this.mergeBlocks({ blocks }),
     });
-    writer.end();
-
-    return;
+    await writer.end();
   }
 
-  private generateBlocks(): Block[] {
+  private async generateBlocks(): Promise<Block[]> {
     const blocks: Block[] = [];
 
     if (this.readmeConfig.apiReferenceLink != null) {
       blocks.push(
-        this.generateDocumentation({
+        await this.generateDocumentation({
           docsLink: this.readmeConfig.apiReferenceLink,
         })
       );
     }
     if (this.readmeConfig.requirements != null) {
       blocks.push(
-        this.generateRequirements({
+        await this.generateRequirements({
           requirements: this.readmeConfig.requirements,
         })
       );
     }
     if (this.readmeConfig.language?.publishInfo != null) {
       blocks.push(
-        this.generateInstallation({
+        await this.generateInstallation({
           language: this.readmeConfig.language,
         })
       );
     }
     if (this.readmeConfig.referenceMarkdownPath != null) {
       blocks.push(
-        this.generateReference({
+        await this.generateReference({
           referenceFile: this.readmeConfig.referenceMarkdownPath,
         })
       );
@@ -101,13 +99,13 @@ export class ReadmeGenerator {
         continue;
       }
       blocks.push(
-        this.generateFeatureBlock({
+        await this.generateFeatureBlock({
           feature,
         })
       );
     }
 
-    const advancedFeatureBlock = this.generateNestedFeatureBlock({
+    const advancedFeatureBlock = await this.generateNestedFeatureBlock({
       featureId: this.ADVANCED_FEATURE_ID,
       features: advancedFeatures,
     });
@@ -127,26 +125,26 @@ export class ReadmeGenerator {
     return feat.advanced ?? false;
   }
 
-  private generateNestedFeatureBlock({
+  private async generateNestedFeatureBlock({
     featureId,
     features,
   }: {
     featureId: string;
     features: FernGeneratorCli.ReadmeFeature[];
-  }): Block | undefined {
+  }): Promise<Block | undefined> {
     if (!this.shouldGenerateFeatures({ features })) {
       return undefined;
     }
 
     const writer = new StringWriter();
-    writer.writeLine(`## ${featureIDToTitle(featureId)}`);
-    writer.writeLine();
+    await writer.writeLine(`## ${featureIDToTitle(featureId)}`);
+    await writer.writeLine();
 
     for (const feature of features) {
       if (this.shouldSkipFeature({ feature })) {
         continue;
       }
-      this.generateFeatureBlock({
+      await this.generateFeatureBlock({
         feature,
         heading: "###",
         maybeWriter: writer,
@@ -158,7 +156,7 @@ export class ReadmeGenerator {
     });
   }
 
-  private generateFeatureBlock({
+  private async generateFeatureBlock({
     feature,
     heading = "##",
     maybeWriter,
@@ -166,23 +164,24 @@ export class ReadmeGenerator {
     feature: FernGeneratorCli.ReadmeFeature;
     heading?: "##" | "###";
     maybeWriter?: StringWriter;
-  }): Block {
+  }): Promise<Block> {
     const writer = maybeWriter ?? new StringWriter();
-    writer.writeLine(`${heading} ${featureIDToTitle(feature.id)}`);
-    writer.writeLine();
+    await writer.writeLine(`${heading} ${featureIDToTitle(feature.id)}`);
+    await writer.writeLine();
     if (feature.description != null) {
-      writer.writeLine(feature.description);
+      await writer.writeLine(feature.description);
     }
-    feature.snippets?.forEach((snippet, index) => {
+
+    for (const [index, snippet] of feature.snippets?.entries() ?? []) {
       if (index > 0) {
-        writer.writeLine();
+        await writer.writeLine();
       }
-      writer.writeCodeBlock(this.readmeConfig.language.type, snippet);
-    });
-    if (feature.addendum != null) {
-      writer.writeLine(feature.addendum);
+      await writer.writeCodeBlock(this.readmeConfig.language.type, snippet);
     }
-    writer.writeLine();
+    if (feature.addendum != null) {
+      await writer.writeLine(feature.addendum);
+    }
+    await writer.writeLine();
     return new Block({
       id: feature.id,
       content: writer.toString(),
@@ -218,179 +217,183 @@ export class ReadmeGenerator {
     return undefined;
   }
 
-  private writeBlocks({
+  private async writeBlocks({
     writer,
     blocks,
   }: {
     writer: Writer;
     blocks: Block[];
-  }): void {
+  }): Promise<void> {
     for (const block of blocks) {
-      block.write(writer);
+      await block.write(writer);
     }
   }
 
-  private writeHeader({ writer }: { writer: Writer }): void {
-    writer.writeLine(
+  private async writeHeader({ writer }: { writer: Writer }): Promise<void> {
+    await writer.writeLine(
       `# ${this.organizationPascalCase} ${this.languageTitle} Library`
     );
-    writer.writeLine();
+    await writer.writeLine();
     if (this.readmeConfig.bannerLink != null) {
-      this.writeBanner({
+      await this.writeBanner({
         writer,
         bannerLink: this.readmeConfig.bannerLink,
       });
     }
-    this.writeFernShield({ writer });
+    await this.writeFernShield({ writer });
     if (this.readmeConfig.language != null) {
-      this.writeShield({
+      await this.writeShield({
         writer,
         language: this.readmeConfig.language,
       });
     }
-    writer.writeLine();
-    this.writeIntroudction({ writer });
+    await writer.writeLine();
+    await this.writeIntro({ writer });
   }
 
-  private writeBanner({
+  private async writeBanner({
     writer,
     bannerLink,
   }: {
     writer: Writer;
     bannerLink: string;
-  }): void {
-    writer.writeLine(`![](${bannerLink})`);
-    writer.writeLine();
+  }): Promise<void> {
+    await writer.writeLine(`![](${bannerLink})`);
+    await writer.writeLine();
   }
 
-  private writeFernShield({ writer }: { writer: Writer }): void {
+  private async writeFernShield({ writer }: { writer: Writer }): Promise<void> {
     const repoSource =
       this.readmeConfig.remote?.repoUrl ??
       `${this.organizationPascalCase}/${this.languageTitle}`;
-    writer.writeLine(
+    await writer.writeLine(
       `[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=${encodeURIComponent(repoSource)})`
     );
   }
 
-  private writeIntroudction({ writer }: { writer: Writer }): void {
-    writer.writeLine(
+  private async writeIntro({ writer }: { writer: Writer }): Promise<void> {
+    await writer.writeLine(
       this.readmeConfig.introduction != null
         ? this.readmeConfig.introduction
         : `The ${this.organizationPascalCase} ${this.languageTitle} library provides convenient access to the ${this.organizationPascalCase} API from ${this.languageTitle}.`
     );
-    writer.writeLine();
+    await writer.writeLine();
   }
 
-  private generateDocumentation({ docsLink }: { docsLink: string }): Block {
+  private async generateDocumentation({
+    docsLink,
+  }: {
+    docsLink: string;
+  }): Promise<Block> {
     const writer = new StringWriter();
-    writer.writeLine("## Documentation");
-    writer.writeLine();
-    writer.writeLine(
+    await writer.writeLine("## Documentation");
+    await writer.writeLine();
+    await writer.writeLine(
       `API reference documentation is available [here](${docsLink}).`
     );
-    writer.writeLine();
+    await writer.writeLine();
     return new Block({
       id: "DOCUMENTATION",
       content: writer.toString(),
     });
   }
 
-  private generateReference({
+  private async generateReference({
     referenceFile,
   }: {
     referenceFile: string;
-  }): Block {
+  }): Promise<Block> {
     const writer = new StringWriter();
-    writer.writeLine("## Reference");
-    writer.writeLine();
-    writer.writeLine(
+    await writer.writeLine("## Reference");
+    await writer.writeLine();
+    await writer.writeLine(
       `A full reference for this library is available [here](${
         this.readmeConfig.remote?.repoUrl != null
           ? `${this.readmeConfig.remote.repoUrl}/blob/HEAD/${referenceFile}`
           : referenceFile
       }).`
     );
-    writer.writeLine();
+    await writer.writeLine();
     return new Block({
       id: "REFERENCE",
       content: writer.toString(),
     });
   }
 
-  private generateRequirements({
+  private async generateRequirements({
     requirements,
   }: {
     requirements: string[];
-  }): Block {
+  }): Promise<Block> {
     const writer = new StringWriter();
-    writer.writeLine("## Requirements");
-    writer.writeLine();
+    await writer.writeLine("## Requirements");
+    await writer.writeLine();
     if (requirements.length === 1) {
-      writer.writeLine(`This SDK requires ${requirements[0]}.`);
+      await writer.writeLine(`This SDK requires ${requirements[0]}.`);
     } else {
-      writer.writeLine("This SDK requires:");
+      await writer.writeLine("This SDK requires:");
       for (const requirement of requirements) {
-        writer.writeLine(`- ${requirement}`);
+        await writer.writeLine(`- ${requirement}`);
       }
     }
-    writer.writeLine();
+    await writer.writeLine();
     return new Block({
       id: "REQUIREMENTS",
       content: writer.toString(),
     });
   }
 
-  private generateInstallation({
+  private async generateInstallation({
     language,
   }: {
     language: FernGeneratorCli.LanguageInfo;
-  }): Block {
+  }): Promise<Block> {
     if (language.publishInfo == null) {
       // This should be unreachable.
       throw new Error("publish information is required for installation block");
     }
     const writer = new StringWriter();
-    writer.writeLine("## Installation");
-    writer.writeLine();
+    await writer.writeLine("## Installation");
+    await writer.writeLine();
     switch (language.type) {
       case "typescript":
-        this.writeInstallationForNPM({
+        await this.writeInstallationForNPM({
           writer,
           npm: language.publishInfo,
         });
         break;
       case "python":
-        this.writeInstallationForPyPi({
+        await this.writeInstallationForPyPi({
           writer,
           pypi: language.publishInfo,
         });
         break;
       case "java":
-        this.writeInstallationForMaven({
+        await this.writeInstallationForMaven({
           writer,
           maven: language.publishInfo,
         });
         break;
       case "go":
-        this.writeInstallationForGo({
+        await this.writeInstallationForGo({
           writer,
           go: language.publishInfo,
         });
         break;
       case "ruby":
-        this.writeInstallationForRubyGems({
+        await this.writeInstallationForRubyGems({
           writer,
           rubyGems: language.publishInfo,
         });
         break;
       case "csharp":
-        this.writeInstallationForNuget({
+        await this.writeInstallationForNuget({
           writer,
           nuget: language.publishInfo,
         });
         break;
       case "php":
-        this.writeInstallationForComposer({
+        await this.writeInstallationForComposer({
           writer,
           composer: language.publishInfo,
         });
@@ -404,136 +407,138 @@ export class ReadmeGenerator {
     });
   }
 
-  private writeInstallationForNPM({
+  private async writeInstallationForNPM({
     writer,
     npm,
   }: {
     writer: Writer;
     npm: FernGeneratorCli.NpmPublishInfo;
-  }): void {
-    writer.writeLine("```sh");
-    writer.writeLine(`npm i -s ${npm.packageName}`);
-    writer.writeLine("```");
-    writer.writeLine();
+  }): Promise<void> {
+    await writer.writeLine("```sh");
+    await writer.writeLine(`npm i -s ${npm.packageName}`);
+    await writer.writeLine("```");
+    await writer.writeLine();
   }
 
-  private writeInstallationForPyPi({
+  private async writeInstallationForPyPi({
     writer,
     pypi,
   }: {
     writer: Writer;
     pypi: FernGeneratorCli.PypiPublishInfo;
-  }): void {
-    writer.writeLine("```sh");
-    writer.writeLine(`pip install ${pypi.packageName}`);
-    writer.writeLine("```");
-    writer.writeLine();
+  }): Promise<void> {
+    await writer.writeLine("```sh");
+    await writer.writeLine(`pip install ${pypi.packageName}`);
+    await writer.writeLine("```");
+    await writer.writeLine();
   }
 
-  private writeInstallationForMaven({
+  private async writeInstallationForMaven({
     writer,
     maven,
   }: {
     writer: Writer;
     maven: FernGeneratorCli.MavenPublishInfo;
-  }): void {
-    writer.writeLine("### Gradle");
-    writer.writeLine();
-    writer.writeLine("Add the dependency in your `build.gradle` file:");
-    writer.writeLine();
-    writer.writeLine("```groovy");
-    writer.writeLine("dependencies {");
-    writer.writeLine(`  implementation '${maven.group}:${maven.artifact}'`);
-    writer.writeLine("}");
-    writer.writeLine("```");
-    writer.writeLine();
+  }): Promise<void> {
+    await writer.writeLine("### Gradle");
+    await writer.writeLine();
+    await writer.writeLine("Add the dependency in your `build.gradle` file:");
+    await writer.writeLine();
+    await writer.writeLine("```groovy");
+    await writer.writeLine("dependencies {");
+    await writer.writeLine(
+      `  implementation '${maven.group}:${maven.artifact}'`
+    );
+    await writer.writeLine("}");
+    await writer.writeLine("```");
+    await writer.writeLine();
 
-    writer.writeLine("### Maven");
-    writer.writeLine();
-    writer.writeLine("Add the dependency in your `pom.xml` file:");
-    writer.writeLine();
-    writer.writeLine("```xml");
-    writer.writeLine("<dependency>");
-    writer.writeLine(`  <groupId>${maven.group}</groupId>`);
-    writer.writeLine(`  <artifactId>${maven.artifact}</artifactId>`);
-    writer.writeLine(`  <version>${maven.version}</version>`);
-    writer.writeLine("</dependency>");
-    writer.writeLine("```");
-    writer.writeLine();
+    await writer.writeLine("### Maven");
+    await writer.writeLine();
+    await writer.writeLine("Add the dependency in your `pom.xml` file:");
+    await writer.writeLine();
+    await writer.writeLine("```xml");
+    await writer.writeLine("<dependency>");
+    await writer.writeLine(`  <groupId>${maven.group}</groupId>`);
+    await writer.writeLine(`  <artifactId>${maven.artifact}</artifactId>`);
+    await writer.writeLine(`  <version>${maven.version}</version>`);
+    await writer.writeLine("</dependency>");
+    await writer.writeLine("```");
+    await writer.writeLine();
   }
 
-  private writeInstallationForGo({
+  private async writeInstallationForGo({
     writer,
     go,
   }: {
     writer: Writer;
     go: FernGeneratorCli.GoPublishInfo;
-  }): void {
-    writer.writeLine("```sh");
-    writer.write(`go get github.com/${go.owner}/${go.repo}`);
+  }): Promise<void> {
+    await writer.writeLine("```sh");
+    await writer.write(`go get github.com/${go.owner}/${go.repo}`);
     const majorVersion = getMajorVersion(go.version);
     if (!majorVersion.startsWith("0") && !majorVersion.startsWith("1")) {
       // For Go, we need to append the major version to the module path for any release greater than v1.X.X.
-      writer.write(`/v${majorVersion}`);
+      await writer.write(`/v${majorVersion}`);
     }
-    writer.writeLine();
-    writer.writeLine("```");
-    writer.writeLine();
+    await writer.writeLine();
+    await writer.writeLine("```");
+    await writer.writeLine();
   }
 
-  private writeInstallationForRubyGems({
+  private async writeInstallationForRubyGems({
     writer,
     rubyGems,
   }: {
     writer: Writer;
     rubyGems: FernGeneratorCli.RubyGemsPublishInfo;
-  }): void {
-    writer.writeLine("```sh");
-    writer.writeLine(`gem install ${rubyGems.packageName}`);
-    writer.writeLine("```");
-    writer.writeLine();
+  }): Promise<void> {
+    await writer.writeLine("```sh");
+    await writer.writeLine(`gem install ${rubyGems.packageName}`);
+    await writer.writeLine("```");
+    await writer.writeLine();
   }
 
-  private writeInstallationForNuget({
+  private async writeInstallationForNuget({
     writer,
     nuget,
   }: {
     writer: Writer;
     nuget: FernGeneratorCli.NugetPublishInfo;
-  }): void {
-    writer.writeLine("```sh");
-    writer.writeLine(`dotnet add package ${nuget.packageName}`);
-    writer.writeLine("```");
-    writer.writeLine();
+  }): Promise<void> {
+    await writer.writeLine("```sh");
+    await writer.writeLine(`dotnet add package ${nuget.packageName}`);
+    await writer.writeLine("```");
+    await writer.writeLine();
   }
 
-  private writeInstallationForComposer({
+  private async writeInstallationForComposer({
     writer,
     composer,
   }: {
     writer: Writer;
     composer: FernGeneratorCli.ComposerPublishInfo;
-  }): void {
-    writer.writeLine("```sh");
-    writer.writeLine(`composer require ${composer.packageName}`);
-    writer.writeLine("```");
-    writer.writeLine();
+  }): Promise<void> {
+    await writer.writeLine("```sh");
+    await writer.writeLine(`composer require ${composer.packageName}`);
+    await writer.writeLine("```");
+    await writer.writeLine();
   }
 
-  private writeShield({
+  private async writeShield({
     writer,
     language,
   }: {
     writer: Writer;
     language: FernGeneratorCli.LanguageInfo;
-  }): void {
+  }): Promise<void> {
     switch (language.type) {
       case "typescript": {
         const npm = language.publishInfo;
         if (npm == null) {
           return;
         }
-        this.writeShieldForNPM({
+        await this.writeShieldForNPM({
           writer,
           npm,
         });
@@ -544,7 +549,7 @@ export class ReadmeGenerator {
         if (pypi == null) {
           return;
         }
-        this.writeShieldForPyPi({
+        await this.writeShieldForPyPi({
           writer,
           pypi,
         });
@@ -555,7 +560,7 @@ export class ReadmeGenerator {
         if (maven == null) {
           return;
         }
-        this.writeShieldForMaven({
+        await this.writeShieldForMaven({
           writer,
           maven,
         });
@@ -566,7 +571,7 @@ export class ReadmeGenerator {
         if (go == null) {
           return;
         }
-        this.writeShieldForGo({
+        await this.writeShieldForGo({
           writer,
           go,
         });
@@ -577,7 +582,7 @@ export class ReadmeGenerator {
         if (rubyGems == null) {
           return;
         }
-        this.writeShieldForRubyGems({
+        await this.writeShieldForRubyGems({
           writer,
           rubyGems,
         });
@@ -588,7 +593,7 @@ export class ReadmeGenerator {
         if (nuget == null) {
           return;
         }
-        this.writeShieldForNuget({
+        await this.writeShieldForNuget({
           writer,
           nuget,
         });
@@ -599,7 +604,7 @@ export class ReadmeGenerator {
         if (composer == null) {
           return;
         }
-        this.writeShieldForComposer({
+        await this.writeShieldForComposer({
           writer,
           composer,
         });
@@ -610,92 +615,104 @@ export class ReadmeGenerator {
     }
   }
 
-  private writeShieldForNPM({
+  private async writeShieldForNPM({
     writer,
     npm,
   }: {
     writer: Writer;
     npm: FernGeneratorCli.NpmPublishInfo;
-  }): void {
-    writer.write("[![npm shield]");
-    writer.write(`(https://img.shields.io/npm/v/${npm.packageName})]`);
-    writer.writeLine(`(https://www.npmjs.com/package/${npm.packageName})`);
+  }): Promise<void> {
+    await writer.write("[![npm shield]");
+    await writer.write(`(https://img.shields.io/npm/v/${npm.packageName})]`);
+    await writer.writeLine(
+      `(https://www.npmjs.com/package/${npm.packageName})`
+    );
   }
 
-  private writeShieldForPyPi({
+  private async writeShieldForPyPi({
     writer,
     pypi,
   }: {
     writer: Writer;
     pypi: FernGeneratorCli.PypiPublishInfo;
-  }): void {
-    writer.write("[![pypi]");
-    writer.write(`(https://img.shields.io/pypi/v/${pypi.packageName})]`);
-    writer.writeLine(`(https://pypi.python.org/pypi/${pypi.packageName})`);
+  }): Promise<void> {
+    await writer.write("[![pypi]");
+    await writer.write(`(https://img.shields.io/pypi/v/${pypi.packageName})]`);
+    await writer.writeLine(
+      `(https://pypi.python.org/pypi/${pypi.packageName})`
+    );
   }
 
-  private writeShieldForMaven({
+  private async writeShieldForMaven({
     writer,
     maven,
   }: {
     writer: Writer;
     maven: FernGeneratorCli.MavenPublishInfo;
-  }): void {
-    writer.write("[![Maven Central]");
-    writer.write(
+  }): Promise<void> {
+    await writer.write("[![Maven Central]");
+    await writer.write(
       `(https://img.shields.io/maven-central/v/${maven.group}/${maven.artifact})]`
     );
-    writer.writeLine(
+    await writer.writeLine(
       `(https://central.sonatype.com/artifact/${maven.group}/${maven.artifact})`
     );
   }
 
-  private writeShieldForGo({
+  private async writeShieldForGo({
     writer,
     go,
   }: {
     writer: Writer;
     go: FernGeneratorCli.GoPublishInfo;
-  }): void {
-    writer.write("[![go shield]");
-    writer.write("(https://img.shields.io/badge/go-docs-blue)]");
-    writer.writeLine(`(https://pkg.go.dev/github.com/${go.owner}/${go.repo})`);
+  }): Promise<void> {
+    await writer.write("[![go shield]");
+    await writer.write("(https://img.shields.io/badge/go-docs-blue)]");
+    await writer.writeLine(
+      `(https://pkg.go.dev/github.com/${go.owner}/${go.repo})`
+    );
   }
 
-  private writeShieldForRubyGems({
+  private async writeShieldForRubyGems({
     writer,
     rubyGems,
   }: {
     writer: Writer;
     rubyGems: FernGeneratorCli.RubyGemsPublishInfo;
-  }): void {
-    writer.write("[![gems shield]");
-    writer.write(`(https://img.shields.io/gem/v/${rubyGems.packageName})]`);
-    writer.writeLine(`(https://rubygems.org/gems/${rubyGems.packageName})`);
+  }): Promise<void> {
+    await writer.write("[![gems shield]");
+    await writer.write(
+      `(https://img.shields.io/gem/v/${rubyGems.packageName})]`
+    );
+    await writer.writeLine(
+      `(https://rubygems.org/gems/${rubyGems.packageName})`
+    );
   }
 
-  private writeShieldForNuget({
+  private async writeShieldForNuget({
     writer,
     nuget,
   }: {
     writer: Writer;
     nuget: FernGeneratorCli.NugetPublishInfo;
-  }): void {
-    writer.write("[![nuget shield]");
-    writer.write(`(https://img.shields.io/nuget/v/${nuget.packageName})]`);
-    writer.writeLine(`(https://nuget.org/packages/${nuget.packageName})`);
+  }): Promise<void> {
+    await writer.write("[![nuget shield]");
+    await writer.write(
+      `(https://img.shields.io/nuget/v/${nuget.packageName})]`
+    );
+    await writer.writeLine(`(https://nuget.org/packages/${nuget.packageName})`);
   }
 
-  private writeShieldForComposer({
+  private async writeShieldForComposer({
     writer,
     composer,
   }: {
     writer: Writer;
     composer: FernGeneratorCli.ComposerPublishInfo;
-  }): void {
-    writer.write("[![php shield]");
-    writer.write("(https://img.shields.io/badge/php-packagist-pink)]");
-    writer.writeLine(
+  }): Promise<void> {
+    await writer.write("[![php shield]");
+    await writer.write("(https://img.shields.io/badge/php-packagist-pink)]");
+    await writer.writeLine(
       `(https://packagist.org/packages/${composer.packageName})`
     );
   }
@@ -773,5 +790,5 @@ function getMajorVersion(version: string): string {
 }
 
 function assertNever(x: never): never {
-  throw new Error("unexpected value: " + JSON.stringify(x));
+  throw new Error(`unexpected value: ${JSON.stringify(x)}`);
 }

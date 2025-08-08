@@ -1,7 +1,7 @@
-import fs from "fs";
+import type fs from "fs";
 
-import { FernGeneratorCli } from "../configuration/generated";
-import {
+import type { FernGeneratorCli } from "../configuration/generated";
+import type {
   EndpointReference,
   LinkedText,
   ParameterReference,
@@ -9,7 +9,7 @@ import {
   RelativeLocation,
   RootPackageReferenceSection,
 } from "../configuration/generated/api";
-import { StreamWriter, StringWriter, Writer } from "../utils/Writer";
+import { StreamWriter, StringWriter, type Writer } from "../utils/Writer";
 
 export class ReferenceGenerator {
   private referenceConfig: FernGeneratorCli.ReferenceConfig;
@@ -22,83 +22,83 @@ export class ReferenceGenerator {
     this.referenceConfig = referenceConfig;
   }
 
-  public async generate({ output }: { output: fs.WriteStream }): Promise<void> {
+  public async generate({
+    output,
+  }: {
+    output: fs.WriteStream | NodeJS.Process["stdout"];
+  }): Promise<void> {
     const writer = new StreamWriter(output);
-    writer.writeLine("# Reference");
+    await writer.writeLine("# Reference");
 
     if (this.referenceConfig.rootSection != null) {
-      this.writeRootSection({
+      await this.writeRootSection({
         section: this.referenceConfig.rootSection,
         writer,
       });
     }
     for (const section of this.referenceConfig.sections) {
-      this.writeSection({ section, writer });
+      await this.writeSection({ section, writer });
     }
-    writer.end();
+    await writer.end();
   }
 
-  private writeRootSection({
+  private async writeRootSection({
     section,
     writer,
   }: {
     section: RootPackageReferenceSection;
     writer: Writer;
-  }): void {
+  }): Promise<void> {
     if (section.description != null) {
-      writer.writeLine(section.description);
+      await writer.writeLine(section.description);
     }
     for (const endpoint of section.endpoints) {
-      this.writeEndpoint({ endpoint, writer });
+      await this.writeEndpoint({ endpoint, writer });
     }
   }
 
-  private writeSection({
+  private async writeSection({
     section,
     writer,
   }: {
     section: ReferenceSection;
     writer: Writer;
-  }): void {
-    writer.writeLine(`## ${section.title}`);
+  }): Promise<void> {
+    await writer.writeLine(`## ${section.title}`);
     if (section.description != null) {
-      writer.writeLine(section.description);
+      await writer.writeLine(section.description);
     }
     for (const endpoint of section.endpoints) {
-      this.writeEndpoint({ endpoint, writer });
+      await this.writeEndpoint({ endpoint, writer });
     }
   }
 
-  private writeEndpoint({
+  private async writeEndpoint({
     endpoint,
     writer,
   }: {
     endpoint: EndpointReference;
     writer: Writer;
-  }): void {
+  }): Promise<void> {
     const stringWriter = new StringWriter();
     if (endpoint.description != null) {
-      stringWriter.writeLine(
-        `#### 📝 Description\n\n${this.writeIndentedBlock(this.writeIndentedBlock(endpoint.description))}\n`
+      await stringWriter.writeLine(
+        `#### 📝 Description\n\n${this.generateIndentedBlock(this.generateIndentedBlock(endpoint.description))}\n`
       );
     }
-    stringWriter.writeLine(
-      `#### 🔌 Usage\n\n${this.writeIndentedBlock(
-        this.writeIndentedBlock(
-          "```" +
-            this.referenceConfig.language.toLowerCase() +
-            "\n" +
-            endpoint.snippet +
-            "\n```"
+    await stringWriter.writeLine(
+      `#### 🔌 Usage\n\n${this.generateIndentedBlock(
+        this.generateIndentedBlock(
+          `\`\`\`${this.referenceConfig.language.toLowerCase()}\n${endpoint.snippet}\n\`\`\``
         )
       )}\n`
     );
     if (endpoint.parameters.length > 0) {
-      stringWriter.writeLine(
-        `#### ⚙️ Parameters\n\n${this.writeIndentedBlock(
+      await stringWriter.writeLine(
+        `#### ⚙️ Parameters\n\n${this.generateIndentedBlock(
           endpoint.parameters
             .map((parameter) =>
-              this.writeIndentedBlock(this.writeParameter(parameter))
+              this.generateIndentedBlock(this.generateParameter(parameter))
             )
             .join("\n\n")
         )}\n`
@@ -109,14 +109,14 @@ export class ReferenceGenerator {
     if (endpoint.title.returnValue != null) {
       linkedSnippet += ` -> ${this.wrapInLink(endpoint.title.returnValue.text, endpoint.title.returnValue.location)}`;
     }
-    writer.writeLine(
+    await writer.writeLine(
       `<details><summary><code>${linkedSnippet}</code></summary>`
     );
-    writer.writeLine(this.writeIndentedBlock(stringWriter.toString()));
-    writer.writeLine("</details>\n");
+    await writer.writeLine(this.generateIndentedBlock(stringWriter.toString()));
+    await writer.writeLine("</details>\n");
   }
 
-  private writeParameter(parameter: ParameterReference): string {
+  private generateParameter(parameter: ParameterReference): string {
     const desc = parameter.description?.match(/[^\r\n]+/g)?.length;
     const containsLineBreak = desc != null && desc > 1;
     return `**${parameter.name}:** \`${this.wrapInLink(parameter.type, parameter.location)}\` ${
@@ -127,7 +127,7 @@ export class ReferenceGenerator {
     `;
   }
 
-  private writeIndentedBlock(content: string): string {
+  private generateIndentedBlock(content: string): string {
     return `<dl>\n<dd>\n\n${content}\n</dd>\n</dl>`;
   }
 

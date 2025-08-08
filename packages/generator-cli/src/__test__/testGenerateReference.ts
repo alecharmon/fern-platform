@@ -3,7 +3,7 @@ import { writeFile } from "fs/promises";
 import path from "path";
 import tmp from "tmp-promise";
 
-import { FernGeneratorCli } from "../configuration/generated";
+import type { FernGeneratorCli } from "../configuration/generated";
 import * as serializers from "../configuration/generated/serialization";
 
 export function testGenerateReference({
@@ -14,7 +14,7 @@ export function testGenerateReference({
   config: FernGeneratorCli.ReferenceConfig;
 }): void {
   describe(fixtureName, () => {
-    it("generate readme", async () => {
+    it("generate reference", async () => {
       const file = await tmp.file();
       const json = JSON.stringify(
         await serializers.ReferenceConfig.jsonOrThrow(config),

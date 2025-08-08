@@ -1,4 +1,4 @@
-import { Writer } from "../utils/Writer";
+import type { Writer } from "../utils/Writer";
 
 export class Block {
   public id: string;
@@ -9,10 +9,10 @@ export class Block {
     this.content = content;
   }
 
-  public write(writer: Writer): void {
-    writer.write(this.content);
+  public async write(writer: Writer): Promise<void> {
+    await writer.write(this.content);
     if (!this.content.endsWith("\n")) {
-      writer.writeLine();
+      await writer.writeLine();
     }
   }
 }

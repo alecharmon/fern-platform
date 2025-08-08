@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`basic-reference > basic-reference > generate readme 1`] = `
+exports[`basic-reference > basic-reference > generate reference 1`] = `
 "# Reference
 <details><summary><code><a href="./src/client.py">client.get_user()</a> -> str</code></summary>
 <dl>

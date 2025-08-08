@@ -1,4 +1,4 @@
-import { Block } from "./Block";
+import type { Block } from "./Block";
 
 export class BlockMerger {
   private original: Block[];

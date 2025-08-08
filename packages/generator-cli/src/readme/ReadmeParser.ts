@@ -9,7 +9,7 @@ export interface ParseResult {
 
 export class ReadmeParser {
   public parse({ content }: { content: string }): ParseResult {
-    let header: string = "";
+    let header = "";
     let currentBlock: Block | undefined;
     const blocks: Block[] = [];
     const lines = content.split("\n");
@@ -28,7 +28,7 @@ export class ReadmeParser {
         header += line;
         continue;
       }
-      currentBlock.content += line + "\n";
+      currentBlock.content += `${line}\n`;
     }
 
     // Don't forget to push the last block

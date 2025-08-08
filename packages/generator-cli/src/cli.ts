@@ -5,7 +5,7 @@ import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
 import {
-  AbsoluteFilePath,
+  type AbsoluteFilePath,
   cwd,
   doesPathExist,
   resolve,
@@ -30,15 +30,15 @@ void yargs(hideBin(process.argv))
       argv
         .option("config", {
           string: true,
-          requred: true,
+          required: true,
         })
         .option("original-readme", {
           string: true,
-          requred: false,
+          required: false,
         })
         .option("output", {
           string: true,
-          requred: false,
+          required: false,
         }),
     async (argv) => {
       if (argv.config == null) {
@@ -72,11 +72,11 @@ void yargs(hideBin(process.argv))
       argv
         .option("config", {
           string: true,
-          requred: true,
+          required: true,
         })
         .option("output", {
           string: true,
-          requred: false,
+          required: false,
         }),
     async (argv) => {
       if (argv.config == null) {
@@ -201,10 +201,10 @@ void yargs(hideBin(process.argv))
 
 async function createWriteStream(
   outputPath: string | undefined
-): Promise<fs.WriteStream> {
+): Promise<fs.WriteStream | NodeJS.Process["stdout"]> {
   return outputPath != null
     ? await createWriteStreamFromFile(resolve(cwd(), outputPath))
-    : (process.stdout as unknown as fs.WriteStream);
+    : process.stdout;
 }
 
 async function createWriteStreamFromFile(
