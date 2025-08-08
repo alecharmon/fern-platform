@@ -25,7 +25,9 @@ export async function GET(
 
   const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
 
-  const content = await getLlmsFullTxt(host, domain, path);
+  const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
+
+  const content = await getLlmsFullTxt(host, domain, path, fernToken);
 
   const html = await generateHtml({
     host,
@@ -46,13 +48,12 @@ export async function GET(
 async function getLlmsFullTxt(
   host: string,
   domain: string,
-  path: string
+  path: string,
+  fernToken: string | undefined
 ): Promise<string> {
   "use cache";
 
   unstable_cacheTag(domain, "getLlmsFullTxt");
-
-  const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
   const loader = await createCachedDocsLoader(host, domain, fernToken);
 

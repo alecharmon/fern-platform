@@ -57,8 +57,10 @@ export async function GET(
     });
   }
 
+  const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
+
   const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
-  const content = await getLlmsTxt(host, domain, path);
+  const content = await getLlmsTxt(host, domain, path, fernToken);
 
   const html = await generateHtml({
     host,
@@ -78,13 +80,12 @@ export async function GET(
 async function getLlmsTxt(
   host: string,
   domain: string,
-  path: string
+  path: string,
+  fernToken: string | undefined
 ): Promise<string> {
   "use cache";
 
   unstable_cacheTag(domain, "getLlmsTxt");
-
-  const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
   const loader = await createCachedDocsLoader(host, domain, fernToken);
 
