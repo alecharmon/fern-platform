@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { AutoResizingInput } from "@/components/input/AutoResizingInput";
 import { useMdxState } from "@/providers/MdxStateContext";
 
 export declare namespace PageTitle {
@@ -34,7 +35,7 @@ export default function PageTitle({
     }
   }, [frontmatterData, filename, text]);
 
-  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     const nextText = e.target.value;
     setText(nextText);
     stageChanges(filename, {
@@ -45,8 +46,8 @@ export default function PageTitle({
   return (
     <div className={["flex", className].join(" ")}>
       <h1 className="fern-page-heading mb-3 h-fit w-full font-extrabold">
-        <input
-          className="mx-5 w-full flex-1 font-extrabold focus:outline-none"
+        <AutoResizingInput
+          className="mx-5 font-extrabold"
           name="title"
           onChange={onChange}
           placeholder="Add a title"
