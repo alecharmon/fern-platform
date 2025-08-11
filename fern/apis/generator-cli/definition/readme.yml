@@ -69,6 +69,7 @@ types:
       ruby: RubyInfo
       csharp: CsharpInfo
       php: PhpInfo
+      rust: RustInfo
 
   TypescriptInfo:
     properties:
@@ -97,6 +98,10 @@ types:
   PhpInfo:
     properties:
       publishInfo: optional<ComposerPublishInfo>
+
+  RustInfo:
+    properties:
+      publishInfo: optional<CargoPublishInfo>
 
   ComposerPublishInfo:
     properties:
@@ -129,3 +134,8 @@ types:
   NugetPublishInfo:
     properties:
       packageName: string
+
+  CargoPublishInfo:
+    properties:
+      packageName: string
+      version: string

@@ -398,6 +398,12 @@ export class ReadmeGenerator {
           composer: language.publishInfo,
         });
         break;
+      case "rust":
+        await this.writeInstallationForCargo({
+          writer,
+          cargo: language.publishInfo,
+        });
+        break;
       default:
         assertNever(language);
     }
@@ -525,6 +531,38 @@ export class ReadmeGenerator {
     await writer.writeLine();
   }
 
+  private async writeInstallationForCargo({
+    writer,
+    cargo,
+  }: {
+    writer: Writer;
+    cargo: FernGeneratorCli.CargoPublishInfo;
+  }): Promise<void> {
+    await writer.writeLine("Add this to your `Cargo.toml`:");
+    await writer.writeLine();
+    await writer.writeLine("```toml");
+    await writer.writeLine("[dependencies]");
+    await writer.writeLine(
+      `${this.getCrateNameFromPackageName(cargo.packageName)} = "${cargo.version}"`
+    );
+    await writer.writeLine("```");
+    await writer.writeLine();
+    await writer.writeLine("Or install via cargo:");
+    await writer.writeLine();
+    await writer.writeLine("```sh");
+    await writer.writeLine(
+      `cargo add ${this.getCrateNameFromPackageName(cargo.packageName)}`
+    );
+    await writer.writeLine("```");
+    await writer.writeLine();
+  }
+
+  private getCrateNameFromPackageName(packageName: string): string {
+    return packageName.includes("/")
+      ? packageName.split("/").pop() ?? packageName
+      : packageName;
+  }
+
   private async writeShield({
     writer,
     language,
@@ -607,6 +645,17 @@ export class ReadmeGenerator {
         await this.writeShieldForComposer({
           writer,
           composer,
+        });
+        return;
+      }
+      case "rust": {
+        const cargo = language.publishInfo;
+        if (cargo == null) {
+          return;
+        }
+        await this.writeShieldForCargo({
+          writer,
+          cargo,
         });
         return;
       }
@@ -717,6 +766,22 @@ export class ReadmeGenerator {
     );
   }
 
+  private async writeShieldForCargo({
+    writer,
+    cargo,
+  }: {
+    writer: Writer;
+    cargo: FernGeneratorCli.CargoPublishInfo;
+  }): Promise<void> {
+    await writer.write("[![crates.io shield]");
+    await writer.write(
+      `(https://img.shields.io/crates/v/${this.getCrateNameFromPackageName(cargo.packageName)})]`
+    );
+    await writer.writeLine(
+      `(https://crates.io/crates/${this.getCrateNameFromPackageName(cargo.packageName)})`
+    );
+  }
+
   private generateContributing(): Block {
     return new Block({
       id: "CONTRIBUTING",
@@ -769,6 +834,8 @@ function languageToTitle(language: FernGeneratorCli.LanguageInfo): string {
       return "C#";
     case "php":
       return "PHP";
+    case "rust":
+      return "Rust";
     default:
       assertNever(language);
   }

@@ -95,7 +95,6 @@ The project code base is mainly located within the `src` folder. This folder is 
 2. Create a handler file, this is mostly boiler plate, so I'd look at the other functions to see how they export their handlers look for `export const handler`
 3. Write the actual logic for the function
 4. Write the `serverless` configuration for your function to get it depolyed
-
    1. In most cases, this should be as simple as adding an entry to the `functions` block:
       ```
         reallyCoolFunction:

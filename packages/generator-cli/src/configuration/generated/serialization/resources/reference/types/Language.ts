@@ -7,8 +7,8 @@ import * as FernGeneratorCli from "../../../../api/index";
 import * as core from "../../../../core";
 
 export const Language: core.serialization.Schema<serializers.Language.Raw, FernGeneratorCli.Language> =
-    core.serialization.enum_(["JAVA", "PYTHON", "GO", "RUBY", "CSHARP", "TYPESCRIPT", "PHP"]);
+    core.serialization.enum_(["JAVA", "PYTHON", "GO", "RUBY", "CSHARP", "TYPESCRIPT", "PHP", "RUST"]);
 
 export declare namespace Language {
-    type Raw = "JAVA" | "PYTHON" | "GO" | "RUBY" | "CSHARP" | "TYPESCRIPT" | "PHP";
+    type Raw = "JAVA" | "PYTHON" | "GO" | "RUBY" | "CSHARP" | "TYPESCRIPT" | "PHP" | "RUST";
 }

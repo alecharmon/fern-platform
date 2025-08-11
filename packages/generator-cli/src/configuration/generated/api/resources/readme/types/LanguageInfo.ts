@@ -16,7 +16,8 @@ export type LanguageInfo =
     | FernGeneratorCli.LanguageInfo.Java
     | FernGeneratorCli.LanguageInfo.Ruby
     | FernGeneratorCli.LanguageInfo.Csharp
-    | FernGeneratorCli.LanguageInfo.Php;
+    | FernGeneratorCli.LanguageInfo.Php
+    | FernGeneratorCli.LanguageInfo.Rust;
 
 export declare namespace LanguageInfo {
     interface Typescript extends FernGeneratorCli.TypescriptInfo, _Utils {
@@ -47,6 +48,10 @@ export declare namespace LanguageInfo {
         type: "php";
     }
 
+    interface Rust extends FernGeneratorCli.RustInfo, _Utils {
+        type: "rust";
+    }
+
     interface _Utils {
         _visit: <_Result>(visitor: FernGeneratorCli.LanguageInfo._Visitor<_Result>) => _Result;
     }
@@ -59,6 +64,7 @@ export declare namespace LanguageInfo {
         ruby: (value: FernGeneratorCli.RubyInfo) => _Result;
         csharp: (value: FernGeneratorCli.CsharpInfo) => _Result;
         php: (value: FernGeneratorCli.PhpInfo) => _Result;
+        rust: (value: FernGeneratorCli.RustInfo) => _Result;
         _other: (value: { type: string }) => _Result;
     }
 }
@@ -155,6 +161,19 @@ export const LanguageInfo = {
         };
     },
 
+    rust: (value: FernGeneratorCli.RustInfo): FernGeneratorCli.LanguageInfo.Rust => {
+        return {
+            ...value,
+            type: "rust",
+            _visit: function <_Result>(
+                this: FernGeneratorCli.LanguageInfo.Rust,
+                visitor: FernGeneratorCli.LanguageInfo._Visitor<_Result>
+            ) {
+                return FernGeneratorCli.LanguageInfo._visit(this, visitor);
+            },
+        };
+    },
+
     _visit: <_Result>(
         value: FernGeneratorCli.LanguageInfo,
         visitor: FernGeneratorCli.LanguageInfo._Visitor<_Result>
@@ -174,6 +193,8 @@ export const LanguageInfo = {
                 return visitor.csharp(value);
             case "php":
                 return visitor.php(value);
+            case "rust":
+                return visitor.rust(value);
             default:
                 return visitor._other(value as any);
         }
