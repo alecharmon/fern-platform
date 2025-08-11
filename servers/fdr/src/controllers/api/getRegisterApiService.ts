@@ -11,6 +11,7 @@ import {
 
 import { APIV1WriteService } from "../../api";
 import { SdkRequest } from "../../api/generated/api";
+import { DynamicIr } from "../../api/generated/api/resources/api/resources/v1/resources/register";
 import type { FdrApplication } from "../../app";
 import { LOGGER } from "../../app/FdrApplication";
 import { SdkIdForPackage } from "../../db/sdk/SdkDao";
@@ -175,7 +176,7 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
       logOperationTime("enrichApiLatestDefinitionWithSnippets");
 
       let sources: Record<string, APIV1Write.SourceUpload> | undefined;
-      if (req.body.sources != null) {
+      if (req.body.sources != null || req.body.dynamicIr) {
         app.logger.debug(
           `Preparing source upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
           REGISTER_API_DEFINITION_META
@@ -184,7 +185,8 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
           app,
           orgId: req.body.orgId,
           apiId: req.body.apiId,
-          sources: req.body.sources,
+          sources: req.body.sources ?? undefined,
+          dynamicIr: req.body.dynamicIr ?? undefined,
         });
         logOperationTime("getSourceUploads");
         app.logger.debug(
@@ -541,17 +543,20 @@ async function getSourceUploads({
   orgId,
   apiId,
   sources,
+  dynamicIr,
 }: {
   app: FdrApplication;
   orgId: FdrAPI.OrgId;
   apiId: FdrAPI.ApiId;
-  sources: Record<string, APIV1Write.Source>;
+  sources: Record<string, APIV1Write.Source> | undefined;
+  dynamicIr: DynamicIr[] | undefined;
 }): Promise<Record<string, APIV1Write.SourceUpload>> {
   const sourceUploadUrls =
     await app.services.s3.getPresignedApiDefinitionSourceUploadUrls({
       orgId,
       apiId,
       sources,
+      dynamicIr,
     });
 
   const sourceUploads = await Promise.all(

@@ -1,3 +1,4 @@
+export * from "./DynamicIr";
 export * from "./RegisterApiDefinitionResponse";
 export * from "./ApiDefinition";
 export * from "./ApiNavigationConfigRoot";

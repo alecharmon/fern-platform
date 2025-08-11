@@ -1,3 +1,4 @@
+export * from "./DynamicIr.js";
 export * from "./RegisterApiDefinitionResponse.js";
 export * from "./ApiDefinition.js";
 export * from "./ApiNavigationConfigRoot.js";

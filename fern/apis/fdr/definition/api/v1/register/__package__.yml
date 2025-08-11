@@ -27,12 +27,20 @@ service:
             definition: optional<ApiDefinition>
             definitionV2: optional<latest.ApiDefinition>
             sources: optional<map<SourceId, Source>>
+            dynamicIr: optional<list<DynamicIr>>
       response: RegisterApiDefinitionResponse
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
 
 types:
+  DynamicIr:
+    properties:
+      language: string
+      dynamicIr:
+        type: unknown
+        docs: The dynamic IR for the given language.
+
   RegisterApiDefinitionResponse:
     properties:
       apiDefinitionId: rootCommons.ApiDefinitionId

@@ -18,6 +18,7 @@ import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 
 import { Cache } from "../../Cache";
 import { FernRegistry } from "../../api/generated";
+import { DynamicIr } from "../../api/generated/api/resources/api/resources/v1/resources/register";
 import type { FdrApplication, FdrConfig } from "../../app";
 
 const ONE_WEEK_IN_SECONDS = 604800;
@@ -72,10 +73,12 @@ export interface S3Service {
     orgId,
     apiId,
     sources,
+    dynamicIr,
   }: {
     orgId: FernRegistry.OrgId;
     apiId: FernRegistry.ApiId;
-    sources: Record<APIV1Write.SourceId, APIV1Write.Source>;
+    sources: Record<APIV1Write.SourceId, APIV1Write.Source> | undefined;
+    dynamicIr: DynamicIr[] | undefined;
   }): Promise<Record<APIV1Write.SourceId, S3ApiDefinitionSourceFileInfo>>;
 
   getPresignedApiDefinitionSourceDownloadUrl({
@@ -311,27 +314,47 @@ export class S3ServiceImpl implements S3Service {
     orgId,
     apiId,
     sources,
+    dynamicIr,
   }: {
     orgId: FernRegistry.OrgId;
     apiId: FernRegistry.ApiId;
-    sources: Record<APIV1Write.SourceId, APIV1Write.Source>;
+    sources: Record<APIV1Write.SourceId, APIV1Write.Source> | undefined;
+    dynamicIr: DynamicIr[] | undefined;
   }): Promise<Record<APIV1Write.SourceId, S3ApiDefinitionSourceFileInfo>> {
     const result: Record<APIV1Write.SourceId, S3ApiDefinitionSourceFileInfo> =
       {};
     const time: string = new Date().toISOString();
-    for (const [sourceId, _source] of Object.entries(sources)) {
-      const { url, key } =
-        await this.createPresignedApiDefinitionSourceUploadUrlWithClient({
+    if (sources) {
+      for (const [sourceId, _source] of Object.entries(sources)) {
+        const { url, key } =
+          await this.createPresignedApiDefinitionSourceUploadUrlWithClient({
+            orgId,
+            apiId,
+            time,
+            sourceId: APIV1Write.SourceId(sourceId),
+          });
+        result[APIV1Write.SourceId(sourceId)] = {
+          presignedUrl: url,
+          key,
+        };
+      }
+    }
+
+    if (dynamicIr) {
+      for (const { language } of dynamicIr) {
+        const { url, key } = await this.createPresignedDynamicIrUrlWithClient({
           orgId,
           apiId,
           time,
-          sourceId: APIV1Write.SourceId(sourceId),
+          language,
         });
-      result[APIV1Write.SourceId(sourceId)] = {
-        presignedUrl: url,
-        key,
-      };
+        result[APIV1Write.SourceId(language)] = {
+          presignedUrl: url,
+          key,
+        };
+      }
     }
+
     return result;
   }
 
@@ -375,6 +398,48 @@ export class S3ServiceImpl implements S3Service {
     };
   }
 
+  async createPresignedDynamicIrUrlWithClient({
+    orgId,
+    apiId,
+    time,
+    language,
+  }: {
+    orgId: FernRegistry.OrgId;
+    apiId: FernRegistry.ApiId;
+    time: string;
+    language: string;
+  }): Promise<{ url: string; key: string }> {
+    let key: string;
+    if (this.config.localModeOverride) {
+      key = this.constructS3DynamicIrKeyWithoutTime({
+        orgId,
+        apiId,
+        language,
+      });
+    } else {
+      key = this.constructS3DynamicIrKey({
+        orgId,
+        apiId,
+        time,
+        language,
+      });
+    }
+
+    // store the dynamic ir alongside corresponding api definitions
+    const bucketName = this.config.privateApiDefinitionSourceS3.bucketName;
+    const input: PutObjectCommandInput = {
+      Bucket: bucketName,
+      Key: key,
+    };
+    const command = new PutObjectCommand(input);
+    return {
+      url: await getSignedUrl(this.privateApiDefinitionSourceS3, command, {
+        expiresIn: 3600,
+      }),
+      key,
+    };
+  }
+
   constructS3DocsKey({
     domain,
     time,
@@ -395,6 +460,32 @@ export class S3ServiceImpl implements S3Service {
     filepath: DocsV1Write.FilePath;
   }): string {
     return `${domain}/${filepath}`;
+  }
+
+  constructS3DynamicIrKey({
+    orgId,
+    apiId,
+    time,
+    language,
+  }: {
+    orgId: FernRegistry.OrgId;
+    apiId: FernRegistry.ApiId;
+    time: string;
+    language: string;
+  }): string {
+    return `${orgId}/${apiId}/${time}/${language}`;
+  }
+
+  constructS3DynamicIrKeyWithoutTime({
+    orgId,
+    apiId,
+    language,
+  }: {
+    orgId: FernRegistry.OrgId;
+    apiId: FernRegistry.ApiId;
+    language: string;
+  }): string {
+    return `${orgId}/${apiId}/${language}`;
   }
 
   constructS3ApiDefinitionSourceKey({

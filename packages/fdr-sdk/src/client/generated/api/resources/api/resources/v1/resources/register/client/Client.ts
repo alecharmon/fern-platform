@@ -40,7 +40,8 @@ export class Register {
      *         apiId: FernRegistry.ApiId("apiId"),
      *         definition: undefined,
      *         definitionV2: undefined,
-     *         sources: undefined
+     *         sources: undefined,
+     *         dynamicIr: undefined
      *     })
      */
     public registerApiDefinition(
