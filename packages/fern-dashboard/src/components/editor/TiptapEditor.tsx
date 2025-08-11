@@ -14,6 +14,7 @@ import StarterKit from "@tiptap/starter-kit";
 
 import BubbleMenu from "./BubbleMenu";
 import FloatingMenu from "./FloatingMenu";
+import NodeHoverHandle from "./NodeHoverHandle";
 import CustomElement from "./extension-custom-element";
 import GlobalDataHashAttribute from "./extension-global-data-hash-attribute";
 
@@ -76,7 +77,7 @@ export default function TiptapEditor({
       content={content}
       editorProps={{
         attributes: {
-          class: "prose prose-md m-5 focus:outline-none max-w-none",
+          class: "prose prose-md p-7 -m-2 focus:outline-none max-w-none",
         },
       }}
       parseOptions={{
@@ -91,6 +92,7 @@ export default function TiptapEditor({
       <TipTapContentUpdateListener content={content} />
       {!disableFloatingMenu && <FloatingMenu />}
       {!disableBubbleMenu && <BubbleMenu />}
+      <NodeHoverHandle />
     </EditorProvider>
   );
 }

@@ -913,6 +913,12 @@ importers:
       '@tiptap/core':
         specifier: 3.0.5
         version: 3.0.5(@tiptap/pm@3.0.5)
+      '@tiptap/extension-drag-handle':
+        specifier: ^3.0.9
+        version: 3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/extension-collaboration@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27))(@tiptap/extension-node-range@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))
+      '@tiptap/extension-drag-handle-react':
+        specifier: ^3.0.9
+        version: 3.0.9(@tiptap/extension-drag-handle@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/extension-collaboration@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27))(@tiptap/extension-node-range@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)))(@tiptap/pm@3.0.5)(@tiptap/react@3.0.5(@floating-ui/dom@1.6.13)(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@tiptap/extension-placeholder':
         specifier: ^3.0.5
         version: 3.0.5(@tiptap/extensions@3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))
@@ -1262,7 +1268,7 @@ importers:
         version: 5.20.3
       cssnano:
         specifier: ^6.0.3
-        version: 6.1.2(postcss@8.5.6)
+        version: 6.1.2(postcss@8.5.2)
       es-toolkit:
         specifier: ^1.32.0
         version: 1.32.0
@@ -5237,14 +5243,8 @@ packages:
   '@fern-fern/revalidation-sdk@0.0.9':
     resolution: {integrity: sha512-iZhm1odMdgWqlJi8B6lUPkza8YFfPz6iAhLfTkTnG4cpgPLER4sdQ8tlO+sUcGJF07Z3KkCRKmD6k54wNhv6Gg==}
 
-  '@floating-ui/core@1.6.8':
-    resolution: {integrity: sha512-7XJ9cPU+yI2QeLS+FCSlqNFZJq8arvswefkZrYI1yQBbftw6FyrZOxYSh+9S7z7TpeWlRt9zJ5IhM1WIL334jA==}
-
   '@floating-ui/core@1.6.9':
     resolution: {integrity: sha512-uMXCuQ3BItDUbAMhIXw7UPXRfAlOAvZzdK9BWpE60MCn+Svt3aLn9jsPTi/WNGlRUu2uI0v5S7JiIUsbsvh3fw==}
-
-  '@floating-ui/dom@1.6.12':
-    resolution: {integrity: sha512-NP83c0HjokcGVEMeoStg317VD9W7eDlGK7457dMBANbKA6GJZdc7rjujdgqzTaz93jkGgc5P/jeWbaCHnMNc+w==}
 
   '@floating-ui/dom@1.6.13':
     resolution: {integrity: sha512-umqzocjDgNRGTuO7Q8CU32dkHkECqI8ZdMZ5Swb6QAM0t5rnlrN3lGo1hdpscRd3WS8T6DKYK4ephgIH9iRh3w==}
@@ -5260,9 +5260,6 @@ packages:
     peerDependencies:
       react: 19.0.0
       react-dom: 19.0.0
-
-  '@floating-ui/utils@0.2.8':
-    resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
 
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
@@ -8832,10 +8829,36 @@ packages:
     peerDependencies:
       '@tiptap/core': ^3.0.5
 
+  '@tiptap/extension-collaboration@3.0.9':
+    resolution: {integrity: sha512-zACNmSFuEMp1G89mFs18wuQzfk769HJMFr1z/SiPw1/yM2By8uy7UKgMqVmmQ7OYTIIvCE8zq0whyBrOUpnOJg==}
+    peerDependencies:
+      '@tiptap/core': ^3.0.9
+      '@tiptap/pm': ^3.0.9
+      '@tiptap/y-tiptap': ^3.0.0-beta.3
+      yjs: ^13
+
   '@tiptap/extension-document@3.0.5':
     resolution: {integrity: sha512-lunRBrNdyjdAxGGtTfEh1/XRfIliQMG9hn9eA/+d5gcPbIKFZFah4nQYFLdgVAaSxq/YXJ26Q0VaxJKR6l5hdA==}
     peerDependencies:
       '@tiptap/core': ^3.0.5
+
+  '@tiptap/extension-drag-handle-react@3.0.9':
+    resolution: {integrity: sha512-y+h5fcAjRd0gFutf5c9DLZ95k7w9I7YiFBA9YFUt3QYK4oxWYkmvij8Ex7U88lWWfi7bstWCIqQHtf0aD16Cyw==}
+    peerDependencies:
+      '@tiptap/extension-drag-handle': ^3.0.9
+      '@tiptap/pm': ^3.0.9
+      '@tiptap/react': ^3.0.9
+      react: 19.0.0
+      react-dom: 19.0.0
+
+  '@tiptap/extension-drag-handle@3.0.9':
+    resolution: {integrity: sha512-2SFlJsFaY/s6uQwd/NhRgJRB4NP1OTV0PLivWYqmGN9zCd2P1jJgmhYtvhuKvui9rHlYeunlpwqXjxzlYryEqA==}
+    peerDependencies:
+      '@tiptap/core': ^3.0.9
+      '@tiptap/extension-collaboration': ^3.0.9
+      '@tiptap/extension-node-range': ^3.0.9
+      '@tiptap/pm': ^3.0.9
+      '@tiptap/y-tiptap': ^3.0.0-beta.3
 
   '@tiptap/extension-dropcursor@3.0.5':
     resolution: {integrity: sha512-GfuyOLZ/rSyvImTdInYXeU3M6STOeEl4ktxKaac8fe79GCJNKHcpWnD7N/tWoXszUV9heCTHTlTw5AYlgJfqEQ==}
@@ -8897,6 +8920,12 @@ packages:
       '@tiptap/core': ^3.0.5
       '@tiptap/pm': ^3.0.5
 
+  '@tiptap/extension-node-range@3.0.9':
+    resolution: {integrity: sha512-lSnQs8SgvJ612w6b90gfrS0BpSDoWRuyudwomKZKrUJpuw7sDaFy2A4I/KHJKFOZ3oKkpSgkSxxtZAlhNxDK3A==}
+    peerDependencies:
+      '@tiptap/core': ^3.0.9
+      '@tiptap/pm': ^3.0.9
+
   '@tiptap/extension-ordered-list@3.0.5':
     resolution: {integrity: sha512-vLrclQGvXBj9hkLBc4F6VEm4uMF+ONIkP8k7VcY2ctcB6+yPrQP6prIhoaa2v/zv5ntiwCCmekev6kxYDYthCQ==}
     peerDependencies:
@@ -8952,6 +8981,16 @@ packages:
 
   '@tiptap/starter-kit@3.0.5':
     resolution: {integrity: sha512-na85bsvFSjqcLCZ8BpoFq+AZReqjB/rNMON228ciX1CBygA6uwNl8y6ugJXi3hqlbG62ZVfQB1BtkmrIFEUJiA==}
+
+  '@tiptap/y-tiptap@3.0.0':
+    resolution: {integrity: sha512-HIeJZCj+KYJde2x6fONzo4o6kd7gW7eonwhQsv2p2VQnUgwNXMVhN+D6Z3AH/2i541Sq33y1PO4U/1ThCPjqbA==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      prosemirror-model: ^1.7.1
+      prosemirror-state: ^1.2.3
+      prosemirror-view: ^1.9.10
+      y-protocols: ^1.0.1
+      yjs: ^13.5.38
 
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
@@ -14341,6 +14380,9 @@ packages:
     peerDependencies:
       ws: '*'
 
+  isomorphic.js@0.2.5:
+    resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
+
   isows@1.0.6:
     resolution: {integrity: sha512-lPHCayd40oW98/I0uvgaHKWCSvkzY27LjWLbtzOm64yQ+G3Q5npjjbdppU65iZXkK1Zt+kH9pfegli0AYfwYYw==}
     peerDependencies:
@@ -14852,6 +14894,11 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
+
+  lib0@0.2.114:
+    resolution: {integrity: sha512-gcxmNFzA4hv8UYi8j43uPlQ7CGcyMJ2KQb5kZASw6SnAKAf10hK12i2fjrS3Cl/ugZa5Ui6WwIu1/6MIXiHttQ==}
+    engines: {node: '>=16'}
+    hasBin: true
 
   lie@3.1.1:
     resolution: {integrity: sha512-RiNhHysUjhrDQntfYSfY4MU24coXXdEOgw9WGcKHNeEwffDYbF//u87M1EWaMGzuFoSbqW0C9C6lEEhDOAswfw==}
@@ -20493,6 +20540,12 @@ packages:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
 
+  y-protocols@1.0.6:
+    resolution: {integrity: sha512-vHRF2L6iT3rwj1jub/K5tYcTT/mEYDUppgNPXwp8fmLpui9f7Yeq3OEtTLVF012j39QnV+KEQpNqoN7CWU7Y9Q==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      yjs: ^13.0.0
+
   y18n@4.0.3:
     resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}
 
@@ -20555,6 +20608,10 @@ packages:
 
   yauzl@2.10.0:
     resolution: {integrity: sha512-p4a9I6X6nu6IhoGmBqAcbJy1mlC4j27vEPZX9F4L4/vZT3Lyq1VkFHw/V/PUcB9Buo+DG3iHkT0x3Qya58zc3g==}
+
+  yjs@13.6.27:
+    resolution: {integrity: sha512-OIDwaflOaq4wC6YlPBy2L6ceKeKuF7DeTxx+jPzv1FHn9tCZ0ZwSRnUBxD05E3yed46fv/FWJbvR+Ud7x0L7zw==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
 
   yn@3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
@@ -23846,18 +23903,9 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@floating-ui/core@1.6.8':
-    dependencies:
-      '@floating-ui/utils': 0.2.9
-
   '@floating-ui/core@1.6.9':
     dependencies:
       '@floating-ui/utils': 0.2.9
-
-  '@floating-ui/dom@1.6.12':
-    dependencies:
-      '@floating-ui/core': 1.6.8
-      '@floating-ui/utils': 0.2.8
 
   '@floating-ui/dom@1.6.13':
     dependencies:
@@ -23866,7 +23914,7 @@ snapshots:
 
   '@floating-ui/react-dom@1.3.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@floating-ui/dom': 1.6.12
+      '@floating-ui/dom': 1.6.13
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
@@ -23875,8 +23923,6 @@ snapshots:
       '@floating-ui/dom': 1.6.13
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
-
-  '@floating-ui/utils@0.2.8': {}
 
   '@floating-ui/utils@0.2.9': {}
 
@@ -29112,9 +29158,33 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
 
+  '@tiptap/extension-collaboration@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27)':
+    dependencies:
+      '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
+      '@tiptap/pm': 3.0.5
+      '@tiptap/y-tiptap': 3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
+      yjs: 13.6.27
+
   '@tiptap/extension-document@3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))':
     dependencies:
       '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
+
+  '@tiptap/extension-drag-handle-react@3.0.9(@tiptap/extension-drag-handle@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/extension-collaboration@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27))(@tiptap/extension-node-range@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)))(@tiptap/pm@3.0.5)(@tiptap/react@3.0.5(@floating-ui/dom@1.6.13)(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@tiptap/extension-drag-handle': 3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/extension-collaboration@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27))(@tiptap/extension-node-range@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))
+      '@tiptap/pm': 3.0.5
+      '@tiptap/react': 3.0.5(@floating-ui/dom@1.6.13)(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
+  '@tiptap/extension-drag-handle@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/extension-collaboration@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27))(@tiptap/extension-node-range@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))':
+    dependencies:
+      '@floating-ui/dom': 1.6.13
+      '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
+      '@tiptap/extension-collaboration': 3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)(@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27)
+      '@tiptap/extension-node-range': 3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)
+      '@tiptap/pm': 3.0.5
+      '@tiptap/y-tiptap': 3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
 
   '@tiptap/extension-dropcursor@3.0.5(@tiptap/extensions@3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5))':
     dependencies:
@@ -29163,6 +29233,11 @@ snapshots:
       '@tiptap/extension-list': 3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)
 
   '@tiptap/extension-list@3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)':
+    dependencies:
+      '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
+      '@tiptap/pm': 3.0.5
+
+  '@tiptap/extension-node-range@3.0.9(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)':
     dependencies:
       '@tiptap/core': 3.0.5(@tiptap/pm@3.0.5)
       '@tiptap/pm': 3.0.5
@@ -29264,6 +29339,15 @@ snapshots:
       '@tiptap/extension-underline': 3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))
       '@tiptap/extensions': 3.0.5(@tiptap/core@3.0.5(@tiptap/pm@3.0.5))(@tiptap/pm@3.0.5)
       '@tiptap/pm': 3.0.5
+
+  '@tiptap/y-tiptap@3.0.0(prosemirror-model@1.25.1)(prosemirror-state@1.4.3)(prosemirror-view@1.40.0)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)':
+    dependencies:
+      lib0: 0.2.114
+      prosemirror-model: 1.25.1
+      prosemirror-state: 1.4.3
+      prosemirror-view: 1.40.0
+      y-protocols: 1.0.6(yjs@13.6.27)
+      yjs: 13.6.27
 
   '@tokenizer/token@0.3.0': {}
 
@@ -32972,10 +33056,6 @@ snapshots:
     dependencies:
       postcss: 8.5.2
 
-  css-declaration-sorter@7.2.0(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-
   css-functions-list@3.2.2: {}
 
   css-functions-list@3.2.3: {}
@@ -33064,59 +33144,15 @@ snapshots:
       postcss-svgo: 6.0.3(postcss@8.5.2)
       postcss-unique-selectors: 6.0.4(postcss@8.5.2)
 
-  cssnano-preset-default@6.1.2(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      css-declaration-sorter: 7.2.0(postcss@8.5.6)
-      cssnano-utils: 4.0.2(postcss@8.5.6)
-      postcss: 8.5.6
-      postcss-calc: 9.0.1(postcss@8.5.6)
-      postcss-colormin: 6.1.0(postcss@8.5.6)
-      postcss-convert-values: 6.1.0(postcss@8.5.6)
-      postcss-discard-comments: 6.0.2(postcss@8.5.6)
-      postcss-discard-duplicates: 6.0.3(postcss@8.5.6)
-      postcss-discard-empty: 6.0.3(postcss@8.5.6)
-      postcss-discard-overridden: 6.0.2(postcss@8.5.6)
-      postcss-merge-longhand: 6.0.5(postcss@8.5.6)
-      postcss-merge-rules: 6.1.1(postcss@8.5.6)
-      postcss-minify-font-values: 6.1.0(postcss@8.5.6)
-      postcss-minify-gradients: 6.0.3(postcss@8.5.6)
-      postcss-minify-params: 6.1.0(postcss@8.5.6)
-      postcss-minify-selectors: 6.0.4(postcss@8.5.6)
-      postcss-normalize-charset: 6.0.2(postcss@8.5.6)
-      postcss-normalize-display-values: 6.0.2(postcss@8.5.6)
-      postcss-normalize-positions: 6.0.2(postcss@8.5.6)
-      postcss-normalize-repeat-style: 6.0.2(postcss@8.5.6)
-      postcss-normalize-string: 6.0.2(postcss@8.5.6)
-      postcss-normalize-timing-functions: 6.0.2(postcss@8.5.6)
-      postcss-normalize-unicode: 6.1.0(postcss@8.5.6)
-      postcss-normalize-url: 6.0.2(postcss@8.5.6)
-      postcss-normalize-whitespace: 6.0.2(postcss@8.5.6)
-      postcss-ordered-values: 6.0.2(postcss@8.5.6)
-      postcss-reduce-initial: 6.1.0(postcss@8.5.6)
-      postcss-reduce-transforms: 6.0.2(postcss@8.5.6)
-      postcss-svgo: 6.0.3(postcss@8.5.6)
-      postcss-unique-selectors: 6.0.4(postcss@8.5.6)
-
   cssnano-utils@4.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-
-  cssnano-utils@4.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
 
   cssnano@6.1.2(postcss@8.5.2):
     dependencies:
       cssnano-preset-default: 6.1.2(postcss@8.5.2)
       lilconfig: 3.1.1
       postcss: 8.5.2
-
-  cssnano@6.1.2(postcss@8.5.6):
-    dependencies:
-      cssnano-preset-default: 6.1.2(postcss@8.5.6)
-      lilconfig: 3.1.1
-      postcss: 8.5.6
 
   csso@5.0.5:
     dependencies:
@@ -36444,6 +36480,8 @@ snapshots:
     dependencies:
       ws: 7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
+  isomorphic.js@0.2.5: {}
+
   isows@1.0.6(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -37322,6 +37360,10 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  lib0@0.2.114:
+    dependencies:
+      isomorphic.js: 0.2.5
 
   lie@3.1.1:
     dependencies:
@@ -39282,7 +39324,8 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nanoid@3.3.11: {}
+  nanoid@3.3.11:
+    optional: true
 
   nanoid@3.3.8: {}
 
@@ -40110,12 +40153,6 @@ snapshots:
       postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
 
-  postcss-calc@9.0.1(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-      postcss-selector-parser: 6.1.2
-      postcss-value-parser: 4.2.0
-
   postcss-colormin@6.1.0(postcss@8.5.2):
     dependencies:
       browserslist: 4.24.4
@@ -40124,57 +40161,27 @@ snapshots:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-colormin@6.1.0(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      caniuse-api: 3.0.0
-      colord: 2.9.3
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-convert-values@6.1.0(postcss@8.5.2):
     dependencies:
       browserslist: 4.24.4
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-convert-values@6.1.0(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-discard-comments@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-
-  postcss-discard-comments@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
 
   postcss-discard-duplicates@6.0.3(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
 
-  postcss-discard-duplicates@6.0.3(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-
   postcss-discard-empty@6.0.3(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
 
-  postcss-discard-empty@6.0.3(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-
   postcss-discard-overridden@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-
-  postcss-discard-overridden@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
 
   postcss-load-config@3.1.4(postcss@8.5.2)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.15))(@types/node@18.19.76)(typescript@5.7.3)):
     dependencies:
@@ -40221,12 +40228,6 @@ snapshots:
       postcss-value-parser: 4.2.0
       stylehacks: 6.1.1(postcss@8.5.2)
 
-  postcss-merge-longhand@6.0.5(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-      stylehacks: 6.1.1(postcss@8.5.6)
-
   postcss-merge-rules@6.1.1(postcss@8.5.2):
     dependencies:
       browserslist: 4.24.4
@@ -40235,22 +40236,9 @@ snapshots:
       postcss: 8.5.2
       postcss-selector-parser: 6.1.2
 
-  postcss-merge-rules@6.1.1(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      caniuse-api: 3.0.0
-      cssnano-utils: 4.0.2(postcss@8.5.6)
-      postcss: 8.5.6
-      postcss-selector-parser: 6.1.2
-
   postcss-minify-font-values@6.1.0(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-value-parser: 4.2.0
-
-  postcss-minify-font-values@6.1.0(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
   postcss-minify-gradients@6.0.3(postcss@8.5.2):
@@ -40260,13 +40248,6 @@ snapshots:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-minify-gradients@6.0.3(postcss@8.5.6):
-    dependencies:
-      colord: 2.9.3
-      cssnano-utils: 4.0.2(postcss@8.5.6)
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-minify-params@6.1.0(postcss@8.5.2):
     dependencies:
       browserslist: 4.24.4
@@ -40274,21 +40255,9 @@ snapshots:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-minify-params@6.1.0(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      cssnano-utils: 4.0.2(postcss@8.5.6)
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-minify-selectors@6.0.4(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-selector-parser: 6.1.2
-
-  postcss-minify-selectors@6.0.4(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-selector-parser: 6.1.2
 
   postcss-modules-extract-imports@3.1.0(postcss@8.5.2):
@@ -40316,18 +40285,9 @@ snapshots:
     dependencies:
       postcss: 8.5.2
 
-  postcss-normalize-charset@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-
   postcss-normalize-display-values@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-value-parser: 4.2.0
-
-  postcss-normalize-display-values@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
   postcss-normalize-positions@6.0.2(postcss@8.5.2):
@@ -40335,19 +40295,9 @@ snapshots:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-positions@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-normalize-repeat-style@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-value-parser: 4.2.0
-
-  postcss-normalize-repeat-style@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
   postcss-normalize-string@6.0.2(postcss@8.5.2):
@@ -40355,19 +40305,9 @@ snapshots:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-string@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-normalize-timing-functions@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-value-parser: 4.2.0
-
-  postcss-normalize-timing-functions@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
   postcss-normalize-unicode@6.1.0(postcss@8.5.2):
@@ -40376,30 +40316,14 @@ snapshots:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-unicode@6.1.0(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-normalize-url@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-normalize-url@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-normalize-whitespace@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-value-parser: 4.2.0
-
-  postcss-normalize-whitespace@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
   postcss-ordered-values@6.0.2(postcss@8.5.2):
@@ -40408,32 +40332,15 @@ snapshots:
       postcss: 8.5.2
       postcss-value-parser: 4.2.0
 
-  postcss-ordered-values@6.0.2(postcss@8.5.6):
-    dependencies:
-      cssnano-utils: 4.0.2(postcss@8.5.6)
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-
   postcss-reduce-initial@6.1.0(postcss@8.5.2):
     dependencies:
       browserslist: 4.24.4
       caniuse-api: 3.0.0
       postcss: 8.5.2
 
-  postcss-reduce-initial@6.1.0(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      caniuse-api: 3.0.0
-      postcss: 8.5.6
-
   postcss-reduce-transforms@6.0.2(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-value-parser: 4.2.0
-
-  postcss-reduce-transforms@6.0.2(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
   postcss-resolve-nested-selector@0.1.1: {}
@@ -40478,20 +40385,9 @@ snapshots:
       postcss-value-parser: 4.2.0
       svgo: 3.3.2
 
-  postcss-svgo@6.0.3(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
-      postcss-value-parser: 4.2.0
-      svgo: 3.3.2
-
   postcss-unique-selectors@6.0.4(postcss@8.5.2):
     dependencies:
       postcss: 8.5.2
-      postcss-selector-parser: 6.1.2
-
-  postcss-unique-selectors@6.0.4(postcss@8.5.6):
-    dependencies:
-      postcss: 8.5.6
       postcss-selector-parser: 6.1.2
 
   postcss-value-parser@4.2.0: {}
@@ -40513,6 +40409,7 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+    optional: true
 
   postgres-array@2.0.0: {}
 
@@ -42686,12 +42583,6 @@ snapshots:
     dependencies:
       browserslist: 4.24.4
       postcss: 8.5.2
-      postcss-selector-parser: 6.1.2
-
-  stylehacks@6.1.1(postcss@8.5.6):
-    dependencies:
-      browserslist: 4.24.4
-      postcss: 8.5.6
       postcss-selector-parser: 6.1.2
 
   stylelint-config-recommended-scss@14.0.0(postcss@8.5.2)(stylelint@16.14.1(typescript@5.7.3)):
@@ -45378,6 +45269,11 @@ snapshots:
 
   xtend@4.0.2: {}
 
+  y-protocols@1.0.6(yjs@13.6.27):
+    dependencies:
+      lib0: 0.2.114
+      yjs: 13.6.27
+
   y18n@4.0.3: {}
 
   y18n@5.0.8: {}
@@ -45444,6 +45340,10 @@ snapshots:
     dependencies:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
+
+  yjs@13.6.27:
+    dependencies:
+      lib0: 0.2.114
 
   yn@3.1.1: {}
 

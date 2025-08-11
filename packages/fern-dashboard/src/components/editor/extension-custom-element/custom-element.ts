@@ -31,7 +31,7 @@ export const CustomElement = Node.create<CustomElementOptions>({
 
   atom: true,
 
-  draggable: false,
+  draggable: true,
 
   selectable: false,
 
@@ -104,23 +104,66 @@ export const CustomElement = Node.create<CustomElementOptions>({
             }
           }
 
-          let result = true; // true for keep, false for stop transaction
-          const replaceSteps: number[] = [];
-          transaction.steps.forEach((step, index) => {
+          // Check if any step involves a custom element
+          let hasCustomElement = false;
+          transaction.steps.forEach((step) => {
             if (step instanceof ReplaceStep) {
-              replaceSteps.push(index);
+              state.doc.nodesBetween(step.from, step.to, (node) => {
+                if (node.type.name === TAG) {
+                  hasCustomElement = true;
+                }
+              });
             }
           });
 
-          replaceSteps.forEach((index) => {
-            const step = transaction.steps[index] as ReplaceStep;
-            const oldStart = step.from;
-            const oldEnd = step.to;
-            state.doc.nodesBetween(oldStart, oldEnd, (node) => {
-              if (node.type.name === TAG) {
-                result = false;
+          // If no custom elements are involved, allow the transaction
+          if (!hasCustomElement) {
+            return true;
+          }
+
+          // Check if this is a drag operation (remove + insert pattern)
+          const replaceSteps = transaction.steps.filter(
+            (step) => step instanceof ReplaceStep
+          ) as ReplaceStep[];
+
+          if (replaceSteps.length === 2) {
+            const [removeStep, insertStep] = replaceSteps;
+
+            // Check if this looks like a drag operation:
+            // - One step removes content (slice size 0, from !== to)
+            // - Another step inserts content (slice size > 0, from === to)
+            const hasRemovalStep =
+              removeStep?.slice?.content?.size === 0 &&
+              removeStep?.from !== removeStep?.to;
+            const hasInsertionStep =
+              !!insertStep?.slice?.content?.size &&
+              insertStep?.from === insertStep?.to;
+
+            if (hasRemovalStep && hasInsertionStep) {
+              return true;
+            }
+          }
+
+          // For other transactions involving custom elements, only block pure deletions
+          // (where content is removed without any corresponding insertion)
+          let result = true;
+          const hasInsertion = replaceSteps.some(
+            (step) => step.slice.content.size > 0
+          );
+
+          transaction.steps.forEach((step) => {
+            if (step instanceof ReplaceStep) {
+              const isDeletion =
+                step.slice.content.size === 0 && step.from !== step.to;
+              if (isDeletion && !hasInsertion) {
+                // This is a pure deletion with no insertion - block it if it affects custom elements
+                state.doc.nodesBetween(step.from, step.to, (node) => {
+                  if (node.type.name === TAG) {
+                    result = false;
+                  }
+                });
               }
-            });
+            }
           });
           return result;
         },
