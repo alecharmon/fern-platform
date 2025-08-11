@@ -473,7 +473,7 @@ export class S3ServiceImpl implements S3Service {
     time: string;
     language: string;
   }): string {
-    return `${orgId}/${apiId}/${time}/${language}`;
+    return `${orgId}/${apiId}/${time}/${language}.json`;
   }
 
   constructS3DynamicIrKeyWithoutTime({
@@ -485,7 +485,7 @@ export class S3ServiceImpl implements S3Service {
     apiId: FernRegistry.ApiId;
     language: string;
   }): string {
-    return `${orgId}/${apiId}/${language}`;
+    return `${orgId}/${apiId}/${language}.json`;
   }
 
   constructS3ApiDefinitionSourceKey({

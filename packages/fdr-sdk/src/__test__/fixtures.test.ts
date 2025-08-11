@@ -175,7 +175,7 @@ function sortObject(object: unknown): unknown {
     const keys = Object.keys(object);
     // console.log(keys);
     keys.sort(function (key1, key2) {
-      ((key1 = key1.toLowerCase()), (key2 = key2.toLowerCase()));
+      (key1 = key1.toLowerCase()), (key2 = key2.toLowerCase());
       if (key1 < key2) {
         return -1;
       }

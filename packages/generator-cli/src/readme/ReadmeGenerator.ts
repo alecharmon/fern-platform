@@ -559,7 +559,7 @@ export class ReadmeGenerator {
 
   private getCrateNameFromPackageName(packageName: string): string {
     return packageName.includes("/")
-      ? packageName.split("/").pop() ?? packageName
+      ? (packageName.split("/").pop() ?? packageName)
       : packageName;
   }
 
