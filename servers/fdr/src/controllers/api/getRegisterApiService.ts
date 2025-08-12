@@ -210,7 +210,7 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
           dynamicIRs: req.body.dynamicIRs,
         });
 
-        logOperationTime("getSourceUploads");
+        logOperationTime("getDynamicIrsUploads");
         app.logger.debug(
           "Successfully prepared dynamic IR upload URLs",
           REGISTER_API_DEFINITION_META
@@ -571,7 +571,7 @@ async function getDynamicIrsUploads({
   orgId: FdrAPI.OrgId;
   apiId: FdrAPI.ApiId;
   dynamicIRs: Record<string, DynamicIr> | undefined;
-}): Promise<Record<string, APIV1Write.SourceUpload>> {
+}): Promise<Record<string, DynamicIrUpload>> {
   const sourceUploadUrls =
     await app.services.s3.getPresignedApiDefinitionDynamicIRsUploadUrls({
       orgId,
