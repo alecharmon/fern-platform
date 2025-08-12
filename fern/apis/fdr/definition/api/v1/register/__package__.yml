@@ -27,17 +27,18 @@ service:
             definition: optional<ApiDefinition>
             definitionV2: optional<latest.ApiDefinition>
             sources: optional<map<SourceId, Source>>
-            dynamicIr: optional<list<DynamicIr>>
+            dynamicIRs: 
+              type: optional<map<string, DynamicIR>>
+              docs: A mapping of languages to dynamic IR.
       response: RegisterApiDefinitionResponse
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
 
 types:
-  DynamicIr:
+  DynamicIR:
     properties:
-      language: string
-      dynamicIr:
+      dynamicIR:
         type: unknown
         docs: The dynamic IR for the given language.
 
@@ -45,6 +46,13 @@ types:
     properties:
       apiDefinitionId: rootCommons.ApiDefinitionId
       sources: optional<map<SourceId, SourceUpload>>
+      dynamicIRs: optional<map<string, DynamicIRUpload>>
+
+  DynamicIRUpload:
+    properties:
+      uploadUrl:
+        docs: The presigned URL to upload the dynamic IR to.
+        type: string
 
   ApiDefinition:
     properties:

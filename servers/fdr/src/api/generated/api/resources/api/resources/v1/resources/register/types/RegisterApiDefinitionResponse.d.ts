@@ -5,4 +5,5 @@ import * as FernRegistry from "../../../../../../../index";
 export interface RegisterApiDefinitionResponse {
     apiDefinitionId: FernRegistry.ApiDefinitionId;
     sources: Record<FernRegistry.api.v1.register.SourceId, FernRegistry.api.v1.register.SourceUpload> | undefined;
+    dynamicIRs: Record<string, FernRegistry.api.v1.register.DynamicIrUpload> | undefined;
 }

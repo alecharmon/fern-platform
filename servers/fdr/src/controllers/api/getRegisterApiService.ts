@@ -11,7 +11,10 @@ import {
 
 import { APIV1WriteService } from "../../api";
 import { SdkRequest } from "../../api/generated/api";
-import { DynamicIr } from "../../api/generated/api/resources/api/resources/v1/resources/register";
+import {
+  DynamicIr,
+  DynamicIrUpload,
+} from "../../api/generated/api/resources/api/resources/v1/resources/register";
 import type { FdrApplication } from "../../app";
 import { LOGGER } from "../../app/FdrApplication";
 import { SdkIdForPackage } from "../../db/sdk/SdkDao";
@@ -176,7 +179,7 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
       logOperationTime("enrichApiLatestDefinitionWithSnippets");
 
       let sources: Record<string, APIV1Write.SourceUpload> | undefined;
-      if (req.body.sources != null || req.body.dynamicIr) {
+      if (req.body.sources != null) {
         app.logger.debug(
           `Preparing source upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
           REGISTER_API_DEFINITION_META
@@ -185,12 +188,31 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
           app,
           orgId: req.body.orgId,
           apiId: req.body.apiId,
-          sources: req.body.sources ?? undefined,
-          dynamicIr: req.body.dynamicIr ?? undefined,
+          sources: req.body.sources,
         });
         logOperationTime("getSourceUploads");
         app.logger.debug(
           "Successfully prepared source upload URLs",
+          REGISTER_API_DEFINITION_META
+        );
+      }
+
+      let dynamicIRsUploads: Record<string, DynamicIrUpload> | undefined;
+      if (req.body.dynamicIRs) {
+        app.logger.debug(
+          `Preparing dynamic IR upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
+          REGISTER_API_DEFINITION_META
+        );
+        dynamicIRsUploads = await getDynamicIrsUploads({
+          app,
+          orgId: req.body.orgId,
+          apiId: req.body.apiId,
+          dynamicIRs: req.body.dynamicIRs,
+        });
+
+        logOperationTime("getSourceUploads");
+        app.logger.debug(
+          "Successfully prepared dynamic IR upload URLs",
           REGISTER_API_DEFINITION_META
         );
       }
@@ -226,6 +248,7 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
       return res.send({
         apiDefinitionId,
         sources,
+        dynamicIRs: dynamicIRsUploads,
       });
     },
   });
@@ -538,25 +561,54 @@ async function getSnippetTemplatesIfEnabled({
   }
 }
 
+async function getDynamicIrsUploads({
+  app,
+  orgId,
+  apiId,
+  dynamicIRs,
+}: {
+  app: FdrApplication;
+  orgId: FdrAPI.OrgId;
+  apiId: FdrAPI.ApiId;
+  dynamicIRs: Record<string, DynamicIr> | undefined;
+}): Promise<Record<string, APIV1Write.SourceUpload>> {
+  const sourceUploadUrls =
+    await app.services.s3.getPresignedApiDefinitionDynamicIRsUploadUrls({
+      orgId,
+      apiId,
+      dynamicIRs,
+    });
+
+  const sourceUploads = await Promise.all(
+    Object.entries(sourceUploadUrls).map(async ([language, fileInfo]) => {
+      return [
+        language,
+        {
+          uploadUrl: fileInfo.presignedUrl,
+        },
+      ];
+    })
+  );
+
+  return Object.fromEntries(sourceUploads);
+}
+
 async function getSourceUploads({
   app,
   orgId,
   apiId,
   sources,
-  dynamicIr,
 }: {
   app: FdrApplication;
   orgId: FdrAPI.OrgId;
   apiId: FdrAPI.ApiId;
   sources: Record<string, APIV1Write.Source> | undefined;
-  dynamicIr: DynamicIr[] | undefined;
 }): Promise<Record<string, APIV1Write.SourceUpload>> {
   const sourceUploadUrls =
     await app.services.s3.getPresignedApiDefinitionSourceUploadUrls({
       orgId,
       apiId,
       sources,
-      dynamicIr,
     });
 
   const sourceUploads = await Promise.all(

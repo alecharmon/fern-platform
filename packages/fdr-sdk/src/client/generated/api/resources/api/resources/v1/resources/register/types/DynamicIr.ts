@@ -3,7 +3,6 @@
  */
 
 export interface DynamicIr {
-    language: string;
     /** The dynamic IR for the given language. */
-    dynamicIr: unknown;
+    dynamicIR: unknown;
 }

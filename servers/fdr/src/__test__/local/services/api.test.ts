@@ -3,6 +3,7 @@ import { expect, inject, it } from "vitest";
 
 import { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 
+import { DynamicIr } from "../../../api/generated/api/resources/api/resources/v1/resources/register";
 import {
   createApiDefinition,
   createApiDefinitionLatest,
@@ -210,23 +211,21 @@ it("register api with sources", async () => {
 it("register api with dynamicIr", async () => {
   const fdr = getClient({ authed: true, url: inject("url") });
 
-  const dynamicIr = [
-    {
-      language: "typescript",
-      dynamicIr: { someData: "test" },
+  const dynamicIRs: Record<string, DynamicIr> = {
+    typescript: {
+      dynamicIR: {},
     },
-    {
-      language: "python",
-      dynamicIr: { otherData: "test2" },
+    python: {
+      dynamicIR: {},
     },
-  ];
+  };
 
   const response = getAPIResponse(
     await fdr.api.v1.register.registerApiDefinition({
       orgId: FdrAPI.OrgId("fern"),
       apiId: FdrAPI.ApiId("api-with-dynamic-ir"),
       definition: EMPTY_REGISTER_API_DEFINITION,
-      dynamicIr,
+      dynamicIRs,
     })
   );
 
@@ -234,18 +233,15 @@ it("register api with dynamicIr", async () => {
   expect(response.apiDefinitionId).toBeDefined();
 
   // Verify sources are returned for dynamicIr languages
-  expect(response.sources).toBeDefined();
-  expect(response.sources).toHaveProperty("typescript");
-  expect(response.sources).toHaveProperty("python");
+  expect(response.sources).toBeUndefined();
+  expect(response.dynamicIRs).toHaveProperty("typescript");
+  expect(response.dynamicIRs).toHaveProperty("python");
 
-  // Verify each dynamicIr source has upload and download URLs
-  Object.values(response.sources!).forEach((sourceUpload) => {
-    expect(sourceUpload.uploadUrl).toBeDefined();
-    expect(sourceUpload.downloadUrl).toBeDefined();
-    expect(typeof sourceUpload.uploadUrl).toBe("string");
-    expect(typeof sourceUpload.downloadUrl).toBe("string");
-    expect(sourceUpload.uploadUrl).toContain("http");
-    expect(sourceUpload.downloadUrl).toContain("http");
+  // Verify each dynamicIr source has upload URLs
+  Object.values(response.dynamicIRs!).forEach((dynamicIRUpload) => {
+    expect(dynamicIRUpload.uploadUrl).toBeDefined();
+    expect(typeof dynamicIRUpload.uploadUrl).toBe("string");
+    expect(dynamicIRUpload.uploadUrl).toContain("http");
   });
 });
 
@@ -258,12 +254,11 @@ it("register api with both sources and dynamicIr", async () => {
     },
   };
 
-  const dynamicIr = [
-    {
-      language: "typescript",
-      dynamicIr: { someData: "test" },
+  const dynamicIRs: Record<string, DynamicIr> = {
+    typescript: {
+      dynamicIR: {},
     },
-  ];
+  };
 
   const response = getAPIResponse(
     await fdr.api.v1.register.registerApiDefinition({
@@ -271,7 +266,7 @@ it("register api with both sources and dynamicIr", async () => {
       apiId: FdrAPI.ApiId("api-with-both"),
       definition: EMPTY_REGISTER_API_DEFINITION,
       sources,
-      dynamicIr,
+      dynamicIRs,
     })
   );
 
@@ -281,10 +276,12 @@ it("register api with both sources and dynamicIr", async () => {
   // Verify sources are returned for both sources and dynamicIr
   expect(response.sources).toBeDefined();
   expect(response.sources).toHaveProperty("openapi-spec");
-  expect(response.sources).toHaveProperty("typescript");
+  expect(response.dynamicIRs).toBeDefined();
+  expect(response.dynamicIRs).toHaveProperty("typescript");
 
   // Verify total number of sources matches expected count
-  expect(Object.keys(response.sources!).length).toBe(2);
+  expect(Object.keys(response.sources!).length).toBe(1);
+  expect(Object.keys(response.dynamicIRs!).length).toBe(1);
 
   // Verify each source has upload and download URLs
   Object.values(response.sources!).forEach((sourceUpload) => {
@@ -294,6 +291,13 @@ it("register api with both sources and dynamicIr", async () => {
     expect(typeof sourceUpload.downloadUrl).toBe("string");
     expect(sourceUpload.uploadUrl).toContain("http");
     expect(sourceUpload.downloadUrl).toContain("http");
+  });
+
+  // Verify each dynamicIr source has upload URLs
+  Object.values(response.dynamicIRs!).forEach((dynamicIRUpload) => {
+    expect(dynamicIRUpload.uploadUrl).toBeDefined();
+    expect(typeof dynamicIRUpload.uploadUrl).toBe("string");
+    expect(dynamicIRUpload.uploadUrl).toContain("http");
   });
 });
 
@@ -338,6 +342,7 @@ it("register api latest with sources", async () => {
 
   // Verify sources are returned
   expect(response.sources).toBeDefined();
+  expect(response.dynamicIRs).toBeUndefined();
   expect(response.sources).toHaveProperty("proto-spec");
 
   // Verify source has upload and download URLs

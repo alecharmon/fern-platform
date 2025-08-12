@@ -41,7 +41,7 @@ export class Register {
      *         definition: undefined,
      *         definitionV2: undefined,
      *         sources: undefined,
-     *         dynamicIr: undefined
+     *         dynamicIRs: undefined
      *     })
      */
     public registerApiDefinition(

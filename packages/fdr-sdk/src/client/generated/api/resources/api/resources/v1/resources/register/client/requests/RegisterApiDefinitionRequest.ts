@@ -12,7 +12,7 @@ import * as FernRegistry from "../../../../../../../../index.js";
  *         definition: undefined,
  *         definitionV2: undefined,
  *         sources: undefined,
- *         dynamicIr: undefined
+ *         dynamicIRs: undefined
  *     }
  */
 export interface RegisterApiDefinitionRequest {
@@ -21,5 +21,6 @@ export interface RegisterApiDefinitionRequest {
     definition?: FernRegistry.api.v1.register.ApiDefinition;
     definitionV2?: FernRegistry.api.latest.ApiDefinition;
     sources?: Record<FernRegistry.api.v1.register.SourceId, FernRegistry.api.v1.register.Source>;
-    dynamicIr?: FernRegistry.api.v1.register.DynamicIr[];
+    /** A mapping of languages to dynamic IR. */
+    dynamicIRs?: Record<string, FernRegistry.api.v1.register.DynamicIr>;
 }
