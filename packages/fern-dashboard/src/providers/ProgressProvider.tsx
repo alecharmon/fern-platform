@@ -12,7 +12,7 @@ export function ProgressProvider({ children }: ProgressProvider.Props) {
   return (
     <BProgressProvider
       height="4px"
-      color="var(--green-600)"
+      color="var(--primary)"
       // don't show spinner in the top right
       options={{ showSpinner: false }}
       // only show after loading for > 1s

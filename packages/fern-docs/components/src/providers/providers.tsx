@@ -10,28 +10,38 @@ import StyledJsxRegistry from "./registry";
 export function Providers({
   children,
   loaderColor,
+  skipProgressProvider = false,
 }: {
   children: React.ReactNode;
   loaderColor?: string;
+  skipProgressProvider?: boolean;
 }) {
-  return (
+  const content = (
     <StyledJsxRegistry>
       <JotaiProvider>
         <TooltipProvider>
           <Toaster />
-          <ProgressProvider
-            height="3px"
-            color={loaderColor ?? "var(--accent)"}
-            options={{ showSpinner: false }}
-            disableSameURL
-            delay={300}
-            memo
-            shouldCompareComplexProps
-          >
-            {children}
-          </ProgressProvider>
+          {children}
         </TooltipProvider>
       </JotaiProvider>
     </StyledJsxRegistry>
+  );
+
+  if (skipProgressProvider) {
+    return content;
+  }
+
+  return (
+    <ProgressProvider
+      height="3px"
+      color={loaderColor ?? "var(--accent)"}
+      options={{ showSpinner: false }}
+      disableSameURL
+      delay={300}
+      memo
+      shouldCompareComplexProps
+    >
+      {content}
+    </ProgressProvider>
   );
 }

@@ -81,7 +81,7 @@ export default async function VisualEditorPreviewLayout({
 
   return (
     <div className="m-2 flex h-[calc(100vh-var(--header-toolbar-height))]">
-      <Providers loaderColor="var(--color-primary)">
+      <Providers skipProgressProvider={true}>
         <FernThemeProvider
           hasLight={Boolean(colors.light)}
           hasDark={Boolean(colors.dark)}
