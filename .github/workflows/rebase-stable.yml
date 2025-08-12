@@ -4,6 +4,9 @@ on:
     - cron: '0 12 * * MON'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   rebase:
     runs-on: ubuntu-latest
@@ -20,6 +23,4 @@ jobs:
           git rebase origin/app
 
       - name: Push
-        env:
-          GIT_AUTH_TOKEN: ${{ secrets.PR_BOT_GH_PAT }}
-        run: git push --force-with-lease https://x-access-token:${GIT_AUTH_TOKEN}@github.com/fern-api/fern-platform stable
+        run: git push --force-with-lease origin stable
