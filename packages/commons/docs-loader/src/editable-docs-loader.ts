@@ -61,7 +61,7 @@ class EditableDocsLoaderImpl implements EditableDocsLoader {
   }
 
   async getAuthConfig(): Promise<AuthEdgeConfig | undefined> {
-    return undefined;
+    return this.readOnlyDocsLoader.getAuthConfig();
   }
 
   async getMetadata(): Promise<{
@@ -192,7 +192,8 @@ export const createEditableDocsLoader = cache(
         kvTtl: 5 * 60, // 5 minutes
         cacheKeySuffix: "editable",
         forceRevalidate,
-      }
+      },
+      true // Skip auth
     );
 
     return new EditableDocsLoaderImpl(docsLoader);

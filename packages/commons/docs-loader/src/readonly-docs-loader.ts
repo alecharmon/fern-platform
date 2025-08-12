@@ -1006,7 +1006,8 @@ export const createCachedDocsLoader = async (
   host: string,
   domain: string,
   fern_token?: string,
-  cacheConfig?: CacheConfig
+  cacheConfig?: CacheConfig,
+  skipAuth?: boolean
 ): Promise<DocsLoader & { clearKvCache: () => Promise<void> }> => {
   assertDocsDomain(domain);
 
@@ -1017,19 +1018,28 @@ export const createCachedDocsLoader = async (
     await clearKvCache(domain);
   }
 
-  const authConfig = getAuthConfig(domain);
+  const authConfig = skipAuth
+    ? Promise.resolve(undefined)
+    : getAuthConfig(domain);
   const metadata = getMetadata(config)(withoutStaging(domain));
 
-  const getAuthState = cache(async (pathname?: string) => {
-    const { getAuthState } = await createGetAuthState(
-      host,
-      domain,
-      fern_token,
-      await authConfig,
-      await metadata
-    );
-    return await getAuthState(pathname);
-  });
+  const getAuthState = skipAuth
+    ? async (_pathname?: string) => ({
+        authed: true as const,
+        ok: true as const,
+        user: {},
+        partner: "custom" as const,
+      })
+    : cache(async (pathname?: string) => {
+        const { getAuthState } = await createGetAuthState(
+          host,
+          domain,
+          fern_token,
+          await authConfig,
+          await metadata
+        );
+        return await getAuthState(pathname);
+      });
 
   return {
     domain,
