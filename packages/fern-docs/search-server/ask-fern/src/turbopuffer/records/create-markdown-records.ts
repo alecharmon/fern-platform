@@ -1,5 +1,7 @@
 import { createHash } from "crypto";
 
+import { FernNavigation } from "@fern-api/fdr-sdk";
+
 import { maybeRemoveCodeBlocks } from "../post-process/chunks/maybe-remove-code-blocks";
 import { maybeRemoveDuplicateNewlines } from "../post-process/chunks/maybe-remove-duplicate-newlines";
 import { maybeRemoveLongWhitespace } from "../post-process/chunks/maybe-remove-long-whitespace";
@@ -10,7 +12,7 @@ import { maybeRemoveIconTags } from "../post-process/shared/maybe-remove-icon-ta
 import { maybeRemoveStyleTags } from "../post-process/shared/maybe-remove-style-tags";
 import { maybeRemoveWrappingTags } from "../post-process/shared/maybe-remove-wrapping-tags";
 import { maybeReplaceCarriageReturns } from "../post-process/shared/maybe-replace-carriage-returns";
-import { BaseRecordIr, TurbopufferRecordWithoutVector } from "../types";
+import { TurbopufferRecordWithoutVector } from "../types";
 
 const SHARED_PROCESSORS = [
   maybeReplaceCarriageReturns,
@@ -32,29 +34,39 @@ const CHUNK_PROCESSORS = [
 const MARKDOWN_PROCESSORS = [...SHARED_PROCESSORS];
 
 export async function createMarkdownRecords({
-  base,
+  node,
+  parents,
+  authed,
   markdown,
+  url,
+  isChangelog,
 }: {
-  base: BaseRecordIr;
+  node: FernNavigation.NavigationNodeWithMetadata;
+  parents: readonly FernNavigation.NavigationNodeParent[];
+  authed: boolean;
   markdown: string;
+  url: string;
+  isChangelog: boolean;
 }): Promise<TurbopufferRecordWithoutVector[]> {
-  const isChangelogEntry = base.attributes.pathname?.includes("/changelog/");
+  const versionNode = parents.find(
+    (n): n is FernNavigation.VersionNode => n.type === "version"
+  );
 
-  const markdownChunks = isChangelogEntry
-    ? [markdown]
-    : chunkMarkdown(markdown);
+  const markdownChunks = isChangelog ? [markdown] : chunkMarkdown(markdown);
 
   return markdownChunks.map((chunk, i) => {
     const processedChunk = postProcessChunk(chunk);
     return {
-      ...base,
-      id: createHash("sha256").update(`${base.id}-${i}`).digest("hex"),
+      id: createHash("sha256").update(`${node.id}-${i}`).digest("hex"),
       attributes: {
-        ...base.attributes,
-        url: `https://${base.attributes.domain}${base.attributes.pathname}${base.attributes.hash ?? ""}`,
         chunk: processedChunk,
-        title: base.attributes.title,
+        title: node.title,
         document: postProcessMarkdown(markdown),
+        version: versionNode?.title,
+        description: undefined,
+        keywords: undefined,
+        authed,
+        url,
       },
     };
   });

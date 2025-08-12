@@ -4,33 +4,29 @@ import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { truncateToBytes } from "@fern-api/ui-core-utils";
 import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
 
-import { BaseRecordIr, RecordIr } from "../types";
+import { TurbopufferRecord } from "../types";
 
 export function createEndpointBaseRecordWebhook({
-  base,
+  parents,
+  authed,
   node,
   endpoint,
+  url,
   types,
 }: {
   node: FernNavigation.WebhookNode;
-  base: BaseRecordIr;
+  parents: readonly FernNavigation.NavigationNodeParent[];
+  authed: boolean;
   endpoint: ApiDefinition.WebhookDefinition;
+  url: string;
   types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
-}): RecordIr {
+}): TurbopufferRecord {
+  const versionNode = parents.find(
+    (n): n is FernNavigation.VersionNode => n.type === "version"
+  );
   const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
   const keywords: string[] = [];
-  if (
-    typeof base.attributes.keywords !== "undefined" &&
-    typeof base.attributes.keywords === "string"
-  ) {
-    keywords.push(base.attributes.keywords);
-  } else if (
-    typeof base.attributes.keywords !== "undefined" &&
-    Array.isArray(base.attributes.keywords)
-  ) {
-    keywords.push(...base.attributes.keywords);
-  }
 
   keywords.push("endpoint", "api", "webhook");
 
@@ -46,24 +42,36 @@ export function createEndpointBaseRecordWebhook({
     },
   }).webhookDefinition(endpoint, endpoint.id);
 
-  const keywords_as_string = keywords.join(" ");
+  const description =
+    prepared.content != null
+      ? truncateToBytes(prepared.content, 50 * 1000)
+      : undefined;
 
-  return {
-    ...base,
-    id: createHash("sha256").update(node.webhookId).digest("hex"),
-    attributes: {
-      ...base.attributes,
-      chunk: prepared.content?.slice(0, 50) ?? "",
+  const document_body = JSON.stringify(
+    {
+      description,
       api_type: "webhook",
       api_definition_id: node.apiDefinitionId,
       api_endpoint_id: node.webhookId,
       method: node.method,
       endpoint_path: endpoint.path.join(""),
-      description:
-        prepared.content != null
-          ? truncateToBytes(prepared.content, 50 * 1000)
-          : undefined,
-      keywords: keywords_as_string,
+    },
+    null,
+    2
+  );
+
+  const document = `${document_body}\n\n${description}`;
+
+  return {
+    id: createHash("sha256").update(node.webhookId).digest("hex"),
+    attributes: {
+      chunk: prepared.content ?? "",
+      title: node.title,
+      document,
+      url,
+      version: versionNode?.title,
+      authed,
+      keywords,
     },
   };
 }

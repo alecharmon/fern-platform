@@ -5,34 +5,29 @@ import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { truncateToBytes, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
 
-import { BaseRecordIr, RecordIr } from "../types";
+import { TurbopufferRecord } from "../types";
 
 export function createEndpointBaseRecordWebSocket({
-  base,
+  parents,
+  authed,
   node,
   endpoint,
+  url,
   types,
 }: {
   node: FernNavigation.WebSocketNode;
-  base: BaseRecordIr;
+  parents: readonly FernNavigation.NavigationNodeParent[];
+  authed: boolean;
   endpoint: ApiDefinition.WebSocketChannel;
+  url: string;
   types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
-}): RecordIr {
+}): TurbopufferRecord {
+  const versionNode = parents.find(
+    (n): n is FernNavigation.VersionNode => n.type === "version"
+  );
   const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
   const keywords: string[] = [];
-  if (
-    typeof base.attributes.keywords !== "undefined" &&
-    typeof base.attributes.keywords === "string"
-  ) {
-    keywords.push(base.attributes.keywords);
-  } else if (
-    typeof base.attributes.keywords !== "undefined" &&
-    Array.isArray(base.attributes.keywords)
-  ) {
-    keywords.push(...base.attributes.keywords);
-  }
-
   keywords.push("endpoint", "api", "websocket", "web socket", "stream");
 
   ApiDefinition.Transformer.with({
@@ -47,27 +42,17 @@ export function createEndpointBaseRecordWebSocket({
     },
   }).webSocketChannel(endpoint, endpoint.id);
 
-  const keywords_as_string = keywords.join(" ");
-
   const endpoint_path = ApiDefinition.toColonEndpointPathLiteral(endpoint.path);
   const endpoint_path_curly = ApiDefinition.toCurlyBraceEndpointPathLiteral(
     endpoint.path
   );
 
-  return {
-    ...base,
-    id: createHash("sha256").update(node.webSocketId).digest("hex"),
-    attributes: {
-      ...base.attributes,
-      chunk: prepared.content ?? "",
+  const document_body = JSON.stringify(
+    {
       api_type: "websocket",
       api_definition_id: node.apiDefinitionId,
       api_endpoint_id: node.webSocketId,
       method: "GET",
-      description:
-        prepared.content != null
-          ? truncateToBytes(prepared.content, 50 * 1000)
-          : undefined,
       endpoint_path,
       endpoint_path_alternates: [
         endpoint_path_curly,
@@ -92,7 +77,27 @@ export function createEndpointBaseRecordWebSocket({
         ]) ?? []
       ),
       default_environment_id: endpoint.defaultEnvironment,
-      keywords: keywords_as_string,
+    },
+    null,
+    2
+  );
+
+  const description =
+    prepared.content != null
+      ? truncateToBytes(prepared.content, 50 * 1000)
+      : undefined;
+  const document = `${document_body}\n\n${description}`;
+
+  return {
+    id: createHash("sha256").update(node.webSocketId).digest("hex"),
+    attributes: {
+      chunk: prepared.content ?? "",
+      title: node.title,
+      document,
+      url,
+      version: versionNode?.title,
+      authed,
+      keywords,
     },
   };
 }

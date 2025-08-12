@@ -61,7 +61,7 @@ export async function runRouteForCohere({
   const searchResultSources = searchResults.map((hit) => {
     return {
       title: hit.attributes.title,
-      url: `https://${hit.attributes.domain}${hit.attributes.pathname}${hit.attributes.hash ?? ""}`,
+      url: hit.attributes.url,
     };
   });
 

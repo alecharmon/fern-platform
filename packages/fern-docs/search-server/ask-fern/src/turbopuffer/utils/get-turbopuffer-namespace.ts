@@ -6,5 +6,5 @@ export function getTurbopufferNamespace(
   domain: string,
   embeddingModel: EmbeddingModel<string>
 ): string {
-  return `${withoutStaging(domain)}_${embeddingModel.modelId}_v2`;
+  return `${withoutStaging(domain)}_${embeddingModel.modelId}_v3`;
 }

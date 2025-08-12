@@ -51,12 +51,11 @@ export async function turbopufferUpsertTask({
   });
   const ns = tpuf.namespace(namespace);
 
-  const { org_id, root, pages, apis, domain } = await loadDocsWithUrl(payload);
+  const { root, pages, apis, domain } = await loadDocsWithUrl(payload);
 
   const unvectorizedRecords = await createTurbopufferRecords({
     root,
     domain,
-    org_id,
     pages,
     apis,
     authed,

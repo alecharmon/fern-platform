@@ -5,7 +5,7 @@ import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
 
-import { BaseRecordIr, RecordIr } from "../types";
+import { TurbopufferRecord } from "../types";
 
 interface RequestProperty {
   key: string;
@@ -14,16 +14,23 @@ interface RequestProperty {
 }
 
 export function createEndpointBaseRecordHttp({
-  base,
   node,
+  parents,
+  authed,
   endpoint,
+  url,
   types,
 }: {
   node: FernNavigation.EndpointNode;
-  base: BaseRecordIr;
+  parents: readonly FernNavigation.NavigationNodeParent[];
+  authed: boolean;
   endpoint: ApiDefinition.EndpointDefinition;
+  url: string;
   types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
-}): RecordIr {
+}): TurbopufferRecord {
+  const versionNode = parents.find(
+    (n): n is FernNavigation.VersionNode => n.type === "version"
+  );
   const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
   const requestProperties: RequestProperty[] = [];
@@ -42,23 +49,9 @@ export function createEndpointBaseRecordHttp({
       });
     }
   });
-  const description =
-    JSON.stringify(requestProperties, null, 2) +
-    "\n\n" +
-    base.attributes.code_snippets?.join("\n\n");
+  let description = JSON.stringify(requestProperties, null, 2);
 
   const keywords: string[] = [];
-  if (
-    typeof base.attributes.keywords !== "undefined" &&
-    typeof base.attributes.keywords === "string"
-  ) {
-    keywords.push(base.attributes.keywords);
-  } else if (
-    typeof base.attributes.keywords !== "undefined" &&
-    Array.isArray(base.attributes.keywords)
-  ) {
-    keywords.push(...base.attributes.keywords);
-  }
 
   keywords.push("endpoint", "api", "http", "rest", "openapi");
 
@@ -75,9 +68,6 @@ export function createEndpointBaseRecordHttp({
   if (response_type != null) {
     keywords.push(response_type);
   }
-
-  // TODO: optimize keywords
-  const keywords_as_string = keywords.join(" ");
 
   ApiDefinition.Transformer.with({
     TypeShape: (type) => {
@@ -96,18 +86,13 @@ export function createEndpointBaseRecordHttp({
     endpoint.path
   );
 
-  return {
-    ...base,
-    id: createHash("sha256").update(node.id).digest("hex"),
-    attributes: {
-      ...base.attributes,
-      chunk: prepared.content ?? "",
+  const document_body = JSON.stringify(
+    {
+      description,
       code_snippets: prepared.code_snippets?.map(
         (code_snippet) => code_snippet.code
       ),
       api_type: "http",
-      api_definition_id: node.apiDefinitionId,
-      api_endpoint_id: node.endpointId,
       method: node.method,
       endpoint_path,
       endpoint_path_alternates: [
@@ -127,7 +112,6 @@ export function createEndpointBaseRecordHttp({
         ) ?? []),
       ],
       response_type,
-      description,
       environments: flatten(
         endpoint.environments?.map((environment) => [
           environment.id,
@@ -135,7 +119,49 @@ export function createEndpointBaseRecordHttp({
         ]) ?? []
       ),
       default_environment_id: endpoint.defaultEnvironment,
-      keywords: keywords_as_string,
+    },
+    null,
+    2
+  );
+
+  const {
+    content: request_description,
+    code_snippets: request_description_code_snippets,
+  } = maybePrepareMdxContent(
+    toDescription(endpoint.requests?.[0]?.description)
+  );
+
+  if (
+    request_description != null ||
+    request_description_code_snippets?.length
+  ) {
+    description = request_description != null ? request_description : "";
+  }
+
+  const { content: response_description } = maybePrepareMdxContent(
+    toDescription(endpoint.responses?.[0]?.description)
+  );
+
+  if (response_description != null) {
+    if (description != null) {
+      description += "\n\n" + response_description;
+    } else {
+      description = response_description;
+    }
+  }
+
+  const document = `${document_body}\n\n${description}`;
+
+  return {
+    id: createHash("sha256").update(node.id).digest("hex"),
+    attributes: {
+      title: node.title,
+      chunk: prepared.content ?? "",
+      document,
+      url,
+      version: versionNode?.title,
+      authed,
+      keywords,
     },
   };
 }

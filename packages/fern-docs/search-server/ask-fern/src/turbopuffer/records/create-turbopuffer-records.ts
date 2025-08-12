@@ -1,5 +1,6 @@
 import { flatten } from "es-toolkit/array";
 
+import { slugToHref } from "@fern-api/docs-utils";
 import { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
 import {
   ApiDefinitionId,
@@ -13,10 +14,6 @@ import {
 } from "@fern-api/fdr-sdk/navigation";
 
 import { TurbopufferRecordWithoutVector } from "../types";
-import { createApiReferenceRecordHttp } from "./create-api-reference-record-http";
-import { createApiReferenceRecordWebSocket } from "./create-api-reference-record-web-socket";
-import { createApiReferenceRecordWebhook } from "./create-api-reference-record-webhook";
-import { createBaseRecord } from "./create-base-record";
 import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";
 import { createEndpointBaseRecordWebSocket } from "./create-endpoint-record-web-socket";
 import { createEndpointBaseRecordWebhook } from "./create-endpoint-record-webhook";
@@ -25,7 +22,6 @@ import { createMarkdownRecords } from "./create-markdown-records";
 interface CreateTurbopufferRecordsOptions {
   root: RootNode;
   domain: string;
-  org_id: string;
   pages: Record<PageId, string>;
   apis: Record<ApiDefinitionId, ApiDefinition>;
   authed?: (node: NavigationNodePage) => boolean;
@@ -37,7 +33,6 @@ export async function createTurbopufferRecords({
   pages,
   apis,
   domain,
-  org_id,
   authed,
 }: CreateTurbopufferRecordsOptions): Promise<TurbopufferRecordWithoutVector[]> {
   const collector = NodeCollector.collect(root);
@@ -66,16 +61,17 @@ export async function createTurbopufferRecords({
             );
             return [];
           }
-
-          const base = createBaseRecord({
+          const path = slugToHref(node.slug);
+          const url = `https://${domain}${path}`;
+          const isChangelog = path?.includes("/changelog/");
+          return createMarkdownRecords({
             node,
             parents: collector.getParents(node.id) ?? [],
-            domain,
-            org_id,
             authed: authed?.(node) ?? false,
-            type: "markdown",
+            markdown,
+            url,
+            isChangelog,
           });
-          return createMarkdownRecords({ base, markdown });
         }
       )
     )
@@ -92,14 +88,7 @@ export async function createTurbopufferRecords({
       return;
     }
 
-    const base = createBaseRecord({
-      node,
-      parents: collector.getParents(node.id) ?? [],
-      domain,
-      org_id,
-      authed: authed?.(node) ?? false,
-      type: "api-reference",
-    });
+    const url = `https://${domain}${slugToHref(node.slug)}`;
 
     if (node.type === "endpoint") {
       const endpoint = apiDefinition.endpoints[node.endpointId];
@@ -110,14 +99,15 @@ export async function createTurbopufferRecords({
         return;
       }
 
-      const endpointBase = createEndpointBaseRecordHttp({
-        base,
-        node,
-        endpoint,
-        types: apiDefinition.types,
-      });
       apiReferenceRecords.push(
-        ...createApiReferenceRecordHttp({ endpointBase, endpoint })
+        createEndpointBaseRecordHttp({
+          node,
+          parents: collector.getParents(node.id) ?? [],
+          authed: authed?.(node) ?? false,
+          endpoint,
+          url,
+          types: apiDefinition.types,
+        })
       );
       return;
     }
@@ -131,14 +121,15 @@ export async function createTurbopufferRecords({
         return;
       }
 
-      const endpointBase = createEndpointBaseRecordWebSocket({
-        base,
-        node,
-        endpoint,
-        types: apiDefinition.types,
-      });
       apiReferenceRecords.push(
-        createApiReferenceRecordWebSocket({ endpointBase })
+        createEndpointBaseRecordWebSocket({
+          node,
+          parents: collector.getParents(node.id) ?? [],
+          authed: authed?.(node) ?? false,
+          endpoint,
+          url,
+          types: apiDefinition.types,
+        })
       );
       return;
     }
@@ -152,14 +143,15 @@ export async function createTurbopufferRecords({
         return;
       }
 
-      const endpointBase = createEndpointBaseRecordWebhook({
-        base,
-        node,
-        endpoint,
-        types: apiDefinition.types,
-      });
       apiReferenceRecords.push(
-        ...createApiReferenceRecordWebhook({ endpointBase, endpoint })
+        createEndpointBaseRecordWebhook({
+          node,
+          parents: collector.getParents(node.id) ?? [],
+          authed: authed?.(node) ?? false,
+          endpoint,
+          url,
+          types: apiDefinition.types,
+        })
       );
       return;
     }
@@ -169,7 +161,6 @@ export async function createTurbopufferRecords({
   const nodeIds = new Set<string>();
   records = records.filter((r) => {
     if (nodeIds.has(r.id)) {
-      console.log("Warning: duplicate node id, filtering out manually", r.id);
       return false;
     } else {
       nodeIds.add(r.id);

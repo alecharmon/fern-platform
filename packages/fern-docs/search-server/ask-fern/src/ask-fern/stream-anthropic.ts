@@ -99,7 +99,7 @@ export async function runRouteForAnthropic({
   const searchResultSources = searchResults.map((hit) => {
     return {
       title: hit.attributes.title,
-      url: `https://${hit.attributes.domain}${hit.attributes.pathname}${hit.attributes.hash ?? ""}`,
+      url: hit.attributes.url,
     };
   });
 
@@ -150,20 +150,22 @@ export async function runRouteForAnthropic({
                   urlsToIgnore: urlsToIgnore,
                 });
                 for (const hit of result) {
-                  const url =
-                    hit.attributes.url ??
-                    `https://${hit.attributes.domain}${hit.attributes.pathname}${hit.attributes.hash ?? ""}`;
+                  const url = hit.attributes.url;
                   documentIdsToIgnore.push(hit.id);
-                  if (!urlsToIgnore.includes(url)) {
+                  if (url != null && !urlsToIgnore.includes(url)) {
                     urlsToIgnore.push(url);
                     if (hit.attributes.document.length > 20000) {
                       response.push({
                         ...hit.attributes,
-                        url,
                         document: hit.attributes.document.slice(0, 20000),
+                        url,
                       });
                     } else {
-                      response.push({ url, ...hit.attributes });
+                      response.push({
+                        ...hit.attributes,
+                        document: hit.attributes.document,
+                        url,
+                      });
                     }
                     if (response.length >= TOP_K) {
                       return response;

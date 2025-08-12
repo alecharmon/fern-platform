@@ -6,11 +6,18 @@ export function convertTpufRecordToCitation(results: TurbopufferRecord[]) {
   return results.map((result) => {
     return {
       type: "file",
-      data: `# ${result.attributes.title}\n\n${result.attributes.document}\n\n${result.attributes.description}`,
+      data: `# ${result.attributes.title}\n\n${result.attributes.document}`,
       mediaType: "text/plain",
-      filename: `${result.attributes.domain}${result.attributes.pathname}${result.attributes.hash ?? ""}`,
+      filename: result.attributes.url,
     };
   });
+}
+
+function maybeTruncate(text: string, maxLength: number): string {
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength) + "...";
+  }
+  return text;
 }
 
 export function convertTpufRecordsToDocuments(
@@ -21,16 +28,12 @@ export function convertTpufRecordsToDocuments(
       return {
         document: result.attributes.document,
         title: result.attributes.title,
-        pathname: result.attributes.pathname,
-        hash: result.attributes.hash,
-        description: result.attributes.description,
-        page_position: result.attributes.page_position,
-        domain: result.attributes.domain,
+        url: result.attributes.url,
       };
     }),
-    (result) => `${result.pathname}${result.hash} - ${result.page_position}`
+    (result) => result.url
   ).map(
     (result) =>
-      `# ${result.title}\n Citation URL: ${result.domain}${result.pathname}${result.hash ?? ""}\n\n${result.document.length > 20000 ? result.document.slice(0, 20000) : result.document}${result.description}`
+      `# ${result.title}\n Citation URL: ${result.url}\n\n${maybeTruncate(result.document, 20000)}`
   );
 }
