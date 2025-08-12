@@ -1,0 +1,24 @@
+{
+  "irFilepath": "/fern/ir.json",
+  "output": {
+    "mode": {
+      "type": "downloadFiles"
+    },
+    "path": "/fern/output",
+    "publishingMetadata": null,
+    "snippetFilepath": "/fern/snippet.json",
+    "snippetTemplateFilepath": "/fern/snippet-templates.json"
+  },
+  "publish": null,
+  "customConfig": {},
+  "workspaceName": "fern",
+  "organization": "fern",
+  "environment": {
+    "_type": "local"
+  },
+  "dryRun": false,
+  "whitelabel": false,
+  "writeUnitTests": true,
+  "generateOauthClients": true,
+  "generatePaginatedClients": true
+}
