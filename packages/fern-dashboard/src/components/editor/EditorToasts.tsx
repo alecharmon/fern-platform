@@ -53,3 +53,7 @@ export function ErrorCreateBranchToast() {
 export function WarningValidationToast(validationError: string) {
   toast.warning("Markdown validation failed: " + validationError);
 }
+
+export function ErrorUpdatePrTitleToast() {
+  toast.error("Failed to update PR title. Please try again.");
+}

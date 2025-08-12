@@ -1,6 +1,8 @@
 import { Anthropic } from "@anthropic-ai/sdk";
 import { Octokit } from "@octokit/core";
 
+import { DEFAULT_PR_TITLE } from "../github/github";
+
 export interface PrDescriptionService {
   generateAndUpdatePrTitle: (params: {
     owner: string;
@@ -148,7 +150,8 @@ export class PrDescriptionServiceImpl implements PrDescriptionService {
         repo,
         pr.number,
         newTitle,
-        newDescription
+        newDescription,
+        pr.title
       );
 
       return {
@@ -379,17 +382,24 @@ Return only the title, nothing else.`;
     repo: string,
     prNumber: number,
     newTitle: string,
-    newDescription: string
+    newDescription: string,
+    existingPrTitle: string
   ): Promise<void> {
     try {
+      const update: Record<string, string> = {};
+      // If the PR title is the default, update title
+      if (existingPrTitle === DEFAULT_PR_TITLE) {
+        update.title = newTitle;
+      }
+
       await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/pulls/{pull_number}",
         {
           owner,
           repo,
           pull_number: prNumber,
-          title: newTitle,
           body: this.appendFernSigningToDescription(newDescription),
+          ...update,
         }
       );
     } catch (error) {

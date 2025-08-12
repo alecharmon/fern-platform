@@ -5,6 +5,7 @@ import { getMyDocsSites } from "@/app/api/get-my-docs-sites/route";
 import { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import { getOrgMembers } from "@/app/api/get-org-members/route";
+import { getPrForBranch } from "@/app/api/get-pr-for-branch/route";
 import { getUserGithubRepos } from "@/app/api/get-user-git-repos/route";
 import { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
 import { getGitHubPermissions } from "@/app/api/github-permissions/route";
@@ -14,6 +15,7 @@ import { postGitCommit } from "@/app/api/post-git-commit/route";
 import { postCreateBranch } from "@/app/api/post-git-create-branch/route";
 import { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import { preloadEditorData } from "@/app/api/preload-editor-data/route";
+import { updatePrTitle } from "@/app/api/update-pr-title/route";
 
 export const DashboardApiClient = {
   getMyDocsSites: (
@@ -73,6 +75,10 @@ export const DashboardApiClient = {
     ),
   preloadEditorData: (request: preloadEditorData.Request) =>
     typedFetch<preloadEditorData.Response>("/api/preload-editor-data", request),
+  getPrForBranch: (request: getPrForBranch.Request) =>
+    typedFetch<getPrForBranch.Response>("/api/get-pr-for-branch", request),
+  updatePrTitle: (request: updatePrTitle.Request) =>
+    typedFetch<updatePrTitle.Response>("/api/update-pr-title", request),
 };
 
 async function typedFetch<T>(

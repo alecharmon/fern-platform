@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { ArrowLeftIcon, GitBranch, Globe } from "lucide-react";
+import { ArrowLeftIcon, Globe } from "lucide-react";
 
 import {
   ClientPageStorage,
@@ -18,9 +18,12 @@ import { getLoadableValue } from "@fern-ui/loadable";
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { handleCreatePr } from "@/app/services/github/github";
+import {
+  DEFAULT_COMMIT_MESSAGE,
+  handleCreatePr,
+} from "@/app/services/github/github";
 import { useBranch } from "@/providers/BranchContext";
-import { useGitPrUrl } from "@/providers/GitPRUrlContext";
+import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useMdxState } from "@/providers/MdxStateContext";
 import { useGithubSourceRepo } from "@/state/useGithubSourceRepo";
 import { DocsUrl } from "@/utils/types";
@@ -38,6 +41,7 @@ import {
   WarningNoChangesToast,
 } from "./EditorToasts";
 import { ErrorFullCommitToast } from "./EditorToasts";
+import { PRTitleEditor } from "./PRTitleEditor";
 
 /**
  * Collects all changes from various sources into a single record
@@ -129,7 +133,7 @@ export function HeaderToolbar({
   const { name, picture } = session.user;
   const { changedMdxFiles, mdxSyncedStatus } = useMdxState();
   // NOTE: useGitPrUrl is not fully in use because the Provider keeps unmounting, but this is in the right direction we want to go in
-  const { gitPrUrl, setPrUrl } = useGitPrUrl();
+  const { gitPrUrl, setPrUrl, prTitle, refetchPrData } = useGitPrInfo();
   const { branch } = useBranch();
   const githubSource = getLoadableValue(useGithubSourceRepo(docsUrl, orgName));
 
@@ -201,7 +205,7 @@ export function HeaderToolbar({
         owner: githubSource.owner,
         repo: githubSource.repo,
         branch,
-        message: "Visual Editor: Update",
+        message: DEFAULT_COMMIT_MESSAGE,
         files: Object.entries(allFilesToCommit).map(([filePath, content]) => ({
           path: `fern/${filePath}`,
           content,
@@ -231,6 +235,8 @@ export function HeaderToolbar({
           owner: githubSource.owner,
           repo: githubSource.repo,
           baseBranch: githubSource.baseBranch,
+          title: prTitle,
+          onAiGenerationComplete: refetchPrData,
         });
         if (newPrUrl) {
           setPrUrl(newPrUrl);
@@ -252,6 +258,8 @@ export function HeaderToolbar({
     mdxSyncedStatus,
     gitPrUrl,
     setPrUrl,
+    prTitle,
+    refetchPrData,
   ]);
 
   const commitDisabledReason = useMemo(() => {
@@ -304,16 +312,14 @@ export function HeaderToolbar({
             <ArrowLeftIcon />
           </a>
         </Button>
-        <div className="flex items-center gap-1 rounded-md p-1 px-2 text-gray-900 transition-colors hover:bg-gray-300 hover:transition-none">
-          <a
-            href={`https://github.com/${githubSource?.owner}/${githubSource?.repo}/compare/${githubSource?.baseBranch}...${branch}`}
-            target="_blank"
-            className="flex items-center gap-1"
-          >
-            <GitBranch className="size-4" />
-            <p>{branch}</p>
-          </a>
-        </div>
+        <PRTitleEditor
+          orgName={orgName}
+          owner={githubSource?.owner}
+          repo={githubSource?.repo}
+          baseBranch={githubSource?.baseBranch}
+          branch={branch}
+          gitPrUrl={gitPrUrl}
+        />
       </div>
       {/* TODO: Add undo/redo/settings buttons
        <div className="flex items-center gap-2">
