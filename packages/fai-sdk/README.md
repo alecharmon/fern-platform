@@ -29,11 +29,11 @@ await client.chat.chatCompletion("domain", {
     messages: [
         {
             role: "role",
-            text: "text",
+            content: "content",
         },
         {
             role: "role",
-            text: "text",
+            content: "content",
         },
     ],
 });

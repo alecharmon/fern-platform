@@ -8,7 +8,7 @@
  *         document_id: "document_id",
  *         is_active: true,
  *         context: ["context", "context"],
- *         content: "content"
+ *         document: "document"
  *     }
  */
 export interface UpdateRequest {
@@ -27,5 +27,5 @@ export interface UpdateRequest {
     /**
      * The content of the document that will be returned in the tool response. If not provided, the document will be removed from the index.
      */
-    content: string;
+    document: string;
 }

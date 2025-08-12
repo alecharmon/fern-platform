@@ -182,11 +182,11 @@ await client.chat.chatCompletion("domain", {
     messages: [
         {
             role: "role",
-            text: "text",
+            content: "content",
         },
         {
             role: "role",
-            text: "text",
+            content: "content",
         },
     ],
 });
@@ -339,7 +339,7 @@ await client.index.indexDocument("domain", {
     index_name: undefined,
     document_id: "document_id",
     context: ["context", "context"],
-    content: "content",
+    document: "document",
 });
 ```
 
@@ -488,7 +488,7 @@ await client.index.updateDocument("domain", {
     document_id: "document_id",
     is_active: true,
     context: ["context", "context"],
-    content: "content",
+    document: "document",
 });
 ```
 
@@ -514,6 +514,79 @@ await client.index.updateDocument("domain", {
 <dd>
 
 **request:** `FernFai.UpdateRequest`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Index.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">syncToQueryIndex</a>(domain, { ...params }) -> void</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Sync an index with the query index
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.index.syncToQueryIndex("domain", {
+    index_name: "index_name",
+});
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `FernFai.SyncIndexRequest`
 
 </dd>
 </dl>

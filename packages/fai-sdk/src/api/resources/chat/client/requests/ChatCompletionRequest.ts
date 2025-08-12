@@ -11,10 +11,10 @@ import * as FernFai from "../../../../index.js";
  *         system_prompt: undefined,
  *         messages: [{
  *                 role: "role",
- *                 text: "text"
+ *                 content: "content"
  *             }, {
  *                 role: "role",
- *                 text: "text"
+ *                 content: "content"
  *             }]
  *     }
  */

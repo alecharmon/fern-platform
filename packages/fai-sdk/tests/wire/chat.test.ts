@@ -13,11 +13,14 @@ describe("Chat", () => {
             model: undefined,
             system_prompt: undefined,
             messages: [
-                { role: "role", text: "text" },
-                { role: "role", text: "text" },
+                { role: "role", content: "content" },
+                { role: "role", content: "content" },
             ],
         };
-        const rawResponseBody = { turn: { role: "role", text: "text" } };
+        const rawResponseBody = [
+            { role: "role", content: "content" },
+            { role: "role", content: "content" },
+        ];
         server
             .mockEndpoint()
             .post("/chat/domain")
@@ -33,19 +36,23 @@ describe("Chat", () => {
             messages: [
                 {
                     role: "role",
-                    text: "text",
+                    content: "content",
                 },
                 {
                     role: "role",
-                    text: "text",
+                    content: "content",
                 },
             ],
         });
-        expect(response).toEqual({
-            turn: {
+        expect(response).toEqual([
+            {
                 role: "role",
-                text: "text",
+                content: "content",
             },
-        });
+            {
+                role: "role",
+                content: "content",
+            },
+        ]);
     });
 });

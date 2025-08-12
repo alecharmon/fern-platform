@@ -4,6 +4,4 @@
 
 import * as FernFai from "../../../index.js";
 
-export interface ChatCompletionResponse {
-    turn: FernFai.ChatTurn;
-}
+export type ChatCompletionResponse = FernFai.ChatTurn[];

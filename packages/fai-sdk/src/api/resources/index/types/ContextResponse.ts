@@ -7,7 +7,7 @@ export interface ContextResponse {
     domain: string;
     context_id: string;
     context: string[];
-    content: string;
+    document: string;
     is_active: boolean;
     created_at: string;
     updated_at: string;

@@ -13,7 +13,7 @@ describe("Index", () => {
             index_name: undefined,
             document_id: "document_id",
             context: ["context", "context"],
-            content: "content",
+            document: "document",
         };
 
         server.mockEndpoint().post("/index/domain").jsonBody(rawRequestBody).respondWith().statusCode(200).build();
@@ -22,7 +22,7 @@ describe("Index", () => {
             index_name: undefined,
             document_id: "document_id",
             context: ["context", "context"],
-            content: "content",
+            document: "document",
         });
         expect(response).toEqual(undefined);
     });
@@ -48,7 +48,7 @@ describe("Index", () => {
             domain: "domain",
             context_id: "context_id",
             context: ["context", "context"],
-            content: "content",
+            document: "document",
             is_active: true,
             created_at: "2024-01-15T09:30:00Z",
             updated_at: "2024-01-15T09:30:00Z",
@@ -65,17 +65,29 @@ describe("Index", () => {
             document_id: "document_id",
             is_active: true,
             context: ["context", "context"],
-            content: "content",
+            document: "document",
         });
         expect(response).toEqual({
             document_id: "document_id",
             domain: "domain",
             context_id: "context_id",
             context: ["context", "context"],
-            content: "content",
+            document: "document",
             is_active: true,
             created_at: "2024-01-15T09:30:00Z",
             updated_at: "2024-01-15T09:30:00Z",
         });
+    });
+
+    test("syncToQueryIndex", async () => {
+        const server = mockServerPool.createServer();
+        const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
+
+        server.mockEndpoint().post("/index/domain/sync").respondWith().statusCode(200).build();
+
+        const response = await client.index.syncToQueryIndex("domain", {
+            index_name: "index_name",
+        });
+        expect(response).toEqual(undefined);
     });
 });

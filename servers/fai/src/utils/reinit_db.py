@@ -2,8 +2,10 @@ import asyncio
 
 from src.fai.db import Base
 from src.fai.db import engine
-from src.fai.db_models.context import Context
-from src.fai.db_models.query import Query
+
+
+# from src.fai.db_models.context import Context
+# from src.fai.db_models.query import Query
 
 
 async def reinit() -> None:

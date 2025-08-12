@@ -56,10 +56,10 @@ export class Chat {
      *         system_prompt: undefined,
      *         messages: [{
      *                 role: "role",
-     *                 text: "text"
+     *                 content: "content"
      *             }, {
      *                 role: "role",
-     *                 text: "text"
+     *                 content: "content"
      *             }]
      *     })
      */

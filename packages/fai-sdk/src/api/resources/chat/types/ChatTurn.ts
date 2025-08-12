@@ -4,5 +4,5 @@
 
 export interface ChatTurn {
     role: string;
-    text: string;
+    content: string;
 }

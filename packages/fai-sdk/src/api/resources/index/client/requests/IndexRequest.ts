@@ -8,7 +8,7 @@
  *         index_name: undefined,
  *         document_id: "document_id",
  *         context: ["context", "context"],
- *         content: "content"
+ *         document: "document"
  *     }
  */
 export interface IndexRequest {
@@ -19,5 +19,5 @@ export interface IndexRequest {
     /** The context of the document, as a list of strings, that will be indexed. */
     context: string[];
     /** The content of the document that will be returned in the tool response */
-    content: string;
+    document: string;
 }

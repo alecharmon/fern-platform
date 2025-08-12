@@ -56,7 +56,7 @@ export class Index {
      *         index_name: undefined,
      *         document_id: "document_id",
      *         context: ["context", "context"],
-     *         content: "content"
+     *         document: "document"
      *     })
      */
     public indexDocument(
@@ -228,7 +228,7 @@ export class Index {
      *         document_id: "document_id",
      *         is_active: true,
      *         context: ["context", "context"],
-     *         content: "content"
+     *         document: "document"
      *     })
      */
     public updateDocument(
@@ -244,12 +244,12 @@ export class Index {
         request: FernFai.UpdateRequest,
         requestOptions?: Index.RequestOptions,
     ): Promise<core.WithRawResponse<FernFai.ContextResponse>> {
-        const { document_id: documentId, is_active: isActive, context, content } = request;
+        const { document_id: documentId, is_active: isActive, context, document } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         _queryParams["document_id"] = documentId;
         _queryParams["is_active"] = isActive.toString();
         _queryParams["context"] = toJson(context);
-        _queryParams["content"] = content;
+        _queryParams["document"] = document;
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -296,6 +296,91 @@ export class Index {
                 });
             case "timeout":
                 throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /index/{domain}/update.");
+            case "unknown":
+                throw new errors.FernFaiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Sync an index with the query index
+     *
+     * @param {string} domain
+     * @param {FernFai.SyncIndexRequest} request
+     * @param {Index.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernFai.BadRequestError}
+     * @throws {@link FernFai.InternalError}
+     *
+     * @example
+     *     await client.index.syncToQueryIndex("domain", {
+     *         index_name: "index_name"
+     *     })
+     */
+    public syncToQueryIndex(
+        domain: string,
+        request: FernFai.SyncIndexRequest,
+        requestOptions?: Index.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__syncToQueryIndex(domain, request, requestOptions));
+    }
+
+    private async __syncToQueryIndex(
+        domain: string,
+        request: FernFai.SyncIndexRequest,
+        requestOptions?: Index.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const { index_name: indexName } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["index_name"] = indexName;
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernFaiEnvironment.Prod,
+                `/index/${encodeURIComponent(domain)}/sync`,
+            ),
+            method: "POST",
+            headers: mergeHeaders(
+                this._options?.headers,
+                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                requestOptions?.headers,
+            ),
+            queryParameters: _queryParams,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as any)?.["error"]) {
+                case "BadRequestError":
+                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
+                case "InternalError":
+                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+                default:
+                    throw new errors.FernFaiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernFaiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /index/{domain}/sync.");
             case "unknown":
                 throw new errors.FernFaiError({
                     message: _response.error.errorMessage,
