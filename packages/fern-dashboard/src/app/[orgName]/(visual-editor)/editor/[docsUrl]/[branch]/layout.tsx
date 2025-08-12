@@ -16,6 +16,7 @@ import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { BranchProvider } from "@/providers/BranchContext";
 import { CurrentPageProvider } from "@/providers/CurrentPageContext";
 import { DevModeProvider } from "@/providers/DevModeProvider";
+import { EditorProvider } from "@/providers/EditorContext";
 import { GitPRProvider } from "@/providers/GitPRContext";
 import { MdxStateProvider } from "@/providers/MdxStateContext";
 import { throwDigestibleError } from "@/utils/errors";
@@ -86,20 +87,22 @@ async function DynamicEditorContent({
             <MdxStateProvider docsUrl={docsUrl}>
               <CurrentPageProvider>
                 <BranchProvider branch={branch}>
-                  <GitPRProvider
-                    owner={sourceRepo.owner}
-                    repo={sourceRepo.repo}
-                    baseBranch={sourceRepo.baseBranch}
-                    branch={branch}
-                    orgName={orgName}
-                  >
-                    <HeaderToolbar
+                  <EditorProvider>
+                    <GitPRProvider
+                      owner={sourceRepo.owner}
+                      repo={sourceRepo.repo}
+                      baseBranch={sourceRepo.baseBranch}
+                      branch={branch}
                       orgName={orgName}
-                      session={session}
-                      docsUrl={docsUrl}
-                    />
-                    {children}
-                  </GitPRProvider>
+                    >
+                      <HeaderToolbar
+                        orgName={orgName}
+                        session={session}
+                        docsUrl={docsUrl}
+                      />
+                      {children}
+                    </GitPRProvider>
+                  </EditorProvider>
                 </BranchProvider>
               </CurrentPageProvider>
             </MdxStateProvider>

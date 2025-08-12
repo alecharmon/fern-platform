@@ -3,12 +3,14 @@
 import { redirect } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import {
+  ArrowUturnLeftIcon,
+  ArrowUturnRightIcon,
+} from "@heroicons/react/24/outline";
 import { ArrowLeftIcon, Globe } from "lucide-react";
 
 import {
   ClientPageStorage,
-  FernTooltip,
-  FernTooltipProvider,
   PageStorage,
   getPageFilename,
   pageDataToMdx,
@@ -23,6 +25,7 @@ import {
   handleCreatePr,
 } from "@/app/services/github/github";
 import { useBranch } from "@/providers/BranchContext";
+import { useEditor } from "@/providers/EditorContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useMdxState } from "@/providers/MdxStateContext";
 import { useGithubSourceRepo } from "@/state/useGithubSourceRepo";
@@ -31,6 +34,7 @@ import { DocsUrl } from "@/utils/types";
 import { GithubLogo } from "../auth/GithubLogo";
 import { ProfileImage } from "../layout/ProfileImage";
 import { Button } from "../ui/button";
+import { DashboardTooltip } from "./DashboardTooltip";
 import { DevModeSwitcher } from "./DevModeSwitcher";
 import {
   ErrorNoBaseBranchToast,
@@ -135,6 +139,7 @@ export function HeaderToolbar({
   // NOTE: useGitPrUrl is not fully in use because the Provider keeps unmounting, but this is in the right direction we want to go in
   const { gitPrUrl, setPrUrl, prTitle, refetchPrData } = useGitPrInfo();
   const { branch } = useBranch();
+  const { editor } = useEditor();
   const githubSource = getLoadableValue(useGithubSourceRepo(docsUrl, orgName));
 
   // If the github source is not found, redirect to the docs page.
@@ -152,6 +157,23 @@ export function HeaderToolbar({
 
   const [isCommitting, setIsCommitting] = useState(false);
   const [changesCommitted, setChangesCommitted] = useState(false);
+
+  // Undo/redo handlers
+  const handleUndo = useCallback(() => {
+    if (editor?.can().undo()) {
+      editor.chain().focus().undo().run();
+    }
+  }, [editor]);
+
+  const handleRedo = useCallback(() => {
+    if (editor?.can().redo()) {
+      editor.chain().focus().redo().run();
+    }
+  }, [editor]);
+
+  // Check if undo/redo is available
+  const canUndo = editor?.can().undo() ?? false;
+  const canRedo = editor?.can().redo() ?? false;
 
   // Initialize changesCommitted state by comparing current changes with last committed hash
   useEffect(() => {
@@ -321,52 +343,49 @@ export function HeaderToolbar({
           gitPrUrl={gitPrUrl}
         />
       </div>
-      {/* TODO: Add undo/redo/settings buttons
-       <div className="flex items-center gap-2">
-         <ProfileImage
-          picture={picture}
-          name={name}
-          className="ring-primary border-3 border-white ring-2"
-        />
-        <div className="bg-(--grayscale-a2) border-border rounded-full border px-3 py-0.5">
-          <Button
-            variant="ghost"
-            className="cursor-not-allowed"
-            size="iconSm"
-            onClick={() => console.log("undo")}
-          >
-            <ArrowUturnLeftIcon />
-          </Button>
-          <Button
-            variant="ghost"
-            className="cursor-not-allowed"
-            size="iconSm"
-            onClick={() => console.log("redo")}
-          >
-            <ArrowUturnRightIcon />
-          </Button>
-          <Button
+      <div className="flex items-center gap-2">
+        <DashboardTooltip content={`Editing as ${name}`}>
+          <ProfileImage
+            picture={picture}
+            name={name}
+            className="ring-primary border-3 size-[34px] border-white ring-2"
+          />
+        </DashboardTooltip>
+        <div className="bg-(--grayscale-a2) border-border overflow-hidden rounded-full border p-0.5">
+          <DashboardTooltip content="Undo" delayDuration={200}>
+            <Button
+              variant="ghost"
+              className="rounded-full"
+              size="iconSm"
+              disabled={!canUndo}
+              onClick={handleUndo}
+            >
+              <ArrowUturnLeftIcon />
+            </Button>
+          </DashboardTooltip>
+          <DashboardTooltip content="Redo" delayDuration={200}>
+            <Button
+              variant="ghost"
+              className="rounded-full"
+              size="iconSm"
+              disabled={!canRedo}
+              onClick={handleRedo}
+            >
+              <ArrowUturnRightIcon />
+            </Button>
+          </DashboardTooltip>
+          {/* TODO: Add settings button */}
+          {/* <Button
             variant="ghost"
             className="cursor-not-allowed"
             size="iconSm"
             onClick={() => console.log("settings")}
           >
             <SettingsIcon />
-          </Button>
-        </div> 
-      </div> */}
-      <div className="flex flex-1 shrink-0 items-center justify-between gap-3 lg:justify-end">
-        <FernTooltipProvider>
-          <FernTooltip
-            content={"Enable dev mode to edit the source code"}
-            delayDuration={400}
-            variant="dashboard"
-          >
-            <div className="pointer-events-auto mr-3 flex items-center justify-center">
-              <DevModeSwitcher />
-            </div>
-          </FernTooltip>
-        </FernTooltipProvider>
+          </Button> */}
+        </div>
+      </div>
+      <div className="flex flex-1 shrink-0 items-center justify-between gap-1 lg:justify-end">
         {/* TODO: Add preview button functionality */}
         {/* <Button
           variant="ghost"
@@ -376,66 +395,41 @@ export function HeaderToolbar({
           <Globe />
           Preview
         </Button> */}
+        {/* TODO: Add files button functionality */}
         {/* <Button variant="ghost">Files</Button> */}
-        <FernTooltipProvider>
-          <FernTooltip
-            content={`Editing as ${name}`}
-            delayDuration={0}
-            variant="dashboard"
+        <DashboardTooltip
+          content="Enable dev mode to edit the source code"
+          hideInnerSpan
+        >
+          <div className="pointer-events-auto mr-3 flex items-center justify-center">
+            <DevModeSwitcher />
+          </div>
+        </DashboardTooltip>
+        <DashboardTooltip
+          content={gitPrUrl ? undefined : "Commit changes to view PR"}
+          delayDuration={200}
+        >
+          <Button disabled={!gitPrUrl} variant="ghost" asChild={!!gitPrUrl}>
+            <a
+              href={gitPrUrl ?? ""}
+              target="_blank"
+              className="flex items-center gap-2"
+            >
+              <Globe />
+              View PR
+            </a>
+          </Button>
+        </DashboardTooltip>
+        <DashboardTooltip content={commitDisabledReason}>
+          <Button
+            loading={isCommitting}
+            disabled={!!commitDisabledReason}
+            onClick={() => void handleCommitPress()}
           >
-            <span className="pointer-events-auto">
-              <ProfileImage
-                picture={picture}
-                name={name}
-                className="ring-primary border-3 border-white ring-2"
-              />
-            </span>
-          </FernTooltip>
-        </FernTooltipProvider>
-
-        <div className="flex gap-1">
-          <FernTooltipProvider>
-            <FernTooltip
-              content={gitPrUrl ? undefined : "Commit changes to view PR"}
-              delayDuration={200}
-              variant="dashboard"
-            >
-              {/* Additional span is needed since disabled buttons don't have pointer events */}
-              <span className="pointer-events-auto">
-                <Button
-                  disabled={!gitPrUrl}
-                  variant="ghost"
-                  asChild={!!gitPrUrl}
-                >
-                  <a
-                    href={gitPrUrl ?? ""}
-                    target="_blank"
-                    className="flex items-center gap-2"
-                  >
-                    <Globe />
-                    View PR
-                  </a>
-                </Button>
-              </span>
-            </FernTooltip>
-          </FernTooltipProvider>
-          <FernTooltipProvider>
-            <FernTooltip
-              content={commitDisabledReason}
-              delayDuration={0}
-              variant="dashboard"
-            >
-              <Button
-                loading={isCommitting}
-                disabled={!!commitDisabledReason}
-                onClick={() => void handleCommitPress()}
-              >
-                <GithubLogo />
-                Commit
-              </Button>
-            </FernTooltip>
-          </FernTooltipProvider>
-        </div>
+            <GithubLogo />
+            Commit
+          </Button>
+        </DashboardTooltip>
       </div>
     </div>
   );

@@ -12,6 +12,8 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
+import { useEditor } from "@/providers/EditorContext";
+
 import BubbleMenu from "./BubbleMenu";
 import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
@@ -89,12 +91,30 @@ export default function TiptapEditor({
       onCreate={onCreate}
       onUpdate={onUpdate}
     >
+      <EditorContextUpdater />
       <TipTapContentUpdateListener content={content} />
       {!disableFloatingMenu && <FloatingMenu />}
       {!disableBubbleMenu && <BubbleMenu />}
       <NodeHoverHandle />
     </EditorProvider>
   );
+}
+
+function EditorContextUpdater() {
+  const { editor } = useCurrentEditor();
+  const { setEditor } = useEditor();
+
+  // Update the shared editor context when the Tiptap editor instance changes
+  useEffect(() => {
+    setEditor(editor);
+
+    // Cleanup when component unmounts or editor changes
+    return () => {
+      setEditor(null);
+    };
+  }, [editor, setEditor]);
+
+  return <></>;
 }
 
 function TipTapContentUpdateListener({
