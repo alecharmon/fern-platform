@@ -47,7 +47,7 @@ import { ParamField } from "./parameters/ParamField";
 // import { EndpointRequestSnippet, EndpointResponseSnippet } from "./snippets";
 // import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
-import { TabGroup } from "./tabs";
+import { Tab, TabGroup } from "./tabs";
 
 // const ElevenLabsWaveform = dynamic(
 //   () => import("./waveform/WaveformComplex").then((mod) => mod.default),
@@ -83,8 +83,8 @@ const FERN_COMPONENTS = {
   ParamField,
   Step,
   StepGroup,
-  // Tab,
-  // TabGroup,
+  Tab,
+  TabGroup,
   Template,
   // Tooltip,
   // TwoSlash,
