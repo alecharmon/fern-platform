@@ -206,7 +206,7 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
         dynamicIRsUploads = await getDynamicIrsUploads({
           app,
           orgId: req.body.orgId,
-          apiId: req.body.apiId,
+          apiId: apiDefinitionId,
           dynamicIRs: req.body.dynamicIRs,
         });
 
@@ -569,7 +569,7 @@ async function getDynamicIrsUploads({
 }: {
   app: FdrApplication;
   orgId: FdrAPI.OrgId;
-  apiId: FdrAPI.ApiId;
+  apiId: APIV1Db.ApiDefinitionId;
   dynamicIRs: Record<string, DynamicIr> | undefined;
 }): Promise<Record<string, DynamicIrUpload>> {
   const sourceUploadUrls =

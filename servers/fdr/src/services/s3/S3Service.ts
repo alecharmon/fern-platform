@@ -9,6 +9,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
 import {
+  APIV1Db,
   APIV1Write,
   DocsV1Write,
   DocsV2Write,
@@ -85,7 +86,7 @@ export interface S3Service {
     dynamicIRs,
   }: {
     orgId: FernRegistry.OrgId;
-    apiId: FernRegistry.ApiId;
+    apiId: APIV1Db.ApiDefinitionId;
     dynamicIRs: Record<string, DynamicIr> | undefined;
   }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>>;
 
@@ -355,7 +356,7 @@ export class S3ServiceImpl implements S3Service {
     dynamicIRs,
   }: {
     orgId: FernRegistry.OrgId;
-    apiId: FernRegistry.ApiId;
+    apiId: APIV1Db.ApiDefinitionId;
     dynamicIRs: Record<string, DynamicIr> | undefined;
   }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>> {
     const result: Record<string, S3ApiDefinitionSourceFileInfo> = {};
@@ -423,7 +424,7 @@ export class S3ServiceImpl implements S3Service {
     language,
   }: {
     orgId: FernRegistry.OrgId;
-    apiId: FernRegistry.ApiId;
+    apiId: APIV1Db.ApiDefinitionId;
     language: string;
   }): Promise<{ url: string; key: string }> {
     const key = this.constructS3DynamicIrKey({
@@ -475,7 +476,7 @@ export class S3ServiceImpl implements S3Service {
     language,
   }: {
     orgId: FernRegistry.OrgId;
-    apiId: FernRegistry.ApiId;
+    apiId: APIV1Db.ApiDefinitionId;
     language: string;
   }): string {
     return `${orgId}/${apiId}/${language}.json`;

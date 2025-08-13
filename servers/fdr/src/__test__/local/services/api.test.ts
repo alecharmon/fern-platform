@@ -241,6 +241,7 @@ it("register api with dynamicIr", async () => {
   Object.values(response.dynamicIRs!).forEach((dynamicIRUpload) => {
     expect(dynamicIRUpload.uploadUrl).toBeDefined();
     expect(typeof dynamicIRUpload.uploadUrl).toBe("string");
+    expect(dynamicIRUpload.uploadUrl).toContain(response.apiDefinitionId);
     expect(dynamicIRUpload.uploadUrl).toContain("http");
   });
 });
@@ -297,6 +298,7 @@ it("register api with both sources and dynamicIr", async () => {
   Object.values(response.dynamicIRs!).forEach((dynamicIRUpload) => {
     expect(dynamicIRUpload.uploadUrl).toBeDefined();
     expect(typeof dynamicIRUpload.uploadUrl).toBe("string");
+    expect(dynamicIRUpload.uploadUrl).toContain(response.apiDefinitionId);
     expect(dynamicIRUpload.uploadUrl).toContain("http");
   });
 });
