@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
 
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { type DocsYmlPageEntry, DocsYmlStorage } from "@fern-docs/components";
 import { useSidebarClientNavigation } from "@fern-docs/components/sidebar/nodes/SidebarClientNavigationProvider";
 import { mdxToHtml } from "@fern-docs/mdx";
 
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useMdxState } from "@/providers/MdxStateContext";
 import { createMdxFrontmatter } from "@/utils/createMdxFrontmatter";
 import { constructEditorSlug } from "@/utils/editor-routing";
@@ -42,6 +44,7 @@ export function CreateClientPage({ children, root }: CreateClientPageProps) {
   const [error, setError] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
   const { stageChanges } = useMdxState();
+  const { owner, repo, branch } = useGitHubRepo();
   const router = useRouter();
   const params = useParams();
 
@@ -119,6 +122,51 @@ export function CreateClientPage({ children, root }: CreateClientPageProps) {
     return true;
   }, [pageTitle, selectedSection, finalSlug, clientNodes]);
 
+  const updateDocsYml = useCallback(
+    async (sectionTitle: string, pageEntry: DocsYmlPageEntry) => {
+      try {
+        // First get the current docs.yml content
+        const response = await fetch("/api/get-docs-yml", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            owner,
+            repo,
+            branch,
+            orgName: params.orgName,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(
+            "API response error:",
+            response.status,
+            response.statusText,
+            errorText
+          );
+          throw new Error(
+            `Failed to get docs.yml: ${response.status} ${response.statusText} - ${errorText}`
+          );
+        }
+
+        const { docsYmlContent } = await response.json();
+
+        // Set the base content and add the update
+        DocsYmlStorage.setBaseContent(branch, docsYmlContent);
+        DocsYmlStorage.addUpdate(branch, sectionTitle, pageEntry);
+
+        return true;
+      } catch (error) {
+        console.error("Error updating docs.yml:", error);
+        return false;
+      }
+    },
+    [owner, repo, branch, params.orgName]
+  );
+
   const handleCreatePage = useCallback(async () => {
     if (!validateForm()) {
       return;
@@ -180,6 +228,21 @@ export function CreateClientPage({ children, root }: CreateClientPageProps) {
         slug: fullSlug,
       });
 
+      // Update docs.yml with the new page
+      const pageEntry: DocsYmlPageEntry = {
+        page: pageTitle,
+        path: `${fullSlug}.mdx`,
+      };
+
+      const docsYmlUpdateSuccessful = await updateDocsYml(
+        selectedSection.title,
+        pageEntry
+      );
+
+      if (!docsYmlUpdateSuccessful) {
+        console.warn("Failed to update docs.yml, but page was created locally");
+      }
+
       // Create a client node for the new page
       const nodeId = `client-${crypto.randomUUID()}` as FernNavigation.NodeId;
       const pageId = `${fullSlug}.mdx` as FernNavigation.PageId;
@@ -237,6 +300,7 @@ export function CreateClientPage({ children, root }: CreateClientPageProps) {
     allSections,
     router,
     params,
+    updateDocsYml,
   ]);
 
   return (

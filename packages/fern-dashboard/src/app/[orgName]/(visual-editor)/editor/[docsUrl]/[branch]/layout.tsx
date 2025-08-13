@@ -17,6 +17,7 @@ import { BranchProvider } from "@/providers/BranchContext";
 import { CurrentPageProvider } from "@/providers/CurrentPageContext";
 import { DevModeProvider } from "@/providers/DevModeProvider";
 import { EditorProvider } from "@/providers/EditorContext";
+import { GitHubRepoProvider } from "@/providers/GitHubRepoContext";
 import { GitPRProvider } from "@/providers/GitPRContext";
 import { MdxStateProvider } from "@/providers/MdxStateContext";
 import { throwDigestibleError } from "@/utils/errors";
@@ -81,33 +82,39 @@ async function DynamicEditorContent({
         enableSystem={false}
         disableTransitionOnChange
       >
-        <SidebarClientNavigationProvider branchName={branch}>
-          <ClientPageManager branchName={branch} />
-          <DevModeProvider>
-            <MdxStateProvider docsUrl={docsUrl}>
-              <CurrentPageProvider>
-                <BranchProvider branch={branch}>
-                  <EditorProvider>
-                    <GitPRProvider
-                      owner={sourceRepo.owner}
-                      repo={sourceRepo.repo}
-                      baseBranch={sourceRepo.baseBranch}
-                      branch={branch}
-                      orgName={orgName}
-                    >
-                      <HeaderToolbar
+        <GitHubRepoProvider
+          owner={sourceRepo.owner ?? ""}
+          repo={sourceRepo.repo ?? ""}
+          branch={branch}
+        >
+          <SidebarClientNavigationProvider branchName={branch}>
+            <ClientPageManager branchName={branch} />
+            <DevModeProvider>
+              <MdxStateProvider docsUrl={docsUrl}>
+                <CurrentPageProvider>
+                  <BranchProvider branch={branch}>
+                    <EditorProvider>
+                      <GitPRProvider
+                        owner={sourceRepo.owner}
+                        repo={sourceRepo.repo}
+                        baseBranch={sourceRepo.baseBranch}
+                        branch={branch}
                         orgName={orgName}
-                        session={session}
-                        docsUrl={docsUrl}
-                      />
-                      {children}
-                    </GitPRProvider>
-                  </EditorProvider>
-                </BranchProvider>
-              </CurrentPageProvider>
-            </MdxStateProvider>
-          </DevModeProvider>
-        </SidebarClientNavigationProvider>
+                      >
+                        <HeaderToolbar
+                          orgName={orgName}
+                          session={session}
+                          docsUrl={docsUrl}
+                        />
+                        {children}
+                      </GitPRProvider>
+                    </EditorProvider>
+                  </BranchProvider>
+                </CurrentPageProvider>
+              </MdxStateProvider>
+            </DevModeProvider>
+          </SidebarClientNavigationProvider>
+        </GitHubRepoProvider>
       </ThemeProvider>
     </GithubExtendedAccessProtectedRoute>
   );

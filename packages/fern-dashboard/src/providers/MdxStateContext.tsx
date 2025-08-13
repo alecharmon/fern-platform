@@ -12,7 +12,6 @@ import {
 
 import { ChangedNodes, MdxToHtmlResponse, htmlToMdx } from "@fern-docs/mdx";
 
-import { setMdxFile } from "@/app/actions/setMdxFile";
 import { createMdxFrontmatter } from "@/utils/createMdxFrontmatter";
 import { DocsUrl } from "@/utils/types";
 
@@ -67,7 +66,7 @@ export const MdxStateContext = createContext<{
 
 export function MdxStateProvider({
   children,
-  docsUrl,
+  docsUrl: _docsUrl,
 }: {
   children: ReactNode;
   docsUrl: DocsUrl;
@@ -237,29 +236,34 @@ export function MdxStateProvider({
         debounceTimeouts.current[filename] = setTimeout(() => {
           setMdxSyncedStatus((prev) => ({
             ...prev,
-            [filename]: "SYNCING",
+            [filename]: "SYNCED",
           }));
-          setMdxFile(docsUrl, filename, content)
-            .then(() => {
-              // If successful, mark file as synced
-              setMdxSyncedStatus((prev) => ({
-                ...prev,
-                [filename]: "SYNCED",
-              }));
-            })
-            .catch(() => {
-              // If error, mark file as error
-              setMdxSyncedStatus((prev) => ({
-                ...prev,
-                [filename]: "ERROR",
-              }));
-            });
+          // TODO: sync changes to the server once we have need for this data on the server
+          // setMdxSyncedStatus((prev) => ({
+          //   ...prev,
+          //   [filename]: "SYNCING",
+          // }));
+          // setMdxFile(docsUrl, filename, content)
+          //   .then(() => {
+          //     // If successful, mark file as synced
+          //     setMdxSyncedStatus((prev) => ({
+          //       ...prev,
+          //       [filename]: "SYNCED",
+          //     }));
+          //   })
+          //   .catch(() => {
+          //     // If error, mark file as error
+          //     setMdxSyncedStatus((prev) => ({
+          //       ...prev,
+          //       [filename]: "ERROR",
+          //     }));
+          //   });
           // Always clear the timeout on run
           debounceTimeouts.current[filename] = null;
         }, DEBOUNCE_TIMEOUT_DELAY);
       }
     },
-    [docsUrl, changedMdxFiles]
+    [changedMdxFiles]
   );
 
   return (

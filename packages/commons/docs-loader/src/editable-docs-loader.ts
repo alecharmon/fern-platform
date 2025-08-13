@@ -1,178 +1,101 @@
 import { cache } from "react";
 
-import type { AuthEdgeConfig } from "@fern-api/docs-auth";
-import type { AuthState } from "@fern-api/docs-server";
-import type { FernFonts } from "@fern-api/docs-server";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
-import type { EdgeFlags, FernColorTheme } from "@fern-api/docs-utils";
 import type { HttpMethod } from "@fern-api/docs-utils";
-import type { FileData } from "@fern-api/docs-utils/types/file-data";
-import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
-import type { DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
+import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type {
-  ApiDefinition,
-  ApiDefinitionId,
-  AuthScheme,
-  EndpointDefinition,
   EndpointId,
-  ObjectProperty,
   PruningNodeType,
-  TypeDefinition,
-  TypeId,
 } from "@fern-api/fdr-sdk/api-definition";
-import type {
-  EndpointNode,
-  NavigationNode,
-  RootNode,
-  Slug,
-} from "@fern-api/fdr-sdk/navigation";
 
 import { createCachedDocsLoader } from "./readonly-docs-loader";
 
-export interface EditableDocsLoader extends DocsLoader {
-  modifiedMdxFiles: Record<string, string>;
-  setMdxFile: (filename: string, content: string) => Promise<void>;
-}
-
 /**
- * This is a wrapper around the read-only docs loader that allows us to modify the mdx files.
- * It is used to allow users to edit the docs and see the changes immediately.
+ * The EditableDocsLoader combines a read-only docs loader with a git loader.
+ * The read-only docs loader is used to get docs metadata.
+ * The git loader is used to get files from a remote git repository.
  */
-class EditableDocsLoaderImpl implements EditableDocsLoader {
-  modifiedMdxFiles: Record<string, string>;
+class EditableDocsLoader implements DocsLoader {
+  private readOnlyDocsLoader: DocsLoader;
   domain: string;
   fern_token: string | undefined;
-  private readOnlyDocsLoader: DocsLoader;
 
-  constructor(docsLoader: DocsLoader) {
-    this.modifiedMdxFiles = {};
+  constructor(
+    docsLoader: DocsLoader,
+    private gitLoader?: GitLoader
+  ) {
     this.readOnlyDocsLoader = docsLoader;
     this.domain = docsLoader.domain;
     this.fern_token = docsLoader.fern_token;
   }
 
-  setMdxFile(filename: string, content: string): Promise<void> {
-    this.modifiedMdxFiles[filename] = content;
-    return Promise.resolve();
-  }
+  getDocsYml = (owner: string, repo: string, ref?: string) =>
+    this.gitLoader?.getDocsYml(owner, repo, ref) ?? Promise.resolve(null);
 
-  async unsafe_getFullRoot(): Promise<FernNavigation.RootNode> {
-    return this.readOnlyDocsLoader.unsafe_getFullRoot();
-  }
+  updateDocsYml = (
+    owner: string,
+    repo: string,
+    content: string,
+    ref?: string
+  ) =>
+    this.gitLoader?.updateDocsYml(owner, repo, content, ref) ??
+    Promise.resolve(false);
 
-  async getAuthConfig(): Promise<AuthEdgeConfig | undefined> {
-    return this.readOnlyDocsLoader.getAuthConfig();
-  }
+  getAuthConfig = () => this.readOnlyDocsLoader.getAuthConfig();
 
-  async getMetadata(): Promise<{
-    url: string;
-    domain: string;
-    basePath: string;
-    org: string;
-    isPreview: boolean;
-  }> {
-    return this.readOnlyDocsLoader.getMetadata();
-  }
+  getMetadata = () => this.readOnlyDocsLoader.getMetadata();
 
-  async getFiles(): Promise<Record<string, FileData>> {
-    return this.readOnlyDocsLoader.getFiles();
-  }
+  getFiles = () => this.readOnlyDocsLoader.getFiles();
 
-  async getMdxBundlerFiles(): Promise<Record<string, string>> {
-    return this.modifiedMdxFiles;
-  }
+  getMdxBundlerFiles = () => this.readOnlyDocsLoader.getMdxBundlerFiles();
 
-  async getPrunedApi(
-    id: string,
-    ...nodes: PruningNodeType[]
-  ): Promise<ApiDefinition> {
-    return this.readOnlyDocsLoader.getPrunedApi(id, ...nodes);
-  }
+  getPrunedApi = (id: string, ...nodes: PruningNodeType[]) =>
+    this.readOnlyDocsLoader.getPrunedApi(id, ...nodes);
 
-  async getEndpointById(
-    apiDefinitionId: string,
-    endpointId: EndpointId
-  ): Promise<{
-    endpoint: EndpointDefinition;
-    nodes: EndpointNode[];
-    globalHeaders: ObjectProperty[];
-    authSchemes: AuthScheme[];
-    types: Record<TypeId, TypeDefinition>;
-  }> {
-    return this.readOnlyDocsLoader.getEndpointById(apiDefinitionId, endpointId);
-  }
+  getEndpointById = (apiDefinitionId: string, endpointId: EndpointId) =>
+    this.readOnlyDocsLoader.getEndpointById(apiDefinitionId, endpointId);
 
-  async getEndpointByLocator(
-    method: HttpMethod,
-    path: string,
-    example?: string
-  ): Promise<{
-    apiDefinitionId: ApiDefinitionId;
-    endpoint: EndpointDefinition;
-    slugs: Slug[];
-  }> {
-    return this.readOnlyDocsLoader.getEndpointByLocator(method, path, example);
-  }
+  getEndpointByLocator = (method: HttpMethod, path: string, example?: string) =>
+    this.readOnlyDocsLoader.getEndpointByLocator(method, path, example);
 
-  async getRoot(): Promise<RootNode> {
-    return this.readOnlyDocsLoader.getRoot();
-  }
+  getRoot = () => this.readOnlyDocsLoader.getRoot();
 
-  async getNavigationNode(id: string): Promise<NavigationNode> {
-    return this.readOnlyDocsLoader.getNavigationNode(id);
-  }
+  getNavigationNode = (id: string) =>
+    this.readOnlyDocsLoader.getNavigationNode(id);
 
-  async getConfig(): Promise<
+  unsafe_getFullRoot = () => this.readOnlyDocsLoader.unsafe_getFullRoot();
+
+  getConfig = (): Promise<
     Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">
-  > {
-    return this.readOnlyDocsLoader.getConfig();
-  }
+  > => this.readOnlyDocsLoader.getConfig();
 
-  async getPage(pageId: string): Promise<{
-    filename: string;
-    markdown: string;
-    editThisPageUrl?: string;
-  }> {
-    // if (this.modifiedMdxFiles[pageId] != null) {
-    //   return {
-    //     filename: pageId,
-    //     markdown: this.modifiedMdxFiles[pageId],
-    //     editThisPageUrl: `https://${this.domain}/docs/edit/${pageId}`,
-    //   };
-    // }
-    return this.readOnlyDocsLoader.getPage(pageId);
-  }
+  getPage = (pageId: string) => this.readOnlyDocsLoader.getPage(pageId);
 
-  async getColors(): Promise<{
-    light?: FernColorTheme;
-    dark?: FernColorTheme;
-  }> {
-    return this.readOnlyDocsLoader.getColors();
-  }
+  getColors = () => this.readOnlyDocsLoader.getColors();
 
-  async getFonts(): Promise<FernFonts> {
-    return this.readOnlyDocsLoader.getFonts();
-  }
+  getFonts = () => this.readOnlyDocsLoader.getFonts();
 
-  async getLayout(): Promise<FernLayoutConfig> {
-    return this.readOnlyDocsLoader.getLayout();
-  }
+  getLayout = () => this.readOnlyDocsLoader.getLayout();
 
-  async getAuthState(pathname?: string): Promise<AuthState> {
-    return this.readOnlyDocsLoader.getAuthState(pathname);
-  }
+  getAuthState = (pathname?: string) =>
+    this.readOnlyDocsLoader.getAuthState(pathname);
 
-  async getEdgeFlags(): Promise<EdgeFlags> {
-    return this.readOnlyDocsLoader.getEdgeFlags();
-  }
+  getEdgeFlags = () => this.readOnlyDocsLoader.getEdgeFlags();
 
-  async getBaseUrl(): Promise<string> {
-    return this.readOnlyDocsLoader.getBaseUrl();
-  }
+  getBaseUrl = () => this.readOnlyDocsLoader.getBaseUrl();
+}
 
-  async getModifiedMdxFiles(): Promise<Record<string, string>> {
-    return this.modifiedMdxFiles;
-  }
+/**
+ * The GitLoader is used to get and update docs.yml from a remote git repository.
+ */
+export interface GitLoader {
+  getDocsYml(owner: string, repo: string, ref?: string): Promise<string | null>;
+  updateDocsYml(
+    owner: string,
+    repo: string,
+    content: string,
+    ref?: string
+  ): Promise<boolean>;
 }
 
 export const createEditableDocsLoader = cache(
@@ -180,6 +103,7 @@ export const createEditableDocsLoader = cache(
     host: string,
     encodedDocsUrl: string,
     fern_token?: string,
+    gitLoader?: GitLoader,
     forceRevalidate?: boolean
   ) => {
     // TODO: derive the domain from the workspace
@@ -196,6 +120,6 @@ export const createEditableDocsLoader = cache(
       true // Skip auth
     );
 
-    return new EditableDocsLoaderImpl(docsLoader);
+    return new EditableDocsLoader(docsLoader, gitLoader);
   }
 );

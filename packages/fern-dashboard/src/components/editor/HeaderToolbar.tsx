@@ -11,6 +11,7 @@ import { ArrowLeftIcon, Globe } from "lucide-react";
 
 import {
   ClientPageStorage,
+  DocsYmlStorage,
   PageStorage,
   getPageFilename,
   pageDataToMdx,
@@ -29,6 +30,7 @@ import { useEditor } from "@/providers/EditorContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useMdxState } from "@/providers/MdxStateContext";
 import { useGithubSourceRepo } from "@/state/useGithubSourceRepo";
+import { addPageToDocsYml } from "@/utils/docsYmlUpdater";
 import { DocsUrl } from "@/utils/types";
 
 import { GithubLogo } from "../auth/GithubLogo";
@@ -82,6 +84,17 @@ function collectAllChanges(
     }
   });
 
+  // Add docs.yml if there are pending updates
+  if (DocsYmlStorage.hasUpdates(branch)) {
+    const finalDocsYmlContent = DocsYmlStorage.getFinalContentWithUpdater(
+      branch,
+      addPageToDocsYml
+    );
+    if (finalDocsYmlContent) {
+      allChanges["docs.yml"] = finalDocsYmlContent;
+    }
+  }
+
   return allChanges;
 }
 
@@ -109,20 +122,6 @@ function generateSimpleHash(content: Record<string, string>): string {
     hash = hash & hash; // Convert to 32bit integer
   }
   return hash.toString();
-}
-
-/**
- * Generates a hash from the changes for tracking committed state
- * @param changedMdxFiles - Files changed in MDX state
- * @param branch - Current branch name
- * @returns Hash string representing all changes
- */
-function generateChangesHash(
-  changedMdxFiles: Record<string, string>,
-  branch: string | null
-): string {
-  const allChanges = collectAllChanges(changedMdxFiles, branch);
-  return generateSimpleHash(allChanges);
 }
 
 export function HeaderToolbar({
@@ -179,7 +178,9 @@ export function HeaderToolbar({
   useEffect(() => {
     if (!branch) return;
 
-    const currentHash = generateChangesHash(changedMdxFiles, branch);
+    // Use the same logic as collectAllChanges to get the complete picture of changes
+    const allCurrentChanges = collectAllChanges(changedMdxFiles, branch);
+    const currentHash = generateSimpleHash(allCurrentChanges);
     const lastCommittedHash = localStorage.getItem(
       `lastCommittedHash-${branch}`
     );
@@ -216,7 +217,14 @@ export function HeaderToolbar({
       WarningNoChangesToast();
       return;
     }
-    if (Object.values(mdxSyncedStatus).some((status) => status !== "SYNCED")) {
+    // Only check sync status for files that are actually in changedMdxFiles
+    // Client pages from localStorage don't need to be synced since they're already committed-ready
+    const filesToCheckForSync = Object.keys(changedMdxFiles);
+    if (
+      filesToCheckForSync.some(
+        (filename) => mdxSyncedStatus[filename] !== "SYNCED"
+      )
+    ) {
       ErrorStillSyncingToast();
       return;
     }
@@ -242,6 +250,11 @@ export function HeaderToolbar({
         // Use the exact same content that was committed to generate the hash
         const committedHash = generateSimpleHash(allFilesToCommit);
         localStorage.setItem(`lastCommittedHash-${branch}`, committedHash);
+
+        // Clear docs.yml updates from localStorage since they've been committed
+        if (allFilesToCommit["docs.yml"]) {
+          DocsYmlStorage.clearAllUpdates(branch);
+        }
       } else {
         ErrorFullCommitToast();
       }
@@ -314,7 +327,14 @@ export function HeaderToolbar({
       return "Latest changes have been committed";
     }
 
-    if (Object.values(mdxSyncedStatus).some((status) => status !== "SYNCED")) {
+    // Only check sync status for files that are actually in changedMdxFiles
+    // Client pages from localStorage don't need to be synced since they're already committed-ready
+    const filesToCheckForSync = Object.keys(changedMdxFiles);
+    if (
+      filesToCheckForSync.some(
+        (filename) => mdxSyncedStatus[filename] !== "SYNCED"
+      )
+    ) {
       return "Commit disabled while changes are syncing";
     }
     return null;

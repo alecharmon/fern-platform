@@ -20,6 +20,7 @@ export default async function preloadEditorData(request: {
       request.host, // Use the host from the request parameter instead of trying to get it from headers
       request.docsUrl,
       session.accessToken,
+      undefined, // No GitHubLoader for preload since we don't have orgName context
       true // force revalidate when preloading
     );
 
@@ -34,7 +35,7 @@ export default async function preloadEditorData(request: {
   } catch (error) {
     return {
       success: false,
-      error: `Preload failed: ${error}`,
+      error: `Preload failed: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }

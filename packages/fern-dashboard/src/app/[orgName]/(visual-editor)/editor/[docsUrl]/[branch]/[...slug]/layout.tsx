@@ -16,6 +16,7 @@ import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/des
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { GitHubLoader } from "@/app/services/github/github-loader";
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
@@ -53,11 +54,17 @@ export default async function VisualEditorPreviewLayout({
 
   const session = await getCurrentSession();
   const host = await getHostFromHeaders();
+
+  // TODO: createEditableDocsLoader should be called here once, and data passed to child pages (@...) rather than called in those places as well
   const loader = await createEditableDocsLoader(
     host,
     docsUrl,
-    session?.accessToken
+    session?.accessToken,
+    session?.user.sub && orgName
+      ? new GitHubLoader(session.user.sub, orgName)
+      : undefined
   );
+
   const [colors, layout, fonts, config, root, unsafe_fullRoot] =
     await Promise.all([
       loader.getColors(),

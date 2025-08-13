@@ -54,7 +54,12 @@ function loadAndProcessStoredPages(branchName: string) {
   const clientNodes: ClientNodes = {};
   const clientFoundNodes: ClientFoundNodes = {};
 
-  Object.entries(storedPages).forEach(([nodeId, storedPage]) => {
+  // Sort stored pages by creation time (newest first) to preserve order
+  const sortedEntries = Object.entries(storedPages).sort(
+    ([, a], [, b]) => (b.createdAt || 0) - (a.createdAt || 0)
+  );
+
+  sortedEntries.forEach(([nodeId, storedPage]) => {
     const { node, parentNodeId, sidebar } = storedPage;
 
     // Add to clientNodes grouped by parent

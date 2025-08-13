@@ -11,8 +11,12 @@ import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRoot
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { Icon } from "@/components/icon/Icon";
+import { Button } from "@/components/ui/button";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { EncodedDocsUrl } from "@/utils/types";
+
+import { CreateClientPage } from "./CreateClientPage";
 
 export default async function SidebarPage({
   params,
@@ -59,12 +63,14 @@ export default async function SidebarPage({
         <HiddenSidebar />
       ) : (
         <>
-          {/* TODO: bring this back once we have a way to update docs.yml as a part of the commit */}
-          {/* <CreateClientPage root={found.sidebar}>
-            <Button className="mb-2 w-full cursor-pointer" variant="outline">
+          <CreateClientPage root={found.sidebar}>
+            <Button
+              className="mb-2 flex w-full items-center justify-center gap-2 self-stretch rounded-lg border border-dashed border-[var(--grayscale-a6)] p-2 text-sm text-[var(--grayscale-a11)] hover:bg-[var(--grayscale-a3)] hover:text-[var(--grayscale-a12)]"
+              variant="ghost"
+            >
               <Icon variant="Plus" /> Create new page
             </Button>
-          </CreateClientPage> */}
+          </CreateClientPage>
           <SidebarRootNode
             root={found.sidebar}
             visibleNodeIds={visibleNodeIds}

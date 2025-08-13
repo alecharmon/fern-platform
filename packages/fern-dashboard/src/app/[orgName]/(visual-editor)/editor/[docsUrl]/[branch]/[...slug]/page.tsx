@@ -8,6 +8,7 @@ import { mdxToHtml } from "@fern-docs/mdx";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { GitHubLoader } from "@/app/services/github/github-loader";
 import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { EncodedDocsUrl } from "@/utils/types";
@@ -42,7 +43,10 @@ export default async function Page({
   const loader = await createEditableDocsLoader(
     host,
     docsUrl,
-    session?.accessToken
+    session?.accessToken,
+    session?.user.sub && orgName
+      ? new GitHubLoader(session.user.sub, orgName)
+      : undefined
   );
   const root = await loader.getRoot();
 
