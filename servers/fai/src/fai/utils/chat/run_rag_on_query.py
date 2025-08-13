@@ -3,7 +3,8 @@ from typing import List
 from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
 
-from src.fai.utils.index.get_tpuf_namespace import get_docs_tpuf_namespace
+from src.fai.utils.index.get_tpuf_namespace import get_query_index_name
+from src.fai.utils.index.get_tpuf_namespace import get_tpuf_namespace
 from src.settings import CONFIG
 from src.settings import VARIABLES
 
@@ -18,7 +19,8 @@ async def run_rag_on_query(query: str, domain: str) -> List[str]:
                 input=query,
                 model=CONFIG.DEFAULT_EMBEDDING_MODEL.model_name,
             )
-            namespace = get_docs_tpuf_namespace(domain)
+            query_index_name = get_query_index_name()
+            namespace = get_tpuf_namespace(domain, query_index_name)
             tpuf_ns = tpuf_client.namespace(namespace)
             query_results = await tpuf_ns.query(
                 rank_by=("vector", "ANN", vector.data[0].embedding),

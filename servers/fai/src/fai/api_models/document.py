@@ -4,8 +4,7 @@ from typing import List
 from pydantic import BaseModel
 
 
-class ContextApi(BaseModel):
-    context_id: str
+class DocumentApi(BaseModel):
     domain: str
     context: List[str]
     document: str

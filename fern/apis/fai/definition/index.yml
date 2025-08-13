@@ -75,7 +75,7 @@ service:
           document:
             type: string
             docs: The content of the document that will be returned in the tool response. If not provided, the document will be removed from the index.
-      response: ContextResponse
+      response: Document
       errors:
         - commons.BadRequestError
         - commons.InternalError
@@ -119,20 +119,19 @@ service:
         - commons.InternalError
 
 types:
-  ContextResponse:
+  Document:
     properties:
       document_id: string
-      domain: string
-      context_id: string
-      context: list<string>
-      document: string
       is_active: boolean
+      context: list<string>
+      domain: string
+      document: string
       created_at: datetime
       updated_at: datetime
 
   DocumentList:
     properties:
-      documents: list<ContextResponse>
+      documents: list<Document>
       pagination: Pagination
 
   Pagination:

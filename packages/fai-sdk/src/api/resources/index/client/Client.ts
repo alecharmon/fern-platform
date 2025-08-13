@@ -235,7 +235,7 @@ export class Index {
         domain: string,
         request: FernFai.UpdateRequest,
         requestOptions?: Index.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.ContextResponse> {
+    ): core.HttpResponsePromise<FernFai.Document> {
         return core.HttpResponsePromise.fromPromise(this.__updateDocument(domain, request, requestOptions));
     }
 
@@ -243,7 +243,7 @@ export class Index {
         domain: string,
         request: FernFai.UpdateRequest,
         requestOptions?: Index.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.ContextResponse>> {
+    ): Promise<core.WithRawResponse<FernFai.Document>> {
         const { document_id: documentId, is_active: isActive, context, document } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         _queryParams["document_id"] = documentId;
@@ -269,7 +269,7 @@ export class Index {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.ContextResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernFai.Document, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {

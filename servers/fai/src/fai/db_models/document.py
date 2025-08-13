@@ -6,28 +6,27 @@ from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import String
 
-from src.fai.api_models.context import ContextApi
+from src.fai.api_models.document import DocumentApi
 from src.fai.api_models.tpuf_record import TpufAttributesApi
 from src.fai.api_models.tpuf_record import TpufRecordWithoutVectorApi
 from src.fai.db import Base
 
 
-class Context(Base):
-    __tablename__ = "contexts"
+class Document(Base):
+    __tablename__ = "documents"
     __table_args__ = {"extend_existing": True}
 
-    context_id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True)
+    document_id = Column(String, nullable=False)
     domain = Column(String, nullable=False)
     context = Column(ARRAY(String), nullable=False)
     document = Column(String, nullable=False)
-    document_id = Column(String, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)
 
-    def to_api(self) -> ContextApi:
-        return ContextApi(
-            context_id=self.context_id,
+    def to_api(self) -> DocumentApi:
+        return DocumentApi(
             domain=self.domain,
             context=self.context,
             document=self.document,
@@ -40,7 +39,7 @@ class Context(Base):
     def to_tpuf_record(self) -> List[TpufRecordWithoutVectorApi]:
         return [
             TpufRecordWithoutVectorApi(
-                id=self.context_id,
+                id=self.document_id,
                 attributes=TpufAttributesApi(
                     chunk=chunk,
                     document=self.document,

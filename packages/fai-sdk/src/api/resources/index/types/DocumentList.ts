@@ -5,8 +5,6 @@
 import * as FernFai from "../../../index.js";
 
 export interface DocumentList {
-    documents: FernFai.ContextResponse[];
-    total: number;
-    page: number;
-    limit: number;
+    documents: FernFai.Document[];
+    pagination: FernFai.Pagination;
 }

@@ -15,13 +15,13 @@ from turbopuffer import NOT_GIVEN
 from turbopuffer import AsyncTurbopuffer
 from turbopuffer.types.row import Row
 
+from fai.db_models.document import Document
 from src.fai.api_models.index import IndexRequest
 from src.fai.api_models.index import UpdateIndexRequest
 from src.fai.app import fai_app
-from src.fai.db_models.context import Context
 from src.fai.dependencies import get_db
+from src.fai.utils.index.get_tpuf_namespace import get_query_index_name
 from src.fai.utils.index.get_tpuf_namespace import get_tpuf_namespace
-from src.fai.utils.index.get_tpuf_namespace import get_tpuf_query_namespace
 from src.settings import CONFIG
 from src.settings import LOGGER
 from src.settings import VARIABLES
@@ -34,8 +34,8 @@ async def index(
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        db_context = Context(
-            context_id=str(uuid.uuid4()),
+        new_db_document = Document(
+            id=str(uuid.uuid4()),
             domain=domain,
             context=body.context,
             document=body.document,
@@ -44,9 +44,19 @@ async def index(
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
-        db.add(db_context)
+
+        exists_document_with_id = await db.scalar(
+            select(Document).where(Document.document_id == body.document_id).where(Document.domain == domain)
+        )
+        if exists_document_with_id:
+            return JSONResponse(
+                status_code=400,
+                content=jsonable_encoder({"message": "Document with this ID already exists for this domain"}),
+            )
+
+        db.add(new_db_document)
         await db.commit()
-        await db.refresh(db_context)
+        await db.refresh(new_db_document)
         LOGGER.info(f"Indexed document {body.document_id} for domain: {domain}")
         return JSONResponse(content=jsonable_encoder({"message": "Document indexed successfully"}))
 
@@ -63,19 +73,19 @@ async def update(
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        db_context = await db.execute(
-            select(Context).where(Context.document_id == document_id, Context.domain == domain)
+        db_document = await db.execute(
+            select(Document).where(Document.document_id == document_id, Document.domain == domain)
         )
-        db_context = db_context.scalar_one_or_none()
-        if db_context:
+        db_document = db_document.scalar_one_or_none()
+        if db_document:
             if body.context is not None:
-                db_context.context = body.context
+                db_document.context = body.context
             if body.document is not None:
-                db_context.document = body.document
+                db_document.document = body.document
             if body.is_active is not None:
-                db_context.is_active = body.is_active
+                db_document.is_active = body.is_active
             await db.commit()
-            await db.refresh(db_context)
+            await db.refresh(db_document)
             LOGGER.info(f"Updated document {document_id} for domain: {domain}")
         return JSONResponse(content=jsonable_encoder({"message": "Document updated successfully"}))
 
@@ -91,16 +101,16 @@ async def get_document_by_id(
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        db_context = await db.execute(
-            select(Context).where(Context.document_id == document_id, Context.domain == domain)
+        db_document = await db.execute(
+            select(Document).where(Document.document_id == document_id, Document.domain == domain)
         )
-        db_context = db_context.scalar_one_or_none()
-        if db_context:
-            return JSONResponse(content=jsonable_encoder(db_context))
+        db_document = db_document.scalar_one_or_none()
+        if db_document:
+            return JSONResponse(content=jsonable_encoder(db_document.to_api()))
         return JSONResponse(content=jsonable_encoder({"message": "Document not found"}))
 
     except Exception as e:
-        LOGGER.exception("Failed to get document context")
+        LOGGER.exception("Failed to get document")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
@@ -119,14 +129,14 @@ async def get_documents(
 
         offset = (page - 1) * limit
 
-        total_count = await db.scalar(select(func.count()).select_from(Context).where(Context.domain == domain))
+        total_count = await db.scalar(select(func.count()).select_from(Document).where(Document.domain == domain))
 
-        stmt = select(Context).where(Context.domain == domain).offset(offset).limit(limit)
+        stmt = select(Document).where(Document.domain == domain).offset(offset).limit(limit)
         result = await db.execute(stmt)
         documents = result.scalars().all()
 
         response = {
-            "documents": jsonable_encoder(documents),
+            "documents": [document.to_api() for document in documents],
             "pagination": {
                 "total": total_count,
                 "page": page,
@@ -134,7 +144,7 @@ async def get_documents(
             },
         }
 
-        return JSONResponse(content=response)
+        return JSONResponse(content=jsonable_encoder(response))
 
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"detail": e.detail})
@@ -161,7 +171,8 @@ async def sync_index(
 
     try:
         source_namespace_id = get_tpuf_namespace(domain, index_name)
-        target_namespace_id = get_tpuf_query_namespace(domain)
+        query_index_name = get_query_index_name()
+        target_namespace_id = get_tpuf_namespace(domain, query_index_name)
         LOGGER.info(f"Syncing index {source_namespace_id} to {target_namespace_id} for domain {domain}")
         async with AsyncTurbopuffer(
             region=CONFIG.TURBOPUFFER_DEFAULT_REGION,

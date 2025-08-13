@@ -45,11 +45,10 @@ describe("Index", () => {
 
         const rawResponseBody = {
             document_id: "document_id",
-            domain: "domain",
-            context_id: "context_id",
-            context: ["context", "context"],
-            document: "document",
             is_active: true,
+            context: ["context", "context"],
+            domain: "domain",
+            document: "document",
             created_at: "2024-01-15T09:30:00Z",
             updated_at: "2024-01-15T09:30:00Z",
         };
@@ -69,11 +68,10 @@ describe("Index", () => {
         });
         expect(response).toEqual({
             document_id: "document_id",
-            domain: "domain",
-            context_id: "context_id",
-            context: ["context", "context"],
-            document: "document",
             is_active: true,
+            context: ["context", "context"],
+            domain: "domain",
+            document: "document",
             created_at: "2024-01-15T09:30:00Z",
             updated_at: "2024-01-15T09:30:00Z",
         });
@@ -87,28 +85,24 @@ describe("Index", () => {
             documents: [
                 {
                     document_id: "document_id",
-                    domain: "domain",
-                    context_id: "context_id",
-                    context: ["context", "context"],
-                    document: "document",
                     is_active: true,
+                    context: ["context", "context"],
+                    domain: "domain",
+                    document: "document",
                     created_at: "2024-01-15T09:30:00Z",
                     updated_at: "2024-01-15T09:30:00Z",
                 },
                 {
                     document_id: "document_id",
-                    domain: "domain",
-                    context_id: "context_id",
-                    context: ["context", "context"],
-                    document: "document",
                     is_active: true,
+                    context: ["context", "context"],
+                    domain: "domain",
+                    document: "document",
                     created_at: "2024-01-15T09:30:00Z",
                     updated_at: "2024-01-15T09:30:00Z",
                 },
             ],
-            total: 1,
-            page: 1,
-            limit: 1,
+            pagination: { total: 1, page: 1, limit: 1 },
         };
         server.mockEndpoint().get("/index/domain").respondWith().statusCode(200).jsonBody(rawResponseBody).build();
 
@@ -117,28 +111,28 @@ describe("Index", () => {
             documents: [
                 {
                     document_id: "document_id",
-                    domain: "domain",
-                    context_id: "context_id",
-                    context: ["context", "context"],
-                    document: "document",
                     is_active: true,
+                    context: ["context", "context"],
+                    domain: "domain",
+                    document: "document",
                     created_at: "2024-01-15T09:30:00Z",
                     updated_at: "2024-01-15T09:30:00Z",
                 },
                 {
                     document_id: "document_id",
-                    domain: "domain",
-                    context_id: "context_id",
-                    context: ["context", "context"],
-                    document: "document",
                     is_active: true,
+                    context: ["context", "context"],
+                    domain: "domain",
+                    document: "document",
                     created_at: "2024-01-15T09:30:00Z",
                     updated_at: "2024-01-15T09:30:00Z",
                 },
             ],
-            total: 1,
-            page: 1,
-            limit: 1,
+            pagination: {
+                total: 1,
+                page: 1,
+                limit: 1,
+            },
         });
     });
 

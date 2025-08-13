@@ -383,7 +383,7 @@ await client.index.indexDocument("domain", {
 </dl>
 </details>
 
-<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">getDocument</a>(domain, { ...params }) -> void</code></summary>
+<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">getDocumentById</a>(domain, { ...params }) -> void</code></summary>
 <dl>
 <dd>
 
@@ -411,7 +411,7 @@ Get a document for a given domain
 <dd>
 
 ```typescript
-await client.index.getDocument("domain", {
+await client.index.getDocumentById("domain", {
     document_id: "document_id",
 });
 ```
@@ -456,7 +456,7 @@ await client.index.getDocument("domain", {
 </dl>
 </details>
 
-<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">updateDocument</a>(domain, { ...params }) -> FernFai.ContextResponse</code></summary>
+<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">updateDocument</a>(domain, { ...params }) -> FernFai.Document</code></summary>
 <dl>
 <dd>
 
@@ -514,6 +514,77 @@ await client.index.updateDocument("domain", {
 <dd>
 
 **request:** `FernFai.UpdateRequest`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Index.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">getDocuments</a>(domain, { ...params }) -> FernFai.DocumentList</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve all paginated documents for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.index.getDocuments("domain");
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string` — The domain to retrieve documents for
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `FernFai.GetDocumentsRequest`
 
 </dd>
 </dl>
