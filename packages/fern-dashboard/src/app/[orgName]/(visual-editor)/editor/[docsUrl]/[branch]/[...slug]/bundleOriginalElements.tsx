@@ -14,7 +14,10 @@ export async function bundleMDX(source: string) {
   return { code };
 }
 
-type OriginalElementWithCode = OriginalElement & { code?: string };
+type OriginalElementWithCode = OriginalElement & {
+  code?: string;
+  bundleAttempted?: boolean;
+};
 
 export async function bundleOriginalElements(
   originalElements: WithCode<OriginalElements>
@@ -31,7 +34,10 @@ export async function bundleOriginalElements(
   const bundledEntries = await Promise.all(
     Object.entries(originalElements).map(async ([key, element]) => {
       const { code } = await bundleMDX(element.content);
-      return [key, { ...element, code }] as [string, OriginalElementWithCode];
+      return [key, { ...element, code, bundleAttempted: true }] as [
+        string,
+        OriginalElementWithCode,
+      ];
     })
   );
   return Object.fromEntries(bundledEntries);

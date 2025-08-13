@@ -4,6 +4,7 @@ import { useMDXComponents } from "@mdx-js/react";
 import { NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import { getMDXComponent } from "mdx-bundler/client";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { MDX_COMPONENTS } from "@/docs/mdx/components";
 import { useOriginalElements } from "@/providers/OriginalElementsContext";
@@ -20,18 +21,37 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
     [originalElements, hash]
   );
 
+  // Check that the element has code and is supported, otherwise return undefined
+  function getComponentIfExists(
+    code: string | undefined,
+    name: string | undefined
+  ) {
+    return code && name && typeof MDX_COMPONENTS[name] !== "undefined"
+      ? getMDXComponent(code)
+      : undefined;
+  }
+
   const components = useMDXComponents();
 
   const Component = useMemo(() => {
-    // Check that there is code to render AND that the component is supported, otherwise render an unsupported content component
+    // If element exists but hasn't been bundled yet, show a loading state
+    if (!originalElement?.bundleAttempted) {
+      const LoadingComponent = () => <Skeleton className="h-24 w-full" />;
+      LoadingComponent.displayName = "LoadingComponent";
+      return LoadingComponent;
+    }
+
+    // Use component if it exists, otherwise render an unsupported content component
     const Component =
-      originalElement?.code &&
-      originalElement?.name &&
-      typeof MDX_COMPONENTS[originalElement?.name] !== "undefined"
-        ? getMDXComponent(originalElement?.code)
-        : () => <UnsupportedContent>{textContent}</UnsupportedContent>;
+      getComponentIfExists(originalElement?.code, originalElement?.name) ??
+      (() => <UnsupportedContent>{textContent}</UnsupportedContent>);
     return Component;
-  }, [originalElement?.code, originalElement?.name, textContent]);
+  }, [
+    originalElement?.code,
+    originalElement?.name,
+    originalElement?.bundleAttempted,
+    textContent,
+  ]);
 
   return (
     <ErrorBoundary

@@ -9,7 +9,7 @@ import { OriginalElements } from "@fern-docs/mdx";
 import { MDX_COMPONENTS } from "@/docs/mdx/components";
 
 export type WithCode<T> = T & {
-  [K in keyof T]: T[K] & { code?: string };
+  [K in keyof T]: T[K] & { code?: string; bundleAttempted?: boolean };
 };
 
 export const OriginalElementsContext = createContext<{
