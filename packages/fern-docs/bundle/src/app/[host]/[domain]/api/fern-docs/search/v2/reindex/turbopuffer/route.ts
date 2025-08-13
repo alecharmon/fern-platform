@@ -7,6 +7,7 @@ import { track } from "@fern-api/docs-server/analytics/posthog";
 import {
   fdrEnvironment,
   fernToken_admin,
+  getFaiOrigin,
   openaiApiKey,
   turbopufferApiKey,
 } from "@fern-api/docs-server/env-variables";
@@ -16,8 +17,10 @@ import { postToSlack } from "@fern-api/docs-server/slack";
 import { Gate, withBasicTokenAnonymous } from "@fern-api/docs-server/withRbac";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { slugToHref, withoutStaging } from "@fern-api/docs-utils";
+import { FernFaiClient } from "@fern-api/fai-sdk";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import {
+  getDocsIndexName,
   getTurbopufferNamespace,
   getTurbopufferVectorizer,
   turbopufferUpsertTask,
@@ -40,7 +43,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const domain = getDocsDomainEdge(req);
   const deleteExisting =
     req.nextUrl.searchParams.get("deleteExisting") === "true";
-  const namespace = getTurbopufferNamespace(domain, embeddingModel);
+
+  const docsIndexName = getDocsIndexName(embeddingModel);
+  const namespace = getTurbopufferNamespace(domain, docsIndexName);
 
   try {
     const loader = await createCachedDocsLoader(host, domain);
@@ -93,6 +98,15 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       },
       deleteExisting,
     });
+    const faiClient = new FernFaiClient({
+      baseUrl: getFaiOrigin(),
+      token: fernToken_admin(),
+    });
+
+    await faiClient.index.syncToQueryIndex(domain, {
+      index_name: docsIndexName,
+    });
+
     const end = Date.now();
 
     track("turbopuffer_reindex", {

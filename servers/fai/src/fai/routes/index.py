@@ -5,8 +5,10 @@ from datetime import datetime
 
 from fastapi import Body
 from fastapi import Depends
+from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from turbopuffer import NOT_GIVEN
@@ -83,7 +85,7 @@ async def update(
 
 
 @fai_app.get("/index/{domain}")
-async def get_context(
+async def get_document_by_id(
     domain: str,
     document_id: str,
     db: AsyncSession = Depends(get_db),
@@ -99,6 +101,48 @@ async def get_context(
 
     except Exception as e:
         LOGGER.exception("Failed to get document context")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.get("/index/{domain}/documents")
+async def get_documents(
+    domain: str,
+    page: int = 1,
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    try:
+        if page < 1:
+            raise HTTPException(status_code=400, detail="page must be >= 1")
+        if limit < 1 or limit > 1000:
+            raise HTTPException(status_code=400, detail="limit must be between 1 and 1000")
+
+        offset = (page - 1) * limit
+
+        total_count = await db.scalar(select(func.count()).select_from(Context).where(Context.domain == domain))
+
+        stmt = select(Context).where(Context.domain == domain).offset(offset).limit(limit)
+        result = await db.execute(stmt)
+        documents = result.scalars().all()
+
+        response = {
+            "documents": jsonable_encoder(documents),
+            "pagination": {
+                "total": total_count,
+                "page": page,
+                "limit": limit,
+            },
+        }
+
+        return JSONResponse(content=response)
+
+    except HTTPException as e:
+        return JSONResponse(status_code=e.status_code, content={"detail": e.detail})
+    except ValueError as e:
+        LOGGER.exception("Bad request when getting documents")
+        return JSONResponse(status_code=400, content={"detail": str(e)})
+    except Exception as e:
+        LOGGER.exception("Failed to get documents")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
@@ -144,7 +188,15 @@ async def sync_index(
                     new_row.source = index_name
                     prefixed_rows.append(new_row)
 
-                await target_ns.write(upsert_rows=prefixed_rows, distance_metric="cosine_distance")
+                source_schema = await source_ns.schema()
+                await target_ns.write(
+                    upsert_rows=prefixed_rows,
+                    distance_metric="cosine_distance",
+                    schema={
+                        **source_schema,
+                        "source": "string",
+                    },
+                )
 
                 if len(result.rows) < 1000:
                     break

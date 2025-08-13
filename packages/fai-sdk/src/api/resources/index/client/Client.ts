@@ -139,19 +139,19 @@ export class Index {
      * @throws {@link FernFai.InternalError}
      *
      * @example
-     *     await client.index.getDocument("domain", {
+     *     await client.index.getDocumentById("domain", {
      *         document_id: "document_id"
      *     })
      */
-    public getDocument(
+    public getDocumentById(
         domain: string,
         request: FernFai.GetRequest,
         requestOptions?: Index.RequestOptions,
     ): core.HttpResponsePromise<void> {
-        return core.HttpResponsePromise.fromPromise(this.__getDocument(domain, request, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__getDocumentById(domain, request, requestOptions));
     }
 
-    private async __getDocument(
+    private async __getDocumentById(
         domain: string,
         request: FernFai.GetRequest,
         requestOptions?: Index.RequestOptions,
@@ -296,6 +296,96 @@ export class Index {
                 });
             case "timeout":
                 throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /index/{domain}/update.");
+            case "unknown":
+                throw new errors.FernFaiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Retrieve all paginated documents for a given domain
+     *
+     * @param {string} domain - The domain to retrieve documents for
+     * @param {FernFai.GetDocumentsRequest} request
+     * @param {Index.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernFai.BadRequestError}
+     * @throws {@link FernFai.InternalError}
+     *
+     * @example
+     *     await client.index.getDocuments("domain")
+     */
+    public getDocuments(
+        domain: string,
+        request: FernFai.GetDocumentsRequest = {},
+        requestOptions?: Index.RequestOptions,
+    ): core.HttpResponsePromise<FernFai.DocumentList> {
+        return core.HttpResponsePromise.fromPromise(this.__getDocuments(domain, request, requestOptions));
+    }
+
+    private async __getDocuments(
+        domain: string,
+        request: FernFai.GetDocumentsRequest = {},
+        requestOptions?: Index.RequestOptions,
+    ): Promise<core.WithRawResponse<FernFai.DocumentList>> {
+        const { page, limit } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        if (page != null) {
+            _queryParams["page"] = page.toString();
+        }
+
+        if (limit != null) {
+            _queryParams["limit"] = limit.toString();
+        }
+
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernFaiEnvironment.Prod,
+                `/index/${encodeURIComponent(domain)}`,
+            ),
+            method: "GET",
+            headers: mergeHeaders(
+                this._options?.headers,
+                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                requestOptions?.headers,
+            ),
+            queryParameters: _queryParams,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernFai.DocumentList, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as any)?.["error"]) {
+                case "BadRequestError":
+                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
+                case "InternalError":
+                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+                default:
+                    throw new errors.FernFaiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernFaiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling GET /index/{domain}.");
             case "unknown":
                 throw new errors.FernFaiError({
                     message: _response.error.errorMessage,

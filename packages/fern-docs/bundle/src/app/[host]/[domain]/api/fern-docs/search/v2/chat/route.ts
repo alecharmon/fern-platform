@@ -6,6 +6,7 @@ import { UIMessage } from "ai";
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
 import {
+  fernToken_admin,
   getFaiOrigin,
   openaiApiKey,
 } from "@fern-api/docs-server/env-variables";
@@ -16,6 +17,7 @@ import { FernFaiClient } from "@fern-api/fai-sdk";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import {
   getLanguageModel,
+  getQueryIndexName,
   getTurbopufferNamespace,
   runRouteForAnthropic,
   runRouteForCohere,
@@ -101,7 +103,7 @@ export async function POST(req: NextRequest) {
 
   const faiClient = new FernFaiClient({
     baseUrl: getFaiOrigin(),
-    token: () => "",
+    token: fernToken_admin(),
   });
   try {
     await faiClient.queries.createQuery({
@@ -118,6 +120,7 @@ export async function POST(req: NextRequest) {
     console.log("Error creating query", error);
   }
 
+  const queryIndexName = getQueryIndexName();
   if (modelProvider === "anthropic") {
     return runRouteForAnthropic({
       domain,
@@ -127,7 +130,7 @@ export async function POST(req: NextRequest) {
       lastUserMessage,
       messages,
       embeddingModel,
-      turbopufferNamespace: getTurbopufferNamespace(domain, embeddingModel),
+      turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
       languageModel,
     });
   } else if (modelProvider === "cohere") {
@@ -139,7 +142,7 @@ export async function POST(req: NextRequest) {
       lastUserMessage,
       messages,
       embeddingModel,
-      turbopufferNamespace: getTurbopufferNamespace(domain, embeddingModel),
+      turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
       languageModel,
     });
   } else {

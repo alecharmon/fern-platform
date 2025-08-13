@@ -36,7 +36,7 @@ service:
         - commons.BadRequestError
         - commons.InternalError
 
-    getDocument:
+    getDocumentById:
       docs: Get a document for a given domain
       path: /{domain}
       method: GET
@@ -80,6 +80,26 @@ service:
         - commons.BadRequestError
         - commons.InternalError
 
+    getDocuments:
+      docs: Retrieve all paginated documents for a given domain
+      path: /{domain}
+      method: GET
+      audiences:
+        - internal
+      path-parameters:
+        domain:
+          type: string
+          docs: The domain to retrieve documents for
+      request:
+        name: GetDocumentsRequest
+        query-parameters:
+          page: optional<integer>
+          limit: optional<integer>
+      response: DocumentList
+      errors:
+        - commons.BadRequestError
+        - commons.InternalError
+
     syncToQueryIndex:
       docs: Sync an index with the query index
       path: /{domain}/sync
@@ -109,3 +129,14 @@ types:
       is_active: boolean
       created_at: datetime
       updated_at: datetime
+
+  DocumentList:
+    properties:
+      documents: list<ContextResponse>
+      pagination: Pagination
+
+  Pagination:
+    properties:
+      total: integer
+      page: integer
+      limit: integer

@@ -15,6 +15,7 @@ import z from "zod";
 
 import { postToSlack, track } from "@fern-api/docs-server";
 import {
+  fernToken_admin,
   getFaiOrigin,
   turbopufferApiKey,
 } from "@fern-api/docs-server/env-variables";
@@ -161,7 +162,7 @@ export async function runRouteForCohere({
           const queryId = crypto.randomUUID();
           const faiClient = new FernFaiClient({
             baseUrl: getFaiOrigin(),
-            token: () => "",
+            token: fernToken_admin(),
           });
           try {
             await faiClient.queries.createQuery({

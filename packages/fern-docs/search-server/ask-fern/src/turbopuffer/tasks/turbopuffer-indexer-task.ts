@@ -43,7 +43,7 @@ export async function turbopufferUpsertTask({
   authed,
   vectorizer,
   splitText = (text) => Promise.resolve([text]),
-  deleteExisting = false,
+  deleteExisting = true,
 }: TurbopufferIndexerTaskOptions): Promise<number> {
   const tpuf = new Turbopuffer({
     apiKey,
