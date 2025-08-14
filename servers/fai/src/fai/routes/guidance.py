@@ -16,6 +16,7 @@ from src.fai.dependencies import get_db
 from src.fai.models.api.index import IndexGuidanceRequest
 from src.fai.models.api.index import UpdateGuidanceRequest
 from src.fai.models.db.guidance import Guidance
+from src.fai.utils.turbopuffer.namespace import get_guidance_index_name
 from src.fai.utils.turbopuffer.namespace import get_query_index_name
 from src.fai.utils.turbopuffer.sync import sync_db_to_tpuf
 from src.fai.utils.turbopuffer.sync import sync_index_to_target
@@ -42,8 +43,8 @@ async def index(
         db.add(new_db_guidance)
         await db.commit()
         await db.refresh(new_db_guidance)
-        await sync_db_to_tpuf(domain, db, CONFIG.GUIDANCE_INDEX_NAME)
-        await sync_index_to_target(domain, CONFIG.GUIDANCE_INDEX_NAME, get_query_index_name())
+        await sync_db_to_tpuf(domain, db, get_guidance_index_name())
+        await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
         LOGGER.info(f"Indexed guidance {new_db_guidance.id} for domain: {domain}")
         return JSONResponse(content=jsonable_encoder({"message": "Guidance indexed successfully"}))
 
@@ -71,8 +72,8 @@ async def update(
             db.add(db_guidance)
             await db.commit()
             await db.refresh(db_guidance)
-            await sync_db_to_tpuf(domain, db, CONFIG.GUIDANCE_INDEX_NAME)
-            await sync_index_to_target(domain, CONFIG.GUIDANCE_INDEX_NAME, get_query_index_name())
+            await sync_db_to_tpuf(domain, db, get_guidance_index_name())
+            await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
             LOGGER.info(f"Updated guidance {guidance_id} for domain: {domain}")
             return JSONResponse(content=jsonable_encoder({"message": "Guidance updated successfully"}))
         return JSONResponse(status_code=404, content=jsonable_encoder({"message": "Guidance not found"}))
@@ -94,8 +95,8 @@ async def delete_guidance_by_id(
         if db_guidance:
             await db.delete(db_guidance)
             await db.commit()
-            await sync_db_to_tpuf(domain, db, CONFIG.GUIDANCE_INDEX_NAME)
-            await sync_index_to_target(domain, CONFIG.GUIDANCE_INDEX_NAME, get_query_index_name())
+            await sync_db_to_tpuf(domain, db, get_guidance_index_name())
+            await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
             LOGGER.info(f"Deleted guidance {guidance_id} for domain: {domain}")
             return JSONResponse(content=jsonable_encoder({"message": "Guidance deleted successfully"}))
         return JSONResponse(content=jsonable_encoder({"message": "Guidance not found"}))

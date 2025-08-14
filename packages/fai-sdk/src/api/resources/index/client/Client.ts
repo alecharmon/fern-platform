@@ -41,6 +41,82 @@ export class Index {
     }
 
     /**
+     * Reconstruct the query index for a given domain
+     *
+     * @param {string} domain
+     * @param {Index.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernFai.BadRequestError}
+     * @throws {@link FernFai.InternalError}
+     *
+     * @example
+     *     await client.index.reconstructQueryIndex("domain")
+     */
+    public reconstructQueryIndex(
+        domain: string,
+        requestOptions?: Index.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__reconstructQueryIndex(domain, requestOptions));
+    }
+
+    private async __reconstructQueryIndex(
+        domain: string,
+        requestOptions?: Index.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernFaiEnvironment.Prod,
+                `/index/${encodeURIComponent(domain)}/reconstruct`,
+            ),
+            method: "POST",
+            headers: mergeHeaders(
+                this._options?.headers,
+                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                requestOptions?.headers,
+            ),
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as any)?.["error"]) {
+                case "BadRequestError":
+                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
+                case "InternalError":
+                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+                default:
+                    throw new errors.FernFaiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernFaiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /index/{domain}/reconstruct.");
+            case "unknown":
+                throw new errors.FernFaiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * Sync an index with the query index
      *
      * @param {string} domain

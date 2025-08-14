@@ -7,6 +7,18 @@ service:
   auth: false
   base-path: /index
   endpoints:
+    reconstructQueryIndex:
+      docs: Reconstruct the query index for a given domain
+      path: /{domain}/reconstruct
+      method: POST
+      audiences:
+        - internal
+      path-parameters:
+        domain: string
+      errors:
+        - commons.BadRequestError
+        - commons.InternalError
+
     syncToQueryIndex:
       docs: Sync an index with the query index
       path: /{domain}/sync

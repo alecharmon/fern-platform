@@ -6,6 +6,16 @@ import { mockServerPool } from "../mock-server/MockServerPool.js";
 import { FernFaiClient } from "../../src/Client";
 
 describe("Index", () => {
+    test("reconstructQueryIndex", async () => {
+        const server = mockServerPool.createServer();
+        const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
+
+        server.mockEndpoint().post("/index/domain/reconstruct").respondWith().statusCode(200).build();
+
+        const response = await client.index.reconstructQueryIndex("domain");
+        expect(response).toEqual(undefined);
+    });
+
     test("syncToQueryIndex", async () => {
         const server = mockServerPool.createServer();
         const client = new FernFaiClient({ token: "test", environment: server.baseUrl });

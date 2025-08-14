@@ -678,6 +678,69 @@ await client.guidance.getGuidances("domain");
 
 ## Index
 
+<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">reconstructQueryIndex</a>(domain) -> void</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Reconstruct the query index for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.index.reconstructQueryIndex("domain");
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Index.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">syncToQueryIndex</a>(domain, { ...params }) -> void</code></summary>
 <dl>
 <dd>
