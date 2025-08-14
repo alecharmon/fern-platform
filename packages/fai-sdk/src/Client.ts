@@ -8,6 +8,7 @@ import { mergeHeaders } from "./core/headers.js";
 import { Analytics } from "./api/resources/analytics/client/Client.js";
 import { Chat } from "./api/resources/chat/client/Client.js";
 import { Conversations } from "./api/resources/conversations/client/Client.js";
+import { Document } from "./api/resources/document/client/Client.js";
 import { Guidance } from "./api/resources/guidance/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
 import { Queries } from "./api/resources/queries/client/Client.js";
@@ -39,6 +40,7 @@ export class FernFaiClient {
     protected _analytics: Analytics | undefined;
     protected _chat: Chat | undefined;
     protected _conversations: Conversations | undefined;
+    protected _document: Document | undefined;
     protected _guidance: Guidance | undefined;
     protected _index: Index | undefined;
     protected _queries: Queries | undefined;
@@ -50,7 +52,7 @@ export class FernFaiClient {
                 {
                     "X-Fern-Language": "JavaScript",
                     "X-Fern-SDK-Name": "@fern-api/fai-sdk",
-                    "X-Fern-SDK-Version": "0.0.59",
+                    "X-Fern-SDK-Version": "0.0.67",
                     "X-Fern-Runtime": core.RUNTIME.type,
                     "X-Fern-Runtime-Version": core.RUNTIME.version,
                 },
@@ -69,6 +71,10 @@ export class FernFaiClient {
 
     public get conversations(): Conversations {
         return (this._conversations ??= new Conversations(this._options));
+    }
+
+    public get document(): Document {
+        return (this._document ??= new Document(this._options));
     }
 
     public get guidance(): Guidance {

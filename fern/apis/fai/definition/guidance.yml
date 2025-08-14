@@ -113,10 +113,4 @@ types:
   GuidanceList:
     properties:
       guidances: list<Guidance>
-      pagination: Pagination
-
-  Pagination:
-    properties:
-      total: integer
-      page: integer
-      limit: integer
+      pagination: commons.Pagination

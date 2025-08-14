@@ -10,6 +10,10 @@ def get_docs_index_name() -> str:
     return DataIndexNames.DOCS.value
 
 
+def get_document_index_name() -> str:
+    return DataIndexNames.DOCUMENT.value
+
+
 def get_guidance_index_name() -> str:
     return DataIndexNames.GUIDANCE.value
 

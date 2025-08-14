@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class TpufRecordApi(BaseModel):
+class TurbopufferRecord(BaseModel):
     id: str
     vector: list[float]
     chunk: str

@@ -12,7 +12,7 @@ from sqlalchemy import String
 from settings import CONFIG
 from src.fai.db import Base
 from src.fai.models.api.guidance import GuidanceApi
-from src.fai.models.api.tpuf_record import TpufRecordApi
+from src.fai.models.types.tpuf_record import TurbopufferRecord
 
 
 def format_guidance_for_tpuf(chunk: str, document: str) -> str:
@@ -45,7 +45,7 @@ class Guidance(Base):
             updated_at=self.updated_at,
         )
 
-    async def to_tpuf_record(self, openai_client: AsyncOpenAI) -> List[TpufRecordApi]:
+    async def to_tpuf_record(self, openai_client: AsyncOpenAI) -> List[TurbopufferRecord]:
         tbuf_records = []
         for chunk_index, chunk in enumerate(self.context):
             embedding = await openai_client.embeddings.create(
@@ -54,7 +54,7 @@ class Guidance(Base):
             )
             chunk_vector = embedding.data[0].embedding
             tbuf_records.append(
-                TpufRecordApi(
+                TurbopufferRecord(
                     id=f"{self.id}:{chunk_index}",
                     vector=chunk_vector,
                     chunk=chunk,

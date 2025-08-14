@@ -305,6 +305,158 @@ await client.conversations.getConversation("domain", "conversation_id");
 </dl>
 </details>
 
+## Document
+
+<details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">createDocument</a>(domain, { ...params }) -> FernFai.CreateDocumentResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Index a document for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.document.createDocument("domain", {
+    document: "document",
+    chunk: undefined,
+    title: undefined,
+    url: undefined,
+    version: undefined,
+    keywords: undefined,
+    authed: undefined,
+});
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `FernFai.IndexDocumentRequest`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Document.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">getDocumentById</a>(domain, documentId) -> FernFai.Document</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get a document for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.document.getDocumentById("domain", "document_id");
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**documentId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Document.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 ## Guidance
 
 <details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">createGuidance</a>(domain, { ...params }) -> void</code></summary>

@@ -11,7 +11,10 @@ from turbopuffer.types.row import Row
 from settings import CONFIG
 from settings import LOGGER
 from settings import VARIABLES
+from src.fai.models.db.document import Document
 from src.fai.models.db.guidance import Guidance
+from src.fai.utils.turbopuffer.namespace import get_document_index_name
+from src.fai.utils.turbopuffer.namespace import get_guidance_index_name
 from src.fai.utils.turbopuffer.namespace import get_tpuf_namespace
 from src.fai.utils.turbopuffer.schemas import get_data_index_tpuf_schema
 from src.fai.utils.turbopuffer.schemas import get_query_index_tpuf_schema
@@ -26,7 +29,32 @@ def prefixed_id(namespace: str, original_id: str, max_len: int = 64) -> str:
     return f"{short_ns}:{hashed}"
 
 
-async def sync_db_to_tpuf(domain: str, db: AsyncSession, index_name: str) -> None:
+async def sync_document_db_to_tpuf(domain: str, db: AsyncSession) -> None:
+    documents = await db.execute(select(Document).where(Document.domain == domain))
+    documents = documents.scalars().all()
+    async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
+        async with AsyncTurbopuffer(
+            region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+            api_key=VARIABLES.TURBOPUFFER_API_KEY,
+        ) as tpuf_client:
+            target_namespace_id = get_tpuf_namespace(domain, get_document_index_name())
+            target_ns = tpuf_client.namespace(target_namespace_id)
+            try:
+                await target_ns.delete_all()
+            except Exception:
+                LOGGER.info(f"No documents to delete from {target_namespace_id}")
+            tbuf_records = []
+            for document in documents:
+                tbuf_records.append(await document.to_tpuf_record(openai_client))
+            await target_ns.write(
+                upsert_rows=[jsonable_encoder(record) for record in tbuf_records],
+                distance_metric="cosine_distance",
+                schema=get_data_index_tpuf_schema(),
+            )
+            LOGGER.info(f"Wrote {len(documents)} documents to {target_namespace_id}")
+
+
+async def sync_guidance_db_to_tpuf(domain: str, db: AsyncSession) -> None:
     guidances = await db.execute(select(Guidance).where(Guidance.domain == domain))
     guidances = guidances.scalars().all()
     async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
@@ -34,7 +62,7 @@ async def sync_db_to_tpuf(domain: str, db: AsyncSession, index_name: str) -> Non
             region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
             api_key=VARIABLES.TURBOPUFFER_API_KEY,
         ) as tpuf_client:
-            target_namespace_id = get_tpuf_namespace(domain, index_name)
+            target_namespace_id = get_tpuf_namespace(domain, get_guidance_index_name())
             target_ns = tpuf_client.namespace(target_namespace_id)
             try:
                 await target_ns.delete_all()
