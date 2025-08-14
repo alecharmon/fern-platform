@@ -5,7 +5,7 @@ import pandas as pd
 
 from openai import OpenAI
 
-from src.fai.api_models.insights import InsightResponse
+from src.fai.models.api.insights import InsightResponse
 from src.settings import CONFIG
 from src.settings import LOGGER
 from src.settings import VARIABLES

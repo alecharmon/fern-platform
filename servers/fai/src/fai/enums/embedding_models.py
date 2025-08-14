@@ -1,6 +1,6 @@
 from enum import Enum
 
-from src.types.model import EmbeddingModel
+from src.fai.models.types.model import EmbeddingModel
 
 
 class EmbeddingModels(Enum):

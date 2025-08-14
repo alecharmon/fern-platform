@@ -3,8 +3,8 @@ from typing import List
 from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
 
-from src.fai.utils.index.get_tpuf_namespace import get_query_index_name
-from src.fai.utils.index.get_tpuf_namespace import get_tpuf_namespace
+from src.fai.utils.turbopuffer.namespace import get_query_index_name
+from src.fai.utils.turbopuffer.namespace import get_tpuf_namespace
 from src.settings import CONFIG
 from src.settings import VARIABLES
 

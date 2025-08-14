@@ -2,8 +2,8 @@ from datetime import datetime
 from datetime import timedelta
 from typing import List
 
-from src.fai.api_models.analytics import HistogramAnalyticsApi
-from src.fai.api_models.analytics import HistogramAnalyticsBarApi
+from src.fai.models.api.analytics import HistogramAnalyticsApi
+from src.fai.models.api.analytics import HistogramAnalyticsBarApi
 
 
 def fill_date_gaps(

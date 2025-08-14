@@ -11,14 +11,14 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.api_models.index import IndexRequest
-from src.fai.api_models.index import UpdateIndexRequest
 from src.fai.app import fai_app
-from src.fai.db_models.document import Document
 from src.fai.dependencies import get_db
-from src.fai.utils.document.write_to_tpuf import sync_db_to_tpuf
-from src.fai.utils.index.get_tpuf_namespace import get_query_index_name
-from src.fai.utils.turbopuffer.sync_index_to_target import sync_index_to_target
+from src.fai.models.api.index import IndexRequest
+from src.fai.models.api.index import UpdateIndexRequest
+from src.fai.models.db.document import Document
+from src.fai.utils.turbopuffer.namespace import get_query_index_name
+from src.fai.utils.turbopuffer.sync import sync_db_to_tpuf
+from src.fai.utils.turbopuffer.sync import sync_index_to_target
 from src.settings import CONFIG
 from src.settings import LOGGER
 

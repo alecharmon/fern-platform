@@ -5,8 +5,8 @@ class SearchToolInput(BaseModel):
     query: str
 
 
-search_tool = {
+SEARCH_TOOL = {
     "name": "search",
     "description": "Search the knowledge base for the user's query. Semantic search is enabled.",
-    "input_schema": SearchToolInput.schema(),
+    "input_schema": SearchToolInput.model_json_schema(),
 }

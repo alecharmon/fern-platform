@@ -3,8 +3,8 @@ from sqlalchemy import DateTime
 from sqlalchemy import Float
 from sqlalchemy import String
 
-from src.fai.api_models.query import QueryApi
 from src.fai.db import Base
+from src.fai.models.api.query import QueryApi
 
 
 class Query(Base):

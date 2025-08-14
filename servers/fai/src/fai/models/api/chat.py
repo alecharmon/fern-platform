@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from src.types.message import ChatMessage
+from src.fai.models.types.message import ChatMessage
 
 
 class ChatCompletionRequest(BaseModel):

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-def get_base_system_prompt(domain: str, documents: str = "") -> str:
+def build_system_prompt(domain: str, documents: str = "") -> str:
     date = datetime.now().strftime("%Y-%m-%d")
     system_prompt = f"""Today's date is {date}.
 You are an AI assistant. The user asking questions may be a developer, technical writer, or product manager. You can provide code examples.

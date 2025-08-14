@@ -4,8 +4,8 @@ from src.fai.db import Base
 from src.fai.db import engine
 
 
-# from src.fai.db_models.document import Document
-# from src.fai.db_models.query import Query
+# from src.fai.models.db.document import Document
+# from src.fai.models.db.query import Query
 
 
 async def reinit() -> None:

@@ -1,4 +1,4 @@
-from src.enums.embedding_models import EmbeddingModels
+from src.fai.enums.embedding_models import EmbeddingModels
 
 
 def get_docs_index_name(domain: str) -> str:

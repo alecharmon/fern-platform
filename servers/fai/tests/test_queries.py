@@ -3,7 +3,7 @@ import uuid
 
 import requests
 
-from src.fai.api_models.query import QueryApi
+from src.fai.models.api.query import QueryApi
 
 
 def generate_unique_query_data() -> QueryApi:

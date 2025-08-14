@@ -8,10 +8,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.api_models.query import QueryApi
 from src.fai.app import fai_app
-from src.fai.db_models.query import Query
 from src.fai.dependencies import get_db
+from src.fai.models.api.query import QueryApi
+from src.fai.models.db.query import Query
 from src.fai.utils.histogram.fetch_grouped_data import fetch_grouped_data
 from src.fai.utils.histogram.fill_date_gaps import fill_date_gaps
 from src.fai.utils.insights.get_insights_from_queries import get_insights_from_queries

@@ -8,8 +8,8 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-from src.enums.embedding_models import EmbeddingModels
-from src.types.model import EmbeddingModel
+from src.fai.enums.embedding_models import EmbeddingModels
+from src.fai.models.types.model import EmbeddingModel
 
 
 load_dotenv()

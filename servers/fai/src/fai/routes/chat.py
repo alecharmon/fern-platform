@@ -7,11 +7,11 @@ from fastapi import Body
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from src.fai.api_models.chat import ChatCompletionRequest
 from src.fai.app import fai_app
-from src.fai.utils.chat.get_base_system_prompt import get_base_system_prompt
+from src.fai.models.api.chat import ChatCompletionRequest
 from src.fai.utils.chat.run_rag_on_query import run_rag_on_query
-from src.fai.utils.chat.search_tool import search_tool
+from src.fai.utils.chat.search_tool import SEARCH_TOOL
+from src.fai.utils.chat.system_prompt import build_system_prompt
 from src.settings import LOGGER
 from src.settings import VARIABLES
 
@@ -40,7 +40,7 @@ async def chat(
                 documents = await run_rag_on_query(last_user_message.content, domain)
 
             system_prompt = (
-                body.system_prompt if body.system_prompt else get_base_system_prompt(domain, "\n\n".join(documents))
+                body.system_prompt if body.system_prompt else build_system_prompt(domain, "\n\n".join(documents))
             )
             model = body.model or "claude-4-sonnet-20250514"
 
@@ -52,7 +52,7 @@ async def chat(
                 model=model,
                 messages=messages,
                 max_tokens=1000,
-                tools=[search_tool],
+                tools=[SEARCH_TOOL],
             )
 
             output = []

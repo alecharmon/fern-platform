@@ -10,10 +10,18 @@ from sqlalchemy import DateTime
 from sqlalchemy import String
 
 from settings import CONFIG
-from src.fai.api_models.document import DocumentApi
-from src.fai.api_models.tpuf_record import TpufRecordApi
 from src.fai.db import Base
-from src.fai.utils.document.format_document_for_tpuf import format_document_for_tpuf
+from src.fai.models.api.document import DocumentApi
+from src.fai.models.api.tpuf_record import TpufRecordApi
+
+
+def format_document_for_tpuf(chunk: str, document: str) -> str:
+    return (
+        "<GUIDANCE>\n"
+        f"In response to the following query:\n{chunk}\n\n"
+        f"You will return an answer based on the following guidance:\n{document}\n"
+        "</GUIDANCE>"
+    )
 
 
 class Document(Base):

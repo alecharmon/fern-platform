@@ -5,9 +5,9 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.api_models.analytics import HistogramAnalyticsApi
-from src.fai.api_models.analytics import HistogramAnalyticsBarApi
-from src.fai.db_models.query import Query
+from src.fai.models.api.analytics import HistogramAnalyticsApi
+from src.fai.models.api.analytics import HistogramAnalyticsBarApi
+from src.fai.models.db.query import Query
 
 
 async def fetch_grouped_data(

@@ -4,9 +4,9 @@ import pandas as pd
 from openai import AsyncOpenAI
 from sklearn.cluster import KMeans
 
-from src.fai.api_models.insights import InsightApi
-from src.fai.api_models.insights import InsightsApi
-from src.fai.api_models.query import QueryApi
+from src.fai.models.api.insights import InsightApi
+from src.fai.models.api.insights import InsightsApi
+from src.fai.models.api.query import QueryApi
 from src.fai.utils.insights.summarize_cluster import summarize_clusters_parallel
 from src.settings import CONFIG
 from src.settings import VARIABLES
