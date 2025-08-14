@@ -6,8 +6,8 @@ def get_tpuf_namespace(domain: str, index_name: str) -> str:
     return f"{domain}_{index_name}"
 
 
-def get_docs_index_name() -> str:
-    return DataIndexNames.DOCS.value
+def get_fern_docs_index_name() -> str:
+    return DataIndexNames.FERN_DOCS.value
 
 
 def get_document_index_name() -> str:

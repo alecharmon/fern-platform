@@ -5,6 +5,6 @@ QUERY_INDEX_NAME = "query"
 
 
 class DataIndexNames(Enum):
-    DOCS = "text-embedding-3-large_v3"
+    FERN_DOCS = "fern_docs"
     DOCUMENT = "document"
     GUIDANCE = "guidance"

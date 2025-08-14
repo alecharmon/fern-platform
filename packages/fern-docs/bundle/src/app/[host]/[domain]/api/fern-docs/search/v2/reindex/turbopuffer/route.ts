@@ -20,7 +20,7 @@ import { slugToHref, withoutStaging } from "@fern-api/docs-utils";
 import { FernFaiClient } from "@fern-api/fai-sdk";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import {
-  getDocsIndexName,
+  getFernDocsIndexName,
   getTurbopufferNamespace,
   getTurbopufferVectorizer,
   turbopufferUpsertTask,
@@ -44,8 +44,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const deleteExisting =
     req.nextUrl.searchParams.get("deleteExisting") === "true";
 
-  const docsIndexName = getDocsIndexName(embeddingModel);
-  const namespace = getTurbopufferNamespace(domain, docsIndexName);
+  const fernDocsIndexName = getFernDocsIndexName();
+  const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
 
   try {
     const loader = await createCachedDocsLoader(host, domain);

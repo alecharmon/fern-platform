@@ -3,7 +3,7 @@ export { createTurbopufferRecords } from "./records/create-turbopuffer-records";
 export { turbopufferUpsertTask } from "./tasks/turbopuffer-indexer-task";
 export {
   getTurbopufferNamespace,
-  getDocsIndexName,
+  getFernDocsIndexName,
   getQueryIndexName,
 } from "./utils/get-turbopuffer-namespace";
 export { getTurbopufferVectorizer } from "./utils/get-turbopuffer-vectorizer";
