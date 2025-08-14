@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { FdrAPI } from "@fern-api/fdr-sdk";
+
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsZeroState } from "@/components/docs-page/DocsZeroState";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
@@ -18,10 +20,19 @@ export default async function Page({
   const { orgName } = await params;
   const session = await getCurrentSessionOrThrow();
 
-  const { docsSites } = await getMyDocsSites({
-    orgName,
-    token: session.accessToken,
-  });
+  // Wrap this in a try/catch to not crash the page if docs sites are not found
+  let docsSites: FdrAPI.dashboard.DocsSite[] = [];
+  try {
+    const response = await getMyDocsSites({
+      orgName,
+      token: session.accessToken,
+    });
+    if (response.docsSites != null) {
+      docsSites = response.docsSites;
+    }
+  } catch (error) {
+    console.error("Failed to load docs sites", error);
+  }
 
   const firstDocsSite = docsSites[0];
   if (firstDocsSite != null) {

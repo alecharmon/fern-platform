@@ -18,6 +18,14 @@ export function useMyDocsSites() {
     useQuery({
       queryKey: ReactQueryKey.myDocsSites(orgName),
       queryFn: () => DashboardApiClient.getMyDocsSites({ orgName }),
+      retry: (failureCount, _error) => {
+        return failureCount < 3;
+      },
+      retryDelay(failureCount) {
+        return failureCount * 1000; // 1 second, 2 seconds, 3 seconds, etc.
+      },
+      gcTime: 0, // Don't cache failed queries
+      staleTime: 10000, // Cache successful results for 10 seconds
     })
   );
   return result;
