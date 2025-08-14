@@ -53,6 +53,7 @@ jobs:
 
       - name: eslint
         run: pnpm lint:eslint
+
   lint-fai:
     runs-on: CLI
     steps:
@@ -121,6 +122,37 @@ jobs:
 
       - name: Ensure no changes to git-tracked files
         run: git --no-pager diff --exit-code
+
+  test-fai:
+    runs-on: ubuntu-latest
+    environment: Fern Dev
+    env:
+      TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      POSTGRES_DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/mydatabase
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Setup poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+          cd servers/fai
+          poetry install
+      - name: Create .env file
+        run: |
+          cd servers/fai
+          echo "TURBOPUFFER_API_KEY=${{ env.TURBOPUFFER_API_KEY }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ env.ANTHROPIC_API_KEY }}" >> .env
+          echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> .env
+          echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
+      - name: test
+        run: |
+          cd servers/fai
+          poetry run pytest -sv
 
   test:
     runs-on: ubuntu-latest

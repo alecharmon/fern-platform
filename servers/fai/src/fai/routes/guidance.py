@@ -101,7 +101,7 @@ async def delete_guidance_by_id(
         return JSONResponse(content=jsonable_encoder({"message": "Guidance not found"}))
 
     except Exception as e:
-        LOGGER.exception("Failed to get guidance")
+        LOGGER.exception("Failed to delete guidance")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
