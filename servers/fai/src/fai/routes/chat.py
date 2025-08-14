@@ -24,8 +24,8 @@ async def chat(
     async def handle_tool_use(tool_use: Any, domain: str) -> Dict[str, str]:
         if tool_use.name == "search":
             query = tool_use.input["query"]
-            documents = await run_rag_on_query(query, domain)
-            return {"tool_use_id": tool_use.id, "output": "\n\n".join(documents)}
+            rag_records = await run_rag_on_query(query, domain)
+            return {"tool_use_id": tool_use.id, "output": "\n\n".join(rag_records)}
         else:
             return {"tool_use_id": tool_use.id, "output": "Tool not supported."}
 
@@ -35,12 +35,12 @@ async def chat(
             messages: List[Dict[str, Any]] = [message.to_dict() for message in body.messages]
             last_user_message = body.messages[-1] if len(body.messages) > 0 else None
 
-            documents = []
+            rag_records = []
             if last_user_message:
-                documents = await run_rag_on_query(last_user_message.content, domain)
+                rag_records = await run_rag_on_query(last_user_message.content, domain)
 
             system_prompt = (
-                body.system_prompt if body.system_prompt else build_system_prompt(domain, "\n\n".join(documents))
+                body.system_prompt if body.system_prompt else build_system_prompt(domain, "\n\n".join(rag_records))
             )
             model = body.model or "claude-4-sonnet-20250514"
 

@@ -6,7 +6,7 @@
  * @example
  *     {}
  */
-export interface GetDocumentsRequest {
+export interface GetGuidancesRequest {
     page?: number;
     limit?: number;
 }

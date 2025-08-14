@@ -4,11 +4,10 @@ from typing import List
 from pydantic import BaseModel
 
 
-class DocumentApi(BaseModel):
+class GuidanceApi(BaseModel):
     domain: str
     context: List[str]
     document: str
-    document_id: str
-    is_active: bool
+    guidance_id: str
     created_at: datetime
     updated_at: datetime

@@ -4,7 +4,7 @@
 
 import * as FernFai from "../../../index.js";
 
-export interface DocumentList {
-    documents: FernFai.Document[];
+export interface GuidanceList {
+    guidances: FernFai.Guidance[];
     pagination: FernFai.Pagination;
 }

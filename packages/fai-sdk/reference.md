@@ -305,9 +305,9 @@ await client.conversations.getConversation("domain", "conversation_id");
 </dl>
 </details>
 
-## Index
+## Guidance
 
-<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">indexDocument</a>(domain, { ...params }) -> void</code></summary>
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">createGuidance</a>(domain, { ...params }) -> void</code></summary>
 <dl>
 <dd>
 
@@ -319,7 +319,7 @@ await client.conversations.getConversation("domain", "conversation_id");
 <dl>
 <dd>
 
-Index a document for a given domain
+Index a guidance document for a given domain
 
 </dd>
 </dl>
@@ -335,9 +335,7 @@ Index a document for a given domain
 <dd>
 
 ```typescript
-await client.index.indexDocument("domain", {
-    index_name: undefined,
-    document_id: "document_id",
+await client.guidance.createGuidance("domain", {
     context: ["context", "context"],
     document: "document",
 });
@@ -364,7 +362,7 @@ await client.index.indexDocument("domain", {
 <dl>
 <dd>
 
-**request:** `FernFai.IndexRequest`
+**request:** `FernFai.IndexGuidanceRequest`
 
 </dd>
 </dl>
@@ -372,7 +370,7 @@ await client.index.indexDocument("domain", {
 <dl>
 <dd>
 
-**requestOptions:** `Index.RequestOptions`
+**requestOptions:** `Guidance.RequestOptions`
 
 </dd>
 </dl>
@@ -383,7 +381,7 @@ await client.index.indexDocument("domain", {
 </dl>
 </details>
 
-<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">getDocumentById</a>(domain, { ...params }) -> void</code></summary>
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">updateGuidanceById</a>(domain, guidanceId, { ...params }) -> FernFai.Guidance</code></summary>
 <dl>
 <dd>
 
@@ -395,7 +393,7 @@ await client.index.indexDocument("domain", {
 <dl>
 <dd>
 
-Get a document for a given domain
+Update a guidance document for a given domain
 
 </dd>
 </dl>
@@ -411,82 +409,7 @@ Get a document for a given domain
 <dd>
 
 ```typescript
-await client.index.getDocumentById("domain", {
-    document_id: "document_id",
-});
-```
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**domain:** `string`
-
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request:** `FernFai.GetRequest`
-
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**requestOptions:** `Index.RequestOptions`
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">updateDocument</a>(domain, { ...params }) -> FernFai.Document</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Update a document for a given domain
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```typescript
-await client.index.updateDocument("domain", {
-    document_id: "document_id",
-    is_active: true,
+await client.guidance.updateGuidanceById("domain", "guidance_id", {
     context: ["context", "context"],
     document: "document",
 });
@@ -513,7 +436,7 @@ await client.index.updateDocument("domain", {
 <dl>
 <dd>
 
-**request:** `FernFai.UpdateRequest`
+**guidanceId:** `string`
 
 </dd>
 </dl>
@@ -521,7 +444,15 @@ await client.index.updateDocument("domain", {
 <dl>
 <dd>
 
-**requestOptions:** `Index.RequestOptions`
+**request:** `FernFai.UpdateGuidanceRequest`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Guidance.RequestOptions`
 
 </dd>
 </dl>
@@ -532,7 +463,7 @@ await client.index.updateDocument("domain", {
 </dl>
 </details>
 
-<details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">getDocuments</a>(domain, { ...params }) -> FernFai.DocumentList</code></summary>
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">deleteGuidanceById</a>(domain, guidanceId) -> void</code></summary>
 <dl>
 <dd>
 
@@ -544,7 +475,7 @@ await client.index.updateDocument("domain", {
 <dl>
 <dd>
 
-Retrieve all paginated documents for a given domain
+Delete a guidance document for a given domain
 
 </dd>
 </dl>
@@ -560,7 +491,149 @@ Retrieve all paginated documents for a given domain
 <dd>
 
 ```typescript
-await client.index.getDocuments("domain");
+await client.guidance.deleteGuidanceById("domain", "guidance_id");
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**guidanceId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Guidance.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">getGuidanceById</a>(domain, guidanceId) -> FernFai.Guidance</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get a guidance document for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.guidance.getGuidanceById("domain", "guidance_id");
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**guidanceId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Guidance.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">getGuidances</a>(domain, { ...params }) -> FernFai.GuidanceList</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve all paginated guidance documents for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.guidance.getGuidances("domain");
 ```
 
 </dd>
@@ -584,7 +657,7 @@ await client.index.getDocuments("domain");
 <dl>
 <dd>
 
-**request:** `FernFai.GetDocumentsRequest`
+**request:** `FernFai.GetGuidancesRequest`
 
 </dd>
 </dl>
@@ -592,7 +665,7 @@ await client.index.getDocuments("domain");
 <dl>
 <dd>
 
-**requestOptions:** `Index.RequestOptions`
+**requestOptions:** `Guidance.RequestOptions`
 
 </dd>
 </dl>
@@ -602,6 +675,8 @@ await client.index.getDocuments("domain");
 </dd>
 </dl>
 </details>
+
+## Index
 
 <details><summary><code>client.index.<a href="/src/api/resources/index/client/Client.ts">syncToQueryIndex</a>(domain, { ...params }) -> void</code></summary>
 <dl>
