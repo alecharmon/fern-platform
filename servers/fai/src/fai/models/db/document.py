@@ -8,7 +8,7 @@ from sqlalchemy import String
 from settings import CONFIG
 from src.fai.db import Base
 from src.fai.models.api.document import DocumentApi
-from src.fai.models.types.tpuf_record import TurbopufferRecord
+from src.fai.models.types.record import TurbopufferRecord
 
 
 class Document(Base):

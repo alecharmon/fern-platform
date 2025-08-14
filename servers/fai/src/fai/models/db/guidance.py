@@ -12,7 +12,7 @@ from sqlalchemy import String
 from settings import CONFIG
 from src.fai.db import Base
 from src.fai.models.api.guidance import GuidanceApi
-from src.fai.models.types.tpuf_record import TurbopufferRecord
+from src.fai.models.types.record import TurbopufferRecord
 
 
 def format_guidance_for_tpuf(chunk: str, document: str) -> str:

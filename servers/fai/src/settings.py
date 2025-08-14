@@ -35,6 +35,7 @@ class Variables:
 class Config:
     INSIGHTS_NUM_CLUSTERS: int = 8
     EMBEDDING_BATCH_SIZE: int = 100
+    INSIGHTS_MAX_EXAMPLES: int = 25
     TURBOPUFFER_DEFAULT_REGION: str = "gcp-us-east4"
     DEFAULT_EMBEDDING_MODEL: EmbeddingModel = EmbeddingModels.TEXT_EMBEDDING_3_LARGE.value
 
