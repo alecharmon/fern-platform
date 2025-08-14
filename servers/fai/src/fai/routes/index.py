@@ -1,4 +1,3 @@
-import hashlib
 import uuid
 
 from datetime import datetime
@@ -11,20 +10,17 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from turbopuffer import NOT_GIVEN
-from turbopuffer import AsyncTurbopuffer
-from turbopuffer.types.row import Row
 
-from fai.db_models.document import Document
 from src.fai.api_models.index import IndexRequest
 from src.fai.api_models.index import UpdateIndexRequest
 from src.fai.app import fai_app
+from src.fai.db_models.document import Document
 from src.fai.dependencies import get_db
+from src.fai.utils.document.write_to_tpuf import sync_db_to_tpuf
 from src.fai.utils.index.get_tpuf_namespace import get_query_index_name
-from src.fai.utils.index.get_tpuf_namespace import get_tpuf_namespace
+from src.fai.utils.turbopuffer.sync_index_to_target import sync_index_to_target
 from src.settings import CONFIG
 from src.settings import LOGGER
-from src.settings import VARIABLES
 
 
 @fai_app.post("/index/{domain}")
@@ -57,6 +53,8 @@ async def index(
         db.add(new_db_document)
         await db.commit()
         await db.refresh(new_db_document)
+        await sync_db_to_tpuf(domain, db, CONFIG.DOCUMENTS_INDEX_NAME)
+        await sync_index_to_target(domain, CONFIG.DOCUMENTS_INDEX_NAME, get_query_index_name())
         LOGGER.info(f"Indexed document {body.document_id} for domain: {domain}")
         return JSONResponse(content=jsonable_encoder({"message": "Document indexed successfully"}))
 
@@ -86,6 +84,8 @@ async def update(
                 db_document.is_active = body.is_active
             await db.commit()
             await db.refresh(db_document)
+            await sync_db_to_tpuf(domain, db, CONFIG.DOCUMENTS_INDEX_NAME)
+            await sync_index_to_target(domain, CONFIG.DOCUMENTS_INDEX_NAME, get_query_index_name())
             LOGGER.info(f"Updated document {document_id} for domain: {domain}")
         return JSONResponse(content=jsonable_encoder({"message": "Document updated successfully"}))
 
@@ -157,61 +157,12 @@ async def get_documents(
 
 
 @fai_app.post("/index/{domain}/sync")
-async def sync_index(
+async def sync_index_to_query_index(
     domain: str,
     index_name: str,
 ) -> JSONResponse:
-    def prefixed_id(namespace: str, original_id: str, max_len: int = 64) -> str:
-        new_id = f"{namespace}:{original_id}"
-        if len(new_id.encode("utf-8")) <= max_len:
-            return new_id
-        hashed = hashlib.sha256(original_id.encode("utf-8")).hexdigest()[:16]
-        short_ns = namespace[: max_len - len(hashed) - 1]
-        return f"{short_ns}:{hashed}"
-
     try:
-        source_namespace_id = get_tpuf_namespace(domain, index_name)
-        query_index_name = get_query_index_name()
-        target_namespace_id = get_tpuf_namespace(domain, query_index_name)
-        LOGGER.info(f"Syncing index {source_namespace_id} to {target_namespace_id} for domain {domain}")
-        async with AsyncTurbopuffer(
-            region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
-            api_key=VARIABLES.TURBOPUFFER_API_KEY,
-        ) as tpuf_client:
-            source_ns = tpuf_client.namespace(source_namespace_id)
-            target_ns = tpuf_client.namespace(target_namespace_id)
-
-            await target_ns.write(delete_by_filter=["source", "Eq", index_name])
-
-            last_id = None
-            while True:
-                result = await source_ns.query(
-                    rank_by=("id", "asc"),
-                    top_k=1000,
-                    include_attributes=True,
-                    filters=("id", "Gt", last_id) if last_id is not None else NOT_GIVEN,
-                )
-
-                prefixed_rows = []
-                for row in result.rows:
-                    new_row = Row.from_dict(row.model_dump())
-                    new_row.id = prefixed_id(source_namespace_id, row.id)
-                    new_row.source = index_name
-                    prefixed_rows.append(new_row)
-
-                source_schema = await source_ns.schema()
-                await target_ns.write(
-                    upsert_rows=prefixed_rows,
-                    distance_metric="cosine_distance",
-                    schema={
-                        **source_schema,
-                        "source": "string",
-                    },
-                )
-
-                if len(result.rows) < 1000:
-                    break
-                last_id = result.rows[-1].id
+        await sync_index_to_target(domain, index_name, get_query_index_name())
         return JSONResponse(content=jsonable_encoder({"message": "Index synced successfully"}))
 
     except Exception as e:

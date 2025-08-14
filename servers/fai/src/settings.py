@@ -36,7 +36,7 @@ class Config:
     INSIGHTS_NUM_CLUSTERS: int = 8
     EMBEDDING_BATCH_SIZE: int = 100
     TURBOPUFFER_DEFAULT_REGION: str = "gcp-us-east4"
-    CUSTOM_INDEX_NAME: str = "custom"
+    DOCUMENTS_INDEX_NAME: str = "documents"
     DEFAULT_EMBEDDING_MODEL: EmbeddingModel = EmbeddingModels.TEXT_EMBEDDING_3_LARGE.value
 
 

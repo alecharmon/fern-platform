@@ -32,8 +32,10 @@ export function convertTpufRecordsToDocuments(
       };
     }),
     (result) => result.url
-  ).map(
-    (result) =>
-      `# ${result.title}\n Citation URL: ${result.url}\n\n${maybeTruncate(result.document, 20000)}`
-  );
+  ).map((result) => {
+    if (result.url == null) {
+      return maybeTruncate(result.document, 20000);
+    }
+    return `# ${result.title}\n Citation URL: ${result.url}\n\n${maybeTruncate(result.document, 20000)}`;
+  });
 }

@@ -11,9 +11,9 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fai.api_models.query import QueryApi
-from fai.db_models.query import Query
+from src.fai.api_models.query import QueryApi
 from src.fai.app import fai_app
+from src.fai.db_models.query import Query
 from src.fai.dependencies import get_db
 from src.settings import LOGGER
 

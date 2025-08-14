@@ -1,15 +1,19 @@
+import hashlib
+
 from typing import List
 
+from openai import AsyncOpenAI
 from sqlalchemy import ARRAY
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import String
 
+from settings import CONFIG
 from src.fai.api_models.document import DocumentApi
-from src.fai.api_models.tpuf_record import TpufAttributesApi
-from src.fai.api_models.tpuf_record import TpufRecordWithoutVectorApi
+from src.fai.api_models.tpuf_record import TpufRecordApi
 from src.fai.db import Base
+from src.fai.utils.document.format_document_for_tpuf import format_document_for_tpuf
 
 
 class Document(Base):
@@ -36,13 +40,20 @@ class Document(Base):
             updated_at=self.updated_at,
         )
 
-    def to_tpuf_record(self) -> List[TpufRecordWithoutVectorApi]:
-        return [
-            TpufRecordWithoutVectorApi(
-                id=self.document_id,
-                attributes=TpufAttributesApi(
+    async def to_tpuf_record(self, openai_client: AsyncOpenAI) -> List[TpufRecordApi]:
+        tbuf_records = []
+        for chunk_index, chunk in enumerate(self.context):
+            embedding = await openai_client.embeddings.create(
+                input=chunk,
+                model=CONFIG.DEFAULT_EMBEDDING_MODEL.model_name,
+            )
+            chunk_vector = embedding.data[0].embedding
+            tbuf_records.append(
+                TpufRecordApi(
+                    id=f"{self.document_id}:{chunk_index}",
+                    vector=chunk_vector,
                     chunk=chunk,
-                    document=self.document,
+                    document=format_document_for_tpuf(chunk, self.document),
                     title="",
                     url="",
                     version=None,
@@ -50,5 +61,4 @@ class Document(Base):
                     authed=None,
                 ),
             )
-            for chunk in self.context
-        ]
+        return tbuf_records

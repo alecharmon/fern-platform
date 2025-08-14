@@ -1,8 +1,8 @@
 import asyncio
 
-from fai.db_models.document import Document
 from src.fai.db import Base
 from src.fai.db import engine
+from src.fai.db_models.document import Document
 from src.fai.db_models.query import Query
 
 
