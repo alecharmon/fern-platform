@@ -28,6 +28,7 @@ async def fetch_grouped_data(
     stmt = (
         select(date_label, conversation_count, query_count)
         .where(and_(Query.domain == domain, Query.created_at >= start, Query.created_at <= end))
+        .where(Query.role == "USER")
         .group_by(date_label)
         .order_by(date_label)
     )
