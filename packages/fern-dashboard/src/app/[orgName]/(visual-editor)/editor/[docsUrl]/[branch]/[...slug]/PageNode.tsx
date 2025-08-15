@@ -11,6 +11,7 @@ import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation
 import { MdxToHtmlResponse, mdxToHtml } from "@fern-docs/mdx";
 
 import { UnsupportedContent } from "@/components/editor/UnsupportedContent";
+import { CSSProvider } from "@/components/editor/extension-custom-element/CSSContext";
 import { OriginalElementsProvider } from "@/providers/OriginalElementsContext";
 import { createMdxFrontmatter } from "@/utils/createMdxFrontmatter";
 
@@ -37,6 +38,7 @@ export declare namespace PageNode {
     initialFrontmatter?: MdxToHtmlResponse["frontmatter"];
     initialOriginalElements?: MdxToHtmlResponse["originalElements"];
     initialOriginalFrontmatter?: MdxToHtmlResponse["originalFrontmatter"];
+    cssConfig?: { inline?: string[] };
   }
 }
 
@@ -139,21 +141,23 @@ export default function PageNode({
         productIsDefault={foundNode.isCurrentProductDefault}
       />
       <OriginalElementsProvider originalElements={initialOriginalElements}>
-        {isUnsupportedNode ? (
-          <UnsupportedContent>
-            This page is not visible in the editor.
-          </UnsupportedContent>
-        ) : (
-          <PageContents
-            filename={initialFilename || foundNode.node.slug || "untitled"}
-            initialHtml={initialHtml}
-            initialFrontmatter={initialFrontmatter}
-            initialOriginalElements={initialOriginalElements}
-            initialOriginalFrontmatter={initialOriginalFrontmatter}
-            clientNodeId={clientNodeId}
-            serverData={serverData}
-          />
-        )}
+        <CSSProvider cssConfig={props.cssConfig}>
+          {isUnsupportedNode ? (
+            <UnsupportedContent>
+              This page is not visible in the editor.
+            </UnsupportedContent>
+          ) : (
+            <PageContents
+              filename={initialFilename || foundNode.node.slug || "untitled"}
+              initialHtml={initialHtml}
+              initialFrontmatter={initialFrontmatter}
+              initialOriginalElements={initialOriginalElements}
+              initialOriginalFrontmatter={initialOriginalFrontmatter}
+              clientNodeId={clientNodeId}
+              serverData={serverData}
+            />
+          )}
+        </CSSProvider>
       </OriginalElementsProvider>
     </>
   );

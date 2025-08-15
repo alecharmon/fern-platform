@@ -718,10 +718,12 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
         cacheConfig.cacheKeySuffix
       );
       if (page != null && isPlainObject(page) && "markdown" in page) {
+        const config = await getConfig(cacheConfig)(domain);
         return {
           filename: pageId,
           markdown: page.markdown,
           editThisPageUrl: page.editThisPageUrl,
+          css: config.css,
         };
       }
     } catch (error) {
@@ -749,6 +751,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
       filename: pageId,
       markdown: page.markdown,
       editThisPageUrl: page.editThisPageUrl,
+      css: response.definition.config.css,
     };
   });
 

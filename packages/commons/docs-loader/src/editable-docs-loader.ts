@@ -69,7 +69,14 @@ class EditableDocsLoader implements DocsLoader {
     Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">
   > => this.readOnlyDocsLoader.getConfig();
 
-  getPage = (pageId: string) => this.readOnlyDocsLoader.getPage(pageId);
+  async getPage(pageId: string): Promise<{
+    filename: string;
+    markdown: string;
+    editThisPageUrl?: string;
+    css?: any;
+  }> {
+    return this.readOnlyDocsLoader.getPage(pageId);
+  }
 
   getColors = () => this.readOnlyDocsLoader.getColors();
 

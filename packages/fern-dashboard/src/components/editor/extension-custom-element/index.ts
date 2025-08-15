@@ -1,5 +1,3 @@
-import { CustomElement } from "./custom-element";
-
-export * from "./custom-element";
-
-export default CustomElement;
+export { CustomElementNodeView } from "./CustomElementNodeView";
+export { CustomElement as default } from "./custom-element";
+export { CSSProvider, useCSS } from "./CSSContext";

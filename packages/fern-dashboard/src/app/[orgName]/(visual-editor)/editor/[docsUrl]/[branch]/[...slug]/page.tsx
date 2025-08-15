@@ -52,10 +52,8 @@ export default async function Page({
 
   const slug = slugAlias === ROOT_SLUG_ALIAS ? root.slug : slugAlias;
   const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
-
   // Check if client-node-id is passed as search param
   const clientNodeId = resolvedSearchParams["client-node-id"];
-
   // If the page is not found and client-node-id is not passed, redirect to appropriate page
   // For client pages, we allow not-found nodes as long as clientNodeId is provided
   if (foundNode.type !== "found" && !clientNodeId) {
@@ -94,13 +92,14 @@ export default async function Page({
 
   const filename = page?.filename;
   const mdx = page?.markdown;
+  const cssConfig = page?.css; // Extract CSS configuration
+
   const { html, frontmatter, originalElements, originalFrontmatter } = mdx
     ? mdxToHtml(mdx, {
         treatAsCustomElement: ["code"],
         treatAsUnsupported: ["math"],
       })
     : {};
-
   return (
     // TODO: Currently, we are force-hiding the table of contents is within Visual Editor.
     // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
@@ -131,6 +130,7 @@ export default async function Page({
           initialFrontmatter={frontmatter}
           initialOriginalElements={originalElements}
           initialOriginalFrontmatter={originalFrontmatter}
+          cssConfig={cssConfig}
         />
       </div>
     </AbstractLayoutEvaluatorContent>

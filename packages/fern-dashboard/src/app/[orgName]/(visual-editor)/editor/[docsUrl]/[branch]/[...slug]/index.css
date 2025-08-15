@@ -23,6 +23,8 @@
   @apply font-body text-body bg-background text-base;
   @apply h-full;
 
+  transform: translateX(0%);
+
   .fern-background-image {
     overflow: hidden;
     position: absolute;
