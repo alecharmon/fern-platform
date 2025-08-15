@@ -67,16 +67,17 @@ async function applyAuth0Middleware(req: NextRequest): Promise<NextResponse> {
     });
   }
 
-  // After the user logs in, we want to redirect them to the organization they were invited to
-  if (req.nextUrl.pathname === "/auth/callback") {
-    const pendingOrgRedirect = req.cookies.get("pending_org_redirect")?.value;
+  // Let Auth0 handle the callback first, then check for pending redirects on the next request
+  // Don't intercept /auth/callback as it prevents Auth0 from establishing the session properly
 
-    if (pendingOrgRedirect) {
-      // Clear the cookie and redirect to the organization
-      authResponse.cookies.delete("pending_org_redirect");
-      const redirectUrl = new URL(`/${pendingOrgRedirect}`, req.nextUrl.origin);
-      return NextResponse.redirect(redirectUrl);
-    }
+  // Clear the pending_org_redirect cookie when user accesses any org page
+  // This ensures the cookie doesn't persist after the invitation flow is complete
+  const pendingOrgRedirect = req.cookies.get("pending_org_redirect")?.value;
+  if (
+    pendingOrgRedirect &&
+    req.nextUrl.pathname.startsWith(`/${pendingOrgRedirect}`)
+  ) {
+    authResponse.cookies.delete("pending_org_redirect");
   }
 
   return authResponse;

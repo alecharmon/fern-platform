@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createPersonalProject } from "./actions/createPersonalProject";
@@ -13,6 +14,15 @@ export default async function Page() {
 
   if (session == null) {
     redirect("/login");
+  }
+
+  // Check if there's a pending org redirect from invitation flow
+  const cookieStore = await cookies();
+  const pendingOrgRedirect = cookieStore.get("pending_org_redirect")?.value;
+
+  if (pendingOrgRedirect) {
+    // Redirect to the invited organization (cookie will be cleared by middleware on next request)
+    redirect(`/${pendingOrgRedirect}`);
   }
 
   const firstOrg = await getOrCreateFirstOrgForUser(session);

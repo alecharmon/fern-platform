@@ -14,7 +14,7 @@ export default async function Page({
   const session = await getCurrentSession();
 
   if (session == null) {
-    redirect("/");
+    redirect("/login");
   }
 
   const { orgName } = await params;
