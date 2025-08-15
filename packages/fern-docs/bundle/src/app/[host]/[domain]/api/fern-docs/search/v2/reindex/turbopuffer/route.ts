@@ -104,7 +104,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     });
 
     await faiClient.index.syncToQueryIndex(domain, {
-      index_name: docsIndexName,
+      index_name: fernDocsIndexName,
     });
 
     const end = Date.now();
