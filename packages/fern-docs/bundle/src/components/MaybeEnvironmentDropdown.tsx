@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from "react";
 
 import { useAtom } from "jotai";
-import { parse } from "url";
+import { URL } from "url";
 
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { sanitizeUrl } from "@fern-api/ui-core-utils";
@@ -73,7 +73,7 @@ export function MaybeEnvironmentDropdown({
   // }, [environmentFilters, environmentId, setSelectedEnvironmentId]);
 
   const preParsedUrl = selectedEnvironmentUrl ?? baseUrl;
-  const url = preParsedUrl && parse(sanitizeUrl(preParsedUrl) ?? "");
+  const url = preParsedUrl && safeParseUrl(sanitizeUrl(preParsedUrl) ?? "");
 
   // TODO: clean up this component
   useEffect(() => {
@@ -89,11 +89,12 @@ export function MaybeEnvironmentDropdown({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEnvironmentUrl]);
 
+  const parsedInputValue = safeParseUrl(inputValue);
   const isValidInput =
     inputValue != null &&
     inputValue !== "" &&
-    parse(inputValue).host != null &&
-    parse(inputValue).protocol != null;
+    parsedInputValue?.host != null &&
+    parsedInputValue?.protocol != null;
 
   const urlProtocol = url ? url.protocol : "";
   const fullyQualifiedDomainAndBasePath = url
@@ -131,11 +132,12 @@ export function MaybeEnvironmentDropdown({
               }
             }}
             onValueChange={(value) => {
+              const parsedValue = safeParseUrl(value);
               if (
                 value === "" ||
                 value == null ||
-                parse(value).host == null ||
-                parse(value).protocol == null
+                parsedValue?.host == null ||
+                parsedValue?.protocol == null
               ) {
                 setInputValue(value);
               } else {
@@ -263,3 +265,15 @@ export function MaybeEnvironmentDropdown({
     </>
   );
 }
+
+const safeParseUrl = (url: string | undefined): URL | null => {
+  return url
+    ? (() => {
+        try {
+          return new URL(url);
+        } catch {
+          return null;
+        }
+      })()
+    : null;
+};

@@ -6,7 +6,7 @@ This repo contains a Dockerfile for self-hosting Fern's docs product. This proje
 
 ### Pre-requisites
 
-- Make sure Node.js 18+ and pnpm are installed on your machine
+- Make sure Node.js 22+ and pnpm are installed on your machine
 - Have Docker installed and have the daemon open on your machine
 
 ## Building the Docker Image:

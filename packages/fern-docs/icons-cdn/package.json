@@ -40,7 +40,7 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@next/bundle-analyzer": "15.3.0-canary.1",
-    "@types/node": "^18.11.9",
+    "@types/node": "^22.0.0",
     "depcheck": "^1.4.7",
     "next": "15.3.0-canary.1",
     "stylelint": "^16.1.0",

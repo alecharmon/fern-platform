@@ -4,7 +4,7 @@ import Link from "next/link";
 import React from "react";
 
 import { ExternalLinkIcon } from "lucide-react";
-import { type UrlObject, format, parse, resolve } from "url";
+import { type UrlObject, format, resolve } from "url";
 
 import { conformTrailingSlash } from "@fern-api/docs-utils";
 
@@ -113,7 +113,13 @@ export function toUrlObject(url: string | UrlObject): UrlObject {
   if (url == null) {
     return {};
   }
-  return typeof url === "string" ? parse(url) : url;
+  if (typeof url === "string") {
+    const parsed = safeParseUrl(url);
+    if (parsed) {
+      return parsed;
+    }
+  }
+  return url as UrlObject;
 }
 
 export function formatUrlString(url: string | UrlObject): string {
@@ -153,6 +159,7 @@ export function checkIsRelativeUrl(url: UrlObject): boolean {
     return false;
   }
 
+  // If it starts with /, it's an absolute path (not relative)
   if (url.href.startsWith("/")) {
     return false;
   }
@@ -208,3 +215,51 @@ function stripNextLinkProps<T extends MaybeFernLinkProps>(
   } = props;
   return rest;
 }
+
+const safeParseUrl = (url: string | undefined): UrlObject | null => {
+  return url
+    ? (() => {
+        try {
+          // check if it's an absolute URL (has protocol)
+          // this includes both http://example.com and mailto:email@example.com
+          if (url.includes("://") || /^[a-zA-Z]+:/.test(url)) {
+            const urlObj = new URL(url);
+            return {
+              protocol: urlObj.protocol,
+              slashes: true,
+              auth: "",
+              host: urlObj.host,
+              port: urlObj.port,
+              hostname: urlObj.hostname,
+              hash: urlObj.hash,
+              search: urlObj.search,
+              query: urlObj.search,
+              pathname: urlObj.pathname,
+              path: urlObj.pathname + urlObj.search,
+              href: urlObj.href,
+            };
+          } else {
+            // handle relative URLs by parsing with a base URL
+            // then extracting only the relative parts
+            const urlObj = new URL(url, "http://localhost");
+            return {
+              protocol: null,
+              slashes: null,
+              auth: null,
+              host: null,
+              port: null,
+              hostname: null,
+              hash: urlObj.hash,
+              search: urlObj.search,
+              query: urlObj.search,
+              pathname: urlObj.pathname,
+              path: urlObj.pathname + urlObj.search,
+              href: url,
+            };
+          }
+        } catch (_error) {
+          return null;
+        }
+      })()
+    : null;
+};

@@ -14,13 +14,13 @@ runs:
     - name: ⎔ Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 9.15.9
+        version: 10.11.0
         run_install: false # https://github.com/pnpm/action-setup?tab=readme-ov-file#use-cache-to-reduce-installation-time
 
     - name: ⎔ Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: pnpm
 
     - name: 📥 Install dependencies

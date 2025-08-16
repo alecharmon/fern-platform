@@ -6,7 +6,7 @@ RUN apk add --no-cache nodejs npm
 RUN npm install -g turbo@2.0.1
 
 COPY . .
-RUN npm install -g pnpm@9.15.9
+RUN npm install -g pnpm@10.11.0
 RUN rm -rf fern/
 
 RUN turbo prune @fern-docs/bundle --docker

@@ -43,21 +43,45 @@
     "vercel:up": "pnpm up -r \"@vercel/*\""
   },
   "resolutions": {
+    "@aa-sdk/core": "^4.31.2",
+    "@account-kit/react": "^4.31.2",
     "@eslint/plugin-kit": "^0.3.3",
+    "@fern-fern/fern-cloud-sdk": "^0.0.305",
+    "@fern-fern/revalidation-sdk": "^0.0.9",
+    "@slack/web-api": "^6.12.0",
+    "@sparticuz/chromium": "^133.0.0",
+    "@tanstack/form-core": "^0.42.1",
+    "@tanstack/react-form": "^0.42.1",
+    "@tanstack/zod-form-adapter": "^0.42.1",
+    "@tiptap/starter-kit": "^3.0.5",
     "@types/estree": "1.0.6",
+    "@types/node": "^22.0.0",
+    "@types/node-fetch": "^2.6.3",
+    "@vercel/node": "^2.15.10",
+    "browserify-sign": "^4.2.3",
     "clipboardy": "4.0.0",
     "colorjs.io": "^0.5.2",
     "cookie": "0.7.0",
     "cross-spawn": "7.0.5",
+    "crypto-browserify": "^3.12.1",
     "elliptic": "6.6.1",
     "esbuild": "0.25.0",
+    "form-data": "^4.0.4",
     "jsonpath-plus": "10.3.0",
     "katex": "0.16.21",
+    "linkifyjs": "^4.3.2",
     "markdown-to-jsx": "7.4.0",
     "micromatch": "4.0.8",
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "parse-asn1": "^5.1.7",
+    "path-to-regexp": "^6.3.0",
+    "pbkdf2": "^3.1.3",
+    "public-encrypt": "^4.0.3",
+    "puppeteer-core": "^24.4.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "shiki": "3.2.1",
+    "tar-fs": "^3.0.9",
     "typescript": "5.7.3",
     "unified": "11.0.5",
     "webpack": "5.94.0"
@@ -79,7 +103,7 @@
     "@types/http-proxy": "^1.17.16",
     "@types/is-ci": "^3.0.4",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^18.11.9",
+    "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "8.25.0",
     "@typescript-eslint/parser": "8.25.0",
     "@typescript/vfs": "^1.6.1",
@@ -135,10 +159,10 @@
       "unplugged": true
     }
   },
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@10.11.0",
   "engines": {
-    "node": ">=18.18.0",
-    "pnpm": "^9"
+    "node": ">=22.0.0",
+    "pnpm": "^10"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

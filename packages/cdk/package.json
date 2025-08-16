@@ -34,7 +34,7 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/archiver": "^6.0.2",
-    "@types/node": "^18.11.9",
+    "@types/node": "^22.0.0",
     "aws-cdk": "^2.179.0",
     "typescript": "^5"
   }
