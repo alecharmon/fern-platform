@@ -21,12 +21,14 @@ jobs:
       continue: ${{ steps.has-changed.outputs.RESULT == 'true' }}
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 2
+          
       - name: 🔎 Has changed
         id: has-changed
         # if there are changes, npx turbo-ignore returns a failure exit code
         # which makes steps.has-changed.outputs.RESULT = 'true'
-        run: npx turbo-ignore @fern-docs/icons-cdn || echo "RESULT=true" >> $GITHUB_OUTPUT
+        run: npx turbo-ignore @fern-docs/icons-cdn HEAD~1 || echo "RESULT=true" >> $GITHUB_OUTPUT
 
   deploy:
     needs: ignore
