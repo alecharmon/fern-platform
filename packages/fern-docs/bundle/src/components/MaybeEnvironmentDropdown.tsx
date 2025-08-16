@@ -1,7 +1,6 @@
 import React, { ReactElement, useEffect, useState } from "react";
 
 import { useAtom } from "jotai";
-import { URL } from "url";
 
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { sanitizeUrl } from "@fern-api/ui-core-utils";

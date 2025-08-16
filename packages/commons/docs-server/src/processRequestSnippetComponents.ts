@@ -1,4 +1,3 @@
-import { URL } from "url";
 import urljoin from "url-join";
 
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
@@ -53,15 +52,17 @@ export function getMatchablePermutationsForEndpoint(
     possiblePaths.add(fullUrl1);
     possiblePaths.add(fullUrl2);
 
-    const parsedUrl = URL.parse(env.baseUrl);
-    const basePath = parsedUrl
-      ? parsedUrl.pathname + parsedUrl.search
-      : undefined;
-    if (basePath !== "" && basePath !== undefined) {
-      const urlWithBasePath1 = urljoin(basePath, path1);
-      const urlWithBasePath2 = urljoin(basePath, path2);
-      possiblePaths.add(urlWithBasePath1);
-      possiblePaths.add(urlWithBasePath2);
+    try {
+      const parsedUrl = new URL(env.baseUrl);
+      const basePath = parsedUrl.pathname + parsedUrl.search;
+      if (basePath !== "" && basePath !== undefined) {
+        const urlWithBasePath1 = urljoin(basePath, path1);
+        const urlWithBasePath2 = urljoin(basePath, path2);
+        possiblePaths.add(urlWithBasePath1);
+        possiblePaths.add(urlWithBasePath2);
+      }
+    } catch {
+      // If URL parsing fails, skip adding base path variations
     }
   });
   return possiblePaths;
