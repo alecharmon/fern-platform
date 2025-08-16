@@ -1,5 +1,5 @@
 {
-  "app": "tsx src/cdk.ts",
+  "app": "tsx --commonjs src/cdk.ts",
   "watch": {
     "include": ["**"],
     "exclude": [
