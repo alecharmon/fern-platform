@@ -28,6 +28,8 @@ const buttonVariants = cva(
           "text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-11)",
         success:
           "bg-(color:--green-a9) hover:bg-(color:--green-a10) text-(color:--green-1)",
+        ghostMinimal:
+          "text-(color:--grayscale-a11) hover:text-(color:--accent) border-none",
         link: "text-(color:--accent-6) underline-offset-4 hover:underline",
       },
       size: {

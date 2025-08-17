@@ -20,6 +20,7 @@ import { cn } from "@fern-docs/components";
 
 import { withErrorBoundary } from "@/components/error-boundary";
 
+import { IdempotentInputGroup } from "../IdempotentInputGroup";
 import { PasswordInputGroup } from "../PasswordInputGroup";
 import { WithLabel } from "../WithLabel";
 import { PlaygroundDiscriminatedUnionForm } from "./PlaygroundDescriminatedUnionForm";
@@ -195,6 +196,14 @@ const PlaygroundTypeReferenceFormInternal =
                     maxLength={string.maxLength}
                     minLength={string.minLength}
                     pattern={string.regex}
+                  />
+                ) : primitive.value.type === "string" &&
+                  property?.key === "idempotency_key" ? (
+                  <IdempotentInputGroup
+                    id={id}
+                    className="w-full"
+                    value={typeof value === "string" ? value : ""}
+                    onValueChange={onChange}
                   />
                 ) : (
                   <FernInput
