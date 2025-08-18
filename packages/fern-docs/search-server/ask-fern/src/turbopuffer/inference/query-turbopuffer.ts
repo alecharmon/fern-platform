@@ -101,7 +101,6 @@ export async function queryTurbopuffer(
           rank_by: [
             "Sum",
             [
-              ["chunk", "BM25", query],
               ["title", "BM25", query],
               ["keywords", "BM25", query],
             ],
