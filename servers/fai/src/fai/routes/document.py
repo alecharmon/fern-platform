@@ -7,7 +7,6 @@ from fastapi import Depends
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,7 +18,6 @@ from src.fai.utils.turbopuffer.namespace import get_document_index_name
 from src.fai.utils.turbopuffer.namespace import get_query_index_name
 from src.fai.utils.turbopuffer.sync import sync_document_db_to_tpuf
 from src.fai.utils.turbopuffer.sync import sync_index_to_target
-from src.settings import CONFIG
 from src.settings import LOGGER
 
 
@@ -67,9 +65,9 @@ async def get_document_by_id(
         document = await db.execute(select(Document).where(Document.id == document_id, Document.domain == domain))
         document = document.scalar_one_or_none()
         if not document:
-            raise HTTPException(status_code=404, detail="Document not found")
+            return JSONResponse(status_code=500, content={"message": "Document not found"})
         return JSONResponse(content=jsonable_encoder(document.to_api()))
 
     except Exception as e:
         LOGGER.exception("Failed to get document")
-        return JSONResponse(status_code=500, content={"detail": str(e)})
+        return JSONResponse(status_code=500, content={"message": str(e)})

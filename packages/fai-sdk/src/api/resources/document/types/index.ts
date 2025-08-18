@@ -1,2 +1,2 @@
-export * from "./CreateDocumentResponse.js";
+export * from "./DocumentIdResponse.js";
 export * from "./Document.js";

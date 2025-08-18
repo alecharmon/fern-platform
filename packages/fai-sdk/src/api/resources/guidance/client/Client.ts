@@ -60,7 +60,7 @@ export class Guidance {
         domain: string,
         request: FernFai.IndexGuidanceRequest,
         requestOptions?: Guidance.RequestOptions,
-    ): core.HttpResponsePromise<void> {
+    ): core.HttpResponsePromise<FernFai.GuidanceIdResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createGuidance(domain, request, requestOptions));
     }
 
@@ -68,7 +68,7 @@ export class Guidance {
         domain: string,
         request: FernFai.IndexGuidanceRequest,
         requestOptions?: Guidance.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
+    ): Promise<core.WithRawResponse<FernFai.GuidanceIdResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -90,7 +90,7 @@ export class Guidance {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernFai.GuidanceIdResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -147,7 +147,7 @@ export class Guidance {
         guidanceId: string,
         request: FernFai.UpdateGuidanceRequest,
         requestOptions?: Guidance.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.Guidance> {
+    ): core.HttpResponsePromise<FernFai.GuidanceIdResponse> {
         return core.HttpResponsePromise.fromPromise(
             this.__updateGuidanceById(domain, guidanceId, request, requestOptions),
         );
@@ -158,7 +158,7 @@ export class Guidance {
         guidanceId: string,
         request: FernFai.UpdateGuidanceRequest,
         requestOptions?: Guidance.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.Guidance>> {
+    ): Promise<core.WithRawResponse<FernFai.GuidanceIdResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -180,7 +180,7 @@ export class Guidance {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.Guidance, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernFai.GuidanceIdResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {

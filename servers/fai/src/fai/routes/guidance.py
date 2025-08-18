@@ -46,7 +46,7 @@ async def index_guidance(
         await sync_guidance_db_to_tpuf(domain, db)
         await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
         LOGGER.info(f"Indexed guidance {new_db_guidance.id} for domain: {domain}")
-        return JSONResponse(content=jsonable_encoder({"message": "Guidance indexed successfully"}))
+        return JSONResponse(content=jsonable_encoder({"guidance_id": new_db_guidance.id}))
 
     except Exception as e:
         LOGGER.exception("Failed to index guidance")
@@ -75,7 +75,7 @@ async def update(
             await sync_guidance_db_to_tpuf(domain, db)
             await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
             LOGGER.info(f"Updated guidance {guidance_id} for domain: {domain}")
-            return JSONResponse(content=jsonable_encoder({"message": "Guidance updated successfully"}))
+            return JSONResponse(content=jsonable_encoder({"guidance_id": db_guidance.id}))
         return JSONResponse(status_code=404, content=jsonable_encoder({"message": "Guidance not found"}))
 
     except Exception as e:

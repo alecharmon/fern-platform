@@ -40,7 +40,7 @@ service:
             authed:
               type: optional<boolean>
               docs: Whether the document is authed
-      response: CreateDocumentResponse
+      response: DocumentIdResponse
       errors:
         - commons.BadRequestError
         - commons.InternalError
@@ -60,7 +60,7 @@ service:
         - commons.InternalError
 
 types:
-  CreateDocumentResponse:
+  DocumentIdResponse:
     properties:
       document_id: string
 

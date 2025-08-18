@@ -307,7 +307,7 @@ await client.conversations.getConversation("domain", "conversation_id");
 
 ## Document
 
-<details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">createDocument</a>(domain, { ...params }) -> FernFai.CreateDocumentResponse</code></summary>
+<details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">createDocument</a>(domain, { ...params }) -> FernFai.DocumentIdResponse</code></summary>
 <dl>
 <dd>
 
@@ -459,7 +459,7 @@ await client.document.getDocumentById("domain", "document_id");
 
 ## Guidance
 
-<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">createGuidance</a>(domain, { ...params }) -> void</code></summary>
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">createGuidance</a>(domain, { ...params }) -> FernFai.GuidanceIdResponse</code></summary>
 <dl>
 <dd>
 
@@ -533,7 +533,7 @@ await client.guidance.createGuidance("domain", {
 </dl>
 </details>
 
-<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">updateGuidanceById</a>(domain, guidanceId, { ...params }) -> FernFai.Guidance</code></summary>
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">updateGuidanceById</a>(domain, guidanceId, { ...params }) -> FernFai.GuidanceIdResponse</code></summary>
 <dl>
 <dd>
 

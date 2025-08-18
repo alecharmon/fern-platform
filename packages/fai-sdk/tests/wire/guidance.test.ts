@@ -10,34 +10,30 @@ describe("Guidance", () => {
         const server = mockServerPool.createServer();
         const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
         const rawRequestBody = { context: ["context", "context"], document: "document" };
-
+        const rawResponseBody = { guidance_id: "guidance_id" };
         server
             .mockEndpoint()
             .post("/guidance/domain/create")
             .jsonBody(rawRequestBody)
             .respondWith()
             .statusCode(200)
+            .jsonBody(rawResponseBody)
             .build();
 
         const response = await client.guidance.createGuidance("domain", {
             context: ["context", "context"],
             document: "document",
         });
-        expect(response).toEqual(undefined);
+        expect(response).toEqual({
+            guidance_id: "guidance_id",
+        });
     });
 
     test("updateGuidanceById", async () => {
         const server = mockServerPool.createServer();
         const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
         const rawRequestBody = { context: ["context", "context"], document: "document" };
-        const rawResponseBody = {
-            guidance_id: "guidance_id",
-            context: ["context", "context"],
-            domain: "domain",
-            document: "document",
-            created_at: "2024-01-15T09:30:00Z",
-            updated_at: "2024-01-15T09:30:00Z",
-        };
+        const rawResponseBody = { guidance_id: "guidance_id" };
         server
             .mockEndpoint()
             .patch("/guidance/domain/guidance_id")
@@ -53,11 +49,6 @@ describe("Guidance", () => {
         });
         expect(response).toEqual({
             guidance_id: "guidance_id",
-            context: ["context", "context"],
-            domain: "domain",
-            document: "document",
-            created_at: "2024-01-15T09:30:00Z",
-            updated_at: "2024-01-15T09:30:00Z",
         });
     });
 

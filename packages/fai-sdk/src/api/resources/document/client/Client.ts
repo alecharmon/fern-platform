@@ -65,7 +65,7 @@ export class Document {
         domain: string,
         request: FernFai.IndexDocumentRequest,
         requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.CreateDocumentResponse> {
+    ): core.HttpResponsePromise<FernFai.DocumentIdResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createDocument(domain, request, requestOptions));
     }
 
@@ -73,7 +73,7 @@ export class Document {
         domain: string,
         request: FernFai.IndexDocumentRequest,
         requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.CreateDocumentResponse>> {
+    ): Promise<core.WithRawResponse<FernFai.DocumentIdResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -95,7 +95,7 @@ export class Document {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.CreateDocumentResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernFai.DocumentIdResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
