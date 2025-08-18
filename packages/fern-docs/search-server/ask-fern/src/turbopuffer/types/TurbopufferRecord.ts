@@ -35,12 +35,12 @@ export const FernTurbopufferAttributeSchema: Record<
 > = {
   chunk: {
     type: "string",
-    filterable: true,
-    bm25: true,
+    filterable: false,
+    bm25: false,
   },
   document: {
     type: "string",
-    filterable: true,
+    filterable: false,
     bm25: false,
   },
   title: {
