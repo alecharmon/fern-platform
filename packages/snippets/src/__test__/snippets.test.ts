@@ -2,194 +2,25 @@ import { describe, expect, it } from "vitest";
 
 import { dynamic } from "@fern-api/dynamic-ir-sdk/api";
 
-import { Language } from "../Language";
 import { SnippetResolver } from "../SnippetResolver";
 import { SnippetInput } from "../types";
+import javaFixture from "./fixtures/demo/java.json";
 import pythonFixture from "./fixtures/demo/python.json";
-// Import fixture data
 import typescriptFixture from "./fixtures/demo/typescript.json";
-
-describe("SnippetResolver", () => {
-  const createSnippetInputs = (): SnippetInput[] => [
-    {
-      language: "typescript",
-      ir: typescriptFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-      config: {},
-    },
-    {
-      language: "python",
-      ir: pythonFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-      config: {},
-    },
-  ];
-
-  it("should create a SnippetResolver with snippet inputs", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    expect(resolver).toBeInstanceOf(SnippetResolver);
-  });
-
-  it("should get SDK for typescript language", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const typescriptSDK = resolver.sdk("typescript");
-    expect(typescriptSDK).toBeDefined();
-  });
-
-  it("should get SDK for python language", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const pythonSDK = resolver.sdk("python");
-    expect(pythonSDK).toBeDefined();
-  });
-
-  it("should throw error for unsupported language", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-
-    expect(() => {
-      resolver.sdk("unsupported" as Language);
-    }).toThrow("No configuration found for language: unsupported");
-  });
-
-  it("should throw error for language without snippet input", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-
-    expect(() => {
-      resolver.sdk("go");
-    }).toThrow("No configuration found for language: go");
-  });
-});
-
-describe("EndpointProvider", () => {
-  const createSnippetInputs = (): SnippetInput[] => [
-    {
-      language: "typescript",
-      ir: typescriptFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-      config: {},
-    },
-    {
-      language: "python",
-      ir: pythonFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-      config: {},
-    },
-  ];
-
-  it("should create endpoint snippet generator for typescript", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const typescriptSDK = resolver.sdk("typescript");
-
-    const endpointGenerator = typescriptSDK.endpoint("GET /users");
-    expect(endpointGenerator).toBeDefined();
-  });
-
-  it("should create endpoint snippet generator for python", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const pythonSDK = resolver.sdk("python");
-
-    const endpointGenerator = pythonSDK.endpoint("GET /users");
-    expect(endpointGenerator).toBeDefined();
-  });
-
-  it("should throw error for invalid endpoint format", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const typescriptSDK = resolver.sdk("typescript");
-
-    expect(() => {
-      typescriptSDK.endpoint("invalid-endpoint");
-    }).toThrow('Invalid endpoint reference: "invalid-endpoint"');
-  });
-});
-
-describe("EndpointSnippetGenerator", () => {
-  const createSnippetInputs = (): SnippetInput[] => [
-    {
-      language: "typescript",
-      ir: typescriptFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-      config: {},
-    },
-  ];
-
-  it("should generate snippets synchronously", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const typescriptSDK = resolver.sdk("typescript");
-
-    const endpointGenerator = typescriptSDK.endpoint("GET /users");
-
-    // Provide a custom request since fixture doesn't have default examples
-    const request = {
-      environment: "Default" as const,
-      auth: {
-        type: "bearer" as const,
-        token: "123",
-      },
-      pathParameters: {},
-      queryParameters: {},
-      headers: {},
-      requestBody: undefined,
-    };
-
-    const snippet = endpointGenerator.generateSync(request);
-
-    expect(snippet).toBeDefined();
-    expect(snippet.snippet).toBeDefined();
-  });
-
-  it("should generate snippets asynchronously", async () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const typescriptSDK = resolver.sdk("typescript");
-
-    const endpointGenerator = typescriptSDK.endpoint("GET /users");
-
-    // Provide a custom request since fixture doesn't have default examples
-    const request = {
-      environment: "Default" as const,
-      auth: {
-        type: "bearer" as const,
-        token: "123",
-      },
-      pathParameters: {},
-      queryParameters: {},
-      headers: {},
-      requestBody: undefined,
-    };
-
-    const snippet = await endpointGenerator.generate(request);
-
-    expect(snippet).toBeDefined();
-    expect(snippet.snippet).toBeDefined();
-  });
-
-  it("should handle different HTTP methods", () => {
-    const snippetInputs = createSnippetInputs();
-    const resolver = new SnippetResolver({ snippetInputs });
-    const typescriptSDK = resolver.sdk("typescript");
-
-    const getEndpoint = typescriptSDK.endpoint("GET /users");
-    const postEndpoint = typescriptSDK.endpoint("POST /users");
-
-    expect(getEndpoint).toBeDefined();
-    expect(postEndpoint).toBeDefined();
-  });
-});
 
 describe("Integration Tests", () => {
   const createSnippetInputs = (): SnippetInput[] => [
     {
       language: "typescript",
-      ir: typescriptFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-      config: {},
+      ir: typescriptFixture as unknown as dynamic.DynamicIntermediateRepresentation,
     },
     {
       language: "python",
-      ir: pythonFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-      config: {},
+      ir: pythonFixture as unknown as dynamic.DynamicIntermediateRepresentation,
+    },
+    {
+      language: "java",
+      ir: javaFixture as unknown as dynamic.DynamicIntermediateRepresentation,
     },
   ];
 
@@ -199,13 +30,150 @@ describe("Integration Tests", () => {
 
     const typescriptSDK = resolver.sdk("typescript");
     const pythonSDK = resolver.sdk("python");
+    const javaSDK = resolver.sdk("java");
 
     const tsEndpoint = typescriptSDK.endpoint("GET /users");
     const pyEndpoint = pythonSDK.endpoint("GET /users");
+    const javaEnpoint = javaSDK.endpoint("GET /users");
 
     // Provide custom requests since fixtures don't have default examples
     const request = {
-      environment: "Default" as const,
+      baseURL: "https://api.example.com" as const,
+      auth: {
+        type: "bearer" as const,
+        token: "123",
+      },
+      pathParameters: {},
+      queryParameters: {},
+      headers: {},
+      requestBody: undefined,
+    };
+
+    const tsSnippet = tsEndpoint.generateSync(request);
+    const pySnippet = pyEndpoint.generateSync(request);
+    const javaSnippet = javaEnpoint.generateSync(request);
+
+    expect(tsSnippet).toBeDefined();
+    expect(pySnippet).toBeDefined();
+    expect(javaSnippet).toBeDefined();
+    expect(tsSnippet.snippet).not.toBe(pySnippet.snippet);
+
+    // Snapshot testing for each language
+    expect(tsSnippet.snippet).toMatchSnapshot("typescript-snippet");
+    expect(pySnippet.snippet).toMatchSnapshot("python-snippet");
+    expect(javaSnippet.snippet).toMatchSnapshot("java-snippet");
+  });
+
+  it("should generate different snippets for different endpoints", () => {
+    const snippetInputs = createSnippetInputs();
+    const resolver = new SnippetResolver({ snippetInputs });
+
+    const typescriptSDK = resolver.sdk("typescript");
+
+    const getUsersEndpoint = typescriptSDK.endpoint("GET /users");
+    const createUserEndpoint = typescriptSDK.endpoint("POST /users");
+
+    const request = {
+      baseURL: "https://api.example.com" as const,
+      auth: {
+        type: "bearer" as const,
+        token: "123",
+      },
+      pathParameters: {},
+      queryParameters: {},
+      headers: {},
+      requestBody: undefined,
+    };
+
+    const getUsersSnippet = getUsersEndpoint.generateSync(request);
+    const createUserSnippet = createUserEndpoint.generateSync(request);
+
+    expect(getUsersSnippet).toBeDefined();
+    expect(createUserSnippet).toBeDefined();
+    expect(getUsersSnippet.snippet).not.toBe(createUserSnippet.snippet);
+
+    // Snapshot testing for different endpoints
+    expect(getUsersSnippet.snippet).toMatchSnapshot("get-users-endpoint");
+    expect(createUserSnippet.snippet).toMatchSnapshot("create-user-endpoint");
+  });
+
+  it("should handle different request types correctly", () => {
+    const snippetInputs = createSnippetInputs();
+    const resolver = new SnippetResolver({ snippetInputs });
+
+    const typescriptSDK = resolver.sdk("typescript");
+    const endpoint = typescriptSDK.endpoint("GET /users");
+
+    // Test with query parameters
+    const requestWithQuery = {
+      baseURL: "https://api.example.com" as const,
+      auth: {
+        type: "bearer" as const,
+        token: "123",
+      },
+      pathParameters: {},
+      queryParameters: {
+        page: 1,
+        limit: 10,
+        sort: "name",
+      },
+      headers: {},
+      requestBody: undefined,
+    };
+
+    const snippetWithQuery = endpoint.generateSync(requestWithQuery);
+    expect(snippetWithQuery).toBeDefined();
+    expect(snippetWithQuery.snippet).toBeDefined();
+
+    // Snapshot testing for query parameters
+    expect(snippetWithQuery.snippet).toMatchSnapshot(
+      "query-parameters-snippet"
+    );
+  });
+
+  it("should generate snippets with custom config", () => {
+    const snippetInputs = createSnippetInputs();
+    const resolver = new SnippetResolver({ snippetInputs });
+
+    const typescriptSDK = resolver.sdk("typescript");
+    const endpoint = typescriptSDK.endpoint("GET /users");
+
+    const request = {
+      baseURL: "https://api.example.com" as const,
+      auth: {
+        type: "bearer" as const,
+        token: "123",
+      },
+      pathParameters: {},
+      queryParameters: {},
+      headers: {},
+      requestBody: undefined,
+    };
+
+    const snippet = endpoint.generateSync(request);
+
+    // Verify the snippet structure
+    expect(snippet).toHaveProperty("snippet");
+    expect(snippet.snippet).toBeDefined();
+
+    // Snapshot testing for basic snippet
+    expect(snippet.snippet).toMatchSnapshot("basic-snippet");
+  });
+
+  it("should handle different languages with appropriate configurations", () => {
+    const snippetInputs = createSnippetInputs();
+    const resolver = new SnippetResolver({ snippetInputs });
+
+    // Test TypeScript
+    const tsSDK = resolver.sdk("typescript");
+    const tsEndpoint = tsSDK.endpoint("GET /users");
+
+    // Test Python
+    const pySDK = resolver.sdk("python");
+    const pyEndpoint = pySDK.endpoint("GET /users");
+
+    const request = {
+      baseURL: "https://api.example.com" as const,
       auth: {
         type: "bearer" as const,
         token: "123",
@@ -219,29 +187,15 @@ describe("Integration Tests", () => {
     const tsSnippet = tsEndpoint.generateSync(request);
     const pySnippet = pyEndpoint.generateSync(request);
 
-    console.log("TS SNIPPET:", tsSnippet);
-    console.log("PY SNIPPET:", pySnippet);
+    // Both should generate valid snippets
+    expect(tsSnippet.snippet).toBeDefined();
+    expect(pySnippet.snippet).toBeDefined();
 
-    expect(tsSnippet).toBeDefined();
-    expect(pySnippet).toBeDefined();
-    expect(tsSnippet.snippet).not.toBe(pySnippet.snippet);
-  });
+    // They should be different due to language-specific generation
+    expect(tsSnippet.snippet).not.toEqual(pySnippet.snippet);
 
-  it("should handle custom configuration", () => {
-    const snippetInputs: SnippetInput[] = [
-      {
-        language: "typescript",
-        ir: typescriptFixture.dynamicIR as unknown as dynamic.DynamicIntermediateRepresentation,
-        config: {
-          workspaceName: "CustomWorkspace",
-          organization: "CustomOrg",
-        },
-      },
-    ];
-
-    const resolver = new SnippetResolver({ snippetInputs });
-    const typescriptSDK = resolver.sdk("typescript");
-
-    expect(typescriptSDK).toBeDefined();
+    // Snapshot testing for language comparison
+    expect(tsSnippet.snippet).toMatchSnapshot("typescript-language-snippet");
+    expect(pySnippet.snippet).toMatchSnapshot("python-language-snippet");
   });
 });

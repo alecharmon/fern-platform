@@ -11,7 +11,7 @@ import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
-const getSignedUrl = async ({
+export const getSignedUrl = async ({
   Bucket,
   Key,
   expiresIn,

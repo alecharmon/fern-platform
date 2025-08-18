@@ -34,6 +34,7 @@ export interface EdgeFlags {
   isPosthogDisabled: boolean;
   isNextMdxRef: boolean;
   isLlmsTxtDisabled: boolean;
+  isDynamicSnippetsEnabled: boolean;
 }
 
 export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
@@ -72,6 +73,7 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
   isPosthogDisabled: false,
   isNextMdxRef: false,
   isLlmsTxtDisabled: false,
+  isDynamicSnippetsEnabled: false,
 };
 
 export const DEFAULT_SELF_HOSTED_EDGE_FLAGS: EdgeFlags = {

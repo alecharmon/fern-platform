@@ -90,6 +90,9 @@ class EditableDocsLoader implements DocsLoader {
   getEdgeFlags = () => this.readOnlyDocsLoader.getEdgeFlags();
 
   getBaseUrl = () => this.readOnlyDocsLoader.getBaseUrl();
+
+  getDynamicIr = (apiNames: string[]) =>
+    this.readOnlyDocsLoader.getDynamicIr(apiNames);
 }
 
 /**

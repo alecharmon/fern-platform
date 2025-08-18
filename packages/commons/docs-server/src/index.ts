@@ -19,6 +19,8 @@ export * from "./getDocsUrlMetadata";
 export * from "./isLocal";
 export * from "./isSelfHosted";
 export * from "./loadWithUrl";
+export * from "./loadDynamicIRWithUrl";
+export * from "./loadDynamicIRFromS3";
 export * from "./slack";
 export * from "./withRbac";
 export * from "./file-resolver";

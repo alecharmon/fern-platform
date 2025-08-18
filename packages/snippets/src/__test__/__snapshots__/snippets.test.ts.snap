@@ -1,0 +1,136 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Integration Tests > should generate different snippets for different endpoints > create-user-endpoint 1`] = `
+"import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com",
+        token: "123",
+    });
+    await client.users.createUser({});
+}
+main();
+"
+`;
+
+exports[`Integration Tests > should generate different snippets for different endpoints > get-users-endpoint 1`] = `
+"import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com",
+        token: "123",
+    });
+    await client.users.getUsers({});
+}
+main();
+"
+`;
+
+exports[`Integration Tests > should generate snippets for multiple languages > java-snippet 1`] = `
+"package com.example.usage;
+
+import com.catcatcat.tree.Cat;
+import com.catcatcat.tree.resources.users.requests.GetUsersRequest;
+
+public class Example {
+    public static void run() {
+        Cat client = Cat
+            .builder()
+            .token("123")
+            .url("https://api.example.com")
+            .build();
+
+        client.users().getUsers(
+            GetUsersRequest
+                .builder()
+                .build()
+        );
+    }
+}"
+`;
+
+exports[`Integration Tests > should generate snippets for multiple languages > python-snippet 1`] = `
+"from catcatcat import CatClient
+
+client = CatClient(
+    base_url="https://api.example.com",
+    token="123"
+)
+
+client.users.get_users()
+"
+`;
+
+exports[`Integration Tests > should generate snippets for multiple languages > typescript-snippet 1`] = `
+"import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com",
+        token: "123",
+    });
+    await client.users.getUsers({});
+}
+main();
+"
+`;
+
+exports[`Integration Tests > should generate snippets with custom config > basic-snippet 1`] = `
+"import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com",
+        token: "123",
+    });
+    await client.users.getUsers({});
+}
+main();
+"
+`;
+
+exports[`Integration Tests > should handle different languages with appropriate configurations > python-language-snippet 1`] = `
+"from catcatcat import CatClient
+
+client = CatClient(
+    base_url="https://api.example.com",
+    token="123"
+)
+
+client.users.get_users()
+"
+`;
+
+exports[`Integration Tests > should handle different languages with appropriate configurations > typescript-language-snippet 1`] = `
+"import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com",
+        token: "123",
+    });
+    await client.users.getUsers({});
+}
+main();
+"
+`;
+
+exports[`Integration Tests > should handle different request types correctly > query-parameters-snippet 1`] = `
+"import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com",
+        token: "123",
+    });
+    await client.users.getUsers({
+        page: 1,
+        limit: 10,
+        sort: "name",
+    });
+}
+main();
+"
+`;

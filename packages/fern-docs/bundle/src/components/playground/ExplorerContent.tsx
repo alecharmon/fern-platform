@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 
 import { createPruneKey } from "@fern-api/docs-loader";
+import { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import {
@@ -25,9 +26,22 @@ export async function ExplorerContent({
   }
 
   let api: ApiDefinition.ApiDefinition | undefined;
+  let dynamicIRsByLanguage: DynamicIRsByLanguage | undefined = {};
 
   try {
     api = await loader.getPrunedApi(node.apiDefinitionId, createPruneKey(node));
+    const edgeFlags = await loader.getEdgeFlags();
+
+    if (edgeFlags.isDynamicSnippetsEnabled) {
+      try {
+        const dynamicIRsByApi = await loader.getDynamicIr([
+          node.apiDefinitionId,
+        ]);
+        dynamicIRsByLanguage = dynamicIRsByApi?.[node.apiDefinitionId];
+      } catch (error) {
+        console.error(`[dynamic-ir] ${JSON.stringify(error)}`);
+      }
+    }
   } catch (error) {
     console.error(`[explorer-content] ${JSON.stringify(error)}`);
     // TODO: don't revalidate too often
@@ -48,7 +62,13 @@ export async function ExplorerContent({
         auth={context.auth}
       />
     );
-    return <PlaygroundEndpoint context={context} authForm={authForm} />;
+    return (
+      <PlaygroundEndpoint
+        context={context}
+        authForm={authForm}
+        dynamicIRsByLanguage={dynamicIRsByLanguage}
+      />
+    );
   } else if (node.type === "webSocket") {
     const context = createWebSocketContext(node, api);
     if (!context) return null;

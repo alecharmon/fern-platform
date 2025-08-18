@@ -24,7 +24,10 @@ import {
   provideRegistryService,
   pruneWithAuthState,
 } from "@fern-api/docs-server";
-import { loadWithUrl as uncachedLoadWithUrl } from "@fern-api/docs-server";
+import {
+  loadDynamicIRWithUrl as uncachedLoadDynamicIRWithUrl,
+  loadWithUrl as uncachedLoadWithUrl,
+} from "@fern-api/docs-server";
 import {
   type DocsLoader,
   type DocsMetadata,
@@ -74,6 +77,7 @@ import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 
 const loadWithUrl = uncachedLoadWithUrl;
+const loadDynamicIRWithUrl = uncachedLoadDynamicIRWithUrl;
 
 // Add cache configuration interface
 export interface CacheConfig {
@@ -963,6 +967,23 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
     };
   });
 
+const getDynamicIr = (apiNames: string[]) =>
+  cache(async (orgId: string) => {
+    "use cache";
+    unstable_cacheTag(orgId, "getDynamicIr");
+
+    const response = await loadDynamicIRWithUrl({
+      orgId,
+      apiNames,
+    });
+
+    if (response) {
+      return response;
+    }
+
+    return undefined;
+  });
+
 function defaultTabsPlacement(domain: string) {
   if (domain.includes("cohere")) {
     return "HEADER";
@@ -1088,6 +1109,10 @@ export const createCachedDocsLoader = async (
     getBaseUrl: async () => {
       const m = await metadata;
       return `https://${m.domain}${m.basePath}`;
+    },
+    getDynamicIr: async (apiNames: string[]) => {
+      const m = await metadata;
+      return getDynamicIr(apiNames)(m.org);
     },
     clearKvCache: () => clearKvCache(domain),
   };

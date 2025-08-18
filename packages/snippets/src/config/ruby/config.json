@@ -2,7 +2,15 @@
   "irFilepath": "/fern/ir.json",
   "output": {
     "mode": {
-      "type": "downloadFiles"
+      "type": "github",
+      "repoUrl": "",
+      "version": "",
+      "publishInfo": {
+        "type": "rubygems",
+        "registryUrl": "https://rubygems.org",
+        "packageName": "",
+        "apiKeyEnvironmentVariable": ""
+      }
     },
     "path": "/fern/output",
     "publishingMetadata": null,
@@ -11,8 +19,8 @@
   },
   "publish": null,
   "customConfig": {},
-  "workspaceName": "fern",
-  "organization": "fern",
+  "workspaceName": "",
+  "organization": "",
   "environment": {
     "_type": "local"
   },

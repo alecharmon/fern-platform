@@ -1,0 +1,216 @@
+"use client";
+
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
+
+import { useAtomValue } from "jotai";
+
+import { DynamicIRsByLanguage } from "@fern-api/docs-server";
+import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
+import { SnippetResolver } from "@fern-api/snippets";
+import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
+
+import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
+
+import { PlaygroundEndpointRequestFormState } from "../types";
+import { usePlaygroundBaseUrl } from "../utils/select-environment";
+
+export type DynamicSnippetLanguage =
+  | "typescript"
+  | "python"
+  | "java"
+  | "ruby"
+  | "csharp"
+  | "go";
+
+interface PlaygroundDynamicRequestPreviewProps {
+  context: EndpointContext;
+  formState: PlaygroundEndpointRequestFormState;
+  requestType: DynamicSnippetLanguage;
+  dynamicIRsByLanguage: DynamicIRsByLanguage;
+}
+export interface PlaygroundDynamicRequestPreviewRef {
+  getCurrentCode: () => string;
+}
+
+// todo: support php
+export const PlaygroundDynamicRequestPreview = forwardRef<
+  PlaygroundDynamicRequestPreviewRef,
+  PlaygroundDynamicRequestPreviewProps
+>(({ context, formState, requestType, dynamicIRsByLanguage }, ref) => {
+  const [code, setCode] = useState<string>("Loading...");
+  const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+  const [baseURL] = usePlaygroundBaseUrl(context.endpoint);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getCurrentCode: () => code,
+    }),
+    [code]
+  );
+
+  // create memoized snippet generators from the IR data
+  const memoizedGenerators = useMemo(() => {
+    try {
+      const snippetInputs = [];
+      const generators: Record<string, any> = {};
+
+      // only process languages that have IR data
+      if (dynamicIRsByLanguage.typescript) {
+        snippetInputs.push({
+          language: "typescript" as const,
+          ir: dynamicIRsByLanguage.typescript as any,
+        });
+      }
+
+      if (dynamicIRsByLanguage.python) {
+        snippetInputs.push({
+          language: "python" as const,
+          ir: dynamicIRsByLanguage.python as any,
+        });
+      }
+
+      if (dynamicIRsByLanguage.java) {
+        snippetInputs.push({
+          language: "java" as const,
+          ir: dynamicIRsByLanguage.java as any,
+        });
+      }
+
+      if (dynamicIRsByLanguage.ruby) {
+        snippetInputs.push({
+          language: "ruby" as const,
+          ir: dynamicIRsByLanguage.ruby as any,
+        });
+      }
+
+      if (dynamicIRsByLanguage.csharp) {
+        snippetInputs.push({
+          language: "csharp" as const,
+          ir: dynamicIRsByLanguage.csharp as any,
+        });
+      }
+
+      if (dynamicIRsByLanguage.go) {
+        snippetInputs.push({
+          language: "go" as const,
+          ir: dynamicIRsByLanguage.go as any,
+        });
+      }
+
+      const snippetResolver = new SnippetResolver({ snippetInputs });
+
+      // create endpoint generators only for languages that have IR data
+      const endpointPath = `${context.endpoint.method} ${context.endpoint.path
+        .map((p) => {
+          if (p.type === "pathParameter") {
+            return `{${p.value}}`;
+          }
+          return p.value;
+        })
+        .join("")}`;
+
+      if (dynamicIRsByLanguage.typescript) {
+        const typescriptSdk = snippetResolver.sdk("typescript");
+        generators.typescript = typescriptSdk?.endpoint(endpointPath);
+      }
+
+      if (dynamicIRsByLanguage.python) {
+        const pythonSdk = snippetResolver.sdk("python");
+        generators.python = pythonSdk?.endpoint(endpointPath);
+      }
+
+      if (dynamicIRsByLanguage.java) {
+        const javaSdk = snippetResolver.sdk("java");
+        generators.java = javaSdk?.endpoint(endpointPath);
+      }
+
+      if (dynamicIRsByLanguage.ruby) {
+        const rubySdk = snippetResolver.sdk("ruby");
+        generators.ruby = rubySdk?.endpoint(endpointPath);
+      }
+
+      if (dynamicIRsByLanguage.csharp) {
+        const csharpSdk = snippetResolver.sdk("csharp");
+        generators.csharp = csharpSdk?.endpoint(endpointPath);
+      }
+
+      if (dynamicIRsByLanguage.go) {
+        const goSdk = snippetResolver.sdk("go");
+        generators.go = goSdk?.endpoint(endpointPath);
+      }
+
+      return generators;
+    } catch (error) {
+      console.error("Error creating snippet generators:", error);
+      return null;
+    }
+  }, [dynamicIRsByLanguage, context.endpoint.method, context.endpoint.path]);
+
+  useEffect(() => {
+    const generateCode = () => {
+      try {
+        if (!memoizedGenerators) {
+          setCode("Failed to create snippet generators");
+          return;
+        }
+
+        const generator = memoizedGenerators[requestType];
+        if (!generator) {
+          setCode(`No SDK snippet available for ${requestType}`);
+          return;
+        }
+
+        let auth;
+        // hack: just parse the bearer token if oauth enabled
+        if (authState.bearerAuth) {
+          auth = {
+            type: "bearer",
+            token: authState.bearerAuth?.token,
+          };
+        } else {
+          auth = authState;
+        }
+
+        // todo: support environments
+        const request = {
+          baseURL,
+          auth,
+          pathParameters: formState.pathParameters,
+          queryParameters: formState.queryParameters,
+          headers: formState.headers,
+          requestBody: formState.body?.value,
+        };
+
+        const result = generator.generateSync(request);
+
+        setCode(result.snippet ?? "Error generating code snippet");
+      } catch (error: unknown) {
+        console.error(`Error generating ${requestType} snippet:`, error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        setCode(`Failed to generate ${requestType} code: ${errorMessage}`);
+      }
+    };
+
+    generateCode();
+  }, [requestType, memoizedGenerators, formState, baseURL, authState]);
+
+  return (
+    <FernSyntaxHighlighter
+      className="relative min-h-0 flex-1 shrink select-text"
+      language={requestType}
+      code={code}
+      fontSize="sm"
+      id={context.endpoint.id}
+    />
+  );
+});
+
+PlaygroundDynamicRequestPreview.displayName = "PlaygroundDynamicRequestPreview";

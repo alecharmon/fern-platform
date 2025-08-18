@@ -6,6 +6,7 @@ import { mapValues } from "es-toolkit/object";
 import { useAtomValue, useSetAtom } from "jotai";
 import { SendHorizonal } from "lucide-react";
 
+import { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
@@ -50,9 +51,11 @@ import { PlaygroundEndpointPath } from "./PlaygroundEndpointPath";
 export const PlaygroundEndpoint = ({
   context,
   authForm,
+  dynamicIRsByLanguage,
 }: {
   context: EndpointContext;
   authForm: React.ReactNode;
+  dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
 }) => {
   const resolvedPlaygroundState = useResolvedPlaygroundState();
   const { node, endpoint, auth } = context;
@@ -272,6 +275,7 @@ export const PlaygroundEndpoint = ({
                 }
               })();
             }}
+            dynamicIRsByLanguage={dynamicIRsByLanguage}
           />
         </div>
       </div>

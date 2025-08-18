@@ -5,6 +5,7 @@ import {
   useDeferredValue,
 } from "react";
 
+import { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { Loadable } from "@fern-ui/loadable";
 
@@ -27,6 +28,7 @@ interface PlaygroundEndpointContentProps {
   response: Loadable<PlaygroundResponse>;
   sendRequest: () => void;
   authForm?: React.ReactNode;
+  dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
 }
 
 export function PlaygroundEndpointContent({
@@ -38,6 +40,7 @@ export function PlaygroundEndpointContent({
   response,
   sendRequest,
   authForm,
+  dynamicIRsByLanguage,
 }: PlaygroundEndpointContentProps): ReactElement<any> {
   const deferredFormState = useDeferredValue(formState);
   const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
@@ -67,6 +70,7 @@ export function PlaygroundEndpointContent({
     <PlaygroundEndpointRequestCard
       context={context}
       formState={deferredFormState}
+      dynamicIRsByLanguage={dynamicIRsByLanguage}
     />
   );
   const responseCard = (

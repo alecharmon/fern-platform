@@ -1,7 +1,10 @@
 ```ts
-import { dynamic, generatorExec } from "@fern-api/dynamic-ir-sdk/api";
-
-import { SnippetInput, SnippetResolver } from "./src/index";
+import {
+  DynamicIR,
+  GeneratorConfig,
+  SnippetInput,
+  SnippetResolver,
+} from "./src/index";
 
 // Example of how to use the updated SnippetResolver
 async function example() {
@@ -9,13 +12,13 @@ async function example() {
   const snippetInputs: SnippetInput[] = [
     {
       language: "typescript",
-      ir: {} as dynamic.DynamicIntermediateRepresentation, // Your TypeScript IR here
-      config: {} as generatorExec.config.GeneratorConfig, // Your TypeScript config here
+      ir: {} as DynamicIR, // Your TypeScript IR here
+      config: {} as GeneratorConfig, // Your TypeScript config here
     },
     {
       language: "python",
-      ir: {} as dynamic.DynamicIntermediateRepresentation, // Your Python IR here
-      config: {} as generatorExec.config.GeneratorConfig, // Your Python config here
+      ir: {} as DynamicIR, // Your Python IR here
+      config: {} as GeneratorConfig, // Your Python config here
     },
   ];
 

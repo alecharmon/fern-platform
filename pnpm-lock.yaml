@@ -1179,6 +1179,9 @@ importers:
       '@fern-api/next-mdx-remote':
         specifier: ^5.0.0
         version: 5.0.0(@types/react@19.0.10)(react@19.0.0)
+      '@fern-api/snippets':
+        specifier: workspace:*
+        version: link:../../snippets
       '@fern-api/template-resolver':
         specifier: workspace:*
         version: link:../../template-resolver
