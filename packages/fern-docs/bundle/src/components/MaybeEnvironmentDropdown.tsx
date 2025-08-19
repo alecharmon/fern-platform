@@ -43,13 +43,18 @@ export function MaybeEnvironmentDropdown({
   const [selectedEnvironmentId, setSelectedEnvironmentId] = useAtom(
     SELECTED_ENVIRONMENT_ID_ATOM
   );
-  const [selectedEnvironmentUrl, setSelectedEnvironmentUrl] = useAtom(
+  const [_selectedEnvironmentUrl, setSelectedEnvironmentUrl] = useAtom(
     SELECTED_ENVIRONMENT_URL_ATOM
   );
   const [inputValue, setInputValue] = useState<string | undefined>(undefined);
   const [initialState, setInitialState] = useState<string | undefined>(
     undefined
   );
+
+  useEffect(() => {
+    setInputValue(sanitizeUrl(baseUrl));
+    setInitialState(sanitizeUrl(baseUrl));
+  }, [baseUrl]);
 
   // if we have selected a new environment id, update the selected url to match
   useEffect(() => {
@@ -61,33 +66,7 @@ export function MaybeEnvironmentDropdown({
     }
   }, [selectedEnvironmentId, options, setSelectedEnvironmentUrl]);
 
-  // const environmentIds = environmentFilters
-  //     ? environmentFilters.filter((environmentFilter) => allEnvironmentIds.includes(environmentFilter))
-  //     : allEnvironmentIds;
-
-  // useEffect(() => {
-  //     if (environmentFilters && environmentId && !environmentFilters.includes(environmentId)) {
-  //         setSelectedEnvironmentId(environmentId);
-  //     }
-  // }, [environmentFilters, environmentId, setSelectedEnvironmentId]);
-
-  const preParsedUrl = selectedEnvironmentUrl ?? baseUrl;
-  const url = preParsedUrl && safeParseUrl(sanitizeUrl(preParsedUrl) ?? "");
-
-  // TODO: clean up this component
-  useEffect(() => {
-    if (
-      !!url &&
-      url.host &&
-      url.host !== "" &&
-      url.protocol &&
-      url.protocol !== ""
-    ) {
-      setInputValue(preParsedUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEnvironmentUrl]);
-
+  // input value is for editing and validation
   const parsedInputValue = safeParseUrl(inputValue);
   const isValidInput =
     inputValue != null &&
@@ -95,6 +74,8 @@ export function MaybeEnvironmentDropdown({
     parsedInputValue?.host != null &&
     parsedInputValue?.protocol != null;
 
+  // url is for splitting into parts
+  const url = baseUrl && safeParseUrl(sanitizeUrl(baseUrl) ?? "");
   const urlProtocol = url ? url.protocol : "";
   const fullyQualifiedDomainAndBasePath = url
     ? url.pathname != null && url.pathname !== "/"
@@ -119,10 +100,9 @@ export function MaybeEnvironmentDropdown({
             }}
             onBlur={(e) => {
               if (isValidInput) {
-                if (selectedEnvironmentUrl) {
-                  setInputValue(selectedEnvironmentUrl);
-                }
                 isEditingEnvironment.setFalse();
+                setSelectedEnvironmentId(undefined);
+                setSelectedEnvironmentUrl(inputValue);
               } else {
                 e.preventDefault();
                 e.stopPropagation();
@@ -131,24 +111,13 @@ export function MaybeEnvironmentDropdown({
               }
             }}
             onValueChange={(value) => {
-              const parsedValue = safeParseUrl(value);
-              if (
-                value === "" ||
-                value == null ||
-                parsedValue?.host == null ||
-                parsedValue?.protocol == null
-              ) {
-                setInputValue(value);
-              } else {
-                setInputValue(value);
-              }
+              setInputValue(value);
             }}
             onKeyDownCapture={(e) => {
               if (e.key === "Enter" && isValidInput) {
-                if (selectedEnvironmentUrl) {
-                  setInputValue(selectedEnvironmentUrl);
-                }
                 isEditingEnvironment.setFalse();
+                setSelectedEnvironmentId(undefined);
+                setSelectedEnvironmentUrl(inputValue);
               } else if (e.key === "Escape") {
                 e.preventDefault();
                 e.stopPropagation();

@@ -28,3 +28,7 @@ export const useAllEnvironmentIds = (): string[] => {
 export const SELECTED_ENVIRONMENT_URL_ATOM = atomWithStorage<
   string | undefined
 >("selected-environment-url", undefined);
+
+export const useSelectedEnvironmentUrl = (): string | undefined => {
+  return useAtomValue(SELECTED_ENVIRONMENT_URL_ATOM);
+};
