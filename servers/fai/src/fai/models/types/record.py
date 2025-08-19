@@ -12,5 +12,6 @@ class TurbopufferRecord(BaseModel):
     title: str
     url: str
     version: Optional[str] = None
+    product: Optional[str] = None
     keywords: Optional[List[str]] = None
     authed: Optional[bool] = None

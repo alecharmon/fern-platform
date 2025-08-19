@@ -1,0 +1,2120 @@
+{
+    "payload": {
+      "orgId": "sandbox",
+      "baseUrl": {
+        "domain": "sandbox.docs.buildwithfern.com"
+      },
+      "definition": {
+        "pages": {
+          "products/history/v1/pages/overview.mdx": {
+            "markdown": "---\ntitle: United States\nslug: overview\n---\n\n## Overview\n\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \n\n\nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.\n\n## History\n\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\n\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.\n"
+          },
+          "products/history/v1/pages/economy.mdx": {
+            "markdown": "---\ntitle: Economy\nslug: economy\n---\n\n## Economy\n\nThe United States has a highly developed diversified mixed economy. It is the world's largest economy by \nnominal GDP and second largest by purchasing power parity (PPP). As of 2025, it has the world's seventh \nhighest nominal GDP per capita and ninth highest GDP per capita by PPP. According to the World Bank, the U.S. \naccounted for 14.8% of the global aggregate GDP in 2024 in purchasing power parity terms and 26.2% in \nnominal terms. The U.S. dollar is the currency of record most used in international transactions and is \nthe world's foremost reserve currency, backed by a large U.S. treasuries market, its role as the reference \nstandard for the petrodollar system, and its linked eurodollar. Several countries use it as their official \ncurrency and in others it is the de facto currency. Since the end of World War II, the economy has achieved \nrelatively steady growth, low unemployment and inflation, and rapid advances in technology.\n"
+          },
+          "products/history/v1/pages/washington.mdx": {
+            "markdown": "---\ntitle: George Washington\nslug: washington\n---\n\n## Overview\n\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"\n"
+          },
+          "products/history/v1/pages/lincoln.mdx": {
+            "markdown": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---\n\n## Overview\n\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.\n"
+          },
+          "products/history/v1/pages/roosevelt.mdx": {
+            "markdown": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---\n\n## Overview\n\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.\n"
+          },
+          "shared/shared-api-info.mdx": {
+            "markdown": "---\ntitle: History API\nslug: history-api\ndescription: >-\n  A simple API for exploring and managing historical events, timelines, and\n  user-curated favorites.\n---\n\nWelcome to the History API. This API is designed to help you explore and manage historical events, timelines, and user-curated favorites.\n\n## Overview\n\nThe History API is a simple API for exploring and managing historical events, timelines, and user-curated favorites.\n"
+          },
+          "products/history/v2/pages/overview.mdx": {
+            "markdown": "---\ntitle: Europe\nslug: overview\n---\n\n## Overview\n\nEurope is a continent located entirely in the Northern Hemisphere and mostly in the Eastern Hemisphere. \nIt is bordered by the Arctic Ocean to the north, the Atlantic Ocean to the west, the Mediterranean Sea to the south, \nand Asia to the east. Europe shares the landmass of Eurasia with Asia, and of Afro-Eurasia with both Africa and Asia. \nEurope is commonly considered to be separated from Asia by the watershed of the Ural Mountains, the Ural River, \nthe Caspian Sea, the Greater Caucasus, the Black Sea, and the Turkish straits.\n\n## Culture\n\n\"Europe\" as a cultural concept is substantially derived from the shared heritage of ancient Greece and the \nRoman Empire and its cultures. The boundaries of Europe were historically understood as those of Christendom \n(or more specifically Latin Christendom), as established or defended throughout the medieval and early modern \nhistory of Europe, especially against Islam, as in the Reconquista and the Ottoman wars in Europe.\n"
+          },
+          "products/history/v2/pages/demographics.mdx": {
+            "markdown": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n"
+          },
+          "products/history/v2/pages/austria.mdx": {
+            "markdown": "---\ntitle: Austria\nslug: austria\n---\n\n## Overview\n\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.\n\n## Culture\n\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.\n"
+          },
+          "products/history/v2/pages/italy.mdx": {
+            "markdown": "---\ntitle: Italy\nslug: italy\n---\n\n## Overview\n\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.\n\n## Culture\n\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.\n"
+          },
+          "products/history/v2/pages/switzerland.mdx": {
+            "markdown": "---\ntitle: Switzerland\nslug: switzerland\n---\n\n## Overview\n\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.\n\n## Culture\n\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.\n"
+          },
+          "products/art/pages/overview.mdx": {
+            "markdown": "---\ntitle: Art\nslug: art\n---\n\n## Overview\n\nArt is a diverse range of human practices in creating visual, auditory or performing artifacts, \nexpressing the author's imaginative or technical skill, intended to be appreciated for their beauty or emotional power.\n"
+          }
+        },
+        "apis": {
+          "45f3c273-acf9-4c18-9da0-13fa0bea22e7": {
+            "id": "45f3c273-acf9-4c18-9da0-13fa0bea22e7",
+            "rootPackage": {
+              "endpoints": [],
+              "subpackages": [
+                "subpackage_event",
+                "subpackage_user"
+              ],
+              "types": [
+                "EventSummary",
+                "Event"
+              ],
+              "webhooks": [],
+              "websockets": []
+            },
+            "types": {
+              "EventSummary": {
+                "name": "EventSummary",
+                "shape": {
+                  "type": "object",
+                  "extends": [],
+                  "properties": [
+                    {
+                      "key": "id",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "title",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "period",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "tags",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "Event": {
+                "name": "Event",
+                "shape": {
+                  "type": "object",
+                  "extends": [],
+                  "properties": [
+                    {
+                      "key": "id",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "title",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "description",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "period",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "tags",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "sources",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "user_addEventToFavorites_Response_200": {
+                "description": "Empty response body",
+                "name": "user_addEventToFavorites_Response_200",
+                "shape": {
+                  "type": "object",
+                  "extends": [],
+                  "properties": []
+                }
+              }
+            },
+            "subpackages": {
+              "subpackage_event": {
+                "subpackageId": "subpackage_event",
+                "name": "event",
+                "endpoints": [
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "search-events",
+                    "method": "GET",
+                    "id": "searchEvents",
+                    "originalEndpointId": "endpoint_event.searchEvents",
+                    "name": "Search events",
+                    "path": {
+                      "pathParameters": [],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/events/search"
+                        }
+                      ]
+                    },
+                    "queryParameters": [
+                      {
+                        "description": "Time period filter (e.g., \"Renaissance\", \"World War II\").",
+                        "key": "period",
+                        "type": {
+                          "type": "optional",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "description": "Comma-separated tags to filter (e.g., \"art,science\").",
+                        "key": "tags",
+                        "type": {
+                          "type": "optional",
+                          "itemType": {
+                            "type": "list",
+                            "itemType": {
+                              "type": "primitive",
+                              "value": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "description": "Keyword search.",
+                        "key": "q",
+                        "type": {
+                          "type": "optional",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "headers": [],
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "id",
+                            "value": "EventSummary"
+                          }
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "A list of events matching the search criteria"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "list",
+                              "itemType": {
+                                "type": "id",
+                                "value": "EventSummary"
+                              }
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "A list of events matching the search criteria"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/events/search",
+                        "pathParameters": {},
+                        "queryParameters": {},
+                        "headers": {},
+                        "responseStatusCode": 200,
+                        "responseBody": [
+                          {
+                            "id": 1,
+                            "title": "string",
+                            "period": "string",
+                            "tags": [
+                              "string"
+                            ]
+                          }
+                        ],
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": [
+                            {
+                              "id": 1,
+                              "title": "string",
+                              "period": "string",
+                              "tags": [
+                                "string"
+                              ]
+                            }
+                          ]
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "description": "Search historical events using time period, tags, or keywords.",
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  },
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "get-event-by-id",
+                    "method": "GET",
+                    "id": "getEventById",
+                    "originalEndpointId": "endpoint_event.getEventById",
+                    "name": "Get event by ID",
+                    "path": {
+                      "pathParameters": [
+                        {
+                          "key": "eventId",
+                          "type": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      ],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/events/"
+                        },
+                        {
+                          "type": "pathParameter",
+                          "value": "eventId"
+                        },
+                        {
+                          "type": "literal",
+                          "value": ""
+                        }
+                      ]
+                    },
+                    "queryParameters": [],
+                    "headers": [],
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Event"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "Event details retrieved successfully"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "id",
+                              "value": "Event"
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "Event details retrieved successfully"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/events/1",
+                        "pathParameters": {
+                          "eventId": 1
+                        },
+                        "queryParameters": {},
+                        "headers": {},
+                        "responseStatusCode": 200,
+                        "responseBody": {
+                          "id": 1,
+                          "title": "string",
+                          "description": "string",
+                          "period": "string",
+                          "tags": [
+                            "string"
+                          ],
+                          "sources": [
+                            "string"
+                          ]
+                        },
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": {
+                            "id": 1,
+                            "title": "string",
+                            "description": "string",
+                            "period": "string",
+                            "tags": [
+                              "string"
+                            ],
+                            "sources": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "description": "Retrieve details about a historical event.",
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  }
+                ],
+                "types": [],
+                "subpackages": [],
+                "urlSlug": "event",
+                "webhooks": [],
+                "websockets": [],
+                "displayName": "event"
+              },
+              "subpackage_user": {
+                "subpackageId": "subpackage_user",
+                "name": "user",
+                "endpoints": [
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "get-user-favorites",
+                    "method": "GET",
+                    "id": "getUserFavorites",
+                    "originalEndpointId": "endpoint_user.getUserFavorites",
+                    "name": "Get user favorites",
+                    "path": {
+                      "pathParameters": [
+                        {
+                          "key": "username",
+                          "type": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/user/"
+                        },
+                        {
+                          "type": "pathParameter",
+                          "value": "username"
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/favorites"
+                        }
+                      ]
+                    },
+                    "queryParameters": [],
+                    "headers": [],
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "id",
+                            "value": "EventSummary"
+                          }
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "List of favorite events"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "list",
+                              "itemType": {
+                                "type": "id",
+                                "value": "EventSummary"
+                              }
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "List of favorite events"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/user/username/favorites",
+                        "pathParameters": {
+                          "username": "username"
+                        },
+                        "queryParameters": {},
+                        "headers": {},
+                        "responseStatusCode": 200,
+                        "responseBody": [
+                          {
+                            "id": 1,
+                            "title": "string",
+                            "period": "string",
+                            "tags": [
+                              "string"
+                            ]
+                          }
+                        ],
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": [
+                            {
+                              "id": 1,
+                              "title": "string",
+                              "period": "string",
+                              "tags": [
+                                "string"
+                              ]
+                            }
+                          ]
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "description": "Retrieve a list of events the user marked as favorite.",
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  },
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "add-event-to-favorites",
+                    "method": "POST",
+                    "id": "addEventToFavorites",
+                    "originalEndpointId": "endpoint_user.addEventToFavorites",
+                    "name": "Add event to favorites",
+                    "path": {
+                      "pathParameters": [
+                        {
+                          "key": "username",
+                          "type": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/user/"
+                        },
+                        {
+                          "type": "pathParameter",
+                          "value": "username"
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/favorites"
+                        }
+                      ]
+                    },
+                    "queryParameters": [],
+                    "headers": [],
+                    "request": {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "object",
+                        "extends": [],
+                        "properties": [
+                          {
+                            "key": "eventId",
+                            "valueType": {
+                              "type": "optional",
+                              "itemType": {
+                                "type": "primitive",
+                                "value": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "requestsV2": {
+                      "requests": [
+                        {
+                          "contentType": "application/json",
+                          "type": {
+                            "type": "object",
+                            "extends": [],
+                            "properties": [
+                              {
+                                "key": "eventId",
+                                "valueType": {
+                                  "type": "optional",
+                                  "itemType": {
+                                    "type": "primitive",
+                                    "value": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "user_addEventToFavorites_Response_200"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "Event successfully added to favorites"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "id",
+                              "value": "user_addEventToFavorites_Response_200"
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "Event successfully added to favorites"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/user/username/favorites",
+                        "pathParameters": {
+                          "username": "username"
+                        },
+                        "queryParameters": {},
+                        "headers": {},
+                        "requestBody": {},
+                        "responseStatusCode": 200,
+                        "responseBody": {},
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "requestBodyV3": {
+                          "type": "json",
+                          "value": {}
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": {}
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  }
+                ],
+                "types": [],
+                "subpackages": [],
+                "urlSlug": "user",
+                "webhooks": [],
+                "websockets": [],
+                "displayName": "user"
+              }
+            },
+            "hasMultipleBaseUrls": false,
+            "globalHeaders": []
+          },
+          "d330c0f2-edc5-45fb-93b3-2c397f28c215": {
+            "id": "d330c0f2-edc5-45fb-93b3-2c397f28c215",
+            "rootPackage": {
+              "endpoints": [],
+              "subpackages": [
+                "subpackage_event",
+                "subpackage_user"
+              ],
+              "types": [
+                "EventSummary",
+                "Event"
+              ],
+              "webhooks": [],
+              "websockets": []
+            },
+            "types": {
+              "EventSummary": {
+                "name": "EventSummary",
+                "shape": {
+                  "type": "object",
+                  "extends": [],
+                  "properties": [
+                    {
+                      "key": "id",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "title",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "period",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "tags",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "Event": {
+                "name": "Event",
+                "shape": {
+                  "type": "object",
+                  "extends": [],
+                  "properties": [
+                    {
+                      "key": "id",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "title",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "description",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "period",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "primitive",
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "tags",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "key": "sources",
+                      "valueType": {
+                        "type": "optional",
+                        "itemType": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "user_addEventToFavorites_Response_200": {
+                "description": "Empty response body",
+                "name": "user_addEventToFavorites_Response_200",
+                "shape": {
+                  "type": "object",
+                  "extends": [],
+                  "properties": []
+                }
+              }
+            },
+            "subpackages": {
+              "subpackage_event": {
+                "subpackageId": "subpackage_event",
+                "name": "event",
+                "endpoints": [
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "search-events",
+                    "method": "GET",
+                    "id": "searchEvents",
+                    "originalEndpointId": "endpoint_event.searchEvents",
+                    "name": "Search events",
+                    "path": {
+                      "pathParameters": [],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/events/search"
+                        }
+                      ]
+                    },
+                    "queryParameters": [
+                      {
+                        "description": "Time period filter (e.g., \"Renaissance\", \"World War II\").",
+                        "key": "period",
+                        "type": {
+                          "type": "optional",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "description": "Comma-separated tags to filter (e.g., \"art,science\").",
+                        "key": "tags",
+                        "type": {
+                          "type": "optional",
+                          "itemType": {
+                            "type": "list",
+                            "itemType": {
+                              "type": "primitive",
+                              "value": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "description": "Keyword search.",
+                        "key": "q",
+                        "type": {
+                          "type": "optional",
+                          "itemType": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "headers": [],
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "id",
+                            "value": "EventSummary"
+                          }
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "A list of events matching the search criteria"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "list",
+                              "itemType": {
+                                "type": "id",
+                                "value": "EventSummary"
+                              }
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "A list of events matching the search criteria"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/events/search",
+                        "pathParameters": {},
+                        "queryParameters": {},
+                        "headers": {},
+                        "responseStatusCode": 200,
+                        "responseBody": [
+                          {
+                            "id": 1,
+                            "title": "string",
+                            "period": "string",
+                            "tags": [
+                              "string"
+                            ]
+                          }
+                        ],
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": [
+                            {
+                              "id": 1,
+                              "title": "string",
+                              "period": "string",
+                              "tags": [
+                                "string"
+                              ]
+                            }
+                          ]
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "description": "Search historical events using time period, tags, or keywords.",
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  },
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "get-event-by-id",
+                    "method": "GET",
+                    "id": "getEventById",
+                    "originalEndpointId": "endpoint_event.getEventById",
+                    "name": "Get event by ID",
+                    "path": {
+                      "pathParameters": [
+                        {
+                          "key": "eventId",
+                          "type": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      ],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/events/"
+                        },
+                        {
+                          "type": "pathParameter",
+                          "value": "eventId"
+                        },
+                        {
+                          "type": "literal",
+                          "value": ""
+                        }
+                      ]
+                    },
+                    "queryParameters": [],
+                    "headers": [],
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Event"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "Event details retrieved successfully"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "id",
+                              "value": "Event"
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "Event details retrieved successfully"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/events/1",
+                        "pathParameters": {
+                          "eventId": 1
+                        },
+                        "queryParameters": {},
+                        "headers": {},
+                        "responseStatusCode": 200,
+                        "responseBody": {
+                          "id": 1,
+                          "title": "string",
+                          "description": "string",
+                          "period": "string",
+                          "tags": [
+                            "string"
+                          ],
+                          "sources": [
+                            "string"
+                          ]
+                        },
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": {
+                            "id": 1,
+                            "title": "string",
+                            "description": "string",
+                            "period": "string",
+                            "tags": [
+                              "string"
+                            ],
+                            "sources": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "description": "Retrieve details about a historical event.",
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  }
+                ],
+                "types": [],
+                "subpackages": [],
+                "urlSlug": "event",
+                "webhooks": [],
+                "websockets": [],
+                "displayName": "event"
+              },
+              "subpackage_user": {
+                "subpackageId": "subpackage_user",
+                "name": "user",
+                "endpoints": [
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "get-user-favorites",
+                    "method": "GET",
+                    "id": "getUserFavorites",
+                    "originalEndpointId": "endpoint_user.getUserFavorites",
+                    "name": "Get user favorites",
+                    "path": {
+                      "pathParameters": [
+                        {
+                          "key": "username",
+                          "type": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/user/"
+                        },
+                        {
+                          "type": "pathParameter",
+                          "value": "username"
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/favorites"
+                        }
+                      ]
+                    },
+                    "queryParameters": [],
+                    "headers": [],
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "list",
+                          "itemType": {
+                            "type": "id",
+                            "value": "EventSummary"
+                          }
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "List of favorite events"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "list",
+                              "itemType": {
+                                "type": "id",
+                                "value": "EventSummary"
+                              }
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "List of favorite events"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/user/username/favorites",
+                        "pathParameters": {
+                          "username": "username"
+                        },
+                        "queryParameters": {},
+                        "headers": {},
+                        "responseStatusCode": 200,
+                        "responseBody": [
+                          {
+                            "id": 1,
+                            "title": "string",
+                            "period": "string",
+                            "tags": [
+                              "string"
+                            ]
+                          }
+                        ],
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": [
+                            {
+                              "id": 1,
+                              "title": "string",
+                              "period": "string",
+                              "tags": [
+                                "string"
+                              ]
+                            }
+                          ]
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "description": "Retrieve a list of events the user marked as favorite.",
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  },
+                  {
+                    "environments": [
+                      {
+                        "id": "Demo server for History Library",
+                        "baseUrl": "https://api.historylibrary.dev/v1"
+                      }
+                    ],
+                    "defaultEnvironment": "Demo server for History Library",
+                    "urlSlug": "add-event-to-favorites",
+                    "method": "POST",
+                    "id": "addEventToFavorites",
+                    "originalEndpointId": "endpoint_user.addEventToFavorites",
+                    "name": "Add event to favorites",
+                    "path": {
+                      "pathParameters": [
+                        {
+                          "key": "username",
+                          "type": {
+                            "type": "primitive",
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "parts": [
+                        {
+                          "type": "literal",
+                          "value": ""
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/user/"
+                        },
+                        {
+                          "type": "pathParameter",
+                          "value": "username"
+                        },
+                        {
+                          "type": "literal",
+                          "value": "/favorites"
+                        }
+                      ]
+                    },
+                    "queryParameters": [],
+                    "headers": [],
+                    "request": {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "object",
+                        "extends": [],
+                        "properties": [
+                          {
+                            "key": "eventId",
+                            "valueType": {
+                              "type": "optional",
+                              "itemType": {
+                                "type": "primitive",
+                                "value": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "requestsV2": {
+                      "requests": [
+                        {
+                          "contentType": "application/json",
+                          "type": {
+                            "type": "object",
+                            "extends": [],
+                            "properties": [
+                              {
+                                "key": "eventId",
+                                "valueType": {
+                                  "type": "optional",
+                                  "itemType": {
+                                    "type": "primitive",
+                                    "value": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "response": {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "user_addEventToFavorites_Response_200"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "Event successfully added to favorites"
+                    },
+                    "responsesV2": {
+                      "responses": [
+                        {
+                          "type": {
+                            "type": "reference",
+                            "value": {
+                              "type": "id",
+                              "value": "user_addEventToFavorites_Response_200"
+                            }
+                          },
+                          "statusCode": 200,
+                          "description": "Event successfully added to favorites"
+                        }
+                      ]
+                    },
+                    "errors": [],
+                    "errorsV2": [],
+                    "examples": [
+                      {
+                        "description": "",
+                        "path": "/user/username/favorites",
+                        "pathParameters": {
+                          "username": "username"
+                        },
+                        "queryParameters": {},
+                        "headers": {},
+                        "requestBody": {},
+                        "responseStatusCode": 200,
+                        "responseBody": {},
+                        "codeExamples": {
+                          "nodeAxios": ""
+                        },
+                        "requestBodyV3": {
+                          "type": "json",
+                          "value": {}
+                        },
+                        "responseBodyV3": {
+                          "type": "json",
+                          "value": {}
+                        },
+                        "codeSamples": []
+                      }
+                    ],
+                    "authed": false,
+                    "protocol": {
+                      "type": "rest"
+                    }
+                  }
+                ],
+                "types": [],
+                "subpackages": [],
+                "urlSlug": "user",
+                "webhooks": [],
+                "websockets": [],
+                "displayName": "user"
+              }
+            },
+            "hasMultipleBaseUrls": false,
+            "globalHeaders": []
+          }
+        },
+        "apisV2": {},
+        "files": {
+          "daf28538-3163-456e-87a7-ef4d80ef4366": "https://fdr-prod-docs-files.s3.us-east-1.amazonaws.com/sandbox.docs.buildwithfern.com/2025-08-19T17%3A11%3A44.079Z/assets/history-logo-dark.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6KXJSKKNNKMPZQ4P%2F20250819%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250819T171144Z&X-Amz-Expires=604800&X-Amz-Signature=a68760c5718a80868d8d0cc39cbbc589a630dabf39c8ad58d8e4d265210cc196&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+          "d2323fde-4920-4416-b50b-1ec160c46ed6": "https://fdr-prod-docs-files.s3.us-east-1.amazonaws.com/sandbox.docs.buildwithfern.com/2025-08-19T17%3A11%3A44.079Z/assets/history-logo-light.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6KXJSKKNNKMPZQ4P%2F20250819%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250819T171144Z&X-Amz-Expires=604800&X-Amz-Signature=4dd42bcceb486cb8286a53dc8bf6516fc0d50275bc202d2307b055db1f8332b7&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+          "f17d669d-93fa-4a72-b7a0-bac154c9dc62": "https://fdr-prod-docs-files.s3.us-east-1.amazonaws.com/sandbox.docs.buildwithfern.com/2025-08-19T17%3A11%3A44.079Z/assets/favicon.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6KXJSKKNNKMPZQ4P%2F20250819%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250819T171144Z&X-Amz-Expires=604800&X-Amz-Signature=2cf16c36ac227f0e16b8e31e44d1806644c61ab4713bb1cef6a937f70ddd9102&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+        },
+        "filesV2": {
+          "daf28538-3163-456e-87a7-ef4d80ef4366": {
+            "type": "image",
+            "width": 512,
+            "height": 512,
+            "url": "https://files.buildwithfern.com/sandbox.docs.buildwithfern.com/2025-08-19T17:11:44.079Z/assets/history-logo-dark.png"
+          },
+          "d2323fde-4920-4416-b50b-1ec160c46ed6": {
+            "type": "image",
+            "width": 512,
+            "height": 512,
+            "url": "https://files.buildwithfern.com/sandbox.docs.buildwithfern.com/2025-08-19T17:11:44.079Z/assets/history-logo-light.png"
+          },
+          "f17d669d-93fa-4a72-b7a0-bac154c9dc62": {
+            "type": "image",
+            "width": 100,
+            "height": 100,
+            "url": "https://files.buildwithfern.com/sandbox.docs.buildwithfern.com/2025-08-19T17:11:44.079Z/assets/favicon.svg"
+          }
+        },
+        "jsFiles": {},
+        "id": "docs_definition_a174286e-2313-4b7f-a49b-46b189ba1122",
+        "config": {
+          "root": {
+            "type": "root",
+            "version": "v1",
+            "id": "d0b6b951d313294318002dfa2c33f529a0d58113d36dc35e0a83bb1e0f8638ec",
+            "child": {
+              "id": "378a8c30c371193fb3f6f07da5470210e41912e3b14f85895a77a28da221e733",
+              "type": "productgroup",
+              "children": [
+                {
+                  "type": "product",
+                  "id": "8602ba3db9262fd04c823994d837408e9760ed2f12eb2792a02ef1f64b230b29",
+                  "productId": "History",
+                  "title": "History",
+                  "subtitle": "",
+                  "slug": "history",
+                  "child": {
+                    "id": "298b9fd8c9bc0e05e8704d61a7aff24bc96bfbd2794d48f2bc6428e01b90efb0",
+                    "type": "versioned",
+                    "children": [
+                      {
+                        "type": "version",
+                        "id": "7533faa1040a7903e390f10751e16f4fce57431e8251b3dd097a6b9881c97c08",
+                        "versionId": "V1",
+                        "title": "V1",
+                        "slug": "history/v-1",
+                        "child": {
+                          "type": "tabbed",
+                          "id": "9ea0704c1b257d352b373b658120a2e26c3cca1762222a320b5271ac5c692591",
+                          "children": [
+                            {
+                              "type": "tab",
+                              "id": "f38e73fc79bf2d6a9d85ebf28e55b58afd00ea64c3dc3f6895a7ae90cfcbb0cc",
+                              "title": "History",
+                              "slug": "history/v-1/history",
+                              "icon": "home",
+                              "child": {
+                                "type": "sidebarRoot",
+                                "id": "956dfb59a7f558a11061bbc0c44b4ee24f3e81f0aadc12046d34ed44edb36017",
+                                "children": [
+                                  {
+                                    "id": "4b8d7d04b63e7084cc9aeb6dd733b99c94dd85a625e4ab8be5cfc8c3cf509a66",
+                                    "type": "section",
+                                    "slug": "history/v-1/history/overview",
+                                    "title": "Overview",
+                                    "children": [
+                                      {
+                                        "id": "38f525469f889cee659b3f7f2d68aa1dd242bc9303c567efd8a4787aa05de0b0",
+                                        "type": "page",
+                                        "slug": "history/v-1/overview",
+                                        "title": "Introduction",
+                                        "pageId": "products/history/v1/pages/overview.mdx"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "65ee3ccdb1e597387d940500d09d3feaf8d77257fa078b0602e7837a801c4117",
+                                    "type": "section",
+                                    "slug": "history/v-1/history/economy",
+                                    "title": "Economy",
+                                    "children": [
+                                      {
+                                        "id": "04d18ae69afcd299b46cfa24193e0bbd15c62edf89b0d9a61ebe44e83c1a7109",
+                                        "type": "page",
+                                        "slug": "history/v-1/economy",
+                                        "title": "Overview",
+                                        "pageId": "products/history/v1/pages/economy.mdx"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "tab",
+                              "id": "139cee6aa2b372d1e2919c50dc72ab83e0196e64bb49de052aaf30d093f2170e",
+                              "title": "Presidents",
+                              "slug": "history/v-1/presidents",
+                              "icon": "book",
+                              "child": {
+                                "type": "sidebarRoot",
+                                "id": "efc20b839f253352f310b0dda8540d1d5064162a0823f8484ad607876f38fd98",
+                                "children": [
+                                  {
+                                    "id": "82c4d549c41de33135b187c86bb21b2f5d4eff391b867208bae76f426f1a1abc",
+                                    "type": "section",
+                                    "slug": "history/v-1/presidents/presidents",
+                                    "title": "Presidents",
+                                    "children": [
+                                      {
+                                        "id": "a412e9baba9e2a1fd6bea7e00a98ee9d83922a07c6c6b76e83c5e94934b9f65f",
+                                        "type": "page",
+                                        "slug": "history/v-1/washington",
+                                        "title": "George Washington",
+                                        "pageId": "products/history/v1/pages/washington.mdx"
+                                      },
+                                      {
+                                        "id": "80c37ee786800a99d4c3e7c7b99688ee55a39250344f4d6a37dbfe4de7ee606b",
+                                        "type": "page",
+                                        "slug": "history/v-1/lincoln",
+                                        "title": "Abraham Lincoln",
+                                        "pageId": "products/history/v1/pages/lincoln.mdx"
+                                      },
+                                      {
+                                        "id": "f4b3158f4ce764d84f62c8689161d65da2e7a65d62ac36685b309abde3ac71c7",
+                                        "type": "page",
+                                        "slug": "history/v-1/roosevelt",
+                                        "title": "Franklin D. Roosevelt",
+                                        "pageId": "products/history/v1/pages/roosevelt.mdx"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "tab",
+                              "id": "8dd9d23d44c4332cfab625eb0b251c8b7a6159b27f203e900c3736934378b8ca",
+                              "title": "API Reference",
+                              "slug": "history/v-1/api-reference",
+                              "icon": "puzzle",
+                              "child": {
+                                "type": "sidebarRoot",
+                                "id": "a04d8f9b3cd2154d4a42db555dc4f3fa94882cad3f97df7800e7ccebc207de1c",
+                                "children": [
+                                  {
+                                    "id": "267614ce3a26007c3a983e8d688470625e10de21924e4b455576fb1e7250e293",
+                                    "type": "sidebarGroup",
+                                    "children": [
+                                      {
+                                        "id": "487ddcf92f10851b9a7a4071eb7fc479cce9dd9a8f29a70ec0e49146266e7939",
+                                        "type": "page",
+                                        "slug": "history/v-1/-api",
+                                        "title": "API Overview",
+                                        "pageId": "shared/shared-api-info.mdx"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "c97d630d9c803b30469c9e9593353eb78c6d31aeec457fe96ae56c5c700e63c7",
+                                    "type": "apiReference",
+                                    "title": "API Reference",
+                                    "apiDefinitionId": "d330c0f2-edc5-45fb-93b3-2c397f28c215",
+                                    "paginated": false,
+                                    "slug": "history/v-1/api-reference/api-reference",
+                                    "hideTitle": false,
+                                    "showErrors": true,
+                                    "children": [
+                                      {
+                                        "id": "d330c0f2-edc5-45fb-93b3-2c397f28c215:subpackage_event",
+                                        "type": "apiPackage",
+                                        "children": [
+                                          {
+                                            "id": "d330c0f2-edc5-45fb-93b3-2c397f28c215:endpoint_event.searchEvents",
+                                            "type": "endpoint",
+                                            "method": "GET",
+                                            "endpointId": "endpoint_event.searchEvents",
+                                            "apiDefinitionId": "d330c0f2-edc5-45fb-93b3-2c397f28c215",
+                                            "isResponseStream": false,
+                                            "title": "Search events",
+                                            "slug": "history/v-1/api-reference/api-reference/event/search-events"
+                                          },
+                                          {
+                                            "id": "d330c0f2-edc5-45fb-93b3-2c397f28c215:endpoint_event.getEventById",
+                                            "type": "endpoint",
+                                            "method": "GET",
+                                            "endpointId": "endpoint_event.getEventById",
+                                            "apiDefinitionId": "d330c0f2-edc5-45fb-93b3-2c397f28c215",
+                                            "isResponseStream": false,
+                                            "title": "Get event by ID",
+                                            "slug": "history/v-1/api-reference/api-reference/event/get-event-by-id"
+                                          }
+                                        ],
+                                        "title": "event",
+                                        "slug": "history/v-1/api-reference/api-reference/event",
+                                        "apiDefinitionId": "d330c0f2-edc5-45fb-93b3-2c397f28c215"
+                                      },
+                                      {
+                                        "id": "d330c0f2-edc5-45fb-93b3-2c397f28c215:subpackage_user",
+                                        "type": "apiPackage",
+                                        "children": [
+                                          {
+                                            "id": "d330c0f2-edc5-45fb-93b3-2c397f28c215:endpoint_user.getUserFavorites",
+                                            "type": "endpoint",
+                                            "method": "GET",
+                                            "endpointId": "endpoint_user.getUserFavorites",
+                                            "apiDefinitionId": "d330c0f2-edc5-45fb-93b3-2c397f28c215",
+                                            "isResponseStream": false,
+                                            "title": "Get user favorites",
+                                            "slug": "history/v-1/api-reference/api-reference/user/get-user-favorites"
+                                          },
+                                          {
+                                            "id": "d330c0f2-edc5-45fb-93b3-2c397f28c215:endpoint_user.addEventToFavorites",
+                                            "type": "endpoint",
+                                            "method": "POST",
+                                            "endpointId": "endpoint_user.addEventToFavorites",
+                                            "apiDefinitionId": "d330c0f2-edc5-45fb-93b3-2c397f28c215",
+                                            "isResponseStream": false,
+                                            "title": "Add event to favorites",
+                                            "slug": "history/v-1/api-reference/api-reference/user/add-event-to-favorites"
+                                          }
+                                        ],
+                                        "title": "user",
+                                        "slug": "history/v-1/api-reference/api-reference/user",
+                                        "apiDefinitionId": "d330c0f2-edc5-45fb-93b3-2c397f28c215"
+                                      }
+                                    ],
+                                    "pointsTo": "history/v-1/api-reference/api-reference/event/search-events"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "default": true
+                      },
+                      {
+                        "type": "version",
+                        "id": "e086ca09ec2d401b5e845e48fc1bdc152654ed9c87487eb0cb9dbb644d01ca70",
+                        "versionId": "V2",
+                        "title": "V2",
+                        "slug": "history/v-2",
+                        "child": {
+                          "type": "tabbed",
+                          "id": "91412133f71509c231eca6ec4532eb0f6371cadf7b25755a1da69ed046735b24",
+                          "children": [
+                            {
+                              "type": "tab",
+                              "id": "e910cf76ddbbfad68661977b6ede0ee882acce1d4052ac76e987705e00bc8d5f",
+                              "title": "History",
+                              "slug": "history/v-2/history",
+                              "icon": "home",
+                              "child": {
+                                "type": "sidebarRoot",
+                                "id": "19273d13ead15bb79700b9c82092ef3a7651d2c0312a0e454bfc5cb85cd7a8aa",
+                                "children": [
+                                  {
+                                    "id": "6495cbb0e8392b6337253a8379e2fa819bb18fe33ece8042de4fe03211958898",
+                                    "type": "section",
+                                    "slug": "history/v-2/history/overview",
+                                    "title": "Overview",
+                                    "children": [
+                                      {
+                                        "id": "219e4413270d36579b0576fa929f0708d04d80811640bf8ddf6561e799c4167a",
+                                        "type": "page",
+                                        "slug": "history/v-2/overview",
+                                        "title": "Introduction",
+                                        "pageId": "products/history/v2/pages/overview.mdx"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "7fdc2857a6d03b0c440dbe8a11c7e4718c5be5a9e6c3a393779be45698ac2eec",
+                                    "type": "section",
+                                    "slug": "history/v-2/history/demographics",
+                                    "title": "Demographics",
+                                    "children": [
+                                      {
+                                        "id": "d458cf64a37ec13b56b1df8d60b516227b4ea77fb07724489c302325c5dbc9d3",
+                                        "type": "page",
+                                        "slug": "history/v-2/demographics",
+                                        "title": "Overview",
+                                        "pageId": "products/history/v2/pages/demographics.mdx"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "tab",
+                              "id": "68b810952fc6891e35ab1d3af82030010eda94df850af6d98dcc049a832be817",
+                              "title": "Countries",
+                              "slug": "history/v-2/countries",
+                              "icon": "book",
+                              "child": {
+                                "type": "sidebarRoot",
+                                "id": "38b5bab8b987c4cd564c9e90a04b925112a689be83b45e1377a47ed3c9cea6a7",
+                                "children": [
+                                  {
+                                    "id": "6b671ff63b473f2172afdad8443c788d39ab8e0f11296da473be30492374f42f",
+                                    "type": "section",
+                                    "slug": "history/v-2/countries/countries",
+                                    "title": "Countries",
+                                    "children": [
+                                      {
+                                        "id": "2388c1520cc8025c57aff09c3053c00ec1111df1fd6a022bfa3d53813777632f",
+                                        "type": "page",
+                                        "slug": "history/v-2/austria",
+                                        "title": "Austria",
+                                        "pageId": "products/history/v2/pages/austria.mdx"
+                                      },
+                                      {
+                                        "id": "f037cf0668fde0534c070a6f1e7514a66138f69116f82abce5640914c0985573",
+                                        "type": "page",
+                                        "slug": "history/v-2/italy",
+                                        "title": "Italy",
+                                        "pageId": "products/history/v2/pages/italy.mdx"
+                                      },
+                                      {
+                                        "id": "25cd6e6369fec3f5a92c5377eb4584ba4336aafaad17ba1ef109356078cf6abe",
+                                        "type": "page",
+                                        "slug": "history/v-2/switzerland",
+                                        "title": "Switzerland",
+                                        "pageId": "products/history/v2/pages/switzerland.mdx"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "tab",
+                              "id": "e41f4074344afd984293a34c540b942c5cdba56a4677655a30e50da36c4c7a3d",
+                              "title": "API Reference",
+                              "slug": "history/v-2/api-reference",
+                              "icon": "puzzle",
+                              "child": {
+                                "type": "sidebarRoot",
+                                "id": "dd7dfb8583755929a5baa09432c29bb4339938f559f1b2c794ac74ac93a9c311",
+                                "children": [
+                                  {
+                                    "id": "173f8e6d9f6c8c511cd3140a3d805aefb96e4fb682fdd877d2c1408a8a540fc6",
+                                    "type": "sidebarGroup",
+                                    "children": [
+                                      {
+                                        "id": "873d566dadbeb65bb68fef5f4c966d29d51ef968814b2608c3afc974ba294a8c",
+                                        "type": "page",
+                                        "slug": "history/v-2/-api",
+                                        "title": "API Overview",
+                                        "pageId": "shared/shared-api-info.mdx"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "545e72a8b4b5a3a983f91282ec29d39751cfa19827cc1073091fb65a898eca78",
+                                    "type": "apiReference",
+                                    "title": "API Reference",
+                                    "apiDefinitionId": "45f3c273-acf9-4c18-9da0-13fa0bea22e7",
+                                    "paginated": false,
+                                    "slug": "history/v-2/api-reference/api-reference",
+                                    "hideTitle": false,
+                                    "showErrors": true,
+                                    "children": [
+                                      {
+                                        "id": "45f3c273-acf9-4c18-9da0-13fa0bea22e7:subpackage_event",
+                                        "type": "apiPackage",
+                                        "children": [
+                                          {
+                                            "id": "45f3c273-acf9-4c18-9da0-13fa0bea22e7:endpoint_event.searchEvents",
+                                            "type": "endpoint",
+                                            "method": "GET",
+                                            "endpointId": "endpoint_event.searchEvents",
+                                            "apiDefinitionId": "45f3c273-acf9-4c18-9da0-13fa0bea22e7",
+                                            "isResponseStream": false,
+                                            "title": "Search events",
+                                            "slug": "history/v-2/api-reference/api-reference/event/search-events"
+                                          },
+                                          {
+                                            "id": "45f3c273-acf9-4c18-9da0-13fa0bea22e7:endpoint_event.getEventById",
+                                            "type": "endpoint",
+                                            "method": "GET",
+                                            "endpointId": "endpoint_event.getEventById",
+                                            "apiDefinitionId": "45f3c273-acf9-4c18-9da0-13fa0bea22e7",
+                                            "isResponseStream": false,
+                                            "title": "Get event by ID",
+                                            "slug": "history/v-2/api-reference/api-reference/event/get-event-by-id"
+                                          }
+                                        ],
+                                        "title": "event",
+                                        "slug": "history/v-2/api-reference/api-reference/event",
+                                        "apiDefinitionId": "45f3c273-acf9-4c18-9da0-13fa0bea22e7"
+                                      },
+                                      {
+                                        "id": "45f3c273-acf9-4c18-9da0-13fa0bea22e7:subpackage_user",
+                                        "type": "apiPackage",
+                                        "children": [
+                                          {
+                                            "id": "45f3c273-acf9-4c18-9da0-13fa0bea22e7:endpoint_user.getUserFavorites",
+                                            "type": "endpoint",
+                                            "method": "GET",
+                                            "endpointId": "endpoint_user.getUserFavorites",
+                                            "apiDefinitionId": "45f3c273-acf9-4c18-9da0-13fa0bea22e7",
+                                            "isResponseStream": false,
+                                            "title": "Get user favorites",
+                                            "slug": "history/v-2/api-reference/api-reference/user/get-user-favorites"
+                                          },
+                                          {
+                                            "id": "45f3c273-acf9-4c18-9da0-13fa0bea22e7:endpoint_user.addEventToFavorites",
+                                            "type": "endpoint",
+                                            "method": "POST",
+                                            "endpointId": "endpoint_user.addEventToFavorites",
+                                            "apiDefinitionId": "45f3c273-acf9-4c18-9da0-13fa0bea22e7",
+                                            "isResponseStream": false,
+                                            "title": "Add event to favorites",
+                                            "slug": "history/v-2/api-reference/api-reference/user/add-event-to-favorites"
+                                          }
+                                        ],
+                                        "title": "user",
+                                        "slug": "history/v-2/api-reference/api-reference/user",
+                                        "apiDefinitionId": "45f3c273-acf9-4c18-9da0-13fa0bea22e7"
+                                      }
+                                    ],
+                                    "pointsTo": "history/v-2/api-reference/api-reference/event/search-events"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "default": false
+                      }
+                    ]
+                  },
+                  "default": false,
+                  "icon": "fa-solid fa-code"
+                },
+                {
+                  "type": "product",
+                  "id": "f8ac60bc2eb74b7166ac43ec6cd584aef4c4fcd3302aeef2d5808fc39a28bf1c",
+                  "productId": "Art",
+                  "title": "Art",
+                  "subtitle": "",
+                  "slug": "art",
+                  "child": {
+                    "type": "unversioned",
+                    "id": "ca9d03aa9534917341f0b1bd093179169fb2ba70f8ca59455bd818dc8784a6ec",
+                    "child": {
+                      "type": "tabbed",
+                      "id": "bb523daeba998d3bcd6529961ff33936d61f34308f0cf3dbc7360dd82b9f5487",
+                      "children": [
+                        {
+                          "type": "tab",
+                          "id": "51e68818b066643bc4ee775dd69dd28218bfb7ebabff271360b1eea30f95799d",
+                          "title": "Art",
+                          "slug": "art/art",
+                          "icon": "book",
+                          "child": {
+                            "type": "sidebarRoot",
+                            "id": "3449cc4c4346bbad25613984e10c9174e0441ce1ac0f7ede93674c1d2d3d6899",
+                            "children": [
+                              {
+                                "id": "94908578de24c4d3aa882207b62e0d73e0a5bf3ae8b096f1597da1916d8ce519",
+                                "type": "section",
+                                "slug": "art/art/art",
+                                "title": "Art",
+                                "children": [
+                                  {
+                                    "id": "ccd363708d228c6d0d008eefb529f9f2807928763a952a191ff9fcfb0be18ee7",
+                                    "type": "page",
+                                    "slug": "art",
+                                    "title": "Overview",
+                                    "pageId": "products/art/pages/overview.mdx"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "tab",
+                          "id": "39735a76e8933f83e5e05e77d89dce2e85d6e09b149c5327871c9d0ab7295923",
+                          "title": "API Reference",
+                          "slug": "art/api-reference",
+                          "icon": "puzzle",
+                          "child": {
+                            "type": "sidebarRoot",
+                            "id": "cc5ef130550e54f290e0dab8efe84f540df40689e897497c713a09397b25ba1d",
+                            "children": [
+                              {
+                                "id": "88ecbc1854ea96b65b486b8b9080cdd026bb81b048588e20978d1ddab9db889f",
+                                "type": "sidebarGroup",
+                                "children": [
+                                  {
+                                    "id": "a9d786ecd3af96df3c7727688993c5a08858be638bc18202da0343c20fd0df09",
+                                    "type": "page",
+                                    "slug": "art/history-api",
+                                    "title": "API Overview",
+                                    "pageId": "shared/shared-api-info.mdx"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "default": false,
+                  "icon": "fa-solid fa-code"
+                }
+              ]
+            },
+            "slug": "",
+            "title": "Sandbox",
+            "hidden": false
+          },
+          "logoHeight": 20,
+          "colorsV3": {
+            "type": "darkAndLight",
+            "light": {
+              "accentPrimary": {
+                "r": 194,
+                "g": 92,
+                "b": 204,
+                "a": 1
+              },
+              "logo": "d2323fde-4920-4416-b50b-1ec160c46ed6",
+              "background": {
+                "type": "gradient"
+              }
+            },
+            "dark": {
+              "accentPrimary": {
+                "r": 88,
+                "g": 27,
+                "b": 94,
+                "a": 1
+              },
+              "logo": "daf28538-3163-456e-87a7-ef4d80ef4366",
+              "background": {
+                "type": "gradient"
+              }
+            }
+          },
+          "title": "Sandbox",
+          "favicon": "f17d669d-93fa-4a72-b7a0-bac154c9dc62",
+          "layout": {
+            "pageWidth": {
+              "type": "full"
+            },
+            "searchbarPlacement": "HEADER",
+            "tabsPlacement": "HEADER",
+            "contentAlignment": "CENTER",
+            "headerPosition": "FIXED",
+            "disableHeader": false
+          },
+          "js": {
+            "files": []
+          },
+          "integrations": {},
+          "analyticsConfig": {}
+        }
+      },
+      "lightModeEnabled": true
+    }
+  }

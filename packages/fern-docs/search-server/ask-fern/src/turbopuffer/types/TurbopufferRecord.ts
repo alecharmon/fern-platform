@@ -9,6 +9,7 @@ export const TurbopufferRecordSchema = z.object({
     title: z.string(),
     url: z.string(),
     version: z.string().optional(),
+    product: z.string().optional(),
     keywords: z.array(z.string()).optional(),
     authed: z.boolean().optional(),
   }),
@@ -59,6 +60,11 @@ export const FernTurbopufferAttributeSchema: Record<
     bm25: false,
   },
   version: {
+    type: "string",
+    filterable: true,
+    bm25: false,
+  },
+  product: {
     type: "string",
     filterable: true,
     bm25: false,

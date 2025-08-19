@@ -52,6 +52,10 @@ export async function createMarkdownRecords({
     (n): n is FernNavigation.VersionNode => n.type === "version"
   );
 
+  const productNode = parents.find(
+    (n): n is FernNavigation.ProductNode => n.type === "product"
+  );
+
   const markdownChunks = isChangelog ? [markdown] : chunkMarkdown(markdown);
 
   return markdownChunks.map((chunk, i) => {
@@ -63,6 +67,7 @@ export async function createMarkdownRecords({
         title: node.title,
         document: postProcessMarkdown(markdown),
         version: versionNode?.title,
+        product: productNode?.title,
         description: undefined,
         keywords: undefined,
         authed,

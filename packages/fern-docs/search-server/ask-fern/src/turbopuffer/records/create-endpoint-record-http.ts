@@ -31,6 +31,9 @@ export function createEndpointBaseRecordHttp({
   const versionNode = parents.find(
     (n): n is FernNavigation.VersionNode => n.type === "version"
   );
+  const productNode = parents.find(
+    (n): n is FernNavigation.ProductNode => n.type === "product"
+  );
   const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
   const requestProperties: RequestProperty[] = [];
@@ -159,6 +162,7 @@ export function createEndpointBaseRecordHttp({
       chunk: prepared.content ?? "",
       document,
       url,
+      product: productNode?.title,
       version: versionNode?.title,
       authed,
       keywords,

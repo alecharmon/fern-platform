@@ -24,6 +24,9 @@ export function createEndpointBaseRecordWebhook({
   const versionNode = parents.find(
     (n): n is FernNavigation.VersionNode => n.type === "version"
   );
+  const productNode = parents.find(
+    (n): n is FernNavigation.ProductNode => n.type === "product"
+  );
   const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
   const keywords: string[] = [];
@@ -70,6 +73,7 @@ export function createEndpointBaseRecordWebhook({
       document,
       url,
       version: versionNode?.title,
+      product: productNode?.title,
       authed,
       keywords,
     },

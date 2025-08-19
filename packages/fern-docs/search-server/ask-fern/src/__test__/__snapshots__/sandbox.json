@@ -1,0 +1,464 @@
+[
+  {
+    "id": "c3626e91c94f77585ae703a192bb04eb7d16bbf5e30beba570c6466104a5e871",
+    "attributes": {
+      "chunk": "---\ntitle: United States\nslug: overview\n---",
+      "title": "Introduction",
+      "document": "---\ntitle: United States\nslug: overview\n---\n\n## Overview\n\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \n\n\nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.\n\n## History\n\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\n\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/overview"
+    }
+  },
+  {
+    "id": "a13a274a1d1403ef2a9a1da72ebe0b195a2a668078a22e78516fccd7bca3c25b",
+    "attributes": {
+      "chunk": "## Overview\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.",
+      "title": "Introduction",
+      "document": "---\ntitle: United States\nslug: overview\n---\n\n## Overview\n\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \n\n\nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.\n\n## History\n\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\n\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/overview"
+    }
+  },
+  {
+    "id": "be79c81a33d4b3436a6a0e19990366e5786df3605209fefeb0e0e605fad0d1e9",
+    "attributes": {
+      "chunk": "## History\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.",
+      "title": "Introduction",
+      "document": "---\ntitle: United States\nslug: overview\n---\n\n## Overview\n\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \n\n\nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.\n\n## History\n\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\n\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/overview"
+    }
+  },
+  {
+    "id": "0647806da0255eb80cfa528f093ca083d7f202b1be9d4822ed3341912e13e5ed",
+    "attributes": {
+      "chunk": "---\ntitle: Economy\nslug: economy\n---",
+      "title": "Overview",
+      "document": "---\ntitle: Economy\nslug: economy\n---\n\n## Economy\n\nThe United States has a highly developed diversified mixed economy. It is the world's largest economy by \nnominal GDP and second largest by purchasing power parity (PPP). As of 2025, it has the world's seventh \nhighest nominal GDP per capita and ninth highest GDP per capita by PPP. According to the World Bank, the U.S. \naccounted for 14.8% of the global aggregate GDP in 2024 in purchasing power parity terms and 26.2% in \nnominal terms. The U.S. dollar is the currency of record most used in international transactions and is \nthe world's foremost reserve currency, backed by a large U.S. treasuries market, its role as the reference \nstandard for the petrodollar system, and its linked eurodollar. Several countries use it as their official \ncurrency and in others it is the de facto currency. Since the end of World War II, the economy has achieved \nrelatively steady growth, low unemployment and inflation, and rapid advances in technology.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/economy"
+    }
+  },
+  {
+    "id": "66bce1429ac1628edd2f907c89f52e070dff953fadb046430aad62a3d8e49f2e",
+    "attributes": {
+      "chunk": "## Economy\nThe United States has a highly developed diversified mixed economy. It is the world's largest economy by \nnominal GDP and second largest by purchasing power parity (PPP). As of 2025, it has the world's seventh \nhighest nominal GDP per capita and ninth highest GDP per capita by PPP. According to the World Bank, the U.S. \naccounted for 14.8% of the global aggregate GDP in 2024 in purchasing power parity terms and 26.2% in \nnominal terms. The U.S. dollar is the currency of record most used in international transactions and is \nthe world's foremost reserve currency, backed by a large U.S. treasuries market, its role as the reference \nstandard for the petrodollar system, and its linked eurodollar. Several countries use it as their official \ncurrency and in others it is the de facto currency. Since the end of World War II, the economy has achieved \nrelatively steady growth, low unemployment and inflation, and rapid advances in technology.",
+      "title": "Overview",
+      "document": "---\ntitle: Economy\nslug: economy\n---\n\n## Economy\n\nThe United States has a highly developed diversified mixed economy. It is the world's largest economy by \nnominal GDP and second largest by purchasing power parity (PPP). As of 2025, it has the world's seventh \nhighest nominal GDP per capita and ninth highest GDP per capita by PPP. According to the World Bank, the U.S. \naccounted for 14.8% of the global aggregate GDP in 2024 in purchasing power parity terms and 26.2% in \nnominal terms. The U.S. dollar is the currency of record most used in international transactions and is \nthe world's foremost reserve currency, backed by a large U.S. treasuries market, its role as the reference \nstandard for the petrodollar system, and its linked eurodollar. Several countries use it as their official \ncurrency and in others it is the de facto currency. Since the end of World War II, the economy has achieved \nrelatively steady growth, low unemployment and inflation, and rapid advances in technology.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/economy"
+    }
+  },
+  {
+    "id": "5e9be9633951846c9fddd38a8c5261bfa5b0ee510b25c06d0641fdb244bd7f90",
+    "attributes": {
+      "chunk": "---\ntitle: George Washington\nslug: washington\n---",
+      "title": "George Washington",
+      "document": "---\ntitle: George Washington\nslug: washington\n---\n\n## Overview\n\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/washington"
+    }
+  },
+  {
+    "id": "95fed93fd460db6201a9db60f7a0fcb9763b0aa126c80b8d20043c8b1f8405b5",
+    "attributes": {
+      "chunk": "## Overview\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.",
+      "title": "George Washington",
+      "document": "---\ntitle: George Washington\nslug: washington\n---\n\n## Overview\n\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/washington"
+    }
+  },
+  {
+    "id": "7db9138dab2511ec58b16a5eb758c9e85cd6fecdc5f60cf8fec08ebcdf8cdff7",
+    "attributes": {
+      "chunk": "## Legacy\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"",
+      "title": "George Washington",
+      "document": "---\ntitle: George Washington\nslug: washington\n---\n\n## Overview\n\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/washington"
+    }
+  },
+  {
+    "id": "3b1548364f3156aa0389b2f064aa0003481d273ba85835660bc3858e91950656",
+    "attributes": {
+      "chunk": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---",
+      "title": "Abraham Lincoln",
+      "document": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---\n\n## Overview\n\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/lincoln"
+    }
+  },
+  {
+    "id": "cf80d5ae9352922523d4d8626ea4340450b2159b5173f3b2832ca6f8b507bf92",
+    "attributes": {
+      "chunk": "## Overview\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.",
+      "title": "Abraham Lincoln",
+      "document": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---\n\n## Overview\n\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/lincoln"
+    }
+  },
+  {
+    "id": "502fae7fc42d94dfefcc72eea54bbdbe550633d9c3751be4e85dc3dba9a2e5da",
+    "attributes": {
+      "chunk": "## Legacy\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.",
+      "title": "Abraham Lincoln",
+      "document": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---\n\n## Overview\n\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/lincoln"
+    }
+  },
+  {
+    "id": "911745e192cb4d06d3690c64026caa4e2ed0af0a17de3acb9eaabd8e112570a9",
+    "attributes": {
+      "chunk": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---",
+      "title": "Franklin D. Roosevelt",
+      "document": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---\n\n## Overview\n\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/roosevelt"
+    }
+  },
+  {
+    "id": "c26b37510603baa2e9b41efafb8c2da3bf7cc5db839ae8431e1a0b8f6a283356",
+    "attributes": {
+      "chunk": "## Overview\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.",
+      "title": "Franklin D. Roosevelt",
+      "document": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---\n\n## Overview\n\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/roosevelt"
+    }
+  },
+  {
+    "id": "d9146812c99334cde99bc5847b97af485b8aa0cac4360ca88ce53d4ecdb29605",
+    "attributes": {
+      "chunk": "## Legacy\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.",
+      "title": "Franklin D. Roosevelt",
+      "document": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---\n\n## Overview\n\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/roosevelt"
+    }
+  },
+  {
+    "id": "2afa7680826dbfc7cf9a9205969bb78b753f549275661589f496dc030375480e",
+    "attributes": {
+      "chunk": "---\ntitle: History API\nslug: history-api\ndescription: >-\nA simple API for exploring and managing historical events, timelines, and\nuser-curated favorites.\n---\nWelcome to the History API. This API is designed to help you explore and manage historical events, timelines, and user-curated favorites.",
+      "title": "API Overview",
+      "document": "---\ntitle: History API\nslug: history-api\ndescription: >-\n  A simple API for exploring and managing historical events, timelines, and\n  user-curated favorites.\n---\n\nWelcome to the History API. This API is designed to help you explore and manage historical events, timelines, and user-curated favorites.\n\n## Overview\n\nThe History API is a simple API for exploring and managing historical events, timelines, and user-curated favorites.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/-api"
+    }
+  },
+  {
+    "id": "23d18203368493b47429162a19a3d55040ac819b85ec5bd5937e7722884e444b",
+    "attributes": {
+      "chunk": "## Overview\nThe History API is a simple API for exploring and managing historical events, timelines, and user-curated favorites.",
+      "title": "API Overview",
+      "document": "---\ntitle: History API\nslug: history-api\ndescription: >-\n  A simple API for exploring and managing historical events, timelines, and\n  user-curated favorites.\n---\n\nWelcome to the History API. This API is designed to help you explore and manage historical events, timelines, and user-curated favorites.\n\n## Overview\n\nThe History API is a simple API for exploring and managing historical events, timelines, and user-curated favorites.\n",
+      "version": "V1",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/-api"
+    }
+  },
+  {
+    "id": "c5edfe9118e895d75be21558f335812949b493dc3110239f4cdf9d46d1b45190",
+    "attributes": {
+      "chunk": "---\ntitle: Demographics\nslug: demographics\n---",
+      "title": "Overview",
+      "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/demographics"
+    }
+  },
+  {
+    "id": "5c8ba20f866c3ab433e1d714084c4f88d996baafb74748342d8ade36d1776499",
+    "attributes": {
+      "chunk": "## Overview\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.",
+      "title": "Overview",
+      "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/demographics"
+    }
+  },
+  {
+    "id": "b6096b2530ace9ce906bdffe2f0437fd2d064459cda22d7a58763824e98b61a1",
+    "attributes": {
+      "chunk": "## Trends",
+      "title": "Overview",
+      "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/demographics"
+    }
+  },
+  {
+    "id": "e04c5d26f4954ae3b4adbbd8e24d7f842e1d55d67b70dc7f0466ba5ad623c098",
+    "attributes": {
+      "chunk": "## Migration\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.",
+      "title": "Overview",
+      "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/demographics"
+    }
+  },
+  {
+    "id": "8c4131cbea0455db8e4c0dcc47c5ffe7cb2180eae7e8993b6ca4e9a525adb3a5",
+    "attributes": {
+      "chunk": "## Emigration\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.",
+      "title": "Overview",
+      "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/demographics"
+    }
+  },
+  {
+    "id": "f8238d40644aaff6f35b8e2b542085f4b11d249af993767334992a3b2351f849",
+    "attributes": {
+      "chunk": "---\ntitle: Austria\nslug: austria\n---",
+      "title": "Austria",
+      "document": "---\ntitle: Austria\nslug: austria\n---\n\n## Overview\n\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.\n\n## Culture\n\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/austria"
+    }
+  },
+  {
+    "id": "9771a7fc9fa0a478f24e5d28b50e1400f4174c0fca92994a75a356d7794d3c46",
+    "attributes": {
+      "chunk": "## Overview\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.",
+      "title": "Austria",
+      "document": "---\ntitle: Austria\nslug: austria\n---\n\n## Overview\n\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.\n\n## Culture\n\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/austria"
+    }
+  },
+  {
+    "id": "ca860ba7f2a543ecec37c432505bf0b020483532bb8f6c58255a19b3b2642f2b",
+    "attributes": {
+      "chunk": "## Culture\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.",
+      "title": "Austria",
+      "document": "---\ntitle: Austria\nslug: austria\n---\n\n## Overview\n\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.\n\n## Culture\n\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/austria"
+    }
+  },
+  {
+    "id": "aea967e664bed5bfa3e5686906b43f160f6d523ba8990e1b68566719663f6fd5",
+    "attributes": {
+      "chunk": "---\ntitle: Italy\nslug: italy\n---",
+      "title": "Italy",
+      "document": "---\ntitle: Italy\nslug: italy\n---\n\n## Overview\n\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.\n\n## Culture\n\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/italy"
+    }
+  },
+  {
+    "id": "a88853a14a57f5c5ec4099300d3dc51b3ce132f36bbcaafaaf9bbfd18da36b31",
+    "attributes": {
+      "chunk": "## Overview\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.",
+      "title": "Italy",
+      "document": "---\ntitle: Italy\nslug: italy\n---\n\n## Overview\n\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.\n\n## Culture\n\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/italy"
+    }
+  },
+  {
+    "id": "5a45fdeafbc0e203cfe55f0816247d9829d42545d89158152901b39e115d1a02",
+    "attributes": {
+      "chunk": "## Culture\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.",
+      "title": "Italy",
+      "document": "---\ntitle: Italy\nslug: italy\n---\n\n## Overview\n\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.\n\n## Culture\n\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/italy"
+    }
+  },
+  {
+    "id": "877ac69be754248e7b93935db38af319f20b2f8b0ba860de32872d84a8e4caa2",
+    "attributes": {
+      "chunk": "---\ntitle: Switzerland\nslug: switzerland\n---",
+      "title": "Switzerland",
+      "document": "---\ntitle: Switzerland\nslug: switzerland\n---\n\n## Overview\n\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.\n\n## Culture\n\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/switzerland"
+    }
+  },
+  {
+    "id": "70ce6e5d2c7ef284b2b4e6fd2415c760319d33faece27460f35f5b8d35aa621f",
+    "attributes": {
+      "chunk": "## Overview\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.",
+      "title": "Switzerland",
+      "document": "---\ntitle: Switzerland\nslug: switzerland\n---\n\n## Overview\n\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.\n\n## Culture\n\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/switzerland"
+    }
+  },
+  {
+    "id": "35a3a2e427b9e72e4e952793c69dbb0f3fc0502fd7d35e9e7c07769df206e027",
+    "attributes": {
+      "chunk": "## Culture\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.",
+      "title": "Switzerland",
+      "document": "---\ntitle: Switzerland\nslug: switzerland\n---\n\n## Overview\n\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.\n\n## Culture\n\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.\n",
+      "version": "V2",
+      "product": "History",
+      "authed": false,
+      "url": "https://sandbox/history/v-2/switzerland"
+    }
+  },
+  {
+    "id": "70387ae393a9fa983f0d756c1c7548a12076d36ad66d1aee61fc83881128e77b",
+    "attributes": {
+      "chunk": "---\ntitle: Art\nslug: art\n---",
+      "title": "Overview",
+      "document": "---\ntitle: Art\nslug: art\n---\n\n## Overview\n\nArt is a diverse range of human practices in creating visual, auditory or performing artifacts, \nexpressing the author's imaginative or technical skill, intended to be appreciated for their beauty or emotional power.\n",
+      "product": "Art",
+      "authed": false,
+      "url": "https://sandbox/art"
+    }
+  },
+  {
+    "id": "27bab0a90931f3db7abf63b3aa92114509d32fce7890757f56711c6d2c0888a8",
+    "attributes": {
+      "chunk": "## Overview\nArt is a diverse range of human practices in creating visual, auditory or performing artifacts, \nexpressing the author's imaginative or technical skill, intended to be appreciated for their beauty or emotional power.",
+      "title": "Overview",
+      "document": "---\ntitle: Art\nslug: art\n---\n\n## Overview\n\nArt is a diverse range of human practices in creating visual, auditory or performing artifacts, \nexpressing the author's imaginative or technical skill, intended to be appreciated for their beauty or emotional power.\n",
+      "product": "Art",
+      "authed": false,
+      "url": "https://sandbox/art"
+    }
+  },
+  {
+    "id": "c3b2af2def50b8fe54229c64f4d48ddbeb78b70726efc297be33917df1aa57fe",
+    "attributes": {
+      "title": "Search events",
+      "chunk": "Search historical events using time period, tags, or keywords.",
+      "document": "{\n  \"description\": \"[]\",\n  \"api_type\": \"http\",\n  \"method\": \"GET\",\n  \"endpoint_path\": \"/events/search\",\n  \"endpoint_path_alternates\": [\n    \"/events/search\",\n    \"https://api.historylibrary.dev/events/search\",\n    \"https://api.historylibrary.dev/events/search\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[]\n\nA list of events matching the search criteria",
+      "url": "https://sandbox/history/api-reference/api-reference/event/search-events",
+      "product": "History",
+      "version": "V1",
+      "authed": false,
+      "keywords": [
+        "endpoint",
+        "api",
+        "http",
+        "rest",
+        "openapi",
+        "json"
+      ]
+    }
+  },
+  {
+    "id": "dc55a09fae262c0998fe08441f830b444c3cc32ddcca8be297bab9b9e7f2097d",
+    "attributes": {
+      "title": "Get event by ID",
+      "chunk": "Retrieve details about a historical event.",
+      "document": "{\n  \"description\": \"[]\",\n  \"api_type\": \"http\",\n  \"method\": \"GET\",\n  \"endpoint_path\": \"/events/:eventId\",\n  \"endpoint_path_alternates\": [\n    \"/events/{eventId}\",\n    \"https://api.historylibrary.dev/events/:eventId\",\n    \"https://api.historylibrary.dev/events/%7BeventId%7D\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[]\n\nEvent details retrieved successfully",
+      "url": "https://sandbox/history/api-reference/api-reference/event/get-event-by-id",
+      "product": "History",
+      "version": "V1",
+      "authed": false,
+      "keywords": [
+        "endpoint",
+        "api",
+        "http",
+        "rest",
+        "openapi",
+        "json"
+      ]
+    }
+  },
+  {
+    "id": "10d5d5250b169c215affe1952e37292d5ba8138374222b36dbfc5a3a565021b0",
+    "attributes": {
+      "title": "Get user favorites",
+      "chunk": "Retrieve a list of events the user marked as favorite.",
+      "document": "{\n  \"description\": \"[]\",\n  \"api_type\": \"http\",\n  \"method\": \"GET\",\n  \"endpoint_path\": \"/user/:username/favorites\",\n  \"endpoint_path_alternates\": [\n    \"/user/{username}/favorites\",\n    \"https://api.historylibrary.dev/user/:username/favorites\",\n    \"https://api.historylibrary.dev/user/%7Busername%7D/favorites\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[]\n\nList of favorite events",
+      "url": "https://sandbox/history/api-reference/api-reference/user/get-user-favorites",
+      "product": "History",
+      "version": "V1",
+      "authed": false,
+      "keywords": [
+        "endpoint",
+        "api",
+        "http",
+        "rest",
+        "openapi",
+        "json"
+      ]
+    }
+  },
+  {
+    "id": "f562414f2cafdb57c5ec414ebbc81f05b69a411ece248fb2099edc4e36f05023",
+    "attributes": {
+      "title": "Add event to favorites",
+      "chunk": "",
+      "document": "{\n  \"description\": \"[\\n  {\\n    \\\"key\\\": \\\"eventId\\\",\\n    \\\"type\\\": \\\"{\\\\\\\"type\\\\\\\":\\\\\\\"alias\\\\\\\",\\\\\\\"value\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"optional\\\\\\\",\\\\\\\"shape\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"alias\\\\\\\",\\\\\\\"value\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"primitive\\\\\\\",\\\\\\\"value\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"integer\\\\\\\"}}}}}\\\"\\n  }\\n]\",\n  \"api_type\": \"http\",\n  \"method\": \"POST\",\n  \"endpoint_path\": \"/user/:username/favorites\",\n  \"endpoint_path_alternates\": [\n    \"/user/{username}/favorites\",\n    \"https://api.historylibrary.dev/user/:username/favorites\",\n    \"https://api.historylibrary.dev/user/%7Busername%7D/favorites\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[\n  {\n    \"key\": \"eventId\",\n    \"type\": \"{\\\"type\\\":\\\"alias\\\",\\\"value\\\":{\\\"type\\\":\\\"optional\\\",\\\"shape\\\":{\\\"type\\\":\\\"alias\\\",\\\"value\\\":{\\\"type\\\":\\\"primitive\\\",\\\"value\\\":{\\\"type\\\":\\\"integer\\\"}}}}}\"\n  }\n]\n\nEvent successfully added to favorites",
+      "url": "https://sandbox/history/api-reference/api-reference/user/add-event-to-favorites",
+      "product": "History",
+      "version": "V1",
+      "authed": false,
+      "keywords": [
+        "endpoint",
+        "api",
+        "http",
+        "rest",
+        "openapi",
+        "json"
+      ]
+    }
+  }
+]
