@@ -13,6 +13,7 @@ import { RubyInfo } from "./RubyInfo";
 import { CsharpInfo } from "./CsharpInfo";
 import { PhpInfo } from "./PhpInfo";
 import { RustInfo } from "./RustInfo";
+import { SwiftInfo } from "./SwiftInfo";
 
 export const LanguageInfo: core.serialization.Schema<serializers.LanguageInfo.Raw, FernGeneratorCli.LanguageInfo> =
     core.serialization
@@ -25,6 +26,7 @@ export const LanguageInfo: core.serialization.Schema<serializers.LanguageInfo.Ra
             csharp: CsharpInfo,
             php: PhpInfo,
             rust: RustInfo,
+            swift: SwiftInfo,
         })
         .transform<FernGeneratorCli.LanguageInfo>({
             transform: (value) => {
@@ -45,6 +47,8 @@ export const LanguageInfo: core.serialization.Schema<serializers.LanguageInfo.Ra
                         return FernGeneratorCli.LanguageInfo.php(value);
                     case "rust":
                         return FernGeneratorCli.LanguageInfo.rust(value);
+                    case "swift":
+                        return FernGeneratorCli.LanguageInfo.swift(value);
                     default:
                         return value as FernGeneratorCli.LanguageInfo;
                 }
@@ -61,7 +65,8 @@ export declare namespace LanguageInfo {
         | LanguageInfo.Ruby
         | LanguageInfo.Csharp
         | LanguageInfo.Php
-        | LanguageInfo.Rust;
+        | LanguageInfo.Rust
+        | LanguageInfo.Swift;
 
     interface Typescript extends TypescriptInfo.Raw {
         type: "typescript";
@@ -93,5 +98,9 @@ export declare namespace LanguageInfo {
 
     interface Rust extends RustInfo.Raw {
         type: "rust";
+    }
+
+    interface Swift extends SwiftInfo.Raw {
+        type: "swift";
     }
 }

@@ -70,6 +70,7 @@ types:
       csharp: CsharpInfo
       php: PhpInfo
       rust: RustInfo
+      swift: SwiftInfo
 
   TypescriptInfo:
     properties:
@@ -102,6 +103,10 @@ types:
   RustInfo:
     properties:
       publishInfo: optional<CargoPublishInfo>
+  
+  SwiftInfo:
+    properties:
+      publishInfo: optional<SwiftPackageManagerPublishInfo>
 
   ComposerPublishInfo:
     properties:
@@ -139,3 +144,8 @@ types:
     properties:
       packageName: string
       version: string
+
+  SwiftPackageManagerPublishInfo:
+    properties:
+      gitUrl: string
+      minVersion: string

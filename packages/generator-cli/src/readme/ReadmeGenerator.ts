@@ -404,6 +404,12 @@ export class ReadmeGenerator {
           cargo: language.publishInfo,
         });
         break;
+      case "swift":
+        await this.writeInstallationForSwiftPackageManager({
+          writer,
+          spm: language.publishInfo,
+        });
+        break;
       default:
         assertNever(language);
     }
@@ -557,6 +563,27 @@ export class ReadmeGenerator {
     await writer.writeLine();
   }
 
+  private async writeInstallationForSwiftPackageManager({
+    writer,
+    spm,
+  }: {
+    writer: Writer;
+    spm: FernGeneratorCli.SwiftPackageManagerPublishInfo;
+  }): Promise<void> {
+    await writer.writeLine(
+      "With Swift Package Manager (SPM), add the following to the top-level `dependencies` array within your `Package.swift` file:"
+    );
+    await writer.writeLine();
+    await writer.writeLine("```swift");
+    await writer.writeLine("dependencies: [");
+    await writer.writeLine(
+      `    .package(url: "${spm.gitUrl}", from: "${spm.minVersion}"),`
+    );
+    await writer.writeLine("]");
+    await writer.writeLine("```");
+    await writer.writeLine();
+  }
+
   private getCrateNameFromPackageName(packageName: string): string {
     return packageName.includes("/")
       ? (packageName.split("/").pop() ?? packageName)
@@ -656,6 +683,17 @@ export class ReadmeGenerator {
         await this.writeShieldForCargo({
           writer,
           cargo,
+        });
+        return;
+      }
+      case "swift": {
+        const spm = language.publishInfo;
+        if (spm == null) {
+          return;
+        }
+        await this.writeShieldForSwiftPackageManager({
+          writer,
+          spm,
         });
         return;
       }
@@ -782,6 +820,18 @@ export class ReadmeGenerator {
     );
   }
 
+  private async writeShieldForSwiftPackageManager({
+    writer,
+  }: {
+    writer: Writer;
+    spm: FernGeneratorCli.SwiftPackageManagerPublishInfo;
+  }): Promise<void> {
+    await writer.write("[![SwiftPM compatible]");
+    await writer.write(
+      "(https://img.shields.io/badge/SwiftPM-compatible-orange.svg)]"
+    );
+  }
+
   private generateContributing(): Block {
     return new Block({
       id: "CONTRIBUTING",
@@ -836,6 +886,8 @@ function languageToTitle(language: FernGeneratorCli.LanguageInfo): string {
       return "PHP";
     case "rust":
       return "Rust";
+    case "swift":
+      return "Swift";
     default:
       assertNever(language);
   }
