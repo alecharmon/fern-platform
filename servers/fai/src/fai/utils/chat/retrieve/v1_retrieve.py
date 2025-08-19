@@ -2,6 +2,7 @@ from typing import List
 
 from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
+from turbopuffer.types.row import Row
 
 from src.fai.utils.turbopuffer.namespace import get_query_index_name
 from src.fai.utils.turbopuffer.namespace import get_tpuf_namespace
@@ -9,7 +10,7 @@ from src.settings import CONFIG
 from src.settings import VARIABLES
 
 
-async def run_rag_on_query(query: str, domain: str) -> List[str]:
+async def v1_retrieve(query: str, domain: str) -> List[Row]:
     async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
         async with AsyncTurbopuffer(
             region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
@@ -27,4 +28,4 @@ async def run_rag_on_query(query: str, domain: str) -> List[str]:
                 top_k=5,
                 include_attributes=["document"],
             )
-            return [result.document for result in query_results.rows]
+            return query_results.rows
