@@ -42,6 +42,74 @@ describe("Document", () => {
         });
     });
 
+    test("updateDocument", async () => {
+        const server = mockServerPool.createServer();
+        const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
+        const rawRequestBody = {
+            document: undefined,
+            chunk: undefined,
+            title: undefined,
+            url: undefined,
+            version: undefined,
+            keywords: undefined,
+            authed: undefined,
+        };
+        const rawResponseBody = {
+            document_id: "document_id",
+            chunk: "chunk",
+            domain: "domain",
+            document: "document",
+            title: "title",
+            url: "url",
+            version: "version",
+            keywords: ["keywords", "keywords"],
+            authed: true,
+            created_at: "2024-01-15T09:30:00Z",
+            updated_at: "2024-01-15T09:30:00Z",
+        };
+        server
+            .mockEndpoint()
+            .patch("/document/domain/document_id")
+            .jsonBody(rawRequestBody)
+            .respondWith()
+            .statusCode(200)
+            .jsonBody(rawResponseBody)
+            .build();
+
+        const response = await client.document.updateDocument("domain", "document_id", {
+            document: undefined,
+            chunk: undefined,
+            title: undefined,
+            url: undefined,
+            version: undefined,
+            keywords: undefined,
+            authed: undefined,
+        });
+        expect(response).toEqual({
+            document_id: "document_id",
+            chunk: "chunk",
+            domain: "domain",
+            document: "document",
+            title: "title",
+            url: "url",
+            version: "version",
+            keywords: ["keywords", "keywords"],
+            authed: true,
+            created_at: "2024-01-15T09:30:00Z",
+            updated_at: "2024-01-15T09:30:00Z",
+        });
+    });
+
+    test("deleteDocumentById", async () => {
+        const server = mockServerPool.createServer();
+        const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
+
+        server.mockEndpoint().delete("/document/domain/document_id").respondWith().statusCode(200).build();
+
+        const response = await client.document.deleteDocumentById("domain", "document_id");
+        expect(response).toEqual(undefined);
+    });
+
     test("getDocumentById", async () => {
         const server = mockServerPool.createServer();
         const client = new FernFaiClient({ token: "test", environment: server.baseUrl });

@@ -131,6 +131,182 @@ export class Document {
     }
 
     /**
+     * Update a document for a given domain
+     *
+     * @param {string} domain
+     * @param {string} documentId
+     * @param {FernFai.UpdateDocumentRequest} request
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernFai.BadRequestError}
+     * @throws {@link FernFai.InternalError}
+     *
+     * @example
+     *     await client.document.updateDocument("domain", "document_id", {
+     *         document: undefined,
+     *         chunk: undefined,
+     *         title: undefined,
+     *         url: undefined,
+     *         version: undefined,
+     *         keywords: undefined,
+     *         authed: undefined
+     *     })
+     */
+    public updateDocument(
+        domain: string,
+        documentId: string,
+        request: FernFai.UpdateDocumentRequest = {},
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<FernFai.Document> {
+        return core.HttpResponsePromise.fromPromise(this.__updateDocument(domain, documentId, request, requestOptions));
+    }
+
+    private async __updateDocument(
+        domain: string,
+        documentId: string,
+        request: FernFai.UpdateDocumentRequest = {},
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<FernFai.Document>> {
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernFaiEnvironment.Prod,
+                `/document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
+            ),
+            method: "PATCH",
+            headers: mergeHeaders(
+                this._options?.headers,
+                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                requestOptions?.headers,
+            ),
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernFai.Document, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as any)?.["error"]) {
+                case "BadRequestError":
+                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
+                case "InternalError":
+                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+                default:
+                    throw new errors.FernFaiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernFaiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernFaiTimeoutError(
+                    "Timeout exceeded when calling PATCH /document/{domain}/{document_id}.",
+                );
+            case "unknown":
+                throw new errors.FernFaiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Delete a document for a given domain
+     *
+     * @param {string} domain
+     * @param {string} documentId
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernFai.BadRequestError}
+     * @throws {@link FernFai.InternalError}
+     *
+     * @example
+     *     await client.document.deleteDocumentById("domain", "document_id")
+     */
+    public deleteDocumentById(
+        domain: string,
+        documentId: string,
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteDocumentById(domain, documentId, requestOptions));
+    }
+
+    private async __deleteDocumentById(
+        domain: string,
+        documentId: string,
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernFaiEnvironment.Prod,
+                `/document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
+            ),
+            method: "DELETE",
+            headers: mergeHeaders(
+                this._options?.headers,
+                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                requestOptions?.headers,
+            ),
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as any)?.["error"]) {
+                case "BadRequestError":
+                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
+                case "InternalError":
+                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+                default:
+                    throw new errors.FernFaiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernFaiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernFaiTimeoutError(
+                    "Timeout exceeded when calling DELETE /document/{domain}/{document_id}.",
+                );
+            case "unknown":
+                throw new errors.FernFaiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * Get a document for a given domain
      *
      * @param {string} domain

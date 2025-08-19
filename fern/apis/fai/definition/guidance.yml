@@ -49,7 +49,7 @@ service:
             document:
               type: string
               docs: The content of the document that will be returned in the tool response. If not provided, the document will be removed from the index.
-      response: GuidanceIdResponse
+      response: Guidance
       errors:
         - commons.BadRequestError
         - commons.InternalError

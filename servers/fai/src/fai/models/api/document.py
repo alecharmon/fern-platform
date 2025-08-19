@@ -27,3 +27,13 @@ class IndexDocumentRequest(BaseModel):
     version: Optional[str] = None
     keywords: Optional[List[str]] = None
     authed: Optional[bool] = None
+
+
+class UpdateDocumentRequest(BaseModel):
+    document: Optional[str] = None
+    chunk: Optional[str] = None
+    title: Optional[str] = None
+    url: Optional[str] = None
+    version: Optional[str] = None
+    keywords: Optional[List[str]] = None
+    authed: Optional[bool] = None

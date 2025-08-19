@@ -75,7 +75,7 @@ async def update(
             await sync_guidance_db_to_tpuf(domain, db)
             await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
             LOGGER.info(f"Updated guidance {guidance_id} for domain: {domain}")
-            return JSONResponse(content=jsonable_encoder({"guidance_id": db_guidance.id}))
+            return JSONResponse(content=jsonable_encoder(db_guidance.to_api()))
         return JSONResponse(status_code=404, content=jsonable_encoder({"message": "Guidance not found"}))
 
     except Exception as e:

@@ -386,6 +386,164 @@ await client.document.createDocument("domain", {
 </dl>
 </details>
 
+<details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">updateDocument</a>(domain, documentId, { ...params }) -> FernFai.Document</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update a document for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.document.updateDocument("domain", "document_id", {
+    document: undefined,
+    chunk: undefined,
+    title: undefined,
+    url: undefined,
+    version: undefined,
+    keywords: undefined,
+    authed: undefined,
+});
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**documentId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `FernFai.UpdateDocumentRequest`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Document.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">deleteDocumentById</a>(domain, documentId) -> void</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Delete a document for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.document.deleteDocumentById("domain", "document_id");
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**documentId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Document.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">getDocumentById</a>(domain, documentId) -> FernFai.Document</code></summary>
 <dl>
 <dd>
@@ -533,7 +691,7 @@ await client.guidance.createGuidance("domain", {
 </dl>
 </details>
 
-<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">updateGuidanceById</a>(domain, guidanceId, { ...params }) -> FernFai.GuidanceIdResponse</code></summary>
+<details><summary><code>client.guidance.<a href="/src/api/resources/guidance/client/Client.ts">updateGuidanceById</a>(domain, guidanceId, { ...params }) -> FernFai.Guidance</code></summary>
 <dl>
 <dd>
 
