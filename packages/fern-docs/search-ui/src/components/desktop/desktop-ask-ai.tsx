@@ -38,10 +38,10 @@ import { useIsomorphicLayoutEffect } from "swr/_internal";
 import { FernTooltip, cn } from "@fern-docs/components";
 import { Badge } from "@fern-docs/components/badges";
 import { Button } from "@fern-docs/components/button";
+import { FacetFilter } from "@fern-docs/search-keyword";
 import { tunnel, useEventCallback, useIsMobile } from "@fern-ui/react-commons";
 
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
-import { FacetFilter } from "../../types";
 import { FootnoteSup, FootnotesSection } from "../chatbot/footnote";
 import {
   ChatbotTurnContextProvider,
@@ -291,6 +291,7 @@ const DesktopAskAIChat = ({
   suggestionsApi,
   body,
   headers,
+  filters,
   onSelectHit,
   prefetch,
   composerActions,
@@ -332,6 +333,7 @@ const DesktopAskAIChat = ({
       body: {
         ...body,
         url: document.location.href,
+        filters,
         conversationId: conversationId,
       },
     }),

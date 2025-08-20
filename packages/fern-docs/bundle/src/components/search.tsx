@@ -34,7 +34,7 @@ import {
   searchDialogOpenAtom,
   searchInitializedAtom,
   useIsAskAiEnabled,
-  useIsDefaultSearchFilterOff,
+  useIsDefaultSearchFilterOn,
 } from "@/state/search";
 import { atomWithStorageString } from "@/state/utils/atomWithStorageString";
 
@@ -90,7 +90,7 @@ export const SearchV2 = React.memo(function SearchV2({
   const userToken = useAlgoliaUserToken();
   const user = useFernUser();
   const isAskAiEnabled = useIsAskAiEnabled();
-  const isDefaultSearchFilterOff = useIsDefaultSearchFilterOff();
+  const isDefaultSearchFilterOn = useIsDefaultSearchFilterOn();
 
   const [open, setOpen] = useCommandTrigger();
   const [askAi, setAskAi] = useAtom(askAiAtom);
@@ -105,7 +105,7 @@ export const SearchV2 = React.memo(function SearchV2({
   });
 
   const shouldApplyVersionFilter =
-    currentVersion != null && !isDefaultSearchFilterOff;
+    currentVersion != null && isDefaultSearchFilterOn;
 
   const facetApiEndpoint = useApiRoute("/api/fern-docs/search/v2/facet");
   let chatEndpoint = useApiRoute("/api/fern-docs/search/v2/chat");

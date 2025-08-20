@@ -42,7 +42,7 @@ import { SetColors } from "@/state/colors";
 import { DarkCode } from "@/state/dark-code";
 import { DefaultLanguage } from "@/state/language";
 import { SetLogoText } from "@/state/logo-text";
-import { SetIsAskAiEnabled, SetIsDefaultSearchFilterOff } from "@/state/search";
+import { SetIsAskAiEnabled, SetIsDefaultSearchFilterOn } from "@/state/search";
 import { Whitelabeled } from "@/state/whitelabeled";
 
 export default async function Layout({
@@ -126,8 +126,8 @@ export default async function Layout({
         <Whitelabeled value={edgeFlags.isWhitelabeled} />
         <SetColors colors={colors} />
         <SetIsAskAiEnabled isAskAiEnabled={edgeFlags.isAskAiEnabled} />
-        <SetIsDefaultSearchFilterOff
-          isDefaultSearchFilterOff={edgeFlags.isDefaultSearchFilterOff}
+        <SetIsDefaultSearchFilterOn
+          isDefaultSearchFilterOn={edgeFlags.isDefaultSearchFilterOn}
         />
         <FernUser domain={domain} host={host} />
         <GlobalStyles

@@ -31,21 +31,21 @@ export const useIsAskAiEnabled = () => {
   return useAtomValue(isAskAiEnabledAtom);
 };
 
-export const isDefaultSearchFilterOffAtom = atom(false);
+export const isDefaultSearchFilterOnAtom = atom(false);
 
-export const SetIsDefaultSearchFilterOff = ({
-  isDefaultSearchFilterOff,
+export const SetIsDefaultSearchFilterOn = ({
+  isDefaultSearchFilterOn,
 }: {
-  isDefaultSearchFilterOff: boolean;
+  isDefaultSearchFilterOn: boolean;
 }) => {
-  useHydrateAtoms([[isDefaultSearchFilterOffAtom, isDefaultSearchFilterOff]], {
+  useHydrateAtoms([[isDefaultSearchFilterOnAtom, isDefaultSearchFilterOn]], {
     dangerouslyForceHydrate: true,
   });
   return null;
 };
 
-export const useIsDefaultSearchFilterOff = () => {
-  return useAtomValue(isDefaultSearchFilterOffAtom);
+export const useIsDefaultSearchFilterOn = () => {
+  return useAtomValue(isDefaultSearchFilterOnAtom);
 };
 
 searchInitializedAtom.onMount = (setInitialized) => {

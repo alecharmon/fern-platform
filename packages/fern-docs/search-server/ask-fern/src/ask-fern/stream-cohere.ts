@@ -21,6 +21,7 @@ import {
 } from "@fern-api/docs-server/env-variables";
 import { FernFaiClient } from "@fern-api/fai-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { FacetFilter } from "@fern-docs/search-keyword";
 
 import {
   convertTpufRecordToCitation,
@@ -38,6 +39,7 @@ export async function runRouteForCohere({
   conversationId,
   lastUserMessage,
   messages,
+  filters,
   embeddingModel,
   turbopufferNamespace,
   languageModel,
@@ -48,6 +50,7 @@ export async function runRouteForCohere({
   conversationId: string;
   lastUserMessage: string;
   messages: UIMessage[];
+  filters: FacetFilter[];
   embeddingModel: EmbeddingModel<string>;
   turbopufferNamespace: string;
   languageModel: LanguageModel;
@@ -58,6 +61,7 @@ export async function runRouteForCohere({
     embeddingModel,
     namespace: turbopufferNamespace,
     topK: 3,
+    filters,
   });
   const searchResultSources = searchResults.map((hit) => {
     return {
@@ -212,6 +216,7 @@ async function runQueryTurbopuffer(
     embeddingModel: EmbeddingModel<string>;
     namespace: string;
     topK?: number;
+    filters?: FacetFilter[];
     documentIdsToIgnore?: string[];
   }
 ) {
@@ -229,6 +234,7 @@ async function runQueryTurbopuffer(
           return embedding.embedding;
         },
         documentIdsToIgnore: opts.documentIdsToIgnore,
+        filters: opts.filters,
       });
 }
 

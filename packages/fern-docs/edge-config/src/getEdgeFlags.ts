@@ -47,7 +47,7 @@ const EDGE_FLAGS = [
   "search-v2" as const,
   "authed-previews" as const,
   "search-disabled" as const,
-  "default-search-filter-off" as const,
+  "default-search-filter-on" as const,
   "changelog-redirects" as const,
   "posthog-disabled" as const,
   "next-mdx-ref" as const,
@@ -196,9 +196,9 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
       domain,
       config["search-disabled"]
     );
-    const isDefaultSearchFilterOff = checkDomainMatchesCustomers(
+    const isDefaultSearchFilterOn = checkDomainMatchesCustomers(
       domain,
-      config["default-search-filter-off"]
+      config["default-search-filter-on"]
     );
     const isChangelogRedirects = checkDomainMatchesCustomers(
       domain,
@@ -253,7 +253,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
       isSearchV2Enabled,
       isAuthedPreview,
       isSearchDisabled,
-      isDefaultSearchFilterOff,
+      isDefaultSearchFilterOn,
       isChangelogRedirects,
       isPosthogDisabled,
       isNextMdxRef,
@@ -293,7 +293,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
       isSearchV2Enabled: domain === "buildwithfern.com",
       isAuthedPreview: false,
       isSearchDisabled: false,
-      isDefaultSearchFilterOff: false,
+      isDefaultSearchFilterOn: false,
       isChangelogRedirects: false,
       isPosthogDisabled: false,
       isNextMdxRef: false,

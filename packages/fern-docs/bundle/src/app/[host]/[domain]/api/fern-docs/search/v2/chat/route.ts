@@ -22,6 +22,7 @@ import {
   runRouteForAnthropic,
   runRouteForCohere,
 } from "@fern-docs/search-ask-fern";
+import { FacetFilter } from "@fern-docs/search-keyword";
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "@fern-docs/search-ui";
 
 import { ModelProvider } from "@/app/utils";
@@ -72,11 +73,13 @@ export async function POST(req: NextRequest) {
   const {
     messages,
     source,
+    filters,
     conversationId,
   }: {
     url: string;
     messages: UIMessage[];
     source: string;
+    filters: FacetFilter[];
     conversationId: string;
   } = await req.json();
 
@@ -129,6 +132,7 @@ export async function POST(req: NextRequest) {
       conversationId,
       lastUserMessage,
       messages,
+      filters,
       embeddingModel,
       turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
       languageModel,
@@ -141,6 +145,7 @@ export async function POST(req: NextRequest) {
       conversationId,
       lastUserMessage,
       messages,
+      filters,
       embeddingModel,
       turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
       languageModel,

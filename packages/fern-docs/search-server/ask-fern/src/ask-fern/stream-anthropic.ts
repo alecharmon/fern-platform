@@ -24,6 +24,7 @@ import {
   turbopufferApiKey,
 } from "@fern-api/docs-server/env-variables";
 import { FernFaiClient } from "@fern-api/fai-sdk";
+import { FacetFilter } from "@fern-docs/search-keyword";
 
 import {
   TurbopufferRecord,
@@ -45,6 +46,7 @@ export async function runRouteForAnthropic({
   conversationId,
   lastUserMessage,
   messages,
+  filters,
   embeddingModel,
   turbopufferNamespace,
   languageModel,
@@ -55,6 +57,7 @@ export async function runRouteForAnthropic({
   conversationId: string;
   lastUserMessage: string;
   messages: UIMessage[];
+  filters: FacetFilter[];
   embeddingModel: EmbeddingModel<string>;
   turbopufferNamespace: string;
   languageModel: LanguageModel;
@@ -85,6 +88,7 @@ export async function runRouteForAnthropic({
     embeddingModel,
     namespace: turbopufferNamespace,
     topK: 3,
+    filters,
   });
   for (const result of turbopufferResults) {
     if (result.attributes.url) {
@@ -149,6 +153,7 @@ export async function runRouteForAnthropic({
                   topK: TOP_K,
                   documentIdsToIgnore: documentIdsToIgnore,
                   urlsToIgnore: urlsToIgnore,
+                  filters,
                 });
                 for (const hit of result) {
                   const url = hit.attributes.url;
@@ -267,6 +272,7 @@ async function runQueryTurbopuffer(
     embeddingModel: EmbeddingModel<string>;
     namespace: string;
     topK?: number;
+    filters?: FacetFilter[];
     documentIdsToIgnore?: string[];
     urlsToIgnore?: string[];
   }
@@ -284,6 +290,7 @@ async function runQueryTurbopuffer(
           });
           return embedding.embedding;
         },
+        filters: opts.filters,
         documentIdsToIgnore: opts.documentIdsToIgnore,
         urlsToIgnore: opts.urlsToIgnore,
       });

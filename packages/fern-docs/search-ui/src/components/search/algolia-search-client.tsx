@@ -17,9 +17,9 @@ import useSWRImmutable from "swr/immutable";
 
 import { getDevice, getPlatform } from "@fern-api/ui-core-utils";
 import type { FacetName, FacetsResponse } from "@fern-docs/search-keyword";
+import { FacetFilter } from "@fern-docs/search-keyword";
 import { useLazyRef } from "@fern-ui/react-commons";
 
-import { FacetFilter } from "../../types";
 import { toAlgoliaFacetFilters } from "../../utils/facet-filters";
 import { FacetFiltersProvider } from "./FacetFiltersProvider";
 import { FacetFiltersContext, useFacetFilters } from "./useFacetFilters";

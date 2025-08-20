@@ -29,7 +29,7 @@ export interface EdgeFlags {
   isSearchV2Enabled: boolean;
   isAuthedPreview: boolean;
   isSearchDisabled: boolean;
-  isDefaultSearchFilterOff: boolean;
+  isDefaultSearchFilterOn: boolean;
   isChangelogRedirects: boolean;
   isPosthogDisabled: boolean;
   isNextMdxRef: boolean;
@@ -68,7 +68,7 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
   isSearchV2Enabled: false,
   isAuthedPreview: false,
   isSearchDisabled: false,
-  isDefaultSearchFilterOff: false,
+  isDefaultSearchFilterOn: false,
   isChangelogRedirects: false,
   isPosthogDisabled: false,
   isNextMdxRef: false,

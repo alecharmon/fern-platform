@@ -22,11 +22,6 @@ export type ApiReferenceRecordHit = MarkRequired<
   "type"
 >;
 
-export interface FacetFilter {
-  facet: FacetName;
-  value: string;
-}
-
 export function isFacetName(facet: string): facet is FacetName {
   return SEARCHABLE_FACET_ATTRIBUTES.includes(facet as FacetName);
 }

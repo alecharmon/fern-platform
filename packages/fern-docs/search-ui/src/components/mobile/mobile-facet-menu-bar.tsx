@@ -18,9 +18,9 @@ import {
   HttpMethodBadge,
   isAvailability,
 } from "@fern-docs/components/badges";
+import { FacetFilter } from "@fern-docs/search-keyword";
 import { FacetName } from "@fern-docs/search-keyword/types";
 
-import { FacetFilter } from "../../types";
 import { getFacetDisplay, toFilterLabel } from "../../utils/facet-display";
 import { useFacetFilters, useFacets } from "../search/algolia-search-client";
 

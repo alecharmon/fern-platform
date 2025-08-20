@@ -5,14 +5,14 @@ import { atomWithDefault } from "jotai/utils";
 import { preload } from "swr";
 
 import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
-import { FacetsResponse } from "@fern-docs/search-keyword";
+import { FacetFilter, FacetsResponse } from "@fern-docs/search-keyword";
 import { FacetName } from "@fern-docs/search-keyword";
 import {
   useDeepCompareEffectNoCheck,
   useEventCallback,
 } from "@fern-ui/react-commons";
 
-import { FacetFilter, isFacetName } from "../../types";
+import { isFacetName } from "../../types";
 import { toAlgoliaFacetFilters } from "../../utils/facet-filters";
 import { FacetFiltersContext } from "./useFacetFilters";
 

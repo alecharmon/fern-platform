@@ -3,8 +3,8 @@ import { cloneElement, isValidElement, useState } from "react";
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 
 import { Badge } from "@fern-docs/components/badges";
+import { FacetFilter } from "@fern-docs/search-keyword";
 
-import { FacetFilter } from "../../types";
 import { getFacetDisplay, toFilterLabel } from "../../utils/facet-display";
 import { useFacets } from "../search/algolia-search-client";
 import {

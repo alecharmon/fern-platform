@@ -4,6 +4,8 @@ import {
   Turbopuffer,
 } from "@turbopuffer/turbopuffer";
 
+import { FacetFilter } from "@fern-docs/search-keyword";
+
 import { TurbopufferRecord } from "../types";
 import { reciprocalRankFusion } from "./reciprocal-rank-fusion";
 
@@ -12,7 +14,7 @@ interface SemanticSearchOptions {
   namespace: string;
   apiKey: string;
   topK: number;
-  filters?: { facet: string; value: string }[];
+  filters?: FacetFilter[];
 
   /**
    * The search mode to use.
@@ -68,7 +70,17 @@ export async function queryTurbopuffer(
           "And",
           [
             ...versionFilters.map((f) => {
-              const filter: FilterCondition = ["version", "Eq", f.value];
+              const filter: Filters = [
+                "Or",
+                [
+                  // TODO(eden): facet filters modify the case of the value (which leads to mismatches with the
+                  // display name property (e.g., V1 -> v1)). Remove when we have a better way to handle this.
+                  ["version", "Eq", f.value],
+                  ["version", "Eq", f.value.toUpperCase()],
+                  ["version", "Eq", f.value.toLowerCase()],
+                  ["version", "Eq", null],
+                ],
+              ];
               return filter;
             }),
             ...documentIdFilters,

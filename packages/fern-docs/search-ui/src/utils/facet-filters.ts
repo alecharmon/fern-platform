@@ -1,6 +1,6 @@
 import { FacetFilters } from "algoliasearch/lite";
 
-import { FacetFilter } from "../types";
+import { FacetFilter } from "@fern-docs/search-keyword";
 
 export function toAlgoliaFacetFilters(
   filters: readonly FacetFilter[]

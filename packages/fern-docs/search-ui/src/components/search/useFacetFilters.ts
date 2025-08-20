@@ -3,9 +3,7 @@ import React, { createContext, useContext, useMemo } from "react";
 import { useAtom } from "jotai";
 import { RESET, atomWithDefault } from "jotai/utils";
 
-import { FacetsResponse } from "@fern-docs/search-keyword";
-
-import { FacetFilter } from "../../types";
+import { FacetFilter, FacetsResponse } from "@fern-docs/search-keyword";
 
 export const FacetFiltersContext = createContext({
   atom: atomWithDefault<readonly FacetFilter[]>(() => []),
