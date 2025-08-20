@@ -57,6 +57,7 @@ export class Document {
      *         title: undefined,
      *         url: undefined,
      *         version: undefined,
+     *         product: undefined,
      *         keywords: undefined,
      *         authed: undefined
      *     })
@@ -148,6 +149,7 @@ export class Document {
      *         title: undefined,
      *         url: undefined,
      *         version: undefined,
+     *         product: undefined,
      *         keywords: undefined,
      *         authed: undefined
      *     })

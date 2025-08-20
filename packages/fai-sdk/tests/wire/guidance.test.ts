@@ -32,7 +32,7 @@ describe("Guidance", () => {
     test("updateGuidanceById", async () => {
         const server = mockServerPool.createServer();
         const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
-        const rawRequestBody = { context: ["context", "context"], document: "document" };
+        const rawRequestBody = { context: undefined, document: undefined };
         const rawResponseBody = {
             guidance_id: "guidance_id",
             context: ["context", "context"],
@@ -51,8 +51,8 @@ describe("Guidance", () => {
             .build();
 
         const response = await client.guidance.updateGuidanceById("domain", "guidance_id", {
-            context: ["context", "context"],
-            document: "document",
+            context: undefined,
+            document: undefined,
         });
         expect(response).toEqual({
             guidance_id: "guidance_id",

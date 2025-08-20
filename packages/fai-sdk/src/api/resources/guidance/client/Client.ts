@@ -138,14 +138,14 @@ export class Guidance {
      *
      * @example
      *     await client.guidance.updateGuidanceById("domain", "guidance_id", {
-     *         context: ["context", "context"],
-     *         document: "document"
+     *         context: undefined,
+     *         document: undefined
      *     })
      */
     public updateGuidanceById(
         domain: string,
         guidanceId: string,
-        request: FernFai.UpdateGuidanceRequest,
+        request: FernFai.UpdateGuidanceRequest = {},
         requestOptions?: Guidance.RequestOptions,
     ): core.HttpResponsePromise<FernFai.Guidance> {
         return core.HttpResponsePromise.fromPromise(
@@ -156,7 +156,7 @@ export class Guidance {
     private async __updateGuidanceById(
         domain: string,
         guidanceId: string,
-        request: FernFai.UpdateGuidanceRequest,
+        request: FernFai.UpdateGuidanceRequest = {},
         requestOptions?: Guidance.RequestOptions,
     ): Promise<core.WithRawResponse<FernFai.Guidance>> {
         const _response = await core.fetcher({

@@ -5,13 +5,19 @@
 /**
  * @example
  *     {
- *         context: ["context", "context"],
- *         document: "document"
+ *         context: undefined,
+ *         document: undefined
  *     }
  */
 export interface UpdateGuidanceRequest {
-    /** The context of the document, as a list of strings, that will be indexed. */
-    context: string[];
-    /** The content of the document that will be returned in the tool response. If not provided, the document will be removed from the index. */
-    document: string;
+    /**
+     * The updated context of the guidance document, as a list of strings, that will be indexed.
+     * If not provided, this field will remain unchanged.
+     */
+    context?: string[];
+    /**
+     * The updated content of the guidance document that will be returned to Ask Fern during Ask Fern retrieval.
+     * If not provided, this field will remain unchanged.
+     */
+    document?: string;
 }

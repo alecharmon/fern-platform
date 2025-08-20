@@ -10,6 +10,7 @@ export interface Document {
     title?: string;
     url?: string;
     version?: string;
+    product?: string;
     keywords?: string[];
     authed?: boolean;
     created_at: string;

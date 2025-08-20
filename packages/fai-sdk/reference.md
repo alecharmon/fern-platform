@@ -341,6 +341,7 @@ await client.document.createDocument("domain", {
     title: undefined,
     url: undefined,
     version: undefined,
+    product: undefined,
     keywords: undefined,
     authed: undefined,
 });
@@ -420,6 +421,7 @@ await client.document.updateDocument("domain", "document_id", {
     title: undefined,
     url: undefined,
     version: undefined,
+    product: undefined,
     keywords: undefined,
     authed: undefined,
 });
@@ -791,8 +793,8 @@ Update a guidance document for a given domain
 
 ```typescript
 await client.guidance.updateGuidanceById("domain", "guidance_id", {
-    context: ["context", "context"],
-    document: "document",
+    context: undefined,
+    document: undefined,
 });
 ```
 

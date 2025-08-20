@@ -10,23 +10,32 @@
  *         title: undefined,
  *         url: undefined,
  *         version: undefined,
+ *         product: undefined,
  *         keywords: undefined,
  *         authed: undefined
  *     }
  */
 export interface IndexDocumentRequest {
-    /** The content of the document that will be returned in the tool response */
+    /** The content of the document that will be returned to Ask Fern during document retrieval. */
     document: string;
-    /** The chunk of the document that will be indexed as a vector. If not provided, the document will be indexed. */
+    /** The textual content that should be vectorized when indexing the document. If not provided, the full document will be vectorized. */
     chunk?: string;
-    /** The title of the document */
+    /** The title of the document. This will be used with the `url` when Ask Fern cites this document. */
     title?: string;
-    /** The url of the document */
+    /** The url of the document. This will be used as the source of the document when Ask Fern cites it. */
     url?: string;
-    /** The version of the document */
+    /**
+     * The version of the document. This will be compared against when running Ask Fern with version filters.
+     * If null, the document will be retrievable by all versions.
+     */
     version?: string;
-    /** The keywords of the document */
+    /**
+     * The product of the document. This will be used to filter documents when running Ask Fern with product filters.
+     * If null, the document will be retrievable by all products.
+     */
+    product?: string;
+    /** The keywords of the document. Adding keywords can improve document matching. */
     keywords?: string[];
-    /** Whether the document is authed */
+    /** Whether the document is authed. If true, the document will be retrievable by all users. */
     authed?: boolean;
 }

@@ -10,23 +10,32 @@
  *         title: undefined,
  *         url: undefined,
  *         version: undefined,
+ *         product: undefined,
  *         keywords: undefined,
  *         authed: undefined
  *     }
  */
 export interface UpdateDocumentRequest {
-    /** The content of the document that will be returned in the tool response. */
+    /**
+     * The updated content of the document that will be returned to Ask Fern during document retrieval.
+     * If not provided, this field will remain unchanged.
+     */
     document?: string;
-    /** The chunk of the document that will be indexed as a vector. */
+    /**
+     * The updated textual content that should be vectorized when indexing the document.
+     * If not provided, this field will remain unchanged.
+     */
     chunk?: string;
-    /** The title of the document */
+    /** The updated title of the document. If not provided, this field will remain unchanged. */
     title?: string;
-    /** The url of the document */
+    /** The updated url of the document. If not provided, this field will remain unchanged. */
     url?: string;
-    /** The version of the document */
+    /** The updated version of the document. If not provided, this field will remain unchanged. */
     version?: string;
-    /** The keywords of the document */
+    /** The updated product of the document. If not provided, this field will remain unchanged. */
+    product?: string;
+    /** The updated keywords of the document. If not provided, this field will remain unchanged. */
     keywords?: string[];
-    /** Whether the document is authed */
+    /** The updated authed status of the document. If not provided, this field will remain unchanged. */
     authed?: boolean;
 }

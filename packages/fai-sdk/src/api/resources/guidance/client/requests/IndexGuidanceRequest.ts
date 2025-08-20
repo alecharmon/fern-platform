@@ -10,8 +10,11 @@
  *     }
  */
 export interface IndexGuidanceRequest {
-    /** The context of the guidance document, as a list of strings, that will be indexed. */
+    /**
+     * The context of the guidance document, as a list of strings, that will be indexed.
+     * Each string will be vectorized separately to generate a separate record.
+     */
     context: string[];
-    /** The content of the guidance document that will be returned in the tool response */
+    /** The content of the guidance document that will be returned to Ask Fern during Ask Fern retrieval. */
     document: string;
 }
