@@ -33,9 +33,14 @@ import { EncodedDocsUrl } from "@/utils/types";
 interface CreateClientPageProps {
   children: React.ReactNode;
   root: FernNavigation.SidebarRootNode | undefined;
+  disabled?: boolean;
 }
 
-export function CreateClientPage({ children, root }: CreateClientPageProps) {
+export function CreateClientPage({
+  children,
+  root,
+  disabled = false,
+}: CreateClientPageProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [pageSlug, setPageSlug] = useState("");
@@ -305,8 +310,9 @@ export function CreateClientPage({ children, root }: CreateClientPageProps) {
 
   return (
     <Popover
-      open={isPopoverOpen}
+      open={isPopoverOpen && !disabled}
       onOpenChange={(open: boolean) => {
+        if (disabled) return;
         setIsPopoverOpen(open);
         if (!open) {
           setPageTitle("");
@@ -321,7 +327,9 @@ export function CreateClientPage({ children, root }: CreateClientPageProps) {
         }
       }}
     >
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverTrigger asChild disabled={disabled}>
+        {children}
+      </PopoverTrigger>
       <PopoverContent className="border-border w-80 border p-3" align="start">
         <div className="space-y-3">
           <div className="space-y-1">

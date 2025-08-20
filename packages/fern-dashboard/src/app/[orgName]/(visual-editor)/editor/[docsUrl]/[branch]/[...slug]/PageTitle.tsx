@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { AutoResizingInput } from "@/components/input/AutoResizingInput";
+import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useMdxState } from "@/providers/MdxStateContext";
 
 export declare namespace PageTitle {
@@ -19,6 +20,7 @@ export default function PageTitle({
   initialText,
 }: PageTitle.Props) {
   const [text, setText] = useState(initialText ?? "");
+  const isEditingDisabled = useEditingDisabled();
 
   const { stageChanges, frontmatterData } = useMdxState();
 
@@ -51,6 +53,7 @@ export default function PageTitle({
           name="title"
           onChange={onChange}
           placeholder="Add a title"
+          disabled={isEditingDisabled}
           value={text}
         />
       </h1>

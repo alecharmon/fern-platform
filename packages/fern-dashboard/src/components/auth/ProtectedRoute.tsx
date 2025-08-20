@@ -24,7 +24,7 @@ export const ProtectedRoute = async ({
     redirect("/");
   }
 
-  const isUserInOrgFromUrl = await auth0Management.doesUserBelongsToOrg(
+  const isUserInOrgFromUrl = await auth0Management.doesUserBelongToOrg(
     session.user.sub,
     orgName
   );

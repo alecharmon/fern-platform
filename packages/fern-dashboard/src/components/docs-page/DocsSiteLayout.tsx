@@ -2,6 +2,7 @@ import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsUrl } from "@/utils/types";
 
 import { PageHeader } from "../layout/PageHeader";
+import { StatusBadge } from "../ui/StatusBadge";
 import { DocsSiteClientWrapper } from "./DocsSiteClientWrapper";
 import { DocsSiteNavBar } from "./DocsSiteNavBar";
 
@@ -22,14 +23,7 @@ export async function DocsSiteLayout({
     <div className="flex min-w-0 flex-1 flex-col gap-3">
       <PageHeader
         title={<span className="break-all">{docsUrl}</span>}
-        titleRightContent={
-          <div className="flex shrink-0 items-center gap-2 rounded-full bg-green-300 px-3 py-2">
-            <div className="bg-green-1100 size-2 rounded-full" />
-            <div className="text-green-1100 mb-0.5 text-sm leading-none">
-              Live
-            </div>
-          </div>
-        }
+        titleRightContent={<StatusBadge status="live" />}
       />
       <div className="flex flex-col gap-4">
         <DocsSiteNavBar orgName={orgName} />

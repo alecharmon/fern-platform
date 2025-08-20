@@ -9,8 +9,8 @@ import {
   useState,
 } from "react";
 
-import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
+import { GithubPrStatus } from "@/app/services/github/types";
 
 export const GitPRContext = createContext<{
   gitPrUrl: string | undefined;
@@ -19,6 +19,9 @@ export const GitPRContext = createContext<{
   setPrTitle: (title: string) => void;
   loading: boolean;
   refetchPrData: () => void;
+  prStatus: GithubPrStatus | undefined;
+  setPrStatus: (status: GithubPrStatus) => void;
+  prNumber: number | undefined;
 }>({
   gitPrUrl: undefined,
   setPrUrl: (_url: string) => {
@@ -32,6 +35,11 @@ export const GitPRContext = createContext<{
   refetchPrData: () => {
     return;
   },
+  prStatus: undefined,
+  setPrStatus: (_status: GithubPrStatus) => {
+    return;
+  },
+  prNumber: undefined,
 });
 
 export function GitPRProvider({
@@ -39,19 +47,21 @@ export function GitPRProvider({
   owner,
   repo,
   branch,
-  orgName,
   baseBranch,
 }: {
   children: ReactNode;
   owner?: string;
   repo?: string;
   branch: string;
-  orgName: Auth0OrgName;
   baseBranch?: string;
 }) {
   const [gitPrUrl, setGitPrUrl] = useState<string | undefined>(undefined);
   const [prTitle, setPrTitle] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [prStatus, setPrStatus] = useState<GithubPrStatus | undefined>(
+    undefined
+  );
+  const [prNumber, setPrNumber] = useState<number | undefined>(undefined);
 
   const fetchPrFromBranch = useCallback(async () => {
     if (!owner || !repo || !branch) {
@@ -65,25 +75,59 @@ export function GitPRProvider({
         owner,
         repo,
         branch,
-        orgName,
         baseBranch,
       });
 
       if (data.success) {
-        const serverTitle = data.title || "";
-        setPrTitle(serverTitle);
+        const {
+          status,
+          draft,
+          merged,
+          title,
+          prUrl,
+          prNumber: newPrNumber,
+        } = data;
 
-        const prUrl = data.prUrl || "";
-        setPrUrl(prUrl);
+        if (newPrNumber && newPrNumber !== prNumber) {
+          setPrNumber(newPrNumber);
+        }
+
+        // Update the PR title if it has changed
+        if (title && title !== prTitle) {
+          setPrTitle(title);
+        }
+
+        // Update the PR URL if it has changed
+        if (prUrl && prUrl !== gitPrUrl) {
+          setPrUrl(prUrl);
+        }
+
+        if (merged) {
+          setPrStatus("merged");
+        } else if (status === "closed") {
+          setPrStatus("closed");
+        } else if (draft) {
+          setPrStatus("draft");
+        } else {
+          setPrStatus("open");
+        }
       } else {
         throw new Error(data.error);
       }
     } catch (err) {
-      console.error("Error fetching PR for branch:", err);
+      if (
+        err instanceof Error &&
+        err.message.includes("No associated PRs found")
+      ) {
+        // If no PRs are found, we'll pretend it's a draft PR because the first commit will open a draft PR
+        setPrStatus("draft");
+      } else {
+        console.error("Error fetching PR for branch:", err);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [owner, repo, branch, orgName, baseBranch]);
+  }, [owner, repo, branch, baseBranch, prNumber, prTitle, gitPrUrl]);
 
   // Fetch PR information when component mounts or dependencies change
   useEffect(() => {
@@ -101,12 +145,15 @@ export function GitPRProvider({
   return (
     <GitPRContext.Provider
       value={{
+        prNumber,
         gitPrUrl,
         setPrUrl,
         prTitle,
         setPrTitle,
         loading: isLoading,
         refetchPrData,
+        prStatus,
+        setPrStatus,
       }}
     >
       {children}

@@ -359,3 +359,13 @@ why? who knows. thanks monaco:)
 .monaco-editor .mtk1 {
   @apply text-gray-1200;
 }
+
+/* PR Title scroll animation */
+@keyframes scroll-text {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-1 * var(--overflow-amount, 100px)));
+  }
+}

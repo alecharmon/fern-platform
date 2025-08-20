@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@fern-docs/components";
 
 import { AutoResizingInput } from "@/components/input/AutoResizingInput";
+import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useMdxState } from "@/providers/MdxStateContext";
 
 export declare namespace PageSubtitle {
@@ -21,6 +22,7 @@ export default function PageSubtitle({
   initialText,
 }: PageSubtitle.Props) {
   const [text, setText] = useState(initialText);
+  const isEditingDisabled = useEditingDisabled();
 
   const { stageChanges, frontmatterData } = useMdxState();
 
@@ -64,6 +66,7 @@ export default function PageSubtitle({
         className="mx-5 text-base"
         name="subtitle"
         onChange={onChange}
+        disabled={isEditingDisabled}
         placeholder="Add a subtitle"
         value={text}
       />

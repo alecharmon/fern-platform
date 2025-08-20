@@ -1,55 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { z } from "zod";
+
+import { withGithubAuth } from "@/app/services/dal/github/middleware";
+import {
+  GithubAuthContext,
+  GithubIdentificationScheme,
+} from "@/app/services/dal/github/types";
+import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { GitHubLoader } from "@/app/services/github/github-loader";
 
-interface GetDocsYmlRequest {
-  owner: string;
-  repo: string;
-  branch: string;
-  orgName: string;
-}
+const GetDocsYmlRequest = GithubIdentificationScheme.and(
+  z.object({
+    branch: z.string(),
+  })
+);
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getCurrentSession();
-    if (!session?.user?.sub) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export const POST = withZodValidation(
+  GetDocsYmlRequest,
+  async (req: NextRequest, validatedBody: z.infer<typeof GetDocsYmlRequest>) =>
+    withGithubAuth(
+      async (_req: NextRequest, { repoData }: GithubAuthContext) => {
+        const { branch } = validatedBody;
+        const { owner, repo } = repoData;
 
-    const body: GetDocsYmlRequest = await request.json();
-    const { owner, repo, branch, orgName } = body;
+        // Create GitHubLoader instance
+        const gitLoader = new GitHubLoader(repoData.githubUrl);
 
-    if (!owner || !repo || !branch) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+        // Get the docs.yml file
+        const docsYmlContent = await gitLoader.getDocsYml(owner, repo, branch);
+        if (!docsYmlContent) {
+          return NextResponse.json(
+            { error: "Failed to fetch docs.yml" },
+            { status: 404 }
+          );
+        }
 
-    // Create GitHubLoader instance
-    const gitLoader = new GitHubLoader(session.user.sub, orgName as any);
-
-    // Get the docs.yml file
-    const docsYmlContent = await gitLoader.getDocsYml(owner, repo, branch);
-    if (!docsYmlContent) {
-      return NextResponse.json(
-        { error: "Failed to fetch docs.yml" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      docsYmlContent,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
-  }
-}
+        return NextResponse.json({
+          success: true,
+          docsYmlContent,
+        });
+      }
+    )(req, validatedBody)
+);

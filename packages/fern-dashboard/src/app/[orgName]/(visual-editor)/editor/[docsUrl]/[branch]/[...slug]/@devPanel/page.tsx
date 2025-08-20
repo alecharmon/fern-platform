@@ -11,6 +11,7 @@ import { mdxToHtml } from "@fern-docs/mdx";
 import { WarningValidationToast } from "@/components/editor/EditorToasts";
 import { defineAppTheme } from "@/components/editor/theme-utils";
 import { Button } from "@/components/ui/button";
+import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
 import { useMdxState } from "@/providers/MdxStateContext";
@@ -22,6 +23,7 @@ export default function DevPanel() {
   const { currentFilename } = useCurrentPage();
   const { allMdxFiles, stageChanges, frontmatterData } = useMdxState();
   const { setOriginalElements } = useOriginalElements();
+  const isEditingDisabled = useEditingDisabled();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
@@ -157,7 +159,7 @@ export default function DevPanel() {
         />
       </div>
       {/* Edit button - bottom right */}
-      {!isEditMode && (
+      {!isEditMode && !isEditingDisabled && (
         <motion.div
           animate={
             shouldShake

@@ -1,9 +1,12 @@
+import "server-only";
+
 import { Octokit } from "@octokit/core";
 
 import { GitLoader } from "@fern-api/docs-loader";
 
-import { getOctokit } from "../auth0/octokit";
-import { Auth0OrgName, Auth0UserID } from "../auth0/types";
+import { getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
+import { getCurrentSession } from "../auth0/getCurrentSession";
+import { getOwnerAndRepoFromGithubUrl } from "./github";
 
 /**
  * The GitHubLoader is used to get files from a remote GitHub repository.
@@ -12,8 +15,15 @@ export class GitHubLoader implements GitLoader {
   private getOctokitInstance: () => Promise<Octokit | null>;
   private octokit: Octokit | null = null;
 
-  constructor(userId: Auth0UserID, orgName?: Auth0OrgName) {
-    this.getOctokitInstance = () => getOctokit(userId, orgName);
+  constructor(githubUrl: string) {
+    this.getOctokitInstance = async () => {
+      const session = await getCurrentSession();
+      if (!session) return null;
+
+      const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+      if (!owner || !repo) return null;
+      return getFernBotOctokitForRepo(owner, repo);
+    };
   }
 
   async getOctokit() {

@@ -8,7 +8,7 @@ import { VariantProps, cva } from "class-variance-authority";
 import { cn } from "./cn";
 
 const tooltipVariants = cva(
-  "animate-popover rounded-2 shadow-card-grayscale z-50 max-w-xs border p-2 text-sm leading-normal backdrop-blur will-change-[transform,opacity]",
+  "animate-popover rounded-2 shadow-card-grayscale z-50 max-w-xs border p-2 text-center text-sm leading-normal backdrop-blur will-change-[transform,opacity]",
   {
     variants: {
       variant: {

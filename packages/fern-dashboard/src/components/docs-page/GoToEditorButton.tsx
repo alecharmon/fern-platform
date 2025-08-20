@@ -3,10 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCallback } from "react";
 import { preload } from "react-dom";
 
-import {
-  ExclamationCircleIcon,
-  PencilSquareIcon,
-} from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Loader2 } from "lucide-react";
 
 import {
@@ -34,14 +31,15 @@ export function GoToEditorButton({
   session,
   sourceRepo,
   disabled = false,
-  disabledReason,
+  isValidatingSource,
 }: {
   orgName: Auth0OrgName;
   docsUrl: DocsUrl;
   session: Auth0SessionData;
-  sourceRepo: GithubSourceRepo;
+  sourceRepo?: GithubSourceRepo;
   disabled?: boolean;
   disabledReason?: string;
+  isValidatingSource?: boolean;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -73,7 +71,7 @@ export function GoToEditorButton({
         docsUrl,
       });
       router.prefetch(editorSlug);
-      preload(editorSlug, { as: "document", crossOrigin: "anonymous" });
+      preload(editorSlug, { as: "fetch", crossOrigin: "anonymous" });
     }
   }, [docsUrl, disabled, router, editorSlug]);
 
@@ -90,7 +88,6 @@ export function GoToEditorButton({
     // Very important - the branch creation needs to be finished before navigation
     // TODO: Move the branch creation logic into the editor page
     DashboardApiClient.postCreateBranch({
-      orgName,
       owner: sourceRepo.owner,
       repo: sourceRepo.repo,
       branch: newBranchName,
@@ -108,59 +105,45 @@ export function GoToEditorButton({
       .catch(() => {
         ErrorCreateBranchToast();
       });
-  }, [sourceRepo, newBranchName, editorSlug, orgName]);
+  }, [sourceRepo, newBranchName, editorSlug]);
 
   return (
-    <FernTooltipProvider>
-      <FernTooltip
-        content={disabledReason}
-        variant="dashboard"
-        delayDuration={0}
-        className="bg-gray-1200 rounded-md text-white"
-      >
-        <div className="flex flex-row items-center gap-1">
-          <Button
-            size="sm"
-            className="text-primary hover:text-primary w-fit"
-            variant="outline"
-            onClick={() => {
-              setIsLoading(true);
-              createBranch();
-            }}
-            disabled={isLoading || disabled}
-            asChild={!disabled}
-          >
-            <div className="flex flex-row items-center gap-1">
-              {isLoading ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <>
-                  <PencilSquareIcon />
-                  Go to Editor
-                </>
-              )}
-            </div>
-          </Button>
-          {disabled && disabledReason && (
-            <ExclamationCircleIcon className="h-4 w-4 text-red-600" />
-          )}
-        </div>
-      </FernTooltip>
-    </FernTooltipProvider>
-    // NOTE: This is the UI we want when we have a way to preview branches.
-    // <Button
-    //   variant="outline"
-    //   size="sm"
-    //   className="text-primary hover:text-primary"
-    //   onClick={() => {
-    //     setIsLoading(true);
-    //     void createBranch();
-    //   }}
-    //   disabled={isLoading}
-    // >
-    //   <PencilSquareIcon className="text-primary" />
-    //   Create a Branch
-    // </Button>
+    <div className="flex w-fit flex-row items-center gap-2">
+      <FernTooltipProvider>
+        <FernTooltip
+          content={isValidatingSource ? "Validating source repo..." : undefined}
+          variant="dashboard"
+          delayDuration={0}
+          side="bottom"
+          className="bg-gray-1200 rounded-md text-white"
+        >
+          <span className="pointer-events-auto">
+            <Button
+              size="sm"
+              className="text-primary hover:text-primary w-fit"
+              variant="outline"
+              onClick={() => {
+                setIsLoading(true);
+                createBranch();
+              }}
+              disabled={isLoading || disabled || isValidatingSource}
+              asChild={!disabled}
+            >
+              <div className="flex flex-row items-center gap-1">
+                {isLoading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <>
+                    <PencilSquareIcon />
+                    Go to Editor
+                  </>
+                )}
+              </div>
+            </Button>
+          </span>
+        </FernTooltip>
+      </FernTooltipProvider>
+    </div>
   );
 }
 

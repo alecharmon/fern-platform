@@ -1,9 +1,8 @@
-import { getDocsGithubSource } from "@/app/api/get-docs-github-source/route";
 import { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
+import { getGithubSourceMetadata } from "@/app/api/get-github-source-metadata/route";
 import { getMyDocsSites } from "@/app/api/get-my-docs-sites/route";
 import { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import { getOrgMembers } from "@/app/api/get-org-members/route";
-import { getUserGithubRepos } from "@/app/api/get-user-git-repos/route";
 import { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
 import { Theme } from "@/app/api/homepage-images/types";
 import { Auth0OrgName } from "@/app/services/auth0/types";
@@ -41,14 +40,8 @@ export const ReactQueryKey = {
   docsUrlOwner: (docsUrl: DocsUrl) =>
     queryKey<getDocsUrlOwner.Response>("docs-url-owner", docsUrl),
   orgSvgLogo: (svgUrl: string) => queryKey<string>("org-svg", svgUrl),
-  userGithubRepos: (orgName: Auth0OrgName, page?: number) =>
-    queryKey<getUserGithubRepos.Response>(
-      "get-user-git-repos",
-      orgName,
-      page?.toString() ?? ""
-    ),
-  githubSourceRepo: (docsUrl: DocsUrl) =>
-    queryKey<getDocsGithubSource.Response>("github-source-repo", docsUrl),
+  githubSourceRepo: (githubUrl: string) =>
+    queryKey<getGithubSourceMetadata.Response>("github-source-repo", githubUrl),
 } as const;
 
 function queryKey<T>(...key: string[]) {

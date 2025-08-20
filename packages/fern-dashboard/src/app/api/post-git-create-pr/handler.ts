@@ -1,20 +1,15 @@
+import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getOctokit } from "@/app/services/auth0/octokit";
-import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 
-export default async function postCreatePr(
-  userId: Auth0UserID,
-  orgName: Auth0OrgName,
-  request: {
-    owner: string;
-    repo: string;
-    head: string;
-    base: string;
-    title: string;
-    body?: string;
-    draft?: boolean;
-  }
-): Promise<{
+export default async function postCreatePr(request: {
+  owner: string;
+  repo: string;
+  head: string;
+  base: string;
+  title: string;
+  body?: string;
+  draft?: boolean;
+}): Promise<{
   success: boolean;
   error?: string;
   prUrl?: string;
@@ -26,7 +21,7 @@ export default async function postCreatePr(
     return { success: false, error: "No session found" };
   }
 
-  const octokit = await getOctokit(userId, orgName);
+  const octokit = await getFernBotOctokitForRepo(request.owner, request.repo);
 
   if (octokit == null) {
     return { success: false, error: "Failed to get GitHub client" };

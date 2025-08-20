@@ -14,13 +14,14 @@ import AbstractDefaultDocs from "@fern-docs/components/theming/AbstractDefaultDo
 import { GlobalStyles } from "@fern-docs/components/theming/global-styles";
 import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/desktop-search-button";
 
-import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { GitHubLoader } from "@/app/services/github/github-loader";
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
 
 import "./index.css";
@@ -52,17 +53,18 @@ export default async function VisualEditorPreviewLayout({
 }>) {
   const { orgName, docsUrl, branch } = await params;
 
-  const session = await getCurrentSession();
+  const { githubUrl, session } = await assertAuthAndFetchGithubUrl({
+    orgName,
+    docsUrl: parseDocsUrlParam({ docsUrl }),
+  });
   const host = await getHostFromHeaders();
 
   // TODO: createEditableDocsLoader should be called here once, and data passed to child pages (@...) rather than called in those places as well
   const loader = await createEditableDocsLoader(
     host,
     docsUrl,
-    session?.accessToken,
-    session?.user.sub && orgName
-      ? new GitHubLoader(session.user.sub, orgName)
-      : undefined
+    session.accessToken,
+    new GitHubLoader(githubUrl)
   );
 
   const [colors, layout, fonts, config, root, unsafe_fullRoot] =

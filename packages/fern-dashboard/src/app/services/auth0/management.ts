@@ -264,17 +264,21 @@ export async function ensureUserBelongsToOrg(
   userId: Auth0UserID,
   orgName: Auth0OrgName
 ) {
-  if (!(await doesUserBelongsToOrg(userId, orgName))) {
+  if (!(await doesUserBelongToOrg(userId, orgName))) {
     throw new Error(`User ${userId} is not in org ${orgName}`);
   }
 }
 
-export async function doesUserBelongsToOrg(
+export async function doesUserBelongToOrg(
   userId: Auth0UserID,
   orgName: Auth0OrgName
 ) {
-  // a fern employee is considered to be in every org
+  // a fern employee is considered to be in every org, but we need to check if the org exists
   if (await isFernEmployee(userId)) {
+    const org = await getOrganization(orgName);
+    if (org == null) {
+      return false;
+    }
     return true;
   }
   const orgs = await getMyOrganizations(userId);

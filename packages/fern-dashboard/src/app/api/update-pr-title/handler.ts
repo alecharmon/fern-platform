@@ -1,30 +1,24 @@
-import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getOctokit } from "@/app/services/auth0/octokit";
-import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 
-export default async function updatePrTitle(
-  userId: Auth0UserID,
-  orgName: Auth0OrgName,
-  request: {
-    owner: string;
-    repo: string;
-    branch: string;
-    title: string;
-    baseBranch?: string;
-  }
-): Promise<{
+/**
+ * Updates the title of a PR.
+ */
+export default async function updatePrTitle(request: {
+  owner: string;
+  repo: string;
+  branch: string;
+  title: string;
+  baseBranch?: string;
+}): Promise<{
   success: boolean;
   error?: string;
   title?: string;
   prNumber?: number;
   prUrl?: string;
 }> {
-  const session = await getCurrentSession();
-  if (session == null) {
-    return { success: false, error: "No session found" };
-  }
+  const { owner, repo } = request;
 
-  const octokit = await getOctokit(userId, orgName);
+  const octokit = await getFernBotOctokitForRepo(owner, repo);
 
   if (octokit == null) {
     return { success: false, error: "Failed to get GitHub client" };

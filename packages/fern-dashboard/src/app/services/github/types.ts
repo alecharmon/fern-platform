@@ -33,4 +33,7 @@ export type GithubSourceRepo = {
   owner: string | undefined;
   repo: string | undefined;
   baseBranch: string | undefined;
+  fernBotHasInstallationId: boolean | undefined;
 };
+
+export type GithubPrStatus = "open" | "closed" | "merged" | "draft";

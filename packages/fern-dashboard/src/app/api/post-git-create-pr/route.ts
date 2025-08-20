@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { withGithubAuth } from "@/app/services/dal/github/middleware";
+import type { GithubAuthContext } from "@/app/services/dal/github/types";
+import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
+import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { ResolvedReturnType } from "@/utils/types";
 
-import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
-import { parseNextRequestBody } from "../utils/parseNextRequestBody";
-import { orgNameValidator } from "../utils/validators";
 import handler from "./handler";
 
 export declare namespace postCreatePr {
@@ -14,39 +15,38 @@ export declare namespace postCreatePr {
   export type Response = ResolvedReturnType<typeof handler>;
 }
 
-export const PostCreatePrRequest = z.object({
-  owner: z.string(),
-  repo: z.string(),
-  head: z.string(),
-  base: z.string(),
-  title: z.string(),
-  body: z.string().optional(),
-  draft: z.boolean().optional(),
-  orgName: orgNameValidator,
-});
+export const PostCreatePrRequest = GithubIdentificationScheme.and(
+  z.object({
+    head: z.string(),
+    base: z.string(),
+    title: z.string(),
+    body: z.string().optional(),
+    draft: z.boolean().optional(),
+  })
+);
 
-export async function POST(req: NextRequest) {
-  const maybeSessionData = await maybeGetCurrentSession(req);
-  if (maybeSessionData.errorResponse != null) {
-    return maybeSessionData.errorResponse;
-  }
-  const { userId } = maybeSessionData.data;
-  const parsedBody = await parseNextRequestBody(req, PostCreatePrRequest);
-  if (parsedBody.errorResponse != null) {
-    return parsedBody.errorResponse;
-  }
-  const { owner, repo, head, base, title, body, draft, orgName } =
-    parsedBody.data;
+export const POST = withZodValidation(
+  PostCreatePrRequest,
+  async (
+    req: NextRequest,
+    validatedBody: z.infer<typeof PostCreatePrRequest>
+  ) =>
+    withGithubAuth(
+      async (_req: NextRequest, { repoData }: GithubAuthContext) => {
+        const { head, base, title, body, draft } = validatedBody;
+        const { owner, repo } = repoData;
 
-  return NextResponse.json(
-    await handler(userId, orgName, {
-      owner,
-      repo,
-      head,
-      base,
-      title,
-      body,
-      draft,
-    })
-  );
-}
+        return NextResponse.json(
+          await handler({
+            owner,
+            repo,
+            head,
+            base,
+            title,
+            body,
+            draft,
+          })
+        );
+      }
+    )(req, validatedBody)
+);

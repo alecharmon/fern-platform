@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   let response = await handler({ token, url });
   if (response.orgName != null) {
-    const doesUserBelongToOrg = await auth0Management.doesUserBelongsToOrg(
+    const doesUserBelongToOrg = await auth0Management.doesUserBelongToOrg(
       userId,
       response.orgName
     );

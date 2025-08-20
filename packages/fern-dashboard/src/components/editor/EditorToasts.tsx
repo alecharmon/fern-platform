@@ -57,3 +57,7 @@ export function WarningValidationToast(validationError: string) {
 export function ErrorUpdatePrTitleToast() {
   toast.error("Failed to update PR title. Please try again.");
 }
+
+export function ErrorUpdatePrStatusToast() {
+  toast.error("Failed to update PR status. Please try again.");
+}

@@ -12,6 +12,7 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
+import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useEditor } from "@/providers/EditorContext";
 
 import BubbleMenu from "./BubbleMenu";
@@ -72,6 +73,8 @@ export default function TiptapEditor({
   onCreate,
   onUpdate,
 }: TiptapEditor.Props) {
+  const isEditingDisabled = useEditingDisabled();
+
   return (
     <EditorProvider
       autofocus={autofocus}
@@ -93,8 +96,8 @@ export default function TiptapEditor({
     >
       <EditorContextUpdater />
       <TipTapContentUpdateListener content={content} />
-      {!disableFloatingMenu && <FloatingMenu />}
-      {!disableBubbleMenu && <BubbleMenu />}
+      {!disableFloatingMenu && !isEditingDisabled && <FloatingMenu />}
+      {!disableBubbleMenu && !isEditingDisabled && <BubbleMenu />}
       <NodeHoverHandle />
     </EditorProvider>
   );
@@ -123,11 +126,22 @@ function TipTapContentUpdateListener({
   content: EditorProviderProps["content"];
 }) {
   const { editor } = useCurrentEditor();
+  const isEditingDisabled = useEditingDisabled();
   const lastSetContentRef = useRef<string | null>(null);
+
+  // Ensure the editor stays in sync with editability status
+  useEffect(() => {
+    if (isEditingDisabled) {
+      editor?.setEditable(false, false);
+    } else {
+      editor?.setEditable(true, false);
+    }
+  }, [isEditingDisabled, editor]);
 
   // Monitor content changes and update editor imperatively when needed
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || isEditingDisabled) return;
+
     // Don't update if the editor is focused (user is typing)
     if (editor.isFocused) return;
     const contentStr =
@@ -149,7 +163,7 @@ function TipTapContentUpdateListener({
         emitUpdate: false, // Don't emit update events since we don't want to trigger the onUpdate callback
       });
     }
-  }, [content, editor]);
+  }, [content, editor, isEditingDisabled]);
 
   return <></>;
 }

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { notFound, redirect } from "next/navigation";
 
 import { createEditableDocsLoader } from "@fern-api/docs-loader";
@@ -6,11 +8,12 @@ import { NodeId, getPageId, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 import { mdxToHtml } from "@fern-docs/mdx";
 
-import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { GitHubLoader } from "@/app/services/github/github-loader";
 import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
 
 import PageNode from "./PageNode";
@@ -29,13 +32,13 @@ export default async function Page({
   }>;
   searchParams: Promise<Record<string, string>>;
 }) {
-  const session = await getCurrentSession();
-
-  if (session == null) {
-    redirect("/");
-  }
-
   const { orgName, docsUrl, branch, slug: slugArray } = await params;
+
+  const { githubUrl, session } = await assertAuthAndFetchGithubUrl({
+    orgName,
+    docsUrl: parseDocsUrlParam({ docsUrl }),
+  });
+
   const resolvedSearchParams = await searchParams;
   const host = await getHostFromHeaders();
   const slugAlias = slugArray.join("/");
@@ -43,10 +46,8 @@ export default async function Page({
   const loader = await createEditableDocsLoader(
     host,
     docsUrl,
-    session?.accessToken,
-    session?.user.sub && orgName
-      ? new GitHubLoader(session.user.sub, orgName)
-      : undefined
+    session.accessToken,
+    new GitHubLoader(githubUrl)
   );
   const root = await loader.getRoot();
 

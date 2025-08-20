@@ -1,18 +1,13 @@
+import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getOctokit } from "@/app/services/auth0/octokit";
-import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { createPrDescriptionService } from "@/app/services/pr-description";
 
-export default async function generatePrDescription(
-  userId: Auth0UserID,
-  orgName: Auth0OrgName,
-  request: {
-    owner: string;
-    repo: string;
-    branch: string;
-    baseBranch?: string;
-  }
-): Promise<{
+export default async function generatePrDescription(request: {
+  owner: string;
+  repo: string;
+  branch: string;
+  baseBranch?: string;
+}): Promise<{
   success: boolean;
   error?: string;
   newTitle?: string;
@@ -22,7 +17,7 @@ export default async function generatePrDescription(
     return { success: false, error: "No session found" };
   }
 
-  const octokit = await getOctokit(userId, orgName);
+  const octokit = await getFernBotOctokitForRepo(request.owner, request.repo);
   if (octokit == null) {
     return { success: false, error: "Failed to get GitHub client" };
   }
@@ -34,7 +29,8 @@ export default async function generatePrDescription(
 
   const prDescriptionService = createPrDescriptionService(
     octokit,
-    anthropicApiKey
+    anthropicApiKey,
+    { name: session.user.name, email: session.user.email }
   );
 
   return await prDescriptionService.generateAndUpdatePrTitleAndDescription(

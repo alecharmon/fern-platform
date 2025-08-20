@@ -53,6 +53,7 @@
     "@mdx-js/react": "^3.1.0",
     "@microlink/react-json-view": "^1.26.1",
     "@monaco-editor/react": "^4.7.0",
+    "@octokit/auth-app": "^8.0.2",
     "@octokit/core": "^7.0.2",
     "@radix-ui/primitive": "^1.1.1",
     "@radix-ui/react-compose-refs": "^1.1.1",
