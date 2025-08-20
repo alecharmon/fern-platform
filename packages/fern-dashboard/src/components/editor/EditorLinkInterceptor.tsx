@@ -1,9 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 
 import { useEditorRouting } from "../../providers/EditorRoutingContext";
-import { interceptLinkClick } from "./link-interceptor";
+import { getInterceptedLink } from "./link-interceptor";
 
 const DROPDOWN_SELECTORS = [
   '[data-testid="product-dropdown-content"]',
@@ -13,9 +14,10 @@ const DROPDOWN_SELECTORS = [
 
 export function EditorLinkInterceptor() {
   const { orgName, docsUrl, branch } = useEditorRouting();
+  const router = useRouter();
 
   const handleClick = useCallback(
-    (event: MouseEvent) => {
+    async (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const link = target.closest("a");
 
@@ -26,21 +28,34 @@ export function EditorLinkInterceptor() {
         link.closest("#preview-container") || link.closest(DROPDOWN_SELECTORS);
 
       if (isInTargetContainer) {
-        interceptLinkClick(event, { orgName, docsUrl, branch });
+        const interceptedLink = getInterceptedLink(event, {
+          orgName,
+          docsUrl,
+          branch,
+        });
+        if (interceptedLink) {
+          router.push(interceptedLink);
+        }
       }
     },
-    [orgName, docsUrl, branch]
+    [orgName, docsUrl, branch, router]
   );
 
   useEffect(() => {
+    const handleClickFn = (event: MouseEvent) => {
+      void handleClick(event);
+    };
+
     // Single global event listener using capture phase for maximum efficiency
-    document.addEventListener("click", handleClick, {
+    document.addEventListener("click", handleClickFn, {
       capture: true,
       passive: false,
     });
 
     return () => {
-      document.removeEventListener("click", handleClick, { capture: true });
+      document.removeEventListener("click", handleClickFn, {
+        capture: true,
+      });
     };
   }, [handleClick]);
 

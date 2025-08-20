@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import CodeEditor, { Monaco } from "@monaco-editor/react";
-import { Code2, Edit3 } from "lucide-react";
-import { motion } from "motion/react";
+import { Code2 } from "lucide-react";
 
 import { mdxToHtml } from "@fern-docs/mdx";
 
@@ -27,22 +26,17 @@ export default function DevPanel() {
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
-  // Edit mode state
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editedContent, setEditedContent] = useState("");
-  const [shouldShake, setShouldShake] = useState(false);
-
   // Get the current file's markdown content
   const activeFilename = currentFilename || Object.keys(allMdxFiles)[0] || "";
   const currentMarkdown =
     allMdxFiles[activeFilename] || "// Loading content...";
 
   useEffect(() => {
-    // Update Monaco editor content when markdown changes (only in read-only mode)
-    if (editorRef.current && currentMarkdown && !isEditMode) {
+    // Update Monaco editor content when markdown changes
+    if (editorRef.current && currentMarkdown) {
       editorRef.current.setValue(currentMarkdown);
     }
-  }, [currentMarkdown, isEditMode]);
+  }, [currentMarkdown]);
 
   function handleEditorDidMount(editorInstance: any, monacoInstance: Monaco) {
     editorRef.current = editorInstance;
@@ -51,35 +45,12 @@ export default function DevPanel() {
     // Define and apply custom theme that uses your app's colors
     const themeName = defineAppTheme(monacoInstance);
     monacoInstance.editor.setTheme(themeName);
-
-    // Listen for attempts to edit in read-only mode
-    editorInstance.onDidAttemptReadOnlyEdit(() => {
-      if (!isEditMode) {
-        setShouldShake(true);
-        // Reset shake state after animation completes
-        setTimeout(() => setShouldShake(false), 500);
-      }
-    });
-  }
-
-  function handleEnterEditMode() {
-    setIsEditMode(true);
-    setEditedContent(currentMarkdown);
-
-    // Update editor options to make it editable
-    if (editorRef.current) {
-      editorRef.current.updateOptions({ readOnly: false });
-    }
   }
 
   function handleCancelEdit() {
-    setIsEditMode(false);
-    setEditedContent("");
-
     // Restore original content and make read-only
     if (editorRef.current) {
       editorRef.current.setValue(currentMarkdown);
-      editorRef.current.updateOptions({ readOnly: true });
     }
   }
 
@@ -117,13 +88,6 @@ export default function DevPanel() {
         frontmatter: mergedFrontmatter,
         originalElements,
       });
-
-      setIsEditMode(false);
-
-      // Make editor read-only again
-      if (editorRef.current) {
-        editorRef.current.updateOptions({ readOnly: true });
-      }
     } catch (conversionError: any) {
       WarningValidationToast(conversionError.message);
     }
@@ -147,50 +111,29 @@ export default function DevPanel() {
         <CodeEditor
           height="100%"
           language="markdown"
-          value={isEditMode ? editedContent : currentMarkdown}
+          value={currentMarkdown}
           onMount={handleEditorDidMount}
           theme="app-theme"
           options={{
-            readOnly: !isEditMode,
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             wordWrap: "on",
+            readOnly: isEditingDisabled,
           }}
         />
       </div>
-      {/* Edit button - bottom right */}
-      {!isEditMode && !isEditingDisabled && (
-        <motion.div
-          animate={
-            shouldShake
-              ? {
-                  x: [-4, 4, -4, 4, -2, 2, 0],
-                  transition: { duration: 0.5, ease: "easeInOut" },
-                }
-              : {}
-          }
-          className="fixed bottom-4 right-4"
-        >
-          <Button onClick={handleEnterEditMode} title="Edit markdown" size="lg">
-            <Edit3 className="size-4" />
-            Edit
-          </Button>
-        </motion.div>
-      )}
 
       {/* Cancel/Save buttons - bottom */}
-      {isEditMode && (
-        <div className="fixed bottom-4 left-4 right-4 z-50 flex items-center gap-2">
-          <div className="ml-auto flex gap-2">
-            <Button onClick={handleCancelEdit} variant="outline" size="lg">
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} variant="default" size="lg">
-              Save
-            </Button>
-          </div>
+      <div className="fixed bottom-4 left-4 right-4 z-50 flex items-center gap-2">
+        <div className="ml-auto flex gap-2">
+          <Button onClick={handleCancelEdit} variant="outline" size="lg">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveEdit} variant="default" size="lg">
+            Save
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

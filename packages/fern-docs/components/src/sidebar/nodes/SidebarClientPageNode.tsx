@@ -44,8 +44,7 @@ export function SidebarClientPageNode({
 
       // Navigate directly without loading states since all data is client-side
       const clientPageUrl = `/${orgName}/editor/${docsUrl}/${branch}/${fullSlug}?client-node-id=${node.id}`;
-      // TODO: use router.push instead of window.location.href (currently there's a bug when the page hits an error boundary)
-      window.location.href = clientPageUrl;
+      router.push(clientPageUrl);
     }
   };
 

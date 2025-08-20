@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { interceptLinkClick } from "./link-interceptor";
+import { getInterceptedLink } from "./link-interceptor";
 
 // Mock window.location
 const mockLocation = {
@@ -20,12 +20,11 @@ Object.defineProperty(global, "window", {
 
 const mockPreventDefault = vi.fn();
 
-describe("interceptLinkClick", () => {
+describe("getInterceptedLink", () => {
   const defaultMetadata = {
     orgName: "test-org",
     docsUrl: "test-docs",
     branch: "main",
-    basePath: "/",
   };
 
   beforeEach(() => {
@@ -47,18 +46,10 @@ describe("interceptLinkClick", () => {
   };
 
   const createMockLink = (href: string, text = "Test Link") => {
-    const removedAttributes = new Set<string>();
-
     const link = {
       href,
       textContent: text,
-      removeAttribute: vi.fn((attribute: string) => {
-        removedAttributes.add(attribute);
-      }),
       getAttribute: (attribute: string) => {
-        if (removedAttributes.has(attribute)) {
-          return null;
-        }
         if (attribute === "href") {
           return href;
         }
@@ -71,7 +62,6 @@ describe("interceptLinkClick", () => {
   const createMockTarget = (link: HTMLAnchorElement | null) => {
     const target = {
       textContent: "Click me",
-      appendChild: vi.fn(),
       closest: vi.fn().mockReturnValue(link),
     } as unknown as HTMLElement;
 
@@ -79,83 +69,75 @@ describe("interceptLinkClick", () => {
   };
 
   describe("when no link is found", () => {
-    it("should return early when target has no link ancestor", () => {
+    it("should return undefined when target has no link ancestor", () => {
       const target = createMockTarget(null);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
 
-    it("should return early when link has no href attribute", () => {
+    it("should return undefined when link has no href attribute", () => {
       const link = createMockLink("");
-      link.removeAttribute("href");
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
   });
 
   describe("when link should be skipped", () => {
-    it("should skip external http links", () => {
+    it("should return undefined for external http links", () => {
       const link = createMockLink("https://example.com");
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
 
-    it("should skip external https links", () => {
+    it("should return undefined for external https links", () => {
       const link = createMockLink("https://api.example.com/docs");
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
 
-    it("should skip mailto links", () => {
+    it("should return undefined for mailto links", () => {
       const link = createMockLink("mailto:user@example.com");
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
 
-    it("should skip anchor links", () => {
+    it("should return undefined for anchor links", () => {
       const link = createMockLink("#section-1");
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
 
-    it("should skip links that already contain /editor/", () => {
+    it("should return undefined for links that already contain /editor/", () => {
       const link = createMockLink("/test-org/editor/test-docs/main/page");
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
   });
 
@@ -165,12 +147,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).toHaveBeenCalledOnce();
-      expect(mockLocation.href).toBe(
-        "/test-org/editor/test-docs/main/api/endpoints"
-      );
+      expect(result).toBe("/test-org/editor/test-docs/main/api/endpoints");
     });
 
     it("should handle relative paths without leading /", () => {
@@ -178,12 +157,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).toHaveBeenCalledOnce();
-      expect(mockLocation.href).toBe(
-        "/test-org/editor/test-docs/main/api/endpoints"
-      );
+      expect(result).toBe("/test-org/editor/test-docs/main/api/endpoints");
     });
 
     it("should handle nested paths", () => {
@@ -191,10 +167,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).toHaveBeenCalledOnce();
-      expect(mockLocation.href).toBe(
+      expect(result).toBe(
         "/test-org/editor/test-docs/main/docs/api/authentication"
       );
     });
@@ -204,10 +179,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).toHaveBeenCalledOnce();
-      expect(mockLocation.href).toBe(
+      expect(result).toBe(
         "/test-org/editor/test-docs/main/api/endpoints?version=1.0"
       );
     });
@@ -217,10 +191,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).toHaveBeenCalledOnce();
-      expect(mockLocation.href).toBe(
+      expect(result).toBe(
         "/test-org/editor/test-docs/main/api/endpoints#authentication"
       );
     });
@@ -230,10 +203,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).toHaveBeenCalledOnce();
-      expect(mockLocation.href).toBe("/test-org/editor/test-docs/main/");
+      expect(result).toBe("/test-org/editor/test-docs/main/");
     });
 
     it("should handle empty path", () => {
@@ -241,10 +213,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockPreventDefault).not.toHaveBeenCalled();
-      expect(mockLocation.href).toBe("");
+      expect(result).toBeUndefined();
     });
   });
 
@@ -255,11 +226,9 @@ describe("interceptLinkClick", () => {
       const event = createMockEvent(target);
       const metadata = { ...defaultMetadata, orgName: "different-org" };
 
-      interceptLinkClick(event, metadata);
+      const result = getInterceptedLink(event, metadata);
 
-      expect(mockLocation.href).toBe(
-        "/different-org/editor/test-docs/main/api/docs"
-      );
+      expect(result).toBe("/different-org/editor/test-docs/main/api/docs");
     });
 
     it("should work with different docs URLs", () => {
@@ -268,11 +237,9 @@ describe("interceptLinkClick", () => {
       const event = createMockEvent(target);
       const metadata = { ...defaultMetadata, docsUrl: "different-docs" };
 
-      interceptLinkClick(event, metadata);
+      const result = getInterceptedLink(event, metadata);
 
-      expect(mockLocation.href).toBe(
-        "/test-org/editor/different-docs/main/api/docs"
-      );
+      expect(result).toBe("/test-org/editor/different-docs/main/api/docs");
     });
 
     it("should work with different branches", () => {
@@ -281,11 +248,9 @@ describe("interceptLinkClick", () => {
       const event = createMockEvent(target);
       const metadata = { ...defaultMetadata, branch: "develop" };
 
-      interceptLinkClick(event, metadata);
+      const result = getInterceptedLink(event, metadata);
 
-      expect(mockLocation.href).toBe(
-        "/test-org/editor/test-docs/develop/api/docs"
-      );
+      expect(result).toBe("/test-org/editor/test-docs/develop/api/docs");
     });
 
     it("should work with special characters in metadata", () => {
@@ -296,12 +261,11 @@ describe("interceptLinkClick", () => {
         orgName: "org-with-dashes",
         docsUrl: "docs_with_underscores",
         branch: "feature/branch-name",
-        basePath: "/",
       };
 
-      interceptLinkClick(event, metadata);
+      const result = getInterceptedLink(event, metadata);
 
-      expect(mockLocation.href).toBe(
+      expect(result).toBe(
         "/org-with-dashes/editor/docs_with_underscores/feature/branch-name/api/docs"
       );
     });
@@ -315,11 +279,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockLocation.href).toBe(
-        `/test-org/editor/test-docs/main${longPath}`
-      );
+      expect(result).toBe(`/test-org/editor/test-docs/main${longPath}`);
     });
 
     it("should handle paths with special characters", () => {
@@ -327,9 +289,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockLocation.href).toBe(
+      expect(result).toBe(
         "/test-org/editor/test-docs/main/api/endpoints/with-special-chars_123"
       );
     });
@@ -339,9 +301,9 @@ describe("interceptLinkClick", () => {
       const target = createMockTarget(link);
       const event = createMockEvent(target);
 
-      interceptLinkClick(event, defaultMetadata);
+      const result = getInterceptedLink(event, defaultMetadata);
 
-      expect(mockLocation.href).toBe(
+      expect(result).toBe(
         "/test-org/editor/test-docs/main/api/endpoints/with%20spaces"
       );
     });

@@ -1,4 +1,4 @@
-export const interceptLinkClick = (
+export const getInterceptedLink = (
   event: MouseEvent,
   metadata: {
     orgName: string;
@@ -32,6 +32,5 @@ export const interceptLinkClick = (
 
   const editorHref = `/${metadata.orgName}/editor/${metadata.docsUrl}/${metadata.branch}/${cleanHref}`;
 
-  // Navigate using Next.js router
-  window.location.href = editorHref;
+  return editorHref;
 };

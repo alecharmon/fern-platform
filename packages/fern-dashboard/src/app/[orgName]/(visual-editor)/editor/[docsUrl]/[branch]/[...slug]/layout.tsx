@@ -234,7 +234,7 @@ export default async function VisualEditorPreviewLayout({
           </RootNodeProvider>
         </FernThemeProvider>
       </Providers>
-      <React.Suspense fallback={null}>{devPanel}</React.Suspense>
+      {devPanel}
     </div>
   );
 }
