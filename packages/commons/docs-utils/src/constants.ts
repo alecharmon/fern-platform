@@ -72,4 +72,5 @@ export const FERN_DOCS_ORIGINS = [
   "staging.ferndocs.com",
   "preview.ferndocs.com",
   "stable.ferndocs.com",
+  "experimental.ferndocs.com",
 ];

@@ -2,6 +2,8 @@ import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
+import { Agent, setGlobalDispatcher } from "undici";
+
 import { isPreviewDomain, withoutStaging } from "@fern-api/docs-utils";
 import { APIResponse, FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
@@ -15,6 +17,14 @@ export type LoadWithUrlResponse = APIResponse<
   FdrAPI.docs.v2.read.LoadDocsForUrlResponse,
   FdrAPI.docs.v2.read.getDocsForUrl.Error
 >;
+
+setGlobalDispatcher(
+  new Agent({
+    connect: { timeout: 2147483647 },
+    bodyTimeout: 0,
+    headersTimeout: 2147483647,
+  })
+);
 
 /**
  * - If the token is a WorkOS token, we need to use the getPrivateDocsForUrl endpoint.
