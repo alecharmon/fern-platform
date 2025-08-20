@@ -13,6 +13,7 @@ class DocumentApi(BaseModel):
     title: Optional[str] = None
     url: Optional[str] = None
     version: Optional[str] = None
+    product: Optional[str] = None
     keywords: Optional[List[str]] = None
     authed: Optional[bool] = None
     created_at: datetime
@@ -25,6 +26,7 @@ class IndexDocumentRequest(BaseModel):
     title: Optional[str] = None
     url: Optional[str] = None
     version: Optional[str] = None
+    product: Optional[str] = None
     keywords: Optional[List[str]] = None
     authed: Optional[bool] = None
 
@@ -35,5 +37,6 @@ class UpdateDocumentRequest(BaseModel):
     title: Optional[str] = None
     url: Optional[str] = None
     version: Optional[str] = None
+    product: Optional[str] = None
     keywords: Optional[List[str]] = None
     authed: Optional[bool] = None

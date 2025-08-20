@@ -22,6 +22,7 @@ class Document(Base):
     title = Column(String, nullable=True)
     url = Column(String, nullable=True)
     version = Column(String, nullable=True)
+    product = Column(String, nullable=True)
     keywords = Column(ARRAY(String), nullable=True)
     authed = Column(Boolean, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False)
@@ -36,6 +37,7 @@ class Document(Base):
             title=self.title,
             url=self.url,
             version=self.version,
+            product=self.product,
             keywords=self.keywords,
             authed=self.authed,
             created_at=self.created_at,
@@ -56,6 +58,7 @@ class Document(Base):
             title=self.title or "",
             url=self.url or "",
             version=self.version,
+            product=self.product,
             keywords=self.keywords,
             authed=self.authed,
         )
