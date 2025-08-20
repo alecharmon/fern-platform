@@ -150,4 +150,79 @@ describe("Document", () => {
             updated_at: "2024-01-15T09:30:00Z",
         });
     });
+
+    test("getDocuments", async () => {
+        const server = mockServerPool.createServer();
+        const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
+
+        const rawResponseBody = {
+            documents: [
+                {
+                    document_id: "document_id",
+                    chunk: "chunk",
+                    domain: "domain",
+                    document: "document",
+                    title: "title",
+                    url: "url",
+                    version: "version",
+                    keywords: ["keywords", "keywords"],
+                    authed: true,
+                    created_at: "2024-01-15T09:30:00Z",
+                    updated_at: "2024-01-15T09:30:00Z",
+                },
+                {
+                    document_id: "document_id",
+                    chunk: "chunk",
+                    domain: "domain",
+                    document: "document",
+                    title: "title",
+                    url: "url",
+                    version: "version",
+                    keywords: ["keywords", "keywords"],
+                    authed: true,
+                    created_at: "2024-01-15T09:30:00Z",
+                    updated_at: "2024-01-15T09:30:00Z",
+                },
+            ],
+            pagination: { total: 1, page: 1, limit: 1 },
+        };
+        server.mockEndpoint().get("/document/domain").respondWith().statusCode(200).jsonBody(rawResponseBody).build();
+
+        const response = await client.document.getDocuments("domain");
+        expect(response).toEqual({
+            documents: [
+                {
+                    document_id: "document_id",
+                    chunk: "chunk",
+                    domain: "domain",
+                    document: "document",
+                    title: "title",
+                    url: "url",
+                    version: "version",
+                    keywords: ["keywords", "keywords"],
+                    authed: true,
+                    created_at: "2024-01-15T09:30:00Z",
+                    updated_at: "2024-01-15T09:30:00Z",
+                },
+                {
+                    document_id: "document_id",
+                    chunk: "chunk",
+                    domain: "domain",
+                    document: "document",
+                    title: "title",
+                    url: "url",
+                    version: "version",
+                    keywords: ["keywords", "keywords"],
+                    authed: true,
+                    created_at: "2024-01-15T09:30:00Z",
+                    updated_at: "2024-01-15T09:30:00Z",
+                },
+            ],
+            pagination: {
+                total: 1,
+                page: 1,
+                limit: 1,
+            },
+        });
+    });
 });

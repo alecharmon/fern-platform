@@ -319,7 +319,7 @@ await client.conversations.getConversation("domain", "conversation_id");
 <dl>
 <dd>
 
-Index a document for a given domain
+Index a document for a given domain. Documents can be used to provide additional context to Ask Fern and improve its accuracy.
 
 </dd>
 </dl>
@@ -597,6 +597,77 @@ await client.document.getDocumentById("domain", "document_id");
 <dd>
 
 **documentId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestOptions:** `Document.RequestOptions`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.document.<a href="/src/api/resources/document/client/Client.ts">getDocuments</a>(domain, { ...params }) -> FernFai.DocumentList</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieve all paginated documents for a given domain
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await client.document.getDocuments("domain");
+```
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**domain:** `string` — The domain to retrieve documents for
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `FernFai.GetDocumentsRequest`
 
 </dd>
 </dl>
