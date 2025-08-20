@@ -194,7 +194,7 @@ export function CreateClientPage({ children, root }: CreateClientPageProps) {
 
       // Create consistent slug construction for both staging and routing
       const fullSlug = selectedSection.slug
-        ? `${selectedSection.slug}/${slug}`
+        ? `docs/pages/${selectedSection.slug}/${slug}`
         : slug;
 
       // Stage the changes

@@ -113,6 +113,38 @@ export class DocsYmlStorage {
           sectionTitle,
           pageEntry,
           createdAt: Date.now(),
+          operation: "add",
+        },
+      },
+    };
+    this.saveState(branchName, newState);
+  }
+
+  static addRemovalUpdate(branchName: string, pagePath: string): void {
+    if (!branchName?.trim() || !pagePath?.trim()) {
+      console.error(
+        "Branch name and page path are required for adding removal update"
+      );
+      return;
+    }
+
+    const state = this.loadState(branchName);
+    if (!state) {
+      console.warn(
+        "No base content found for branch. Call setBaseContent first."
+      );
+      return;
+    }
+
+    const newState: DocsYmlState = {
+      ...state,
+      updates: {
+        ...state.updates,
+        [pagePath]: {
+          sectionTitle: "", // Not needed for removal
+          pageEntry: { page: "", path: pagePath },
+          createdAt: Date.now(),
+          operation: "remove",
         },
       },
     };
@@ -162,7 +194,8 @@ export class DocsYmlStorage {
       content: string,
       sectionTitle: string,
       pageEntry: any
-    ) => string
+    ) => string,
+    removePageFromDocsYmlFn?: (content: string, pagePath: string) => string
   ): string | null {
     const state = this.loadState(branchName);
     if (!state?.baseContent) {
@@ -177,12 +210,27 @@ export class DocsYmlStorage {
     // Apply all updates to the base content
     try {
       let updatedContent = state.baseContent;
-      Object.values(state.updates).forEach((update) => {
-        updatedContent = addPageToDocsYmlFn(
-          updatedContent,
-          update.sectionTitle,
-          update.pageEntry
-        );
+
+      // Sort updates by creation time to apply them in chronological order
+      const sortedUpdates = Object.values(state.updates).sort(
+        (a, b) => (a.createdAt || 0) - (b.createdAt || 0)
+      );
+
+      sortedUpdates.forEach((update) => {
+        const operation = update.operation || "add"; // Default to "add" for backward compatibility
+
+        if (operation === "add") {
+          updatedContent = addPageToDocsYmlFn(
+            updatedContent,
+            update.sectionTitle,
+            update.pageEntry
+          );
+        } else if (operation === "remove" && removePageFromDocsYmlFn) {
+          updatedContent = removePageFromDocsYmlFn(
+            updatedContent,
+            update.pageEntry.path || ""
+          );
+        }
       });
 
       return updatedContent;

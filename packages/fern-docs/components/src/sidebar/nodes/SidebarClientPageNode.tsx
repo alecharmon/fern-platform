@@ -1,13 +1,17 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ReactNode, useRef } from "react";
+
+import { MinusCircleIcon } from "lucide-react";
 
 import { useScrollSidebarNodeIntoView } from "../../hooks/sidebar-scroll";
 import { useIsSelectedSidebarNode } from "../../state/navigation";
 import { SidebarLink } from "../SidebarLink";
+import { useSidebarClientNavigation } from "./SidebarClientNavigationProvider";
 import { SidebarPageNodeProps } from "./SidebarPageNode";
 import { ClientPageStorage } from "./clientPageStorage";
+import { DocsYmlStorage } from "./docsYmlStorage";
 
 // Mirror the SidebarPageNodeProps interface
 interface SidebarClientPageNodeProps extends SidebarPageNodeProps {}
@@ -20,8 +24,10 @@ export function SidebarClientPageNode({
 }: SidebarClientPageNodeProps): ReactNode {
   const ref = useRef<HTMLAnchorElement>(null);
   const params = useParams();
+  const { removeClientNode } = useSidebarClientNavigation();
   useScrollSidebarNodeIntoView(ref, node.id);
   const selected = useIsSelectedSidebarNode(node.id);
+  const router = useRouter();
 
   const handleClick = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -43,20 +49,59 @@ export function SidebarClientPageNode({
     }
   };
 
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (params?.branch && removeClientNode) {
+      const branch = params.branch as string;
+
+      // Get the stored page data to extract the full path
+      const storedPages = ClientPageStorage.loadClientPages(branch);
+      const storedPage = storedPages[node.id];
+      const pagePath = storedPage?.fullSlug
+        ? `${storedPage.fullSlug}.mdx`
+        : `${node.slug}.mdx`;
+
+      // Add a removal update to DocsYmlStorage
+      DocsYmlStorage.addRemovalUpdate(branch, pagePath);
+
+      // Remove the client node from the sidebar
+      removeClientNode(node.id);
+
+      // Navigate directly to special "root" page, use router.push instead of window.location.href so navigation happens instantly
+      // TODO: clean this up
+      const rootPageUrl = `/${params.orgName}/editor/${params.docsUrl}/${params.branch}/root`;
+      setTimeout(() => {
+        router.push(rootPageUrl);
+      }, 0);
+    }
+  };
+
   return (
-    <SidebarLink
-      ref={ref}
-      icon={icon}
-      nodeId={node.id}
-      className={className}
-      onClick={handleClick}
-      depth={Math.max(depth - 1, 0)}
-      title={node.title}
-      hidden={node.hidden}
-      authed={node.authed}
-      shallow={true} // Always use shallow routing for client pages
-      scroll={false} // Don't scroll since we're handling navigation manually
-      selected={selected}
-    />
+    <div className="group relative">
+      <SidebarLink
+        ref={ref}
+        icon={icon}
+        nodeId={node.id}
+        className={className}
+        onClick={handleClick}
+        depth={Math.max(depth - 1, 0)}
+        title={node.title}
+        hidden={node.hidden}
+        authed={node.authed}
+        shallow={true} // Always use shallow routing for client pages
+        scroll={false} // Don't scroll since we're handling navigation manually
+        selected={selected}
+      />
+      <button
+        onClick={handleDelete}
+        className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-red-600 opacity-0 transition-opacity duration-200 hover:bg-red-50 hover:text-red-700 group-hover:opacity-100 dark:text-red-400 dark:hover:bg-red-950/20 dark:hover:text-red-300"
+        title="Delete page"
+        aria-label="Delete page"
+      >
+        <MinusCircleIcon className="size-4" />
+      </button>
+    </div>
   );
 }

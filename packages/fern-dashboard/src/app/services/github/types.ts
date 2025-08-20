@@ -4,11 +4,18 @@ export type GITHUB_FILE_MODE =
   | "040000"
   | "160000"
   | "120000";
-export interface GithubCommitableFile {
-  path: string;
-  content: string;
-  mode?: GITHUB_FILE_MODE;
-}
+export type GithubCommitableFile =
+  | {
+      path: string;
+      delete: true;
+      mode?: GITHUB_FILE_MODE;
+    }
+  | {
+      path: string;
+      content: string;
+      mode?: GITHUB_FILE_MODE;
+      delete?: false;
+    };
 
 export type GithubRepo = {
   name: string;

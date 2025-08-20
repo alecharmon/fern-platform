@@ -7,6 +7,7 @@ export interface DocsYmlUpdate {
   sectionTitle: string;
   pageEntry: DocsYmlPageEntry;
   createdAt: number;
+  operation?: "add" | "remove"; // "add" is default for backward compatibility
 }
 
 export interface DocsYmlState {

@@ -9,13 +9,17 @@ import {
 } from "@heroicons/react/24/outline";
 import { ArrowLeftIcon, Globe } from "lucide-react";
 
+import { FernNavigation } from "@fern-api/fdr-sdk";
 import {
   ClientPageStorage,
+  CommittedFilesStorage,
   DocsYmlStorage,
   PageStorage,
   getPageFilename,
   pageDataToMdx,
 } from "@fern-docs/components";
+import type { StoredClientPage } from "@fern-docs/components/sidebar/nodes";
+import type { DocsYmlPageEntry } from "@fern-docs/components/sidebar/nodes";
 import { getLoadableValue } from "@fern-ui/loadable";
 
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -30,7 +34,10 @@ import { useEditor } from "@/providers/EditorContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useMdxState } from "@/providers/MdxStateContext";
 import { useGithubSourceRepo } from "@/state/useGithubSourceRepo";
-import { addPageToDocsYml } from "@/utils/docsYmlUpdater";
+import {
+  addPageToDocsYml,
+  removePageFromDocsYml,
+} from "@/utils/docsYmlUpdater";
 import { DocsUrl } from "@/utils/types";
 
 import { GithubLogo } from "../auth/GithubLogo";
@@ -50,36 +57,133 @@ import { ErrorFullCommitToast } from "./EditorToasts";
 import { PRTitleEditor } from "./PRTitleEditor";
 
 /**
+ * Finds the section title for a given client page by traversing the navigation
+ */
+function findSectionForPage(
+  clientPageData: StoredClientPage,
+  sidebar: FernNavigation.SidebarRootNode | null | undefined
+): string | null {
+  if (!sidebar?.children || !clientPageData.parentNodeId) {
+    return null;
+  }
+
+  // Look for the parent section in the sidebar navigation
+  for (const child of sidebar.children) {
+    if (child.id === clientPageData.parentNodeId && child.type === "section") {
+      return child.title;
+    }
+    // If it's a nested structure, we might need to search deeper
+    if (child.children) {
+      const found = findSectionInChildren(
+        child.children,
+        clientPageData.parentNodeId
+      );
+      if (found) {
+        return found;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Recursively searches for a section by ID in navigation children
+ */
+function findSectionInChildren(
+  children: FernNavigation.NavigationNode[],
+  parentNodeId: string
+): string | null {
+  for (const child of children) {
+    if (child.id === parentNodeId && child.type === "section") {
+      return child.title;
+    }
+    if ("children" in child && child.children) {
+      const found = findSectionInChildren(child.children, parentNodeId);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * Collects all changes from various sources into a single record
  * @param changedMdxFiles - Files changed in MDX state
  * @param branch - Current branch name
- * @returns Record of all changes keyed by filename
+ * @returns Object containing files to commit and files to delete
  */
 function collectAllChanges(
   changedMdxFiles: Record<string, string>,
   branch: string | null
-): Record<string, string> {
-  const allChanges: Record<string, string> = { ...changedMdxFiles };
+): { filesToCommit: Record<string, string>; filesToDelete: string[] } {
+  const filesToCommit: Record<string, string> = { ...changedMdxFiles };
+  const filesToDelete: string[] = [];
 
-  if (!branch) return allChanges;
+  if (!branch) return { filesToCommit, filesToDelete: [] };
+
+  // Get previously committed client page files
+  const previouslyCommittedFiles =
+    CommittedFilesStorage.getCommittedClientPages(branch);
+  const currentClientPageFiles = new Set<string>();
 
   // Add client pages from localStorage
   const clientPages = ClientPageStorage.loadClientPages(branch);
   Object.entries(clientPages).forEach(([_clientNodeId, clientPageData]) => {
     if (clientPageData.pageData && clientPageData.fullSlug?.trim()) {
       const filename = getPageFilename(clientPageData.fullSlug);
-      if (!allChanges[filename]) {
-        allChanges[filename] = pageDataToMdx(clientPageData.pageData);
+      currentClientPageFiles.add(filename);
+      if (!filesToCommit[filename]) {
+        filesToCommit[filename] = pageDataToMdx(clientPageData.pageData);
+      }
+
+      // Ensure this client page has a corresponding docs.yml entry
+      // We need to add it to DocsYmlStorage if not already tracked
+      const pagePath = `${clientPageData.fullSlug}.mdx`;
+      const currentState = DocsYmlStorage.loadState(branch);
+
+      // If we don't already have an update for this page, we need to add one
+      if (currentState && !currentState.updates[pagePath]) {
+        // Get the section title from the parent node in the stored sidebar
+        const parentSection = findSectionForPage(
+          clientPageData,
+          clientPageData.sidebar
+        );
+        if (parentSection) {
+          const pageEntry: DocsYmlPageEntry = {
+            page: clientPageData.node.title,
+            path: pagePath,
+          };
+          DocsYmlStorage.addUpdate(branch, parentSection, pageEntry);
+        }
+      } else if (!currentState) {
+        // If we don't have any state at all, it means we need to initialize it first
+        // This can happen if the base content hasn't been fetched yet
+        // In this case, we'll skip adding the update for now as it will be handled
+        // when the user manually creates pages or the base content is fetched
+        console.warn(
+          `No DocsYmlStorage state found for branch ${branch}, skipping docs.yml update for ${pagePath}`
+        );
       }
     }
   });
+
+  // Find files that were previously committed but are no longer in ClientPageStorage
+  for (const previousFile of previouslyCommittedFiles) {
+    if (!currentClientPageFiles.has(previousFile)) {
+      filesToDelete.push(previousFile);
+    }
+  }
+
+  // Don't update committed files tracking yet - that happens after successful commit
 
   // Add server pages with localStorage changes
   const serverPages = PageStorage.loadPages(branch);
   Object.entries(serverPages).forEach(([filename, pageData]) => {
     if (pageData.pageType === "server" && filename?.trim()) {
-      if (!allChanges[filename]) {
-        allChanges[filename] = pageDataToMdx(pageData);
+      if (!filesToCommit[filename]) {
+        filesToCommit[filename] = pageDataToMdx(pageData);
       }
     }
   });
@@ -88,14 +192,15 @@ function collectAllChanges(
   if (DocsYmlStorage.hasUpdates(branch)) {
     const finalDocsYmlContent = DocsYmlStorage.getFinalContentWithUpdater(
       branch,
-      addPageToDocsYml
+      addPageToDocsYml,
+      removePageFromDocsYml
     );
     if (finalDocsYmlContent) {
-      allChanges["docs.yml"] = finalDocsYmlContent;
+      filesToCommit["docs.yml"] = finalDocsYmlContent;
     }
   }
 
-  return allChanges;
+  return { filesToCommit, filesToDelete };
 }
 
 /**
@@ -179,7 +284,10 @@ export function HeaderToolbar({
     if (!branch) return;
 
     // Use the same logic as collectAllChanges to get the complete picture of changes
-    const allCurrentChanges = collectAllChanges(changedMdxFiles, branch);
+    const { filesToCommit: allCurrentChanges } = collectAllChanges(
+      changedMdxFiles,
+      branch
+    );
     const currentHash = generateSimpleHash(allCurrentChanges);
     const lastCommittedHash = localStorage.getItem(
       `lastCommittedHash-${branch}`
@@ -201,19 +309,23 @@ export function HeaderToolbar({
   }, [changedMdxFiles, branch, mdxSyncedStatus]); // Added mdxSyncedStatus to ensure we wait for data to load
 
   const handleCommitPress = useCallback(async () => {
-    if (githubSource?.owner == null || githubSource.repo == null) {
+    if (!githubSource?.owner || !githubSource.repo) {
       ErrorNoGithubSourceToast();
       return;
     }
-    if (branch == null) {
+    if (!branch) {
       ErrorNoBranchToast();
       return;
     }
 
     // Collect all files to commit using the utility function
-    const allFilesToCommit = collectAllChanges(changedMdxFiles, branch);
+    const { filesToCommit: allFilesToCommit, filesToDelete } =
+      collectAllChanges(changedMdxFiles, branch);
 
-    if (Object.keys(allFilesToCommit).length === 0) {
+    if (
+      Object.keys(allFilesToCommit).length === 0 &&
+      filesToDelete.length === 0
+    ) {
       WarningNoChangesToast();
       return;
     }
@@ -230,17 +342,27 @@ export function HeaderToolbar({
     }
     setIsCommitting(true);
     try {
+      const gitFiles = [
+        // Files to commit/update
+        ...Object.entries(allFilesToCommit).map(([filePath, content]) => ({
+          path: `fern/${filePath}`,
+          content,
+          mode: "100644" as const,
+        })),
+        // Files to delete
+        ...filesToDelete.map((filePath) => ({
+          path: `fern/${filePath}`,
+          delete: true as const,
+        })),
+      ];
+
       const response = await DashboardApiClient.postGitCommit({
         orgName,
         owner: githubSource.owner,
         repo: githubSource.repo,
         branch,
         message: DEFAULT_COMMIT_MESSAGE,
-        files: Object.entries(allFilesToCommit).map(([filePath, content]) => ({
-          path: `fern/${filePath}`,
-          content,
-          mode: "100644",
-        })),
+        files: gitFiles,
       });
       if (response.success) {
         SuccessfulCommitToast();
@@ -255,12 +377,28 @@ export function HeaderToolbar({
         if (allFilesToCommit["docs.yml"]) {
           DocsYmlStorage.clearAllUpdates(branch);
         }
+
+        // Update committed files tracking after successful commit
+        const currentClientPageFiles = new Set<string>();
+        const clientPages = ClientPageStorage.loadClientPages(branch);
+        Object.entries(clientPages).forEach(
+          ([_clientNodeId, clientPageData]) => {
+            if (clientPageData.pageData && clientPageData.fullSlug?.trim()) {
+              const filename = getPageFilename(clientPageData.fullSlug);
+              currentClientPageFiles.add(filename);
+            }
+          }
+        );
+        CommittedFilesStorage.setCommittedClientPages(
+          branch,
+          currentClientPageFiles
+        );
       } else {
         ErrorFullCommitToast();
       }
 
       if (response.success && !gitPrUrl) {
-        if (githubSource.baseBranch == null) {
+        if (!githubSource.baseBranch) {
           ErrorNoBaseBranchToast();
           return;
         }
@@ -302,21 +440,17 @@ export function HeaderToolbar({
       return "Disabled while committing";
     }
 
-    // Check if there are any changes to commit (current changes + localStorage)
-    let hasAnyChanges = Object.keys(changedMdxFiles)?.length > 0;
+    // Check if there are any changes to commit (current changes + localStorage + deletions)
+    let hasAnyChanges = Object.keys(changedMdxFiles).length > 0;
 
     if (!hasAnyChanges && branch) {
-      // Check localStorage for client pages
-      const clientPages = ClientPageStorage.loadClientPages(branch);
-      hasAnyChanges = Object.keys(clientPages).length > 0;
-
-      // Check localStorage for server pages with changes
-      if (!hasAnyChanges) {
-        const serverPages = PageStorage.loadPages(branch);
-        hasAnyChanges = Object.values(serverPages).some(
-          (page) => page.pageType === "server"
-        );
-      }
+      // Use collectAllChanges to get the complete picture including deletions
+      const { filesToCommit, filesToDelete } = collectAllChanges(
+        changedMdxFiles,
+        branch
+      );
+      hasAnyChanges =
+        Object.keys(filesToCommit).length > 0 || filesToDelete.length > 0;
     }
 
     if (!hasAnyChanges) {

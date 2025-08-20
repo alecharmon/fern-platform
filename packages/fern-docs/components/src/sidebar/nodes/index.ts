@@ -1,4 +1,5 @@
 export * from "./clientPageStorage";
+export * from "./committedFilesStorage";
 export * from "./docsYmlStorage";
 export * from "./docsYmlTypes";
 export * from "./pageStorage";

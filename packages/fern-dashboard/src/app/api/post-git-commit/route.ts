@@ -20,14 +20,25 @@ export const PostGitCommitRequest = z.object({
   branch: z.string(),
   message: z.string(),
   files: z.array(
-    z.object({
-      path: z.string(),
-      content: z.string(),
-      // 100644 is normal file, 100755 is executable file, 040000 is directory, 160000 is symlink, 120000 is submodule
-      mode: z
-        .enum(["100644", "100755", "040000", "160000", "120000"])
-        .optional(),
-    })
+    z.discriminatedUnion("delete", [
+      z.object({
+        path: z.string(),
+        delete: z.literal(true),
+        // 100644 is normal file, 100755 is executable file, 040000 is directory, 160000 is symlink, 120000 is submodule
+        mode: z
+          .enum(["100644", "100755", "040000", "160000", "120000"])
+          .optional(),
+      }),
+      z.object({
+        path: z.string(),
+        content: z.string(),
+        // 100644 is normal file, 100755 is executable file, 040000 is directory, 160000 is symlink, 120000 is submodule
+        mode: z
+          .enum(["100644", "100755", "040000", "160000", "120000"])
+          .optional(),
+        delete: z.literal(false).optional(),
+      }),
+    ])
   ),
   orgName: orgNameValidator,
 });
