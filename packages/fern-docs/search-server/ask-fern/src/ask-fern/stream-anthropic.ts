@@ -10,7 +10,6 @@ import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
-  embed,
   stepCountIs,
   streamText,
   tool,
@@ -21,7 +20,6 @@ import { postToSlack, track } from "@fern-api/docs-server";
 import {
   fernToken_admin,
   getFaiOrigin,
-  turbopufferApiKey,
 } from "@fern-api/docs-server/env-variables";
 import { FernFaiClient } from "@fern-api/fai-sdk";
 import { FacetFilter } from "@fern-docs/search-keyword";
@@ -30,14 +28,9 @@ import {
   TurbopufferRecord,
   convertTpufRecordsToDocuments,
   createChatSystemPrompt,
-  queryTurbopuffer,
 } from "../index";
-
-export const maxDuration = 60;
-export const revalidate = 0;
-
-const TOP_K = 5;
-const MAX_QUERY_ATTEMPTS = 5;
+import { runQueryTurbopuffer } from "./run-query-turbopuffer";
+import { MAX_QUERY_ATTEMPTS, TOP_K } from "./stream-constants";
 
 export async function runRouteForAnthropic({
   domain,
@@ -264,34 +257,4 @@ export async function runRouteForAnthropic({
   });
 
   return createUIMessageStreamResponse({ stream: uiMessageStream });
-}
-
-async function runQueryTurbopuffer(
-  query: string | null | undefined,
-  opts: {
-    embeddingModel: EmbeddingModel<string>;
-    namespace: string;
-    topK?: number;
-    filters?: FacetFilter[];
-    documentIdsToIgnore?: string[];
-    urlsToIgnore?: string[];
-  }
-) {
-  return query == null || query.trimStart().length === 0
-    ? []
-    : await queryTurbopuffer(query, {
-        namespace: opts.namespace,
-        apiKey: turbopufferApiKey(),
-        topK: opts.topK ?? 5,
-        vectorizer: async (text) => {
-          const embedding = await embed({
-            model: opts.embeddingModel,
-            value: text,
-          });
-          return embedding.embedding;
-        },
-        filters: opts.filters,
-        documentIdsToIgnore: opts.documentIdsToIgnore,
-        urlsToIgnore: opts.urlsToIgnore,
-      });
 }

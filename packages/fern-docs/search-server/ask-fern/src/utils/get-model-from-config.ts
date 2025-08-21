@@ -2,6 +2,7 @@ import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createCohere } from "@ai-sdk/cohere";
 import { LanguageModel } from "ai";
+import { createFallback } from "ai-fallback";
 
 import {
   anthropicApiKey,
@@ -10,12 +11,14 @@ import {
 
 type ModelId = string;
 
+export type ModelProvider = "anthropic" | "cohere" | "bedrock";
+
 type ModelConfig = {
   modelId: string;
   region: string;
 };
 
-const DEFAULT_MODEL_ID = "claude-3.5";
+export const DEFAULT_MODEL_ID = "claude-3.5";
 const DEFAULT_MODEL_CONFIG: ModelConfig = {
   modelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
   region: "us-west-2",
@@ -40,24 +43,46 @@ export function getModelConfig(model: ModelId): ModelConfig {
   return modelConfig;
 }
 
-export function getLanguageModel(model: string | undefined): LanguageModel {
+export function getLanguageModel(model: string | undefined): {
+  model: LanguageModel;
+  provider: ModelProvider;
+} {
   if (model === "command-a" || model === "command-r-plus") {
     // TODO: remove command-r-plus once fern generate change is resolved
     const cohere = createCohere({ apiKey: cohereApiKey() });
-    return cohere("command-a-03-2025");
-  }
-
-  if (model === "claude-4") {
-    const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
-    return anthropic("claude-4-sonnet-20250514");
+    return {
+      model: cohere("command-a-03-2025"),
+      provider: "cohere",
+    };
   }
 
   const modelConfig = getModelConfig(model ?? DEFAULT_MODEL_ID);
+  if (model === "claude-4") {
+    const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
+    const bedrock = createAmazonBedrock({
+      region: modelConfig.region,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    });
+    return {
+      model: createFallback({
+        models: [
+          anthropic("claude-4-sonnet-20250514"),
+          bedrock(DEFAULT_MODEL_ID),
+        ],
+      }),
+      provider: "anthropic",
+    };
+  }
+
   const bedrock = createAmazonBedrock({
     region: modelConfig.region,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   });
 
-  return bedrock(modelConfig.modelId);
+  return {
+    model: bedrock(modelConfig.modelId),
+    provider: "bedrock",
+  };
 }

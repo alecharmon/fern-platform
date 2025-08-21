@@ -23,7 +23,6 @@ import { TooltipPortal, TooltipProvider } from "@radix-ui/react-tooltip";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { DefaultChatTransport } from "ai";
 import type { Element as HastElement } from "hast";
-import { useAtomValue } from "jotai";
 import {
   ArrowLeft,
   ArrowUp,
@@ -36,17 +35,13 @@ import {
 import { useIsomorphicLayoutEffect } from "swr/_internal";
 
 import { FernTooltip, cn } from "@fern-docs/components";
-import { Badge } from "@fern-docs/components/badges";
 import { Button } from "@fern-docs/components/button";
 import { FacetFilter } from "@fern-docs/search-keyword";
 import { tunnel, useEventCallback, useIsMobile } from "@fern-ui/react-commons";
 
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
 import { FootnoteSup, FootnotesSection } from "../chatbot/footnote";
-import {
-  ChatbotTurnContextProvider,
-  useChatbotTurnContext,
-} from "../chatbot/turn-context";
+import { ChatbotTurnContextProvider } from "../chatbot/turn-context";
 import {
   SqueezedMessage,
   combineSearchResults,
@@ -58,12 +53,13 @@ import { CodeBlock } from "../code-block";
 import { MarkdownContent } from "../md-content";
 import { useFacetFilters } from "../search/useFacetFilters";
 import { CommandAskAIGroup } from "../shared";
-import { CommandLink } from "../shared/command-link";
 import { TextArea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { DesktopCommandContent, afterInput } from "./desktop-command";
 import { DesktopCommandInput } from "./desktop-command-input";
 import { DesktopCommandRoot } from "./desktop-command-root";
+import { FootnoteCommands } from "./footnote-commands";
+import { HideHeadersInUserMessage } from "./hide-headers-in-user-messages";
 import { Suggestions } from "./suggestions";
 
 type PropsWithElement<T> = T & { node: HastElement };
@@ -876,56 +872,3 @@ const AskAICommandItems = memo<{
 );
 
 AskAICommandItems.displayName = "AskAICommandItems";
-
-function FootnoteCommands({
-  onSelect,
-  prefetch,
-  domain,
-}: {
-  onSelect?: (path: string) => void;
-  prefetch?: (path: string) => Promise<void>;
-  domain: string;
-}) {
-  const { footnotesAtom } = useChatbotTurnContext();
-  const footnotes = useAtomValue(footnotesAtom);
-  return (
-    <>
-      {footnotes.map((footnote, idx) => (
-        <CommandLink
-          key={footnote.ids.join("-")}
-          href={footnote.url}
-          onSelect={onSelect}
-          prefetch={prefetch}
-          domain={domain}
-        >
-          <Badge color="gray" variant="subtleSolidHover">
-            {String(idx + 1)}
-          </Badge>
-          <div>
-            <div className="text-sm font-semibold">{footnote.title}</div>
-            <div className="text-(color:--grayscale-12) text-xs">
-              {footnote.url}
-            </div>
-          </div>
-        </CommandLink>
-      ))}
-    </>
-  );
-}
-
-function HideHeadersInUserMessage() {
-  return {
-    h1: ({ children }: PropsWithElement<React.ComponentProps<"h1">>) =>
-      children,
-    h2: ({ children }: PropsWithElement<React.ComponentProps<"h2">>) =>
-      children,
-    h3: ({ children }: PropsWithElement<React.ComponentProps<"h3">>) =>
-      children,
-    h4: ({ children }: PropsWithElement<React.ComponentProps<"h4">>) =>
-      children,
-    h5: ({ children }: PropsWithElement<React.ComponentProps<"h5">>) =>
-      children,
-    h6: ({ children }: PropsWithElement<React.ComponentProps<"h6">>) =>
-      children,
-  };
-}

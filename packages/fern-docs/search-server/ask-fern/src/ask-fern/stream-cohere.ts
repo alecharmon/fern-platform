@@ -29,9 +29,6 @@ import {
   queryTurbopuffer,
 } from "../index";
 
-export const maxDuration = 60;
-export const revalidate = 0;
-
 export async function runRouteForCohere({
   domain,
   chatSource,

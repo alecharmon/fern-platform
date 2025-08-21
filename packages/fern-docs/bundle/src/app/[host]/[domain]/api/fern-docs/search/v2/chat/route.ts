@@ -25,8 +25,6 @@ import {
 import { FacetFilter } from "@fern-docs/search-keyword";
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "@fern-docs/search-ui";
 
-import { ModelProvider } from "@/app/utils";
-
 export const maxDuration = 60;
 export const revalidate = 0;
 
@@ -95,11 +93,8 @@ export async function POST(req: NextRequest) {
   const chatSource = source ?? "CHAT";
 
   const modelId = config.aiChatConfig?.model ?? "claude-3.5";
-  let modelProvider: ModelProvider = "anthropic";
-  if (modelId === "claude-4" || modelId === "claude-3.5")
-    modelProvider = "anthropic";
-  if (modelId === "command-a") modelProvider = "cohere";
-  const languageModel = getLanguageModel(modelId);
+  const { model: languageModel, provider: modelProvider } =
+    getLanguageModel(modelId);
 
   const openai = createOpenAI({ apiKey: openaiApiKey() });
   const embeddingModel = openai.embedding("text-embedding-3-large");
@@ -124,7 +119,7 @@ export async function POST(req: NextRequest) {
   }
 
   const queryIndexName = getQueryIndexName();
-  if (modelProvider === "anthropic") {
+  if (modelProvider === "anthropic" || modelProvider === "bedrock") {
     return runRouteForAnthropic({
       domain,
       chatSource,
