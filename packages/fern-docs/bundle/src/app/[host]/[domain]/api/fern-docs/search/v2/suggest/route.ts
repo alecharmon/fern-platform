@@ -37,7 +37,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     );
   }
 
-  const languageModel = getLanguageModel("claude-4");
+  const { model: languageModel, provider: _ } = getLanguageModel("claude-4");
 
   const domain = getDocsDomainEdge(req);
   const edgeFlags = await getEdgeFlags(domain);
