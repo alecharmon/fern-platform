@@ -119,7 +119,8 @@ export class Write {
      *             pages: {
      *                 "pages": {
      *                     markdown: "markdown",
-     *                     editThisPageUrl: undefined
+     *                     editThisPageUrl: undefined,
+     *                     rawMarkdown: undefined
      *                 }
      *             },
      *             config: {

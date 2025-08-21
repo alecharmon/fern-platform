@@ -11,7 +11,8 @@ import * as FernRegistry from "../../../../../../../../index.js";
  *             pages: {
  *                 "pages": {
  *                     markdown: "markdown",
- *                     editThisPageUrl: undefined
+ *                     editThisPageUrl: undefined,
+ *                     rawMarkdown: undefined
  *                 }
  *             },
  *             config: {
