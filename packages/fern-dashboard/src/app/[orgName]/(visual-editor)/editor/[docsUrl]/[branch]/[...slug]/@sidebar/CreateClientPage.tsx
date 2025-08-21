@@ -4,7 +4,11 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
 
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { type DocsYmlPageEntry, DocsYmlStorage } from "@fern-docs/components";
+import {
+  type DocsYmlPageEntry,
+  DocsYmlStorage,
+  NavigationContext,
+} from "@fern-docs/components";
 import { useSidebarClientNavigation } from "@fern-docs/components/sidebar/nodes/SidebarClientNavigationProvider";
 import { mdxToHtml } from "@fern-docs/mdx";
 
@@ -34,12 +38,14 @@ interface CreateClientPageProps {
   children: React.ReactNode;
   root: FernNavigation.SidebarRootNode | undefined;
   disabled?: boolean;
+  navigationContext?: NavigationContext;
 }
 
 export function CreateClientPage({
   children,
   root,
   disabled = false,
+  navigationContext,
 }: CreateClientPageProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
@@ -55,14 +61,55 @@ export function CreateClientPage({
 
   const { prependClientNode, clientNodes } = useSidebarClientNavigation();
 
-  // Get all sections root section
+  // Interface to track section with its parent hierarchy
+  interface SectionWithHierarchy extends FernNavigation.SectionNode {
+    parentTitles: string[];
+  }
+
+  // Recursively find all section nodes in the navigation tree with parent hierarchy
+  const getAllSections = useCallback(
+    (
+      nodes: FernNavigation.NavigationNode[],
+      parentTitles: string[] = []
+    ): SectionWithHierarchy[] => {
+      const sections: SectionWithHierarchy[] = [];
+
+      for (const node of nodes) {
+        if (node.type === "section") {
+          const sectionNode = node as FernNavigation.SectionNode;
+          const sectionWithHierarchy: SectionWithHierarchy = {
+            ...sectionNode,
+            parentTitles,
+          };
+          sections.push(sectionWithHierarchy);
+
+          // Recursively search nested sections, adding current section to parent chain
+          if ("children" in node && node.children) {
+            const currentTitle =
+              sectionNode.title || sectionNode.slug || "Untitled";
+            sections.push(
+              ...getAllSections(node.children, [...parentTitles, currentTitle])
+            );
+          }
+        } else if ("children" in node && node.children) {
+          // For non-section nodes, add their title to parent chain if they have one
+          const nodeTitle = "title" in node && node.title ? node.title : null;
+          const newParentTitles = nodeTitle
+            ? [...parentTitles, nodeTitle]
+            : parentTitles;
+          sections.push(...getAllSections(node.children, newParentTitles));
+        }
+      }
+
+      return sections;
+    },
+    []
+  );
+
+  // Get all sections from the navigation tree (including nested ones)
   const allSections = useMemo(
-    () =>
-      root?.children?.filter((child) => {
-        if (child.type !== "section") return false;
-        return true;
-      }) || [],
-    [root]
+    () => (root?.children ? getAllSections(root.children) : []),
+    [root, getAllSections]
   );
 
   // Set default section on first load
@@ -131,6 +178,7 @@ export function CreateClientPage({
     async (sectionTitle: string, pageEntry: DocsYmlPageEntry) => {
       try {
         // First get the current docs.yml content
+        // TODO: we cannot assume that the whole navigation structure lives in one file
         const response = await fetch("/api/get-docs-yml", {
           method: "POST",
           headers: {
@@ -279,7 +327,8 @@ export function CreateClientPage({
           frontmatter,
           originalElements,
         },
-        fullSlug
+        fullSlug,
+        navigationContext
       );
 
       // Navigate to the new page
@@ -306,6 +355,7 @@ export function CreateClientPage({
     router,
     params,
     updateDocsYml,
+    navigationContext,
   ]);
 
   return (
@@ -380,7 +430,10 @@ export function CreateClientPage({
                 onValueChange={(value) => {
                   const section = allSections.find(
                     (s) => (s as FernNavigation.SectionNode).id === value
-                  ) as FernNavigation.SectionNode;
+                  );
+                  if (!section) {
+                    return;
+                  }
                   setSelectedSection(section);
                   setError("");
                 }}
@@ -388,12 +441,18 @@ export function CreateClientPage({
                 <SelectTrigger className="h-8 w-full text-sm">
                   <SelectValue placeholder="Select section..." />
                 </SelectTrigger>
-                <SelectContent>
-                  {allSections.map((child) => {
-                    const section = child as FernNavigation.SectionNode;
+                <SelectContent className="border-border">
+                  {allSections.map((section) => {
                     return (
                       <SelectItem key={section.id} value={section.id}>
-                        {getSectionDisplayName(section)}
+                        <div className="flex items-center">
+                          {section.parentTitles.length > 0 && (
+                            <span className="text-muted-foreground mr-1">
+                              {section.parentTitles.join(" / ")} /
+                            </span>
+                          )}
+                          <span>{getSectionDisplayName(section)}</span>
+                        </div>
                       </SelectItem>
                     );
                   })}

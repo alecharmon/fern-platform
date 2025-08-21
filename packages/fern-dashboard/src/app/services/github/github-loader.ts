@@ -33,10 +33,17 @@ export class GitHubLoader implements GitLoader {
     return this.octokit;
   }
 
-  async getDocsYml(
+  /**
+   * Helper function to get the content of a file from a GitHub repository. If docs.yml
+   * files are divided into multiple files, we can reuse this for each file we need.
+   *
+   * NOTE: I have not yet handled the recursion needed to get all docs.yml files and sub-files.
+   */
+  private async getFileContent(
     owner: string,
     repo: string,
-    ref: string = "main"
+    ref: string,
+    path: string
   ): Promise<string | null> {
     try {
       const octokit = await this.getOctokit();
@@ -50,7 +57,7 @@ export class GitHubLoader implements GitLoader {
         {
           owner,
           repo,
-          path: "fern/docs.yml",
+          path,
           ref,
         }
       );
@@ -64,9 +71,17 @@ export class GitHubLoader implements GitLoader {
 
       return null;
     } catch (error) {
-      console.error(`Failed to fetch docs.yml from ${owner}/${repo}:`, error);
+      console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
       return null;
     }
+  }
+
+  async getDocsYml(
+    owner: string,
+    repo: string,
+    ref: string = "main"
+  ): Promise<string | null> {
+    return this.getFileContent(owner, repo, ref, "fern/docs.yml");
   }
 
   async updateDocsYml(

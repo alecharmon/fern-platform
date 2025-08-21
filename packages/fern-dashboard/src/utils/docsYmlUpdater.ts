@@ -33,6 +33,7 @@ function isSectionEntry(entry: unknown): entry is SectionEntry {
 
 export interface DocsConfig {
   navigation?: (PageEntry | SectionEntry)[];
+  products?: unknown;
 }
 
 /**
@@ -49,6 +50,26 @@ export function parseYaml(yamlContent: string): DocsConfig {
     console.error("Error parsing YAML:", error);
     throw new Error("Failed to parse YAML content");
   }
+}
+
+/**
+ * Checks if a page already exists in the navigation structure
+ */
+export function pageExistsInNavigation(
+  navigationContents: (PageEntry | SectionEntry)[],
+  pagePath: string
+): boolean {
+  for (const item of navigationContents) {
+    if (isSectionEntry(item)) {
+      // Recursively check within sections
+      if (pageExistsInNavigation(item.contents, pagePath)) {
+        return true;
+      }
+    } else if (isPageEntry(item) && item.path === pagePath) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -69,7 +90,7 @@ export function stringifyYaml(obj: DocsConfig): string {
 }
 
 /**
- * Adds a new page to a section in the navigation structure
+ * Adds a new page to a section in the navigation structure (supports nested sections)
  */
 export function addPageToSection(
   navigationContents: (PageEntry | SectionEntry)[],
@@ -78,29 +99,92 @@ export function addPageToSection(
 ): (PageEntry | SectionEntry)[] {
   const updatedContents = [...navigationContents];
 
-  // Find the section to add the page to
-  const sectionIndex = updatedContents.findIndex(
+  // First try to find the section at the top level
+  const topLevelIndex = updatedContents.findIndex(
     (item) => isSectionEntry(item) && item.section === sectionTitle
   );
 
-  if (sectionIndex === -1) {
-    throw new Error(`Section "${sectionTitle}" not found in navigation`);
+  if (topLevelIndex !== -1) {
+    // Section found at top level, we know it's a SectionEntry
+    const section = updatedContents[topLevelIndex] as SectionEntry;
+    const updatedSection = {
+      ...section,
+      contents: [pageEntry, ...section.contents],
+    };
+    updatedContents[topLevelIndex] = updatedSection;
+    return updatedContents;
   }
 
-  const section = updatedContents[sectionIndex] as SectionEntry;
+  // If not found at top level, search recursively through nested sections
+  for (let i = 0; i < updatedContents.length; i++) {
+    const item = updatedContents[i];
 
-  // Add the page to the beginning of the section's contents
-  const updatedSection: SectionEntry = {
-    ...section,
-    contents: [pageEntry, ...section.contents],
-  };
+    if (isSectionEntry(item)) {
+      // Try to find and update the target section within this section's contents
+      const result = findAndUpdateSection(
+        item.contents,
+        sectionTitle,
+        pageEntry
+      );
+      if (result.found) {
+        updatedContents[i] = {
+          ...item,
+          contents: result.updatedContents,
+        };
+        return updatedContents;
+      }
+    }
+  }
 
-  updatedContents[sectionIndex] = updatedSection;
-  return updatedContents;
+  throw new Error(`Section "${sectionTitle}" not found in navigation`);
 }
 
 /**
- * Removes a page from a section in the navigation structure
+ * Helper function to find and update a section within nested contents
+ */
+function findAndUpdateSection(
+  contents: (PageEntry | SectionEntry)[],
+  sectionTitle: string,
+  pageEntry: PageEntry
+): { found: boolean; updatedContents: (PageEntry | SectionEntry)[] } {
+  const updatedContents = [...contents];
+
+  for (let i = 0; i < updatedContents.length; i++) {
+    const item = updatedContents[i];
+
+    if (isSectionEntry(item) && item.section === sectionTitle) {
+      // Found the target section - add the page to its contents
+      const section = item;
+      updatedContents[i] = {
+        ...section,
+        contents: [pageEntry, ...section.contents],
+      };
+      return { found: true, updatedContents };
+    }
+
+    // If this is a section with contents, search recursively
+    if (isSectionEntry(item)) {
+      const recursiveResult = findAndUpdateSection(
+        item.contents,
+        sectionTitle,
+        pageEntry
+      );
+      if (recursiveResult.found) {
+        // Update the current item's contents with the updated nested contents
+        updatedContents[i] = {
+          ...item,
+          contents: recursiveResult.updatedContents,
+        };
+        return { found: true, updatedContents };
+      }
+    }
+  }
+
+  return { found: false, updatedContents };
+}
+
+/**
+ * Removes a page from a section in the navigation structure (supports nested sections)
  */
 export function removePageFromSection(
   navigationContents: (PageEntry | SectionEntry)[],
@@ -109,24 +193,15 @@ export function removePageFromSection(
   return navigationContents
     .map((item): PageEntry | SectionEntry | null => {
       if (isSectionEntry(item)) {
-        // This is a section, filter its contents
-        // TODO: this should be done recursively
+        // This is a section, recursively remove from its contents
         const section = item;
         return {
           ...section,
-          contents: section.contents.filter((contentItem) => {
-            if (isPageEntry(contentItem)) {
-              // This is a page, check if it matches the path to remove
-              return contentItem.path !== pagePath;
-            }
-            // This is a subsection, keep it
-            // TODO: nested sections should be handled recursively
-            return true;
-          }),
+          contents: removePageFromSection(section.contents, pagePath),
         };
       }
       // This is a top-level page, check if it matches the path to remove
-      if (isPageEntry(item) && "path" in item && item.path === pagePath) {
+      if (isPageEntry(item) && item.path === pagePath) {
         return null; // Mark for removal
       }
       return item;
@@ -144,24 +219,30 @@ export function addPageToDocsYml(
 ): string {
   const docsConfig = parseYaml(docsYmlContent);
 
-  if (!docsConfig.navigation || !Array.isArray(docsConfig.navigation)) {
-    throw new Error("Invalid docs.yml: missing or invalid navigation array");
+  // Handle different docs.yml structures
+  if (docsConfig.products && Array.isArray(docsConfig.products)) {
+    // Products-based structure - navigation is defined in separate product files
+    // Return original content as client-side navigation handles page display
+    return docsYmlContent;
+  } else if (docsConfig.navigation && Array.isArray(docsConfig.navigation)) {
+    // Direct navigation structure - update the navigation array
+    const updatedNavigation = addPageToSection(
+      docsConfig.navigation,
+      sectionTitle,
+      pageEntry
+    );
+
+    const updatedConfig = {
+      ...docsConfig,
+      navigation: updatedNavigation,
+    };
+
+    return stringifyYaml(updatedConfig);
+  } else {
+    throw new Error(
+      "Invalid docs.yml: missing navigation array and no products structure found"
+    );
   }
-
-  // Add the page to the specified section
-  const updatedNavigation = addPageToSection(
-    docsConfig.navigation,
-    sectionTitle,
-    pageEntry
-  );
-
-  // Update the docs config
-  const updatedConfig = {
-    ...docsConfig,
-    navigation: updatedNavigation,
-  };
-
-  return stringifyYaml(updatedConfig);
 }
 
 /**
@@ -173,21 +254,27 @@ export function removePageFromDocsYml(
 ): string {
   const docsConfig = parseYaml(docsYmlContent);
 
-  if (!docsConfig.navigation || !Array.isArray(docsConfig.navigation)) {
-    throw new Error("Invalid docs.yml: missing or invalid navigation array");
+  // Handle different docs.yml structures
+  if (docsConfig.products && Array.isArray(docsConfig.products)) {
+    // Products-based structure - navigation is defined in separate product files
+    // Return original content as client-side navigation handles page display
+    return docsYmlContent;
+  } else if (docsConfig.navigation && Array.isArray(docsConfig.navigation)) {
+    // Direct navigation structure - remove from the navigation array
+    const updatedNavigation = removePageFromSection(
+      docsConfig.navigation,
+      pagePath
+    );
+
+    const updatedConfig = {
+      ...docsConfig,
+      navigation: updatedNavigation,
+    };
+
+    return stringifyYaml(updatedConfig);
+  } else {
+    throw new Error(
+      "Invalid docs.yml: missing navigation array and no products structure found"
+    );
   }
-
-  // Remove the page from navigation
-  const updatedNavigation = removePageFromSection(
-    docsConfig.navigation,
-    pagePath
-  );
-
-  // Update the docs config
-  const updatedConfig = {
-    ...docsConfig,
-    navigation: updatedNavigation,
-  };
-
-  return stringifyYaml(updatedConfig);
 }

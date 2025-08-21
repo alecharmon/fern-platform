@@ -3,6 +3,7 @@ import React from "react";
 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
+import { SidebarClientNavigationChildInjector } from "./SidebarClientNavigationChildInjector";
 import { SidebarCollapseGroup } from "./SidebarCollapseGroup";
 import { SidebarPageNode } from "./SidebarPageNode";
 
@@ -46,6 +47,11 @@ export function SidebarSectionNode({
       depth={depth}
       className={className}
     >
+      {/* Inject client nodes for this section */}
+      <SidebarClientNavigationChildInjector
+        parentNodeId={node.id}
+        childDepth={depth + 1}
+      />
       {children}
     </SidebarCollapseGroup>
   );

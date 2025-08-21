@@ -1,3 +1,4 @@
+import { FernNavigation } from "@fern-api/fdr-sdk";
 import { OriginalElements } from "@fern-docs/mdx";
 
 /**
@@ -23,4 +24,16 @@ export interface MdxContent {
   html: string;
   frontmatter: Record<string, any>;
   originalElements: OriginalElements;
+}
+
+/**
+ * Navigation context for client pages
+ * Used to maintain product/version/tab selection when creating and storing client pages
+ */
+export interface NavigationContext {
+  currentProduct?: FernNavigation.ProductNode;
+  currentVersion?: FernNavigation.VersionNode;
+  currentTab?: FernNavigation.TabChild;
+  isCurrentVersionDefault?: boolean;
+  isCurrentProductDefault?: boolean;
 }

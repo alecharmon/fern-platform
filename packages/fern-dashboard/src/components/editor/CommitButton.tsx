@@ -26,6 +26,8 @@ import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useMdxState } from "@/providers/MdxStateContext";
 import {
   addPageToDocsYml,
+  pageExistsInNavigation,
+  parseYaml,
   removePageFromDocsYml,
 } from "@/utils/docsYmlUpdater";
 
@@ -114,52 +116,56 @@ function collectAllChanges(
     CommittedFilesStorage.getCommittedClientPages(branch);
   const currentClientPageFiles = new Set<string>();
 
+  // Get DocsYmlStorage state to check for pending removal operations
+  const docsYmlState = DocsYmlStorage.loadState(branch);
+
   // Add client pages from localStorage
   const clientPages = ClientPageStorage.loadClientPages(branch);
   Object.entries(clientPages).forEach(([_clientNodeId, clientPageData]) => {
     if (clientPageData.pageData && clientPageData.fullSlug?.trim()) {
       const filename = getPageFilename(clientPageData.fullSlug);
-      currentClientPageFiles.add(filename);
-      if (!filesToCommit[filename]) {
-        filesToCommit[filename] = pageDataToMdx(clientPageData.pageData);
-      }
-
-      // Ensure this client page has a corresponding docs.yml entry
-      // We need to add it to DocsYmlStorage if not already tracked
       const pagePath = `${clientPageData.fullSlug}.mdx`;
-      const currentState = DocsYmlStorage.loadState(branch);
 
-      // If we don't already have an update for this page, we need to add one
-      if (currentState && !currentState.updates[pagePath]) {
-        // Get the section title from the parent node in the stored sidebar
-        const parentSection = findSectionForPage(
-          clientPageData,
-          clientPageData.sidebar
-        );
-        if (parentSection) {
-          const pageEntry: DocsYmlPageEntry = {
-            page: clientPageData.node.title,
-            path: pagePath,
-          };
-          DocsYmlStorage.addUpdate(branch, parentSection, pageEntry);
+      // Check if this page has a pending removal operation
+      const hasRemovalUpdate =
+        docsYmlState?.updates[pagePath]?.operation === "remove";
+
+      if (!hasRemovalUpdate) {
+        currentClientPageFiles.add(filename);
+        if (!filesToCommit[filename]) {
+          filesToCommit[filename] = pageDataToMdx(clientPageData.pageData);
         }
-      } else if (!currentState) {
-        // If we don't have any state at all, it means we need to initialize it first
-        // This can happen if the base content hasn't been fetched yet
-        // In this case, we'll skip adding the update for now as it will be handled
-        // when the user manually creates pages or the base content is fetched
-        console.warn(
-          `No DocsYmlStorage state found for branch ${branch}, skipping docs.yml update for ${pagePath}`
-        );
+
+        // Note: Docs.yml updates will be handled later based on final commit files
       }
     }
   });
 
   // Find files that were previously committed but are no longer in ClientPageStorage
+  // or have pending removal operations
   for (const previousFile of previouslyCommittedFiles) {
     if (!currentClientPageFiles.has(previousFile)) {
       filesToDelete.push(previousFile);
     }
+  }
+
+  // Track page paths for files being deleted (needed for docs.yml updates)
+  const filesToDeleteWithPaths: { filename: string; pagePath: string }[] = [];
+
+  // Also add files that have pending removal operations to filesToDelete
+  if (docsYmlState) {
+    Object.entries(docsYmlState.updates).forEach(([pagePath, update]) => {
+      if (update.operation === "remove") {
+        const filename = getPageFilename(pagePath.replace(".mdx", ""));
+        if (
+          !filesToDelete.includes(filename) &&
+          previouslyCommittedFiles.has(filename)
+        ) {
+          filesToDelete.push(filename);
+          filesToDeleteWithPaths.push({ filename, pagePath });
+        }
+      }
+    });
   }
 
   // Don't update committed files tracking yet - that happens after successful commit
@@ -174,15 +180,88 @@ function collectAllChanges(
     }
   });
 
-  // Add docs.yml if there are pending updates
-  if (DocsYmlStorage.hasUpdates(branch)) {
-    const finalDocsYmlContent = DocsYmlStorage.getFinalContentWithUpdater(
-      branch,
-      addPageToDocsYml,
-      removePageFromDocsYml
-    );
-    if (finalDocsYmlContent) {
-      filesToCommit["docs.yml"] = finalDocsYmlContent;
+  // Build docs.yml updates based only on files being committed/deleted
+  if (docsYmlState?.baseContent) {
+    // Preserve removal operations before clearing updates
+    const removalOperations: { filename: string; pagePath: string }[] = [];
+    if (docsYmlState.updates) {
+      Object.entries(docsYmlState.updates).forEach(([pagePath, update]) => {
+        if (update.operation === "remove") {
+          const filename = getPageFilename(pagePath.replace(".mdx", ""));
+          if (filesToDelete.includes(filename)) {
+            removalOperations.push({ filename, pagePath });
+          }
+        }
+      });
+    }
+
+    // Clear all existing updates and rebuild based on actual commit operations
+    DocsYmlStorage.clearAllUpdates(branch);
+    DocsYmlStorage.setBaseContent(branch, docsYmlState.baseContent);
+
+    let needsDocsYmlUpdate = false;
+
+    // Add updates for files being committed
+    Object.keys(filesToCommit).forEach((filename) => {
+      if (filename.endsWith(".mdx")) {
+        // This is a page file, find the corresponding client page data
+        const clientPages = ClientPageStorage.loadClientPages(branch);
+        const clientPageData = Object.values(clientPages).find(
+          (page) => getPageFilename(page.fullSlug) === filename
+        );
+
+        if (clientPageData) {
+          const pagePath = `${clientPageData.fullSlug}.mdx`;
+
+          // Check if this page already exists in base docs.yml
+          try {
+            const baseDocsConfig = parseYaml(docsYmlState.baseContent);
+            const pageAlreadyExists = baseDocsConfig.navigation
+              ? pageExistsInNavigation(baseDocsConfig.navigation, pagePath)
+              : false;
+
+            if (!pageAlreadyExists) {
+              const parentSection = findSectionForPage(
+                clientPageData,
+                clientPageData.sidebar
+              );
+              if (parentSection) {
+                const pageEntry: DocsYmlPageEntry = {
+                  page: clientPageData.node.title,
+                  path: pagePath,
+                };
+                DocsYmlStorage.addUpdate(branch, parentSection, pageEntry);
+                needsDocsYmlUpdate = true;
+              }
+            }
+          } catch (error) {
+            console.warn(
+              "Error checking page existence for docs.yml update:",
+              error
+            );
+          }
+        }
+      }
+    });
+
+    // Add removal updates for files being deleted
+    removalOperations.forEach(({ filename, pagePath }) => {
+      if (filename.endsWith(".mdx")) {
+        DocsYmlStorage.addRemovalUpdate(branch, pagePath);
+        needsDocsYmlUpdate = true;
+      }
+    });
+
+    // Generate final docs.yml content if we have updates
+    if (needsDocsYmlUpdate) {
+      const finalDocsYmlContent = DocsYmlStorage.getFinalContentWithUpdater(
+        branch,
+        addPageToDocsYml,
+        removePageFromDocsYml
+      );
+      if (finalDocsYmlContent) {
+        filesToCommit["docs.yml"] = finalDocsYmlContent;
+      }
     }
   }
 

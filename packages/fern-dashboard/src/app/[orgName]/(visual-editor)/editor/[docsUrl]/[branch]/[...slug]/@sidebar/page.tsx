@@ -36,8 +36,11 @@ export default async function SidebarPage({
 
   let found = FernNavigation.utils.findNode(root, slugjoin(slug));
   if (found.type !== "found") {
-    // TODO: this is a placeholder, replace with real logic
-    found = FernNavigation.utils.findNode(root, slugjoin(["welcome"]));
+    // For client pages that don't exist in server navigation, use the redirect
+    // which points to the root node of the active product/version
+    if (found.redirect) {
+      found = FernNavigation.utils.findNode(root, found.redirect);
+    }
   }
   if (found.type !== "found") {
     return null;
@@ -61,7 +64,16 @@ export default async function SidebarPage({
         <HiddenSidebar />
       ) : (
         <>
-          <CreatePageButton root={found.sidebar} />
+          <CreatePageButton
+            root={found.sidebar}
+            navigationContext={{
+              currentProduct: found.currentProduct,
+              currentVersion: found.currentVersion,
+              currentTab: found.currentTab,
+              isCurrentVersionDefault: found.isCurrentVersionDefault,
+              isCurrentProductDefault: found.isCurrentProductDefault,
+            }}
+          />
           <SidebarRootNode
             root={found.sidebar}
             visibleNodeIds={visibleNodeIds}

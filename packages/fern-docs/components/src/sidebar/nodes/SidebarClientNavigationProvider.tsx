@@ -13,7 +13,7 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
 
 import { ClientPageStorage } from "./clientPageStorage";
-import { PageData } from "./types";
+import { NavigationContext, PageData } from "./types";
 
 type ClientNodes = Record<NodeId, FernNavigation.PageNode[]>;
 
@@ -28,7 +28,8 @@ interface SidebarClientNavigationContextValue {
     node: FernNavigation.PageNode,
     sidebar?: FernNavigation.SidebarRootNode,
     pageData?: PageData,
-    fullSlug?: string
+    fullSlug?: string,
+    navigationContext?: NavigationContext
   ) => void;
   removeClientNode?: (nodeId: NodeId) => void;
   updateClientPageData?: (nodeId: NodeId, pageData: PageData) => void;
@@ -60,7 +61,7 @@ function loadAndProcessStoredPages(branchName: string) {
   );
 
   sortedEntries.forEach(([nodeId, storedPage]) => {
-    const { node, parentNodeId, sidebar } = storedPage;
+    const { node, parentNodeId, sidebar, navigationContext } = storedPage;
 
     // Add to clientNodes grouped by parent
     if (!clientNodes[parentNodeId]) {
@@ -68,11 +69,18 @@ function loadAndProcessStoredPages(branchName: string) {
     }
     clientNodes[parentNodeId].push(node);
 
-    // Add to clientFoundNodes
+    // Add to clientFoundNodes with stored navigation context
     clientFoundNodes[nodeId as NodeId] = {
       type: "found",
       node,
       sidebar,
+      currentProduct: navigationContext?.currentProduct,
+      currentVersion: navigationContext?.currentVersion,
+      currentTab: navigationContext?.currentTab,
+      isCurrentVersionDefault:
+        navigationContext?.isCurrentVersionDefault ?? false,
+      isCurrentProductDefault:
+        navigationContext?.isCurrentProductDefault ?? false,
     } as FernNavigation.utils.Node.Found;
   });
 
@@ -91,6 +99,7 @@ export function SidebarClientNavigationProvider({
   }>(() => {
     const { clientNodes, clientFoundNodes } =
       loadAndProcessStoredPages(branchName);
+
     return {
       clientNodes,
       clientFoundNodes,
@@ -120,7 +129,8 @@ export function SidebarClientNavigationProvider({
       node: FernNavigation.PageNode,
       sidebar?: FernNavigation.SidebarRootNode,
       pageData?: PageData,
-      fullSlug?: string
+      fullSlug?: string,
+      navigationContext?: NavigationContext
     ) => {
       // Update local state
       setState((prevState) => ({
@@ -138,6 +148,13 @@ export function SidebarClientNavigationProvider({
             type: "found",
             node,
             sidebar,
+            currentProduct: navigationContext?.currentProduct,
+            currentVersion: navigationContext?.currentVersion,
+            currentTab: navigationContext?.currentTab,
+            isCurrentVersionDefault:
+              navigationContext?.isCurrentVersionDefault ?? false,
+            isCurrentProductDefault:
+              navigationContext?.isCurrentProductDefault ?? false,
           } as FernNavigation.utils.Node.Found,
         },
       }));
@@ -149,6 +166,7 @@ export function SidebarClientNavigationProvider({
         sidebar,
         pageData,
         fullSlug: fullSlug || node.slug || "",
+        navigationContext,
       });
     },
     [branchName]

@@ -1,7 +1,7 @@
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
 
-import { PageData } from "./types";
+import { NavigationContext, PageData } from "./types";
 
 export interface StoredClientPage {
   node: FernNavigation.PageNode;
@@ -12,6 +12,8 @@ export interface StoredClientPage {
   fullSlug: string;
   // Store the page content data for editor
   pageData?: PageData;
+  // Store navigation context for proper sidebar rendering
+  navigationContext?: NavigationContext;
 }
 
 export type StoredClientPages = Record<NodeId, StoredClientPage>;
