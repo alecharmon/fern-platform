@@ -9,15 +9,23 @@ import { Expand } from "lucide-react";
 import { cn } from "@fern-docs/components";
 import { FernButton, FernScrollArea } from "@fern-docs/components";
 
-export function Table({ className, ...rest }: ComponentProps<"table">) {
+interface TableProps extends ComponentProps<"table"> {
+  sticky?: boolean;
+}
+
+export function Table({ className, sticky, ...rest }: TableProps) {
   const [isFullScreen, setIsFullScreen] = useState(false);
+
+  if (sticky) {
+    return <table {...rest} className={cn("fern-table sticky", className)} />;
+  }
 
   return (
     <>
       <Tooltip.TooltipProvider delayDuration={300}>
         <Tooltip.Root>
           <Tooltip.Trigger asChild>
-            <div className="fern-table-root not-prose">
+            <div className={cn("fern-table-root not-prose")}>
               <FernScrollArea>
                 <table {...rest} className={cn("fern-table", className)} />
               </FernScrollArea>

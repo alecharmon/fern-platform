@@ -37,6 +37,18 @@
     }
   }
 
+  .fern-table.sticky {
+    thead {
+      @apply sticky;
+
+      top: var(--header-height, var(--spacing-header-height-real));
+    }
+
+    thead tr th {
+      @apply bg-(color:--grayscale-2);
+    }
+  }
+
   .fern-table-root.fullscreen .fern-table thead th {
     @apply sticky top-0;
 
