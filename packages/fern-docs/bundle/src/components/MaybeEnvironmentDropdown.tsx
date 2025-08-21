@@ -128,13 +128,13 @@ export function MaybeEnvironmentDropdown({
             className={cn(
               "p-0",
               isValidInput ? "" : "error",
-              "h-auto",
+              "h-auto w-fit",
               "flex flex-col"
             )}
             inputClassName={cn(
               "px-1",
               "py-0.5",
-              "h-auto",
+              "h-auto w-fit",
               "font-mono",
               small ? "text-xs" : "text-sm"
             )}
