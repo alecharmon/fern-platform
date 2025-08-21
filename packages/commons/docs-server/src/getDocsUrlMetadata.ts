@@ -35,6 +35,15 @@ export const uncachedGetDocsUrlMetadata = async (
   }
 
   try {
+    // address FDR error: Failed to parse URL: %5Bdomain%5D
+    // todo: figure out where these calls originate
+    if (domain.includes("[") || domain.includes("%5B")) {
+      console.error(
+        `Cannot get docs url metadata for an invalid domain: ${domain}`
+      );
+      notFound();
+    }
+
     const response = await fetch(
       `${getFdrOrigin()}/v2/registry/docs/metadata-for-url`,
       {
