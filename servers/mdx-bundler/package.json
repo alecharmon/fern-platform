@@ -33,7 +33,7 @@
     "@typescript/vfs": "^1.6.1",
     "cors": "^2.8.5",
     "es-toolkit": "^1.32.0",
-    "esbuild": "^0.20.2",
+    "esbuild": "0.25.0",
     "estree-util-to-js": "^2.0.0",
     "estree-walker": "^3.0.3",
     "express": "^4.21.2",
