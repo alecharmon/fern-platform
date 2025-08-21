@@ -49,7 +49,7 @@ export const uncachedGetDocsUrlMetadata = async (
 
     if (!response.ok) {
       throw new Error(
-        `Invalid docs url metadata (response is not ok) ${response.status} ${response.statusText}`
+        `Invalid docs url metadata for ${withoutStaging(domain)} (response is not ok) ${response.status} ${response.statusText}`
       );
     }
 
@@ -74,9 +74,12 @@ export const uncachedGetDocsUrlMetadata = async (
       isPreview: body.isPreviewUrl,
     };
   } catch (error) {
-    console.error("Failed to get docs url metadata", {
-      cause: error,
-    });
+    console.error(
+      `Failed to get docs url metadata for ${withoutStaging(domain)}`,
+      {
+        cause: error,
+      }
+    );
     notFound();
   }
 };
