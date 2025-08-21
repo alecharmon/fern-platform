@@ -1,12 +1,9 @@
-import {
-  FilterCondition,
-  Filters,
-  Turbopuffer,
-} from "@turbopuffer/turbopuffer";
+import { Turbopuffer } from "@turbopuffer/turbopuffer";
 
 import { FacetFilter } from "@fern-docs/search-keyword";
 
 import { TurbopufferRecord } from "../types";
+import { buildQueryFilters } from "./query-filters";
 import { reciprocalRankFusion } from "./reciprocal-rank-fusion";
 
 interface SemanticSearchOptions {
@@ -48,50 +45,11 @@ export async function queryTurbopuffer(
 
   const vector = await vectorizer(query);
 
-  const documentIdFilters: FilterCondition[] = documentIdsToIgnore.map((id) => [
-    "id",
-    "NotEq",
-    id,
-  ]);
-
-  const urlFilters: FilterCondition[] = urlsToIgnore.map((url) => [
-    "url",
-    "NotEq",
-    url,
-  ]);
-
-  const versionFilters = filters
-    ? filters.filter((f) => f.facet === "version.title")
-    : [];
-
-  const queryFilters: Filters | undefined =
-    versionFilters.length > 0
-      ? [
-          "And",
-          [
-            ...versionFilters.map((f) => {
-              const filter: Filters = [
-                "Or",
-                [
-                  // TODO(eden): facet filters modify the case of the value (which leads to mismatches with the
-                  // display name property (e.g., V1 -> v1)). Remove when we have a better way to handle this.
-                  ["version", "Eq", f.value],
-                  ["version", "Eq", f.value.toUpperCase()],
-                  ["version", "Eq", f.value.toLowerCase()],
-                  ["version", "Eq", null],
-                ],
-              ];
-              return filter;
-            }),
-            ...documentIdFilters,
-            ...urlFilters,
-          ],
-        ]
-      : documentIdFilters.length > 0
-        ? documentIdFilters.length === 1
-          ? documentIdFilters[0]
-          : ["And", documentIdFilters]
-        : undefined;
+  const queryFilters = buildQueryFilters({
+    filters: filters ?? [],
+    documentIdsToIgnore,
+    urlsToIgnore,
+  });
 
   const semanticResults =
     mode !== "bm25"

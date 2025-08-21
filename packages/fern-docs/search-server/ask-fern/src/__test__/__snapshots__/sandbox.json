@@ -5,7 +5,7 @@
       "chunk": "---\ntitle: United States\nslug: overview\n---",
       "title": "Introduction",
       "document": "---\ntitle: United States\nslug: overview\n---\n\n## Overview\n\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \n\n\nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.\n\n## History\n\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\n\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/overview"
@@ -17,7 +17,7 @@
       "chunk": "## Overview\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.",
       "title": "Introduction",
       "document": "---\ntitle: United States\nslug: overview\n---\n\n## Overview\n\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \n\n\nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.\n\n## History\n\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\n\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/overview"
@@ -29,7 +29,7 @@
       "chunk": "## History\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.",
       "title": "Introduction",
       "document": "---\ntitle: United States\nslug: overview\n---\n\n## Overview\n\nThe United States of America (USA), also known as the United States (U.S.) or America, is a country primarily located \nin North America. It is a federal republic of 50 states and a federal capital district, Washington, D.C. \n\n\nThe 48 contiguous states border Canada to the north and Mexico to the south, with the semi-exclave of Alaska in \nthe northwest and the archipelago of Hawaii in the Pacific Ocean. The United States also asserts sovereignty over \nfive major island territories and various uninhabited islands in Oceania and the Caribbean. It is a megadiverse country, \nwith the world's third-largest land area and third-largest population, exceeding 340 million.\n\n## History\n\nThe Mayflower Compact in Massachusetts and the Fundamental Orders of Connecticut established precedents for \nrepresentative self-governance and constitutionalism that would develop throughout the American colonies. While \nEuropean settlers in what is now the United States experienced conflicts with Native Americans, they also engaged \nin trade, exchanging European tools for food and animal pelts. Relations ranged from close cooperation to warfare \nand massacres. The colonial authorities often pursued policies that forced Native Americans to adopt European \nlifestyles, including conversion to Christianity.\n\nIn 1776, the thirteen American colonies declared independence from British rule. The country has since grown to \nbecome the world's largest economy and one of the most powerful nations in the world.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/overview"
@@ -41,7 +41,7 @@
       "chunk": "---\ntitle: Economy\nslug: economy\n---",
       "title": "Overview",
       "document": "---\ntitle: Economy\nslug: economy\n---\n\n## Economy\n\nThe United States has a highly developed diversified mixed economy. It is the world's largest economy by \nnominal GDP and second largest by purchasing power parity (PPP). As of 2025, it has the world's seventh \nhighest nominal GDP per capita and ninth highest GDP per capita by PPP. According to the World Bank, the U.S. \naccounted for 14.8% of the global aggregate GDP in 2024 in purchasing power parity terms and 26.2% in \nnominal terms. The U.S. dollar is the currency of record most used in international transactions and is \nthe world's foremost reserve currency, backed by a large U.S. treasuries market, its role as the reference \nstandard for the petrodollar system, and its linked eurodollar. Several countries use it as their official \ncurrency and in others it is the de facto currency. Since the end of World War II, the economy has achieved \nrelatively steady growth, low unemployment and inflation, and rapid advances in technology.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/economy"
@@ -53,7 +53,7 @@
       "chunk": "## Economy\nThe United States has a highly developed diversified mixed economy. It is the world's largest economy by \nnominal GDP and second largest by purchasing power parity (PPP). As of 2025, it has the world's seventh \nhighest nominal GDP per capita and ninth highest GDP per capita by PPP. According to the World Bank, the U.S. \naccounted for 14.8% of the global aggregate GDP in 2024 in purchasing power parity terms and 26.2% in \nnominal terms. The U.S. dollar is the currency of record most used in international transactions and is \nthe world's foremost reserve currency, backed by a large U.S. treasuries market, its role as the reference \nstandard for the petrodollar system, and its linked eurodollar. Several countries use it as their official \ncurrency and in others it is the de facto currency. Since the end of World War II, the economy has achieved \nrelatively steady growth, low unemployment and inflation, and rapid advances in technology.",
       "title": "Overview",
       "document": "---\ntitle: Economy\nslug: economy\n---\n\n## Economy\n\nThe United States has a highly developed diversified mixed economy. It is the world's largest economy by \nnominal GDP and second largest by purchasing power parity (PPP). As of 2025, it has the world's seventh \nhighest nominal GDP per capita and ninth highest GDP per capita by PPP. According to the World Bank, the U.S. \naccounted for 14.8% of the global aggregate GDP in 2024 in purchasing power parity terms and 26.2% in \nnominal terms. The U.S. dollar is the currency of record most used in international transactions and is \nthe world's foremost reserve currency, backed by a large U.S. treasuries market, its role as the reference \nstandard for the petrodollar system, and its linked eurodollar. Several countries use it as their official \ncurrency and in others it is the de facto currency. Since the end of World War II, the economy has achieved \nrelatively steady growth, low unemployment and inflation, and rapid advances in technology.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/economy"
@@ -65,7 +65,7 @@
       "chunk": "---\ntitle: George Washington\nslug: washington\n---",
       "title": "George Washington",
       "document": "---\ntitle: George Washington\nslug: washington\n---\n\n## Overview\n\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/washington"
@@ -77,7 +77,7 @@
       "chunk": "## Overview\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.",
       "title": "George Washington",
       "document": "---\ntitle: George Washington\nslug: washington\n---\n\n## Overview\n\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/washington"
@@ -89,7 +89,7 @@
       "chunk": "## Legacy\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"",
       "title": "George Washington",
       "document": "---\ntitle: George Washington\nslug: washington\n---\n\n## Overview\n\nGeorge Washington (February 22, 1732 to December 14, 1799) was the first president of the United States,\nserving from 1789 to 1797. He led the Continental Army to victory in the American Revolutionary War,\npresided over the Constitutional Convention of 1787, and established many important precedents for the\nnational government and presidency.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Washington is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Revolutionary War, role in founding the republic, and establishment of key presidential precedents\nhave earned him the informal title \"Father of His Country.\"\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/washington"
@@ -101,7 +101,7 @@
       "chunk": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---",
       "title": "Abraham Lincoln",
       "document": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---\n\n## Overview\n\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/lincoln"
@@ -113,7 +113,7 @@
       "chunk": "## Overview\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.",
       "title": "Abraham Lincoln",
       "document": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---\n\n## Overview\n\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/lincoln"
@@ -125,7 +125,7 @@
       "chunk": "## Legacy\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.",
       "title": "Abraham Lincoln",
       "document": "---\ntitle: Abraham Lincoln\nslug: lincoln\n---\n\n## Overview\n\nAbraham Lincoln (February 12, 1809 to April 15, 1865) was the 16th president of the United States, \nserving from 1861 until his assassination in 1865. He led the United States through the American Civil War, \ndefeating the Confederate States of America and playing a major role in the abolition of slavery.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln, \nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Between 1999 and 2011, \nLincoln, John F. Kennedy, and Ronald Reagan were the top-ranked presidents in eight public opinion surveys \nby Gallup. A 2004 study found that scholars in history and politics ranked Lincoln number one, while legal \nscholars placed him second after Washington.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/lincoln"
@@ -137,7 +137,7 @@
       "chunk": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---",
       "title": "Franklin D. Roosevelt",
       "document": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---\n\n## Overview\n\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/roosevelt"
@@ -149,7 +149,7 @@
       "chunk": "## Overview\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.",
       "title": "Franklin D. Roosevelt",
       "document": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---\n\n## Overview\n\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/roosevelt"
@@ -161,7 +161,7 @@
       "chunk": "## Legacy\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.",
       "title": "Franklin D. Roosevelt",
       "document": "---\ntitle: Franklin D. Roosevelt\nslug: roosevelt\n---\n\n## Overview\n\nFranklin Delano Roosevelt (January 30, 1882 to April 12, 1945) was the 32nd president of the United States,\nserving from 1933 to 1945. He led the United States through the Great Depression and World War II,\nimplementing his New Deal domestic agenda in response to the worst economic crisis in U.S. history,\nand forging the Allied Powers coalition that defeated Nazi Germany and Imperial Japan.\n\n## Legacy\n\nIn surveys of U.S. scholars ranking presidents since 1948, the top three presidents are generally Lincoln,\nGeorge Washington, and Franklin Delano Roosevelt, although the order varies. Roosevelt is consistently\nranked among the top three presidents in both academic and public opinion polls. His leadership during\nthe Great Depression, World War II, and implementation of lasting New Deal programs like Social Security\nhave earned him recognition as one of America's greatest presidents.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/roosevelt"
@@ -173,7 +173,7 @@
       "chunk": "---\ntitle: History API\nslug: history-api\ndescription: >-\nA simple API for exploring and managing historical events, timelines, and\nuser-curated favorites.\n---\nWelcome to the History API. This API is designed to help you explore and manage historical events, timelines, and user-curated favorites.",
       "title": "API Overview",
       "document": "---\ntitle: History API\nslug: history-api\ndescription: >-\n  A simple API for exploring and managing historical events, timelines, and\n  user-curated favorites.\n---\n\nWelcome to the History API. This API is designed to help you explore and manage historical events, timelines, and user-curated favorites.\n\n## Overview\n\nThe History API is a simple API for exploring and managing historical events, timelines, and user-curated favorites.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/-api"
@@ -185,7 +185,7 @@
       "chunk": "## Overview\nThe History API is a simple API for exploring and managing historical events, timelines, and user-curated favorites.",
       "title": "API Overview",
       "document": "---\ntitle: History API\nslug: history-api\ndescription: >-\n  A simple API for exploring and managing historical events, timelines, and\n  user-curated favorites.\n---\n\nWelcome to the History API. This API is designed to help you explore and manage historical events, timelines, and user-curated favorites.\n\n## Overview\n\nThe History API is a simple API for exploring and managing historical events, timelines, and user-curated favorites.\n",
-      "version": "V1",
+      "version": "v1",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/-api"
@@ -197,7 +197,7 @@
       "chunk": "---\ntitle: Demographics\nslug: demographics\n---",
       "title": "Overview",
       "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/demographics"
@@ -209,7 +209,7 @@
       "chunk": "## Overview\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.",
       "title": "Overview",
       "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/demographics"
@@ -221,7 +221,7 @@
       "chunk": "## Trends",
       "title": "Overview",
       "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/demographics"
@@ -233,7 +233,7 @@
       "chunk": "## Migration\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.",
       "title": "Overview",
       "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/demographics"
@@ -245,7 +245,7 @@
       "chunk": "## Emigration\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.",
       "title": "Overview",
       "document": "---\ntitle: Demographics\nslug: demographics\n---\n\n## Overview\n\nPan and Pfeil (2004) count 87 distinct \"peoples of Europe\", of which 33 form the majority population in at \nleast one sovereign state, while the remaining 54 constitute ethnic minorities. Romani people are the largest \nethnic minority in Europe, according to European Commission.\n\n## Trends\n\n### Migration\n\nEurope is home to the highest number of migrants of all global regions at nearly 87 million people in 2020, \naccording to the International Organisation for Migration. In 2005, the EU had an overall net gain from \nimmigration of 1.8 million people.\n\nThis accounted for almost 85% of Europe's total population growth. In 2021, \n827,000 persons were given citizenship of an EU member state, an increase of about 14% compared with 2020. \n2.3 million immigrants from non-EU countries entered the EU in 2021.\n\n### Emigration\n\nEarly modern emigration from Europe began with Spanish and Portuguese settlers in the 16th century, and French \nand English settlers in the 17th century. But numbers remained relatively small until waves of mass emigration \nin the 19th century, when millions of poor families left Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/demographics"
@@ -257,7 +257,7 @@
       "chunk": "---\ntitle: Austria\nslug: austria\n---",
       "title": "Austria",
       "document": "---\ntitle: Austria\nslug: austria\n---\n\n## Overview\n\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.\n\n## Culture\n\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/austria"
@@ -269,7 +269,7 @@
       "chunk": "## Overview\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.",
       "title": "Austria",
       "document": "---\ntitle: Austria\nslug: austria\n---\n\n## Overview\n\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.\n\n## Culture\n\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/austria"
@@ -281,7 +281,7 @@
       "chunk": "## Culture\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.",
       "title": "Austria",
       "document": "---\ntitle: Austria\nslug: austria\n---\n\n## Overview\n\nAustria is a landlocked country in Central Europe, known for its rich cultural heritage, stunning Alpine \nlandscapes, and historical significance. The country shares borders with Germany, Czech Republic, Slovakia, \nHungary, Slovenia, Italy, Switzerland, and Liechtenstein. Its capital and largest city is Vienna, which served \nas the heart of the Habsburg Empire for centuries.\n\n## Culture\n\nAustrian culture is deeply rooted in the arts, particularly classical music, with famous composers like Mozart, \nBeethoven, and Strauss having strong connections to Vienna. The country is also renowned for its architectural \nheritage, featuring baroque buildings, imperial palaces, and medieval castles. Austrian cuisine, including \ndishes like Wiener Schnitzel and Sachertorte, reflects influences from its historical position at the crossroads of \nCentral Europe.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/austria"
@@ -293,7 +293,7 @@
       "chunk": "---\ntitle: Italy\nslug: italy\n---",
       "title": "Italy",
       "document": "---\ntitle: Italy\nslug: italy\n---\n\n## Overview\n\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.\n\n## Culture\n\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/italy"
@@ -305,7 +305,7 @@
       "chunk": "## Overview\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.",
       "title": "Italy",
       "document": "---\ntitle: Italy\nslug: italy\n---\n\n## Overview\n\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.\n\n## Culture\n\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/italy"
@@ -317,7 +317,7 @@
       "chunk": "## Culture\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.",
       "title": "Italy",
       "document": "---\ntitle: Italy\nslug: italy\n---\n\n## Overview\n\nItaly is a country in Southern Europe, known for its rich cultural heritage, stunning Mediterranean \nlandscapes, and historical significance. The country shares borders with France, Switzerland, Austria, \nSlovenia, and includes the enclaved microstates of Vatican City and San Marino. Its capital and largest \ncity is Rome, which served as the heart of the Roman Empire and remains a major cultural center.\n\n## Culture\n\nItalian culture is deeply rooted in the arts, particularly Renaissance art and architecture, with famous artists \nlike Leonardo da Vinci, Michelangelo, and Botticelli. The country is also renowned for its architectural \nheritage, featuring ancient Roman ruins, Renaissance palaces, and medieval towns. Italian cuisine, including \ndishes like pasta, pizza, and gelato, has influenced culinary traditions worldwide and reflects the country's \ndiverse regional cultures and Mediterranean heritage.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/italy"
@@ -329,7 +329,7 @@
       "chunk": "---\ntitle: Switzerland\nslug: switzerland\n---",
       "title": "Switzerland",
       "document": "---\ntitle: Switzerland\nslug: switzerland\n---\n\n## Overview\n\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.\n\n## Culture\n\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/switzerland"
@@ -341,7 +341,7 @@
       "chunk": "## Overview\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.",
       "title": "Switzerland",
       "document": "---\ntitle: Switzerland\nslug: switzerland\n---\n\n## Overview\n\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.\n\n## Culture\n\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/switzerland"
@@ -353,7 +353,7 @@
       "chunk": "## Culture\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.",
       "title": "Switzerland",
       "document": "---\ntitle: Switzerland\nslug: switzerland\n---\n\n## Overview\n\nSwitzerland is a landlocked country in Central Europe, known for its stunning Alpine landscapes, political \nneutrality, and high standard of living. The country shares borders with Germany, France, Italy, Austria, \nand Liechtenstein. Its capital is Bern, while Zürich is its largest city. Switzerland is renowned for its \ndirect democracy system and has maintained a policy of armed neutrality since the 16th century.\n\n## Culture\n\nSwiss culture is a unique blend of German, French, Italian, and Romansh influences, reflecting its \nmultilingual heritage. The country is famous for its precision watchmaking, banking sector, and culinary \ntraditions including Swiss chocolate, cheese fondue, and raclette. Switzerland's cultural landscape includes \npicturesque mountain villages, medieval towns, and modern cities. The Swiss are known for their strong \nemphasis on quality, efficiency, and environmental consciousness.\n",
-      "version": "V2",
+      "version": "v2",
       "product": "History",
       "authed": false,
       "url": "https://sandbox/history/v-2/switzerland"
@@ -382,14 +382,69 @@
     }
   },
   {
-    "id": "c3b2af2def50b8fe54229c64f4d48ddbeb78b70726efc297be33917df1aa57fe",
+    "id": "4cc487565978e02b5fb4e7582c4d052daf7651411b5754988ce1f96d11875dba",
+    "attributes": {
+      "chunk": "---\ntitle: Claude Monet\nslug: monet\n---",
+      "title": "Claude Monet",
+      "document": "---\ntitle: Claude Monet\nslug: monet\n---\n\n## Claude Monet\n\nClaude Monet was a French painter and a founder of Impressionism. He is most famous for his series of paintings \ndepicting urban scenes, landscapes, and water lilies.\n\n## Biography\n\nMonet was born on November 14, 1840, in Paris, France. He was the son of a merchant and started painting at a young age. \nHe studied at the École des Beaux-Arts in Paris, where he was influenced by the works of Jean-Baptiste-Camille Corot and \nEugène Delacroix. He later became a member of the Impressionist movement, which he co-founded with artists like Pierre-Auguste \nRenoir, Alfred Sisley, and Berthe Morisot.\n\n## Artistic Style\n\nMonet's artistic style is characterized by his use of light and color to capture the fleeting effects of light and atmosphere. \nHe is known for his loose brushstrokes and his ability to capture the changing effects of light on his subjects.\n\n## Notable Works\n\nMonet's most famous works include \"Impression, Sunrise\", \"Water Lilies\", and \"Nympheas\".\n",
+      "product": "Art",
+      "authed": false,
+      "url": "https://sandbox/art/monet"
+    }
+  },
+  {
+    "id": "94fa1374409a5227b7381a273caed75046a916415566d5afbbbd07ac630caa32",
+    "attributes": {
+      "chunk": "## Claude Monet\nClaude Monet was a French painter and a founder of Impressionism. He is most famous for his series of paintings \ndepicting urban scenes, landscapes, and water lilies.",
+      "title": "Claude Monet",
+      "document": "---\ntitle: Claude Monet\nslug: monet\n---\n\n## Claude Monet\n\nClaude Monet was a French painter and a founder of Impressionism. He is most famous for his series of paintings \ndepicting urban scenes, landscapes, and water lilies.\n\n## Biography\n\nMonet was born on November 14, 1840, in Paris, France. He was the son of a merchant and started painting at a young age. \nHe studied at the École des Beaux-Arts in Paris, where he was influenced by the works of Jean-Baptiste-Camille Corot and \nEugène Delacroix. He later became a member of the Impressionist movement, which he co-founded with artists like Pierre-Auguste \nRenoir, Alfred Sisley, and Berthe Morisot.\n\n## Artistic Style\n\nMonet's artistic style is characterized by his use of light and color to capture the fleeting effects of light and atmosphere. \nHe is known for his loose brushstrokes and his ability to capture the changing effects of light on his subjects.\n\n## Notable Works\n\nMonet's most famous works include \"Impression, Sunrise\", \"Water Lilies\", and \"Nympheas\".\n",
+      "product": "Art",
+      "authed": false,
+      "url": "https://sandbox/art/monet"
+    }
+  },
+  {
+    "id": "926bc4364487bb1df0d5e27e859609152e26ba179f90557260aea1e5f21e82de",
+    "attributes": {
+      "chunk": "## Biography\nMonet was born on November 14, 1840, in Paris, France. He was the son of a merchant and started painting at a young age. \nHe studied at the École des Beaux-Arts in Paris, where he was influenced by the works of Jean-Baptiste-Camille Corot and \nEugène Delacroix. He later became a member of the Impressionist movement, which he co-founded with artists like Pierre-Auguste \nRenoir, Alfred Sisley, and Berthe Morisot.",
+      "title": "Claude Monet",
+      "document": "---\ntitle: Claude Monet\nslug: monet\n---\n\n## Claude Monet\n\nClaude Monet was a French painter and a founder of Impressionism. He is most famous for his series of paintings \ndepicting urban scenes, landscapes, and water lilies.\n\n## Biography\n\nMonet was born on November 14, 1840, in Paris, France. He was the son of a merchant and started painting at a young age. \nHe studied at the École des Beaux-Arts in Paris, where he was influenced by the works of Jean-Baptiste-Camille Corot and \nEugène Delacroix. He later became a member of the Impressionist movement, which he co-founded with artists like Pierre-Auguste \nRenoir, Alfred Sisley, and Berthe Morisot.\n\n## Artistic Style\n\nMonet's artistic style is characterized by his use of light and color to capture the fleeting effects of light and atmosphere. \nHe is known for his loose brushstrokes and his ability to capture the changing effects of light on his subjects.\n\n## Notable Works\n\nMonet's most famous works include \"Impression, Sunrise\", \"Water Lilies\", and \"Nympheas\".\n",
+      "product": "Art",
+      "authed": false,
+      "url": "https://sandbox/art/monet"
+    }
+  },
+  {
+    "id": "846b587ded512795adefe21403ea82479a1eddfbe035a6e534e279ea4e70aa2e",
+    "attributes": {
+      "chunk": "## Artistic Style\nMonet's artistic style is characterized by his use of light and color to capture the fleeting effects of light and atmosphere. \nHe is known for his loose brushstrokes and his ability to capture the changing effects of light on his subjects.",
+      "title": "Claude Monet",
+      "document": "---\ntitle: Claude Monet\nslug: monet\n---\n\n## Claude Monet\n\nClaude Monet was a French painter and a founder of Impressionism. He is most famous for his series of paintings \ndepicting urban scenes, landscapes, and water lilies.\n\n## Biography\n\nMonet was born on November 14, 1840, in Paris, France. He was the son of a merchant and started painting at a young age. \nHe studied at the École des Beaux-Arts in Paris, where he was influenced by the works of Jean-Baptiste-Camille Corot and \nEugène Delacroix. He later became a member of the Impressionist movement, which he co-founded with artists like Pierre-Auguste \nRenoir, Alfred Sisley, and Berthe Morisot.\n\n## Artistic Style\n\nMonet's artistic style is characterized by his use of light and color to capture the fleeting effects of light and atmosphere. \nHe is known for his loose brushstrokes and his ability to capture the changing effects of light on his subjects.\n\n## Notable Works\n\nMonet's most famous works include \"Impression, Sunrise\", \"Water Lilies\", and \"Nympheas\".\n",
+      "product": "Art",
+      "authed": false,
+      "url": "https://sandbox/art/monet"
+    }
+  },
+  {
+    "id": "e09147ed9eeb3c99486f820e4ad3218769b30f78cde3e79cfdbc8c49bf6cc296",
+    "attributes": {
+      "chunk": "## Notable Works\nMonet's most famous works include \"Impression, Sunrise\", \"Water Lilies\", and \"Nympheas\".",
+      "title": "Claude Monet",
+      "document": "---\ntitle: Claude Monet\nslug: monet\n---\n\n## Claude Monet\n\nClaude Monet was a French painter and a founder of Impressionism. He is most famous for his series of paintings \ndepicting urban scenes, landscapes, and water lilies.\n\n## Biography\n\nMonet was born on November 14, 1840, in Paris, France. He was the son of a merchant and started painting at a young age. \nHe studied at the École des Beaux-Arts in Paris, where he was influenced by the works of Jean-Baptiste-Camille Corot and \nEugène Delacroix. He later became a member of the Impressionist movement, which he co-founded with artists like Pierre-Auguste \nRenoir, Alfred Sisley, and Berthe Morisot.\n\n## Artistic Style\n\nMonet's artistic style is characterized by his use of light and color to capture the fleeting effects of light and atmosphere. \nHe is known for his loose brushstrokes and his ability to capture the changing effects of light on his subjects.\n\n## Notable Works\n\nMonet's most famous works include \"Impression, Sunrise\", \"Water Lilies\", and \"Nympheas\".\n",
+      "product": "Art",
+      "authed": false,
+      "url": "https://sandbox/art/monet"
+    }
+  },
+  {
+    "id": "a163a47b76e111700c00111bef5999fc7e7a4ce2236e06c5ba2492320e775239",
     "attributes": {
       "title": "Search events",
       "chunk": "Search historical events using time period, tags, or keywords.",
       "document": "{\n  \"description\": \"[]\",\n  \"api_type\": \"http\",\n  \"method\": \"GET\",\n  \"endpoint_path\": \"/events/search\",\n  \"endpoint_path_alternates\": [\n    \"/events/search\",\n    \"https://api.historylibrary.dev/events/search\",\n    \"https://api.historylibrary.dev/events/search\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[]\n\nA list of events matching the search criteria",
       "url": "https://sandbox/history/api-reference/api-reference/event/search-events",
       "product": "History",
-      "version": "V1",
+      "version": "v1",
       "authed": false,
       "keywords": [
         "endpoint",
@@ -402,14 +457,14 @@
     }
   },
   {
-    "id": "dc55a09fae262c0998fe08441f830b444c3cc32ddcca8be297bab9b9e7f2097d",
+    "id": "35761359153db28ed0a73a4a0a2bcde0dd545899524d4c3a4b122e16ea7eb917",
     "attributes": {
       "title": "Get event by ID",
       "chunk": "Retrieve details about a historical event.",
       "document": "{\n  \"description\": \"[]\",\n  \"api_type\": \"http\",\n  \"method\": \"GET\",\n  \"endpoint_path\": \"/events/:eventId\",\n  \"endpoint_path_alternates\": [\n    \"/events/{eventId}\",\n    \"https://api.historylibrary.dev/events/:eventId\",\n    \"https://api.historylibrary.dev/events/%7BeventId%7D\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[]\n\nEvent details retrieved successfully",
       "url": "https://sandbox/history/api-reference/api-reference/event/get-event-by-id",
       "product": "History",
-      "version": "V1",
+      "version": "v1",
       "authed": false,
       "keywords": [
         "endpoint",
@@ -422,14 +477,14 @@
     }
   },
   {
-    "id": "10d5d5250b169c215affe1952e37292d5ba8138374222b36dbfc5a3a565021b0",
+    "id": "fc1093afc46f87f4f72ef14037c0a4e56a6ee7374353708033e5f195e4a2d826",
     "attributes": {
       "title": "Get user favorites",
       "chunk": "Retrieve a list of events the user marked as favorite.",
       "document": "{\n  \"description\": \"[]\",\n  \"api_type\": \"http\",\n  \"method\": \"GET\",\n  \"endpoint_path\": \"/user/:username/favorites\",\n  \"endpoint_path_alternates\": [\n    \"/user/{username}/favorites\",\n    \"https://api.historylibrary.dev/user/:username/favorites\",\n    \"https://api.historylibrary.dev/user/%7Busername%7D/favorites\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[]\n\nList of favorite events",
       "url": "https://sandbox/history/api-reference/api-reference/user/get-user-favorites",
       "product": "History",
-      "version": "V1",
+      "version": "v1",
       "authed": false,
       "keywords": [
         "endpoint",
@@ -442,14 +497,14 @@
     }
   },
   {
-    "id": "f562414f2cafdb57c5ec414ebbc81f05b69a411ece248fb2099edc4e36f05023",
+    "id": "7c170547bc914d320cc8f3c94c2163e61f0454ea1264690d6d0c9cc7cc7c5e8a",
     "attributes": {
       "title": "Add event to favorites",
       "chunk": "",
       "document": "{\n  \"description\": \"[\\n  {\\n    \\\"key\\\": \\\"eventId\\\",\\n    \\\"type\\\": \\\"{\\\\\\\"type\\\\\\\":\\\\\\\"alias\\\\\\\",\\\\\\\"value\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"optional\\\\\\\",\\\\\\\"shape\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"alias\\\\\\\",\\\\\\\"value\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"primitive\\\\\\\",\\\\\\\"value\\\\\\\":{\\\\\\\"type\\\\\\\":\\\\\\\"integer\\\\\\\"}}}}}\\\"\\n  }\\n]\",\n  \"api_type\": \"http\",\n  \"method\": \"POST\",\n  \"endpoint_path\": \"/user/:username/favorites\",\n  \"endpoint_path_alternates\": [\n    \"/user/{username}/favorites\",\n    \"https://api.historylibrary.dev/user/:username/favorites\",\n    \"https://api.historylibrary.dev/user/%7Busername%7D/favorites\"\n  ],\n  \"response_type\": \"json\",\n  \"environments\": [\n    \"Demo server for History Library\",\n    \"https://api.historylibrary.dev/v1\"\n  ],\n  \"default_environment_id\": \"Demo server for History Library\"\n}\n\n[\n  {\n    \"key\": \"eventId\",\n    \"type\": \"{\\\"type\\\":\\\"alias\\\",\\\"value\\\":{\\\"type\\\":\\\"optional\\\",\\\"shape\\\":{\\\"type\\\":\\\"alias\\\",\\\"value\\\":{\\\"type\\\":\\\"primitive\\\",\\\"value\\\":{\\\"type\\\":\\\"integer\\\"}}}}}\"\n  }\n]\n\nEvent successfully added to favorites",
       "url": "https://sandbox/history/api-reference/api-reference/user/add-event-to-favorites",
       "product": "History",
-      "version": "V1",
+      "version": "v1",
       "authed": false,
       "keywords": [
         "endpoint",
