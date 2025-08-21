@@ -122,6 +122,7 @@ export default [
 
     {
       plugins: {
+        // @ts-ignore
         "react-hooks": reactHooks,
       },
       rules: {

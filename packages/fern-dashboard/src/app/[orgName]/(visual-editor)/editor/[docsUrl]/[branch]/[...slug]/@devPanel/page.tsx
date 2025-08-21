@@ -126,10 +126,10 @@ export default function DevPanel() {
       {/* Cancel/Save buttons - bottom */}
       <div className="fixed bottom-4 left-4 right-4 z-50 flex items-center gap-2">
         <div className="ml-auto flex gap-2">
-          <Button onClick={handleCancelEdit} variant="outline" size="lg">
+          <Button onClick={handleCancelEdit} variant="outline">
             Cancel
           </Button>
-          <Button onClick={handleSaveEdit} variant="default" size="lg">
+          <Button onClick={handleSaveEdit} variant="default">
             Save
           </Button>
         </div>

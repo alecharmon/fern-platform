@@ -1,10 +1,11 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useCallback } from "react";
 import { preload } from "react-dom";
 
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 import {
   FernTooltip,
@@ -119,9 +120,6 @@ export function GoToEditorButton({
         >
           <span className="pointer-events-auto">
             <Button
-              size="sm"
-              className="text-primary hover:text-primary w-fit"
-              variant="outline"
               onClick={() => {
                 setIsLoading(true);
                 createBranch();
@@ -134,8 +132,8 @@ export function GoToEditorButton({
                   <Loader2 className="animate-spin" />
                 ) : (
                   <>
-                    <PencilSquareIcon />
-                    Go to Editor
+                    <Plus />
+                    New session
                   </>
                 )}
               </div>
