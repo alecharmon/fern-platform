@@ -135,68 +135,74 @@ export default async function Page(props: {
           }
         />
 
-        <Card className="flex flex-col items-center justify-center gap-4">
-          <Image
-            src="/ve_empty.svg"
-            alt="Docs Preview"
-            width={400}
-            height={300}
-          />
-          <div className="flex flex-col items-center justify-center">
-            <p className="text-lg font-semibold">Fern Visual Editor</p>
-            <p className="text-muted-foreground text-sm">
-              Modify your documentation without touching code.
-            </p>
+        <Card className="p-0! relative flex h-[300px] flex-col-reverse gap-0 lg:flex-row">
+          <div className="lg:max-w-1/2 h-full w-full">
+            <Image
+              src="/ve_empty.avif"
+              alt="Docs Preview"
+              width={2000}
+              height={2000}
+              className="h-full w-auto object-contain object-bottom"
+            />
           </div>
+          <div className="flex flex-col items-center justify-center gap-4 p-6 md:flex-1 lg:items-start">
+            <div className="flex flex-col items-center lg:items-start">
+              <p className="text-lg font-semibold">Fern Visual Editor</p>
+              <p className="text-muted-foreground text-sm">
+                Modify your documentation without touching code.
+              </p>
+            </div>
 
-          {!githubAuthState.hasFernBotInstalled ? (
-            <>
-              <p className="text-muted-foreground text-sm">
-                To get started, install the Fern app on your GitHub repository.
-              </p>
-              <Button asChild>
-                <a
-                  href="https://github.com/apps/fern-api"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <GithubLogo />
-                  Install
-                </a>
-              </Button>
-            </>
-          ) : !githubAuthState.hasWriteAccess ? (
-            <WarningNote>
-              You do not have write access to this repo. Contact your Github
-              admin.
-            </WarningNote>
-          ) : !githubAuthState.repoExists ? (
-            <WarningNote>
-              This repo was not found. Please check that the repo exists and
-              that you have access to it.
-            </WarningNote>
-          ) : (
-            <>
-              <GoToEditorButton
-                orgName={orgName}
-                docsUrl={docsUrl}
-                session={session}
-                sourceRepo={githubAuthState.sourceRepo}
-              />
-              <p className="text-muted-foreground text-sm">
-                All sessions will turn into PRs in your Github repo{" "}
-                <a
-                  href={githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary underline transition-colors"
-                >
-                  here
-                </a>
-                .
-              </p>
-            </>
-          )}
+            {!githubAuthState.hasFernBotInstalled ? (
+              <>
+                <p className="text-muted-foreground text-sm">
+                  To get started, install the Fern app on your GitHub
+                  repository.
+                </p>
+                <Button asChild>
+                  <a
+                    href="https://github.com/apps/fern-api"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <GithubLogo />
+                    Install
+                  </a>
+                </Button>
+              </>
+            ) : !githubAuthState.hasWriteAccess ? (
+              <WarningNote>
+                You do not have write access to this repo. Contact your Github
+                admin.
+              </WarningNote>
+            ) : !githubAuthState.repoExists ? (
+              <WarningNote>
+                This repo was not found. Please check that the repo exists and
+                that you have access to it.
+              </WarningNote>
+            ) : (
+              <>
+                <GoToEditorButton
+                  orgName={orgName}
+                  docsUrl={docsUrl}
+                  session={session}
+                  sourceRepo={githubAuthState.sourceRepo}
+                />
+                <p className="text-muted-foreground text-sm">
+                  All sessions will turn into PRs in your Github repo{" "}
+                  <a
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary underline transition-colors"
+                  >
+                    here
+                  </a>
+                  .
+                </p>
+              </>
+            )}
+          </div>
         </Card>
       </div>
     </FeatureFlaggedServerSide>
