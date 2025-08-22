@@ -16,6 +16,8 @@ jobs:
         with:
           ref: stable
           fetch-depth: 0
+          token: ${{ secrets.PR_BOT_GH_PAT }}
+
 
       - name: Rebase
         run: |
@@ -23,4 +25,6 @@ jobs:
           git rebase origin/app
 
       - name: Push
+        env:
+          GITHUB_TOKEN: ${{ secrets.PR_BOT_GH_PAT }}
         run: git push --force-with-lease origin stable
