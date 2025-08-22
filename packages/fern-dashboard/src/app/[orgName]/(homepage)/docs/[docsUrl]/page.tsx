@@ -135,7 +135,7 @@ export default async function Page(props: {
           }
         />
 
-        <Card className="p-0! relative flex h-[300px] flex-col-reverse gap-0 lg:flex-row">
+        <Card className="relative flex h-[300px] flex-col-reverse gap-0 !p-0 lg:flex-row">
           <div className="lg:max-w-1/2 h-full w-full">
             <Image
               src="/ve_empty.avif"

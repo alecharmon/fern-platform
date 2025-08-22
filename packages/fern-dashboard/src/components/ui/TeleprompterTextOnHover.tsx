@@ -40,8 +40,6 @@ export function TeleprompterTextOnHover({
 
   const handleMouseEnter = useCallback(
     (e: React.MouseEvent<HTMLSpanElement>) => {
-      console.log("🐭 TeleprompterTextOnHover: Mouse enter", shouldAnimate());
-
       if (shouldAnimate() && containerRef.current) {
         const containerWidth = containerRef.current.clientWidth;
         const textWidth = e.currentTarget.scrollWidth;

@@ -96,9 +96,7 @@ export function GoToEditorButton({
     })
       .then((response) => {
         if (response.success) {
-          // TODO: client-side nav results in infinite loop, just use browser nav for now
-          window.location.href = editorSlug;
-          // router.push(editorSlug);
+          router.push(editorSlug);
         } else {
           throw new Error();
         }
@@ -106,7 +104,7 @@ export function GoToEditorButton({
       .catch(() => {
         ErrorCreateBranchToast();
       });
-  }, [sourceRepo, newBranchName, editorSlug]);
+  }, [sourceRepo, newBranchName, editorSlug, router]);
 
   return (
     <div className="flex w-fit flex-row items-center gap-2">

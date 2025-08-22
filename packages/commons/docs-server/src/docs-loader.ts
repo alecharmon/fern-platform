@@ -122,6 +122,7 @@ export interface DocsLoader {
     filename: string;
     markdown: string;
     editThisPageUrl?: string;
+    rawMarkdown?: string;
   }>;
 
   getColors: () => Promise<{

@@ -74,6 +74,7 @@ class EditableDocsLoader implements DocsLoader {
     markdown: string;
     editThisPageUrl?: string;
     css?: any;
+    rawMarkdown?: string;
   }> {
     return this.readOnlyDocsLoader.getPage(pageId);
   }
@@ -122,12 +123,15 @@ export const createEditableDocsLoader = cache(
       decodeURIComponent(encodedDocsUrl),
       fern_token,
       {
-        // For editable docs, we want shorter TTL so that cache stays fresh
-        kvTtl: 5 * 60, // 5 minutes
-        cacheKeySuffix: "editable",
-        forceRevalidate,
-      },
-      true // Skip auth
+        returnRawMarkdown: true,
+        cacheConfig: {
+          // For editable docs, we want shorter TTL so that cache stays fresh
+          kvTtl: 5 * 60, // 5 minutes
+          cacheKeySuffix: "editable",
+          forceRevalidate,
+        },
+        skipAuth: true,
+      }
     );
 
     return new EditableDocsLoader(docsLoader, gitLoader);
