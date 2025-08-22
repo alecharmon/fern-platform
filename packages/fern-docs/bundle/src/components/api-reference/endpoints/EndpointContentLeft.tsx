@@ -60,7 +60,7 @@ export async function EndpointContentLeft({
           key: ApiDefinition.PropertyKey("Authorization"),
           description:
             basicAuth.description ??
-            "Basic authentication of the form Basic <username:password>.",
+            "Basic authentication of the form `Basic <username:password>`.",
           hidden: false,
           valueShape: stringShape,
           availability: undefined,
@@ -72,7 +72,7 @@ export async function EndpointContentLeft({
           key: ApiDefinition.PropertyKey("Authorization"),
           description:
             bearerAuth.description ??
-            "Bearer authentication of the form Bearer <token>, where token is your auth token.",
+            "Bearer authentication of the form `Bearer <token>`, where token is your auth token.",
           hidden: false,
           valueShape: stringShape,
           availability: undefined,
@@ -84,7 +84,7 @@ export async function EndpointContentLeft({
           key: ApiDefinition.PropertyKey(value.headerWireValue),
           description:
             (value.description ?? value.prefix != null)
-              ? `Header authentication of the form ${value.prefix} <token>`
+              ? `Header authentication of the form \`${value.prefix} <token>\``
               : undefined,
           hidden: false,
           valueShape: stringShape,
@@ -105,7 +105,7 @@ export async function EndpointContentLeft({
                 ),
                 description:
                   oauth.description ??
-                  `OAuth authentication of the form ${clientCredentialsValue.value.tokenPrefix ? `${clientCredentialsValue.value.tokenPrefix ?? "Bearer"} ` : ""}<token>.`,
+                  `OAuth authentication of the form \`${clientCredentialsValue.value.tokenPrefix ? `${clientCredentialsValue.value.tokenPrefix ?? "Bearer"} ` : ""}<token>\`.`,
                 hidden: false,
                 valueShape: stringShape,
                 availability: undefined,
