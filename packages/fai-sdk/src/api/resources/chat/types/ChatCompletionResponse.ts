@@ -4,4 +4,7 @@
 
 import * as FernFai from "../../../index.js";
 
-export type ChatCompletionResponse = FernFai.ChatTurn[];
+export interface ChatCompletionResponse {
+    turns: FernFai.ChatTurn[];
+    citations: string[];
+}

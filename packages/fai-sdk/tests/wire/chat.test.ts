@@ -10,17 +10,20 @@ describe("Chat", () => {
         const server = mockServerPool.createServer();
         const client = new FernFaiClient({ token: "test", environment: server.baseUrl });
         const rawRequestBody = {
-            model: undefined,
+            model: "claude-4-sonnet-20250514",
             system_prompt: undefined,
             messages: [
                 { role: "role", content: "content" },
                 { role: "role", content: "content" },
             ],
         };
-        const rawResponseBody = [
-            { role: "role", content: "content" },
-            { role: "role", content: "content" },
-        ];
+        const rawResponseBody = {
+            turns: [
+                { role: "role", content: "content" },
+                { role: "role", content: "content" },
+            ],
+            citations: ["citations", "citations"],
+        };
         server
             .mockEndpoint()
             .post("/chat/domain")
@@ -31,7 +34,7 @@ describe("Chat", () => {
             .build();
 
         const response = await client.chat.chatCompletion("domain", {
-            model: undefined,
+            model: "claude-4-sonnet-20250514",
             system_prompt: undefined,
             messages: [
                 {
@@ -44,15 +47,18 @@ describe("Chat", () => {
                 },
             ],
         });
-        expect(response).toEqual([
-            {
-                role: "role",
-                content: "content",
-            },
-            {
-                role: "role",
-                content: "content",
-            },
-        ]);
+        expect(response).toEqual({
+            turns: [
+                {
+                    role: "role",
+                    content: "content",
+                },
+                {
+                    role: "role",
+                    content: "content",
+                },
+            ],
+            citations: ["citations", "citations"],
+        });
     });
 });

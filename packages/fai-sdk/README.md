@@ -24,7 +24,7 @@ import { FernFaiClient } from "@fern-api/fai-sdk";
 
 const client = new FernFaiClient({ token: "YOUR_TOKEN" });
 await client.chat.chatCompletion("domain", {
-    model: undefined,
+    model: "claude-4-sonnet-20250514",
     system_prompt: undefined,
     messages: [
         {

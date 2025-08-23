@@ -177,7 +177,7 @@ Create a docs chat completion for a given domain
 
 ```typescript
 await client.chat.chatCompletion("domain", {
-    model: undefined,
+    model: "claude-4-sonnet-20250514",
     system_prompt: undefined,
     messages: [
         {

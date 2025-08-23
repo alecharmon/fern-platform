@@ -52,7 +52,7 @@ export class Chat {
      *
      * @example
      *     await client.chat.chatCompletion("domain", {
-     *         model: undefined,
+     *         model: "claude-4-sonnet-20250514",
      *         system_prompt: undefined,
      *         messages: [{
      *                 role: "role",

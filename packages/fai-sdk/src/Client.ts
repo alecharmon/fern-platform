@@ -52,7 +52,7 @@ export class FernFaiClient {
                 {
                     "X-Fern-Language": "JavaScript",
                     "X-Fern-SDK-Name": "@fern-api/fai-sdk",
-                    "X-Fern-SDK-Version": "0.0.81",
+                    "X-Fern-SDK-Version": "0.0.82",
                     "X-Fern-Runtime": core.RUNTIME.type,
                     "X-Fern-Runtime-Version": core.RUNTIME.version,
                 },

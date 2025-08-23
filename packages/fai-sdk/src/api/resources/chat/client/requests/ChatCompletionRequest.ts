@@ -7,7 +7,7 @@ import * as FernFai from "../../../../index.js";
 /**
  * @example
  *     {
- *         model: undefined,
+ *         model: "claude-4-sonnet-20250514",
  *         system_prompt: undefined,
  *         messages: [{
  *                 role: "role",
@@ -19,7 +19,10 @@ import * as FernFai from "../../../../index.js";
  *     }
  */
 export interface ChatCompletionRequest {
-    model?: string;
+    /** The model to use for the chat completion. */
+    model: FernFai.LanguageModel;
+    /** The system prompt to use for the chat completion. */
     system_prompt?: string;
+    /** The messages to use for the chat completion. */
     messages: FernFai.ChatTurn[];
 }
