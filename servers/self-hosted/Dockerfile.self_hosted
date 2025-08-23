@@ -98,8 +98,7 @@ COPY docs_bundle.tar.gz .
 RUN mkdir -p /nextapp && \
     tar -xzf docs_bundle.tar.gz -C /nextapp && \
     cd /nextapp && \
-    node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
-    pnpm add esbuild
+    node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
 
 # ----------- End nextapp setup -------------
 
