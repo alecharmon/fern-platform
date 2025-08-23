@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactElement, ReactNode } from "react";
 
-import { FernTooltip, FernTooltipProvider } from "@fern-docs/components";
+import { FernTooltip } from "@fern-docs/components";
 
 interface TooltipProps {
   tip: string | ReactNode;
@@ -12,13 +12,22 @@ export function Tooltip({
   children,
   tip,
   side = "top",
-  sideOffset = 6,
+  sideOffset = 4,
 }: PropsWithChildren<TooltipProps>): ReactElement<any> {
   return (
-    <FernTooltipProvider delayDuration={0}>
-      <FernTooltip content={tip} side={side} sideOffset={sideOffset}>
+    <FernTooltip
+      content={tip}
+      side={side}
+      sideOffset={sideOffset}
+      delayDuration={0}
+      className="p-0.5"
+    >
+      <span
+        className="inline-block cursor-help underline decoration-dashed underline-offset-2"
+        style={{ position: "relative" }}
+      >
         {children}
-      </FernTooltip>
-    </FernTooltipProvider>
+      </span>
+    </FernTooltip>
   );
 }
