@@ -10,3 +10,7 @@ class ChatMessage(BaseModel):
 
     def to_dict(self) -> Dict[str, str]:
         return {"role": self.role, "content": self.content}
+
+
+class Citation(BaseModel):
+    document: str

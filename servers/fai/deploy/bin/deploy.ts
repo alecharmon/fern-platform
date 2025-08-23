@@ -35,6 +35,7 @@ async function main() {
             TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
             OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
             ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
+            COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
           },
           {
             env: { account: "985111089818", region: "us-east-1" },
@@ -56,6 +57,7 @@ async function main() {
             TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
             OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
             ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
+            COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
           },
           {
             env: { account: "985111089818", region: "us-east-1" },
@@ -77,6 +79,7 @@ async function main() {
             TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
             OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
             ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
+            COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
           },
           {
             env: { account: "985111089818", region: "us-east-1" },

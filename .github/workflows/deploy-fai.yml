@@ -16,6 +16,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
       POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
@@ -29,6 +30,7 @@ jobs:
           cd servers/fai
           echo "TURBOPUFFER_API_KEY=${{ env.TURBOPUFFER_API_KEY }}" >> .env
           echo "ANTHROPIC_API_KEY=${{ env.ANTHROPIC_API_KEY }}" >> .env
+          echo "COHERE_API_KEY=${{ env.COHERE_API_KEY }}" >> .env
           echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> .env
           echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
       - name: Deploy to prod

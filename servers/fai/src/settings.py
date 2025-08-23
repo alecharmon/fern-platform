@@ -19,6 +19,7 @@ LOGGER = logging.getLogger()
 
 class Variables:
     ANTHROPIC_API_KEY: Optional[str] = os.environ.get("ANTHROPIC_API_KEY")
+    COHERE_API_KEY: Optional[str] = os.environ.get("COHERE_API_KEY")
     OPENAI_API_KEY: Optional[str] = os.environ.get("OPENAI_API_KEY")
     POSTGRES_DATABASE_URL: Optional[str] = os.environ.get("POSTGRES_DATABASE_URL")
     TURBOPUFFER_API_KEY: Optional[str] = os.environ.get("TURBOPUFFER_API_KEY")
