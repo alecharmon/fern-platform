@@ -7,4 +7,5 @@ import * as FernRegistry from "../../../../../../../index.js";
 export interface ChangelogItem {
     date: string;
     pageId: FernRegistry.PageId;
+    tags: string[] | undefined;
 }

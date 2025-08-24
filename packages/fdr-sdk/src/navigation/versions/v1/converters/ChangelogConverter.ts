@@ -162,6 +162,7 @@ export class ChangelogNavigationConverter {
         viewers: undefined,
         orphaned: undefined,
         featureFlags: undefined,
+        tags: item.tags,
       };
     });
   }

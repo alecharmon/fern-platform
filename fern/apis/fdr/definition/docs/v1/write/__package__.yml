@@ -343,6 +343,7 @@ types:
       date: date
       pageId: rootCommons.PageId
       hidden: optional<boolean>
+      tags: optional<list<string>>
 
   DocsSection:
     extends: NavigationNodeMetadata

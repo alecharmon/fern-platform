@@ -72,7 +72,10 @@ types:
       canonical-url:
         type: optional<string>
         docs: The canonical URL of the page. This is used for the <link rel="canonical"> tag in the HTML.
-
+      tags:
+        type: optional<seo.StringOrStringList>
+        docs: Tags for the page. This is used to group and filter changelog pages.
+  
   Logo:
     discriminated: false
     union:

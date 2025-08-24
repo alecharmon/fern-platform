@@ -231,6 +231,7 @@ types:
     properties:
       type: literal<"changelogEntry">
       date: date
+      tags: optional<list<string>>
 
   ApiReferenceNode:
     extends:

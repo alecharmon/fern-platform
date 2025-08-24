@@ -576,6 +576,7 @@ export class FernNavigationV1ToLatest {
       viewers: node.viewers,
       orphaned: node.orphaned,
       featureFlags: node.featureFlags,
+      tags: node.tags,
     };
     return latest;
   };

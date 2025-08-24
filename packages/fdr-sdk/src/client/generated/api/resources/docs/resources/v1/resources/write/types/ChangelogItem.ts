@@ -8,4 +8,5 @@ export interface ChangelogItem {
     date: string;
     pageId: FernRegistry.PageId;
     hidden: boolean | undefined;
+    tags: string[] | undefined;
 }

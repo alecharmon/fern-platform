@@ -312,6 +312,7 @@ types:
     properties:
       date: date
       pageId: rootCommons.PageId
+      tags: optional<list<string>>
 
   DocsSection:
     extends: NavigationNodeMetadata

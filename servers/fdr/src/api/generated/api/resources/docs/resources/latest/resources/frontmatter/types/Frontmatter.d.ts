@@ -45,4 +45,6 @@ export interface Frontmatter extends FernRegistry.docs.latest.WithMetadataConfig
     excerpt: string | undefined;
     /** The canonical URL of the page. This is used for the <link rel="canonical"> tag in the HTML. */
     "canonical-url": string | undefined;
+    /** Tags for the page. This is used to group and filter changelog pages. */
+    tags: FernRegistry.docs.latest.StringOrStringList | undefined;
 }

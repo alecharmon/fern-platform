@@ -9,4 +9,5 @@ export interface ChangelogEntryNode
         FernRegistry.navigation.latest.WithPage {
     type: "changelogEntry";
     date: string;
+    tags: string[] | undefined;
 }

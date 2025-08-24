@@ -231,6 +231,7 @@ function toChangelogDb(
     items: writeShape.items.map((item) => ({
       date: item.date,
       pageId: item.pageId,
+      tags: item.tags,
     })),
     pageId: writeShape.pageId,
     urlSlug:
@@ -267,6 +268,7 @@ export function transformNavigationItemForDb(
                 items: writeShape.changelog.items.map((item) => ({
                   date: item.date,
                   pageId: item.pageId,
+                  tags: item.tags,
                 })),
                 pageId: writeShape.changelog.pageId,
                 urlSlug: writeShape.changelog.urlSlug,
