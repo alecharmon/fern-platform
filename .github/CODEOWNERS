@@ -1,1 +1,7 @@
-* @dsinghvi
+packages/fern-dashboard/* @sbawabe @stephencme
+packages/fai-sdk/* @eyw520
+packages/fern-docs/* @coltondotio @chdeskur
+
+servers/fai/* @eyw520
+servers/fdr/* @dsinghvi
+servers/mdx-bundler/* @chdeskur
