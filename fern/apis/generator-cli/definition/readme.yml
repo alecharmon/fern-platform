@@ -24,6 +24,7 @@ types:
       referenceMarkdownPath: optional<string>
       requirements: optional<list<string>>
       disabledFeatures: optional<list<feature.FeatureId>>
+      whiteLabel: optional<boolean>
       features:
         docs: |
           Specifies the list of features supported by a specific generator.

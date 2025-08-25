@@ -21,6 +21,7 @@ const CONFIG: FernGeneratorCli.ReadmeConfig = {
             advanced: true,
         },
     ],
+    whiteLabel: true
 };
 
 export default CONFIG;

@@ -22,6 +22,7 @@ export interface ReadmeConfig {
     referenceMarkdownPath?: string;
     requirements?: string[];
     disabledFeatures?: FernGeneratorCli.FeatureId[];
+    whiteLabel?: boolean;
     /**
      * Specifies the list of features supported by a specific generator.
      * The features are rendered in the order they're specified.

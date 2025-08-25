@@ -248,7 +248,9 @@ export class ReadmeGenerator {
         bannerLink: this.readmeConfig.bannerLink,
       });
     }
-    await this.writeFernShield({ writer });
+    if (!this.isWhiteLabel()) {
+      await this.writeFernShield({ writer });
+    }
     if (this.readmeConfig.language != null) {
       await this.writeShield({
         writer,
@@ -257,6 +259,10 @@ export class ReadmeGenerator {
     }
     await writer.writeLine();
     await this.writeIntro({ writer });
+  }
+
+  private isWhiteLabel(): boolean {
+    return this.readmeConfig.whiteLabel ?? false;
   }
 
   private async writeBanner({

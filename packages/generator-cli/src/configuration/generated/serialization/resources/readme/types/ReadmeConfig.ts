@@ -24,6 +24,7 @@ export const ReadmeConfig: core.serialization.ObjectSchema<
     referenceMarkdownPath: core.serialization.string().optional(),
     requirements: core.serialization.list(core.serialization.string()).optional(),
     disabledFeatures: core.serialization.list(FeatureId).optional(),
+    whiteLabel: core.serialization.boolean().optional(),
     features: core.serialization.list(ReadmeFeature).optional(),
 });
 
@@ -39,6 +40,7 @@ export declare namespace ReadmeConfig {
         referenceMarkdownPath?: string | null;
         requirements?: string[] | null;
         disabledFeatures?: FeatureId.Raw[] | null;
+        whiteLabel?: boolean | null;
         features?: ReadmeFeature.Raw[] | null;
     }
 }
