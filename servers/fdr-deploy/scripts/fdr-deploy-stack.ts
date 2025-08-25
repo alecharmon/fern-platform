@@ -10,7 +10,7 @@ import {
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
-import { Alarm } from "aws-cdk-lib/aws-cloudwatch";
+import { Alarm, ComparisonOperator } from "aws-cdk-lib/aws-cloudwatch";
 import * as actions from "aws-cdk-lib/aws-cloudwatch-actions";
 import { IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import {
@@ -497,7 +497,7 @@ export class FdrDeployStack extends Stack {
         cluster,
         cpu: 4096,
         memoryLimitMiB: 8192,
-        desiredCount: 4, // for fallback on failure
+        desiredCount: 2, // reduced from 4 to improve stability during deployment
         securityGroups: [mdxBundlerSg],
         taskImageOptions: {
           image: (() => {
@@ -518,6 +518,16 @@ export class FdrDeployStack extends Stack {
           })(),
           environment: {
             NODE_ENV: "production",
+            // add Node 22 specific optimizations
+            NODE_OPTIONS: "--max-old-space-size=6144 --enable-source-maps",
+            // increase startup timeout for Node 22
+            STARTUP_TIMEOUT: "300000",
+            // add Node 22 specific environment variables for better stability
+            UV_THREADPOOL_SIZE: "32",
+            NODE_NO_WARNINGS: "1",
+            // add health check specific variables
+            HEALTH_CHECK_PATH: "/health",
+            HEALTH_CHECK_TIMEOUT: "180000",
           },
           containerName: MDX_BUNDLER_CONTAINER_NAME,
           containerPort: 8080,
@@ -544,9 +554,22 @@ export class FdrDeployStack extends Stack {
       }
     );
 
+    // configure deployment settings for better stability
+    const cfnService = mdxBundlerService.service.node.defaultChild as any;
+    if (cfnService && cfnService.deploymentConfiguration) {
+      cfnService.deploymentConfiguration = {
+        maximumPercent: 100, // reduced from 200 to prevent overwhelming
+        minimumHealthyPercent: 50,
+        deploymentCircuitBreaker: {
+          enable: true,
+          rollback: true, // enable automatic rollback on failures
+        },
+      };
+    }
+
     mdxBundlerService.targetGroup.setAttribute(
       "deregistration_delay.timeout_seconds",
-      "120" // allow bundling to finish if deregistered
+      "180" // increased from 120 to allow more time for bundling to finish
     );
 
     mdxBundlerService.loadBalancer.setAttribute(
@@ -558,9 +581,10 @@ export class FdrDeployStack extends Stack {
       healthyHttpCodes: "200",
       path: "/health",
       port: "8080",
-      timeout: Duration.seconds(120),
-      interval: Duration.seconds(150),
-      unhealthyThresholdCount: 5,
+      timeout: Duration.seconds(180), // increased from 120 for Node 22
+      interval: Duration.seconds(180), // increased from 150 for Node 22
+      unhealthyThresholdCount: 3, // reduced from 5 to fail faster
+      healthyThresholdCount: 2, // require 2 successful checks before marking healthy
     });
 
     const mdxBundlerLbResponseTimeAlarm = new Alarm(

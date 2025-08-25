@@ -32,6 +32,8 @@ RUN pnpm install --no-frozen-lockfile
 # Build
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
+
+RUN pnpm --filter @fern-api/ui-core-utils compile
 RUN pnpm --filter @fern-docs/mdx compile
 RUN pnpm --filter @fern-platform/mdx-bundler bundler:build
 
