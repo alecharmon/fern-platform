@@ -36,7 +36,7 @@
     "esbuild": "0.25.0",
     "estree-util-to-js": "^2.0.0",
     "estree-walker": "^3.0.3",
-    "express": "^4.21.2",
+    "express": "^5.0.0",
     "google": "link:next/font/google",
     "hast-util-properties-to-mdx-jsx-attributes": "^1.0.0",
     "hast-util-to-estree": "^3.1.1",
