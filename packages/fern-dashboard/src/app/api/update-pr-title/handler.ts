@@ -18,11 +18,13 @@ export default async function updatePrTitle(request: {
 }> {
   const { owner, repo } = request;
 
-  const octokit = await getFernBotOctokitForRepo(owner, repo);
+  const octokitResult = await getFernBotOctokitForRepo(owner, repo);
 
-  if (octokit == null) {
-    return { success: false, error: "Failed to get GitHub client" };
+  if (!octokitResult.ok) {
+    throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
   }
+
+  const octokit = octokitResult.octokit;
 
   try {
     // First, find the PR for the branch

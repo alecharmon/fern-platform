@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { orgNameValidator } from "@/app/api/utils/validators";
 import { withGithubAuth } from "@/app/services/dal/github/middleware";
-import {
-  GithubAuthContext,
-  GithubIdentificationScheme,
-} from "@/app/services/dal/github/types";
+import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { ResolvedReturnType } from "@/utils/types";
 
@@ -19,6 +17,7 @@ export declare namespace postGitCommit {
 
 export const PostGitCommitRequest = GithubIdentificationScheme.and(
   z.object({
+    orgName: orgNameValidator,
     owner: z.string(),
     repo: z.string(),
     branch: z.string(),
@@ -52,22 +51,18 @@ export const POST = withZodValidation(
   async (
     req: NextRequest,
     validatedBody: z.infer<typeof PostGitCommitRequest>
-  ) =>
-    withGithubAuth(
-      async (_req: NextRequest, { repoData }: GithubAuthContext) => {
-        const { branch, message, files } = validatedBody;
-        const { owner, repo } = repoData;
+  ) => {
+    const { orgName, branch, message, files, ...repoData } = validatedBody;
 
-        // Call the actual business logic handler
-        return NextResponse.json(
-          await handler({
-            owner,
-            repo,
-            branch,
-            message,
-            files,
-          })
-        );
-      }
-    )(req, validatedBody)
+    return withGithubAuth(req, orgName, repoData, async ({ owner, repo }) => {
+      const result = await handler({
+        owner,
+        repo,
+        branch,
+        message,
+        files,
+      });
+      return NextResponse.json(result);
+    });
+  }
 );

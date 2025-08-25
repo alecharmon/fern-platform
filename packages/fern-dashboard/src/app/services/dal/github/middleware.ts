@@ -3,97 +3,132 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
+import { Auth0OrgName } from "@/app/services/auth0/types";
+import { getValidationErrorMessage } from "@/utils/errors";
 
-import { deriveRepoIdentifier, normalizeRepoData } from "./request-utils";
-import type { AuthenticatedHandler, GithubAuthContext } from "./types";
+import { getOwnerAndRepoFromGithubUrl } from "../../github/github";
+import { assertUserHasOrganizationAccess } from "../organization";
+import type { GithubIdentificationSchemeType, RepoIdentifier } from "./types";
 import { validateGithubRepoAccess } from "./validators";
 
+export interface ParsedRepoData {
+  owner: string;
+  repo: string;
+  githubUrl: string;
+}
+
 /**
- * Higher-order function that wraps API route handlers with GitHub authentication
+ * Validates user authentication, organization membership, and GitHub repository access,
+ * then executes authenticated code
  *
- * This middleware:
- * 1. Validates user session
- * 2. Extracts repository data from request
- * 3. Validates GitHub access permissions
- * 4. Calls the wrapped handler with validated context
+ * This function:
+ * 1. Validates user session authentication
+ * 2. Confirms user is a member of the specified Auth0 organization
+ * 3. Parses repository information from GithubIdentificationScheme
+ * 4. Validates GitHub access permissions for the specified organization and repository
+ * 5. Executes the provided callback with parsed repo data if all validations pass
+ * 6. Returns appropriate HTTP status codes if any validation fails
  *
- * @param handler - The actual route handler to wrap
- * @returns A new handler with GitHub authentication built-in
+ * @param req - The NextRequest object for session validation
+ * @param orgName - The organization name
+ * @param repoData - Repository data matching GithubIdentificationScheme (either githubUrl or owner/repo)
+ * @param callback - The authenticated code to execute after validation passes
+ * @returns NextResponse with either the callback result or an error
  *
  * @example
- * export const POST = withGithubAuth(async (req, { userId, repoData }) => {
- *   // Handler only runs if GitHub auth passes
- *   const result = await someGitOperation({ userId, ...repoData });
+ * const { orgName, ...repoData } = validatedBody;
+ * return withGithubAuth(req, orgName, repoData, async ({ owner, repo, githubUrl }) => {
+ *   const result = await someGitOperation({ owner, repo });
  *   return NextResponse.json(result);
  * });
  */
-export function withGithubAuth<TAdditionalContext = {}>(
-  handler: AuthenticatedHandler<TAdditionalContext>
-) {
-  return async (req: NextRequest, parsedBody?: any): Promise<NextResponse> => {
-    try {
-      // Step 1: Validate user session
-      const sessionResult = await maybeGetCurrentSession(req);
-      if (sessionResult.errorResponse != null) {
-        return sessionResult.errorResponse;
-      }
+export async function withGithubAuth(
+  req: NextRequest,
+  orgName: Auth0OrgName,
+  repoData: GithubIdentificationSchemeType,
+  callback: (parsedRepo: ParsedRepoData) => Promise<NextResponse> | NextResponse
+): Promise<NextResponse> {
+  // Validate user session
+  const sessionResult = await maybeGetCurrentSession(req);
+  if (sessionResult.errorResponse != null) {
+    return sessionResult.errorResponse;
+  }
+  const { userId } = sessionResult.data;
 
-      const { userId } = sessionResult.data;
+  // Validate user organization membership
+  try {
+    await assertUserHasOrganizationAccess({ userId, orgName });
+  } catch (_) {
+    return NextResponse.json(
+      { error: "User is not a member of the specified organization" },
+      { status: 403 }
+    );
+  }
 
-      // Step 2: Derive the repo identifier
-      const data = parsedBody ?? (await req.json());
-      const identifierResult = await deriveRepoIdentifier(data);
+  // Parse the repo data to create a RepoIdentifier and extract information
+  let identifier: RepoIdentifier;
+  let owner: string;
+  let repo: string;
+  let githubUrl: string;
 
-      if (!identifierResult.success) {
-        return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-      }
+  if ("githubUrl" in repoData) {
+    // It's a GitHub URL
+    githubUrl = repoData.githubUrl;
+    identifier = { type: "url", githubUrl };
 
-      const { identifier } = identifierResult;
+    const parsed = getOwnerAndRepoFromGithubUrl(githubUrl);
 
-      // Step 3: Normalize the repo data
-      const repoData = normalizeRepoData(identifier);
-
-      // Step 4: Validate that the user has access to the repo
-      const validation = await validateGithubRepoAccess(userId, identifier);
-
-      if (!validation.repoExists) {
-        return NextResponse.json(
-          { error: "Repository not found or not accessible" },
-          { status: 404 }
-        );
-      }
-      if (!validation.hasWriteAccess) {
-        return NextResponse.json(
-          { error: "User does not have write permission to this repo" },
-          { status: 403 }
-        );
-      }
-      if (!validation.hasFernBotInstalled) {
-        return NextResponse.json(
-          { error: "Fern bot is not installed on this repo" },
-          { status: 403 }
-        );
-      }
-
-      // Step 5: Create validated context
-      const context: GithubAuthContext = {
-        userId,
-        repoData,
-      };
-
-      // Step 6: Call the wrapped handler with validated context
-      return await handler(
-        req,
-        context as GithubAuthContext & TAdditionalContext
-      );
-    } catch (error) {
-      // Handle unexpected errors
-      console.error("GitHub auth middleware error:", error);
-
+    if (parsed.owner == null || parsed.repo == null) {
       return NextResponse.json(
-        { error: "Authentication failed" },
-        { status: 500 }
+        { error: "Invalid GitHub URL format" },
+        { status: 400 }
       );
+    } else {
+      owner = parsed.owner;
+      repo = parsed.repo;
     }
-  };
+  } else {
+    // It's an object with owner and repo
+    owner = repoData.owner;
+    repo = repoData.repo;
+    githubUrl = `https://github.com/${owner}/${repo}`;
+    identifier = { type: "owner-repo", owner, repo };
+  }
+
+  // Validate GitHub access
+  const validation = await validateGithubRepoAccess(orgName, identifier);
+
+  if (!validation.ok) {
+    const { error } = validation;
+    const message = getValidationErrorMessage(error);
+    let status: number;
+
+    switch (error.type) {
+      case "FERN_BOT_NOT_INSTALLED":
+        status = 403;
+        break;
+      case "FERN_CONFIG_JSON_ORG_MISMATCH":
+        status = 403;
+        break;
+      case "FERN_CONFIG_JSON_MISSING":
+        status = 404;
+        break;
+      case "FERN_CONFIG_JSON_MALFORMED":
+        status = 400;
+        break;
+      case "MALFORMED_GITHUB_URL":
+        status = 400;
+        break;
+      case "UNEXPECTED_ERROR":
+        status = 500;
+        break;
+      default:
+        status = 500;
+    }
+
+    return NextResponse.json({ error: message }, { status });
+  }
+
+  // If we reach here, validation passed - execute the callback with parsed repo data
+  return await callback({ owner, repo, githubUrl });
 }

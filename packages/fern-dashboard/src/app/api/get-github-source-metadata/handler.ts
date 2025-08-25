@@ -37,11 +37,12 @@ export default async function getGithubSourceMetadataHandler({
       throw new Error("NoOwnerOrRepo");
     }
 
-    const octokit = await getFernBotOctokitForRepo(owner, repo);
-    if (octokit == null) {
+    const octokitResult = await getFernBotOctokitForRepo(owner, repo);
+    if (!octokitResult.ok) {
       // Don't cache this failure, so throw to skip cache
-      throw new Error("NoOctokit");
+      throw new Error(`NoOctokit: ${octokitResult.error.type}`);
     }
+    const octokit = octokitResult.octokit;
 
     try {
       const response = await octokit.request("GET /repos/{owner}/{repo}", {
@@ -49,10 +50,8 @@ export default async function getGithubSourceMetadataHandler({
         repo,
       });
       // check if fern-bot is installed on this app
-      const fernBotHasInstallationId = !!(await getFernBotInstallationId(
-        owner,
-        repo
-      ));
+      const installationResult = await getFernBotInstallationId(owner, repo);
+      const fernBotHasInstallationId = installationResult.ok;
 
       return {
         githubUrl,

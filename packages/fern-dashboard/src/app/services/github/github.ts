@@ -1,9 +1,11 @@
+import { Auth0OrgName } from "../auth0/types";
 import { DashboardApiClient } from "../dashboard-api/client";
 
 export const DEFAULT_PR_TITLE = "Visual Editor: Update";
 export const DEFAULT_COMMIT_MESSAGE = "Visual Editor: Update";
 
 export async function handleCreatePr({
+  orgName,
   branch,
   owner,
   repo,
@@ -11,6 +13,7 @@ export async function handleCreatePr({
   title,
   onAiGenerationComplete,
 }: {
+  orgName: Auth0OrgName;
   branch: string;
   owner: string;
   repo: string;
@@ -20,6 +23,7 @@ export async function handleCreatePr({
 }): Promise<string | undefined> {
   try {
     const response = await DashboardApiClient.postCreatePr({
+      orgName,
       owner,
       repo,
       head: branch,
@@ -31,6 +35,7 @@ export async function handleCreatePr({
       try {
         // No need to await this, we just want to try to generate a PR description.
         void handleGeneratePrDescription({
+          orgName,
           branch,
           owner,
           repo,
@@ -55,11 +60,13 @@ export async function handleCreatePr({
 }
 
 export async function handleGeneratePrDescription({
+  orgName,
   branch,
   owner,
   repo,
   baseBranch,
 }: {
+  orgName: Auth0OrgName;
   branch: string;
   owner: string;
   repo: string;
@@ -70,6 +77,7 @@ export async function handleGeneratePrDescription({
   newTitle?: string;
 }> {
   return await DashboardApiClient.generatePrDescription({
+    orgName,
     owner,
     repo,
     branch,

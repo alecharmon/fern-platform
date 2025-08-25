@@ -15,13 +15,6 @@ export async function checkFernHasAccessToRepo(githubUrl: string) {
     return false;
   }
 
-  try {
-    const fernBotOctokit = await getFernBotOctokitForRepo(owner, repo);
-    if (fernBotOctokit == null) {
-      return false;
-    }
-    return true;
-  } catch (_error) {
-    return false;
-  }
+  const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
+  return fernBotResult.ok;
 }

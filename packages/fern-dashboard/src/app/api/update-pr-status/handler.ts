@@ -38,11 +38,13 @@ export default async function updatePrStatus(request: {
 > {
   const { owner, repo } = request;
 
-  const octokit = await getFernBotOctokitForRepo(owner, repo);
+  const octokitResult = await getFernBotOctokitForRepo(owner, repo);
 
-  if (octokit == null) {
-    return { success: false, error: "Failed to get GitHub client" };
+  if (!octokitResult.ok) {
+    throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
   }
+
+  const octokit = octokitResult.octokit;
 
   try {
     const pr = await getPrForBranch({

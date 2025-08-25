@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { orgNameValidator } from "@/app/api/utils/validators";
 import { withGithubAuth } from "@/app/services/dal/github/middleware";
-import {
-  type GithubAuthContext,
-  GithubIdentificationScheme,
-} from "@/app/services/dal/github/types";
+import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { ResolvedReturnType } from "@/utils/types";
 
@@ -19,6 +17,7 @@ export declare namespace validateGithubBranch {
 
 const ValidateGithubBranchRequest = GithubIdentificationScheme.and(
   z.object({
+    orgName: orgNameValidator,
     branchName: z.string(),
   })
 );
@@ -28,14 +27,12 @@ export const POST = withZodValidation(
   async (
     req: NextRequest,
     validatedBody: z.infer<typeof ValidateGithubBranchRequest>
-  ) =>
-    withGithubAuth(
-      async (_req: NextRequest, { repoData }: GithubAuthContext) => {
-        const { branchName } = validatedBody;
-        const { owner, repo } = repoData;
+  ) => {
+    const { orgName, branchName, ...repoData } = validatedBody;
 
-        const response = await handler({ owner, repo, branchName });
-        return NextResponse.json(response);
-      }
-    )(req, validatedBody)
+    return withGithubAuth(req, orgName, repoData, async ({ owner, repo }) => {
+      const response = await handler({ owner, repo, branchName });
+      return NextResponse.json(response);
+    });
+  }
 );

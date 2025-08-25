@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { ChevronDownIcon } from "lucide-react";
 
+import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { GithubPrStatus } from "@/app/services/github/types";
 import { useGitPrInfo } from "@/providers/GitPRContext";
@@ -28,6 +29,7 @@ export function PRStatusDropdown({
   baseBranch,
 }: PRStatusDropdownProps) {
   const { prStatus, setPrStatus, loading } = useGitPrInfo();
+  const orgName = useOrgName();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStatusChange = useCallback(
@@ -46,6 +48,7 @@ export function PRStatusDropdown({
 
       try {
         const data = await DashboardApiClient.updatePrStatus({
+          orgName,
           owner,
           repo,
           branch,
@@ -65,7 +68,7 @@ export function PRStatusDropdown({
         setIsUpdating(false);
       }
     },
-    [owner, repo, branch, prStatus, gitPrUrl, setPrStatus, baseBranch]
+    [owner, repo, branch, prStatus, gitPrUrl, setPrStatus, baseBranch, orgName]
   );
 
   // If the PR does not yet exist, we'll pretend it's a draft

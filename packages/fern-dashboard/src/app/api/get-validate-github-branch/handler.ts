@@ -14,13 +14,14 @@ export default async function validateGithubBranchHandler({
   repo: string;
   branchName: string;
 }): Promise<ValidateGithubBranchResponse> {
-  const octokit = await getFernBotOctokitForRepo(owner, repo);
-  if (octokit == null) {
-    return {
-      exists: false,
-      error: "Failed to get Octokit instance",
-    };
+  const octokitResult = await getFernBotOctokitForRepo(owner, repo);
+  if (!octokitResult.ok) {
+    throw new Error(
+      `Failed to get Octokit instance: ${octokitResult.error.type}`
+    );
   }
+
+  const octokit = octokitResult.octokit;
 
   if (!owner || !repo) {
     return {

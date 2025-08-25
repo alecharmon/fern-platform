@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { GitPullRequest, Loader2 } from "lucide-react";
 
+import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { TeleprompterTextOnHover } from "@/components/ui/TeleprompterTextOnHover";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ export function PRTitleEditor({
 }: PRTitleEditorProps) {
   const { prTitle: serverTitle, setPrTitle, loading } = useGitPrInfo();
   const isEditingDisabled = useEditingDisabled();
+  const orgName = useOrgName();
   const [localTitle, setLocalTitle] = useState<string>(serverTitle ?? "");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -58,6 +60,7 @@ export function PRTitleEditor({
 
       try {
         const data = await DashboardApiClient.updatePrTitle({
+          orgName,
           owner,
           repo,
           branch,
@@ -87,6 +90,7 @@ export function PRTitleEditor({
       setPrTitle,
       baseBranch,
       isEditingDisabled,
+      orgName,
     ]
   );
 

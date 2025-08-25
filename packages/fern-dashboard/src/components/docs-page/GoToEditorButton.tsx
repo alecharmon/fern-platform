@@ -12,8 +12,8 @@ import {
   FernTooltipProvider,
 } from "@fern-docs/components/FernTooltip";
 
+import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { GithubSourceRepo } from "@/app/services/github/types";
 import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
@@ -27,14 +27,12 @@ import {
 import { Button } from "../ui/button";
 
 export function GoToEditorButton({
-  orgName,
   docsUrl,
   session,
   sourceRepo,
   disabled = false,
   isValidatingSource,
 }: {
-  orgName: Auth0OrgName;
   docsUrl: DocsUrl;
   session: Auth0SessionData;
   sourceRepo?: GithubSourceRepo;
@@ -42,6 +40,7 @@ export function GoToEditorButton({
   disabledReason?: string;
   isValidatingSource?: boolean;
 }) {
+  const orgName = useOrgName();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -89,6 +88,7 @@ export function GoToEditorButton({
     // Very important - the branch creation needs to be finished before navigation
     // TODO: Move the branch creation logic into the editor page
     DashboardApiClient.postCreateBranch({
+      orgName,
       owner: sourceRepo.owner,
       repo: sourceRepo.repo,
       branch: newBranchName,
@@ -101,10 +101,18 @@ export function GoToEditorButton({
           throw new Error();
         }
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("Error creating branch in GoToEditorButton:", {
+          error: e,
+          orgName,
+          owner: sourceRepo?.owner,
+          repo: sourceRepo?.repo,
+          branch: newBranchName,
+          baseBranch: sourceRepo?.baseBranch,
+        });
         ErrorCreateBranchToast();
       });
-  }, [sourceRepo, newBranchName, editorSlug, router]);
+  }, [sourceRepo, newBranchName, editorSlug, orgName, router]);
 
   return (
     <div className="flex w-fit flex-row items-center gap-2">

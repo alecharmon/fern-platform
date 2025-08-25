@@ -8,7 +8,10 @@ import getMyDocsSitesHandler from "@/app/api/get-my-docs-sites/handler";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsGithubUrl from "@/app/services/dal/github/getDocsGithubUrl";
-import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import {
+  GithubRepoValidationError,
+  validateGithubRepoAccess,
+} from "@/app/services/dal/github/validators";
 import { GithubLogo } from "@/components/auth/GithubLogo";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import {
@@ -60,9 +63,13 @@ export default async function Page(props: {
 
   let githubUrl = undefined;
   let githubAuthState: GithubAuthState = {
-    repoExists: false,
-    hasWriteAccess: false,
-    hasFernBotInstalled: false,
+    validationResult: {
+      ok: false,
+      error: {
+        type: "UNEXPECTED_ERROR",
+        message: "",
+      },
+    },
     sourceRepo: undefined,
     isLoading: false,
   };
@@ -78,7 +85,7 @@ export default async function Page(props: {
     // If we have a GitHub URL, validate the auth state
     if (githubUrl) {
       try {
-        const validation = await validateGithubRepoAccess(session.user.sub, {
+        const validation = await validateGithubRepoAccess(orgName, {
           type: "url",
           githubUrl,
         });
@@ -86,11 +93,7 @@ export default async function Page(props: {
         let sourceRepo = undefined;
 
         // If user has all required access, fetch the source repo metadata
-        if (
-          validation.repoExists &&
-          validation.hasWriteAccess &&
-          validation.hasFernBotInstalled
-        ) {
+        if (validation.ok) {
           try {
             sourceRepo = await getGithubSourceMetadataHandler({
               githubUrl,
@@ -103,9 +106,7 @@ export default async function Page(props: {
         }
 
         githubAuthState = {
-          repoExists: validation.repoExists,
-          hasWriteAccess: validation.hasWriteAccess,
-          hasFernBotInstalled: validation.hasFernBotInstalled,
+          validationResult: validation,
           sourceRepo,
           isLoading: false,
         };
@@ -151,60 +152,153 @@ export default async function Page(props: {
               <p className="text-muted-foreground text-sm">
                 Modify your documentation without touching code.
               </p>
+              {githubUrl == null && (
+                <p className="text-muted-foreground text-sm">
+                  Connect your repository above to get started.
+                </p>
+              )}
             </div>
 
-            {!githubAuthState.hasFernBotInstalled ? (
-              <>
-                <p className="text-muted-foreground text-sm">
-                  To get started, install the Fern app on your GitHub
-                  repository.
-                </p>
-                <Button asChild>
-                  <a
-                    href="https://github.com/apps/fern-api"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <GithubLogo />
-                    Install
-                  </a>
-                </Button>
-              </>
-            ) : !githubAuthState.hasWriteAccess ? (
-              <WarningNote>
-                You do not have write access to this repo. Contact your Github
-                admin.
-              </WarningNote>
-            ) : !githubAuthState.repoExists ? (
-              <WarningNote>
-                This repo was not found. Please check that the repo exists and
-                that you have access to it.
-              </WarningNote>
-            ) : (
-              <>
-                <GoToEditorButton
-                  orgName={orgName}
-                  docsUrl={docsUrl}
-                  session={session}
-                  sourceRepo={githubAuthState.sourceRepo}
+            {githubUrl != null &&
+              (githubAuthState.validationResult.ok ? (
+                <>
+                  <GoToEditorButton
+                    docsUrl={docsUrl}
+                    session={session}
+                    sourceRepo={githubAuthState.sourceRepo}
+                  />
+                  <p className="text-muted-foreground text-sm">
+                    All sessions will turn into PRs in your Github repo{" "}
+                    <a
+                      href={githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary underline transition-colors"
+                    >
+                      here
+                    </a>
+                    .
+                  </p>
+                </>
+              ) : (
+                <ValidationErrorHandler
+                  error={githubAuthState.validationResult.error}
+                  githubUrl={githubUrl}
                 />
-                <p className="text-muted-foreground text-sm">
-                  All sessions will turn into PRs in your Github repo{" "}
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary underline transition-colors"
-                  >
-                    here
-                  </a>
-                  .
-                </p>
-              </>
-            )}
+              ))}
           </div>
         </Card>
       </div>
     </FeatureFlaggedServerSide>
   );
+}
+
+interface ValidationErrorHandlerProps {
+  error: GithubRepoValidationError;
+  githubUrl?: string;
+}
+
+function ValidationErrorHandler({
+  error,
+  githubUrl,
+}: ValidationErrorHandlerProps) {
+  switch (error.type) {
+    case "FERN_BOT_NOT_INSTALLED":
+      return (
+        <>
+          <p className="text-muted-foreground text-sm">
+            To get started, install the Fern app on your GitHub repository.
+          </p>
+          <Button asChild>
+            <a
+              href="https://github.com/apps/fern-api"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <GithubLogo />
+              Install
+            </a>
+          </Button>
+        </>
+      );
+
+    case "MALFORMED_GITHUB_URL":
+      return (
+        <WarningNote>
+          This repo was not found. Please check that the repo exists and that
+          you have access to it.
+        </WarningNote>
+      );
+
+    case "FERN_CONFIG_JSON_MISSING":
+      return (
+        <WarningNote>
+          Your repository is missing a <code>fern.config.json</code> file.
+          Please ensure your Fern project is properly configured.
+          {githubUrl && (
+            <>
+              {" "}
+              Check your repository{" "}
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary underline transition-colors"
+              >
+                here
+              </a>
+              .
+            </>
+          )}
+        </WarningNote>
+      );
+
+    case "FERN_CONFIG_JSON_MALFORMED":
+      return (
+        <WarningNote>
+          Your <code>fern.config.json</code> file is malformed. Please check the
+          file syntax and ensure it follows the correct format.
+          {githubUrl && (
+            <>
+              {" "}
+              Check your repository{" "}
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary underline transition-colors"
+              >
+                here
+              </a>
+              .
+            </>
+          )}
+        </WarningNote>
+      );
+
+    case "FERN_CONFIG_JSON_ORG_MISMATCH":
+      return (
+        <WarningNote>
+          The organization in your <code>fern.config.json</code> file does not
+          match your current organization.
+        </WarningNote>
+      );
+
+    case "UNEXPECTED_ERROR":
+      return (
+        <WarningNote>
+          {
+            "An unexpected error occurred while attempting to access to this repository. Please try again or contact support if the issue persists."
+          }
+        </WarningNote>
+      );
+
+    default:
+      return (
+        <WarningNote>
+          We were unable to validate access to this repo. Please try again or
+          contact support if the issue persists.
+        </WarningNote>
+      );
+  }
 }

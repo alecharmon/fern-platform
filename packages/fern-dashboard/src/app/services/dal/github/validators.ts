@@ -1,31 +1,38 @@
 import "server-only";
 
-import { Auth0UserID } from "@/app/services/auth0/types";
-import { checkUserHasWritePermissionToRepo } from "@/app/services/dal/github/checkWritePermissionToRepo";
-import { throwDigestibleError } from "@/utils/errors";
+import {
+  getValidationErrorMessage,
+  throwDigestibleError,
+} from "@/utils/errors";
 
-import { checkFernHasAccessToRepo } from "./checkFernHasAccessToRepo";
+import { checkOrgWritePermissionToRepo } from "./checkOrgWritePermissionToRepo";
 import { RepoIdentifier } from "./types";
 
-interface GithubRepoValidation {
-  hasWriteAccess: boolean;
-  hasFernBotInstalled: boolean;
-  repoExists: boolean;
-}
+export type GithubRepoValidationError =
+  | { type: "MALFORMED_GITHUB_URL"; url: string }
+  | { type: "FERN_BOT_NOT_INSTALLED" }
+  | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
+  | { type: "FERN_CONFIG_JSON_MISSING" }
+  | { type: "FERN_CONFIG_JSON_MALFORMED" }
+  | { type: "UNEXPECTED_ERROR"; message: string };
+
+export type GithubRepoValidationResult =
+  | { ok: true }
+  | { ok: false; error: GithubRepoValidationError };
 
 // Cache for GitHub repo validation results
 const githubValidationCache = new Map<
   string,
-  { data: GithubRepoValidation; timestamp: number }
+  { data: GithubRepoValidationResult; timestamp: number }
 >();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-function getCacheKey(userId: Auth0UserID, identifier: RepoIdentifier): string {
+function getCacheKey(orgName: string, identifier: RepoIdentifier): string {
   const repoKey =
     identifier.type === "url"
       ? identifier.githubUrl
       : `${identifier.owner}/${identifier.repo}`;
-  return `${userId}:${repoKey}`;
+  return `${orgName}:${repoKey}`;
 }
 
 function deriveGithubUrl(identifier: RepoIdentifier): string {
@@ -36,10 +43,10 @@ function deriveGithubUrl(identifier: RepoIdentifier): string {
 }
 
 export const validateGithubRepoAccess = async (
-  userId: Auth0UserID,
+  orgName: string,
   identifier: RepoIdentifier
-): Promise<GithubRepoValidation> => {
-  const cacheKey = getCacheKey(userId, identifier);
+): Promise<GithubRepoValidationResult> => {
+  const cacheKey = getCacheKey(orgName, identifier);
   const cached = githubValidationCache.get(cacheKey);
 
   // Return cached result if still fresh
@@ -49,48 +56,28 @@ export const validateGithubRepoAccess = async (
 
   const githubUrl = deriveGithubUrl(identifier);
 
-  // Initialize validation result
-  const validation: GithubRepoValidation = {
-    hasWriteAccess: false,
-    hasFernBotInstalled: false,
-    repoExists: false,
-  };
-
   try {
-    // Check both user permissions and Fern bot access in parallel
-    const [hasWriteAccess, hasFernBotInstalled] = await Promise.allSettled([
-      checkUserHasWritePermissionToRepo(userId, githubUrl),
-      checkFernHasAccessToRepo(githubUrl),
-    ]);
+    const result = await checkOrgWritePermissionToRepo(orgName, githubUrl);
 
-    // Process write permission result
-    if (hasWriteAccess.status === "fulfilled" && hasWriteAccess.value) {
-      validation.hasWriteAccess = true;
-      validation.repoExists = true; // If we have write access, repo exists
-    }
-
-    // Process Fern bot access result
-    if (
-      hasFernBotInstalled.status === "fulfilled" &&
-      hasFernBotInstalled.value
-    ) {
-      validation.hasFernBotInstalled = true;
-      validation.repoExists = true; // If Fern bot has access, repo exists
-    }
+    const validationResult: GithubRepoValidationResult = result.ok
+      ? { ok: true }
+      : { ok: false, error: result.error };
 
     // Cache the validation result
     githubValidationCache.set(cacheKey, {
-      data: validation,
+      data: validationResult,
       timestamp: Date.now(),
     });
 
-    return validation;
-  } catch (_error) {
+    return validationResult;
+  } catch (error) {
     // In case of unexpected errors, cache negative result for shorter duration
-    const failedValidation: GithubRepoValidation = {
-      hasWriteAccess: false,
-      hasFernBotInstalled: false,
-      repoExists: false,
+    const failedValidation: GithubRepoValidationResult = {
+      ok: false,
+      error: {
+        type: "UNEXPECTED_ERROR",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
     };
 
     githubValidationCache.set(cacheKey, {
@@ -103,39 +90,27 @@ export const validateGithubRepoAccess = async (
 };
 
 /**
- * Asserts that the user has required GitHub access for components.
+ * Asserts that the organization has required GitHub access for components.
  *
- * @throws {DigestibleError} if the user does not have required access
+ * @throws {DigestibleError} if the organization does not have required access
  */
 export async function assertGithubAccess(
-  userId: Auth0UserID,
+  orgName: string,
   identifier: RepoIdentifier
 ): Promise<void> {
-  const validation = await validateGithubRepoAccess(userId, identifier);
-  if (!validation.hasFernBotInstalled) {
-    throw throwDigestibleError(
-      new Error("Fern bot is not installed on this repo"),
-      "FERN_BOT_NOT_INSTALLED"
-    );
-  }
+  const validation = await validateGithubRepoAccess(orgName, identifier);
 
-  if (!validation.hasWriteAccess) {
-    throw throwDigestibleError(
-      new Error("User does not have write permission to this repo"),
-      "WRITE_PERMISSION_ERROR"
-    );
-  }
-
-  if (!validation.repoExists) {
-    throw throwDigestibleError(
-      new Error("GitHub repository not found or not accessible"),
-      "REPO_NOT_FOUND"
+  if (!validation.ok) {
+    const { error } = validation;
+    throwDigestibleError(
+      new Error(`${error.type}: ${getValidationErrorMessage(error)}`),
+      error.type
     );
   }
 }
 
 export async function assertGithubAccessByUrl(
-  userId: Auth0UserID,
+  orgName: string,
   githubUrl?: string
 ): Promise<void> {
   if (githubUrl == null) {
@@ -145,5 +120,5 @@ export async function assertGithubAccessByUrl(
     );
   }
   const identifier: RepoIdentifier = { type: "url", githubUrl };
-  await assertGithubAccess(userId, identifier);
+  await assertGithubAccess(orgName, identifier);
 }

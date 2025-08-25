@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Cog, Loader2 } from "lucide-react";
 
+import { GithubRepoValidationResult } from "@/app/services/dal/github/validators";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import { GithubSourceRepo } from "@/app/services/github/types";
 import { DocsUrl } from "@/utils/types";
@@ -13,9 +14,7 @@ import { Button } from "../ui/button";
 import { SetGithubSourcePopover } from "./SetGithubSource";
 
 export interface GithubAuthState {
-  repoExists: boolean;
-  hasWriteAccess: boolean;
-  hasFernBotInstalled: boolean;
+  validationResult: GithubRepoValidationResult;
   sourceRepo?: GithubSourceRepo;
   isLoading?: boolean;
 }

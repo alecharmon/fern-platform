@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { orgNameValidator } from "@/app/api/utils/validators";
 import { withGithubAuth } from "@/app/services/dal/github/middleware";
-import {
-  type GithubAuthContext,
-  GithubIdentificationScheme,
-} from "@/app/services/dal/github/types";
+import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { ResolvedReturnType } from "@/utils/types";
 
@@ -19,6 +17,7 @@ export declare namespace getGithubSourceMetadata {
 
 const GetGithubSourceMetadataRequest = GithubIdentificationScheme.and(
   z.object({
+    orgName: orgNameValidator,
     skipCache: z.boolean().optional(),
   })
 );
@@ -28,14 +27,21 @@ export const POST = withZodValidation(
   async (
     req: NextRequest,
     validatedBody: z.infer<typeof GetGithubSourceMetadataRequest>
-  ) =>
-    withGithubAuth(
-      async (_req: NextRequest, { userId, repoData }: GithubAuthContext) => {
-        const { skipCache } = validatedBody;
-        const { githubUrl } = repoData;
+  ) => {
+    const { orgName, skipCache, ...repoData } = validatedBody;
 
-        const response = await handler({ userId, githubUrl, skipCache });
-        return NextResponse.json(response);
+    return withGithubAuth(req, orgName, repoData, async ({ githubUrl }) => {
+      const { maybeGetCurrentSession } = await import(
+        "@/app/api/utils/maybeGetCurrentSession"
+      );
+      const sessionResult = await maybeGetCurrentSession(req);
+      if (sessionResult.errorResponse != null) {
+        return sessionResult.errorResponse;
       }
-    )(req, validatedBody)
+      const { userId } = sessionResult.data;
+
+      const response = await handler({ userId, githubUrl, skipCache });
+      return NextResponse.json(response);
+    });
+  }
 );

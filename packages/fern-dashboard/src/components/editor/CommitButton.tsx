@@ -14,6 +14,7 @@ import {
   pageDataToMdx,
 } from "@fern-docs/components";
 
+import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import {
   DEFAULT_COMMIT_MESSAGE,
@@ -300,6 +301,7 @@ export function CommitButton() {
   const { branch } = useBranch();
   const isEditingDisabled = useEditingDisabled();
   const { owner, repo, baseBranch } = useGitHubRepo();
+  const orgName = useOrgName();
 
   useEffect(() => {
     // NOTE: This is a temporary solution to persist the PR URL across route changes/refreshes.
@@ -390,6 +392,7 @@ export function CommitButton() {
       ];
 
       const response = await DashboardApiClient.postGitCommit({
+        orgName,
         owner,
         repo,
         branch,
@@ -435,6 +438,7 @@ export function CommitButton() {
           return;
         }
         const newPrUrl = await handleCreatePr({
+          orgName,
           branch,
           owner,
           repo,
@@ -465,6 +469,7 @@ export function CommitButton() {
     owner,
     repo,
     baseBranch,
+    orgName,
   ]);
 
   const commitDisabledReason = useMemo(() => {

@@ -2,30 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { orgNameValidator } from "@/app/api/utils/validators";
 import { withGithubAuth } from "@/app/services/dal/github/middleware";
-import {
-  GithubAuthContext,
-  GithubIdentificationScheme,
-} from "@/app/services/dal/github/types";
+import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { GitHubLoader } from "@/app/services/github/github-loader";
 
 const GetDocsYmlRequest = GithubIdentificationScheme.and(
   z.object({
+    orgName: orgNameValidator,
     branch: z.string(),
   })
 );
 
 export const POST = withZodValidation(
   GetDocsYmlRequest,
-  async (req: NextRequest, validatedBody: z.infer<typeof GetDocsYmlRequest>) =>
-    withGithubAuth(
-      async (_req: NextRequest, { repoData }: GithubAuthContext) => {
-        const { branch } = validatedBody;
-        const { owner, repo } = repoData;
+  async (
+    req: NextRequest,
+    validatedBody: z.infer<typeof GetDocsYmlRequest>
+  ) => {
+    const { orgName, branch, ...repoData } = validatedBody;
 
+    return withGithubAuth(
+      req,
+      orgName,
+      repoData,
+      async ({ owner, repo, githubUrl }) => {
         // Create GitHubLoader instance
-        const gitLoader = new GitHubLoader(repoData.githubUrl);
+        const gitLoader = new GitHubLoader(githubUrl);
 
         // Get the docs.yml file
         const docsYmlContent = await gitLoader.getDocsYml(owner, repo, branch);
@@ -41,5 +45,6 @@ export const POST = withZodValidation(
           docsYmlContent,
         });
       }
-    )(req, validatedBody)
+    );
+  }
 );

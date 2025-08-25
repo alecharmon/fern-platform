@@ -1,63 +1,85 @@
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
 
+export type FernBotOctokitError =
+  | { type: "MISSING_APP_ID" }
+  | { type: "MISSING_PRIVATE_KEY" }
+  | { type: "NOT_INSTALLED"; owner: string; repo: string }
+  | { type: "UNKNOWN_ERROR"; message: string };
+
+export type GetFernBotOctokitForRepoResult =
+  | { ok: true; octokit: Octokit }
+  | { ok: false; error: FernBotOctokitError };
+
+export type GetFernBotInstallationIdResult =
+  | { ok: true; installationId: number }
+  | { ok: false; error: FernBotOctokitError };
+
 /**
  * Gets Octokit for a specific repo where fern-bot is installed. This should then
  * deprecate the use of the `octokit.ts` file.
  *
  * @param owner - The owner of the repository
  * @param repo - The name of the repository
- * @returns The Octokit instance for the fern-bot installation
- * @throws Error if no fern-bot is installed on that repo
- * @throws Error if FERN_BOT_APP_ID or FERN_BOT_PRIVATE_KEY are not defined or defined incorrectly
+ * @returns A discriminated union result with the Octokit instance or an error
  */
-export async function getFernBotOctokitForRepo(owner: string, repo: string) {
+export async function getFernBotOctokitForRepo(
+  owner: string,
+  repo: string
+): Promise<GetFernBotOctokitForRepoResult> {
   const appId = process.env.FERN_BOT_APP_ID;
   const privateKey = process.env.FERN_BOT_PRIVATE_KEY;
 
   if (!appId) {
-    throw new Error("FERN_BOT_APP_ID environment variable is missing");
+    return { ok: false, error: { type: "MISSING_APP_ID" } };
   }
   if (!privateKey) {
-    throw new Error("FERN_BOT_PRIVATE_KEY environment variable is missing");
+    return { ok: false, error: { type: "MISSING_PRIVATE_KEY" } };
   }
 
-  const installationId = await getFernBotInstallationId(owner, repo);
-  if (!installationId) {
-    throw new Error(
-      `No fern-bot installation found for repo ${owner}/${repo}. Please ensure the app is installed on this repository.`
-    );
+  const installationIdResult = await getFernBotInstallationId(owner, repo);
+  if (!installationIdResult.ok) {
+    return { ok: false, error: installationIdResult.error };
   }
 
-  // installation-specific Octokit
-  return new Octokit({
-    authStrategy: createAppAuth,
-    auth: {
-      appId: process.env.FERN_BOT_APP_ID,
-      privateKey: formatPrivateKey(privateKey),
-      installationId: installationId,
-    },
-  });
+  try {
+    const octokit = new Octokit({
+      authStrategy: createAppAuth,
+      auth: {
+        appId,
+        privateKey: formatPrivateKey(privateKey),
+        installationId: installationIdResult.installationId,
+      },
+    });
+    return { ok: true, octokit };
+  } catch (e: any) {
+    return {
+      ok: false,
+      error: { type: "UNKNOWN_ERROR", message: e?.message ?? "Unknown error" },
+    };
+  }
 }
 
 /**
  * Gets the installation id for the fern-bot for a given owner and repo
- * or returns undefined if it does not exist.
+ * or returns an error result if it does not exist or on failure.
  *
  * @param owner - The owner of the repository
  * @param repo - The name of the repository
- * @returns string installation id, or undefined if no such id exists
- * @throws Error if FERN_BOT_APP_ID or FERN_BOT_PRIVATE_KEY are not defined or defined incorrectly
+ * @returns A discriminated union result with the installation id or an error
  */
-export async function getFernBotInstallationId(owner: string, repo: string) {
+export async function getFernBotInstallationId(
+  owner: string,
+  repo: string
+): Promise<GetFernBotInstallationIdResult> {
   const appId = process.env.FERN_BOT_APP_ID;
   const privateKeyEnv = process.env.FERN_BOT_PRIVATE_KEY;
 
   if (!appId) {
-    throw new Error("FERN_BOT_APP_ID environment variable is missing");
+    return { ok: false, error: { type: "MISSING_APP_ID" } };
   }
   if (!privateKeyEnv) {
-    throw new Error("FERN_BOT_PRIVATE_KEY environment variable is missing");
+    return { ok: false, error: { type: "MISSING_PRIVATE_KEY" } };
   }
 
   const privateKey = formatPrivateKey(privateKeyEnv);
@@ -70,7 +92,6 @@ export async function getFernBotInstallationId(owner: string, repo: string) {
     },
   });
 
-  let installation;
   try {
     const response = await appOctokit.request(
       "GET /repos/{owner}/{repo}/installation",
@@ -79,17 +100,25 @@ export async function getFernBotInstallationId(owner: string, repo: string) {
         repo,
       }
     );
-    installation = response.data;
+    const installation = response.data;
+    return { ok: true, installationId: installation.id };
   } catch (error: any) {
-    if (error.status === 404) {
+    if (error?.status === 404) {
       // fern-bot is not yet installed on that repo
-      return undefined;
+      return {
+        ok: false,
+        error: { type: "NOT_INSTALLED", owner, repo },
+      };
     } else {
-      return undefined;
+      return {
+        ok: false,
+        error: {
+          type: "UNKNOWN_ERROR",
+          message: error?.message ?? "Unknown error",
+        },
+      };
     }
   }
-
-  return installation.id;
 }
 
 function formatPrivateKey(privateKey: string) {

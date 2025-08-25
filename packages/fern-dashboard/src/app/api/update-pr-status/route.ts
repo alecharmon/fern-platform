@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { orgNameValidator } from "@/app/api/utils/validators";
 import { withGithubAuth } from "@/app/services/dal/github/middleware";
-import {
-  type GithubAuthContext,
-  GithubIdentificationScheme,
-} from "@/app/services/dal/github/types";
+import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { ResolvedReturnType } from "@/utils/types";
 
@@ -19,6 +17,7 @@ export declare namespace updatePrStatus {
 
 export const UpdatePrStatusRequest = GithubIdentificationScheme.and(
   z.object({
+    orgName: orgNameValidator,
     branch: z.string(),
     status: z.enum(["open", "draft"]),
     baseBranch: z.string().optional(),
@@ -30,21 +29,18 @@ export const POST = withZodValidation(
   async (
     req: NextRequest,
     validatedBody: z.infer<typeof UpdatePrStatusRequest>
-  ) =>
-    withGithubAuth(
-      async (_req: NextRequest, { repoData }: GithubAuthContext) => {
-        const { branch, status, baseBranch } = validatedBody;
-        const { owner, repo } = repoData;
+  ) => {
+    const { orgName, branch, status, baseBranch, ...repoData } = validatedBody;
 
-        return NextResponse.json(
-          await handler({
-            owner,
-            repo,
-            branch,
-            status,
-            baseBranch,
-          })
-        );
-      }
-    )(req, validatedBody)
+    return withGithubAuth(req, orgName, repoData, async ({ owner, repo }) => {
+      const result = await handler({
+        owner,
+        repo,
+        branch,
+        status,
+        baseBranch,
+      });
+      return NextResponse.json(result);
+    });
+  }
 );

@@ -22,11 +22,16 @@ export default async function getPrForBranch(request: {
     return { success: false, error: "No session found" };
   }
 
-  const octokit = await getFernBotOctokitForRepo(request.owner, request.repo);
+  const octokitResult = await getFernBotOctokitForRepo(
+    request.owner,
+    request.repo
+  );
 
-  if (octokit == null) {
-    return { success: false, error: "Failed to get GitHub client" };
+  if (!octokitResult.ok) {
+    throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
   }
+
+  const octokit = octokitResult.octokit;
 
   try {
     // Find associated PRs for the branch

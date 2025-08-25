@@ -22,7 +22,9 @@ export class GitHubLoader implements GitLoader {
 
       const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
       if (!owner || !repo) return null;
-      return getFernBotOctokitForRepo(owner, repo);
+
+      const result = await getFernBotOctokitForRepo(owner, repo);
+      return result.ok ? result.octokit : null;
     };
   }
 

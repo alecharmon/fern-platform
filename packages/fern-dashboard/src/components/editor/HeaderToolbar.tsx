@@ -8,8 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { ArrowLeftIcon } from "lucide-react";
 
+import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
 import { useEditor } from "@/providers/EditorContext";
@@ -26,11 +26,9 @@ import { PRStatusDropdown } from "./PRStatusDropdown";
 import { PRTitleEditor } from "./PRTitleEditor";
 
 export function HeaderToolbar({
-  orgName,
   session,
   docsUrl,
 }: {
-  orgName: Auth0OrgName;
   session: Auth0SessionData;
   docsUrl: DocsUrl;
 }) {
@@ -40,6 +38,7 @@ export function HeaderToolbar({
   const { editor } = useEditor();
   const isEditingDisabled = useEditingDisabled();
   const { owner, repo, baseBranch } = useGitHubRepo();
+  const orgName = useOrgName();
 
   useEffect(() => {
     // NOTE: This is a temporary solution to persist the PR URL across route changes/refreshes.

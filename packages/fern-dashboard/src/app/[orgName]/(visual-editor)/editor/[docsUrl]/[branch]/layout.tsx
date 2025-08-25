@@ -6,6 +6,7 @@ import type React from "react";
 import { ClientPageManager } from "@fern-docs/components/sidebar/nodes/ClientPageManager";
 import { SidebarClientNavigationProvider } from "@fern-docs/components/sidebar/nodes/SidebarClientNavigationProvider";
 
+import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import getGithubSourceMetadata from "@/app/api/get-github-source-metadata/handler";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
@@ -63,35 +64,33 @@ export default async function EditorLayout({
         enableSystem={false}
         disableTransitionOnChange
       >
-        <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo}>
-          <SidebarClientNavigationProvider branchName={branch}>
-            <ClientPageManager branchName={branch} />
-            <DevModeProvider>
-              <MdxStateProvider docsUrl={docsUrl}>
-                <CurrentPageProvider>
-                  <BranchProvider branch={branch}>
-                    <EditorProvider>
-                      <GitPRProvider
-                        owner={sourceRepo.owner}
-                        repo={sourceRepo.repo}
-                        baseBranch={sourceRepo.baseBranch}
-                        branch={branch}
-                      >
-                        <HeaderToolbar
-                          orgName={orgName}
-                          session={session}
-                          docsUrl={docsUrl}
-                        />
-                        <PreviewOnlyNotification />
-                        {children}
-                      </GitPRProvider>
-                    </EditorProvider>
-                  </BranchProvider>
-                </CurrentPageProvider>
-              </MdxStateProvider>
-            </DevModeProvider>
-          </SidebarClientNavigationProvider>
-        </GitHubRepoProvider>
+        <OrgNameProvider orgName={orgName}>
+          <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo}>
+            <SidebarClientNavigationProvider branchName={branch}>
+              <ClientPageManager branchName={branch} />
+              <DevModeProvider>
+                <MdxStateProvider docsUrl={docsUrl}>
+                  <CurrentPageProvider>
+                    <BranchProvider branch={branch}>
+                      <EditorProvider>
+                        <GitPRProvider
+                          owner={sourceRepo.owner}
+                          repo={sourceRepo.repo}
+                          baseBranch={sourceRepo.baseBranch}
+                          branch={branch}
+                        >
+                          <HeaderToolbar session={session} docsUrl={docsUrl} />
+                          <PreviewOnlyNotification />
+                          {children}
+                        </GitPRProvider>
+                      </EditorProvider>
+                    </BranchProvider>
+                  </CurrentPageProvider>
+                </MdxStateProvider>
+              </DevModeProvider>
+            </SidebarClientNavigationProvider>
+          </GitHubRepoProvider>
+        </OrgNameProvider>
       </ThemeProvider>
     </EditorShell>
   );
