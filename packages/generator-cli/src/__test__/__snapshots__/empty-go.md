@@ -2,7 +2,7 @@
 
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=Empty%2FGo)
 
-The Empty Go library provides convenient access to the Empty API from Go.
+The Empty Go library provides convenient access to the Empty APIs from Go.
 
 ## Contributing
 

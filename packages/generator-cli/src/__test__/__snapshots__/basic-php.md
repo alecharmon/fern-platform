@@ -3,7 +3,7 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=Basic%2FPHP)
 [![php shield](https://img.shields.io/badge/php-packagist-pink)](https://packagist.org/packages/square/square-php-sdk)
 
-The Basic PHP library provides convenient access to the Basic API from PHP.
+The Basic PHP library provides convenient access to the Basic APIs from PHP.
 
 ## Installation
 

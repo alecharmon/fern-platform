@@ -23,6 +23,7 @@ export class ReadmeGenerator {
   private originalReadme: string | undefined;
   private languageTitle: string;
   private organizationPascalCase: string;
+  private apiName: string;
 
   constructor({
     readmeParser,
@@ -38,6 +39,7 @@ export class ReadmeGenerator {
     this.originalReadme = originalReadme;
     this.languageTitle = languageToTitle(this.readmeConfig.language);
     this.organizationPascalCase = pascalCase(this.readmeConfig.organization);
+    this.apiName = this.readmeConfig.apiName ?? this.organizationPascalCase;
   }
 
   public async generateReadme({
@@ -113,9 +115,17 @@ export class ReadmeGenerator {
       blocks.push(advancedFeatureBlock);
     }
 
-    blocks.push(this.generateContributing());
+    if (
+      !this.featureDisabled(FernGeneratorCli.StructuredFeatureId.Contributing)
+    ) {
+      blocks.push(this.generateContributing());
+    }
 
     return blocks;
+  }
+
+  private featureDisabled(featureId: FernGeneratorCli.FeatureId): boolean {
+    return this.readmeConfig.disabledFeatures?.includes(featureId) ?? false;
   }
 
   private isAdvanced(feat: ReadmeFeature): boolean {
@@ -230,9 +240,7 @@ export class ReadmeGenerator {
   }
 
   private async writeHeader({ writer }: { writer: Writer }): Promise<void> {
-    await writer.writeLine(
-      `# ${this.organizationPascalCase} ${this.languageTitle} Library`
-    );
+    await writer.writeLine(`# ${this.apiName} ${this.languageTitle} Library`);
     await writer.writeLine();
     if (this.readmeConfig.bannerLink != null) {
       await this.writeBanner({
@@ -275,7 +283,7 @@ export class ReadmeGenerator {
     await writer.writeLine(
       this.readmeConfig.introduction != null
         ? this.readmeConfig.introduction
-        : `The ${this.organizationPascalCase} ${this.languageTitle} library provides convenient access to the ${this.organizationPascalCase} API from ${this.languageTitle}.`
+        : `The ${this.apiName} ${this.languageTitle} library provides convenient access to the ${this.apiName} APIs from ${this.languageTitle}.`
     );
     await writer.writeLine();
   }
@@ -854,8 +862,9 @@ On the other hand, contributions to the README are always very welcome!
     feature: FernGeneratorCli.ReadmeFeature;
   }): boolean {
     return (
-      !feature.snippetsAreOptional &&
-      (feature.snippets == null || feature.snippets.length === 0)
+      this.featureDisabled(feature.id) ||
+      (!feature.snippetsAreOptional &&
+        (feature.snippets == null || feature.snippets.length === 0))
     );
   }
 

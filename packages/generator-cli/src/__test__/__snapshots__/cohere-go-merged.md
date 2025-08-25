@@ -5,7 +5,7 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=Cohere%2FGo)
 [![go shield](https://img.shields.io/badge/go-docs-blue)](https://pkg.go.dev/github.com/cohere-ai/cohere-go)
 
-The Cohere Go library provides convenient access to the Cohere API from Go.
+The Cohere Go library provides convenient access to the Cohere APIs from Go.
 
 ## Documentation
 

@@ -4,6 +4,9 @@ const CONFIG: FernGeneratorCli.ReadmeConfig = {
     language: FernGeneratorCli.LanguageInfo.typescript({
         publishInfo: undefined,
     }),
+    apiName: "IMDB Inc",
+    introduction: "This is a test introduction. Custom override.",
+    disabledFeatures: [ "CONTRIBUTING" ],
     organization: "imdb",
     features: [
         {

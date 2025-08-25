@@ -3,7 +3,7 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=Basic%2FRust)
 [![crates.io shield](https://img.shields.io/crates/v/foxglove-rust-sdk)](https://crates.io/crates/foxglove-rust-sdk)
 
-The Basic Rust library provides convenient access to the Basic API from Rust.
+The Basic Rust library provides convenient access to the Basic APIs from Rust.
 
 ## Installation
 

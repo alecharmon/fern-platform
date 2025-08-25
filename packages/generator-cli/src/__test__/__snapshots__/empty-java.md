@@ -2,7 +2,7 @@
 
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=Basic%2FJava)
 
-The Basic Java library provides convenient access to the Basic API from Java.
+The Basic Java library provides convenient access to the Basic APIs from Java.
 
 ## Contributing
 

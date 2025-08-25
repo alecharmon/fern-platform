@@ -24,6 +24,7 @@ types:
       - STREAMING
       - TIMEOUTS
       - CUSTOM_CLIENT
+      - CONTRIBUTING
 
   FeatureConfig:
     docs: |

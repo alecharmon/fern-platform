@@ -7,6 +7,7 @@ import * as FernGeneratorCli from "../../../../api/index";
 import * as core from "../../../../core";
 import { Remote } from "./Remote";
 import { LanguageInfo } from "./LanguageInfo";
+import { FeatureId } from "../../feature/types/FeatureId";
 import { ReadmeFeature } from "./ReadmeFeature";
 
 export const ReadmeConfig: core.serialization.ObjectSchema<
@@ -16,11 +17,13 @@ export const ReadmeConfig: core.serialization.ObjectSchema<
     remote: Remote.optional(),
     language: LanguageInfo,
     organization: core.serialization.string(),
+    apiName: core.serialization.string().optional(),
     bannerLink: core.serialization.string().optional(),
     introduction: core.serialization.string().optional(),
     apiReferenceLink: core.serialization.string().optional(),
     referenceMarkdownPath: core.serialization.string().optional(),
     requirements: core.serialization.list(core.serialization.string()).optional(),
+    disabledFeatures: core.serialization.list(FeatureId).optional(),
     features: core.serialization.list(ReadmeFeature).optional(),
 });
 
@@ -29,11 +32,13 @@ export declare namespace ReadmeConfig {
         remote?: Remote.Raw | null;
         language: LanguageInfo.Raw;
         organization: string;
+        apiName?: string | null;
         bannerLink?: string | null;
         introduction?: string | null;
         apiReferenceLink?: string | null;
         referenceMarkdownPath?: string | null;
         requirements?: string[] | null;
+        disabledFeatures?: FeatureId.Raw[] | null;
         features?: ReadmeFeature.Raw[] | null;
     }
 }

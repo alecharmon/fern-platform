@@ -15,11 +15,13 @@ export interface ReadmeConfig {
     remote?: FernGeneratorCli.Remote;
     language: FernGeneratorCli.LanguageInfo;
     organization: string;
+    apiName?: string;
     bannerLink?: string;
     introduction?: string;
     apiReferenceLink?: string;
     referenceMarkdownPath?: string;
     requirements?: string[];
+    disabledFeatures?: FernGeneratorCli.FeatureId[];
     /**
      * Specifies the list of features supported by a specific generator.
      * The features are rendered in the order they're specified.

@@ -17,11 +17,13 @@ types:
         type: optional<Remote>
       language: LanguageInfo
       organization: string
+      apiName: optional<string>
       bannerLink: optional<string>
       introduction: optional<string>
       apiReferenceLink: optional<string>
       referenceMarkdownPath: optional<string>
       requirements: optional<list<string>>
+      disabledFeatures: optional<list<feature.FeatureId>>
       features:
         docs: |
           Specifies the list of features supported by a specific generator.

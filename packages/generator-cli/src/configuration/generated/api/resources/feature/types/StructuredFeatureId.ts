@@ -14,7 +14,8 @@ export type StructuredFeatureId =
     | "REQUEST_OPTIONS"
     | "STREAMING"
     | "TIMEOUTS"
-    | "CUSTOM_CLIENT";
+    | "CUSTOM_CLIENT"
+    | "CONTRIBUTING";
 
 export const StructuredFeatureId = {
     Authentication: "AUTHENTICATION",
@@ -26,6 +27,7 @@ export const StructuredFeatureId = {
     Streaming: "STREAMING",
     Timeouts: "TIMEOUTS",
     CustomClient: "CUSTOM_CLIENT",
+    Contributing: "CONTRIBUTING",
     _visit: <R>(value: StructuredFeatureId, visitor: StructuredFeatureId.Visitor<R>) => {
         switch (value) {
             case StructuredFeatureId.Authentication:
@@ -46,6 +48,8 @@ export const StructuredFeatureId = {
                 return visitor.timeouts();
             case StructuredFeatureId.CustomClient:
                 return visitor.customClient();
+            case StructuredFeatureId.Contributing:
+                return visitor.contributing();
             default:
                 return visitor._other();
         }
@@ -63,6 +67,7 @@ export declare namespace StructuredFeatureId {
         streaming: () => R;
         timeouts: () => R;
         customClient: () => R;
+        contributing: () => R;
         _other: () => R;
     }
 }
