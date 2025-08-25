@@ -22,7 +22,7 @@
     "@types/jest": "^29.5.12",
     "@types/node": "^22.0.0",
     "@types/prettier": "2.6.0",
-    "aws-cdk": "^2.179.0",
+    "aws-cdk": "^2.197.0",
     "redis-cli": "^2.1.2",
     "ts-node": "^10.9.1",
     "typescript": "^5",
