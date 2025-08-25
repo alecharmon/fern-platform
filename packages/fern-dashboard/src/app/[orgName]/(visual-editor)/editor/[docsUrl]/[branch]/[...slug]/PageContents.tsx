@@ -82,7 +82,6 @@ export default function PageContents({
     );
 
     if (needsBundling && bundledElementsRef.current !== elementsHash) {
-      bundledElementsRef.current = elementsHash;
       // IMPORTANT: This fix prevents async state updates from triggering
       // during error boundary recovery by:
 
@@ -104,6 +103,7 @@ export default function PageContents({
         // Prevent state updates after component unmounts or error boundary recovery
         if (!cancelled) {
           setOriginalElements(bundled);
+          bundledElementsRef.current = elementsHash;
         }
       });
 
