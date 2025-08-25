@@ -1,6 +1,5 @@
 import "server-only";
 
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import getGithubSourceMetadataHandler from "@/app/api/get-github-source-metadata/handler";
@@ -19,6 +18,7 @@ import {
   GithubSource,
 } from "@/components/docs-page/GithubSource";
 import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
+import { VEPreviewImage } from "@/components/docs-page/VEPreviewImage";
 import { WarningNote } from "@/components/docs-page/WarningNote";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { FeatureFlaggedServerSide } from "@/components/posthog/feature-flags/server-side";
@@ -138,13 +138,7 @@ export default async function Page(props: {
 
         <Card className="relative flex h-[300px] flex-col-reverse gap-0 !p-0 lg:flex-row">
           <div className="lg:max-w-1/2 h-full w-full">
-            <Image
-              src="/ve_empty.avif"
-              alt="Docs Preview"
-              width={2000}
-              height={2000}
-              className="h-full w-auto object-contain object-bottom"
-            />
+            <VEPreviewImage className="h-full w-full" />
           </div>
           <div className="flex flex-col items-center justify-center gap-4 p-6 md:flex-1 lg:items-start">
             <div className="flex flex-col items-center lg:items-start">

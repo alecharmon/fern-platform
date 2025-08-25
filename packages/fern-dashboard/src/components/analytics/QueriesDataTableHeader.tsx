@@ -1,6 +1,8 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleLeftEllipsisIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 import { Table } from "@tanstack/react-table";
-import { MessageSquare } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 
@@ -31,13 +33,13 @@ export function QueriesDataTableHeader<TData>({
   isExporting,
 }: QueriesDataTableHeaderProps<TData>) {
   return (
-    <div className="mb-4 flex items-center justify-between">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
       <div className="flex items-center gap-2">
-        <MessageSquare className="h-4 w-4" />
-        <span>Conversations</span>
+        <ChatBubbleLeftEllipsisIcon className="h-4 w-4" />
+        <span>All Conversations</span>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="relative">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px]">
           <MagnifyingGlassIcon className="text-radix-gray-9 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Search..."

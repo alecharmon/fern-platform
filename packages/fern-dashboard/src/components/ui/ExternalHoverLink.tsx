@@ -21,8 +21,12 @@ export function ExternalHoverLink({
         href={href}
         target="_blank"
         className="dashboard-link"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => {
+          setIsHovered(true);
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false);
+        }}
       >
         <span className="truncate">{displayHref ?? href}</span>
         <ArrowTopRightOnSquareIcon

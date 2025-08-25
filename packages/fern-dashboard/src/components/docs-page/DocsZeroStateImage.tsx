@@ -1,31 +1,80 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 
 import { useIsFirstClientSideRender } from "@/utils/useIsFirstClientSideRender";
 
-import exampleDocsSiteDark from "../../../public/example-docs-site-dark.avif";
-import exampleDocsSiteLight from "../../../public/example-docs-site-light.avif";
+import exampleDocsSiteDark from "../../../public/example-docs-dark.avif";
+import exampleDocsSiteLight from "../../../public/example-docs-light.avif";
 
-export function DocsZeroStateImage() {
+function CrossfadeThemeImage({
+  light,
+  dark,
+  alt,
+  width,
+  height,
+  className,
+}: {
+  light: string | StaticImageData;
+  dark: string | StaticImageData;
+  alt: string;
+  width: number;
+  height: number;
+  className?: string;
+}) {
   const { resolvedTheme = "light" } = useTheme();
-
-  // render `null` on the first render to match the SSR and avoid hydration errors
   const isFirstClientSideRender = useIsFirstClientSideRender();
   if (isFirstClientSideRender) {
     return null;
   }
 
   return (
-    <div className="relative mx-[5%] flex max-w-[700px] flex-1 justify-center">
+    <div
+      className={`relative w-full ${className ?? ""}`}
+      style={{ aspectRatio: width / height }}
+    >
       <Image
-        className="absolute top-0 opacity-50"
-        src={
-          resolvedTheme === "light" ? exampleDocsSiteLight : exampleDocsSiteDark
-        }
-        alt="example doc site"
+        src={light}
+        alt={alt}
+        fill
+        placeholder="blur"
+        priority
+        aria-hidden={resolvedTheme !== "light"}
+        className={`absolute left-0 top-0 h-full w-full object-contain transition-opacity duration-300 ${
+          resolvedTheme === "light" ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <Image
+        src={dark}
+        alt={alt}
+        fill
+        placeholder="blur"
+        priority
+        aria-hidden={resolvedTheme !== "dark"}
+        className={`absolute left-0 top-0 h-full w-full object-contain transition-opacity duration-300 ${
+          resolvedTheme === "dark" ? "opacity-100" : "opacity-0"
+        }`}
       />
     </div>
+  );
+}
+
+export function DocsZeroStateImage() {
+  const imgLight = exampleDocsSiteLight as unknown as {
+    width: number;
+    height: number;
+  };
+  const intrinsicWidth = imgLight.width;
+  const intrinsicHeight = imgLight.height;
+
+  return (
+    <CrossfadeThemeImage
+      light={exampleDocsSiteLight}
+      dark={exampleDocsSiteDark}
+      alt="example doc site"
+      width={intrinsicWidth}
+      height={intrinsicHeight}
+    />
   );
 }

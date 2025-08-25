@@ -63,7 +63,12 @@ export function QueriesTable({
   };
 
   return (
-    <div className={cn(BORDER_STYLES, "border-gray-0 w-full border")}>
+    <div
+      className={cn(
+        BORDER_STYLES,
+        "border-gray-0 w-full overflow-hidden border"
+      )}
+    >
       <QueriesDataTable
         columns={columns}
         data={queries}

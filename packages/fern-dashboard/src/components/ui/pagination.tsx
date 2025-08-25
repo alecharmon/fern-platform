@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
@@ -12,7 +14,10 @@ const PaginationContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-row items-center gap-1", className)}
+    className={cn(
+      "flex w-full flex-row items-center justify-center gap-1",
+      className
+    )}
     {...props}
   />
 ));
@@ -97,27 +102,28 @@ const PaginationEllipsis = ({
 );
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
-const __generatePageNumbers = (currentPage: number, totalPages: number) => {
+const __generatePageNumbers = (
+  currentPage: number,
+  totalPages: number,
+  maxVisiblePages: number
+) => {
   const pages: (number | string)[] = [];
-  const maxVisiblePages = 7;
+  const clampedMax = Math.max(2, Math.floor(maxVisiblePages));
 
-  if (totalPages <= maxVisiblePages) {
+  if (totalPages <= clampedMax) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 
-  pages.push(1);
+  const windowSize = clampedMax - 2; // exclude first and last
+  let start = Math.max(2, currentPage - Math.floor(windowSize / 2));
+  const end = Math.min(totalPages - 1, start + windowSize - 1);
+  start = Math.max(2, end - windowSize + 1);
 
-  if (currentPage <= 3) {
-    for (let i = 2; i <= 5; i++) pages.push(i);
-    pages.push("ellipsis", totalPages);
-  } else if (currentPage >= totalPages - 3) {
-    pages.push("ellipsis");
-    for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-  } else {
-    pages.push("ellipsis");
-    for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-    pages.push("ellipsis", totalPages);
-  }
+  pages.push(1);
+  if (start > 2) pages.push("ellipsis");
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (end < totalPages - 1) pages.push("ellipsis");
+  pages.push(totalPages);
 
   return pages;
 };
@@ -135,6 +141,20 @@ const Pagination = ({
   totalPages: number;
   className?: string;
 }) => {
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    const mql = window.matchMedia("(max-width: 768px)");
+    const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile("matches" in e ? e.matches : (e as MediaQueryList).matches);
+    };
+    onChange(mql);
+    mql.addEventListener("change", onChange as (e: Event) => void);
+    return () => {
+      mql.removeEventListener("change", onChange as (e: Event) => void);
+    };
+  }, []);
+
+  const maxVisiblePages = isMobile ? 3 : 7;
   return (
     <nav
       role="navigation"
@@ -144,32 +164,38 @@ const Pagination = ({
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            onClick={() => {
+              setCurrentPage(Math.max(1, currentPage - 1));
+            }}
             disabled={currentPage === 1 || isLoading}
           />
         </PaginationItem>
 
-        {__generatePageNumbers(currentPage, totalPages).map((page, index) => (
-          <PaginationItem key={index}>
-            {page === "ellipsis" ? (
-              <PaginationEllipsis className="w-8" />
-            ) : (
-              <PaginationLink
-                isActive={currentPage === page}
-                onClick={() => setCurrentPage(page as number)}
-                disabled={isLoading}
-              >
-                {page}
-              </PaginationLink>
-            )}
-          </PaginationItem>
-        ))}
+        {__generatePageNumbers(currentPage, totalPages, maxVisiblePages).map(
+          (page, index) => (
+            <PaginationItem key={index}>
+              {page === "ellipsis" ? (
+                <PaginationEllipsis className="w-8" />
+              ) : (
+                <PaginationLink
+                  isActive={currentPage === page}
+                  onClick={() => {
+                    setCurrentPage(page as number);
+                  }}
+                  disabled={isLoading}
+                >
+                  {page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          )
+        )}
 
         <PaginationItem>
           <PaginationNext
-            onClick={() =>
-              setCurrentPage(Math.min(totalPages, currentPage + 1))
-            }
+            onClick={() => {
+              setCurrentPage(Math.min(totalPages, currentPage + 1));
+            }}
             disabled={currentPage === totalPages || isLoading}
           />
         </PaginationItem>

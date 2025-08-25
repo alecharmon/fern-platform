@@ -20,7 +20,7 @@ export function DocsSiteNavBarItem({ title, href }: DocsSiteNavBarItem.Props) {
   const orgName = useOrgNameFromPathname();
   const pathname = usePathnameWithoutOrgName();
   const { pathnameForDocsSite, tabPathname } = useMemo(() => {
-    const match = pathname.match(DOCS_PATHNAME_REGEX);
+    const match = DOCS_PATHNAME_REGEX.exec(pathname);
     const pathnameForDocsSite = match?.[1];
     const tabPathname = match?.[2];
     if (pathnameForDocsSite == null || tabPathname == null) {

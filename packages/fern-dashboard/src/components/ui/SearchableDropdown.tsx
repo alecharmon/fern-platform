@@ -56,7 +56,9 @@ export function SearchableDropdown<T>({
                 <Input
                   placeholder={searchPlaceholder}
                   value={searchTerm}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  onChange={(e) => {
+                    onSearchChange(e.target.value);
+                  }}
                   className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
                 />
               </div>

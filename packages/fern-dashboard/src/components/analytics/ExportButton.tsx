@@ -15,11 +15,11 @@ export function ExportButton({
 }: ExportButtonProps) {
   return (
     <Button
-      size="sm"
+      size="lg"
       variant="outline"
       onClick={onClick}
       disabled={disabled || isLoading}
-      className="flex items-center gap-2 text-black"
+      className="text-gray-1200 shadow-xs flex h-[36px] items-center gap-2"
     >
       <ArrowDownTrayIcon className="h-4 w-4" />
       {isLoading ? "Exporting..." : "Export CSV"}

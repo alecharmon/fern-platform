@@ -2,6 +2,7 @@
 
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
+@config "../../tailwind.config.ts";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -31,7 +32,8 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
+  /* --sidebar: oklch(0.985 0 0); */
+  --sidebar: var(--gray-200);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -39,6 +41,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-width: 240px;
 
   /* monaco editor */
   --monaco-blue: #0969da;
@@ -131,7 +134,7 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: var(--gray-200);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -311,16 +314,21 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(to bottom, var(--gray-300), var(--gray-400));
   }
 }
 
 .noise {
-  z-index: 1;
   opacity: 1;
   background-image: url(https://cdn.prod.website-files.com/67880ff570cdb1a85eee946f/6789751936e0c7bd371e8cf2_noise-full.webp);
-  background-position: 5px 0;
-  background-size: 5rem 10rem;
+  background-size: 2.5rem;
+  background-repeat: repeat;
+}
+
+/* Intensify background texture in dark mode without affecting child content */
+.dark .noise {
+  opacity: 0.1;
 }
 
 .dashboard-link {
@@ -358,6 +366,220 @@ why? who knows. thanks monaco:)
 
 .monaco-editor .mtk1 {
   @apply text-gray-1200;
+}
+
+/* Icon animations: Book */
+.book-open #left-lines,
+.book-open #right-lines {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+}
+
+/* Icon animations: Users */
+.group:hover .users #right-heady,
+.hover-animating .users #right-heady {
+  animation: bobHead 0.3s ease-in-out forwards;
+}
+
+.group:hover .users #left-head,
+.hover-animating .users #left-head {
+  animation: bobHead 0.3s ease-in-out 0.1s forwards;
+}
+
+.group:hover .users #right-body,
+.hover-animating .users #right-body {
+  animation: none;
+}
+
+.group:hover .users #left-body,
+.hover-animating .users #left-body {
+  animation: none;
+}
+
+/* Icon animations: Key (self-hover) */
+.key:hover {
+  animation: shake 0.3s ease-in-out;
+}
+
+.key:hover path {
+  animation: none;
+}
+
+@keyframes bobHead {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Book edges */
+.book-open #left-edge,
+.book-open #right-edge {
+  transform-origin: center;
+}
+
+.group:hover .book-open #left-lines,
+.group:hover .book-open #right-lines,
+.hover-animating .book-open #left-lines,
+.hover-animating .book-open #right-lines {
+  stroke-dashoffset: 100;
+  animation: drawLine 1.3s ease-in-out forwards;
+}
+
+/* Slide-out sidepanel: width rules based on child content */
+@layer components {
+  /* Mobile (<1024px): always collapsed */
+  @media (max-width: 1023px) {
+    .sidepanel-container {
+      width: 0 !important;
+    }
+  }
+
+  /* Desktop (>=1024px): expand based on content */
+  @media (min-width: 1024px) {
+    /* default collapsed */
+    .sidepanel-container {
+      width: 0;
+    }
+    /* stays collapsed if the direct child div is empty */
+    .sidepanel-container:has(> div:empty) {
+      width: 0;
+    }
+    /* expands to content size when the direct child div has children */
+    .sidepanel-container:has(> div:not(:empty)) {
+      width: fit-content;
+    }
+  }
+}
+
+/* Icon animations: Book (edge animations) */
+.group:hover .book-open #left-edge,
+.hover-animating .book-open #left-edge {
+  animation: openLeftEdge 0.3s ease-in-out forwards;
+}
+
+.group:hover .book-open #right-edge,
+.hover-animating .book-open #right-edge {
+  animation: openRightEdge 0.3s ease-in-out forwards;
+}
+
+/* Icon animations: Shared keyframes */
+@keyframes drawLine {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes openLeftEdge {
+  0% {
+    transform: translateX(7.5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes openRightEdge {
+  0% {
+    transform: translateX(-7.5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+/* Icon animations: Code bracket */
+.code-bracket #middle {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 0;
+}
+
+.code-bracket #outer {
+  stroke-dasharray: none;
+}
+
+.group:hover .code-bracket #middle,
+.hover-animating .code-bracket #middle {
+  animation: drawMiddleLine 0.3s ease-in-out;
+}
+
+.group:hover .code-bracket #outer-left,
+.hover-animating .code-bracket #outer-left {
+  animation: shiftLeft 0.3s ease-in-out;
+}
+
+.group:hover .code-bracket #outer-right,
+.hover-animating .code-bracket #outer-right {
+  animation: shiftRight 0.3s ease-in-out;
+}
+
+@keyframes shiftLeft {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(1px);
+  }
+}
+
+@keyframes shiftRight {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-1px);
+  }
+}
+
+@keyframes drawMiddleLine {
+  0% {
+    stroke-dashoffset: 20;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Icon animations: Credit card */
+.credit-card #details,
+.credit-card #stripe {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+}
+
+.group:hover .credit-card #details,
+.group:hover .credit-card #stripe,
+.hover-animating .credit-card #details,
+.hover-animating .credit-card #stripe {
+  stroke-dashoffset: 100;
+  animation: drawLine 0.8s ease-in-out forwards;
+}
+
+/* Icon animations: Key (group triggers) */
+.group:hover .key,
+.hover-animating .key {
+  animation: shake 0.3s ease-in-out;
 }
 
 /* PR Title scroll animation */

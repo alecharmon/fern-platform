@@ -1,8 +1,8 @@
-type CircularGaugeProps = {
+interface CircularGaugeProps {
   percentage: number;
   size?: number;
   strokeWidth?: number;
-};
+}
 
 export default function CircularGauge({
   percentage,

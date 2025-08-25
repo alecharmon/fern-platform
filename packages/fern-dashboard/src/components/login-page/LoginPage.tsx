@@ -1,22 +1,26 @@
 import { BookOpen } from "lucide-react";
 
 import { LoginButton } from "../auth/LoginButton";
+import { ThemeToggle } from "../theme/ThemeToggle";
 import { ThemedFernLogo } from "../theme/ThemedFernLogo";
 import { Button } from "../ui/button";
 import { LoginImage } from "./LoginImage";
+import { Auth0Logo } from "./logos/Auth0Logo";
 import { CohereLogo } from "./logos/CohereLogo";
+import { ElevenLabsLogo } from "./logos/ElevenLabsLogo";
 import { IntercomLogo } from "./logos/IntercomLogo";
-import { PineconeLogo } from "./logos/PineconeLogo";
 import { SquareLogo } from "./logos/SquareLogo";
 import { WebflowLogo } from "./logos/WebflowLogo";
 
 export const LoginPage = () => {
   return (
     <div className="relative flex flex-1">
-      <div className="md:border-border relative flex flex-1 items-center bg-white md:mx-2 md:mt-2 md:w-[40%] md:min-w-[350px] md:flex-initial md:rounded-t-2xl md:border-x md:border-t md:shadow-md dark:bg-black">
-        <div className="mx-[15%] flex flex-1 flex-col">
-          <div className="mb-2 text-xl font-bold">Welcome to Fern</div>
-          <div className="mb-8 text-sm text-gray-900">
+      <div className="md:border-border bg-background relative flex flex-1 items-center justify-center px-4 md:mt-2 md:w-[40%] md:min-w-[350px] md:flex-initial md:rounded-t-2xl md:border-x md:border-t md:shadow-md">
+        <div className="mx-4 flex w-full max-w-[400px] flex-1 flex-col items-stretch md:mx-auto">
+          <div className="mb-2 text-center text-xl font-bold">
+            Welcome to Fern
+          </div>
+          <div className="mb-8 text-center text-sm text-gray-900">
             Sign in to your account
           </div>
           <LoginButton />
@@ -43,9 +47,9 @@ export const LoginPage = () => {
       </div>
       <div className="relative hidden flex-1 flex-col md:flex">
         <div className="mt-16 flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="mx-16 flex flex-col">
+          <div className="z-3 relative mx-16 flex flex-col">
             <ThemedFernLogo className="mb-8 mt-4 w-28" />
-            <div className="text-3xl font-bold">
+            <div className="text-3xl font-bold tracking-tight">
               <div className="text-gray-1100">Instantly offer</div>
               <div>
                 SDKs <span className="text-gray-1100">and</span> API Docs
@@ -55,21 +59,23 @@ export const LoginPage = () => {
           <div className="relative mb-2 flex flex-1">
             <LoginImage />
           </div>
-          <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-4 p-8">
+          <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-4 p-16">
             <div className="text-gray-1000 text-left text-sm">
               Giving API superpowers to world-class companies
             </div>
-            <div className="flex items-center sm:gap-3 md:gap-6 lg:gap-8">
+            <div className="flex flex-wrap items-center sm:gap-3 md:gap-6 lg:gap-8">
               <SquareLogo />
               <WebflowLogo />
               <IntercomLogo />
-              <PineconeLogo />
+              <ElevenLabsLogo />
               <CohereLogo />
+              <Auth0Logo />
             </div>
           </div>
         </div>
       </div>
       <div className="absolute right-4 top-4 flex gap-2">
+        <ThemeToggle />
         <Button asChild variant="outline">
           <a href="https://buildwithfern.com/learn" target="_blank">
             <BookOpen />

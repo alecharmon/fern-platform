@@ -1,3 +1,4 @@
+import { ThemeProvider } from "next-themes";
 import { redirect } from "next/navigation";
 
 import { LoginPage } from "@/components/login-page/LoginPage";
@@ -8,7 +9,16 @@ export default async function Page() {
   const session = await getCurrentSession();
 
   if (session == null) {
-    return <LoginPage />;
+    return (
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <LoginPage />
+      </ThemeProvider>
+    );
   } else {
     redirect("/");
   }

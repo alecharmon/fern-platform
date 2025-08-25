@@ -4,8 +4,10 @@ import { usePathname } from "next/navigation";
 import {
   ReactNode,
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -29,14 +31,16 @@ export function SidepanelProvider({ children }: { children: ReactNode }) {
     setContent(null);
   }, [pathname]);
 
+  const clear = useCallback(() => {
+    setContent(null);
+  }, []);
+  const value = useMemo(
+    () => ({ content, setContent, clear }),
+    [content, clear]
+  );
+
   return (
-    <SidepanelContext.Provider
-      value={{
-        content,
-        setContent,
-        clear: () => setContent(null),
-      }}
-    >
+    <SidepanelContext.Provider value={value}>
       {children}
     </SidepanelContext.Provider>
   );

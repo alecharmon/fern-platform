@@ -20,7 +20,7 @@ export function InviteUserDialog({ org }: InviteUserDialog.Props) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="default">
           <PlusIcon />
           Add member
         </Button>
@@ -32,6 +32,7 @@ export function InviteUserDialog({ org }: InviteUserDialog.Props) {
         onInteractOutside={(event) => {
           event.preventDefault();
         }}
+        persistent={true}
       >
         <InviteUserDialogContent
           org={org}

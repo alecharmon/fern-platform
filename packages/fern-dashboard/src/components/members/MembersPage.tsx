@@ -26,7 +26,7 @@ export function MembersPage({ session }: MembersPage.Props) {
       <PageHeader
         title="Members"
         subtitle="Manage team members and invitations"
-        rightContent={
+        farRightContent={
           <div className="flex md:items-center">
             <InviteUserDialog org={org} />
           </div>

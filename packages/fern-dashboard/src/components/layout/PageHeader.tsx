@@ -4,6 +4,7 @@ export declare namespace PageHeader {
     titleRightContent?: React.JSX.Element;
     subtitle?: string;
     rightContent?: React.JSX.Element;
+    farRightContent?: React.JSX.Element;
   }
 }
 
@@ -12,17 +13,21 @@ export function PageHeader({
   titleRightContent,
   subtitle,
   rightContent,
+  farRightContent,
 }: PageHeader.Props) {
   return (
-    <div className="mb-5 flex justify-between">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          <div className="text-xl font-bold">{title}</div>
-          {titleRightContent}
+    <div className="mb-5 flex w-full flex-wrap justify-between gap-2">
+      <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <div className="text-lg font-bold md:text-2xl">{title}</div>
+            {titleRightContent}
+          </div>
+          {subtitle != null && <div className="text-gray-900">{subtitle}</div>}
         </div>
-        {subtitle != null && <div className="text-gray-900">{subtitle}</div>}
+        {rightContent}
       </div>
-      {rightContent}
+      {farRightContent}
     </div>
   );
 }

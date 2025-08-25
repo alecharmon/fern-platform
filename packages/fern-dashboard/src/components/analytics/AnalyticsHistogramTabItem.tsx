@@ -13,14 +13,19 @@ export function AnalyticsHistogramTabItem({
 }) {
   const className = cn(
     "flex flex-row items-center gap-2 px-4 py-2 transition",
-    isSelected ? "border-b-2 border-black text-black" : "text-gray-900",
+    isSelected ? "text-gray-1100" : "text-gray-900",
     "hover:text-gray-1100 cursor-pointer"
   );
 
   return (
-    <button onClick={onClick} className={className}>
-      <span className="flex items-center">{icon}</span>
-      {title}
-    </button>
+    <div className="flex flex-col">
+      <button onClick={onClick} className={className}>
+        <span className="flex items-center">{icon}</span>
+        {title}
+      </button>
+      {isSelected && (
+        <div className="bg-gray-1100 h-0.5 rounded-full dark:bg-gray-700" />
+      )}
+    </div>
   );
 }

@@ -92,7 +92,7 @@ export function InviteUserDialogContent({
     <>
       <DialogHeader>
         <DialogTitle>
-          Add member to {getOrgDisplayName(org) ?? "organization"}
+          Invite members to {getOrgDisplayName(org) ?? "organization"}
         </DialogTitle>
         <DialogDescription>
           The user will receive an email to accept the invitation.
@@ -114,8 +114,13 @@ export function InviteUserDialogContent({
           Cancel
         </Button>
         <Button
-          disabled={!isValidEmail || isInviting}
           onClick={() => {
+            if (!isValidEmail || isInviting) {
+              toast.error("Invalid email or already invited", {
+                duration: Infinity,
+              });
+              return;
+            }
             inviteUser.mutate();
             close();
           }}

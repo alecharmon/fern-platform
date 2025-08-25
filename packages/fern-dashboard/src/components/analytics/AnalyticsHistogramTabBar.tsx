@@ -16,18 +16,22 @@ export function AnalyticsHistogramTabBar({
   onChangeRenderType: (type: RenderType) => void;
 }) {
   return (
-    <div className="border-gray-0 flex min-w-0 flex-1 border-b">
+    <div className="flex min-w-0">
       <AnalyticsHistogramTabItem
         title="Queries"
         icon={<SparklesIcon className="h-4 w-4" />}
         isSelected={renderType === "QUERIES"}
-        onClick={() => onChangeRenderType("QUERIES")}
+        onClick={() => {
+          onChangeRenderType("QUERIES");
+        }}
       />
       <AnalyticsHistogramTabItem
         title="Conversations"
         icon={<ChatBubbleLeftEllipsisIcon className="h-4 w-4" />}
         isSelected={renderType === "CONVERSATIONS"}
-        onClick={() => onChangeRenderType("CONVERSATIONS")}
+        onClick={() => {
+          onChangeRenderType("CONVERSATIONS");
+        }}
       />
     </div>
   );
