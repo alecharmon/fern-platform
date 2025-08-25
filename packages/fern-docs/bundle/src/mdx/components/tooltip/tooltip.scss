@@ -1,20 +1,31 @@
 @layer components {
   .fern-mdx-tooltip-trigger {
+    /* CSS Variables for customization */
+    --tooltip-underline-color: var(--grayscale-a10);
+    --tooltip-underline-hover-color: var(--grayscale-12);
+    --tooltip-underline-thickness: 1px;
+    --tooltip-underline-offset: 1px;
+    --tooltip-transition-duration: 0.15s;
+
     display: inline-block;
     cursor: help;
     position: relative;
-    text-decoration: underline dashed var(--grayscale-a10) 1px;
+    text-decoration: underline dashed var(--tooltip-underline-color)
+      var(--tooltip-underline-thickness);
     text-underline-position: under;
-    text-underline-offset: 1px;
-    transition: text-decoration-color 0.15s ease;
+    text-underline-offset: var(--tooltip-underline-offset);
+    transition: text-decoration-color var(--tooltip-transition-duration) ease;
 
     &:hover {
-      text-decoration-color: var(--grayscale-12);
+      text-decoration-color: var(--tooltip-underline-hover-color);
     }
   }
 
   .fern-mdx-tooltip-content {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
+    /* CSS Variables for customization */
+    --tooltip-padding-x: 0.75rem;
+
+    padding-left: var(--tooltip-padding-x) !important;
+    padding-right: var(--tooltip-padding-x) !important;
   }
 }
