@@ -581,8 +581,8 @@ export class FdrDeployStack extends Stack {
       healthyHttpCodes: "200",
       path: "/health",
       port: "8080",
-      timeout: Duration.seconds(180), // increased from 120 for Node 22
-      interval: Duration.seconds(240), // increased to 4 minutes to be greater than timeout
+      timeout: Duration.seconds(120),
+      interval: Duration.seconds(180),
       unhealthyThresholdCount: 3, // reduced from 5 to fail faster
       healthyThresholdCount: 2, // require 2 successful checks before marking healthy
     });
