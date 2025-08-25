@@ -826,9 +826,9 @@ export class ReadmeGenerator {
     writer: Writer;
     spm: FernGeneratorCli.SwiftPackageManagerPublishInfo;
   }): Promise<void> {
-    await writer.write("[![SwiftPM compatible]");
-    await writer.write(
-      "(https://img.shields.io/badge/SwiftPM-compatible-orange.svg)]"
+    await writer.write("![SwiftPM compatible]");
+    await writer.writeLine(
+      "(https://img.shields.io/badge/SwiftPM-compatible-orange.svg)"
     );
   }
 

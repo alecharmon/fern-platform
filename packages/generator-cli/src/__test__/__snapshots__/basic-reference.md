@@ -1,7 +1,4 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`basic-reference > basic-reference > generate reference 1`] = `
-"# Reference
+# Reference
 <details><summary><code><a href="./src/client.py">client.get_user()</a> -> str</code></summary>
 <dl>
 <dd>
@@ -30,9 +27,9 @@ It can also be multi-line.
 <dl>
 <dd>
 
-\`\`\`python
+```python
 client.get(user_id="ID")
-\`\`\`
+```
 </dd>
 </dl>
 </dd>
@@ -46,7 +43,7 @@ client.get(user_id="ID")
 <dl>
 <dd>
 
-**user_id:** \`str\` — The ID of the user to retrieve.
+**user_id:** `str` — The ID of the user to retrieve.
     
 </dd>
 </dl>
@@ -88,9 +85,9 @@ It can also be multi-line.
 <dl>
 <dd>
 
-\`\`\`python
+```python
 client.accounts.get(account_id="ID")
-\`\`\`
+```
 </dd>
 </dl>
 </dd>
@@ -104,7 +101,7 @@ client.accounts.get(account_id="ID")
 <dl>
 <dd>
 
-**account_id:** \`str\` 
+**account_id:** `str` 
 
 The ID of the account to retrieve.
 
@@ -148,9 +145,9 @@ Some description specific to the endpoint about users, etc. etc.
 <dl>
 <dd>
 
-\`\`\`python
+```python
 client.users.get(user_id="ID", account_id="ACCOUNT_ID")
-\`\`\`
+```
 </dd>
 </dl>
 </dd>
@@ -164,7 +161,7 @@ client.users.get(user_id="ID", account_id="ACCOUNT_ID")
 <dl>
 <dd>
 
-**user_id:** \`str\` — The ID of the user to retrieve.
+**user_id:** `str` — The ID of the user to retrieve.
     
 </dd>
 </dl>
@@ -172,7 +169,7 @@ client.users.get(user_id="ID", account_id="ACCOUNT_ID")
 <dl>
 <dd>
 
-**account_id:** \`str\` — The ID of the account to retrieve the user from.
+**account_id:** `str` — The ID of the account to retrieve the user from.
     
 </dd>
 </dl>
@@ -210,9 +207,9 @@ Some description specific to the endpoint about users, etc. etc.
 <dl>
 <dd>
 
-\`\`\`python
+```python
 client.users.get(update=User(id="ID")
-\`\`\`
+```
 </dd>
 </dl>
 </dd>
@@ -226,7 +223,7 @@ client.users.get(update=User(id="ID")
 <dl>
 <dd>
 
-**update:** \`<a href="./src/users.py">User</a>\` — The updated user object to send to the server.
+**update:** `<a href="./src/users.py">User</a>` — The updated user object to send to the server.
     
 </dd>
 </dl>
@@ -237,5 +234,3 @@ client.users.get(update=User(id="ID")
 </dd>
 </dl>
 </details>
-"
-`;

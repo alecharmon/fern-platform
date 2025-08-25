@@ -1,7 +1,4 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`cohere-go-merged > cohere-go-merged > generate readme 1`] = `
-"# Cohere Go Library
+# Cohere Go Library
 
 ![](https://raw.githubusercontent.com/cohere-ai/cohere-typescript/5188b11a6e91727fdd4d46f4a690419ad204224d/banner.png)
 
@@ -16,9 +13,9 @@ API reference documentation is available [here](https://docs.cohere.com).
 
 ## Installation
 
-\`\`\`sh
+```sh
 go get github.com/cohere-ai/cohere-go/v2
-\`\`\`
+```
 
 ## Zero 
 
@@ -28,7 +25,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
 
 Instantiate the client with the following:
 
-\`\`\`go
+```go
 import (
 	fern "github.com/custom/fern"
 	fernclient "github.com/custom/fern/client"
@@ -46,7 +43,7 @@ response, err := client.Chat(
 		Message: "Can you give me a global market overview of solar panels?",
 	},
 )
-\`\`\`
+```
 
 ## Custom
 
@@ -65,7 +62,7 @@ This is another custom section that should ideally stay between the usage and ti
 Structured error types are returned from API calls that return non-success status codes.
 For example, you can check if the error was of a particular type with the following:
 
-\`\`\`go
+```go
 response, err := client.Chat(
 	ctx,
 	&fern.ChatRequest{
@@ -79,7 +76,7 @@ if err != nil {
 	}
 	return nil, err
 }
-\`\`\`
+```
 
 ## Three
 
@@ -90,10 +87,10 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
 ### Timeouts
 
 Setting a timeout for each individual request is as simple as
-using the standard \`context\` library. Setting a one second timeout
+using the standard `context` library. Setting a one second timeout
 for an individual API call looks like the following:
 
-\`\`\`go
+```go
 ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 defer cancel()
 
@@ -103,7 +100,7 @@ response, err := client.Chat(
 		Message: "Can you give me a global market overview of solar panels?",
 	},
 )
-\`\`\`
+```
 
 ## Four
 
@@ -120,5 +117,4 @@ an issue first to discuss with us!
 On the other hand, contributions to the README are always very welcome!
 ## Five
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-`;
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.

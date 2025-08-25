@@ -1,7 +1,4 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`cohere-go > cohere-go > generate readme 1`] = `
-"# Cohere Go Library
+# Cohere Go Library
 
 ![](https://raw.githubusercontent.com/cohere-ai/cohere-typescript/5188b11a6e91727fdd4d46f4a690419ad204224d/banner.png)
 
@@ -18,15 +15,15 @@ API reference documentation is available [here](https://docs.cohere.com).
 
 ## Installation
 
-\`\`\`sh
+```sh
 go get github.com/cohere-ai/cohere-go/v2
-\`\`\`
+```
 
 ## Usage
 
 Instantiate the client with the following:
 
-\`\`\`go
+```go
 import (
 	fern "github.com/custom/fern"
 	fernclient "github.com/custom/fern/client"
@@ -44,14 +41,14 @@ response, err := client.Chat(
 		Message: "Can you give me a global market overview of solar panels?",
 	},
 )
-\`\`\`
+```
 
 ## Errors
 
 Structured error types are returned from API calls that return non-success status codes.
 For example, you can check if the error was of a particular type with the following:
 
-\`\`\`go
+```go
 response, err := client.Chat(
 	ctx,
 	&fern.ChatRequest{
@@ -65,14 +62,14 @@ if err != nil {
 	}
 	return nil, err
 }
-\`\`\`
+```
 
 ## Advanced
 
 ### Retries
 
 The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long as the request is deemed retriable and the number of retry attempts has not grown larger than the configured retry limit (default: 2).
-\`\`\`go
+```go
 response, err := client.Chat(
 	ctx,
 	&fern.ChatRequest{
@@ -80,15 +77,15 @@ response, err := client.Chat(
 	},
 	option.WithMaxAttempts(1),
 )
-\`\`\`
+```
 
 ### Timeouts
 
 Setting a timeout for each individual request is as simple as
-using the standard \`context\` library. Setting a one second timeout
+using the standard `context` library. Setting a one second timeout
 for an individual API call looks like the following:
 
-\`\`\`go
+```go
 ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 defer cancel()
 
@@ -98,7 +95,7 @@ response, err := client.Chat(
 		Message: "Can you give me a global market overview of solar panels?",
 	},
 )
-\`\`\`
+```
 
 ## Contributing
 
@@ -108,5 +105,4 @@ otherwise they would be overwritten upon the next generated release. Feel free t
 a proof of concept, but know that we will not be able to merge it as-is. We suggest opening
 an issue first to discuss with us!
 
-On the other hand, contributions to the README are always very welcome!"
-`;
+On the other hand, contributions to the README are always very welcome!
