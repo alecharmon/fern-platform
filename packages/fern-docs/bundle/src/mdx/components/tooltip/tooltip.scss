@@ -1,0 +1,20 @@
+@layer components {
+  .fern-mdx-tooltip-trigger {
+    display: inline-block;
+    cursor: help;
+    position: relative;
+    text-decoration: underline dashed var(--grayscale-a10) 1px;
+    text-underline-position: under;
+    text-underline-offset: 1px;
+    transition: text-decoration-color 0.15s ease;
+
+    &:hover {
+      text-decoration-color: var(--grayscale-12);
+    }
+  }
+
+  .fern-mdx-tooltip-content {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}

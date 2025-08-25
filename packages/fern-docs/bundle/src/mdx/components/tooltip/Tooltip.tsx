@@ -20,14 +20,9 @@ export function Tooltip({
       side={side}
       sideOffset={sideOffset}
       delayDuration={0}
-      className="p-0.5"
+      className="fern-mdx-tooltip-content"
     >
-      <span
-        className="inline-block cursor-help underline decoration-dashed underline-offset-2"
-        style={{ position: "relative" }}
-      >
-        {children}
-      </span>
+      <span className="fern-mdx-tooltip-trigger">{children}</span>
     </FernTooltip>
   );
 }
