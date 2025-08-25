@@ -40,6 +40,8 @@ export const SPECIAL_TOKENS = [
   "OAuth2",
   "OAuth2.0",
   "SAML",
+  "SCIM",
+  "SSO",
   "OpenID",
   "OpenID Connect",
   "CAPTCHA",
