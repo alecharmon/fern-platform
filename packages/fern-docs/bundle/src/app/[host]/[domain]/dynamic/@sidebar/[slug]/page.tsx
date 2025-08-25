@@ -1,10 +1,13 @@
 import "server-only";
 
+import { redirect } from "next/navigation";
+
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { getTabs } from "@fern-api/docs-server/handle-node-fallbacks";
 import {
   getIsSidebarFixed,
   getIsSingleOverviewPage,
+  slugToHref,
 } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
@@ -41,6 +44,11 @@ export default async function SidebarPage({
 
   const found = FernNavigation.utils.findNode(root, slugjoin(slug));
   if (found.type !== "found") {
+    // explicitly redirect the sidebar slot for dynamic pages to avoid race condition => empty sidebar
+    if (found.type === "redirect") {
+      redirect(prepareRedirect(found.redirect));
+    }
+
     return null;
   }
 
@@ -76,4 +84,15 @@ export default async function SidebarPage({
       )}
     </>
   );
+}
+
+function prepareRedirect(destination: string): string {
+  if (destination.startsWith("http://") || destination.startsWith("https://")) {
+    // triggers a throw in the server-side if the destination url is invalid
+    const url = new URL(destination);
+    destination = String(url);
+  } else {
+    destination = encodeURI(slugToHref(destination));
+  }
+  return destination;
 }
