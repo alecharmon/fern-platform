@@ -43,7 +43,7 @@ export const remarkExtractTitle: Unified.Plugin<[], Mdast.Root> = () => {
         });
       } else {
         const parsedYaml = parseYaml(yaml.value);
-        parsedYaml.title = `"${extractedTitle.replaceAll('"', '\\"')}"`;
+        parsedYaml.title = extractedTitle;
         yaml.value = stringifyYaml(parsedYaml);
       }
     }
