@@ -57,6 +57,7 @@
   "scripts": {
     "build-storybook": "storybook build",
     "chromatic": "pnpx chromatic --project-token=chpt_48b3c560025e978",
+    "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
     "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",

@@ -17,7 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rm -rf ./lib && tsc --build --clean",
+    "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
     "depcheck": "depcheck",
     "dev": "tsc --watch",
