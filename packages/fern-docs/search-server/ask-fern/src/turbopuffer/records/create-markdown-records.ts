@@ -1,6 +1,10 @@
 import { createHash } from "crypto";
 
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import {
+  createDelimitedRolesetString,
+  createViewersForNodes,
+} from "@fern-docs/search-utils";
 
 import { maybeRemoveCodeBlocks } from "../post-process/chunks/maybe-remove-code-blocks";
 import { maybeRemoveDuplicateNewlines } from "../post-process/chunks/maybe-remove-duplicate-newlines";
@@ -56,6 +60,11 @@ export async function createMarkdownRecords({
     (n): n is FernNavigation.ProductNode => n.type === "product"
   );
 
+  const { roles, authed: isNodeAuthed } = createViewersForNodes(
+    [...parents, node],
+    authed
+  );
+
   const markdownChunks = isChangelog ? [markdown] : chunkMarkdown(markdown);
 
   return markdownChunks.map((chunk, i) => {
@@ -70,7 +79,8 @@ export async function createMarkdownRecords({
         product: productNode?.title,
         description: undefined,
         keywords: undefined,
-        authed,
+        authed: isNodeAuthed,
+        roles: roles.map((role) => createDelimitedRolesetString(role)),
         url,
       },
     };

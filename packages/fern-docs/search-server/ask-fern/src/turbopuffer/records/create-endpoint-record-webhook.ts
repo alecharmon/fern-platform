@@ -2,7 +2,12 @@ import { createHash } from "crypto";
 
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { truncateToBytes } from "@fern-api/ui-core-utils";
-import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
+import {
+  createDelimitedRolesetString,
+  createViewersForNodes,
+  maybePrepareMdxContent,
+  toDescription,
+} from "@fern-docs/search-utils";
 
 import { TurbopufferRecord } from "../types";
 
@@ -63,6 +68,11 @@ export function createEndpointBaseRecordWebhook({
     2
   );
 
+  const { roles, authed: isNodeAuthed } = createViewersForNodes(
+    [...parents, node],
+    authed
+  );
+
   const document = `${document_body}\n\n${description}`;
 
   return {
@@ -74,7 +84,8 @@ export function createEndpointBaseRecordWebhook({
       url,
       version: versionNode?.title,
       product: productNode?.title,
-      authed,
+      authed: isNodeAuthed,
+      roles: roles.map((role) => createDelimitedRolesetString(role)),
       keywords,
     },
   };

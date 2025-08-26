@@ -3,7 +3,12 @@ import { flatten } from "es-toolkit/array";
 
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { truncateToBytes, withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
+import {
+  createDelimitedRolesetString,
+  createViewersForNodes,
+  maybePrepareMdxContent,
+  toDescription,
+} from "@fern-docs/search-utils";
 
 import { TurbopufferRecord } from "../types";
 
@@ -91,6 +96,11 @@ export function createEndpointBaseRecordWebSocket({
       : undefined;
   const document = `${document_body}\n\n${description}`;
 
+  const { roles, authed: isNodeAuthed } = createViewersForNodes(
+    [...parents, node],
+    authed
+  );
+
   return {
     id: createHash("sha256").update(node.webSocketId).digest("hex"),
     attributes: {
@@ -100,7 +110,8 @@ export function createEndpointBaseRecordWebSocket({
       url,
       version: versionNode?.title,
       product: productNode?.title,
-      authed,
+      authed: isNodeAuthed,
+      roles: roles.map((role) => createDelimitedRolesetString(role)),
       keywords,
     },
   };

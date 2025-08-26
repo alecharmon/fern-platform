@@ -12,6 +12,7 @@ def get_data_index_tpuf_schema() -> Dict[str, Any]:
         "url": {"type": "string", "filterable": True, "bm25": False},
         "version": {"type": "string", "filterable": True, "bm25": False},
         "product": {"type": "string", "filterable": True, "bm25": False},
+        "roles": {"type": "[]string", "filterable": True, "bm25": False},
         "keywords": {"type": "[]string", "filterable": False, "bm25": True},
         "authed": {"type": "bool", "filterable": True, "bm25": False},
     }
@@ -27,6 +28,7 @@ def get_query_index_tpuf_schema() -> Dict[str, Any]:
         "url": {"type": "string", "filterable": True, "bm25": False},
         "version": {"type": "string", "filterable": True, "bm25": False},
         "product": {"type": "string", "filterable": True, "bm25": False},
+        "roles": {"type": "[]string", "filterable": True, "bm25": False},
         "keywords": {"type": "[]string", "filterable": False, "bm25": True},
         "authed": {"type": "bool", "filterable": True, "bm25": False},
         "source": "string",

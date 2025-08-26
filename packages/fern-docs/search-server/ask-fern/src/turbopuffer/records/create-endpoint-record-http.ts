@@ -3,7 +3,12 @@ import { flatten } from "es-toolkit/array";
 
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
+import {
+  createDelimitedRolesetString,
+  createViewersForNodes,
+  maybePrepareMdxContent,
+  toDescription,
+} from "@fern-docs/search-utils";
 
 import { TurbopufferRecord } from "../types";
 
@@ -155,6 +160,11 @@ export function createEndpointBaseRecordHttp({
 
   const document = `${document_body}\n\n${description}`;
 
+  const { roles, authed: isNodeAuthed } = createViewersForNodes(
+    [...parents, node],
+    authed
+  );
+
   return {
     id: createHash("sha256").update(node.id).digest("hex"),
     attributes: {
@@ -164,7 +174,8 @@ export function createEndpointBaseRecordHttp({
       url,
       product: productNode?.title,
       version: versionNode?.title,
-      authed,
+      authed: isNodeAuthed,
+      roles: roles.map((role) => createDelimitedRolesetString(role)),
       keywords,
     },
   };
