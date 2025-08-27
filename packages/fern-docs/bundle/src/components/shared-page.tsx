@@ -39,6 +39,11 @@ export default async function SharedPage({
   loader: DocsLoader;
   slug: Slug;
 }) {
+  if (slug.endsWith(".js")) {
+    console.debug(`[SharedPage] returning early not found for ${slug}`);
+    return notFound();
+  }
+
   console.debug("/app/[domain]/_page.tsx: starting...");
 
   // start loading the root node early

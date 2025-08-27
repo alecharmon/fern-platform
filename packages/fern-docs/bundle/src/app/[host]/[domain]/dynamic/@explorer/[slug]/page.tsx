@@ -21,6 +21,13 @@ export default async function ExplorerPage({
 }) {
   const { host, domain, slug: slugProp } = await params;
 
+  if (slugProp.endsWith(".js")) {
+    console.debug(
+      `[dynamic-explorer] returning early not found for ${slugProp}`
+    );
+    return null;
+  }
+
   const slug = FernNavigation.slugjoin(slugProp);
 
   const loader = await createCachedDocsLoader(
