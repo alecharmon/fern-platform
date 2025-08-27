@@ -12,6 +12,7 @@ interface SemanticSearchOptions {
   apiKey: string;
   topK: number;
   filters?: FacetFilter[];
+  explodedRoles: string[];
 
   /**
    * The search mode to use.
@@ -32,6 +33,7 @@ export async function queryTurbopuffer(
     apiKey,
     topK,
     filters,
+    explodedRoles,
     mode = "hybrid",
     documentIdsToIgnore = [],
     urlsToIgnore = [],
@@ -47,6 +49,7 @@ export async function queryTurbopuffer(
 
   const queryFilters = buildQueryFilters({
     filters: filters ?? [],
+    explodedRoles,
     documentIdsToIgnore,
     urlsToIgnore,
   });

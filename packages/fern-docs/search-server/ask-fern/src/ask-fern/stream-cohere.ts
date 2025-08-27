@@ -7,7 +7,6 @@ import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
-  embed,
   stepCountIs,
   streamText,
 } from "ai";
@@ -17,17 +16,13 @@ import { postToSlack, track } from "@fern-api/docs-server";
 import {
   fernToken_admin,
   getFaiOrigin,
-  turbopufferApiKey,
 } from "@fern-api/docs-server/env-variables";
 import { FernFaiClient } from "@fern-api/fai-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FacetFilter } from "@fern-docs/search-keyword";
 
-import {
-  convertTpufRecordToCitation,
-  createChatSystemPrompt,
-  queryTurbopuffer,
-} from "../index";
+import { convertTpufRecordToCitation, createChatSystemPrompt } from "../index";
+import { runQueryTurbopuffer } from "./run-query-turbopuffer";
 
 export async function runRouteForCohere({
   domain,
@@ -37,6 +32,7 @@ export async function runRouteForCohere({
   lastUserMessage,
   messages,
   filters,
+  explodedRoles,
   embeddingModel,
   turbopufferNamespace,
   languageModel,
@@ -48,6 +44,7 @@ export async function runRouteForCohere({
   lastUserMessage: string;
   messages: UIMessage[];
   filters: FacetFilter[];
+  explodedRoles: string[];
   embeddingModel: EmbeddingModel<string>;
   turbopufferNamespace: string;
   languageModel: LanguageModel;
@@ -59,6 +56,7 @@ export async function runRouteForCohere({
     namespace: turbopufferNamespace,
     topK: 3,
     filters,
+    explodedRoles,
   });
   const searchResultSources = searchResults.map((hit) => {
     return {
@@ -205,34 +203,6 @@ export async function runRouteForCohere({
   });
 
   return createUIMessageStreamResponse({ stream: uiMessageStream });
-}
-
-async function runQueryTurbopuffer(
-  query: string | null | undefined,
-  opts: {
-    embeddingModel: EmbeddingModel<string>;
-    namespace: string;
-    topK?: number;
-    filters?: FacetFilter[];
-    documentIdsToIgnore?: string[];
-  }
-) {
-  return query == null || query.trimStart().length === 0
-    ? []
-    : await queryTurbopuffer(query, {
-        namespace: opts.namespace,
-        apiKey: turbopufferApiKey(),
-        topK: opts.topK ?? 5,
-        vectorizer: async (text) => {
-          const embedding = await embed({
-            model: opts.embeddingModel,
-            value: text,
-          });
-          return embedding.embedding;
-        },
-        documentIdsToIgnore: opts.documentIdsToIgnore,
-        filters: opts.filters,
-      });
 }
 
 const rawCitationChunkFormatSchema = z.object({

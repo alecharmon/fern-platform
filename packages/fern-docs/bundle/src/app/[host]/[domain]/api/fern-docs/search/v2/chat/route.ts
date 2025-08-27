@@ -24,6 +24,7 @@ import {
 } from "@fern-docs/search-ask-fern";
 import { FacetFilter } from "@fern-docs/search-keyword";
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "@fern-docs/search-ui";
+import { createDelimitedRolesetCombinations } from "@fern-docs/search-utils";
 
 export const maxDuration = 60;
 export const revalidate = 0;
@@ -45,6 +46,9 @@ export async function POST(req: NextRequest) {
   if (!authState.ok) {
     return NextResponse.json("Unauthorized", { status: 401 });
   }
+
+  const roles = authState.authed ? (authState.user.roles ?? []) : [];
+  const explodedRoles = createDelimitedRolesetCombinations({ roleset: roles });
 
   const loader = await createCachedDocsLoader(host, domain);
   const metadata = await loader.getMetadata();
@@ -128,6 +132,7 @@ export async function POST(req: NextRequest) {
       lastUserMessage,
       messages,
       filters,
+      explodedRoles,
       embeddingModel,
       turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
       languageModel,
@@ -141,6 +146,7 @@ export async function POST(req: NextRequest) {
       lastUserMessage,
       messages,
       filters,
+      explodedRoles,
       embeddingModel,
       turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
       languageModel,

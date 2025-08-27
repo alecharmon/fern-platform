@@ -1,5 +1,11 @@
-import { FilterCondition, Filters } from "@turbopuffer/turbopuffer";
+import {
+  FilterCondition,
+  FilterConnective,
+  FilterOperator,
+  Filters,
+} from "@turbopuffer/turbopuffer";
 
+import { EVERYONE_ROLE } from "@fern-api/docs-utils";
 import { FacetFilter } from "@fern-docs/search-keyword";
 
 export function buildNegationFilters(
@@ -11,10 +17,12 @@ export function buildNegationFilters(
 
 export const buildQueryFilters = ({
   filters,
+  explodedRoles,
   documentIdsToIgnore,
   urlsToIgnore,
 }: {
   filters: FacetFilter[];
+  explodedRoles: string[];
   documentIdsToIgnore: string[];
   urlsToIgnore: string[];
 }): Filters | undefined => {
@@ -49,33 +57,42 @@ export const buildQueryFilters = ({
     return filter;
   });
 
-  const productFilters = productFacetFilters.map((f) => {
-    const filter: Filters = [
-      "Or",
-      [
-        ["product", "Eq", f.value],
-        ["product", "Eq", null],
-      ],
-    ];
-    return filter;
-  });
+  const productFilters: [FilterConnective, Filters[]][] =
+    productFacetFilters.map((f) => {
+      const filter: Filters = [
+        "Or",
+        [
+          ["product", "Eq", f.value],
+          ["product", "Eq", null],
+        ],
+      ];
+      return filter;
+    });
 
-  const queryFilters: Filters | undefined =
-    versionFacetFilters.length > 0 || productFacetFilters.length > 0
-      ? [
-          "And",
-          [
-            ...versionFilters,
-            ...productFilters,
-            ...documentIdFilters,
-            ...urlFilters,
-          ],
-        ]
-      : documentIdFilters.length > 0
-        ? documentIdFilters.length === 1
-          ? documentIdFilters[0]
-          : ["And", documentIdFilters]
-        : undefined;
+  const rolesToFilter = explodedRoles.includes(EVERYONE_ROLE)
+    ? explodedRoles
+    : [...explodedRoles, EVERYONE_ROLE];
+  const roleFilters: [FilterConnective, Filters[]] = [
+    "Or",
+    [
+      ...rolesToFilter.map((role) => [
+        "roles",
+        "Contains" as unknown as FilterOperator,
+        role,
+      ]),
+      ["roles", "Eq", null],
+    ] as Filters[],
+  ];
+  const queryFilters: Filters | undefined = [
+    "And",
+    [
+      ...versionFilters,
+      ...productFilters,
+      roleFilters,
+      ...documentIdFilters,
+      ...urlFilters,
+    ],
+  ];
 
   return queryFilters;
 };

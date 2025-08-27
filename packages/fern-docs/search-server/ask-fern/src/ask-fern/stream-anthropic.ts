@@ -40,6 +40,7 @@ export async function runRouteForAnthropic({
   lastUserMessage,
   messages,
   filters,
+  explodedRoles,
   embeddingModel,
   turbopufferNamespace,
   languageModel,
@@ -51,6 +52,7 @@ export async function runRouteForAnthropic({
   lastUserMessage: string;
   messages: UIMessage[];
   filters: FacetFilter[];
+  explodedRoles: string[];
   embeddingModel: EmbeddingModel<string>;
   turbopufferNamespace: string;
   languageModel: LanguageModel;
@@ -82,6 +84,7 @@ export async function runRouteForAnthropic({
     namespace: turbopufferNamespace,
     topK: 3,
     filters,
+    explodedRoles,
   });
   for (const result of turbopufferResults) {
     if (result.attributes.url) {
@@ -147,6 +150,7 @@ export async function runRouteForAnthropic({
                   documentIdsToIgnore: documentIdsToIgnore,
                   urlsToIgnore: urlsToIgnore,
                   filters,
+                  explodedRoles,
                 });
                 for (const hit of result) {
                   const url = hit.attributes.url;
