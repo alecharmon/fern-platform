@@ -22,7 +22,9 @@ export function sanitizeUrl(url: string | undefined): string | undefined {
     !url.startsWith("http://") &&
     !url.startsWith("https://") &&
     !url.startsWith("wss://") &&
-    !url.startsWith("ws://")
+    !url.startsWith("ws://") &&
+    !url.startsWith("mailto:") &&
+    !url.startsWith("tel:")
   ) {
     try {
       const parsedUrl = new URL(`https://${url}`);

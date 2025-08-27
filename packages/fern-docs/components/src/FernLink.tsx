@@ -224,9 +224,13 @@ const safeParseUrl = (url: string | undefined): UrlObject | null => {
           // this includes both http://example.com and mailto:email@example.com
           if (url.includes("://") || /^[a-zA-Z]+:/.test(url)) {
             const urlObj = new URL(url);
+            // for non-http protocols like mailto:, tel:, etc., don't set slashes to true
+            // as they don't use the standard URL format with slashes
+            const isStandardProtocol =
+              urlObj.protocol === "http:" || urlObj.protocol === "https:";
             return {
               protocol: urlObj.protocol,
-              slashes: true,
+              slashes: isStandardProtocol,
               auth: "",
               host: urlObj.host,
               port: urlObj.port,

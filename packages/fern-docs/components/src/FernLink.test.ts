@@ -66,6 +66,15 @@ describe("toUrlObject", () => {
       "/path?search"
     );
   });
+
+  it("properly formats mailto URLs without extra slashes", () => {
+    expect(formatUrlString(toUrlObject("mailto:hello@example.com"))).toEqual(
+      "mailto:hello@example.com"
+    );
+    expect(formatUrlString(toUrlObject("tel:1234567890"))).toEqual(
+      "tel:1234567890"
+    );
+  });
 });
 
 describe("resolveRelativeUrl", () => {
