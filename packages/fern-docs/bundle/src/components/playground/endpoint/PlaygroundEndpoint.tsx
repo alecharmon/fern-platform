@@ -160,6 +160,46 @@ export const PlaygroundEndpoint = ({
         );
 
         const time = Date.now();
+
+        if (res.headers.get("content-type")?.includes("audio/")) {
+          const reader = stream.getReader();
+          const chunks: Uint8Array[] = [];
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+          }
+
+          const audioBlob = new Blob(chunks, {
+            type: res.headers.get("content-type") || "",
+          });
+          const audioUrl = URL.createObjectURL(audioBlob);
+
+          setResponse(
+            loaded({
+              type: "file",
+              response: {
+                headers: Object.fromEntries(res.headers.entries()),
+                ok: res.ok,
+                redirected: res.redirected,
+                status: res.status,
+                statusText: res.statusText,
+                type: res.type,
+                url: res.url,
+                body: audioUrl,
+              },
+              contentType: res.headers.get("content-type") || "",
+              time: Date.now() - time,
+              size: String(
+                chunks.reduce((total, chunk) => total + chunk.length, 0)
+              ),
+            })
+          );
+
+          return;
+        }
+
         const reader = stream.getReader();
         let result = "";
         const decoder = new TextDecoder();
