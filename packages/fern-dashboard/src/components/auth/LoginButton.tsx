@@ -14,7 +14,9 @@ export const LoginButton = ({
 }) => {
   return (
     <Button {...buttonProps} asChild>
-      <a href={getLoginUrl({ returnTo, additionalParams })}>
+      <a
+        href={getLoginUrl({ connection: "github", returnTo, additionalParams })}
+      >
         {children ?? (
           <>
             <GithubLogo />
@@ -27,15 +29,18 @@ export const LoginButton = ({
 };
 
 function getLoginUrl({
+  connection,
   returnTo,
   additionalParams,
 }: {
+  connection: string;
   returnTo?: string;
   additionalParams?: Record<string, string>;
-} = {}) {
+}) {
   const searchParams = new URLSearchParams(additionalParams);
   if (returnTo != null) {
     searchParams.append("returnTo", returnTo);
   }
+  searchParams.append("connection", connection);
   return `/auth/login?${searchParams.toString()}`;
 }
