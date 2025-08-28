@@ -15,16 +15,25 @@ export function buildNegationFilters(
   return values.map((v) => [field, "NotEq", v]);
 }
 
+export function buildInclusionFilters(
+  field: string,
+  values: string[] = []
+): FilterCondition[] {
+  return values.map((v) => [field, "Eq", v]);
+}
+
 export const buildQueryFilters = ({
   filters,
   explodedRoles,
   documentIdsToIgnore,
   urlsToIgnore,
+  documentUrls,
 }: {
   filters: FacetFilter[];
   explodedRoles: string[];
   documentIdsToIgnore: string[];
   urlsToIgnore: string[];
+  documentUrls?: string[];
 }): Filters | undefined => {
   const versionFacetFilters = filters.filter(
     (f) => f.facet === "version.title"
@@ -33,14 +42,18 @@ export const buildQueryFilters = ({
     (f) => f.facet === "product.title"
   );
 
-  const documentIdFilters: FilterCondition[] = buildNegationFilters(
+  const documentIdNegationFilters: FilterCondition[] = buildNegationFilters(
     "id",
     documentIdsToIgnore
   );
-  const urlFilters: FilterCondition[] = buildNegationFilters(
+  const urlNegationFilters: FilterCondition[] = buildNegationFilters(
     "url",
     urlsToIgnore
   );
+
+  const urlInclusionFilters: FilterCondition[] = documentUrls?.length
+    ? buildInclusionFilters("url", documentUrls)
+    : [];
 
   const versionFilters = versionFacetFilters.map((f) => {
     const filter: Filters = [
@@ -69,6 +82,8 @@ export const buildQueryFilters = ({
       return filter;
     });
 
+  const hasDocumentConstraints = urlInclusionFilters.length > 0;
+
   const rolesToFilter = explodedRoles.includes(EVERYONE_ROLE)
     ? explodedRoles
     : [...explodedRoles, EVERYONE_ROLE];
@@ -83,16 +98,28 @@ export const buildQueryFilters = ({
       ["roles", "Eq", null],
     ] as Filters[],
   ];
-  const queryFilters: Filters | undefined = [
-    "And",
-    [
-      ...versionFilters,
-      ...productFilters,
-      roleFilters,
-      ...documentIdFilters,
-      ...urlFilters,
-    ],
-  ];
+
+  const queryFilters: Filters | undefined =
+    hasDocumentConstraints && urlInclusionFilters.length > 0
+      ? [
+          "And",
+          [
+            ["Or", [...urlInclusionFilters]],
+            ...versionFilters,
+            ...productFilters,
+            roleFilters,
+          ],
+        ]
+      : [
+          "And",
+          [
+            ...versionFilters,
+            ...productFilters,
+            roleFilters,
+            ...documentIdNegationFilters,
+            ...urlNegationFilters,
+          ],
+        ];
 
   return queryFilters;
 };

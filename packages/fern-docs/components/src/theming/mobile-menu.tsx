@@ -252,7 +252,12 @@ export function MobileMenu({
                   mainRef.current.style.willChange = "transform";
                 }
               }}
-              style={{ x, touchAction: "none" }}
+              style={{
+                x,
+                touchAction: "none",
+                right: "var(--ask-ai-panel-width, 0px)",
+                transition: "transform 0.2s ease-out, right 0.2s ease-out",
+              }}
               drag="x"
               dragDirectionLock
               dragSnapToOrigin

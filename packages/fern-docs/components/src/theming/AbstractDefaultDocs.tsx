@@ -25,6 +25,8 @@ export default function AbstractDefaultDocs({
   darkHeaderClassName,
   lightSidebarClassName,
   darkSidebarClassName,
+  isSidePanelOpen = false,
+  isSidePanelResizing = false,
 }: {
   header: React.ReactNode;
   versionSelect?: React.ReactNode;
@@ -40,6 +42,8 @@ export default function AbstractDefaultDocs({
   darkHeaderClassName?: string;
   lightSidebarClassName?: string;
   darkSidebarClassName?: string;
+  isSidePanelOpen?: boolean;
+  isSidePanelResizing?: boolean;
 }) {
   const { resolvedTheme } = useTheme();
   const headerClassName =
@@ -48,14 +52,28 @@ export default function AbstractDefaultDocs({
     resolvedTheme === "dark" ? darkSidebarClassName : lightSidebarClassName;
   const mainRef = React.useRef<HTMLDivElement>(null);
   return (
-    <>
+    <div
+      className={cn(
+        "transition-all duration-500 ease-out",
+        isSidePanelResizing && "!transition-none"
+      )}
+      style={{
+        marginRight: isSidePanelOpen ? "var(--ask-ai-panel-width, 24rem)" : "0",
+      }}
+    >
       <div className="fern-background-image pointer-events-none fixed inset-0" />
       <FernHeader
         className={cn(
-          "fern-background-image",
+          "fern-background-image transition-all duration-500 ease-out",
           { "lg:hidden": isHeaderDisabled },
+          isSidePanelResizing && "!transition-none",
           headerClassName
         )}
+        style={{
+          width: isSidePanelOpen
+            ? "calc(100% - var(--ask-ai-panel-width, 24rem))"
+            : "100%",
+        }}
         data-theme="default"
       >
         {announcement}
@@ -98,6 +116,6 @@ export default function AbstractDefaultDocs({
 
       {/* Enables footer DOM injection */}
       <footer id={FERN_FOOTER_ID} className="width-before-scroll-bar" />
-    </>
+    </div>
   );
 }

@@ -9,7 +9,7 @@
     @apply bg-background-a3 fixed inset-0 z-40 backdrop-blur-md;
   }
 
-  #fern-search-desktop-command[data-cmdk-root] {
+  [data-fern-search="desktop-command"][data-cmdk-root] {
     display: flex;
     flex-direction: column;
     max-height: 100dvh;
@@ -171,9 +171,11 @@
       }
     }
 
-    #fern-search-desktop-command[data-cmdk-root] {
-      border: 1px solid var(--color-border-default);
-      border-radius: var(--radius-3);
+    [data-fern-search="desktop-command"][data-cmdk-root] {
+      &:not([data-mode="ask-ai"]) {
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--radius-3);
+      }
 
       &[data-mode="ask-ai"] {
         height: 100%;

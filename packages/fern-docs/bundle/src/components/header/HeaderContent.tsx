@@ -7,6 +7,7 @@ import { AbstractHeaderContent } from "@fern-docs/components/abstract/AbstractHe
 import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";
 
 import { SearchV2Trigger } from "@/state/search";
+import { SearchPanelTrigger } from "@/state/search-panel";
 
 export function HeaderContent({
   logo,
@@ -18,6 +19,7 @@ export function HeaderContent({
   navbarLinks,
   loginButton,
   forceHeader = false,
+  headerDisabled = false,
 }: {
   logo: React.ReactNode;
   versionSelect: React.ReactNode;
@@ -28,6 +30,7 @@ export function HeaderContent({
   navbarLinks: React.ReactNode;
   loginButton?: React.ReactNode;
   forceHeader?: boolean;
+  headerDisabled?: boolean;
 }) {
   return (
     <AbstractHeaderContent
@@ -40,12 +43,16 @@ export function HeaderContent({
       loginButton={loginButton}
       forceHeader={forceHeader}
       showSearchBar={showSearchBar}
+      headerDisabled={headerDisabled}
       searchBar={
-        <SearchV2Trigger
-          aria-label="Search"
-          className="fern-header-search-bar overflow-hidden"
-          isSearchInSidebar={false}
-        />
+        <div className="flex w-full max-w-[640px] flex-row gap-2">
+          <SearchV2Trigger
+            aria-label="Search"
+            className="fern-header-search-bar flex-1 overflow-hidden"
+            isSearchInSidebar={false}
+          />
+          <SearchPanelTrigger aria-label="Ask AI" />
+        </div>
       }
       themeSwitch={<ThemeSwitch iconOnly variant="ghost" className="ml-2" />}
     />

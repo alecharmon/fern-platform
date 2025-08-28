@@ -21,6 +21,7 @@ export function AbstractHeaderContent({
   forceHeader = false,
   searchBar,
   themeSwitch,
+  headerDisabled = false,
 }: {
   logo: React.ReactNode;
   versionSelect: React.ReactNode;
@@ -33,6 +34,7 @@ export function AbstractHeaderContent({
   forceHeader?: boolean;
   searchBar: React.ReactNode;
   themeSwitch: React.ReactNode;
+  headerDisabled?: boolean;
 }) {
   const isDesktop = useIsDesktop();
   return (
@@ -64,7 +66,7 @@ export function AbstractHeaderContent({
           </div>
         </div>
 
-        {(showSearchBar || !isDesktop) && searchBar}
+        {(showSearchBar || !isDesktop) && !headerDisabled && searchBar}
 
         <FernButtonGroup asChild>
           <nav className="fern-header-navbar-links" aria-label="Navbar links">

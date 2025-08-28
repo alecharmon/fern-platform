@@ -12,12 +12,19 @@ import {
   FERN_FOOTER_ID,
 } from "@fern-docs/components/constants";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
+import { useDomain } from "@fern-docs/components/state/domain";
 import { SCROLL_BODY_ATOM } from "@fern-docs/components/state/viewport";
 import { FernHeader } from "@fern-docs/components/theming/fern-header";
 import { MainCtx } from "@fern-docs/components/theming/mobile-menu";
 import { SidebarNav } from "@fern-docs/components/theming/side-nav";
 
 import { HeaderTabsRoot } from "@/components/header/HeaderTabsRoot";
+import { SearchPanel } from "@/components/search-panel";
+import { useIsAskAiEnabled } from "@/state/search";
+import {
+  useIsSearchPanelOpen,
+  useIsSearchPanelResizing,
+} from "@/state/search-panel";
 
 const CohereDocsStyle = () => {
   return (
@@ -86,6 +93,11 @@ export default function CohereDocs({
   }, [setScrollBody]);
 
   const pathname = useCurrentPathname();
+  const isAskAiEnabled = useIsAskAiEnabled();
+  const domain = useDomain();
+  const isSidePanelOpen = useIsSearchPanelOpen();
+  const isSidePanelResizing = useIsSearchPanelResizing();
+
   useEffect(() => {
     scrollAreaRef.current?.scrollTo(0, 0);
   }, [pathname]);
@@ -95,7 +107,18 @@ export default function CohereDocs({
       <CohereDocsStyle />
       {announcement}
       {/* <HeaderContainer header={header} tabs={tabs} /> */}
-      <div className="width-before-scroll-bar flex min-h-0 flex-1 shrink flex-col gap-3 p-3">
+      <div
+        className={cn(
+          "width-before-scroll-bar flex min-h-0 flex-1 shrink flex-col gap-3 p-3",
+          "transition-all duration-500 ease-out",
+          isSidePanelResizing && "!transition-none"
+        )}
+        style={{
+          marginRight: isSidePanelOpen
+            ? "var(--ask-ai-panel-width, 24rem)"
+            : "0",
+        }}
+      >
         <FernHeader
           className={cn(
             "flex flex-col gap-3",
@@ -138,6 +161,7 @@ export default function CohereDocs({
           </main>
         </MainCtx.Provider>
       </div>
+      {isAskAiEnabled && <SearchPanel domain={domain} />}
     </div>
   );
 }

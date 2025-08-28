@@ -1,12 +1,13 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 
 import { useAtom } from "jotai";
 import { RESET, atomWithDefault } from "jotai/utils";
 
 import { FacetFilter, FacetsResponse } from "@fern-docs/search-keyword";
 
+import { filtersAtom } from "./FilterProvider";
+
 export const FacetFiltersContext = createContext({
-  atom: atomWithDefault<readonly FacetFilter[]>(() => []),
   preloadFacets: (_: readonly FacetFilter[]): Promise<FacetsResponse> =>
     Promise.resolve({}),
   fetchFacets: (_: readonly string[]): Promise<FacetsResponse> =>
@@ -31,9 +32,8 @@ export interface FacetFiltersManager<T = readonly FacetFilter[]> {
 export function useFacetFilters(
   atom?: ReturnType<typeof atomWithDefault<readonly FacetFilter[]>>
 ): FacetFiltersManager {
-  const contextAtom = useContext(FacetFiltersContext).atom;
+  const [filters, setFilters] = useAtom(atom ?? filtersAtom);
 
-  const [filters, setFilters] = useAtom(atom ?? contextAtom);
   return useMemo(() => {
     const clearFilters = () => setFilters([]);
     const resetFilters = () => setFilters(RESET);

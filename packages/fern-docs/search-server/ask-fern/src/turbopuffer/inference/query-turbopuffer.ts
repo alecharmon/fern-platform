@@ -23,6 +23,9 @@ interface SemanticSearchOptions {
   // ignore these document ids & urls; used to avoid tool-calls returning the same document over and over
   documentIdsToIgnore?: string[];
   urlsToIgnore?: string[];
+
+  // include only these specific documents
+  documentUrls?: string[];
 }
 
 export async function queryTurbopuffer(
@@ -37,6 +40,7 @@ export async function queryTurbopuffer(
     mode = "hybrid",
     documentIdsToIgnore = [],
     urlsToIgnore = [],
+    documentUrls,
   }: SemanticSearchOptions
 ): Promise<TurbopufferRecord[]> {
   const tpuf = new Turbopuffer({
@@ -52,7 +56,16 @@ export async function queryTurbopuffer(
     explodedRoles,
     documentIdsToIgnore,
     urlsToIgnore,
+    documentUrls,
   });
+
+  if (documentUrls?.length) {
+    const results = await ns.query({
+      filters: queryFilters,
+      include_attributes: true,
+    });
+    return results as unknown as TurbopufferRecord[];
+  }
 
   const semanticResults =
     mode !== "bm25"

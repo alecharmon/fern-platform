@@ -1,5 +1,6 @@
 "use client";
 
+import { ParamValue } from "next/dist/server/request/params";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -10,7 +11,8 @@ import { isSelfHosted } from "@fern-api/docs-server";
 import { FernButton, FernDropdown } from "@fern-docs/components";
 
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
-import { searchDialogOpenAtom, useIsAskAiEnabled } from "@/state/search";
+import { useIsAskAiEnabled } from "@/state/search";
+import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
 
 import {
   CopyPageOption,
@@ -18,15 +20,15 @@ import {
   OpenWithLLM,
   ViewAsMarkdownOption,
 } from "./PageActionsDropdownOptions";
-import { askAiAtom } from "./search";
 
 export function PageActionsDropdown({ markdown }: { markdown: string }) {
   const [showCopied, setShowCopied] = useState<boolean>(false);
   const { domain, slug } = useParams();
 
   // this is used to open the search dialog, and then AI chat
-  const setSearchDialogState = useSetAtom(searchDialogOpenAtom);
-  const setAskAi = useSetAtom(askAiAtom);
+  // const setSearchDialogState = useSetAtom(searchDialogOpenAtom);
+  const setSearchPanelState = useSetAtom(searchPanelOpenAtom);
+  const setPageContext = useSetPageContext();
 
   const copyOption = CopyPageOption();
   const viewAsMarkdownOption = ViewAsMarkdownOption();
@@ -64,8 +66,12 @@ export function PageActionsDropdown({ markdown }: { markdown: string }) {
         });
       }
     } else if (value === "open-ai-search") {
-      setSearchDialogState(true);
-      setAskAi(true);
+      const pageContext = {
+        title: document.title,
+        url: constructPageUrl(domain, slug),
+      };
+      setPageContext(pageContext);
+      setSearchPanelState(true);
       capturePosthogEventInternal("page_actions_dropdown", {
         type: "ai-search",
         page_location: window.location.pathname,
@@ -123,4 +129,8 @@ export function PageActionsDropdown({ markdown }: { markdown: string }) {
       </FernDropdown>
     </div>
   );
+}
+
+function constructPageUrl(domain: ParamValue, slug: ParamValue) {
+  return `https://${domain as string}${decodeURIComponent(slug as string)}`;
 }

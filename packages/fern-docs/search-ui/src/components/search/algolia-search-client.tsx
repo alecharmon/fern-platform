@@ -4,6 +4,7 @@ import {
   PropsWithChildren,
   ReactNode,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -13,6 +14,7 @@ import { InstantSearchNext } from "react-instantsearch-nextjs";
 
 import { LiteClient, liteClient } from "algoliasearch/lite";
 import { uniq } from "es-toolkit/array";
+import { preload } from "swr";
 import useSWRImmutable from "swr/immutable";
 
 import { getDevice, getPlatform } from "@fern-api/ui-core-utils";

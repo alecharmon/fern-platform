@@ -32,7 +32,7 @@ export function SidebarFixedItemsSection({
     return null;
   }
   return (
-    <div className={cn("flex flex-col px-4 lg:pl-5", className)}>
+    <div className={cn("flex flex-col px-4 pt-2 lg:pl-5", className)}>
       {showHeaderInSidebar && (
         <>
           <div className="fern-sidebar-header">

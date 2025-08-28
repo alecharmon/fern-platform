@@ -303,7 +303,7 @@
     }
   }
 
-  #fern-search-desktop-command {
+  [data-fern-search="desktop-command"]:not([data-mode="ask-ai"]) {
     .fern-copy-button,
     .fern-expand-button {
       top: 0.1rem !important;

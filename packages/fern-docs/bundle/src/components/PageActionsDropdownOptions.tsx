@@ -12,7 +12,7 @@ import {
   ClaudeIcon,
   MarkdownIcon,
   OpenAIIcon,
-  SparklesIcon,
+  SparklesIconHollow,
   TextIcon,
 } from "./PageActionsDropdownAssets";
 
@@ -55,7 +55,7 @@ export const OpenAISearchOption = (): FernDropdown.ValueOption => {
     value: "open-ai-search",
     label: "Ask a question",
     helperText: "Chat with an AI assistant",
-    icon: <SparklesIcon />,
+    icon: <SparklesIconHollow />,
   } as FernDropdown.ValueOption;
 };
 

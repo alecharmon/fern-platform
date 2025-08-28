@@ -10,7 +10,8 @@ import {
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 
-import { FERN_SEARCH_DESKTOP_COMMAND_ID } from "../../constants";
+import { cn } from "@fern-docs/components";
+
 import * as Command from "../cmdk";
 import { CommandUxProvider } from "../shared/command-ux";
 
@@ -56,7 +57,6 @@ export const DesktopCommandRoot = forwardRef<
           label="Search"
           ref={composeRefs(forwardedRef, ref)}
           {...props}
-          id={FERN_SEARCH_DESKTOP_COMMAND_ID}
           onKeyDown={composeEventHandlers(
             props.onKeyDown,
             (e) => {
@@ -113,6 +113,9 @@ export const DesktopCommandRoot = forwardRef<
                 inputRef.current?.focus();
               }
             }
+          )}
+          className={cn(
+            props["data-mode" as keyof typeof props] === "ask-ai" && "h-full"
           )}
         >
           {children}

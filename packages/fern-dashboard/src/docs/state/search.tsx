@@ -10,7 +10,6 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { FERN_SEARCH_BUTTON_ID } from "@fern-docs/components/constants";
 import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/desktop-search-button";
-import { useIsMobile } from "@fern-ui/react-commons";
 
 export const searchDialogOpenAtom = atom(false);
 export const searchInitializedAtom = atom(false);
@@ -73,16 +72,8 @@ export const SearchV2Trigger = React.memo(function SearchV2Trigger(
 ) {
   const isInitialized = useAtomValue(searchInitializedAtom);
   const toggleSearchDialog = useToggleSearchDialog();
-  const isAskAiEnabled = useIsAskAiEnabled();
-  const isMobile = useIsMobile();
   const isLocalEnvironment = isLocal();
-  let placeholder = "Search";
-
-  if (isAskAiEnabled && !isMobile) {
-    placeholder = props.isSearchInSidebar
-      ? "Search or ask AI"
-      : "Search or ask AI a question";
-  }
+  const placeholder = "Search";
 
   return (
     <DesktopSearchButton

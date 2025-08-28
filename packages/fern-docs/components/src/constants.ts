@@ -12,6 +12,11 @@ export const FERN_HEADER_ID = "fern-header";
 export const FERN_PLAYGROUND_FLOATING_BUTTON_ID =
   "fern-playground-floating-button";
 export const FERN_SEARCH_BUTTON_ID = "fern-search-button";
+export const FERN_ASK_AI_BUTTON_ID = "fern-ask-ai-button";
+export const FERN_ASK_AI_BUTTON_ICON_ID = "fern-ask-ai-button-icon";
+export const FERN_ASK_AI_PANEL_HEADER_ID = "fern-ask-ai-panel-header";
+export const FERN_ASK_AI_PANEL_HEADER_ICON_ID = "fern-ask-ai-panel-header-icon";
+export const FERN_ASK_AI_PANEL_INPUT_ID = "fern-ask-ai-panel-input";
 export const FERN_SIDEBAR_ID = "fern-sidebar";
 export const FERN_SIDEBAR_OVERLAY_ID = "fern-sidebar-overlay";
 export const FERN_SIDEBAR_SCROLL_AREA_ID = "fern-sidebar-scroll-area";

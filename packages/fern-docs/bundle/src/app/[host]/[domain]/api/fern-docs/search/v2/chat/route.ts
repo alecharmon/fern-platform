@@ -77,12 +77,14 @@ export async function POST(req: NextRequest) {
     source,
     filters,
     conversationId,
+    documentUrls,
   }: {
     url: string;
     messages: UIMessage[];
     source: string;
     filters: FacetFilter[];
     conversationId: string;
+    documentUrls: string[];
   } = await req.json();
 
   const lastUserMessage = getLastUserMessage(messages);
@@ -136,6 +138,7 @@ export async function POST(req: NextRequest) {
       embeddingModel,
       turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
       languageModel,
+      documentUrls,
     });
   } else if (modelProvider === "cohere") {
     return runRouteForCohere({

@@ -55,6 +55,7 @@ export const Suggestions = ({
             key={suggestion}
             value={suggestion}
             onSelect={() => askAI(suggestion)}
+            className="text-(color:--accent) bg-transparent text-[12px] font-semibold hover:cursor-pointer hover:underline"
             forceMount
           >
             {suggestion}

@@ -1,8 +1,17 @@
+"use client";
+
 import React from "react";
 
+import { useDomain } from "@fern-docs/components/state/domain";
 import AbstractDefaultDocs from "@fern-docs/components/theming/AbstractDefaultDocs";
 
 import { HeaderTabsRoot } from "@/components/header/HeaderTabsRoot";
+import { SearchPanel } from "@/components/search-panel";
+import { useIsAskAiEnabled } from "@/state/search";
+import {
+  useIsSearchPanelOpen,
+  useIsSearchPanelResizing,
+} from "@/state/search-panel";
 
 export default function DefaultDocs({
   header,
@@ -37,27 +46,36 @@ export default function DefaultDocs({
   lightSidebarClassName?: string;
   darkSidebarClassName?: string;
 }) {
+  const domain = useDomain();
+  const isSidePanelOpen = useIsSearchPanelOpen();
+  const isResizing = useIsSearchPanelResizing();
+  const isAskAiEnabled = useIsAskAiEnabled();
   return (
-    <AbstractDefaultDocs
-      versionSelect={versionSelect}
-      productSelect={productSelect}
-      sidebar={sidebar}
-      announcement={announcement}
-      header={header}
-      hasProductsOrVersions={hasProductsOrVersions}
-      isSidebarFixed={isSidebarFixed}
-      isHeaderDisabled={isHeaderDisabled}
-      headerTabs={
-        <HeaderTabsRoot showSearchBar={showSearchBarInTabs}>
-          {tabs}
-        </HeaderTabsRoot>
-      }
-      lightHeaderClassName={lightHeaderClassName}
-      darkHeaderClassName={darkHeaderClassName}
-      lightSidebarClassName={lightSidebarClassName}
-      darkSidebarClassName={darkSidebarClassName}
-    >
-      {children}
-    </AbstractDefaultDocs>
+    <>
+      <AbstractDefaultDocs
+        versionSelect={versionSelect}
+        productSelect={productSelect}
+        sidebar={sidebar}
+        announcement={announcement}
+        header={header}
+        hasProductsOrVersions={hasProductsOrVersions}
+        isSidebarFixed={isSidebarFixed}
+        isHeaderDisabled={isHeaderDisabled}
+        isSidePanelOpen={isSidePanelOpen}
+        isSidePanelResizing={isResizing}
+        headerTabs={
+          <HeaderTabsRoot showSearchBar={showSearchBarInTabs}>
+            {tabs}
+          </HeaderTabsRoot>
+        }
+        lightHeaderClassName={lightHeaderClassName}
+        darkHeaderClassName={darkHeaderClassName}
+        lightSidebarClassName={lightSidebarClassName}
+        darkSidebarClassName={darkSidebarClassName}
+      >
+        {children}
+      </AbstractDefaultDocs>
+      {isAskAiEnabled && <SearchPanel domain={domain} />}
+    </>
   );
 }

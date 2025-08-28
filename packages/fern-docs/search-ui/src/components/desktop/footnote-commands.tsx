@@ -29,9 +29,9 @@ export function FootnoteCommands({
           <Badge color="gray" variant="subtleSolidHover">
             {String(idx + 1)}
           </Badge>
-          <div>
+          <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="text-sm font-semibold">{footnote.title}</div>
-            <div className="text-(color:--grayscale-12) text-xs">
+            <div className="text-(color:--grayscale-12) min-w-0 truncate text-xs">
               {footnote.url}
             </div>
           </div>

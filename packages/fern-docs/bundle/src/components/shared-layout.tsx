@@ -16,6 +16,7 @@ import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import { SearchV2Trigger } from "@/state/search";
+import { SearchPanelTrigger } from "@/state/search-panel";
 
 import { LoginButton } from "./login-button";
 
@@ -46,6 +47,7 @@ export default async function SharedLayout({
     loader.getRoot(),
   ]);
   const theme = edgeFlags.isCohereTheme ? "cohere" : "default";
+  const isAskAiEnabled = edgeFlags.isAskAiEnabled;
   const announcementText = config.announcement?.text;
 
   const serialize = createCachedMdxSerializer(loader, {
@@ -117,6 +119,7 @@ export default async function SharedLayout({
             </React.Suspense>
           }
           forceHeader={edgeFlags.isCohereTheme}
+          headerDisabled={layout.isHeaderDisabled}
         />
       }
       productSelect={
@@ -156,17 +159,22 @@ export default async function SharedLayout({
             </React.Suspense>
           }
           searchBar={
-            <SearchV2Trigger
-              aria-label="Search"
-              className={cn(
-                "w-full overflow-hidden",
-                !showHeaderInSidebar && "mt-3 lg:mt-2",
-                {
-                  "mt-3": showHeaderInSidebar && hasProductsOrVersions,
-                }
+            <div className="flex w-full items-center gap-2">
+              <SearchV2Trigger
+                aria-label="Search"
+                className={cn(
+                  "w-full overflow-hidden",
+                  !showHeaderInSidebar && "mt-3 lg:mt-2",
+                  {
+                    "mt-3": showHeaderInSidebar && hasProductsOrVersions,
+                  }
+                )}
+                isSearchInSidebar={true}
+              />
+              {isAskAiEnabled && (
+                <SearchPanelTrigger isSearchInSidebar={true} />
               )}
-              isSearchInSidebar={true}
-            />
+            </div>
           }
         >
           {sidebar}

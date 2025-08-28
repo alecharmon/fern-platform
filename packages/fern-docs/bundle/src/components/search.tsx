@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 import { isEqual } from "es-toolkit/predicate";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { z } from "zod";
 
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
@@ -24,7 +24,7 @@ import {
   MeiliSearchClientRoot,
   SEARCH_INDEX,
 } from "@fern-docs/search-ui";
-import { useEventCallback, useLazyRef } from "@fern-ui/react-commons";
+import { useEventCallback } from "@fern-ui/react-commons";
 
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
@@ -36,26 +36,18 @@ import {
   useIsAskAiEnabled,
   useIsDefaultSearchFilterOn,
 } from "@/state/search";
-import { atomWithStorageString } from "@/state/utils/atomWithStorageString";
+import { useOpenSearchPanel } from "@/state/search-panel";
+import { searchPanelInitialInputAtom } from "@/state/search-panel";
 
 import { Feedback } from "./feedback/Feedback";
-
-const ALGOLIA_USER_TOKEN_KEY = "algolia-user-token";
+import { generateConversationId } from "./generate-conversation-id";
+import { useAlgoliaUserToken } from "./util/getAlgoliaUserToken";
 
 const ApiKeySchema = z.object({
   appId: z.string(),
   apiKey: z.string(),
 });
 
-export const generateConversationId = () => {
-  const chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = "";
-  for (let i = 0; i < 32; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
 export const conversationIdAtom = atom<string>(generateConversationId());
 export function useConversationId() {
   const [conversationId, setConversationId] = useAtom(conversationIdAtom);
@@ -65,19 +57,6 @@ export function useConversationId() {
     resetConversationId: () => setConversationId(generateConversationId()),
   };
 }
-
-function useAlgoliaUserToken() {
-  const userTokenRef = useLazyRef(() =>
-    atomWithStorageString(
-      ALGOLIA_USER_TOKEN_KEY,
-      `anonymous-user-${crypto.randomUUID()}`,
-      { getOnInit: true }
-    )
-  );
-  return useAtomValue(userTokenRef.current);
-}
-
-export const askAiAtom = atom(false);
 
 export const SearchV2 = React.memo(function SearchV2({
   domain,
@@ -93,8 +72,8 @@ export const SearchV2 = React.memo(function SearchV2({
   const isDefaultSearchFilterOn = useIsDefaultSearchFilterOn();
 
   const [open, setOpen] = useCommandTrigger();
-  const [askAi, setAskAi] = useAtom(askAiAtom);
-  const [initialInput, setInitialInput] = React.useState("");
+  const [initialInput, setInitialInput] = useAtom(searchPanelInitialInputAtom);
+  const openSearchPanel = useOpenSearchPanel();
 
   const { data } = useApiRouteSWRImmutable("/api/fern-docs/search/v2/key", {
     request: { headers: { "X-User-Token": userToken } },
@@ -108,15 +87,6 @@ export const SearchV2 = React.memo(function SearchV2({
     currentVersion != null && isDefaultSearchFilterOn;
 
   const facetApiEndpoint = useApiRoute("/api/fern-docs/search/v2/facet");
-  let chatEndpoint = useApiRoute("/api/fern-docs/search/v2/chat");
-  let suggestEndpoint = useApiRoute("/api/fern-docs/search/v2/suggest");
-
-  // Rerouting to ferndocs.com for production environments to ensure streaming works
-  // Also see: next.config.mjs, where we set CORS headers
-  if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production") {
-    chatEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI}/api/fern-docs/search/v2/chat`;
-    suggestEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI}/api/fern-docs/search/v2/suggest`;
-  }
 
   const router = useRouter();
 
@@ -230,13 +200,9 @@ export const SearchV2 = React.memo(function SearchV2({
           <DesktopCommandWithAskAI
             useConversationId={useConversationId}
             domain={domain}
-            askAI={askAi}
-            setAskAI={setAskAi}
-            api={chatEndpoint}
             headers={{
               "X-Fern-Host": domain,
             }}
-            suggestionsApi={suggestEndpoint}
             initialInput={initialInput}
             setInitialInput={setInitialInput}
             body={{ algoliaSearchKey: apiKey }}
@@ -260,6 +226,7 @@ export const SearchV2 = React.memo(function SearchV2({
             }}
             darkCodeEnabled={isDarkCodeEnabled}
             className="shadow-xl"
+            openSearchPanel={openSearchPanel}
           >
             {children}
           </DesktopCommandWithAskAI>
@@ -318,6 +285,7 @@ function useCommandTrigger(): [
         // support for / key (only if not in an input)
         if (
           event.key === "/" &&
+          !(event.metaKey || event.ctrlKey) &&
           !(document.activeElement instanceof HTMLInputElement) &&
           !(document.activeElement instanceof HTMLTextAreaElement) &&
           !(
@@ -328,7 +296,6 @@ function useCommandTrigger(): [
           event.preventDefault();
           return true;
         }
-
         return prev;
       });
     };

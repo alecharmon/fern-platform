@@ -44,6 +44,7 @@ export async function runRouteForAnthropic({
   embeddingModel,
   turbopufferNamespace,
   languageModel,
+  documentUrls,
 }: {
   domain: string;
   chatSource: string;
@@ -56,6 +57,7 @@ export async function runRouteForAnthropic({
   embeddingModel: EmbeddingModel<string>;
   turbopufferNamespace: string;
   languageModel: LanguageModel;
+  documentUrls?: string[];
 }) {
   /*
     Anthropic's API has a bug (see: https://github.com/anthropics/claude-code/issues/473)
@@ -79,13 +81,16 @@ export async function runRouteForAnthropic({
 
   const searchResultURLs = new Set<string>();
   const searchResults: TurbopufferRecord[] = [];
+
   const turbopufferResults = await runQueryTurbopuffer(lastUserMessage, {
     embeddingModel,
     namespace: turbopufferNamespace,
     topK: 3,
     filters,
+    documentUrls,
     explodedRoles,
   });
+
   for (const result of turbopufferResults) {
     if (result.attributes.url) {
       if (!searchResultURLs.has(result.attributes.url)) {
