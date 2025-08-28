@@ -79,7 +79,7 @@ async function getLlmsFullTxt(
         nodes,
         (a) => FernNavigation.getPageId(a) ?? a.canonicalSlug ?? a.slug
       ).map(async (node) => {
-        const markdown = await getMarkdownForPath(node, loader);
+        const markdown = await getMarkdownForPath(node, loader, domain);
         if (markdown == null) {
           return undefined;
         }
