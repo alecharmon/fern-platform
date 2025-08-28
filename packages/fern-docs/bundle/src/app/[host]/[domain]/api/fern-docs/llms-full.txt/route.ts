@@ -11,7 +11,6 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 
-import { generateHtml } from "@/app/utils";
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 
@@ -29,16 +28,10 @@ export async function GET(
 
   const content = await getLlmsFullTxt(host, domain, path, fernToken);
 
-  const html = await generateHtml({
-    host,
-    domain,
-    content,
-  });
-
-  return new NextResponse(html, {
+  return new NextResponse(content, {
     status: 200,
     headers: {
-      "Content-Type": "text/html; charset=utf-8",
+      "Content-Type": "text/plain; charset=utf-8",
       "X-Robots-Tag": "noindex",
       "Cache-Control": "s-maxage=60",
     },

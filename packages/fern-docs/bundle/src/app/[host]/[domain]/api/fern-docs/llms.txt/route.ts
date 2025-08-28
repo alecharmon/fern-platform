@@ -15,7 +15,6 @@ import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { getEdgeFlags } from "@fern-docs/edge-config";
 
-import { generateHtml } from "@/app/utils";
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 import { getLlmTxtMetadata } from "@/server/llm-txt-md";
@@ -62,16 +61,10 @@ export async function GET(
   const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
   const content = await getLlmsTxt(host, domain, path, fernToken);
 
-  const html = await generateHtml({
-    host,
-    domain,
-    content,
-  });
-
-  return new NextResponse(html, {
+  return new NextResponse(content, {
     status: 200,
     headers: {
-      "Content-Type": "text/html; charset=utf-8",
+      "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "s-maxage=60",
     },
   });
