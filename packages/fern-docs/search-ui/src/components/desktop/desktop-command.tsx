@@ -72,6 +72,8 @@ const DesktopCommand = forwardRef<
         checkForDefaultPrevented: false,
       })}
       escapeKeyShouldPopState={filters.length > 0}
+      data-fern-search="desktop-command"
+      data-mode={"search"}
     >
       <DesktopCommandContent asChild={asChild}>
         {children}

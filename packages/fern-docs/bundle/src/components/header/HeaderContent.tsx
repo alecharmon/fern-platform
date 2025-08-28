@@ -7,6 +7,7 @@ import { AbstractHeaderContent } from "@fern-docs/components/abstract/AbstractHe
 import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";
 
 import { SearchV2Trigger } from "@/state/search";
+import { useIsAskAiEnabled } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 
 export function HeaderContent({
@@ -32,6 +33,7 @@ export function HeaderContent({
   forceHeader?: boolean;
   headerDisabled?: boolean;
 }) {
+  const isAskAiEnabled = useIsAskAiEnabled();
   return (
     <AbstractHeaderContent
       className={className}
@@ -51,7 +53,7 @@ export function HeaderContent({
             className="fern-header-search-bar flex-1 overflow-hidden"
             isSearchInSidebar={false}
           />
-          <SearchPanelTrigger aria-label="Ask AI" />
+          {isAskAiEnabled && <SearchPanelTrigger aria-label="Ask AI" />}
         </div>
       }
       themeSwitch={<ThemeSwitch iconOnly variant="ghost" className="ml-2" />}

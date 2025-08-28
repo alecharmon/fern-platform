@@ -19,9 +19,6 @@ export const CommandAskAIGroup = forwardRef<
       <Command.Item onSelect={() => onAskAI(query)}>
         <Sparkles />
         <AskAIText query={query.trim().length > 0 ? query.trim() : ""} />
-        <Badge rounded className="ml-auto" size="sm">
-          Experimental
-        </Badge>
       </Command.Item>
     </Command.Group>
   );

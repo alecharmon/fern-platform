@@ -147,7 +147,7 @@ function CommandHit({
         onSelect={(value) => {
           // record click-through event for record
           if (hit.record) {
-            sendEvent("click", hit.record);
+            sendEvent("click", hit.record, "search-result-clicked");
           }
           onSelect(value);
         }}

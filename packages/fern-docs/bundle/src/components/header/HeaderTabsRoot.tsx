@@ -3,6 +3,7 @@
 import { AbstractHeaderTabsRoot } from "@fern-docs/components/abstract/AbstractHeaderTabsRoot";
 
 import { SearchV2Trigger } from "@/state/search";
+import { useIsAskAiEnabled } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 
 export function HeaderTabsRoot({
@@ -14,6 +15,7 @@ export function HeaderTabsRoot({
   showSearchBar: boolean;
   className?: string;
 }) {
+  const isAskAiEnabled = useIsAskAiEnabled();
   return (
     <AbstractHeaderTabsRoot
       className={className}
@@ -25,7 +27,12 @@ export function HeaderTabsRoot({
               className="max-w-sidebar-width overflow-hidden"
               isSearchInSidebar={false}
             />
-            <SearchPanelTrigger aria-label="Ask AI" isSearchInSidebar={false} />
+            {isAskAiEnabled && (
+              <SearchPanelTrigger
+                aria-label="Ask AI"
+                isSearchInSidebar={false}
+              />
+            )}
           </div>
         )
       }
