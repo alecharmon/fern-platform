@@ -35,9 +35,9 @@ import {
 } from "@fern-api/docs-server/docs-loader";
 import {
   DEFAULT_CONTENT_WIDTH,
-  DEFAULT_EDGE_FLAGS,
   DEFAULT_GUTTER_WIDTH,
   DEFAULT_HEADER_HEIGHT,
+  DEFAULT_LOCAL_EDGE_FLAGS,
   DEFAULT_LOGO_HEIGHT,
   DEFAULT_PAGE_WIDTH,
   DEFAULT_SELF_HOSTED_EDGE_FLAGS,
@@ -201,7 +201,7 @@ async function clearKvCache(domain: string) {
 
 const cachedGetEdgeFlags = cache(async (domain: string) => {
   if (isLocal()) {
-    return DEFAULT_EDGE_FLAGS;
+    return DEFAULT_LOCAL_EDGE_FLAGS;
   } else if (isSelfHosted()) {
     return DEFAULT_SELF_HOSTED_EDGE_FLAGS;
   }
