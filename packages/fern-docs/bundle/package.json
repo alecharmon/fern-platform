@@ -91,7 +91,7 @@
     "@react-three/fiber": "9.0.4",
     "@segment/snippet": "^5.2.1",
     "@types/qs": "6.9.14",
-    "@upstash/qstash": "^2.7.16",
+    "@upstash/qstash": "^2.8.2",
     "@vercel/analytics": "^1.5.0",
     "@vercel/functions": "^2.0.0",
     "@vercel/kv": "^2.0.0",

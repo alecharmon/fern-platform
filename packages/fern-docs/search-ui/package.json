@@ -71,7 +71,7 @@
     "@types/mdast": "^4.0.3",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
-    "@upstash/qstash": "^2.7.16",
+    "@upstash/qstash": "^2.8.2",
     "ai": "5.0.0-beta.2",
     "cssnano": "^6.0.3",
     "jotai": "^2.12.1",

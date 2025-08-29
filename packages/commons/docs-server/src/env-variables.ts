@@ -32,6 +32,10 @@ export function qstashToken(): string {
   return getEnvVariable("QSTASH_TOKEN");
 }
 
+export function qstashBaseUrl(): string {
+  return getEnvVariable("QSTASH_URL");
+}
+
 export function qstashCurrentSigningKey(): string {
   return getEnvVariable("QSTASH_CURRENT_SIGNING_KEY");
 }

@@ -1,7 +1,10 @@
 import { Client } from "@upstash/qstash";
 import { getEnv } from "@vercel/functions";
 
-import { qstashToken } from "@fern-api/docs-server/env-variables";
+import {
+  qstashBaseUrl,
+  qstashToken,
+} from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { cleanBasePath } from "@fern-api/docs-server/utils/clean-base-path";
 import {
@@ -15,7 +18,7 @@ import { isSelfHosted } from "./isSelfHosted";
 const q =
   isLocal() || isSelfHosted()
     ? undefined
-    : new Client({ token: qstashToken() });
+    : new Client({ token: qstashToken(), baseUrl: qstashBaseUrl() });
 
 export async function queue<TBody = unknown>({
   host,
