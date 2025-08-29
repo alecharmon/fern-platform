@@ -1,6 +1,6 @@
 import { BookOpen } from "lucide-react";
 
-import { LoginButton } from "../auth/LoginButton";
+import { GithubLoginButton, GoogleLoginButton } from "../auth/LoginButton";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ThemedFernLogo } from "../theme/ThemedFernLogo";
 import { Button } from "../ui/button";
@@ -23,7 +23,10 @@ export const LoginPage = () => {
           <div className="mb-8 text-center text-sm text-gray-900">
             Sign in to your account
           </div>
-          <LoginButton />
+          <div className="flex flex-col gap-2">
+            <GithubLoginButton />
+            <GoogleLoginButton />
+          </div>
         </div>
         <div className="absolute bottom-8 left-0 right-0 mx-[15%] text-center text-xs text-gray-900">
           By continuing, you agree to Fern&apos;s{" "}
