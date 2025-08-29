@@ -144,6 +144,15 @@ async function createFeed(
 ): Promise<Feed> {
   const loader = await createCachedDocsLoader(host, domain, fernToken);
   const root = await loader.getRoot();
+  const [config, files] = await Promise.all([
+    loader.getConfig(),
+    loader.getFiles(),
+  ]);
+
+  let favicon;
+  if (config.favicon) {
+    favicon = files[config.favicon]?.src;
+  }
 
   if (!root) {
     console.error(`[createFeed:${domain}] Could not find root`);
@@ -166,12 +175,11 @@ async function createFeed(
   const feed = new Feed({
     id: link,
     link,
-    title: node.title,
+    title: `${config.title} ${node.title}`,
+    favicon,
     copyright: `All rights reserved ${new Date().getFullYear()}`,
     generator: "buildwithfern.com",
   });
-
-  const files = await loader.getFiles();
 
   await Promise.allSettled(
     node.children.flatMap((year) => {
