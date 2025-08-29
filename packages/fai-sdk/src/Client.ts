@@ -7,18 +7,18 @@ import * as core from "./core/index.js";
 import { mergeHeaders } from "./core/headers.js";
 import { Analytics } from "./api/resources/analytics/client/Client.js";
 import { Chat } from "./api/resources/chat/client/Client.js";
-import { Conversations } from "./api/resources/conversations/client/Client.js";
+import { Conversation } from "./api/resources/conversation/client/Client.js";
 import { Document } from "./api/resources/document/client/Client.js";
 import { Guidance } from "./api/resources/guidance/client/Client.js";
+import { Health } from "./api/resources/health/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
-import { Queries } from "./api/resources/queries/client/Client.js";
+import { Query } from "./api/resources/query/client/Client.js";
 
-export declare namespace FernFaiClient {
+export declare namespace FernAIClient {
     export interface Options {
-        environment?: core.Supplier<environments.FernFaiEnvironment | string>;
+        environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
@@ -30,29 +30,30 @@ export declare namespace FernFaiClient {
         maxRetries?: number;
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
+        /** Additional query string parameters to include in the request. */
+        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
 }
 
-export class FernFaiClient {
-    protected readonly _options: FernFaiClient.Options;
+export class FernAIClient {
+    protected readonly _options: FernAIClient.Options;
     protected _analytics: Analytics | undefined;
     protected _chat: Chat | undefined;
-    protected _conversations: Conversations | undefined;
+    protected _conversation: Conversation | undefined;
     protected _document: Document | undefined;
     protected _guidance: Guidance | undefined;
+    protected _health: Health | undefined;
     protected _index: Index | undefined;
-    protected _queries: Queries | undefined;
+    protected _query: Query | undefined;
 
-    constructor(_options: FernFaiClient.Options = {}) {
+    constructor(_options: FernAIClient.Options = {}) {
         this._options = {
             ..._options,
             headers: mergeHeaders(
                 {
                     "X-Fern-Language": "JavaScript",
-                    "X-Fern-SDK-Name": "@fern-api/fai-sdk",
-                    "X-Fern-SDK-Version": "0.0.82",
                     "X-Fern-Runtime": core.RUNTIME.type,
                     "X-Fern-Runtime-Version": core.RUNTIME.version,
                 },
@@ -69,8 +70,8 @@ export class FernFaiClient {
         return (this._chat ??= new Chat(this._options));
     }
 
-    public get conversations(): Conversations {
-        return (this._conversations ??= new Conversations(this._options));
+    public get conversation(): Conversation {
+        return (this._conversation ??= new Conversation(this._options));
     }
 
     public get document(): Document {
@@ -81,11 +82,15 @@ export class FernFaiClient {
         return (this._guidance ??= new Guidance(this._options));
     }
 
+    public get health(): Health {
+        return (this._health ??= new Health(this._options));
+    }
+
     public get index(): Index {
         return (this._index ??= new Index(this._options));
     }
 
-    public get queries(): Queries {
-        return (this._queries ??= new Queries(this._options));
+    public get query(): Query {
+        return (this._query ??= new Query(this._options));
     }
 }

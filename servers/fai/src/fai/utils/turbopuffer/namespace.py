@@ -1,5 +1,7 @@
-from src.fai.enums.index_names import QUERY_INDEX_NAME
-from src.fai.enums.index_names import DataIndexNames
+from src.fai.models.enums.index_names import (
+    QUERY_INDEX_NAME,
+    DataIndexNames,
+)
 
 
 def get_tpuf_namespace(domain: str, index_name: str) -> str:

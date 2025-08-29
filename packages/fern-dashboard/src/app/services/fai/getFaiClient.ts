@@ -1,12 +1,14 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import { FernFaiClient } from "@fern-api/fai-sdk";
+import { FernAIClient } from "@fern-api/fai-sdk";
 
-export function getFaiClient({ token }: { token: string }): FernFaiClient {
+export function getFaiClient({ token }: { token: string }): FernAIClient {
   if (process.env.FAI_SERVER_URL == null) {
     throw new Error("FAI_SERVER_URL is not defined in the current environment");
   }
-  return new FernFaiClient({
-    environment: process.env.FAI_SERVER_URL,
-    token,
+  return new FernAIClient({
+    baseUrl: process.env.FAI_SERVER_URL,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 }

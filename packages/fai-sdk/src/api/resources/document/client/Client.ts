@@ -4,16 +4,15 @@
 
 import * as environments from "../../../../environments.js";
 import * as core from "../../../../core/index.js";
-import * as FernFai from "../../../index.js";
-import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
+import * as FernAI from "../../../index.js";
+import { mergeHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
 export declare namespace Document {
     export interface Options {
-        environment?: core.Supplier<environments.FernFaiEnvironment | string>;
+        environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
@@ -25,14 +24,13 @@ export declare namespace Document {
         maxRetries?: number;
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
+        /** Additional query string parameters to include in the request. */
+        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
 }
 
-/**
- * FAI Document API
- */
 export class Document {
     protected readonly _options: Document.Options;
 
@@ -41,54 +39,42 @@ export class Document {
     }
 
     /**
-     * Index a document for a given domain. Documents can be used to provide additional context to Ask Fern and improve its accuracy.
-     *
      * @param {string} domain
-     * @param {FernFai.IndexDocumentRequest} request
+     * @param {FernAI.CreateDocumentRequest} request
      * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.document.createDocument("domain", {
-     *         document: "document",
-     *         chunk: undefined,
-     *         title: undefined,
-     *         url: undefined,
-     *         version: undefined,
-     *         product: undefined,
-     *         keywords: undefined,
-     *         authed: undefined
+     *         document: "document"
      *     })
      */
     public createDocument(
         domain: string,
-        request: FernFai.IndexDocumentRequest,
+        request: FernAI.CreateDocumentRequest,
         requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.DocumentIdResponse> {
+    ): core.HttpResponsePromise<FernAI.CreateDocumentResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createDocument(domain, request, requestOptions));
     }
 
     private async __createDocument(
         domain: string,
-        request: FernFai.IndexDocumentRequest,
+        request: FernAI.CreateDocumentRequest,
         requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.DocumentIdResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.CreateDocumentResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/document/${encodeURIComponent(domain)}/create`,
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/create`,
             ),
             method: "POST",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
+            headers: _headers,
             contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
             requestType: "json",
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
@@ -96,17 +82,18 @@ export class Document {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.DocumentIdResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.CreateDocumentResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -116,15 +103,15 @@ export class Document {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /document/{domain}/create.");
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /document/{domain}/create.");
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
@@ -132,191 +119,11 @@ export class Document {
     }
 
     /**
-     * Update a document for a given domain
-     *
-     * @param {string} domain
-     * @param {string} documentId
-     * @param {FernFai.UpdateDocumentRequest} request
-     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
-     *
-     * @example
-     *     await client.document.updateDocument("domain", "document_id", {
-     *         document: undefined,
-     *         chunk: undefined,
-     *         title: undefined,
-     *         url: undefined,
-     *         version: undefined,
-     *         product: undefined,
-     *         keywords: undefined,
-     *         authed: undefined
-     *     })
-     */
-    public updateDocument(
-        domain: string,
-        documentId: string,
-        request: FernFai.UpdateDocumentRequest = {},
-        requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.Document> {
-        return core.HttpResponsePromise.fromPromise(this.__updateDocument(domain, documentId, request, requestOptions));
-    }
-
-    private async __updateDocument(
-        domain: string,
-        documentId: string,
-        request: FernFai.UpdateDocumentRequest = {},
-        requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.Document>> {
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
-            ),
-            method: "PATCH",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            contentType: "application/json",
-            requestType: "json",
-            body: request,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as FernFai.Document, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
-                default:
-                    throw new errors.FernFaiError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernFaiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernFaiTimeoutError(
-                    "Timeout exceeded when calling PATCH /document/{domain}/{document_id}.",
-                );
-            case "unknown":
-                throw new errors.FernFaiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Delete a document for a given domain
-     *
      * @param {string} domain
      * @param {string} documentId
      * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
-     *
-     * @example
-     *     await client.document.deleteDocumentById("domain", "document_id")
-     */
-    public deleteDocumentById(
-        domain: string,
-        documentId: string,
-        requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<void> {
-        return core.HttpResponsePromise.fromPromise(this.__deleteDocumentById(domain, documentId, requestOptions));
-    }
-
-    private async __deleteDocumentById(
-        domain: string,
-        documentId: string,
-        requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
-            ),
-            method: "DELETE",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
-                default:
-                    throw new errors.FernFaiError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernFaiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernFaiTimeoutError(
-                    "Timeout exceeded when calling DELETE /document/{domain}/{document_id}.",
-                );
-            case "unknown":
-                throw new errors.FernFaiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Get a document for a given domain
-     *
-     * @param {string} domain
-     * @param {string} documentId
-     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.document.getDocumentById("domain", "document_id")
@@ -325,7 +132,7 @@ export class Document {
         domain: string,
         documentId: string,
         requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.Document> {
+    ): core.HttpResponsePromise<FernAI.GetDocumentResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getDocumentById(domain, documentId, requestOptions));
     }
 
@@ -333,36 +140,35 @@ export class Document {
         domain: string,
         documentId: string,
         requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.Document>> {
+    ): Promise<core.WithRawResponse<FernAI.GetDocumentResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
             ),
             method: "GET",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.Document, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.GetDocumentResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -372,17 +178,17 @@ export class Document {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError(
+                throw new errors.FernAITimeoutError(
                     "Timeout exceeded when calling GET /document/{domain}/{document_id}.",
                 );
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
@@ -390,31 +196,188 @@ export class Document {
     }
 
     /**
-     * Retrieve all paginated documents for a given domain
-     *
-     * @param {string} domain - The domain to retrieve documents for
-     * @param {FernFai.GetDocumentsRequest} request
+     * @param {string} domain
+     * @param {string} documentId
      * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.document.deleteDocumentById("domain", "document_id")
+     */
+    public deleteDocumentById(
+        domain: string,
+        documentId: string,
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.DeleteDocumentResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteDocumentById(domain, documentId, requestOptions));
+    }
+
+    private async __deleteDocumentById(
+        domain: string,
+        documentId: string,
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.DeleteDocumentResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.DeleteDocumentResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling DELETE /document/{domain}/{document_id}.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
+     * @param {string} documentId
+     * @param {FernAI.UpdateDocumentRequest} request
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.document.updateDocument("domain", "document_id")
+     */
+    public updateDocument(
+        domain: string,
+        documentId: string,
+        request: FernAI.UpdateDocumentRequest = {},
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.UpdateDocumentResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__updateDocument(domain, documentId, request, requestOptions));
+    }
+
+    private async __updateDocument(
+        domain: string,
+        documentId: string,
+        request: FernAI.UpdateDocumentRequest = {},
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.UpdateDocumentResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
+            ),
+            method: "PATCH",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.UpdateDocumentResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling PATCH /document/{domain}/{document_id}.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
+     * @param {FernAI.GetDocumentsRequest} request
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.document.getDocuments("domain")
      */
     public getDocuments(
         domain: string,
-        request: FernFai.GetDocumentsRequest = {},
+        request: FernAI.GetDocumentsRequest = {},
         requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.DocumentList> {
+    ): core.HttpResponsePromise<FernAI.GetDocumentsResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getDocuments(domain, request, requestOptions));
     }
 
     private async __getDocuments(
         domain: string,
-        request: FernFai.GetDocumentsRequest = {},
+        request: FernAI.GetDocumentsRequest = {},
         requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.DocumentList>> {
+    ): Promise<core.WithRawResponse<FernAI.GetDocumentsResponse>> {
         const { page, limit } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (page != null) {
@@ -425,36 +388,34 @@ export class Document {
             _queryParams["limit"] = limit.toString();
         }
 
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/document/${encodeURIComponent(domain)}`,
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}`,
             ),
             method: "GET",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            queryParameters: _queryParams,
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.DocumentList, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.GetDocumentsResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -464,27 +425,18 @@ export class Document {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling GET /document/{domain}.");
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /document/{domain}.");
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
         }
-    }
-
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
     }
 }

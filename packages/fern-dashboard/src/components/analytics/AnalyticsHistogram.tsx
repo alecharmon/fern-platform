@@ -1,6 +1,6 @@
 "use client";
 
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 
 import { cn } from "@/utils/utils";
 
@@ -28,7 +28,7 @@ export function AnalyticsHistogram({
   setRenderType: (type: RenderType) => void;
   histogramTimeRange: TimeRange;
   setHistogramTimeRange: (range: TimeRange) => void;
-  histogramData: FernFai.HistogramAnalytics;
+  histogramData: FernAI.GetHistogramAnalyticsResponse;
 }) {
   const chartData = histogramData.bars.map((bar) => ({
     displayLabel: parseLabel(bar.label),

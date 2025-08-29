@@ -1,1 +1,1 @@
-export { type ChatCompletionRequest } from "./ChatCompletionRequest.js";
+export { type PostChatCompletionRequest } from "./PostChatCompletionRequest.js";

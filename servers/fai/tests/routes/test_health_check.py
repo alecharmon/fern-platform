@@ -1,9 +1,24 @@
-import requests
+import pytest
+from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 
-def test_health_check(fai_docker: None, docker_ip: str) -> None:
-    """Test that the health check endpoint returns 200."""
-    print("Running health check...")
-    response = requests.get(f"http://{docker_ip}:8080/health", timeout=5)
-    print(response.text)
+def test_health_check_sync(test_client: TestClient) -> None:
+    """Test that the health check endpoint returns 200 using sync client."""
+    response = test_client.get("/health")
     assert response.status_code == 200
+
+    data = response.json()
+    assert "status" in data, "status should be in the response"
+    assert data["status"] == "hello fernie!", "status should be 'hello fernie!'"
+
+
+@pytest.mark.asyncio
+async def test_health_check_async(async_test_client: AsyncClient) -> None:
+    """Test that the health check endpoint returns 200 using async client."""
+    response = await async_test_client.get("/health")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "status" in data, "status should be in the response"
+    assert data["status"] == "hello fernie!", "status should be 'hello fernie!'"

@@ -4,27 +4,12 @@
 
 /**
  * @example
- *     {
- *         document: undefined,
- *         chunk: undefined,
- *         title: undefined,
- *         url: undefined,
- *         version: undefined,
- *         product: undefined,
- *         keywords: undefined,
- *         authed: undefined
- *     }
+ *     {}
  */
 export interface UpdateDocumentRequest {
-    /**
-     * The updated content of the document that will be returned to Ask Fern during document retrieval.
-     * If not provided, this field will remain unchanged.
-     */
+    /** The updated content of the document that will be returned to Ask Fern during document retrieval. If not provided, this field will remain unchanged. */
     document?: string;
-    /**
-     * The updated textual content that should be vectorized when indexing the document.
-     * If not provided, this field will remain unchanged.
-     */
+    /** The updated textual content that should be vectorized when indexing the document. If not provided, this field will remain unchanged. */
     chunk?: string;
     /** The updated title of the document. If not provided, this field will remain unchanged. */
     title?: string;

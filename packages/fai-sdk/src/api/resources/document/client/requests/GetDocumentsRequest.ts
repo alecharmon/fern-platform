@@ -7,6 +7,8 @@
  *     {}
  */
 export interface GetDocumentsRequest {
+    /** The page number for pagination */
     page?: number;
+    /** The number of documents per page */
     limit?: number;
 }

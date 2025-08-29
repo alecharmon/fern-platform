@@ -1,6 +1,11 @@
-code-cleanup:
+code-format:
 	poetry run black .
 	poetry run isort .
+
+code-cleanup:
+	make code-format
+	poetry run ruff check --fix src/ tests/
+	poetry run ruff format src/ tests/
 
 check:
 	poetry run python -m mypy .

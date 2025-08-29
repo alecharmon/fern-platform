@@ -1,37 +1,107 @@
+import importlib
 import os
-import uuid
+import pkgutil
+from collections.abc import (
+    AsyncGenerator,
+    Generator,
+)
+from typing import Any
 
 import pytest
-import requests
+import pytest_asyncio
+from fastapi.testclient import TestClient
+from httpx import (
+    ASGITransport,
+    AsyncClient,
+)
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
-from _pytest.config import Config
-from pytest_docker.plugin import Services
+from src.fai.db import Base
+
+TEST_FERN_TOKEN = "test-fern-token"
+TEST_ANTHROPIC_API_KEY = "test-anthropic-api-key"
+TEST_COHERE_API_KEY = "test-cohere-api-key"
+TEST_OPENAI_API_KEY = "test-openai-api-key"
+TEST_TURBOPUFFER_API_KEY = "test-turbopuffer-api-key"
+
+ROUTES_PACKAGE_NAME = "src.fai.routes"
+
+
+def _load_routes() -> None:
+    for _, module_name, is_pkg in pkgutil.iter_modules([ROUTES_PACKAGE_NAME.replace(".", "/")]):
+        full_module_name = f"{ROUTES_PACKAGE_NAME}.{module_name}"
+        importlib.import_module(full_module_name)
 
 
 @pytest.fixture(scope="session")
-def docker_compose_file(pytestconfig: Config) -> str:
-    os.environ["COMPOSE_PROJECT_NAME"] = f"pytest_{uuid.uuid4().hex[:8]}"
-    return os.path.join(str(pytestconfig.rootdir), "docker-compose.yml")
-
-
-def is_responsive(url: str) -> bool:
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return True
-    except Exception:
-        return False
-    return False
+def test_database_url() -> str:
+    return "sqlite+aiosqlite:///:memory:"
 
 
 @pytest.fixture(scope="session")
-def fai_docker(docker_ip: str, docker_services: Services) -> None:
-    db_port = docker_services.port_for("db", 5432)
-    db_url = f"postgresql+asyncpg://postgres:postgres@{docker_ip}:{db_port}/mydatabase"
-    os.environ["POSTGRES_DATABASE_URL"] = db_url
+def test_engine(test_database_url: str) -> AsyncEngine:
+    engine = create_async_engine(test_database_url, echo=False)
+    return engine
 
-    docker_services.wait_until_responsive(
-        timeout=30.0,
-        pause=1,
-        check=lambda: is_responsive(f"http://{docker_ip}:8080/health"),
-    )
+
+@pytest_asyncio.fixture
+async def test_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
+    # Import all database models to ensure they're registered with Base
+
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async_session_maker = async_sessionmaker(bind=test_engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with async_session_maker() as session:
+        yield session
+
+
+@pytest.fixture(autouse=True)
+def setup_test_env(test_database_url: str) -> Any:
+    original_url = os.environ.get("POSTGRES_DATABASE_URL")
+    os.environ["IS_LOCAL"] = "true"
+    os.environ["POSTGRES_DATABASE_URL"] = test_database_url
+    os.environ["COHERE_API_KEY"] = TEST_COHERE_API_KEY
+    os.environ["ANTHROPIC_API_KEY"] = TEST_ANTHROPIC_API_KEY
+    os.environ["TURBOPUFFER_API_KEY"] = TEST_TURBOPUFFER_API_KEY
+    os.environ["OPENAI_API_KEY"] = TEST_OPENAI_API_KEY
+    os.environ["FERN_API_KEY"] = TEST_FERN_TOKEN
+
+    yield
+
+    if original_url:
+        os.environ["POSTGRES_DATABASE_URL"] = original_url
+    else:
+        os.environ.pop("POSTGRES_DATABASE_URL", None)
+
+
+@pytest.fixture
+def test_client(setup_test_env: Any, test_session: AsyncSession) -> Generator[TestClient, None, None]:
+    from src.fai.app import fai_app
+    from src.fai.dependencies import get_db
+
+    async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
+        yield test_session
+
+    fai_app.dependency_overrides[get_db] = override_get_db
+    _load_routes()
+
+    client = TestClient(fai_app)
+    yield client
+
+    fai_app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def async_test_client(setup_test_env: Any) -> AsyncGenerator[AsyncClient, None]:
+    from src.fai.app import fai_app
+
+    _load_routes()
+    async with AsyncClient(transport=ASGITransport(app=fai_app), base_url="http://test") as client:
+        yield client

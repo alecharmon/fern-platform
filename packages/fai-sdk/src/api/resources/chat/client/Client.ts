@@ -4,16 +4,15 @@
 
 import * as environments from "../../../../environments.js";
 import * as core from "../../../../core/index.js";
-import * as FernFai from "../../../index.js";
-import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
+import * as FernAI from "../../../index.js";
+import { mergeHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
 export declare namespace Chat {
     export interface Options {
-        environment?: core.Supplier<environments.FernFaiEnvironment | string>;
+        environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
@@ -25,14 +24,13 @@ export declare namespace Chat {
         maxRetries?: number;
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
+        /** Additional query string parameters to include in the request. */
+        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
 }
 
-/**
- * FAI Chat API
- */
 export class Chat {
     protected readonly _options: Chat.Options;
 
@@ -41,55 +39,45 @@ export class Chat {
     }
 
     /**
-     * Create a docs chat completion for a given domain
-     *
      * @param {string} domain
-     * @param {FernFai.ChatCompletionRequest} request
+     * @param {FernAI.PostChatCompletionRequest} request
      * @param {Chat.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.chat.chatCompletion("domain", {
-     *         model: "claude-4-sonnet-20250514",
-     *         system_prompt: undefined,
+     *     await client.chat.postChatCompletion("domain", {
      *         messages: [{
-     *                 role: "role",
-     *                 content: "content"
-     *             }, {
-     *                 role: "role",
+     *                 role: "user",
      *                 content: "content"
      *             }]
      *     })
      */
-    public chatCompletion(
+    public postChatCompletion(
         domain: string,
-        request: FernFai.ChatCompletionRequest,
+        request: FernAI.PostChatCompletionRequest,
         requestOptions?: Chat.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.ChatCompletionResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__chatCompletion(domain, request, requestOptions));
+    ): core.HttpResponsePromise<FernAI.PostChatCompletionResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__postChatCompletion(domain, request, requestOptions));
     }
 
-    private async __chatCompletion(
+    private async __postChatCompletion(
         domain: string,
-        request: FernFai.ChatCompletionRequest,
+        request: FernAI.PostChatCompletionRequest,
         requestOptions?: Chat.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.ChatCompletionResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.PostChatCompletionResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/chat/${encodeURIComponent(domain)}`,
+                    environments.FernAIEnvironment.Production,
+                `chat/${encodeURIComponent(domain)}`,
             ),
             method: "POST",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
+            headers: _headers,
             contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
             requestType: "json",
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
@@ -97,17 +85,18 @@ export class Chat {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.ChatCompletionResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.PostChatCompletionResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -117,27 +106,18 @@ export class Chat {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /chat/{domain}.");
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /chat/{domain}.");
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
         }
-    }
-
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
     }
 }

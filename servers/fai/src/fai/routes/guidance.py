@@ -1,37 +1,52 @@
 import uuid
-
 from datetime import datetime
 
-from fastapi import Body
-from fastapi import Depends
-from fastapi import HTTPException
+from fastapi import (
+    Body,
+    Depends,
+    HTTPException,
+)
+from fastapi import Query as QueryParam
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from sqlalchemy import func
-from sqlalchemy import select
+from sqlalchemy import (
+    func,
+    select,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
 from src.fai.dependencies import get_db
-from src.fai.models.api.guidance import IndexGuidanceRequest
-from src.fai.models.api.guidance import UpdateGuidanceRequest
-from src.fai.models.db.guidance import Guidance
-from src.fai.utils.turbopuffer.namespace import get_guidance_index_name
-from src.fai.utils.turbopuffer.namespace import get_query_index_name
-from src.fai.utils.turbopuffer.sync import sync_guidance_db_to_tpuf
-from src.fai.utils.turbopuffer.sync import sync_index_to_target
-from src.settings import CONFIG
+from src.fai.models.api.commons.pagination import PaginationResponse
+from src.fai.models.api.guidance_api import (
+    CreateGuidanceRequest,
+    CreateGuidanceResponse,
+    DeleteGuidanceResponse,
+    GetGuidanceResponse,
+    GetGuidancesResponse,
+    UpdateGuidanceRequest,
+    UpdateGuidanceResponse,
+)
+from src.fai.models.db.guidance_db import GuidanceDb
+from src.fai.utils.turbopuffer.namespace import (
+    get_guidance_index_name,
+    get_query_index_name,
+)
+from src.fai.utils.turbopuffer.sync import (
+    sync_guidance_db_to_tpuf,
+    sync_index_to_target,
+)
 from src.settings import LOGGER
 
 
-@fai_app.post("/guidance/{domain}/create")
-async def index_guidance(
+@fai_app.post("/guidance/{domain}/create", response_model=CreateGuidanceResponse)
+async def create_guidance(
     domain: str,
-    body: IndexGuidanceRequest = Body(...),
+    body: CreateGuidanceRequest = Body(...),
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        new_db_guidance = Guidance(
+        new_db_guidance = GuidanceDb(
             id=str(uuid.uuid4()),
             domain=domain,
             context=body.context,
@@ -46,14 +61,14 @@ async def index_guidance(
         await sync_guidance_db_to_tpuf(domain, db)
         await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
         LOGGER.info(f"Indexed guidance {new_db_guidance.id} for domain: {domain}")
-        return JSONResponse(content=jsonable_encoder({"guidance_id": new_db_guidance.id}))
+        return JSONResponse(jsonable_encoder(CreateGuidanceResponse(guidance_id=new_db_guidance.id)))
 
     except Exception as e:
         LOGGER.exception("Failed to index guidance")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.patch("/guidance/{domain}/{guidance_id}")
+@fai_app.patch("/guidance/{domain}/{guidance_id}", response_model=UpdateGuidanceResponse)
 async def update(
     domain: str,
     guidance_id: str,
@@ -61,7 +76,9 @@ async def update(
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        db_guidance = await db.execute(select(Guidance).where(Guidance.id == guidance_id, Guidance.domain == domain))
+        db_guidance = await db.execute(
+            select(GuidanceDb).where(GuidanceDb.id == guidance_id, GuidanceDb.domain == domain)
+        )
         db_guidance = db_guidance.scalar_one_or_none()
         if db_guidance:
             if body.context is not None:
@@ -75,7 +92,7 @@ async def update(
             await sync_guidance_db_to_tpuf(domain, db)
             await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
             LOGGER.info(f"Updated guidance {guidance_id} for domain: {domain}")
-            return JSONResponse(content=jsonable_encoder(db_guidance.to_api()))
+            return JSONResponse(jsonable_encoder(UpdateGuidanceResponse(guidance=db_guidance.to_api())))
         return JSONResponse(status_code=404, content=jsonable_encoder({"message": "Guidance not found"}))
 
     except Exception as e:
@@ -83,14 +100,16 @@ async def update(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.delete("/guidance/{domain}/{guidance_id}")
+@fai_app.delete("/guidance/{domain}/{guidance_id}", response_model=DeleteGuidanceResponse)
 async def delete_guidance_by_id(
     domain: str,
     guidance_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        db_guidance = await db.execute(select(Guidance).where(Guidance.id == guidance_id, Guidance.domain == domain))
+        db_guidance = await db.execute(
+            select(GuidanceDb).where(GuidanceDb.id == guidance_id, GuidanceDb.domain == domain)
+        )
         db_guidance = db_guidance.scalar_one_or_none()
         if db_guidance:
             await db.delete(db_guidance)
@@ -98,63 +117,65 @@ async def delete_guidance_by_id(
             await sync_guidance_db_to_tpuf(domain, db)
             await sync_index_to_target(domain, get_guidance_index_name(), get_query_index_name())
             LOGGER.info(f"Deleted guidance {guidance_id} for domain: {domain}")
-            return JSONResponse(content=jsonable_encoder({"message": "Guidance deleted successfully"}))
-        return JSONResponse(content=jsonable_encoder({"message": "Guidance not found"}))
+            return JSONResponse(jsonable_encoder(DeleteGuidanceResponse(success=True)))
+        return JSONResponse(jsonable_encoder(DeleteGuidanceResponse(success=False)))
 
     except Exception as e:
         LOGGER.exception("Failed to delete guidance")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/guidance/{domain}/{guidance_id}")
+@fai_app.get("/guidance/{domain}/{guidance_id}", response_model=GetGuidanceResponse)
 async def get_guidance_by_id(
     domain: str,
     guidance_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        db_guidance = await db.execute(select(Guidance).where(Guidance.id == guidance_id, Guidance.domain == domain))
+        db_guidance = await db.execute(
+            select(GuidanceDb).where(GuidanceDb.id == guidance_id, GuidanceDb.domain == domain)
+        )
         db_guidance = db_guidance.scalar_one_or_none()
         if db_guidance:
-            return JSONResponse(content=jsonable_encoder(db_guidance.to_api()))
-        return JSONResponse(content=jsonable_encoder({"message": "Guidance not found"}))
+            return JSONResponse(jsonable_encoder(GetGuidanceResponse(guidance=db_guidance.to_api())))
+        return JSONResponse(status_code=404, content={"detail": "Guidance not found"})
 
     except Exception as e:
         LOGGER.exception("Failed to get guidance")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/guidance/{domain}")
+@fai_app.get("/guidance/{domain}", response_model=GetGuidancesResponse)
 async def get_guidances(
     domain: str,
-    page: int = 1,
-    limit: int = 10,
+    page: int | None = QueryParam(default=None, description="The page number for pagination"),
+    limit: int | None = QueryParam(default=None, description="The number of documents per page"),
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        if page < 1:
+        if page is None or page < 1:
             raise HTTPException(status_code=400, detail="page must be >= 1")
-        if limit < 1 or limit > 1000:
+        if limit is None or limit < 1 or limit > 1000:
             raise HTTPException(status_code=400, detail="limit must be between 1 and 1000")
 
         offset = (page - 1) * limit
 
-        total_count = await db.scalar(select(func.count()).select_from(Guidance).where(Guidance.domain == domain))
+        total_count = await db.scalar(select(func.count()).select_from(GuidanceDb).where(GuidanceDb.domain == domain))
 
-        stmt = select(Guidance).where(Guidance.domain == domain).offset(offset).limit(limit)
+        stmt = select(GuidanceDb).where(GuidanceDb.domain == domain).offset(offset).limit(limit)
         result = await db.execute(stmt)
         guidances = result.scalars().all()
 
-        response = {
-            "guidances": [guidance.to_api() for guidance in guidances],
-            "pagination": {
-                "total": total_count,
-                "page": page,
-                "limit": limit,
-            },
-        }
+        response = GetGuidancesResponse(
+            guidances=[guidance.to_api() for guidance in guidances],
+            pagination=PaginationResponse(
+                total=total_count,
+                page=page,
+                limit=limit,
+            ),
+        )
 
-        return JSONResponse(content=jsonable_encoder(response))
+        return JSONResponse(jsonable_encoder(response))
 
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"detail": e.detail})

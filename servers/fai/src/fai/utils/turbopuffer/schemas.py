@@ -1,8 +1,7 @@
 from typing import Any
-from typing import Dict
 
 
-def get_data_index_tpuf_schema() -> Dict[str, Any]:
+def get_data_index_tpuf_schema() -> dict[str, Any]:
     return {
         "id": "string",
         "vector": {"type": "[3072]f32", "ann": True, "bm25": False},
@@ -18,7 +17,7 @@ def get_data_index_tpuf_schema() -> Dict[str, Any]:
     }
 
 
-def get_query_index_tpuf_schema() -> Dict[str, Any]:
+def get_query_index_tpuf_schema() -> dict[str, Any]:
     return {
         "id": "string",
         "vector": {"type": "[3072]f32", "ann": True, "bm25": False},

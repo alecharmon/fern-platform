@@ -20,7 +20,7 @@
     "docs:self-hosted-fdr:compile": "bash scripts/compile-selfhosted-fdr.sh",
     "docs:start": "turbo docs:start",
     "fai:dev": "bash scripts/run-local-fai.sh",
-    "fai:generate": "pnpm fern generate --api fai --preview && rm -rf packages/fai-sdk/ && mv fern/apis/fai/.preview/fern-typescript-node-sdk packages/fai-sdk/ && git restore --source=HEAD --worktree --staged packages/fai-sdk/package.json packages/fai-sdk/yarn.lock && rm -rf fern/apis/fai/.preview",
+    "fai:generate": "pnpm fern generate --api fai && pnpm turbo --filter=@fern-api/fai-sdk compile",
     "fdr:generate": "pnpm fern generate --api fdr --local && pnpm turbo --filter=@fern-api/fdr-sdk compile",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",

@@ -1,6 +1,6 @@
 "use server";
 
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 
 import {
   TimeRange,
@@ -22,10 +22,10 @@ export async function getQueries({
   limit: number;
   cutoffTime: string;
   timeRange: TimeRange;
-}): Promise<FernFai.QueryPage> {
+}): Promise<FernAI.GetQueriesResponse> {
   const session = await getCurrentSessionOrThrow();
   const faiClient = getFaiClient({ token: session.accessToken });
-  return await faiClient.queries.getRecentQueries(domain, {
+  return await faiClient.query.getRecentQueries(domain, {
     page,
     limit,
     cutoff_time: cutoffTime,

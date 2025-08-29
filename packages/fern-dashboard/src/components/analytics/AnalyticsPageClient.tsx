@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 
 import { getDomainAnalytics } from "@/app/actions/getAnalytics";
 import { getQueries } from "@/app/actions/getQueries";
@@ -33,8 +33,8 @@ export function AnalyticsPageClient({
   analyticsBillingEnabled,
 }: {
   baseDocsUrl: string;
-  initialQueriesData: FernFai.Query[];
-  initialHistogramData: FernFai.HistogramAnalytics;
+  initialQueriesData: FernAI.Query[];
+  initialHistogramData: FernAI.GetHistogramAnalyticsResponse;
   initialTotalQueries: number;
   cutoffTime: string;
   analyticsBillingEnabled: boolean;
@@ -52,11 +52,11 @@ export function AnalyticsPageClient({
     Math.ceil(initialTotalQueries / ITEMS_PER_PAGE)
   );
   const [selectedConversation, setSelectedConversation] =
-    useState<FernFai.Conversation | null>(null);
+    useState<FernAI.Conversation | null>(null);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [pageCache, setPageCache] = useState<Record<number, FernFai.Query[]>>(
+  const [pageCache, setPageCache] = useState<Record<number, FernAI.Query[]>>(
     {}
   );
   const { setContent, clear } = useSidepanel();
@@ -101,7 +101,9 @@ export function AnalyticsPageClient({
         }));
 
         setQueriesData(response.queries);
-        setTotalQueriesPages(Math.ceil(response.total / ITEMS_PER_PAGE));
+        setTotalQueriesPages(
+          Math.ceil(response.pagination.total / ITEMS_PER_PAGE)
+        );
       } catch (error) {
         console.error("Failed to fetch queries data:", error);
       } finally {
@@ -118,7 +120,7 @@ export function AnalyticsPageClient({
 
   const timeoutRef = React.useRef<number | null>(null);
 
-  function handleSelectConversation(convo: FernFai.Conversation | null) {
+  function handleSelectConversation(convo: FernAI.Conversation | null) {
     if (convo) {
       setSelectedConversation(convo);
       setIsConversationLoading(true);

@@ -1,8 +1,7 @@
 from typing import Any
-from typing import Dict
 
 
-def as_dict(obj: Any) -> Dict[str, Any]:
+def as_dict(obj: Any) -> dict[str, Any]:
     """
     Best-effort to turn SDK/Pydantic rows into dicts without assuming .get exists.
     """

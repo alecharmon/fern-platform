@@ -1,16 +1,18 @@
-from typing import List
-
 from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
 from turbopuffer.types.row import Row
 
-from src.fai.utils.turbopuffer.namespace import get_query_index_name
-from src.fai.utils.turbopuffer.namespace import get_tpuf_namespace
-from src.settings import CONFIG
-from src.settings import VARIABLES
+from src.fai.utils.turbopuffer.namespace import (
+    get_query_index_name,
+    get_tpuf_namespace,
+)
+from src.settings import (
+    CONFIG,
+    VARIABLES,
+)
 
 
-async def v1_retrieve(query: str, domain: str) -> List[Row]:
+async def v1_retrieve(query: str, domain: str) -> list[Row]:
     async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
         async with AsyncTurbopuffer(
             region=CONFIG.TURBOPUFFER_DEFAULT_REGION,

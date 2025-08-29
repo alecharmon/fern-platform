@@ -1,3 +1,5 @@
+import { FernAI } from "@fern-api/fai-sdk";
+
 export enum TimeRange {
   LAST_WEEK = "LAST_WEEK",
   LAST_MONTH = "LAST_MONTH",
@@ -30,11 +32,7 @@ const getLastMonthStart = (): string => {
 
 export const getRequestParams = (
   timeRange: TimeRange
-): {
-  start_date: string | undefined;
-  end_date: string;
-  groupBy: "DAY" | "MONTH";
-} => {
+): FernAI.GetAnalyticsHistogramRequest => {
   const endDate = getToday();
 
   switch (timeRange) {
@@ -42,28 +40,28 @@ export const getRequestParams = (
       return {
         start_date: getLastWeekStart(),
         end_date: endDate,
-        groupBy: "DAY",
+        group_by: "DAY",
       };
 
     case TimeRange.LAST_MONTH:
       return {
         start_date: getLastMonthStart(),
         end_date: endDate,
-        groupBy: "DAY",
+        group_by: "DAY",
       };
 
     case TimeRange.LAST_YEAR:
       return {
         start_date: getLastYearStart(),
         end_date: endDate,
-        groupBy: "MONTH",
+        group_by: "MONTH",
       };
 
     case TimeRange.ALL:
       return {
         start_date: undefined,
         end_date: endDate,
-        groupBy: "MONTH",
+        group_by: "MONTH",
       };
   }
 };

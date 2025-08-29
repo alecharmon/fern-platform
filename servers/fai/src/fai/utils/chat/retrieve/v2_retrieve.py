@@ -1,40 +1,40 @@
+from collections.abc import Iterable
 from typing import Any
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Optional
 
 from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
 
 from src.fai.utils.as_dict import as_dict
-from src.fai.utils.turbopuffer.namespace import get_query_index_name
-from src.fai.utils.turbopuffer.namespace import get_tpuf_namespace
-from src.settings import CONFIG
-from src.settings import VARIABLES
-
+from src.fai.utils.turbopuffer.namespace import (
+    get_query_index_name,
+    get_tpuf_namespace,
+)
+from src.settings import (
+    CONFIG,
+    VARIABLES,
+)
 
 # TODO: This should be "document"
 DOCUMENT_ATTRIBUTES = ["chunk", "url", "version", "title", "keywords"]
 
 
 class TPUFRow:
-    def __init__(self, id: str, score: Optional[float], attributes: Dict[str, Any]):
+    def __init__(self, id: str, score: float | None, attributes: dict[str, Any]):
         self.id = id
         self.score = score
         self.attributes = attributes
 
     @property
-    def document(self) -> Optional[str]:
+    def document(self) -> str | None:
         return self.attributes.get("document")
 
     @property
-    def chunk(self) -> Optional[str]:
+    def chunk(self) -> str | None:
         return self.attributes.get("chunk")
 
 
-def _normalize_rows(rows: Iterable[Any]) -> List[TPUFRow]:
-    norm: List[TPUFRow] = []
+def _normalize_rows(rows: Iterable[Any]) -> list[TPUFRow]:
+    norm: list[TPUFRow] = []
     for r in rows:
         _id = getattr(r, "id", None)
         _score = getattr(r, "score", None)
@@ -66,22 +66,22 @@ def _normalize_rows(rows: Iterable[Any]) -> List[TPUFRow]:
     return norm
 
 
-def _results_to_ranks(items: List[TPUFRow]) -> Dict[str, int]:
-    ranks: Dict[str, int] = {}
+def _results_to_ranks(items: list[TPUFRow]) -> dict[str, int]:
+    ranks: dict[str, int] = {}
     for i, it in enumerate(items, start=1):
         if it and it.id is not None and it.id not in ranks:
             ranks[it.id] = i
     return ranks
 
 
-def _rrf(bm25: List[TPUFRow], vector: List[TPUFRow], k: int = 60) -> List[TPUFRow]:
-    by_id: Dict[str, TPUFRow] = {it.id: it for it in bm25}
+def _rrf(bm25: list[TPUFRow], vector: list[TPUFRow], k: int = 60) -> list[TPUFRow]:
+    by_id: dict[str, TPUFRow] = {it.id: it for it in bm25}
     by_id.update({it.id: it for it in vector})
 
     bm25_ranks = _results_to_ranks(bm25)
     vec_ranks = _results_to_ranks(vector)
 
-    scores: Dict[str, float] = {}
+    scores: dict[str, float] = {}
     all_ids = set(bm25_ranks.keys()) | set(vec_ranks.keys())
 
     for doc_id in all_ids:
@@ -91,7 +91,7 @@ def _rrf(bm25: List[TPUFRow], vector: List[TPUFRow], k: int = 60) -> List[TPUFRo
 
     fused = sorted(all_ids, key=lambda _id: scores[_id], reverse=True)
 
-    results: List[TPUFRow] = []
+    results: list[TPUFRow] = []
     for _id in fused:
         row = by_id[_id]
         row.score = scores[_id]
@@ -101,20 +101,20 @@ def _rrf(bm25: List[TPUFRow], vector: List[TPUFRow], k: int = 60) -> List[TPUFRo
 
 
 def _build_filters(
-    filters: Optional[List[Dict[str, str]]],
-    document_ids_to_ignore: Optional[List[str]],
-    urls_to_ignore: Optional[List[str]],
-) -> Optional[Any]:
+    filters: list[dict[str, str]] | None,
+    document_ids_to_ignore: list[str] | None,
+    urls_to_ignore: list[str] | None,
+) -> Any | None:
     """Build TPUF-compatible filter expression mirroring the TS logic."""
     document_ids_to_ignore = document_ids_to_ignore or []
     urls_to_ignore = urls_to_ignore or []
     filters = filters or []
 
-    doc_id_filters: List[Any] = [["id", "NotEq", _id] for _id in document_ids_to_ignore]
-    url_filters: List[Any] = [["url", "NotEq", u] for u in urls_to_ignore]
+    doc_id_filters: list[Any] = [["id", "NotEq", _id] for _id in document_ids_to_ignore]
+    url_filters: list[Any] = [["url", "NotEq", u] for u in urls_to_ignore]
 
     version_filters = [f for f in filters if f.get("facet") == "version.title"]
-    version_conds: List[Any] = [["version", "Eq", f["value"]] for f in version_filters if "value" in f]
+    version_conds: list[Any] = [["version", "Eq", f["value"]] for f in version_filters if "value" in f]
 
     if version_conds:
         return ["And", [*version_conds, *doc_id_filters, *url_filters]]
@@ -132,10 +132,10 @@ async def v2_retrieve(
     *,
     top_k: int = 5,
     mode: str = "hybrid",  # "semantic" | "bm25" | "hybrid"
-    filters: Optional[List[Dict[str, str]]] = None,
-    document_ids_to_ignore: Optional[List[str]] = None,
-    urls_to_ignore: Optional[List[str]] = None,
-) -> List[TPUFRow]:
+    filters: list[dict[str, str]] | None = None,
+    document_ids_to_ignore: list[str] | None = None,
+    urls_to_ignore: list[str] | None = None,
+) -> list[TPUFRow]:
     async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
         async with AsyncTurbopuffer(
             region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
@@ -147,8 +147,8 @@ async def v2_retrieve(
 
             query_filters = _build_filters(filters, document_ids_to_ignore, urls_to_ignore)
 
-            semantic_rows: List[TPUFRow] = []
-            bm25_rows: List[TPUFRow] = []
+            semantic_rows: list[TPUFRow] = []
+            bm25_rows: list[TPUFRow] = []
 
             if mode != "bm25":
                 embedding = (
@@ -192,7 +192,7 @@ async def v2_retrieve(
             else:
                 fused = _rrf(bm25_rows, semantic_rows, k=60)
 
-            results: List[Any] = []
+            results: list[Any] = []
             for row in fused:
                 results.append(row)
 

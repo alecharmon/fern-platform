@@ -4,16 +4,15 @@
 
 import * as environments from "../../../../environments.js";
 import * as core from "../../../../core/index.js";
-import * as FernFai from "../../../index.js";
-import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
+import * as FernAI from "../../../index.js";
+import { mergeHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
 export declare namespace Guidance {
     export interface Options {
-        environment?: core.Supplier<environments.FernFaiEnvironment | string>;
+        environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
@@ -25,14 +24,13 @@ export declare namespace Guidance {
         maxRetries?: number;
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
+        /** Additional query string parameters to include in the request. */
+        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
 }
 
-/**
- * FAI Guidance API
- */
 export class Guidance {
     protected readonly _options: Guidance.Options;
 
@@ -41,48 +39,43 @@ export class Guidance {
     }
 
     /**
-     * Index a guidance document for a given domain
-     *
      * @param {string} domain
-     * @param {FernFai.IndexGuidanceRequest} request
+     * @param {FernAI.CreateGuidanceRequest} request
      * @param {Guidance.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.guidance.createGuidance("domain", {
-     *         context: ["context", "context"],
+     *         context: ["context"],
      *         document: "document"
      *     })
      */
     public createGuidance(
         domain: string,
-        request: FernFai.IndexGuidanceRequest,
+        request: FernAI.CreateGuidanceRequest,
         requestOptions?: Guidance.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.GuidanceIdResponse> {
+    ): core.HttpResponsePromise<FernAI.CreateGuidanceResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createGuidance(domain, request, requestOptions));
     }
 
     private async __createGuidance(
         domain: string,
-        request: FernFai.IndexGuidanceRequest,
+        request: FernAI.CreateGuidanceRequest,
         requestOptions?: Guidance.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.GuidanceIdResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.CreateGuidanceResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/guidance/${encodeURIComponent(domain)}/create`,
+                    environments.FernAIEnvironment.Production,
+                `guidance/${encodeURIComponent(domain)}/create`,
             ),
             method: "POST",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
+            headers: _headers,
             contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
             requestType: "json",
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
@@ -90,17 +83,18 @@ export class Guidance {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.GuidanceIdResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.CreateGuidanceResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -110,15 +104,15 @@ export class Guidance {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /guidance/{domain}/create.");
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /guidance/{domain}/create.");
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
@@ -126,187 +120,11 @@ export class Guidance {
     }
 
     /**
-     * Update a guidance document for a given domain
-     *
-     * @param {string} domain
-     * @param {string} guidanceId
-     * @param {FernFai.UpdateGuidanceRequest} request
-     * @param {Guidance.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
-     *
-     * @example
-     *     await client.guidance.updateGuidanceById("domain", "guidance_id", {
-     *         context: undefined,
-     *         document: undefined
-     *     })
-     */
-    public updateGuidanceById(
-        domain: string,
-        guidanceId: string,
-        request: FernFai.UpdateGuidanceRequest = {},
-        requestOptions?: Guidance.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.Guidance> {
-        return core.HttpResponsePromise.fromPromise(
-            this.__updateGuidanceById(domain, guidanceId, request, requestOptions),
-        );
-    }
-
-    private async __updateGuidanceById(
-        domain: string,
-        guidanceId: string,
-        request: FernFai.UpdateGuidanceRequest = {},
-        requestOptions?: Guidance.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.Guidance>> {
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
-            ),
-            method: "PATCH",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            contentType: "application/json",
-            requestType: "json",
-            body: request,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as FernFai.Guidance, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
-                default:
-                    throw new errors.FernFaiError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernFaiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernFaiTimeoutError(
-                    "Timeout exceeded when calling PATCH /guidance/{domain}/{guidance_id}.",
-                );
-            case "unknown":
-                throw new errors.FernFaiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Delete a guidance document for a given domain
-     *
      * @param {string} domain
      * @param {string} guidanceId
      * @param {Guidance.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
-     *
-     * @example
-     *     await client.guidance.deleteGuidanceById("domain", "guidance_id")
-     */
-    public deleteGuidanceById(
-        domain: string,
-        guidanceId: string,
-        requestOptions?: Guidance.RequestOptions,
-    ): core.HttpResponsePromise<void> {
-        return core.HttpResponsePromise.fromPromise(this.__deleteGuidanceById(domain, guidanceId, requestOptions));
-    }
-
-    private async __deleteGuidanceById(
-        domain: string,
-        guidanceId: string,
-        requestOptions?: Guidance.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
-            ),
-            method: "DELETE",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
-                default:
-                    throw new errors.FernFaiError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernFaiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernFaiTimeoutError(
-                    "Timeout exceeded when calling DELETE /guidance/{domain}/{guidance_id}.",
-                );
-            case "unknown":
-                throw new errors.FernFaiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Get a guidance document for a given domain
-     *
-     * @param {string} domain
-     * @param {string} guidanceId
-     * @param {Guidance.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.guidance.getGuidanceById("domain", "guidance_id")
@@ -315,7 +133,7 @@ export class Guidance {
         domain: string,
         guidanceId: string,
         requestOptions?: Guidance.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.Guidance> {
+    ): core.HttpResponsePromise<FernAI.GetGuidanceResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getGuidanceById(domain, guidanceId, requestOptions));
     }
 
@@ -323,36 +141,35 @@ export class Guidance {
         domain: string,
         guidanceId: string,
         requestOptions?: Guidance.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.Guidance>> {
+    ): Promise<core.WithRawResponse<FernAI.GetGuidanceResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
+                    environments.FernAIEnvironment.Production,
+                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
             ),
             method: "GET",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.Guidance, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.GetGuidanceResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -362,17 +179,17 @@ export class Guidance {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError(
+                throw new errors.FernAITimeoutError(
                     "Timeout exceeded when calling GET /guidance/{domain}/{guidance_id}.",
                 );
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
@@ -380,31 +197,188 @@ export class Guidance {
     }
 
     /**
-     * Retrieve all paginated guidance documents for a given domain
-     *
-     * @param {string} domain - The domain to retrieve documents for
-     * @param {FernFai.GetGuidancesRequest} request
+     * @param {string} domain
+     * @param {string} guidanceId
      * @param {Guidance.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.guidance.deleteGuidanceById("domain", "guidance_id")
+     */
+    public deleteGuidanceById(
+        domain: string,
+        guidanceId: string,
+        requestOptions?: Guidance.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.DeleteGuidanceResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteGuidanceById(domain, guidanceId, requestOptions));
+    }
+
+    private async __deleteGuidanceById(
+        domain: string,
+        guidanceId: string,
+        requestOptions?: Guidance.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.DeleteGuidanceResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.DeleteGuidanceResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling DELETE /guidance/{domain}/{guidance_id}.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
+     * @param {string} guidanceId
+     * @param {FernAI.UpdateGuidanceRequest} request
+     * @param {Guidance.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.guidance.update("domain", "guidance_id")
+     */
+    public update(
+        domain: string,
+        guidanceId: string,
+        request: FernAI.UpdateGuidanceRequest = {},
+        requestOptions?: Guidance.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.UpdateGuidanceResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__update(domain, guidanceId, request, requestOptions));
+    }
+
+    private async __update(
+        domain: string,
+        guidanceId: string,
+        request: FernAI.UpdateGuidanceRequest = {},
+        requestOptions?: Guidance.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.UpdateGuidanceResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
+            ),
+            method: "PATCH",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.UpdateGuidanceResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling PATCH /guidance/{domain}/{guidance_id}.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
+     * @param {FernAI.GetGuidancesRequest} request
+     * @param {Guidance.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.guidance.getGuidances("domain")
      */
     public getGuidances(
         domain: string,
-        request: FernFai.GetGuidancesRequest = {},
+        request: FernAI.GetGuidancesRequest = {},
         requestOptions?: Guidance.RequestOptions,
-    ): core.HttpResponsePromise<FernFai.GuidanceList> {
+    ): core.HttpResponsePromise<FernAI.GetGuidancesResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getGuidances(domain, request, requestOptions));
     }
 
     private async __getGuidances(
         domain: string,
-        request: FernFai.GetGuidancesRequest = {},
+        request: FernAI.GetGuidancesRequest = {},
         requestOptions?: Guidance.RequestOptions,
-    ): Promise<core.WithRawResponse<FernFai.GuidanceList>> {
+    ): Promise<core.WithRawResponse<FernAI.GetGuidancesResponse>> {
         const { page, limit } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (page != null) {
@@ -415,36 +389,34 @@ export class Guidance {
             _queryParams["limit"] = limit.toString();
         }
 
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/guidance/${encodeURIComponent(domain)}`,
+                    environments.FernAIEnvironment.Production,
+                `guidance/${encodeURIComponent(domain)}`,
             ),
             method: "GET",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            queryParameters: _queryParams,
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernFai.GuidanceList, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.GetGuidancesResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -454,27 +426,18 @@ export class Guidance {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling GET /guidance/{domain}.");
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /guidance/{domain}.");
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
         }
-    }
-
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
     }
 }

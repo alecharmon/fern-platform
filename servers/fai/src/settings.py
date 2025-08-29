@@ -1,16 +1,12 @@
 import logging
 import logging.config
 import os
-
 from typing import Any
-from typing import Dict
-from typing import Optional
 
 from dotenv import load_dotenv
 
-from src.fai.enums.embedding_models import EmbeddingModels
-from src.fai.models.types.model import EmbeddingModel
-
+from src.fai.models.enums.embedding_models import EmbeddingModels
+from src.fai.models.utils.model import EmbeddingModel
 
 load_dotenv()
 logging.config.fileConfig("logging.conf")
@@ -18,17 +14,17 @@ LOGGER = logging.getLogger()
 
 
 class Variables:
-    ANTHROPIC_API_KEY: Optional[str] = os.environ.get("ANTHROPIC_API_KEY")
-    COHERE_API_KEY: Optional[str] = os.environ.get("COHERE_API_KEY")
-    OPENAI_API_KEY: Optional[str] = os.environ.get("OPENAI_API_KEY")
-    POSTGRES_DATABASE_URL: Optional[str] = os.environ.get("POSTGRES_DATABASE_URL")
-    TURBOPUFFER_API_KEY: Optional[str] = os.environ.get("TURBOPUFFER_API_KEY")
+    ANTHROPIC_API_KEY: str | None = os.environ.get("ANTHROPIC_API_KEY")
+    COHERE_API_KEY: str | None = os.environ.get("COHERE_API_KEY")
+    OPENAI_API_KEY: str | None = os.environ.get("OPENAI_API_KEY")
+    POSTGRES_DATABASE_URL: str | None = os.environ.get("POSTGRES_DATABASE_URL")
+    TURBOPUFFER_API_KEY: str | None = os.environ.get("TURBOPUFFER_API_KEY")
     IS_LOCAL: bool = os.environ.get("IS_LOCAL", "false").lower() == "true"
 
     @classmethod
     def validate_env_variables(cls) -> None:
         for attr_name, attr_value in vars(cls).items():
-            if not attr_name.startswith("_") and isinstance(attr_value, (str, type(None))):
+            if not attr_name.startswith("_") and isinstance(attr_value, str | type(None)):
                 if attr_value is None:
                     raise ValueError(f"Setup: Environment variable {attr_name} is not set.")
 
@@ -42,7 +38,7 @@ class Config:
 
 
 class SingletonFactory:
-    _instances: Dict[Any, Any] = {}
+    _instances: dict[Any, Any] = {}
 
     @classmethod
     def get_instance(cls, target_class: Any, *args: Any, **kwargs: Any) -> Any:

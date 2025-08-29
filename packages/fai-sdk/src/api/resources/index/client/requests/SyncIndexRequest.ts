@@ -9,8 +9,6 @@
  *     }
  */
 export interface SyncIndexRequest {
-    /**
-     * The name of the index to sync
-     */
+    /** The name of the index to sync */
     index_name: string;
 }

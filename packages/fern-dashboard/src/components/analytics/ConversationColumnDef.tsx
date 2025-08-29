@@ -2,9 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 
-export const columns: ColumnDef<FernFai.Query>[] = [
+export const columns: ColumnDef<FernAI.Query>[] = [
   {
     id: "query",
     accessorFn: (query) => query.text,

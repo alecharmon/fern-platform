@@ -4,16 +4,15 @@
 
 import * as environments from "../../../../environments.js";
 import * as core from "../../../../core/index.js";
-import * as FernFai from "../../../index.js";
-import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
+import * as FernAI from "../../../index.js";
+import { mergeHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
 export declare namespace Index {
     export interface Options {
-        environment?: core.Supplier<environments.FernFaiEnvironment | string>;
+        environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
@@ -25,14 +24,13 @@ export declare namespace Index {
         maxRetries?: number;
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
+        /** Additional query string parameters to include in the request. */
+        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
         headers?: Record<string, string | core.Supplier<string | undefined> | undefined>;
     }
 }
 
-/**
- * FAI Index API
- */
 export class Index {
     protected readonly _options: Index.Options;
 
@@ -41,13 +39,10 @@ export class Index {
     }
 
     /**
-     * Reconstruct the query index for a given domain
-     *
      * @param {string} domain
      * @param {Index.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.index.reconstructQueryIndex("domain")
@@ -55,43 +50,42 @@ export class Index {
     public reconstructQueryIndex(
         domain: string,
         requestOptions?: Index.RequestOptions,
-    ): core.HttpResponsePromise<void> {
+    ): core.HttpResponsePromise<FernAI.ReconstructIndexResponse> {
         return core.HttpResponsePromise.fromPromise(this.__reconstructQueryIndex(domain, requestOptions));
     }
 
     private async __reconstructQueryIndex(
         domain: string,
         requestOptions?: Index.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
+    ): Promise<core.WithRawResponse<FernAI.ReconstructIndexResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/index/${encodeURIComponent(domain)}/reconstruct`,
+                    environments.FernAIEnvironment.Production,
+                `index/${encodeURIComponent(domain)}/reconstruct`,
             ),
             method: "POST",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.ReconstructIndexResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -101,15 +95,15 @@ export class Index {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /index/{domain}/reconstruct.");
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /index/{domain}/reconstruct.");
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
@@ -117,66 +111,61 @@ export class Index {
     }
 
     /**
-     * Sync an index with the query index
-     *
      * @param {string} domain
-     * @param {FernFai.SyncIndexRequest} request
+     * @param {FernAI.SyncIndexRequest} request
      * @param {Index.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FernFai.BadRequestError}
-     * @throws {@link FernFai.InternalError}
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.index.syncToQueryIndex("domain", {
+     *     await client.index.syncIndexToQueryIndex("domain", {
      *         index_name: "index_name"
      *     })
      */
-    public syncToQueryIndex(
+    public syncIndexToQueryIndex(
         domain: string,
-        request: FernFai.SyncIndexRequest,
+        request: FernAI.SyncIndexRequest,
         requestOptions?: Index.RequestOptions,
-    ): core.HttpResponsePromise<void> {
-        return core.HttpResponsePromise.fromPromise(this.__syncToQueryIndex(domain, request, requestOptions));
+    ): core.HttpResponsePromise<FernAI.SyncIndexResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__syncIndexToQueryIndex(domain, request, requestOptions));
     }
 
-    private async __syncToQueryIndex(
+    private async __syncIndexToQueryIndex(
         domain: string,
-        request: FernFai.SyncIndexRequest,
+        request: FernAI.SyncIndexRequest,
         requestOptions?: Index.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
-        const { index_name: indexName } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        _queryParams["index_name"] = indexName;
+    ): Promise<core.WithRawResponse<FernAI.SyncIndexResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernFaiEnvironment.Prod,
-                `/index/${encodeURIComponent(domain)}/sync`,
+                    environments.FernAIEnvironment.Production,
+                `index/${encodeURIComponent(domain)}/sync`,
             ),
             method: "POST",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            queryParameters: _queryParams,
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.SyncIndexResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
-                case "BadRequestError":
-                    throw new FernFai.BadRequestError(_response.error.body as string, _response.rawResponse);
-                case "InternalError":
-                    throw new FernFai.InternalError(_response.error.body as string, _response.rawResponse);
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
                 default:
-                    throw new errors.FernFaiError({
+                    throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
                         rawResponse: _response.rawResponse,
@@ -186,27 +175,18 @@ export class Index {
 
         switch (_response.error.reason) {
             case "non-json":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernFaiTimeoutError("Timeout exceeded when calling POST /index/{domain}/sync.");
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /index/{domain}/sync.");
             case "unknown":
-                throw new errors.FernFaiError({
+                throw new errors.FernAIError({
                     message: _response.error.errorMessage,
                     rawResponse: _response.rawResponse,
                 });
         }
-    }
-
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
     }
 }

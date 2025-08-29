@@ -1,6 +1,6 @@
 "use server";
 
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 
 import {
   TimeRange,
@@ -16,14 +16,14 @@ export async function getDomainAnalytics({
 }: {
   docsUrl: string;
   timeRange: TimeRange;
-}): Promise<FernFai.HistogramAnalytics> {
+}): Promise<FernAI.GetHistogramAnalyticsResponse> {
   const session = await getCurrentSessionOrThrow();
   const faiClient = getFaiClient({ token: session.accessToken });
   const requestParams = getRequestParams(timeRange);
   if (requestParams.start_date === undefined) {
     throw new Error("All data is not supported for analytics");
   }
-  return await faiClient.analytics.getHistogramAnalytics(
+  return await faiClient.analytics.getAnalyticsHistogram(
     docsUrl,
     requestParams
   );

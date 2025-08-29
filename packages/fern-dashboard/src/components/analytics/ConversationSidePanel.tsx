@@ -1,7 +1,7 @@
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import { Sparkles, X } from "lucide-react";
 
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 import { FootnoteSup } from "@fern-docs/search-ui/components/chatbot/footnote";
 import { ChatbotTurnContextProvider } from "@fern-docs/search-ui/components/chatbot/turn-context";
 import { MarkdownContent } from "@fern-docs/search-ui/components/md-content";
@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 
 interface ConversationSidePanelProps {
-  conversation: FernFai.Conversation;
+  conversation: FernAI.Conversation;
   onClose: () => void;
   isConversationLoading?: boolean;
 }

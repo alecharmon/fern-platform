@@ -13,7 +13,7 @@ import {
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
-import { FernFaiClient } from "@fern-api/fai-sdk";
+import { FernAIClient } from "@fern-api/fai-sdk";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import {
   getLanguageModel,
@@ -105,12 +105,14 @@ export async function POST(req: NextRequest) {
   const openai = createOpenAI({ apiKey: openaiApiKey() });
   const embeddingModel = openai.embedding("text-embedding-3-large");
 
-  const faiClient = new FernFaiClient({
+  const faiClient = new FernAIClient({
     baseUrl: getFaiOrigin(),
-    token: fernToken_admin(),
+    headers: {
+      Authorization: `Bearer ${fernToken_admin()}`,
+    },
   });
   try {
-    await faiClient.queries.createQuery({
+    await faiClient.query.createQuery({
       query_id: queryId,
       conversation_id: conversationId,
       domain,

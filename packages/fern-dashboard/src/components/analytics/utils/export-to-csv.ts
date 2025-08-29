@@ -1,4 +1,4 @@
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 
 function escapeCSVField(value: string): string {
   const normalized = value.replace(/\r/g, "\\r").replace(/\n/g, "\\n");
@@ -16,7 +16,7 @@ function escapeCSVField(value: string): string {
 }
 
 export function exportToCSV(
-  queries: FernFai.Query[],
+  queries: FernAI.Query[],
   filename: string = "queries-export"
 ) {
   const headers = ["Query", "Date", "Conversation ID"];

@@ -1,8 +1,4 @@
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
 
 from cohere import AsyncClientV2
 from turbopuffer.types.row import Row
@@ -10,26 +6,25 @@ from turbopuffer.types.row import Row
 from src.fai.utils.chat.prompts.cohere import build_cohere_system_prompt
 from src.fai.utils.chat.retrieve.v1_retrieve import v1_retrieve
 from src.fai.utils.chat.tools import SEARCH_TOOL_COHERE
-from src.settings import LOGGER
 from src.settings import VARIABLES
 
 
 async def get_cohere_response(
-    maybe_system_prompt: Optional[str],
+    maybe_system_prompt: str | None,
     model: str,
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     domain: str,
-    rag_records: List[str],
-) -> Tuple[List[Dict[str, str]], List[str]]:
-    async def _handle_cohere_tool_use(tool_use: Any, domain: str) -> Tuple[str, List[str]]:
+    rag_records: list[str],
+) -> tuple[list[dict[str, str]], list[str]]:
+    async def _handle_cohere_tool_use(tool_use: Any, domain: str) -> tuple[str, list[str]]:
         args = tool_use.function.arguments
         if isinstance(args, str):
             args = eval(args)
         query = args["query"]
-        query_results: List[Row] = await v1_retrieve(query, domain)
+        query_results: list[Row] = await v1_retrieve(query, domain)
         return tool_use.id, [result.document for result in query_results]
 
-    def _build_system_turn(system_prompt: str) -> Dict[str, str]:
+    def _build_system_turn(system_prompt: str) -> dict[str, str]:
         return {"role": "system", "content": system_prompt}
 
     def _to_str_content(content: Any) -> str:
@@ -48,7 +43,7 @@ async def get_cohere_response(
             return "\n".join(parts).strip()
         return str(content)
 
-    def _normalize_messages_for_cohere(system_prompt: str, msgs: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    def _normalize_messages_for_cohere(system_prompt: str, msgs: list[dict[str, Any]]) -> list[dict[str, str]]:
         allowed = {"user", "assistant", "system", "tool"}
         out = [_build_system_turn(system_prompt)]
         for m in msgs:
@@ -60,8 +55,8 @@ async def get_cohere_response(
             out.append({"role": role, "content": _to_str_content(m.get("content", ""))})
         return out
 
-    def _collect_text_parts_from_cohere(resp_obj: Any) -> List[Dict[str, str]]:
-        out: List[Dict[str, str]] = []
+    def _collect_text_parts_from_cohere(resp_obj: Any) -> list[dict[str, str]]:
+        out: list[dict[str, str]] = []
         for part in resp_obj.message.content:
             if part.type == "text":
                 out.append({"type": "text", "text": part.text})

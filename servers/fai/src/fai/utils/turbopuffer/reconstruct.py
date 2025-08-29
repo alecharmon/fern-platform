@@ -1,11 +1,15 @@
 from turbopuffer import AsyncTurbopuffer
 
-from settings import CONFIG
-from settings import LOGGER
-from settings import VARIABLES
-from src.fai.enums.index_names import DataIndexNames
-from src.fai.utils.turbopuffer.namespace import get_query_index_name
-from src.fai.utils.turbopuffer.namespace import get_tpuf_namespace
+from settings import (
+    CONFIG,
+    LOGGER,
+    VARIABLES,
+)
+from src.fai.models.enums.index_names import DataIndexNames
+from src.fai.utils.turbopuffer.namespace import (
+    get_query_index_name,
+    get_tpuf_namespace,
+)
 from src.fai.utils.turbopuffer.sync import sync_index_to_target
 
 

@@ -1,2 +1,2 @@
-export { FernFaiError } from "./FernFaiError.js";
-export { FernFaiTimeoutError } from "./FernFaiTimeoutError.js";
+export { FernAIError } from "./FernAIError.js";
+export { FernAITimeoutError } from "./FernAITimeoutError.js";

@@ -21,7 +21,7 @@ import {
   fernToken_admin,
   getFaiOrigin,
 } from "@fern-api/docs-server/env-variables";
-import { FernFaiClient } from "@fern-api/fai-sdk";
+import { FernAIClient } from "@fern-api/fai-sdk";
 import { FacetFilter } from "@fern-docs/search-keyword";
 
 import {
@@ -222,12 +222,14 @@ export async function runRouteForAnthropic({
         onFinish: async (e) => {
           const end = Date.now();
           const queryId = crypto.randomUUID();
-          const faiClient = new FernFaiClient({
+          const faiClient = new FernAIClient({
             baseUrl: getFaiOrigin(),
-            token: fernToken_admin(),
+            headers: {
+              Authorization: `Bearer ${fernToken_admin()}`,
+            },
           });
           try {
-            await faiClient.queries.createQuery({
+            await faiClient.query.createQuery({
               query_id: queryId,
               conversation_id: conversationId,
               domain,

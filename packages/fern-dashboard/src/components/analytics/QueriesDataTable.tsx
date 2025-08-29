@@ -11,7 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { FernFai } from "@fern-api/fai-sdk";
+import { FernAI } from "@fern-api/fai-sdk";
 
 import { getConversation } from "@/app/actions/getConversation";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -23,8 +23,8 @@ interface QueriesDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   baseDocsUrl: string;
-  onSelectConversation: (conversation: FernFai.Conversation) => void;
-  selectedConversation: FernFai.Conversation | null;
+  onSelectConversation: (conversation: FernAI.Conversation) => void;
+  selectedConversation: FernAI.Conversation | null;
   queryTimeRange: TimeRange;
   setQueryTimeRange: (range: TimeRange) => void;
   onExport: () => void;
@@ -54,7 +54,7 @@ export function QueriesDataTable<TData, TValue>({
     return async () => {
       const conversation = await getConversation({
         domain: baseDocsUrl,
-        conversationId: (row.original as FernFai.Query).conversation_id,
+        conversationId: (row.original as FernAI.Query).conversation_id,
       });
       onSelectConversation(conversation);
     };
@@ -96,7 +96,7 @@ export function QueriesDataTable<TData, TValue>({
                     key={row.id}
                     data-state={
                       selectedConversation?.conversation_id ===
-                        (row.original as FernFai.Query).conversation_id &&
+                        (row.original as FernAI.Query).conversation_id &&
                       "selected"
                     }
                     className="data-[state=selected]:bg-accent cursor-pointer border-none"

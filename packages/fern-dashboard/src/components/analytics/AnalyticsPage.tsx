@@ -23,7 +23,7 @@ export default async function AnalyticsPage({
     timeRange: TimeRange.LAST_WEEK,
   });
 
-  const queriesData = await client.queries.getRecentQueries(baseDocsUrl, {
+  const queriesData = await client.query.getRecentQueries(baseDocsUrl, {
     cutoff_time: cutoffTime,
     limit: ITEMS_PER_PAGE,
   });
@@ -33,7 +33,7 @@ export default async function AnalyticsPage({
       baseDocsUrl={baseDocsUrl}
       initialQueriesData={queriesData.queries}
       initialHistogramData={analyticsData}
-      initialTotalQueries={queriesData.total}
+      initialTotalQueries={queriesData.pagination.total}
       cutoffTime={cutoffTime}
       analyticsBillingEnabled={analyticsBillingEnabled}
     />

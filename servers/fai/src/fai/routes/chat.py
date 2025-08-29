@@ -1,43 +1,40 @@
 from typing import Any
-from typing import Dict
-from typing import List
 
-from fastapi import Body
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from turbopuffer.types.row import Row
 
 from src.fai.app import fai_app
-from src.fai.models.api.chat import ChatCompletionRequest
-from src.fai.models.api.chat import ChatCompletionResponse
-from src.fai.models.types.message import ChatMessage
-from src.fai.models.types.message import Citation
+from src.fai.models.api.chat_api import (
+    PostChatCompletionRequest,
+    PostChatCompletionResponse,
+)
+from src.fai.models.types.chat_types import ChatMessage
 from src.fai.utils.chat.response.anthropic import get_anthropic_response
 from src.fai.utils.chat.response.cohere import get_cohere_response
 from src.fai.utils.chat.retrieve.v1_retrieve import v1_retrieve
 from src.settings import LOGGER
 
-
 SUPPORTED_MODELS = ["claude-4-sonnet-20250514", "command-a-03-2025"]
 
 
-@fai_app.post("/chat/{domain}")
-async def chat(
+@fai_app.post("/chat/{domain}", response_model=PostChatCompletionResponse)
+async def post_chat_completion(
     domain: str,
-    body: ChatCompletionRequest = Body(...),
+    request: PostChatCompletionRequest,
 ) -> JSONResponse:
     LOGGER.info(f"Chatting for domain {domain}")
     try:
-        messages: List[Dict[str, Any]] = [message.to_dict() for message in body.messages]
-        last_user_message = body.messages[-1] if len(body.messages) > 0 else None
+        messages: list[dict[str, Any]] = [message.to_dict() for message in request.messages]
+        last_user_message = messages[-1] if len(messages) > 0 else None
 
-        rag_records: List[str] = []
+        rag_records: list[str] = []
         if last_user_message:
-            query_results: List[Row] = await v1_retrieve(last_user_message.content, domain)
+            query_results: list[Row] = await v1_retrieve(last_user_message["content"], domain)
             rag_records.extend([result.document for result in query_results])
 
-        maybe_system_prompt = body.system_prompt
-        model = body.model or "claude-4-sonnet-20250514"
+        maybe_system_prompt = request.system_prompt
+        model = request.model or "claude-4-sonnet-20250514"
 
         if model not in SUPPORTED_MODELS:
             raise ValueError(f"Model {model} not supported")
@@ -52,9 +49,9 @@ async def chat(
                 maybe_system_prompt, model, messages, domain, rag_records
             )
 
-        output: ChatCompletionResponse = ChatCompletionResponse(
+        output: PostChatCompletionResponse = PostChatCompletionResponse(
             turns=[ChatMessage(role="assistant", content=turn["text"]) for turn in output_turns],
-            citations=[Citation(document=record) for record in citations],
+            citations=citations,
         )
 
         return JSONResponse(content=jsonable_encoder(output))

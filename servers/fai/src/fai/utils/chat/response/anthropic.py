@@ -1,8 +1,4 @@
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
 
 from anthropic import AsyncAnthropic
 from turbopuffer.types.row import Row
@@ -14,15 +10,15 @@ from src.settings import VARIABLES
 
 
 async def get_anthropic_response(
-    maybe_system_prompt: Optional[str],
+    maybe_system_prompt: str | None,
     model: str,
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     domain: str,
-    rag_records: List[str],
-) -> Tuple[List[Dict[str, str]], List[str]]:
-    async def _handle_anthropic_tool_use(tool_use: Any, domain: str) -> Tuple[str, List[str]]:
+    rag_records: list[str],
+) -> tuple[list[dict[str, str]], list[str]]:
+    async def _handle_anthropic_tool_use(tool_use: Any, domain: str) -> tuple[str, list[str]]:
         query = tool_use.input["query"]
-        query_results: List[Row] = await v1_retrieve(query, domain)
+        query_results: list[Row] = await v1_retrieve(query, domain)
         rag_records = [result.document for result in query_results]
         return tool_use.id, rag_records
 
