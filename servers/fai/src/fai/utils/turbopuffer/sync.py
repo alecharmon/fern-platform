@@ -10,11 +10,6 @@ from turbopuffer import (
 )
 from turbopuffer.types.row import Row
 
-from settings import (
-    CONFIG,
-    LOGGER,
-    VARIABLES,
-)
 from src.fai.models.db.document_db import DocumentDb
 from src.fai.models.db.guidance_db import GuidanceDb
 from src.fai.utils.turbopuffer.namespace import (
@@ -25,6 +20,11 @@ from src.fai.utils.turbopuffer.namespace import (
 from src.fai.utils.turbopuffer.schemas import (
     get_data_index_tpuf_schema,
     get_query_index_tpuf_schema,
+)
+from src.settings import (
+    CONFIG,
+    LOGGER,
+    VARIABLES,
 )
 
 

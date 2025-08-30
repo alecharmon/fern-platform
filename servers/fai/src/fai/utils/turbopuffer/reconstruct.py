@@ -1,16 +1,16 @@
 from turbopuffer import AsyncTurbopuffer
 
-from settings import (
-    CONFIG,
-    LOGGER,
-    VARIABLES,
-)
 from src.fai.models.enums.index_names import DataIndexNames
 from src.fai.utils.turbopuffer.namespace import (
     get_query_index_name,
     get_tpuf_namespace,
 )
 from src.fai.utils.turbopuffer.sync import sync_index_to_target
+from src.settings import (
+    CONFIG,
+    LOGGER,
+    VARIABLES,
+)
 
 
 async def reconstruct_query_index_for_domain(domain: str) -> None:

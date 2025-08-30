@@ -8,12 +8,6 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.factories import (
-    CreateDocumentRequestFactory,
-    UpdateDocumentRequestFactory,
-    create_test_domain,
-    create_test_id,
-)
 
 from src.fai.models.api.document_api import (
     CreateDocumentResponse,
@@ -23,6 +17,12 @@ from src.fai.models.api.document_api import (
     UpdateDocumentResponse,
 )
 from src.fai.models.db.document_db import DocumentDb
+from tests.factories import (
+    CreateDocumentRequestFactory,
+    UpdateDocumentRequestFactory,
+    create_test_domain,
+    create_test_id,
+)
 
 
 class TestDocumentRoutes:

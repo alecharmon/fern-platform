@@ -5,11 +5,11 @@ from sqlalchemy import (
     String,
 )
 
-from settings import CONFIG
 from src.fai.db import Base
 from src.fai.models.db.array_column import ArrayColumn
 from src.fai.models.types.guidance_types import Guidance
 from src.fai.models.utils.record import TurbopufferRecord
+from src.settings import CONFIG
 
 
 def format_guidance_for_tpuf(chunk: str, document: str) -> str:

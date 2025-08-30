@@ -14,6 +14,8 @@ export * from "./GetGuidanceResponse.js";
 export * from "./GetGuidancesResponse.js";
 export * from "./GetHistogramAnalyticsResponse.js";
 export * from "./GetInsightsResponse.js";
+export * from "./GetMcpBmfQueryResponse.js";
+export * from "./GetMcpSemanticQueryResponse.js";
 export * from "./GetQueriesResponse.js";
 export * from "./GroupBy.js";
 export * from "./Guidance.js";

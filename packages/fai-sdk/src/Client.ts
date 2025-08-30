@@ -12,6 +12,7 @@ import { Document } from "./api/resources/document/client/Client.js";
 import { Guidance } from "./api/resources/guidance/client/Client.js";
 import { Health } from "./api/resources/health/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
+import { Mcp } from "./api/resources/mcp/client/Client.js";
 import { Query } from "./api/resources/query/client/Client.js";
 
 export declare namespace FernAIClient {
@@ -46,6 +47,7 @@ export class FernAIClient {
     protected _guidance: Guidance | undefined;
     protected _health: Health | undefined;
     protected _index: Index | undefined;
+    protected _mcp: Mcp | undefined;
     protected _query: Query | undefined;
 
     constructor(_options: FernAIClient.Options = {}) {
@@ -88,6 +90,10 @@ export class FernAIClient {
 
     public get index(): Index {
         return (this._index ??= new Index(this._options));
+    }
+
+    public get mcp(): Mcp {
+        return (this._mcp ??= new Mcp(this._options));
     }
 
     public get query(): Query {

@@ -8,12 +8,6 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.factories import (
-    CreateGuidanceRequestFactory,
-    UpdateGuidanceRequestFactory,
-    create_test_domain,
-    create_test_id,
-)
 
 from src.fai.models.api.guidance_api import (
     CreateGuidanceResponse,
@@ -23,6 +17,12 @@ from src.fai.models.api.guidance_api import (
     UpdateGuidanceResponse,
 )
 from src.fai.models.db.guidance_db import GuidanceDb
+from tests.factories import (
+    CreateGuidanceRequestFactory,
+    UpdateGuidanceRequestFactory,
+    create_test_domain,
+    create_test_id,
+)
 
 
 class TestGuidanceRoutes:

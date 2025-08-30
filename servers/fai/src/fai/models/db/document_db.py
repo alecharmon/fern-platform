@@ -6,11 +6,11 @@ from sqlalchemy import (
     String,
 )
 
-from settings import CONFIG
 from src.fai.db import Base
 from src.fai.models.db.array_column import ArrayColumn
 from src.fai.models.types.document_types import Document
 from src.fai.models.utils.record import TurbopufferRecord
+from src.settings import CONFIG
 
 
 class DocumentDb(Base):

@@ -4,6 +4,7 @@ from datetime import (
 )
 
 from fastapi.testclient import TestClient
+
 from tests.factories import (
     QueryFactory,
     create_test_domain,
