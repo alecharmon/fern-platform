@@ -6,7 +6,7 @@ RUN apk add --no-cache nodejs npm
 RUN npm install -g turbo@2.0.1
 
 COPY . .
-RUN npm install -g pnpm@10.11.0
+RUN npm install -g pnpm@9.15.9
 RUN rm -rf fern/
 
 RUN turbo prune @fern-docs/bundle --docker
@@ -98,7 +98,8 @@ COPY docs_bundle.tar.gz .
 RUN mkdir -p /nextapp && \
     tar -xzf docs_bundle.tar.gz -C /nextapp && \
     cd /nextapp && \
-    node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
+    node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
+    pnpm add esbuild
 
 # ----------- End nextapp setup -------------
 
