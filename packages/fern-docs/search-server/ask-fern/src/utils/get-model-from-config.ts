@@ -18,7 +18,7 @@ type ModelConfig = {
   region: string;
 };
 
-export const DEFAULT_MODEL_ID = "claude-3.5";
+const FALLBACK_MODEL_ID = "anthropic.claude-3-5-sonnet-20241022-v2:0";
 const DEFAULT_MODEL_CONFIG: ModelConfig = {
   modelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
   region: "us-west-2",
@@ -56,7 +56,7 @@ export function getLanguageModel(model: string | undefined): {
     };
   }
 
-  const modelConfig = getModelConfig(model ?? DEFAULT_MODEL_ID);
+  const modelConfig = getModelConfig(model ?? "claude-3.5");
   if (model === "claude-4") {
     const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
     const bedrock = createAmazonBedrock({
@@ -68,7 +68,7 @@ export function getLanguageModel(model: string | undefined): {
       model: createFallback({
         models: [
           anthropic("claude-4-sonnet-20250514"),
-          bedrock(DEFAULT_MODEL_ID),
+          bedrock(FALLBACK_MODEL_ID),
         ],
       }),
       provider: "anthropic",
