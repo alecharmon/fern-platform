@@ -58,20 +58,31 @@ export function getLanguageModel(model: string | undefined): {
 
   const modelConfig = getModelConfig(model ?? "claude-3.5");
   if (model === "claude-4") {
-    const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
+    // TODO: Remove this once we restore Anthropic support.
+    // const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
+    // const bedrock = createAmazonBedrock({
+    //   region: modelConfig.region,
+    //   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    //   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    // });
+    // return {
+    //   model: createFallback({
+    //     models: [
+    //       anthropic("claude-4-sonnet-20250514"),
+    //       bedrock(FALLBACK_MODEL_ID),
+    //     ],
+    //   }),
+    //   provider: "anthropic",
+    // };
     const bedrock = createAmazonBedrock({
       region: modelConfig.region,
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     });
+
     return {
-      model: createFallback({
-        models: [
-          anthropic("claude-4-sonnet-20250514"),
-          bedrock(FALLBACK_MODEL_ID),
-        ],
-      }),
-      provider: "anthropic",
+      model: bedrock(FALLBACK_MODEL_ID),
+      provider: "bedrock",
     };
   }
 
