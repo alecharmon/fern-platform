@@ -15,7 +15,7 @@ export default async function AuthedLayout({
 }: Readonly<{
   params: Promise<{ orgName: Auth0OrgName }>;
   children: React.JSX.Element;
-  sidepanel?: React.ReactNode;
+  sidepanel: React.ReactNode;
 }>) {
   const { orgName } = await params;
 
