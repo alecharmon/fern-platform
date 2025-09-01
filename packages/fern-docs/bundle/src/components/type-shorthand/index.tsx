@@ -84,14 +84,12 @@ export function renderTypeShorthandRoot({
         toPrimitiveTypeLabels({ primitive: unwrapped.shape.value }).map(
           (label, index) => <code key={index}>{label}</code>
         )}
-      {unwrapped.default != null &&
-        unwrapped.isOptional &&
-        !hideAllModifiers && (
-          <span>
-            {"Defaults to "}
-            <code>{unknownToString(unwrapped.default)}</code>
-          </span>
-        )}
+      {unwrapped.default != null && !hideAllModifiers && (
+        <span>
+          {"Defaults to "}
+          <code>{unknownToString(unwrapped.default)}</code>
+        </span>
+      )}
     </span>
   );
 }
@@ -212,6 +210,7 @@ export function renderTypeShorthand(
   types: Record<string, TypeDefinition>
 ): string {
   const unwrapped = unwrapReference(shape, types);
+
   const maybeWithArticle = (article: string, stringWithoutArticle: string) =>
     withArticle ? `${article} ${stringWithoutArticle}` : stringWithoutArticle;
 
