@@ -4,7 +4,7 @@ export const queueAlgoliaReindex = async (
   host: string,
   domain: string,
   basepath?: string
-): Promise<string | undefined> => {
+): Promise<void> => {
   return queue({
     host,
     domain,
@@ -18,7 +18,7 @@ export const queueTurbopufferReindex = async (
   host: string,
   domain: string,
   basepath?: string
-): Promise<string | undefined> => {
+): Promise<void> => {
   return queue({
     host,
     domain,

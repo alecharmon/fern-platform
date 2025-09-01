@@ -44,7 +44,7 @@ export async function queue<TBody = unknown>({
   retries?: number;
   deduplicationId?: string;
   disableVercelPreviewDeployment?: boolean;
-}): Promise<string | undefined> {
+}): Promise<void> {
   if (isLocal() || isSelfHosted() || q === undefined) {
     return undefined;
   }
@@ -74,14 +74,12 @@ export async function queue<TBody = unknown>({
   const basepath = cleanBasePath(basepathProp);
   const endpoint = slugToHref(endpointProp);
 
-  const res = await q.publishJSON({
+  await q.publishJSON({
     url: `https://${host}${basepath}${endpoint}`,
     retries: 1,
     ...request,
     headers,
   });
-
-  return res.messageId;
 }
 
 export async function batchQueue<TBody = unknown>({
@@ -121,19 +119,19 @@ export async function batchQueue<TBody = unknown>({
   headers?: HeadersInit;
   retries?: number;
   disableVercelPreviewDeployment?: boolean;
-}): Promise<string[]> {
+}): Promise<void> {
   if (isLocal() || q === undefined || isSelfHosted()) {
-    return [];
+    return;
   }
 
   const { VERCEL, VERCEL_ENV, VERCEL_AUTOMATION_BYPASS_SECRET } = getEnv();
 
   if (!VERCEL || VERCEL_ENV === "development") {
-    return [];
+    return;
   }
 
   if (disableVercelPreviewDeployment && VERCEL_ENV !== "production") {
-    return [];
+    return;
   }
 
   if (queueName) {
@@ -168,7 +166,5 @@ export async function batchQueue<TBody = unknown>({
     }
   );
 
-  const responses = await q.batchJSON(batchRequests);
-
-  return responses.map((res) => res.messageId);
+  await q.batchJSON(batchRequests);
 }
