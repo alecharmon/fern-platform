@@ -12,6 +12,15 @@ import { cleanHost } from "./util";
  * Note: x-fern-host is always appended to the request header by cloudfront for all *.docs.buildwithfern.com requests.
  */
 export function getDocsDomainEdge(req: NextRequest): string {
+  // transfer x-fern-host query parameter to header
+  if (req.nextUrl.searchParams.has(HEADER_X_FERN_HOST)) {
+    const fernHostValue = req.nextUrl.searchParams.get(HEADER_X_FERN_HOST);
+    if (fernHostValue) {
+      req.headers.set(HEADER_X_FERN_HOST, fernHostValue);
+      req.nextUrl.searchParams.delete(HEADER_X_FERN_HOST);
+    }
+  }
+
   const hosts = [
     getNextPublicDocsDomain(),
     req.cookies.get(COOKIE_FERN_DOCS_PREVIEW)?.value,
