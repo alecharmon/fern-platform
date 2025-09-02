@@ -153,7 +153,7 @@ export async function runRouteForCohere({
           console.error(msg);
           postToSlack(
             "#search-notifs",
-            `:rotating_light: [${domain}] [source: ${chatSource}] [conversationId: ${conversationId}] \`Ask AI\` encountered a ${errorKind} for query '${lastUserMessage}': \`${JSON.stringify(error)}\``
+            `:rotating_light: [${domain}] [source: ${chatSource}] [languageModel: ${JSON.stringify(languageModel)}] [conversationId: ${conversationId}] \`Ask AI\` encountered a ${errorKind}: \`${JSON.stringify(error)}\``
           );
         },
         onFinish: async (e) => {

@@ -18,21 +18,25 @@ type ModelConfig = {
   region: string;
 };
 
-const FALLBACK_MODEL_ID = "anthropic.claude-3-5-sonnet-20241022-v2:0";
-const DEFAULT_MODEL_CONFIG: ModelConfig = {
+const CLAUDE_3_5_MODEL_CONFIG = {
   modelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
   region: "us-west-2",
 };
 
+const CLAUDE_3_7_MODEL_CONFIG = {
+  modelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+  region: "us-east-1",
+};
+
+const DEFAULT_MODEL_CONFIG: ModelConfig = CLAUDE_3_5_MODEL_CONFIG;
+
+const FALLBACK_MODEL_CONFIG: ModelConfig = CLAUDE_3_5_MODEL_CONFIG;
+
+const FALLBACK_MODEL_CONFIG_2: ModelConfig = CLAUDE_3_7_MODEL_CONFIG;
+
 const modelMap: Record<ModelId, ModelConfig> = {
-  "claude-3.5": {
-    modelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
-    region: "us-west-2",
-  },
-  "claude-3.7": {
-    modelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-    region: "us-east-1",
-  },
+  "claude-3.5": CLAUDE_3_5_MODEL_CONFIG,
+  "claude-3.7": CLAUDE_3_7_MODEL_CONFIG,
 };
 
 export function getModelConfig(model: ModelId): ModelConfig {
@@ -59,8 +63,13 @@ export function getLanguageModel(model: string | undefined): {
   const modelConfig = getModelConfig(model ?? "claude-3.5");
   if (model === "claude-4") {
     const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
-    const bedrock = createAmazonBedrock({
-      region: modelConfig.region,
+    const bedrock_3_5 = createAmazonBedrock({
+      region: FALLBACK_MODEL_CONFIG.region,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    });
+    const bedrock_3_7 = createAmazonBedrock({
+      region: FALLBACK_MODEL_CONFIG_2.region,
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     });
@@ -68,7 +77,8 @@ export function getLanguageModel(model: string | undefined): {
       model: createFallback({
         models: [
           anthropic("claude-4-sonnet-20250514"),
-          bedrock(FALLBACK_MODEL_ID),
+          bedrock_3_5(FALLBACK_MODEL_CONFIG.modelId),
+          bedrock_3_7(FALLBACK_MODEL_CONFIG_2.modelId),
         ],
       }),
       provider: "anthropic",
