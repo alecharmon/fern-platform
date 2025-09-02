@@ -4,8 +4,6 @@ import { FdrAPI } from "@fern-api/fdr-sdk";
 
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsZeroState } from "@/components/docs-page/DocsZeroState";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
-import { FeatureFlaggedServerSide } from "@/components/posthog/feature-flags/server-side";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 
@@ -42,13 +40,5 @@ export default async function Page({
     );
   }
 
-  return (
-    <FeatureFlaggedServerSide
-      flag={PosthogFeatureFlag.ENABLE_DOCS_PAGE}
-      redirectWhenDisabled
-      orgName={orgName}
-    >
-      <DocsZeroState user={session.user} />
-    </FeatureFlaggedServerSide>
-  );
+  return <DocsZeroState user={session.user} />;
 }

@@ -27,6 +27,7 @@ export function VEPreviewImage({ className }: { className?: string }) {
           resolvedTheme === "light" ? "opacity-100" : "opacity-0"
         }`}
         priority
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
       <Image
         src={veDark}
@@ -38,6 +39,7 @@ export function VEPreviewImage({ className }: { className?: string }) {
           resolvedTheme === "dark" ? "opacity-100" : "opacity-0"
         }`}
         priority
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
     </div>
   );

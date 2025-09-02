@@ -12,6 +12,7 @@ import {
   validateGithubRepoAccess,
 } from "@/app/services/dal/github/validators";
 import { GithubLogo } from "@/components/auth/GithubLogo";
+import { BetaBadge } from "@/components/docs-page/BetaBadge";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import {
   GithubAuthState,
@@ -20,8 +21,6 @@ import {
 import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
 import { VEPreviewImage } from "@/components/docs-page/VEPreviewImage";
 import { WarningNote } from "@/components/docs-page/WarningNote";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
-import { FeatureFlaggedServerSide } from "@/components/posthog/feature-flags/server-side";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
@@ -120,70 +119,67 @@ export default async function Page(props: {
   }
 
   return (
-    <FeatureFlaggedServerSide
-      flag={PosthogFeatureFlag.ENABLE_DOCS_PAGE}
-      redirectWhenDisabled
-      orgName={orgName}
-    >
-      <div className="flex w-full flex-col gap-4">
-        <DocsSiteOverviewCard
-          docsUrl={docsUrl}
-          githubProtectedArea={
-            <div className="flex w-fit flex-col gap-2">
-              <p>Source</p>
-              <GithubSource docsUrl={docsUrl} githubUrl={githubUrl} />
-            </div>
-          }
-        />
-
-        <Card className="relative flex h-[300px] flex-col-reverse gap-0 !p-0 lg:flex-row">
-          <div className="lg:max-w-1/2 h-full w-full">
-            <VEPreviewImage className="h-full w-full" />
+    <div className="flex w-full flex-col gap-4">
+      <DocsSiteOverviewCard
+        docsUrl={docsUrl}
+        githubProtectedArea={
+          <div className="flex w-fit flex-col gap-2">
+            <p>Source</p>
+            <GithubSource docsUrl={docsUrl} githubUrl={githubUrl} />
           </div>
-          <div className="flex flex-col items-center justify-center gap-4 p-6 md:flex-1 lg:items-start">
-            <div className="flex flex-col items-center lg:items-start">
-              <p className="text-lg font-semibold">Fern Visual Editor</p>
+        }
+      />
+
+      <Card className="relative flex h-[300px] flex-col-reverse gap-0 !p-0 lg:flex-row">
+        <div className="lg:max-w-1/2 h-full w-full">
+          <VEPreviewImage className="h-full w-full" />
+        </div>
+        <div className="flex flex-col items-center justify-center gap-4 p-6 md:flex-1 lg:items-start">
+          <div className="flex flex-col items-center lg:items-start">
+            <div className="flex items-center gap-2 text-lg font-semibold">
+              Fern Visual Editor
+              <BetaBadge />
+            </div>
+            <p className="text-muted-foreground text-sm">
+              Modify your documentation without touching code.
+            </p>
+            {githubUrl == null && (
               <p className="text-muted-foreground text-sm">
-                Modify your documentation without touching code.
+                Connect your repository above to get started.
               </p>
-              {githubUrl == null && (
-                <p className="text-muted-foreground text-sm">
-                  Connect your repository above to get started.
-                </p>
-              )}
-            </div>
-
-            {githubUrl != null &&
-              (githubAuthState.validationResult.ok ? (
-                <>
-                  <GoToEditorButton
-                    docsUrl={docsUrl}
-                    session={session}
-                    sourceRepo={githubAuthState.sourceRepo}
-                  />
-                  <p className="text-muted-foreground text-sm">
-                    All sessions will turn into PRs in your Github repo{" "}
-                    <a
-                      href={githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-primary underline transition-colors"
-                    >
-                      here
-                    </a>
-                    .
-                  </p>
-                </>
-              ) : (
-                <ValidationErrorHandler
-                  error={githubAuthState.validationResult.error}
-                  githubUrl={githubUrl}
-                />
-              ))}
+            )}
           </div>
-        </Card>
-      </div>
-    </FeatureFlaggedServerSide>
+
+          {githubUrl != null &&
+            (githubAuthState.validationResult.ok ? (
+              <>
+                <GoToEditorButton
+                  docsUrl={docsUrl}
+                  session={session}
+                  sourceRepo={githubAuthState.sourceRepo}
+                />
+                <p className="text-muted-foreground text-sm">
+                  All sessions will turn into PRs in your Github repo{" "}
+                  <a
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary underline transition-colors"
+                  >
+                    here
+                  </a>
+                  .
+                </p>
+              </>
+            ) : (
+              <ValidationErrorHandler
+                error={githubAuthState.validationResult.error}
+                githubUrl={githubUrl}
+              />
+            ))}
+        </div>
+      </Card>
+    </div>
   );
 }
 
