@@ -246,6 +246,7 @@ export async function runRouteForAnthropic({
             languageModel: languageModel.valueOf().toString(),
             embeddingModel: embeddingModel.modelId,
             durationMs: end - start,
+            timeToFirstToken,
             domain,
             namespace: turbopufferNamespace,
             numToolCalls: e.toolCalls.length,
