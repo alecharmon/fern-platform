@@ -512,10 +512,26 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
       }
       return;
     }
-    const item = getValidItems().find(
+
+    // First, try to find an item that is not disabled and allows auto-selection
+    const primaryItem = getValidItems().find(
+      (item) =>
+        item.getAttribute("aria-disabled") !== "true" &&
+        item.getAttribute("data-disable-auto-selection") !== "true"
+    );
+
+    if (primaryItem) {
+      const value = primaryItem.getAttribute(VALUE_ATTR);
+      store.setState("value", value ?? "");
+      return;
+    }
+
+    // Fallback: if no primary items are available, select the first available item (including Ask AI)
+    const fallbackItem = getValidItems().find(
       (item) => item.getAttribute("aria-disabled") !== "true"
     );
-    const value = item?.getAttribute(VALUE_ATTR);
+
+    const value = fallbackItem?.getAttribute(VALUE_ATTR);
     store.setState("value", value ?? "");
   }
 

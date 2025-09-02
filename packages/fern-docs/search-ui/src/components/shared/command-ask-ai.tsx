@@ -14,9 +14,18 @@ export const CommandAskAIGroup = forwardRef<
   >
 >(({ onAskAI, ...props }, ref) => {
   const { query } = useSearchBox();
+  const wordCount = query
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
+  const shouldDisableAutoSelection = wordCount < 5;
+
   return (
     <Command.Group ref={ref} {...props}>
-      <Command.Item onSelect={() => onAskAI(query)}>
+      <Command.Item
+        onSelect={() => onAskAI(query.trim())}
+        data-disable-auto-selection={shouldDisableAutoSelection}
+      >
         <Sparkles />
         <AskAIText query={query.trim().length > 0 ? query.trim() : ""} />
       </Command.Item>
