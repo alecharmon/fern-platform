@@ -22,6 +22,7 @@ export * from "./Guidance.js";
 export * from "./HttpValidationError.js";
 export * from "./HistogramAnalyticsBar.js";
 export * from "./InsightWithCount.js";
+export * from "./JobStatusResponse.js";
 export * from "./LanguageModel.js";
 export * from "./PaginationResponse.js";
 export * from "./PostChatCompletionResponse.js";

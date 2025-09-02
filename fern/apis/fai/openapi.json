@@ -972,6 +972,48 @@
         }
       }
     },
+    "/jobs/{job_id}/status": {
+      "get": {
+        "tags": [
+          "Index"
+        ],
+        "summary": "Get Job Status",
+        "operationId": "get_job_status",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mcp/semantic/{domain}": {
       "post": {
         "tags": [
@@ -1964,6 +2006,83 @@
         ],
         "title": "InsightWithCount"
       },
+      "JobStatusResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id",
+            "description": "The job ID"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current status of the job"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "When the job was created"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At",
+            "description": "When the job started"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At",
+            "description": "When the job completed"
+          },
+          "success": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Success",
+            "description": "Whether the job succeeded (only set when completed)"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "Error message if the job failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "status",
+          "created_at"
+        ],
+        "title": "JobStatusResponse"
+      },
       "LanguageModel": {
         "type": "string",
         "enum": [
@@ -2146,15 +2265,15 @@
       },
       "SyncIndexResponse": {
         "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "description": "Whether the index sync was successful"
+          "job_id": {
+            "type": "string",
+            "title": "Job Id",
+            "description": "The ID of the sync job"
           }
         },
         "type": "object",
         "required": [
-          "success"
+          "job_id"
         ],
         "title": "SyncIndexResponse"
       },

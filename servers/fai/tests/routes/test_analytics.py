@@ -18,8 +18,8 @@ class TestAnalyticsHistogram:
         with patch("src.fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
             "src.fai.routes.analytics.fill_date_gaps"
         ) as mock_fill:
-            mock_fetch.return_value = []  # Raw data from DB
-            mock_fill.return_value = mock_histogram_data  # Processed data
+            mock_fetch.return_value = []
+            mock_fill.return_value = mock_histogram_data
 
             response = test_client.get(f"/analytics/histogram/{domain}")
 
@@ -38,8 +38,8 @@ class TestAnalyticsHistogram:
         with patch("src.fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
             "src.fai.routes.analytics.fill_date_gaps"
         ) as mock_fill:
-            mock_fetch.return_value = []  # Raw data from DB
-            mock_fill.return_value = mock_histogram_data  # Processed data
+            mock_fetch.return_value = []
+            mock_fill.return_value = mock_histogram_data
 
             response = test_client.get(
                 f"/analytics/histogram/{domain}",

@@ -3,6 +3,6 @@
  */
 
 export interface SyncIndexResponse {
-    /** Whether the index sync was successful */
-    success: boolean;
+    /** The ID of the sync job */
+    job_id: string;
 }

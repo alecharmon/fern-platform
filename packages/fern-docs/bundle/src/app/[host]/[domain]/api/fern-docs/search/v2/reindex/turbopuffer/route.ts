@@ -102,9 +102,29 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       baseUrl: getFaiOrigin(),
     });
 
-    await faiClient.index.syncIndexToQueryIndex(domain, {
+    const syncResponse = await faiClient.index.syncIndexToQueryIndex(domain, {
       index_name: fernDocsIndexName,
     });
+
+    const pollJobStatus = async (jobId: string): Promise<void> => {
+      while (true) {
+        const statusResponse = await faiClient.index.getJobStatus(jobId);
+        const { status, success, error } = statusResponse;
+
+        if (status === "completed") {
+          if (success === false) {
+            throw new Error(`Sync job failed: ${error || "Unknown error"}`);
+          }
+          break;
+        } else if (status === "failed") {
+          throw new Error(`Sync job failed: ${error || "Unknown error"}`);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 15000));
+      }
+    };
+
+    await pollJobStatus(syncResponse.job_id);
 
     const end = Date.now();
 
@@ -114,6 +134,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       domain,
       namespace,
       added: numInserted,
+      job_id: syncResponse.job_id,
     });
 
     return NextResponse.json(
