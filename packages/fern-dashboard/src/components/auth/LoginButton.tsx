@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "../ui/button";
 import { GithubLogo } from "./GithubLogo";
 import { GoogleLogo } from "./GoogleLogo";
@@ -49,7 +51,7 @@ export const GoogleLoginButton = ({
     >
       {children ?? (
         <>
-          <GoogleLogo grayscale />
+          <GoogleLogo />
           Continue with Google
         </>
       )}
