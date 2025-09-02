@@ -73,32 +73,64 @@ export async function POST(req: NextRequest): Promise<Response> {
     },
   });
 
-  const result = await generateObject({
-    model: languageModel,
-    mode: "json",
-    system: `You are a helpful assistant that makes suggestions of questions for the user to ask about the documentation.
-The prompt will be a an array of separate search results that are JSON objects.
-Generate 5 questions based on the following search results.`,
-    prompt: response.hits
-      .map(
-        (hit) =>
-          `# ${hit.title}\n${hit.description ?? ""}\n${hit.type === "changelog" || hit.type === "markdown" ? (hit.content ?? "") : ""}`
-      )
-      .join("\n\n"),
-    maxRetries: 3,
-    schema: SuggestionsSchema,
-    experimental_telemetry: {
-      isEnabled: true,
-      recordInputs: true,
-      recordOutputs: true,
-      functionId: "ask_ai_suggest",
-      metadata: {
-        domain,
-        indexName: SEARCH_INDEX,
-        languageModel: "claude-4",
+  let result;
+
+  try {
+    result = await generateObject({
+      model: languageModel,
+      mode: "json",
+      system: `You are a helpful assistant that makes suggestions of questions for the user to ask about the documentation.
+The prompt will be an array of separate search results that are JSON objects.
+Generate exactly 5 questions based on the search results provided.
+Your response must be in the following format:\n\n
+{
+  "suggestions": [
+    "<question_1>",
+    "<question_2>",
+    "<question_3>",
+    "<question_4>",
+    "<question_5>"
+  ]
+}
+\n
+DO NOT include any explanatory text - only return the JSON object.`,
+      prompt: response.hits
+        .map(
+          (hit) =>
+            `# ${hit.title}\n${hit.description ?? ""}\n${hit.type === "changelog" || hit.type === "markdown" ? (hit.content ?? "") : ""}`
+        )
+        .join("\n\n"),
+      maxRetries: 3,
+      schema: SuggestionsSchema,
+      experimental_telemetry: {
+        isEnabled: true,
+        recordInputs: true,
+        recordOutputs: true,
+        functionId: "ask_ai_suggest",
+        metadata: {
+          domain,
+          indexName: SEARCH_INDEX,
+          languageModel: "claude-4",
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error(
+      "AI suggestions generation failed after retries, returning fallback suggestions:",
+      error
+    );
+    result = {
+      object: {
+        suggestions: [
+          "How do I get started with this documentation?",
+          "What are the main features covered in this guide?",
+          "Where can I find API reference documentation?",
+          "What are the common use cases and examples?",
+          "How can I troubleshoot common issues?",
+        ],
+      },
+    };
+  }
 
   if (result.object && !cookieJar.has(COOKIE_FERN_TOKEN)) {
     await kv.set(cacheKey, result.object);

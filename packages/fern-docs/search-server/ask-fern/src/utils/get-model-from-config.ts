@@ -1,8 +1,13 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { createCohere } from "@ai-sdk/cohere";
 import { LanguageModel } from "ai";
+import { createFallback } from "ai-fallback";
 
-import { cohereApiKey } from "@fern-api/docs-server/env-variables";
+import {
+  anthropicApiKey,
+  cohereApiKey,
+} from "@fern-api/docs-server/env-variables";
 
 type ModelId = string;
 
@@ -53,31 +58,20 @@ export function getLanguageModel(model: string | undefined): {
 
   const modelConfig = getModelConfig(model ?? "claude-3.5");
   if (model === "claude-4") {
-    // TODO: Remove this once we restore Anthropic support.
-    // const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
-    // const bedrock = createAmazonBedrock({
-    //   region: modelConfig.region,
-    //   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    //   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    // });
-    // return {
-    //   model: createFallback({
-    //     models: [
-    //       anthropic("claude-4-sonnet-20250514"),
-    //       bedrock(FALLBACK_MODEL_ID),
-    //     ],
-    //   }),
-    //   provider: "anthropic",
-    // };
+    const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
     const bedrock = createAmazonBedrock({
       region: modelConfig.region,
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     });
-
     return {
-      model: bedrock(FALLBACK_MODEL_ID),
-      provider: "bedrock",
+      model: createFallback({
+        models: [
+          anthropic("claude-4-sonnet-20250514"),
+          bedrock(FALLBACK_MODEL_ID),
+        ],
+      }),
+      provider: "anthropic",
     };
   }
 
