@@ -33,19 +33,21 @@ RUN pnpm install --no-frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN pnpm --filter @fern-api/ui-core-utils compile
-RUN pnpm --filter @fern-docs/mdx compile
-RUN pnpm --filter @fern-platform/mdx-bundler bundler:build
+# Copy the built server.cjs file
+COPY servers/mdx-bundler/cjs /mdx-bundler
 
 FROM base AS runner
-WORKDIR /app
+WORKDIR /mdx-bundler
 
 COPY --from=installer /app .
+
+# Copy the built server.cjs file
+COPY --from=installer /mdx-bundler/server.cjs .
 
 EXPOSE 8080
 
 # ENTRYPOINT ["/bin/sh", "/app/servers/mdx-bundler/run.sh"]
 # Run the server and use tail -f to keep the container running
-ENTRYPOINT ["node", "--experimental-specifier-resolution=node", "/app/servers/mdx-bundler/dist/server.js"]
+ENTRYPOINT ["node", "server.cjs"]
 
 

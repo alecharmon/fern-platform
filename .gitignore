@@ -18,6 +18,7 @@ servers/**/lib
 servers/**/dist
 servers/**/tsconfig*tsbuildinfo
 servers/**/out
+servers/**/cjs
 clis/**/dist
 docker/build
 

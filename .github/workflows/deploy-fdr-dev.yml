@@ -81,6 +81,7 @@ jobs:
         run: |
           git_version="$(scripts/git-version.sh)"
           pnpm --filter=@fern-platform/fdr run docker:dev "${git_version}"
+          pnpm --filter=@fern-platform/mdx-bundler build:tsup:cjs
           pnpm --filter=@fern-platform/mdx-bundler docker "${git_version}"
           npm install -g aws-cdk
           cd servers/fdr-deploy
