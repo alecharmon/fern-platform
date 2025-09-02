@@ -392,6 +392,7 @@ export function usePlaygroundWebsocketFormState(
   ];
 }
 
+// use to track initial environment-specific state of auth
 export function useResolvedPlaygroundState() {
   return useAtomValue(PLAYGROUND_RESOLVED_STATE_ATOM);
 }

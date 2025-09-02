@@ -3,6 +3,7 @@ export * from "./default-values";
 export * from "./endpoints";
 export * from "./match-typeref";
 export * from "./oauth";
+export * from "./parse-auth-options";
 export * from "./serialize";
 export * from "./snippets";
 export * from "./utils";

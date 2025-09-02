@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 import { noop } from "es-toolkit/function";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 
 import { APIV1Read } from "@fern-api/fdr-sdk";
 import { Button, FernCollapse } from "@fern-docs/components";
@@ -43,14 +43,29 @@ export function PlaygroundAuthorizationFormCardRoot({
 }) {
   const openState = useBooleanState(false);
 
-  const setBearerAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
+  const [bearerAuth, setBearerAuth] = useAtom(
+    PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM
+  );
   const setOAuth = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
   const apiKey = useInjectedApiKey();
   const resolvedState = useResolvedPlaygroundState();
+  const prevTokenRef = useRef<string | undefined>(
+    resolvedState?.auth?.bearer_token
+  );
+
   const handleResetBearerAuth = () => {
     setBearerAuth({ token: resolvedState?.auth?.bearer_token ?? apiKey ?? "" });
     setOAuth((prev) => ({ ...prev, userSuppliedAccessToken: "" }));
   };
+
+  // only update bearer auth if the resolved environment value actually changes
+  useEffect(() => {
+    const currentToken = resolvedState?.auth?.bearer_token;
+    if (currentToken && currentToken !== prevTokenRef.current) {
+      setBearerAuth({ token: currentToken });
+      prevTokenRef.current = currentToken;
+    }
+  }, [resolvedState?.auth?.bearer_token, setBearerAuth]);
 
   return (
     <PlaygroundAuthorizationFormCardCtx.Provider
@@ -59,7 +74,7 @@ export function PlaygroundAuthorizationFormCardRoot({
         setOpen: openState.setValue,
         toggleOpen: openState.toggleValue,
         resetForm: handleResetBearerAuth,
-        apiKey: resolvedState?.auth?.bearer_token ?? apiKey ?? "",
+        apiKey: bearerAuth.token ?? "",
       }}
     >
       <div className="relative">{children}</div>

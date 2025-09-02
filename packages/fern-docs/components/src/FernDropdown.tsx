@@ -25,6 +25,13 @@ import { FernTooltip, FernTooltipProvider } from "./FernTooltip";
 import { cn } from "./cn";
 
 export declare namespace FernDropdown {
+  export interface AuthOption {
+    type: "auth";
+    key: string;
+    value: string;
+    selected: boolean;
+  }
+
   export interface ProductOption {
     type: "product";
     id: string;
@@ -57,7 +64,11 @@ export declare namespace FernDropdown {
     type: "separator";
   }
 
-  export type Option = ProductOption | ValueOption | SeparatorOption;
+  export type Option =
+    | ProductOption
+    | ValueOption
+    | SeparatorOption
+    | AuthOption;
 
   export interface Props {
     className?: string;
@@ -154,6 +165,13 @@ export const FernDropdown = forwardRef<
                     key={option.id}
                     option={option}
                     dense={option.dense}
+                  />
+                ) : option.type === "auth" ? (
+                  <FernDropdownItemAuth key={option.key} option={option} />
+                ) : option.type === "separator" ? (
+                  <DropdownMenu.Separator
+                    key={idx}
+                    className="bg-border-default mx-2 my-1 h-px"
                   />
                 ) : (
                   <DropdownMenu.Separator
@@ -298,5 +316,19 @@ function FernDropdownItemValue({
         )}
       </DropdownMenu.RadioItem>
     </FernTooltip>
+  );
+}
+
+function FernDropdownItemAuth({ option }: { option: FernDropdown.AuthOption }) {
+  return (
+    <DropdownMenu.RadioItem asChild={true} value={option.key}>
+      <div className="flex cursor-pointer items-center justify-between gap-2 px-2 py-1">
+        <div className="text-sm">{option.key}</div>
+
+        <DropdownMenu.ItemIndicator asChild>
+          <Check />
+        </DropdownMenu.ItemIndicator>
+      </div>
+    </DropdownMenu.RadioItem>
   );
 }

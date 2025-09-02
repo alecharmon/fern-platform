@@ -10,6 +10,7 @@ import { Button, SemanticBadge } from "@fern-docs/components";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 
 import { PlaygroundAuthState } from "../types";
+import { isMultiAuthToken } from "../utils/parse-auth-options";
 
 interface PlaygroundCardTriggerManualProps {
   auth: APIV1Read.ApiAuth;
@@ -25,6 +26,10 @@ export function PlaygroundCardTriggerManual({
   isOpen,
 }: PlaygroundCardTriggerManualProps): ReactElement<any> | false {
   const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+
+  if (isMultiAuthToken(authState.bearerAuth?.token ?? "")) {
+    return <></>;
+  }
 
   const authButtonCopy = visitDiscriminatedUnion(auth)._visit({
     bearerAuth: () => "Enter your bearer token",

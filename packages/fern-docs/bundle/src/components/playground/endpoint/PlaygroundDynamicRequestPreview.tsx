@@ -18,6 +18,7 @@ import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter"
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 
 import { PlaygroundEndpointRequestFormState } from "../types";
+import { returnSelectedOption } from "../utils/parse-auth-options";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 
 export type DynamicSnippetLanguage =
@@ -170,9 +171,11 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         let auth;
         // hack: just parse the bearer token if oauth enabled
         if (authState.bearerAuth) {
+          const token = returnSelectedOption(authState.bearerAuth.token).value;
+
           auth = {
             type: "bearer",
-            token: authState.bearerAuth?.token,
+            token: token,
           };
         } else {
           auth = authState;

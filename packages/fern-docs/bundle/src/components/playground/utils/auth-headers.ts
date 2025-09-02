@@ -10,6 +10,7 @@ import {
   OAuthClientCredentialReferencedEndpointLoginFlowProps,
   oAuthClientCredentialReferencedEndpointLoginFlow,
 } from "./oauth";
+import { returnSelectedOption } from "./parse-auth-options";
 
 export function buildAuthHeaders(
   auth: ApiDefinition.AuthScheme | undefined,
@@ -26,6 +27,9 @@ export function buildAuthHeaders(
     visitDiscriminatedUnion(auth)._visit({
       bearerAuth: () => {
         let token = authState.bearerAuth?.token ?? "";
+
+        token = returnSelectedOption(token).value;
+
         if (redacted) {
           token = obfuscateSecret(token);
         }
