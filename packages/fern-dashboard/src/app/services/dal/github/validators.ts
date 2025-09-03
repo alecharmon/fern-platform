@@ -44,13 +44,14 @@ function deriveGithubUrl(identifier: RepoIdentifier): string {
 
 export const validateGithubRepoAccess = async (
   orgName: string,
-  identifier: RepoIdentifier
+  identifier: RepoIdentifier,
+  skipCache: boolean = false
 ): Promise<GithubRepoValidationResult> => {
   const cacheKey = getCacheKey(orgName, identifier);
   const cached = githubValidationCache.get(cacheKey);
 
   // Return cached result if still fresh
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+  if (!skipCache && cached && Date.now() - cached.timestamp < CACHE_DURATION) {
     return cached.data;
   }
 

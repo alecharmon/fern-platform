@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
@@ -28,6 +29,7 @@ export function SetGithubSourcePopover({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [inputUrl, setInputUrl] = useState("");
 
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const handleConnectRepo = useCallback(
@@ -40,10 +42,12 @@ export function SetGithubSourcePopover({
           githubUrl: repoUrl,
         });
 
-        // Invalidate the github source repo query so that we can see the new repo
+        // Invalidate the github source repo query so that we can see the new repo client side
         await queryClient.invalidateQueries({
           queryKey: ReactQueryKey.githubSourceRepo(docsUrl),
         });
+        // Invalidate data cache so that we can see the new repo server side
+        router.refresh();
 
         SuccessfulEditSourceToast();
 
@@ -55,7 +59,7 @@ export function SetGithubSourcePopover({
         setIsSaving(false);
       }
     },
-    [docsUrl, queryClient, setIsSaving]
+    [docsUrl, queryClient, setIsSaving, router]
   );
 
   const inputUrlIsGithubUrl = useMemo(() => {

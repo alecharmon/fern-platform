@@ -11,7 +11,6 @@ import {
   GithubRepoValidationError,
   validateGithubRepoAccess,
 } from "@/app/services/dal/github/validators";
-import { GithubLogo } from "@/components/auth/GithubLogo";
 import { BetaBadge } from "@/components/docs-page/BetaBadge";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import {
@@ -19,13 +18,15 @@ import {
   GithubSource,
 } from "@/components/docs-page/GithubSource";
 import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
+import { InstallGithubAppButton } from "@/components/docs-page/InstallGithubAppButton";
 import { VEPreviewImage } from "@/components/docs-page/VEPreviewImage";
 import { WarningNote } from "@/components/docs-page/WarningNote";
-import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
+
+export const dynamic = "force-dynamic";
 
 export default async function Page(props: {
   params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
@@ -84,10 +85,14 @@ export default async function Page(props: {
     // If we have a GitHub URL, validate the auth state
     if (githubUrl) {
       try {
-        const validation = await validateGithubRepoAccess(orgName, {
-          type: "url",
-          githubUrl,
-        });
+        const validation = await validateGithubRepoAccess(
+          orgName,
+          {
+            type: "url",
+            githubUrl,
+          },
+          true // Skip cache so that we can force re-fetch on page load
+        );
 
         let sourceRepo = undefined;
 
@@ -97,7 +102,6 @@ export default async function Page(props: {
             sourceRepo = await getGithubSourceMetadataHandler({
               githubUrl,
               userId: session.user.sub,
-              skipCache: false,
             });
           } catch (error) {
             console.error("Failed to fetch source repo metadata:", error);
@@ -175,6 +179,7 @@ export default async function Page(props: {
               <ValidationErrorHandler
                 error={githubAuthState.validationResult.error}
                 githubUrl={githubUrl}
+                orgName={orgName}
               />
             ))}
         </div>
@@ -186,10 +191,12 @@ export default async function Page(props: {
 interface ValidationErrorHandlerProps {
   error: GithubRepoValidationError;
   githubUrl?: string;
+  orgName: Auth0OrgName;
 }
 
 function ValidationErrorHandler({
   error,
+  orgName,
   githubUrl,
 }: ValidationErrorHandlerProps) {
   switch (error.type) {
@@ -199,16 +206,7 @@ function ValidationErrorHandler({
           <p className="text-muted-foreground text-sm">
             To get started, install the Fern app on your GitHub repository.
           </p>
-          <Button asChild>
-            <a
-              href="https://github.com/apps/fern-api"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <GithubLogo />
-              Install
-            </a>
-          </Button>
+          <InstallGithubAppButton orgName={orgName} githubUrl={githubUrl} />
         </>
       );
 
