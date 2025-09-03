@@ -148,7 +148,6 @@ class GitHubClient:
         return []
 
     def parse_usage_snippet(self, usage_snippet: str) -> ReferenceSnippet | None:
-
         if not usage_snippet:
             return None
 

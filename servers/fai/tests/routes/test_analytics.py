@@ -13,7 +13,15 @@ class TestAnalyticsHistogram:
     def test_get_analytics_histogram_success(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        mock_histogram_data = [{"label": "2024-01-01", "queryCount": 10, "conversationCount": 5}]
+        mock_histogram_data = [
+            {
+                "label": "2024-01-01",
+                "queryCount": 10,
+                "conversationCount": 5,
+                "conversationsPositiveCount": 3,
+                "conversationsNegativeCount": 1,
+            }
+        ]
 
         with patch("src.fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
             "src.fai.routes.analytics.fill_date_gaps"
@@ -33,7 +41,15 @@ class TestAnalyticsHistogram:
         start_date = datetime.now() - timedelta(days=7)
         end_date = datetime.now()
 
-        mock_histogram_data = [{"label": "2024-W01", "queryCount": 5, "conversationCount": 3}]
+        mock_histogram_data = [
+            {
+                "label": "2024-W01",
+                "queryCount": 5,
+                "conversationCount": 3,
+                "conversationsPositiveCount": 2,
+                "conversationsNegativeCount": 1,
+            }
+        ]
 
         with patch("src.fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
             "src.fai.routes.analytics.fill_date_gaps"

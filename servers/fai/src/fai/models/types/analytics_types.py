@@ -5,6 +5,8 @@ class HistogramAnalyticsBar(BaseModel):
     label: str
     queryCount: int
     conversationCount: int
+    conversationsPositiveCount: int
+    conversationsNegativeCount: int
 
 
 class Insight(BaseModel):
