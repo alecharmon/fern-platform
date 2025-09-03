@@ -39,7 +39,7 @@ async def sync_index_to_query_index(
     body: SyncIndexRequest,
 ) -> JSONResponse:
     try:
-        job_id = job_manager.create_job()
+        job_id = await job_manager.create_job()
 
         asyncio.create_task(
             job_manager.execute_job(job_id, sync_index_to_target, domain, body.index_name, get_query_index_name())
@@ -55,7 +55,7 @@ async def sync_index_to_query_index(
 @fai_app.get("/jobs/{job_id}/status", response_model=JobStatusResponse)
 async def get_job_status(job_id: str) -> JSONResponse:
     try:
-        job = job_manager.get_job_status(job_id)
+        job = await job_manager.get_job_status(job_id)
         if not job:
             return JSONResponse(status_code=404, content={"detail": "Job not found"})
 
