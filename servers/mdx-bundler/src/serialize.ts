@@ -33,10 +33,9 @@ export async function serializeTwoslash(
   content = sanitizeMdxExpression(content)[0];
 
   process.env.ESBUILD_BINARY_PATH = path.join(
-    "/app/servers/mdx-bundler",
+    "/mdx-bundler",
     "node_modules",
-    "esbuild",
-    "bin",
+    ".bin",
     "esbuild"
   );
 
@@ -93,7 +92,7 @@ export async function serializeTwoslash(
                         lib: ["dom", "esnext"],
                         skipLibCheck: true,
                       },
-                      vfsRoot: "/app/servers/mdx-bundler",
+                      vfsRoot: "/mdx-bundler",
                     },
                   })
                 : null,

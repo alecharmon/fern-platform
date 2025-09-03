@@ -1,7 +1,7 @@
 import { createTwoslasher } from "twoslash";
 
 const twoslasher_ = createTwoslasher({
-  vfsRoot: "/app/servers/mdx-bundler",
+  vfsRoot: "/mdx-bundler",
 });
 
 export function twoslasher() {
