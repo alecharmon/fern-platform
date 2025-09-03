@@ -46,17 +46,17 @@ export class Conversation {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.conversation.getConversation("domain", "conversation_id")
+     *     await client.conversation.getConversationById("domain", "conversation_id")
      */
-    public getConversation(
+    public getConversationById(
         domain: string,
         conversationId: string,
         requestOptions?: Conversation.RequestOptions,
     ): core.HttpResponsePromise<FernAI.GetConversationResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getConversation(domain, conversationId, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__getConversationById(domain, conversationId, requestOptions));
     }
 
-    private async __getConversation(
+    private async __getConversationById(
         domain: string,
         conversationId: string,
         requestOptions?: Conversation.RequestOptions,

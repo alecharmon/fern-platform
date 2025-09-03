@@ -82,7 +82,7 @@ export const DesktopAskAiPanel = forwardRef<
     onSelectHit?: (path: string) => void;
     prefetch?: (path: string) => Promise<void>;
     domain: string;
-    renderActions?: (message: SqueezedMessage) => ReactNode;
+    renderActions?: (message: SqueezedMessage, queryId?: string) => ReactNode;
     initialInput?: string;
     setInitialInput?: (initialInput: string) => void;
     children?: ReactNode;
@@ -91,6 +91,11 @@ export const DesktopAskAiPanel = forwardRef<
       conversationId: string;
       setConversationId: (conversationId: string) => void;
       resetConversationId: () => void;
+    };
+    useQueryId: () => {
+      queryId: string;
+      setQueryId: (queryId: string) => void;
+      resetQueryId: () => void;
     };
     onClose?: () => void;
     pageContext?: { title: string; url: string } | null;
@@ -116,6 +121,7 @@ export const DesktopAskAiPanel = forwardRef<
       asChild,
       darkCodeEnabled,
       useConversationId,
+      useQueryId,
       onClose,
       pageContext,
       onRemovePageContext,
@@ -143,6 +149,7 @@ export const DesktopAskAiPanel = forwardRef<
       >
         <DesktopAskAIContent
           useConversationId={useConversationId}
+          useQueryId={useQueryId}
           api={api}
           suggestionsApi={suggestionsApi}
           body={body}
@@ -178,6 +185,10 @@ const DesktopAskAIContent = (props: {
     setConversationId: (conversationId: string) => void;
     resetConversationId: () => void;
   };
+  useQueryId: () => {
+    queryId: string | undefined;
+    setQueryId: (queryId: string | undefined) => void;
+  };
   api?: string;
   suggestionsApi?: string;
   body?: object;
@@ -186,7 +197,7 @@ const DesktopAskAIContent = (props: {
   onSelectHit?: (path: string) => void;
   prefetch?: (path: string) => Promise<void>;
   domain: string;
-  renderActions?: (message: SqueezedMessage) => ReactNode;
+  renderActions?: (message: SqueezedMessage, queryId?: string) => ReactNode;
   darkCodeEnabled?: boolean;
   onClose?: () => void;
   pageContext?: { title: string; url: string } | null;
@@ -206,6 +217,7 @@ const DesktopAskAIChat = ({
   setInitialInput,
   chatId,
   useConversationId,
+  useQueryId,
   api,
   suggestionsApi,
   body,
@@ -230,6 +242,10 @@ const DesktopAskAIChat = ({
     setConversationId: (conversationId: string) => void;
     resetConversationId: () => void;
   };
+  useQueryId: () => {
+    queryId: string | undefined;
+    setQueryId: (queryId: string | undefined) => void;
+  };
   api?: string;
   suggestionsApi?: string;
   body?: object;
@@ -238,7 +254,7 @@ const DesktopAskAIChat = ({
   onSelectHit?: (path: string) => void;
   prefetch?: (path: string) => Promise<void>;
   domain: string;
-  renderActions?: (message: SqueezedMessage) => ReactNode;
+  renderActions?: (message: SqueezedMessage, queryId?: string) => ReactNode;
   darkCodeEnabled?: boolean;
   onClose?: () => void;
   pageContext?: { title: string; url: string } | null;
@@ -251,15 +267,26 @@ const DesktopAskAIChat = ({
   const [initialInputSent, setInitialInputSent] = useState(false);
   const { conversationId, resetConversationId } = useConversationId();
   const [showMaximizeOption, setShowMaximizeOption] = useState(true);
+  const { queryId, setQueryId } = useQueryId();
+  const [messageQueryIds, setMessageQueryIds] = useState<
+    Record<string, string>
+  >({});
+
+  useEffect(() => {
+    if (!queryId) {
+      setQueryId(crypto.randomUUID());
+    }
+  }, [queryId, setQueryId]);
 
   const defaultTransportBody = useMemo(() => {
     return {
       ...body,
       url: window.location.href,
       conversationId,
+      queryId,
       filters,
     };
-  }, [body, conversationId, filters, window.location.href]);
+  }, [body, conversationId, queryId, filters, window.location.href]);
 
   const transport = new DefaultChatTransport({
     api: api || "/api/chat",
@@ -305,12 +332,39 @@ const DesktopAskAIChat = ({
     }
   }, [chat.status === "streaming"]);
 
+  useEffect(() => {
+    const lastMessage = chat.messages[chat.messages.length - 1];
+    if (lastMessage?.role === "assistant" && chat.status === "ready") {
+      if (messageQueryIds[lastMessage.id]) {
+        return;
+      }
+
+      const queryIdPart = lastMessage.parts?.find(
+        (part: any) => part.type === "data-assistant-query-id"
+      );
+
+      if (queryIdPart?.data) {
+        setMessageQueryIds((prev) => ({
+          ...prev,
+          [lastMessage.id]: queryIdPart.data,
+        }));
+      } else {
+        const assistantQueryId = crypto.randomUUID();
+        setMessageQueryIds((prev) => ({
+          ...prev,
+          [lastMessage.id]: assistantQueryId,
+        }));
+      }
+    }
+  }, [chat.messages, chat.status, messageQueryIds]);
+
   const [input, setInput] = useState("");
 
   const askAI = useCallback(
     (message?: string): void => {
-      // message is set when clicking suggestions
-      // otherwise we use internal state (input, setInput)
+      const newQueryId = crypto.randomUUID();
+      setQueryId(newQueryId);
+
       void chat.sendMessage(
         {
           role: "user",
@@ -319,13 +373,15 @@ const DesktopAskAIChat = ({
         {
           body: {
             ...defaultTransportBody,
+            queryId: newQueryId, // Use the new queryId for this specific message
             documentUrls: [pageContext?.url].filter(isNonNullish),
           },
         }
       );
+
       setInput("");
     },
-    [chat, input, setInput, pageContext?.url, defaultTransportBody]
+    [chat, input, setInput, pageContext?.url, defaultTransportBody, setQueryId]
   );
 
   if (
@@ -398,6 +454,7 @@ const DesktopAskAIChat = ({
               chat.setMessages([]);
               chat.error = undefined;
               resetConversationId();
+              setQueryId(crypto.randomUUID());
             }}
           >
             <RotateCw size={16} />
@@ -505,6 +562,7 @@ const DesktopAskAIChat = ({
           userScrolled={userScrolled}
           domain={domain}
           renderActions={renderActions}
+          messageQueryIds={messageQueryIds}
         >
           {suggestionsApi && (
             <Suggestions
@@ -536,6 +594,7 @@ const DesktopAskAIChat = ({
           chat.setMessages([]);
           chat.error = undefined;
           resetConversationId();
+          setQueryId(crypto.randomUUID());
         }}
         onSend={askAI}
         onKeyDown={useEventCallback((e) => {
@@ -699,7 +758,8 @@ const AskAICommandItems = memo<{
   children?: ReactNode;
   prefetch?: (path: string) => Promise<void>;
   domain: string;
-  renderActions?: (message: SqueezedMessage) => ReactNode;
+  renderActions?: (message: SqueezedMessage, queryId?: string) => ReactNode;
+  messageQueryIds?: Record<string, string>;
 }>(
   ({
     messages,
@@ -713,6 +773,7 @@ const AskAICommandItems = memo<{
     prefetch,
     domain,
     renderActions,
+    messageQueryIds = {},
   }): ReactElement<any> => {
     const messagesWithNewLines = ensureMessagePartsHaveNewLines(messages);
     const squeezedMessages = squeezeMessages(messagesWithNewLines);
@@ -864,7 +925,10 @@ const AskAICommandItems = memo<{
                           </p>
                         )}
                         {(!isLastMessage || !isLoading) &&
-                          renderActions?.(message)}
+                          renderActions?.(
+                            message,
+                            messageQueryIds[message.assistant?.id || ""]
+                          )}
                       </section>
                     </div>
                   </article>

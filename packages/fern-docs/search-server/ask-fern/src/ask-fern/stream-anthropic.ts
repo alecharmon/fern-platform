@@ -125,11 +125,18 @@ export async function runRouteForAnthropic({
   let timeToFirstToken: number | undefined = undefined;
   let responseText = "";
 
+  const assistantQueryId = crypto.randomUUID();
+
   const uiMessageStream = createUIMessageStream({
     execute({ writer }) {
       writer.write({
         type: "data-sources",
         data: searchResultSources,
+      });
+
+      writer.write({
+        type: "data-assistant-query-id",
+        data: assistantQueryId,
       });
 
       const result = streamText({
@@ -221,7 +228,6 @@ export async function runRouteForAnthropic({
         },
         onFinish: async (e) => {
           const end = Date.now();
-          const queryId = crypto.randomUUID();
           const faiClient = new FernAIClient({
             baseUrl: getFaiOrigin(),
             headers: {
@@ -230,7 +236,7 @@ export async function runRouteForAnthropic({
           });
           try {
             await faiClient.query.createQuery({
-              query_id: queryId,
+              query_id: assistantQueryId,
               conversation_id: conversationId,
               domain,
               text: responseText,
@@ -240,7 +246,7 @@ export async function runRouteForAnthropic({
               time_to_first_token: timeToFirstToken,
             });
           } catch (error) {
-            console.log("Error creating query", error);
+            console.log("Error creating assistant query", error);
           }
           track("ask_ai", {
             languageModel: languageModel.valueOf().toString(),

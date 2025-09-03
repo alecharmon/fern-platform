@@ -53,9 +53,7 @@ class TestIndexSync:
             mock_get_name.return_value = "query-index"
             mock_create_job.return_value = "test-job-id-123"
 
-            from datetime import (
-                datetime,
-            )
+            from datetime import datetime
 
             from src.fai.models.db.job_db import JobDb
 

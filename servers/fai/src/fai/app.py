@@ -56,7 +56,9 @@ class FAIApp(FastAPI):
 fai_app = FAIApp(lifespan=lifespan)
 
 origins = [
-    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
     "https://www.app.buildwithfern.com",
     "https://app.buildwithfern.com",
     "https://www.app-dev.buildwithfern.com",

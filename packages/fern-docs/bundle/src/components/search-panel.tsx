@@ -27,6 +27,7 @@ import { searchPanelOpenAtom } from "@/state/search-panel";
 
 import { Feedback } from "./feedback/Feedback";
 import { generateConversationId } from "./generate-conversation-id";
+import { generateQueryId } from "./generate-query-id";
 import { useAlgoliaUserToken } from "./util/getAlgoliaUserToken";
 
 const ApiKeySchema = z.object({
@@ -41,6 +42,16 @@ export function useConversationId() {
     conversationId,
     setConversationId,
     resetConversationId: () => setConversationId(generateConversationId()),
+  };
+}
+
+export const queryIdAtom = atom<string>(generateQueryId());
+export function useQueryId() {
+  const [queryId, setQueryId] = useAtom(queryIdAtom);
+  return {
+    queryId,
+    setQueryId,
+    resetQueryId: () => setQueryId(generateQueryId()),
   };
 }
 
@@ -69,6 +80,8 @@ export const SearchPanel = React.memo(function SearchPanel({
   const setIsResizing = useSetSearchPanelResizing();
   const searchDialogOpen = useIsSearchDialogOpen();
   const [width, setWidth] = useAtom(widthAtom);
+  const conversationIdHook = useConversationId();
+  const queryIdHook = useQueryId();
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -209,7 +222,8 @@ export const SearchPanel = React.memo(function SearchPanel({
 
       <div className="flex-1 overflow-y-auto">
         <DesktopAskAiPanel
-          useConversationId={useConversationId}
+          useConversationId={() => conversationIdHook}
+          useQueryId={() => queryIdHook}
           domain={domain}
           api={chatEndpoint}
           headers={{
@@ -221,7 +235,7 @@ export const SearchPanel = React.memo(function SearchPanel({
           body={{ algoliaSearchKey: apiKey }}
           onSelectHit={handleNavigate}
           onEscapeKeyDown={() => setIsOpen(false)}
-          renderActions={({ user, assistant }) => {
+          renderActions={({ user, assistant }, queryId) => {
             if (!assistant) {
               return null;
             }
@@ -232,8 +246,12 @@ export const SearchPanel = React.memo(function SearchPanel({
                 metadata={() => ({
                   user: user?.content,
                   assistant: assistant.content,
+                  assistantId: assistant.id,
+                  conversationId: conversationIdHook.conversationId,
+                  queryId: queryId || queryIdHook.queryId,
+                  domain,
                 })}
-                feedbackPrepend="[Ask Fern] "
+                feedbackSource="ask-fern"
               />
             );
           }}

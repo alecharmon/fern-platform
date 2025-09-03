@@ -19,7 +19,7 @@ from src.settings import LOGGER
 
 
 @fai_app.get("/conversation/{domain}/{conversation_id}", response_model=GetConversationResponse)
-async def get_conversation(
+async def get_conversation_by_id(
     domain: str,
     conversation_id: str,
     db: AsyncSession = Depends(get_db),
@@ -46,8 +46,7 @@ async def get_conversation(
             created_at=turns[-1].created_at if turns else None,
             turns=turns,
         )
-        conversation_response = GetConversationResponse(conversation=conversation)
-        return JSONResponse(content=jsonable_encoder(conversation_response))
+        return JSONResponse(content=jsonable_encoder(GetConversationResponse(conversation=conversation)))
     except Exception as e:
         LOGGER.exception(f"Failed to get conversation {conversation_id}")
         return JSONResponse(status_code=500, content={"detail": str(e)})

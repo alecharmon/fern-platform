@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  const queryId = crypto.randomUUID();
   const createdAt = new Date();
   const host = req.nextUrl.host;
   const domain = getDocsDomainEdge(req);
@@ -77,6 +76,7 @@ export async function POST(req: NextRequest) {
     source,
     filters,
     conversationId,
+    queryId,
     documentUrls,
   }: {
     url: string;
@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
     source: string;
     filters: FacetFilter[];
     conversationId: string;
+    queryId: string;
     documentUrls: string[];
   } = await req.json();
 

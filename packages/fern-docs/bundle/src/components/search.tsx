@@ -41,6 +41,7 @@ import { searchPanelInitialInputAtom } from "@/state/search-panel";
 
 import { Feedback } from "./feedback/Feedback";
 import { generateConversationId } from "./generate-conversation-id";
+import { generateQueryId } from "./generate-query-id";
 import { useAlgoliaUserToken } from "./util/getAlgoliaUserToken";
 
 const ApiKeySchema = z.object({
@@ -55,6 +56,16 @@ export function useConversationId() {
     conversationId,
     setConversationId,
     resetConversationId: () => setConversationId(generateConversationId()),
+  };
+}
+
+export const queryIdAtom = atom<string>(generateQueryId());
+export function useQueryId() {
+  const [queryId, setQueryId] = useAtom(queryIdAtom);
+  return {
+    queryId,
+    setQueryId,
+    resetQueryId: () => setQueryId(generateQueryId()),
   };
 }
 
@@ -74,6 +85,8 @@ export const SearchV2 = React.memo(function SearchV2({
   const [open, setOpen] = useCommandTrigger();
   const [initialInput, setInitialInput] = useAtom(searchPanelInitialInputAtom);
   const openSearchPanel = useOpenSearchPanel();
+  const conversationIdHook = useConversationId();
+  const queryIdHook = useQueryId();
 
   const { data } = useApiRouteSWRImmutable("/api/fern-docs/search/v2/key", {
     request: { headers: { "X-User-Token": userToken } },
@@ -198,7 +211,7 @@ export const SearchV2 = React.memo(function SearchV2({
       <DesktopSearchDialog open={open} onOpenChange={setOpen}>
         {isAskAiEnabled ? (
           <DesktopCommandWithAskAI
-            useConversationId={useConversationId}
+            useConversationId={() => conversationIdHook}
             domain={domain}
             headers={{
               "X-Fern-Host": domain,
@@ -208,7 +221,7 @@ export const SearchV2 = React.memo(function SearchV2({
             body={{ algoliaSearchKey: apiKey }}
             onSelectHit={handleNavigate}
             onEscapeKeyDown={() => setOpen(false)}
-            renderActions={({ user, assistant }) => {
+            renderActions={({ user, assistant }, queryId) => {
               if (!assistant) {
                 return null;
               }
@@ -219,8 +232,11 @@ export const SearchV2 = React.memo(function SearchV2({
                   metadata={() => ({
                     user: user?.content,
                     assistant: assistant.content,
+                    conversationId: conversationIdHook.conversationId,
+                    queryId: queryId || queryIdHook.queryId,
+                    domain,
                   })}
-                  feedbackPrepend="[Ask Fern] "
+                  feedbackSource="ask-fern"
                 />
               );
             }}

@@ -65,23 +65,23 @@ export function ConversationSidePanel({
           </div>
         ) : (
           <div className="animate-in fade-in duration-300">
-            {conversation.turns.map((message) => {
+            {conversation.turns.map((turn) => {
               return (
-                <ChatbotTurnContextProvider key={message.created_at}>
+                <ChatbotTurnContextProvider key={turn.created_at}>
                   <article>
-                    {message.role === "USER" && (
+                    {turn.role === "USER" && (
                       <div className="relative mb-2 ml-auto w-fit max-w-[70%] whitespace-pre-wrap rounded-md bg-gray-300 px-5 py-2">
                         <section className="prose cursor-auto text-sm">
-                          <MarkdownContent>{message.text}</MarkdownContent>
+                          <MarkdownContent>{turn.text}</MarkdownContent>
                         </section>
                       </div>
                     )}
                     <div className="flex items-start justify-start gap-4">
-                      {message.role !== "USER" && (
+                      {turn.role !== "USER" && (
                         <Sparkles className="my-1 size-4 shrink-0" />
                       )}
                       <section className="prose min-w-0 flex-1 shrink cursor-text text-sm [&_a]:break-words">
-                        {message.role !== "USER" && (
+                        {turn.role !== "USER" && (
                           <MarkdownContent
                             components={{
                               // ...components,
@@ -95,7 +95,7 @@ export function ConversationSidePanel({
                             }}
                             plugins={["remarkGfm", "remarkTest"]}
                           >
-                            {message.text}
+                            {turn.text}
                           </MarkdownContent>
                         )}
                       </section>

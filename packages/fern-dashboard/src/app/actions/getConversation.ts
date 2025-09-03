@@ -14,7 +14,7 @@ export async function getConversation({
 }): Promise<FernAI.Conversation> {
   const session = await getCurrentSessionOrThrow();
   const faiClient = getFaiClient({ token: session.accessToken });
-  const response = await faiClient.conversation.getConversation(
+  const response = await faiClient.conversation.getConversationById(
     domain,
     conversationId
   );
