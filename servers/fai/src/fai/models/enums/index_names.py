@@ -7,3 +7,4 @@ class DataIndexNames(Enum):
     FERN_DOCS = "fern_docs"
     DOCUMENT = "document"
     GUIDANCE = "guidance"
+    CODE = "code"
