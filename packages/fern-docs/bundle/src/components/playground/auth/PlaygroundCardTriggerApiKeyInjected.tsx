@@ -40,9 +40,15 @@ export function PlaygroundCardTriggerApiKeyInjected({
   const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
   const logoutApiRoute = useApiRoute("/api/fern-docs/auth/logout");
 
-  const apiKey = config.authenticated
+  let apiKey = config.authenticated
     ? (authState?.bearerAuth?.token ?? config.access_token)
     : null;
+
+  // if we have reset the api key and the access_token is present, use it as the api key
+  if (apiKey === "" && config.authenticated && config.access_token != null) {
+    apiKey = config.access_token;
+  }
+
   const setBearerAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
   const setBasicAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM);
 
