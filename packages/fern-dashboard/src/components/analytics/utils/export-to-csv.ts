@@ -19,14 +19,15 @@ export function exportToCSV(
   queries: FernAI.Query[],
   filename: string = "queries-export"
 ) {
-  const headers = ["Query", "Date", "Conversation ID"];
+  const headers = ["Conversation ID", "Date", "Role", "Query"];
 
   const rows = queries.map((query) => {
     const isoDate = new Date(query.created_at).toISOString();
     return [
-      escapeCSVField(query.text),
-      isoDate,
       escapeCSVField(query.conversation_id),
+      isoDate,
+      escapeCSVField(query.role),
+      escapeCSVField(query.text),
     ];
   });
 
