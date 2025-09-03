@@ -1,6 +1,7 @@
 export * from "./ChatMessage.js";
 export * from "./Conversation.js";
 export * from "./ConversationTurn.js";
+export * from "./ConversationTurnFeedback.js";
 export * from "./CreateDocumentResponse.js";
 export * from "./CreateFeedbackResponse.js";
 export * from "./CreateGuidanceResponse.js";
@@ -31,6 +32,7 @@ export * from "./PaginationResponse.js";
 export * from "./PostChatCompletionResponse.js";
 export * from "./Query.js";
 export * from "./ReconstructIndexResponse.js";
+export * from "./ReferenceSnippet.js";
 export * from "./SyncIndexResponse.js";
 export * from "./UpdateDocumentResponse.js";
 export * from "./UpdateGuidanceResponse.js";

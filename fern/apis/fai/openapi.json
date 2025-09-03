@@ -672,6 +672,63 @@
         }
       }
     },
+    "/github/{domain}/reference-md/index": {
+      "post": {
+        "tags": [
+          "Github"
+        ],
+        "summary": "Index Reference Md",
+        "description": "Index an SDK repository's reference.md file.",
+        "operationId": "index_reference_md",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitHubFileInfoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReferenceSnippet"
+                  },
+                  "title": "Response Index Reference Md Github  Domain  Reference Md Index Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/guidance/{domain}/create": {
       "post": {
         "tags": [
@@ -1481,6 +1538,16 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConversationTurnFeedback"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -1490,6 +1557,30 @@
           "created_at"
         ],
         "title": "ConversationTurn"
+      },
+      "ConversationTurnFeedback": {
+        "properties": {
+          "is_helpful": {
+            "type": "boolean",
+            "title": "Is Helpful"
+          },
+          "feedback_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_helpful"
+        ],
+        "title": "ConversationTurnFeedback"
       },
       "CreateDocumentRequest": {
         "properties": {
@@ -2136,6 +2227,23 @@
         ],
         "title": "GetQueriesResponse"
       },
+      "GitHubFileInfoRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Url",
+            "description": "The GitHub repository URL (e.g., https://github.com/owner/repo)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "GitHubFileInfoRequest"
+      },
       "GroupBy": {
         "type": "string",
         "enum": [
@@ -2214,13 +2322,23 @@
           "conversationCount": {
             "type": "integer",
             "title": "Conversationcount"
+          },
+          "conversationsPositiveCount": {
+            "type": "integer",
+            "title": "Conversationspositivecount"
+          },
+          "conversationsNegativeCount": {
+            "type": "integer",
+            "title": "Conversationsnegativecount"
           }
         },
         "type": "object",
         "required": [
           "label",
           "queryCount",
-          "conversationCount"
+          "conversationCount",
+          "conversationsPositiveCount",
+          "conversationsNegativeCount"
         ],
         "title": "HistogramAnalyticsBar"
       },
@@ -2492,6 +2610,71 @@
           "success"
         ],
         "title": "ReconstructIndexResponse"
+      },
+      "ReferenceSnippet": {
+        "properties": {
+          "method_header": {
+            "type": "string",
+            "title": "Method Header",
+            "description": "The header of the method or function, e.g., 'def foo(bar):'"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "The language of the code snippet"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "A description of what the method does"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage",
+            "description": "A code snippet showing how to use the method"
+          },
+          "parameters": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parameters",
+            "description": "A list of parameter names for the method"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method_header"
+        ],
+        "title": "ReferenceSnippet"
       },
       "SyncIndexRequest": {
         "properties": {
