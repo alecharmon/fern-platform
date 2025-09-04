@@ -30,7 +30,10 @@ class Variables:
 
 
 class Config:
-    INSIGHTS_NUM_CLUSTERS: int = 8
+    MIN_INSIGHTS_QUERIES: int = 100
+    MAX_INSIGHTS_QUERIES: int = 1000
+    MAX_INSIGHTS_EXAMPLES: int = 5
+    INSIGHTS_NUM_CLUSTERS: int = 5
     EMBEDDING_BATCH_SIZE: int = 100
     INSIGHTS_MAX_EXAMPLES: int = 25
     TURBOPUFFER_DEFAULT_REGION: str = "gcp-us-east4"

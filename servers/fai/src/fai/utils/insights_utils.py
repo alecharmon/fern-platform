@@ -14,7 +14,8 @@ from sklearn.cluster import KMeans
 from src.fai.models.api.analytics_api import GetInsightsResponse
 from src.fai.models.types.analytics_types import (
     Insight,
-    InsightWithCount,
+    InsightExample,
+    InsightWithMetadata,
 )
 from src.fai.models.types.query_types import Query
 from src.settings import (
@@ -25,21 +26,39 @@ from src.settings import (
 
 
 async def get_insights_from_queries(domain: str, queries: list[Query]) -> GetInsightsResponse:
-    df = pd.DataFrame([{"text": query.text} for query in queries])
+    df = pd.DataFrame([{"text": query.text, "conversation_id": query.conversation_id} for query in queries])
     df["embedding"] = await get_embeddings(df["text"].tolist())
     df["cluster"], kmeans = cluster_embeddings(df["embedding"].tolist())
 
     top_cluster_ids = select_top_clusters(df, kmeans)
     summaries = summarize_clusters_parallel(domain, df, top_cluster_ids)
 
-    insights = [
-        InsightWithCount(
-            insightText=summaries[cluster_id].insightText,
-            numberOfQueries=len(df[df["cluster"] == cluster_id]),
-            examples=summaries[cluster_id].examples,
+    insights = []
+    for cluster_id in top_cluster_ids:
+        cluster_df = df[df["cluster"] == cluster_id]
+        insight_summary = summaries[cluster_id]
+
+        examples = []
+        for example_text in insight_summary.examples:
+            for _, row in cluster_df.iterrows():
+                if row["text"] == example_text:
+                    examples.append(InsightExample(query=example_text, conversationId=row["conversation_id"]))
+                    break
+
+        if not examples and len(cluster_df) > 0:
+            for i in range(min(CONFIG.MAX_INSIGHTS_EXAMPLES, len(cluster_df))):
+                row = cluster_df.iloc[i]
+                examples.append(InsightExample(query=row["text"], conversationId=row["conversation_id"]))
+
+        insights.append(
+            InsightWithMetadata(
+                insightText=insight_summary.insightText,
+                numberOfQueries=len(cluster_df),
+                examples=examples,
+            )
         )
-        for cluster_id in top_cluster_ids
-    ]
+
+    insights.sort(key=lambda x: x.numberOfQueries, reverse=True)
     return GetInsightsResponse(insights=insights)
 
 
@@ -82,15 +101,17 @@ def summarize_cluster(cluster_id: int, domain: str, filtered_df: pd.DataFrame) -
         cluster_text = "\n".join(f"{i+1}. {x}" for i, x in enumerate(inputs))
 
         prompt = (
-            f"You are an API expert analyzing common queries users have about your documentation site, {domain}. "
-            f"Here are text examples from a semantic cluster. "
-            "Briefly summarize, in 1-2 sentences, a key insight into questions users have about your service, "
-            "documentation, or API. "
-            "This insight will be used to improve the documentation for the service, so keep it concise, "
-            "specific, and actionable. "
-            "Cite any examples from the cluster that are particularly relevant to the insight.\n\n"
+            f"You are an API and developer experience expert analyzing common queries users have "
+            f"about the documentation site {domain}. Here are text examples from a semantic cluster. "
+            "Your task is to extract a clear, actionable suggestion for how the developer documentation "
+            "could be improved to reduce confusion and better serve developers. "
+            "Focus on identifying gaps, unclear explanations, missing examples, or structural improvements. "
+            "Be concise (1 sentence) and specific about what change should be made to the documentation. "
+            "Cite any examples from the cluster that are particularly relevant to the suggestion.\n\n"
             f"{cluster_text}\n\n"
-            "Return your response as JSON with fields 'insight' (string) and 'examples' (list of strings)."
+            "Return your response as JSON with fields:\n"
+            "  'insightText' (string): a clear suggestion for improving the documentation\n"
+            "  'examples' (list of strings): representative queries that motivated this suggestion"
         )
 
         response = openai_client.responses.parse(

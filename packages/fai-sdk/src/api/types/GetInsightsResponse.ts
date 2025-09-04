@@ -6,5 +6,5 @@ import * as FernAI from "../index.js";
 
 export interface GetInsightsResponse {
     /** List of insights with query counts */
-    insights: FernAI.InsightWithCount[];
+    insights: FernAI.InsightWithMetadata[];
 }

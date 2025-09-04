@@ -24,7 +24,10 @@ from src.fai.utils.histogram_utils import (
     fill_date_gaps,
 )
 from src.fai.utils.insights_utils import get_insights_from_queries
-from src.settings import LOGGER
+from src.settings import (
+    CONFIG,
+    LOGGER,
+)
 
 
 @fai_app.get(
@@ -84,18 +87,37 @@ async def get_analytics_insights(
     try:
         query = select(QueryDb).where(QueryDb.domain == domain).where(QueryDb.role == "USER")
 
-        if start_date is not None:
-            start = start_date
-            query = query.where(QueryDb.created_at >= start)
-
-        if end_date is not None:
+        if end_date is None:
+            now = datetime.now()
+            days_since_sunday = (now.weekday() + 1) % 7
+            if days_since_sunday == 0:
+                days_since_sunday = 7
+            end = (now - timedelta(days=days_since_sunday)).replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
             end = end_date
-            query = query.where(QueryDb.created_at <= end)
+
+        if start_date is None:
+            start = end - timedelta(days=7)
+        else:
+            start = start_date
+
+        query = query.where(QueryDb.created_at >= start).where(QueryDb.created_at <= end)
 
         result = await db.execute(query)
         queries = result.scalars().all()
 
         api_queries: list[Query] = [query.to_api() for query in queries]
+        api_queries = [q for q in api_queries if len(q.text.split()) >= 5]
+
+        if len(api_queries) < CONFIG.MIN_INSIGHTS_QUERIES:
+            return JSONResponse(status_code=400, content={"detail": "Not enough queries to generate insights"})
+
+        if len(api_queries) > CONFIG.MAX_INSIGHTS_QUERIES:
+            api_queries.sort(key=lambda q: q.created_at)
+            step = len(api_queries) / CONFIG.MAX_INSIGHTS_QUERIES
+            sampled_indices = [int(i * step) for i in range(CONFIG.MAX_INSIGHTS_QUERIES)]
+            api_queries = [api_queries[i] for i in sampled_indices]
+
         insights = await get_insights_from_queries(domain, api_queries)
 
         return JSONResponse(jsonable_encoder(insights))

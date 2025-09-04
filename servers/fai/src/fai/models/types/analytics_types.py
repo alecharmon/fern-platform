@@ -9,10 +9,17 @@ class HistogramAnalyticsBar(BaseModel):
     conversationsNegativeCount: int
 
 
+class InsightExample(BaseModel):
+    query: str
+    conversationId: str
+
+
 class Insight(BaseModel):
     insightText: str
     examples: list[str]
 
 
-class InsightWithCount(Insight):
+class InsightWithMetadata(BaseModel):
+    insightText: str
     numberOfQueries: int
+    examples: list[InsightExample]

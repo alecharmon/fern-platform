@@ -2202,7 +2202,7 @@
         "properties": {
           "insights": {
             "items": {
-              "$ref": "#/components/schemas/InsightWithCount"
+              "$ref": "#/components/schemas/InsightWithMetadata"
             },
             "type": "array",
             "title": "Insights",
@@ -2414,31 +2414,49 @@
         ],
         "title": "HistogramAnalyticsBar"
       },
-      "InsightWithCount": {
+      "InsightExample": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "conversationId": {
+            "type": "string",
+            "title": "Conversationid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "conversationId"
+        ],
+        "title": "InsightExample"
+      },
+      "InsightWithMetadata": {
         "properties": {
           "insightText": {
             "type": "string",
             "title": "Insighttext"
           },
-          "examples": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Examples"
-          },
           "numberOfQueries": {
             "type": "integer",
             "title": "Numberofqueries"
+          },
+          "examples": {
+            "items": {
+              "$ref": "#/components/schemas/InsightExample"
+            },
+            "type": "array",
+            "title": "Examples"
           }
         },
         "type": "object",
         "required": [
           "insightText",
-          "examples",
-          "numberOfQueries"
+          "numberOfQueries",
+          "examples"
         ],
-        "title": "InsightWithCount"
+        "title": "InsightWithMetadata"
       },
       "JobStatusResponse": {
         "properties": {

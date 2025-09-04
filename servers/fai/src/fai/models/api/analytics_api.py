@@ -5,7 +5,7 @@ from pydantic import (
 
 from src.fai.models.types.analytics_types import (
     HistogramAnalyticsBar,
-    InsightWithCount,
+    InsightWithMetadata,
 )
 
 
@@ -14,4 +14,4 @@ class GetHistogramAnalyticsResponse(BaseModel):
 
 
 class GetInsightsResponse(BaseModel):
-    insights: list[InsightWithCount] = Field(description="List of insights with query counts")
+    insights: list[InsightWithMetadata] = Field(description="List of insights with query counts")

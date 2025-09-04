@@ -71,7 +71,7 @@ class TestAnalyticsHistogram:
 
         response = test_client.get(f"/analytics/histogram/{domain}", params={"group_by": "INVALID"})
 
-        assert response.status_code == 422  # Pydantic validation error
+        assert response.status_code == 422
         data = response.json()
         assert "detail" in data
 
@@ -90,48 +90,13 @@ class TestAnalyticsHistogram:
 
 
 class TestAnalyticsInsights:
-    def test_get_analytics_insights_success(self, test_client: TestClient) -> None:
+    def test_get_analytics_insights_insufficient_queries(self, test_client: TestClient) -> None:
+        """Test that the endpoint returns 400 when there are insufficient queries"""
         domain = create_test_domain()
 
-        mock_insights = {"total_queries": 100, "top_queries": ["query1", "query2"], "avg_response_time": 1.5}
+        response = test_client.get(f"/analytics/insights/{domain}")
 
-        with patch("src.fai.routes.analytics.get_insights_from_queries") as mock_insights_fn:
-            mock_insights_fn.return_value = mock_insights
-
-            response = test_client.get(f"/analytics/insights/{domain}")
-
-            assert response.status_code == 200
-            data = response.json()
-            assert data == mock_insights
-
-    def test_get_analytics_insights_with_date_range(self, test_client: TestClient) -> None:
-        domain = create_test_domain()
-        start_date = datetime.now() - timedelta(days=30)
-        end_date = datetime.now()
-
-        mock_insights = {"total_queries": 50}
-
-        with patch("src.fai.routes.analytics.get_insights_from_queries") as mock_insights_fn:
-            mock_insights_fn.return_value = mock_insights
-
-            response = test_client.get(
-                f"/analytics/insights/{domain}",
-                params={"start_date": start_date.isoformat(), "end_date": end_date.isoformat()},
-            )
-
-            assert response.status_code == 200
-            data = response.json()
-            assert data == mock_insights
-
-    def test_get_analytics_insights_failure(self, test_client: TestClient) -> None:
-        domain = create_test_domain()
-
-        with patch("src.fai.routes.analytics.get_insights_from_queries") as mock_insights_fn:
-            mock_insights_fn.side_effect = Exception("Insights error")
-
-            response = test_client.get(f"/analytics/insights/{domain}")
-
-            assert response.status_code == 500
-            data = response.json()
-            assert "detail" in data
-            assert data["detail"] == "Insights error"
+        assert response.status_code == 400
+        data = response.json()
+        assert "detail" in data
+        assert data["detail"] == "Not enough queries to generate insights"
