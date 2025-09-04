@@ -39,7 +39,11 @@ from src.fai.utils.turbopuffer.sync import (
 from src.settings import LOGGER
 
 
-@fai_app.post("/guidance/{domain}/create", response_model=CreateGuidanceResponse)
+@fai_app.post(
+    "/guidance/{domain}/create",
+    response_model=CreateGuidanceResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def create_guidance(
     domain: str,
     body: CreateGuidanceRequest = Body(...),
@@ -68,7 +72,11 @@ async def create_guidance(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.patch("/guidance/{domain}/{guidance_id}", response_model=UpdateGuidanceResponse)
+@fai_app.patch(
+    "/guidance/{domain}/{guidance_id}",
+    response_model=UpdateGuidanceResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def update(
     domain: str,
     guidance_id: str,
@@ -100,7 +108,11 @@ async def update(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.delete("/guidance/{domain}/{guidance_id}", response_model=DeleteGuidanceResponse)
+@fai_app.delete(
+    "/guidance/{domain}/{guidance_id}",
+    response_model=DeleteGuidanceResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def delete_guidance_by_id(
     domain: str,
     guidance_id: str,
@@ -125,7 +137,11 @@ async def delete_guidance_by_id(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/guidance/{domain}/{guidance_id}", response_model=GetGuidanceResponse)
+@fai_app.get(
+    "/guidance/{domain}/{guidance_id}",
+    response_model=GetGuidanceResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def get_guidance_by_id(
     domain: str,
     guidance_id: str,
@@ -145,7 +161,9 @@ async def get_guidance_by_id(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/guidance/{domain}", response_model=GetGuidancesResponse)
+@fai_app.get(
+    "/guidance/{domain}", response_model=GetGuidancesResponse, openapi_extra={"x-fern-audiences": ["customers"]}
+)
 async def get_guidances(
     domain: str,
     page: int | None = QueryParam(default=None, description="The page number for pagination"),

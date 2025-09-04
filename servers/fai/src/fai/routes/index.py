@@ -20,7 +20,11 @@ from src.fai.utils.turbopuffer.sync import sync_index_to_target
 from src.settings import LOGGER
 
 
-@fai_app.post("/index/{domain}/reconstruct", response_model=ReconstructIndexResponse)
+@fai_app.post(
+    "/index/{domain}/reconstruct",
+    response_model=ReconstructIndexResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
 async def reconstruct_query_index(
     domain: str,
 ) -> JSONResponse:
@@ -33,7 +37,9 @@ async def reconstruct_query_index(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.post("/index/{domain}/sync", response_model=SyncIndexResponse)
+@fai_app.post(
+    "/index/{domain}/sync", response_model=SyncIndexResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+)
 async def sync_index_to_query_index(
     domain: str,
     body: SyncIndexRequest,
@@ -52,7 +58,9 @@ async def sync_index_to_query_index(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/jobs/{job_id}/status", response_model=JobStatusResponse)
+@fai_app.get(
+    "/jobs/{job_id}/status", response_model=JobStatusResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+)
 async def get_job_status(job_id: str) -> JSONResponse:
     try:
         job = await job_manager.get_job_status(job_id)

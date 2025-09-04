@@ -26,7 +26,7 @@ from src.fai.models.types.query_types import Query
 from src.settings import LOGGER
 
 
-@fai_app.post("/queries", response_model=CreateQueryResponse)
+@fai_app.post("/queries", response_model=CreateQueryResponse, openapi_extra={"x-fern-audiences": ["internal"]})
 async def create_query(query: Query, db: AsyncSession = Depends(get_db)) -> JSONResponse:
     LOGGER.info("Creating new query")
     try:
@@ -50,7 +50,7 @@ async def create_query(query: Query, db: AsyncSession = Depends(get_db)) -> JSON
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/queries/{domain}", response_model=GetQueriesResponse)
+@fai_app.get("/queries/{domain}", response_model=GetQueriesResponse, openapi_extra={"x-fern-audiences": ["internal"]})
 async def get_recent_queries(
     domain: str,
     db: AsyncSession = Depends(get_db),

@@ -22,7 +22,11 @@ from src.fai.utils.turbopuffer.sync import sync_code_db_to_tpuf
 from src.settings import LOGGER
 
 
-@fai_app.post("/github/{domain}/reference-md/index", response_model=list[ReferenceSnippet])
+@fai_app.post(
+    "/github/{domain}/reference-md/index",
+    response_model=list[ReferenceSnippet],
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def index_reference_md(
     domain: str,
     body: GitHubFileInfoRequest = Body(...),

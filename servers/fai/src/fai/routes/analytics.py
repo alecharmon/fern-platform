@@ -27,7 +27,11 @@ from src.fai.utils.insights_utils import get_insights_from_queries
 from src.settings import LOGGER
 
 
-@fai_app.get("/analytics/histogram/{domain}", response_model=GetHistogramAnalyticsResponse)
+@fai_app.get(
+    "/analytics/histogram/{domain}",
+    response_model=GetHistogramAnalyticsResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
 async def get_analytics_histogram(
     domain: str,
     start_date: datetime | None = QueryParam(
@@ -64,7 +68,9 @@ async def get_analytics_histogram(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/analytics/insights/{domain}", response_model=GetInsightsResponse)
+@fai_app.get(
+    "/analytics/insights/{domain}", response_model=GetInsightsResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+)
 async def get_analytics_insights(
     domain: str,
     start_date: datetime | None = QueryParam(

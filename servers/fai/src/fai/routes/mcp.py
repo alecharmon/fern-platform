@@ -13,7 +13,11 @@ from src.fai.utils.search.semantic import semantic_search
 from src.settings import LOGGER
 
 
-@fai_app.post("/mcp/semantic/{domain}", response_model=GetMcpSemanticQueryResponse)
+@fai_app.post(
+    "/mcp/semantic/{domain}",
+    response_model=GetMcpSemanticQueryResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
 async def get_mcp_semantic_query(
     domain: str,
     body: GetMcpSemanticQueryRequest,
@@ -27,7 +31,9 @@ async def get_mcp_semantic_query(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.post("/mcp/bmf/{domain}", response_model=GetMcpBmfQueryResponse)
+@fai_app.post(
+    "/mcp/bmf/{domain}", response_model=GetMcpBmfQueryResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+)
 async def get_mcp_bmf_query(
     domain: str,
     body: GetMcpBmfQueryRequest,

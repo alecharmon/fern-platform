@@ -94,7 +94,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/analytics/insights/{domain}": {
@@ -174,7 +177,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/chat/{domain}": {
@@ -226,7 +232,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/conversation/{domain}/{conversation_id}": {
@@ -329,7 +338,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/document/{domain}/{document_id}": {
@@ -390,7 +402,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       },
       "delete": {
         "tags": [
@@ -439,7 +454,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       },
       "get": {
         "tags": [
@@ -488,7 +506,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/document/{domain}": {
@@ -566,7 +587,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/feedback/{domain}": {
@@ -618,7 +642,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/feedback/{domain}/{conversation_id}": {
@@ -669,7 +696,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/github/{domain}/reference-md/index": {
@@ -726,7 +756,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/guidance/{domain}/create": {
@@ -778,7 +811,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/guidance/{domain}/{guidance_id}": {
@@ -839,7 +875,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       },
       "delete": {
         "tags": [
@@ -888,7 +927,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       },
       "get": {
         "tags": [
@@ -937,7 +979,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/guidance/{domain}": {
@@ -1015,7 +1060,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
       }
     },
     "/health": {
@@ -1035,7 +1083,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/index/{domain}/reconstruct": {
@@ -1077,7 +1128,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/index/{domain}/sync": {
@@ -1129,7 +1183,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/jobs/{job_id}/status": {
@@ -1171,7 +1228,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/mcp/semantic/{domain}": {
@@ -1223,7 +1283,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/mcp/bmf/{domain}": {
@@ -1275,7 +1338,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/queries": {
@@ -1316,7 +1382,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     },
     "/queries/{domain}": {
@@ -1469,7 +1538,10 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
       }
     }
   },

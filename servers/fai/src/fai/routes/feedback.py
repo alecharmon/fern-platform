@@ -24,7 +24,9 @@ from src.fai.models.db.feedback_db import FeedbackDb
 from src.settings import LOGGER
 
 
-@fai_app.post("/feedback/{domain}", response_model=CreateFeedbackResponse)
+@fai_app.post(
+    "/feedback/{domain}", response_model=CreateFeedbackResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+)
 async def create_feedback(
     domain: str,
     request: CreateFeedbackRequest,
@@ -50,7 +52,11 @@ async def create_feedback(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/feedback/{domain}/{conversation_id}", response_model=GetFeedbackResponse)
+@fai_app.get(
+    "/feedback/{domain}/{conversation_id}",
+    response_model=GetFeedbackResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
 async def get_feedback_by_id(
     domain: str,
     conversation_id: str,

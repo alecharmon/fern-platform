@@ -39,7 +39,11 @@ from src.fai.utils.turbopuffer.sync import (
 from src.settings import LOGGER
 
 
-@fai_app.post("/document/{domain}/create", response_model=CreateDocumentResponse)
+@fai_app.post(
+    "/document/{domain}/create",
+    response_model=CreateDocumentResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def create_document(
     domain: str,
     body: CreateDocumentRequest = Body(...),
@@ -73,7 +77,11 @@ async def create_document(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.patch("/document/{domain}/{document_id}", response_model=UpdateDocumentResponse)
+@fai_app.patch(
+    "/document/{domain}/{document_id}",
+    response_model=UpdateDocumentResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def update_document(
     domain: str,
     document_id: str,
@@ -115,7 +123,11 @@ async def update_document(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.delete("/document/{domain}/{document_id}", response_model=DeleteDocumentResponse)
+@fai_app.delete(
+    "/document/{domain}/{document_id}",
+    response_model=DeleteDocumentResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def delete_document_by_id(
     domain: str,
     document_id: str,
@@ -140,7 +152,11 @@ async def delete_document_by_id(
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
-@fai_app.get("/document/{domain}/{document_id}", response_model=GetDocumentResponse)
+@fai_app.get(
+    "/document/{domain}/{document_id}",
+    response_model=GetDocumentResponse,
+    openapi_extra={"x-fern-audiences": ["customers"]},
+)
 async def get_document_by_id(
     domain: str,
     document_id: str,
@@ -159,7 +175,9 @@ async def get_document_by_id(
         return JSONResponse(status_code=500, content={"message": str(e)})
 
 
-@fai_app.get("/document/{domain}", response_model=GetDocumentsResponse)
+@fai_app.get(
+    "/document/{domain}", response_model=GetDocumentsResponse, openapi_extra={"x-fern-audiences": ["customers"]}
+)
 async def get_documents(
     domain: str,
     page: int | None = QueryParam(default=None, description="The page number for pagination"),
