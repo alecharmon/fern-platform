@@ -14,6 +14,7 @@ import {
   streamText,
   tool,
 } from "ai";
+import { FallbackModel } from "ai-fallback";
 import z from "zod";
 
 import { postToSlack, track } from "@fern-api/docs-server";
@@ -139,6 +140,8 @@ export async function runRouteForAnthropic({
         data: assistantQueryId,
       });
 
+      let numToolCalls = 0;
+
       const result = streamText({
         model: languageModel,
         system: systemPrompt,
@@ -153,6 +156,7 @@ export async function runRouteForAnthropic({
               query: z.string(),
             }),
             async execute({ query }) {
+              numToolCalls++;
               const response = [];
               for (let i = 0; i < MAX_QUERY_ATTEMPTS; i++) {
                 const result = await runQueryTurbopuffer(query, {
@@ -248,14 +252,17 @@ export async function runRouteForAnthropic({
           } catch (error) {
             console.log("Error creating assistant query", error);
           }
+          const { activeLanguageModel, activeModelProvider } =
+            getModelUsageInfo(languageModel);
           track("ask_ai", {
-            languageModel: languageModel.valueOf().toString(),
+            languageModel: activeLanguageModel,
+            provider: activeModelProvider,
             embeddingModel: embeddingModel.modelId,
             durationMs: end - start,
             timeToFirstToken,
             domain,
             namespace: turbopufferNamespace,
-            numToolCalls: e.toolCalls.length,
+            numToolCalls,
             finishReason: e.finishReason,
             ...e.usage,
           });
@@ -275,4 +282,28 @@ export async function runRouteForAnthropic({
   });
 
   return createUIMessageStreamResponse({ stream: uiMessageStream });
+}
+
+function getModelUsageInfo(languageModel: LanguageModel): {
+  activeLanguageModel?: string;
+  activeModelProvider?: string;
+} {
+  if (typeof languageModel === "string") {
+    return {
+      activeLanguageModel: languageModel,
+    };
+  } else if (languageModel instanceof FallbackModel) {
+    return {
+      activeLanguageModel:
+        languageModel.settings.models[languageModel.currentModelIndex]?.modelId,
+      activeModelProvider:
+        languageModel.settings.models[languageModel.currentModelIndex]
+          ?.provider ?? "anthropic",
+    };
+  } else {
+    return {
+      activeLanguageModel: languageModel.modelId,
+      activeModelProvider: languageModel.provider,
+    };
+  }
 }

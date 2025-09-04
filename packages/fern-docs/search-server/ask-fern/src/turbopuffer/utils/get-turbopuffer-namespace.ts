@@ -14,3 +14,7 @@ export function getFernDocsIndexName(): string {
 export function getQueryIndexName(): string {
   return `query`;
 }
+
+export function getCodeIndexName(): string {
+  return `code`;
+}
