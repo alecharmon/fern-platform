@@ -737,11 +737,53 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReferenceSnippet"
-                  },
-                  "title": "Response Index Reference Md Github  Domain  Reference Md Index Post"
+                  "$ref": "#/components/schemas/IndexResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
+      }
+    },
+    "/github/{domain}/indexed": {
+      "get": {
+        "tags": [
+          "Github"
+        ],
+        "summary": "Check Code Index Status",
+        "description": "Check if the domain has a non-empty code index in both database and turbopuffer.",
+        "operationId": "check_code_index_status",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeIndexStatusResponse"
                 }
               }
             }
@@ -1568,6 +1610,20 @@
           "content"
         ],
         "title": "ChatMessage"
+      },
+      "CodeIndexStatusResponse": {
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "title": "Exists",
+            "description": "Whether the domain has a non-empty code index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "exists"
+        ],
+        "title": "CodeIndexStatusResponse"
       },
       "Conversation": {
         "properties": {
@@ -2414,6 +2470,20 @@
         ],
         "title": "HistogramAnalyticsBar"
       },
+      "IndexResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Whether the index operation was successful"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "title": "IndexResponse"
+      },
       "InsightExample": {
         "properties": {
           "query": {
@@ -2700,71 +2770,6 @@
           "success"
         ],
         "title": "ReconstructIndexResponse"
-      },
-      "ReferenceSnippet": {
-        "properties": {
-          "method_header": {
-            "type": "string",
-            "title": "Method Header",
-            "description": "The header of the method or function, e.g., 'def foo(bar):'"
-          },
-          "language": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Language",
-            "description": "The language of the code snippet"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "A description of what the method does"
-          },
-          "usage": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage",
-            "description": "A code snippet showing how to use the method"
-          },
-          "parameters": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Parameters",
-            "description": "A list of parameter names for the method"
-          }
-        },
-        "type": "object",
-        "required": [
-          "method_header"
-        ],
-        "title": "ReferenceSnippet"
       },
       "SyncIndexRequest": {
         "properties": {

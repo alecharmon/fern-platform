@@ -11,6 +11,7 @@ export function createChatSystemPrompt({
   documents,
   promptTemplate,
   documentsProvidedByUser = false,
+  availableTools,
 }: {
   modelProvider: string;
   domain: string;
@@ -18,6 +19,7 @@ export function createChatSystemPrompt({
   documents: string;
   promptTemplate?: string;
   documentsProvidedByUser?: boolean;
+  availableTools: string[];
 }) {
   return modelProvider === "cohere"
     ? createCohereSystemPrompt({
@@ -32,11 +34,13 @@ export function createChatSystemPrompt({
           date,
           documents,
           promptTemplate,
+          availableTools,
         })
       : createDefaultSystemPrompt({
           domain,
           date,
           documents,
           promptTemplate,
+          availableTools,
         });
 }

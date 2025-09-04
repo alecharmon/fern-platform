@@ -71,6 +71,7 @@ export async function runRouteForCohere({
     date: new Date().toDateString(),
     documents: "",
     promptTemplate,
+    availableTools: [],
   });
 
   const documents = convertTpufRecordToCitation(searchResults);

@@ -25,3 +25,11 @@ class ReferenceSnippet(BaseModel):
     description: str | None = Field(default=None, description="A description of what the method does")
     usage: str | None = Field(default=None, description="A code snippet showing how to use the method")
     parameters: list[str] | None = Field(default=None, description="A list of parameter names for the method")
+
+
+class CodeIndexStatusResponse(BaseModel):
+    exists: bool = Field(description="Whether the domain has a non-empty code index")
+
+
+class IndexResponse(BaseModel):
+    success: bool = Field(description="Whether the index operation was successful")

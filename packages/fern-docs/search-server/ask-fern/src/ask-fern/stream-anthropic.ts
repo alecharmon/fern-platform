@@ -29,9 +29,11 @@ import {
   TurbopufferRecord,
   convertTpufRecordsToDocuments,
   createChatSystemPrompt,
+  getTurbopufferNamespace,
 } from "../index";
+import { getCodeIndexName } from "../turbopuffer/utils/get-turbopuffer-namespace";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";
-import { MAX_QUERY_ATTEMPTS, TOP_K } from "./stream-constants";
+import { MAX_QUERY_ATTEMPTS, TOP_K, TOP_K_CODE } from "./stream-constants";
 
 export async function runRouteForAnthropic({
   domain,
@@ -60,6 +62,13 @@ export async function runRouteForAnthropic({
   languageModel: LanguageModel;
   documentUrls?: string[];
 }) {
+  const faiClient = new FernAIClient({
+    baseUrl: getFaiOrigin(),
+    headers: {
+      Authorization: `Bearer ${fernToken_admin()}`,
+    },
+  });
+
   /*
     Anthropic's API has a bug (see: https://github.com/anthropics/claude-code/issues/473)
     Where tool calls are not formatted properly, breaking messages that contain tool calls.
@@ -67,6 +76,7 @@ export async function runRouteForAnthropic({
 
     Will file an issue with Vercel to fix this, but for now this is not blocking.
   */
+
   const cleanedMessages: UIMessage[] = [];
   for (const message of messages) {
     if (message.role === "assistant") {
@@ -111,12 +121,18 @@ export async function runRouteForAnthropic({
   });
 
   const systemPromptDocuments = convertTpufRecordsToDocuments(searchResults);
+
+  const codeIndexedResult = await faiClient.github.checkCodeIndexStatus(domain);
+
   const systemPrompt = createChatSystemPrompt({
     modelProvider: "anthropic",
     domain,
     date: new Date().toDateString(),
     documents: systemPromptDocuments.join("\n\n"),
     promptTemplate,
+    availableTools: codeIndexedResult.exists
+      ? ["documentationSearch", "codeSearch"]
+      : ["documentationSearch"],
   });
 
   const documentIdsToIgnore: string[] = [];
@@ -148,10 +164,23 @@ export async function runRouteForAnthropic({
         messages: modelMessages,
         maxRetries: 3,
         stopWhen: stepCountIs(10),
+        prepareStep: async () => {
+          const codeIndexed =
+            await faiClient.github.checkCodeIndexStatus(domain);
+          if (codeIndexed.exists) {
+            return {
+              activeTools: ["documentationSearch", "codeSearch"],
+            };
+          } else {
+            return {
+              activeTools: ["documentationSearch"],
+            };
+          }
+        },
         tools: {
-          search: tool({
+          documentationSearch: tool({
             description:
-              "Search the knowledge base for the user's query. Semantic search is enabled.",
+              "Search the knowledge base for the user's query with semantic search and bm25",
             inputSchema: z.object({
               query: z.string(),
             }),
@@ -198,6 +227,32 @@ export async function runRouteForAnthropic({
               return response;
             },
           }),
+          codeSearch: tool({
+            description:
+              "Search code snippets for the user's query with semantic search and bm25",
+            inputSchema: z.object({
+              query: z.string(),
+            }),
+            async execute({ query }) {
+              numToolCalls++;
+              const result = await runQueryTurbopuffer(query, {
+                embeddingModel,
+                namespace: getTurbopufferNamespace(domain, getCodeIndexName()),
+                topK: TOP_K_CODE,
+                documentIdsToIgnore: documentIdsToIgnore,
+                filters,
+                explodedRoles,
+              });
+
+              return result.map((hit) => ({
+                ...hit.attributes,
+                document:
+                  hit.attributes.document.length > 20000
+                    ? hit.attributes.document.slice(0, 20000)
+                    : hit.attributes.document,
+              }));
+            },
+          }),
         },
         onChunk: (chunk) => {
           if (chunk.chunk.type === "text" && chunk.chunk.text.length > 0) {
@@ -232,12 +287,6 @@ export async function runRouteForAnthropic({
         },
         onFinish: async (e) => {
           const end = Date.now();
-          const faiClient = new FernAIClient({
-            baseUrl: getFaiOrigin(),
-            headers: {
-              Authorization: `Bearer ${fernToken_admin()}`,
-            },
-          });
           try {
             await faiClient.query.createQuery({
               query_id: assistantQueryId,
