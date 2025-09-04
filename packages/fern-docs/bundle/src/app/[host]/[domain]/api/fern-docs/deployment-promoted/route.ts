@@ -66,7 +66,11 @@ export async function POST(request: NextRequest) {
       .map(withoutStaging)
   );
 
-  const settledMetadata = await Promise.allSettled(domains.map(getMetadata));
+  const settledMetadata = await Promise.allSettled(
+    domains.map(
+      getMetadata({ kvTtl: 0, forceRevalidate: false, cacheKeySuffix: "" })
+    )
+  );
 
   const rejectedMetadata = settledMetadata.filter(
     (result) => result.status === "rejected"
