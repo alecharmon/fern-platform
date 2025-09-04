@@ -16,12 +16,21 @@ from src.fai.models.api.analytics_api import (
     GetHistogramAnalyticsResponse,
     GetInsightsResponse,
 )
+from src.fai.models.db.insight_db import InsightDb
 from src.fai.models.db.query_db import QueryDb
 from src.fai.models.enums.analytics_enums import GroupBy
 from src.fai.models.types.query_types import Query
+from src.fai.scheduler import (
+    generate_weekly_insights_job,
+    get_scheduler,
+)
 from src.fai.utils.histogram_utils import (
     fetch_grouped_data,
     fill_date_gaps,
+)
+from src.fai.utils.insights_job import (
+    generate_insight_id,
+    generate_insights_for_all_domains,
 )
 from src.fai.utils.insights_utils import get_insights_from_queries
 from src.settings import (
@@ -85,8 +94,6 @@ async def get_analytics_insights(
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        query = select(QueryDb).where(QueryDb.domain == domain).where(QueryDb.role == "USER")
-
         if end_date is None:
             now = datetime.now()
             days_since_sunday = (now.weekday() + 1) % 7
@@ -101,6 +108,17 @@ async def get_analytics_insights(
         else:
             start = start_date
 
+        insight_id = generate_insight_id(domain, start)
+
+        cached_insight_query = select(InsightDb).where(InsightDb.insight_id == insight_id)
+        cached_result = await db.execute(cached_insight_query)
+        cached_insight = cached_result.scalar_one_or_none()
+
+        if cached_insight:
+            LOGGER.info(f"Found cached insights for domain: {domain}, period: {start} to {end}")
+            return JSONResponse(jsonable_encoder(cached_insight.to_api()))
+
+        query = select(QueryDb).where(QueryDb.domain == domain).where(QueryDb.role == "USER")
         query = query.where(QueryDb.created_at >= start).where(QueryDb.created_at <= end)
 
         result = await db.execute(query)
@@ -120,8 +138,95 @@ async def get_analytics_insights(
 
         insights = await get_insights_from_queries(domain, api_queries)
 
+        new_insight = InsightDb(
+            insight_id=insight_id,
+            domain=domain,
+            started_at=start,
+            ended_at=end,
+            insights_data=jsonable_encoder(insights),
+            created_at=datetime.utcnow(),
+        )
+        db.add(new_insight)
+        await db.commit()
+
+        LOGGER.info(f"Generated and cached new insights for domain: {domain}, period: {start} to {end}")
         return JSONResponse(jsonable_encoder(insights))
 
     except Exception as e:
         LOGGER.exception("Failed to get insights analytics")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.post(
+    "/analytics/insights/generate_all",
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def generate_all_insights(
+    start_date: datetime | None = QueryParam(
+        default=None, description="The start date of the period to generate insights for"
+    ),
+    end_date: datetime | None = QueryParam(
+        default=None, description="The end date of the period to generate insights for"
+    ),
+    db: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    """Generate insights for all domains with queries in the specified period."""
+    try:
+        results = await generate_insights_for_all_domains(db, start_date, end_date)
+        return JSONResponse(jsonable_encoder(results))
+    except Exception as e:
+        LOGGER.exception("Failed to generate insights for all domains")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.post(
+    "/analytics/insights/trigger_scheduled",
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def trigger_scheduled_insights_generation() -> JSONResponse:
+    """Manually trigger the scheduled weekly insights generation job."""
+    try:
+        scheduler = get_scheduler()
+
+        if not scheduler.running:
+            return JSONResponse(status_code=503, content={"detail": "Scheduler is not running"})
+
+        import asyncio
+
+        asyncio.create_task(generate_weekly_insights_job())
+
+        return JSONResponse(
+            content={"status": "triggered", "message": "Weekly insights generation job has been triggered"}
+        )
+    except Exception as e:
+        LOGGER.exception("Failed to trigger scheduled insights generation")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.get(
+    "/analytics/scheduler/status",
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def get_scheduler_status() -> JSONResponse:
+    """Get the status of the scheduler and its jobs."""
+    try:
+        from src.fai.scheduler import get_scheduler
+
+        scheduler = get_scheduler()
+
+        jobs_info = []
+        if scheduler.running:
+            for job in scheduler.get_jobs():
+                jobs_info.append(
+                    {
+                        "id": job.id,
+                        "name": job.name,
+                        "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
+                        "trigger": str(job.trigger),
+                    }
+                )
+
+        return JSONResponse(content={"scheduler_running": scheduler.running, "jobs": jobs_info})
+    except Exception as e:
+        LOGGER.exception("Failed to get scheduler status")
         return JSONResponse(status_code=500, content={"detail": str(e)})

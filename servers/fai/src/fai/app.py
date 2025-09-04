@@ -5,6 +5,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
+from src.fai.scheduler import (
+    start_scheduler,
+    stop_scheduler,
+)
 from src.settings import (
     LOGGER,
     VARIABLES,
@@ -23,8 +27,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             raise e
     else:
         LOGGER.info("Setup: Production mode. Database not initialized.")
+
+    try:
+        start_scheduler()
+        LOGGER.info("Setup: Scheduler started.")
+    except Exception as e:
+        LOGGER.error(f"Setup: Error starting scheduler: {e}")
+
     yield
-    LOGGER.info("Setup: Database not initialized.")
+
+    try:
+        stop_scheduler()
+        LOGGER.info("Shutdown: Scheduler stopped.")
+    except Exception as e:
+        LOGGER.error(f"Shutdown: Error stopping scheduler: {e}")
 
 
 class FAIApp(FastAPI):

@@ -16,11 +16,7 @@ T = TypeVar("T")
 
 
 class ArrayColumn(TypeDecorator):
-    """Custom array column type that works with both PostgreSQL and SQLite.
-
-    - PostgreSQL: Uses native ARRAY type
-    - SQLite: Stores as JSON string and deserializes to list
-    """
+    """Custom array column type that works with both PostgreSQL and SQLite."""
 
     impl = TEXT
     cache_ok = True
@@ -33,7 +29,6 @@ class ArrayColumn(TypeDecorator):
         if dialect.name == "postgresql":
             return dialect.type_descriptor(ARRAY(self.item_type))
         else:
-            # For SQLite and other databases, use TEXT
             return dialect.type_descriptor(TEXT())
 
     def process_bind_param(self, value: list[Any] | None, dialect: Dialect) -> list[Any] | str | None:
@@ -41,10 +36,8 @@ class ArrayColumn(TypeDecorator):
             return value
 
         if dialect.name == "postgresql":
-            # PostgreSQL handles arrays natively
             return value
         else:
-            # For SQLite, serialize to JSON
             return json.dumps(value)
 
     def process_result_value(self, value: list[Any] | str | None, dialect: Dialect) -> list[Any] | None:
@@ -52,10 +45,8 @@ class ArrayColumn(TypeDecorator):
             return value
 
         if dialect.name == "postgresql":
-            # PostgreSQL returns arrays natively
             return value if isinstance(value, list) else []
         else:
-            # For SQLite, deserialize from JSON
             if isinstance(value, str):
                 try:
                     return json.loads(value)

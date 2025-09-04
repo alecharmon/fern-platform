@@ -51,7 +51,13 @@ def test_engine(test_database_url: str) -> AsyncEngine:
 
 @pytest_asyncio.fixture
 async def test_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
-    # Import all database models to ensure they're registered with Base
+    from src.fai.models.db.code_db import CodeDb  # noqa: F401
+    from src.fai.models.db.document_db import DocumentDb  # noqa: F401
+    from src.fai.models.db.feedback_db import FeedbackDb  # noqa: F401
+    from src.fai.models.db.guidance_db import GuidanceDb  # noqa: F401
+    from src.fai.models.db.insight_db import InsightDb  # noqa: F401
+    from src.fai.models.db.job_db import JobDb  # noqa: F401
+    from src.fai.models.db.query_db import QueryDb  # noqa: F401
 
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

@@ -1,9 +1,12 @@
 import asyncio
 
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
+from src.fai.dependencies import get_db
 from src.fai.models.api.index_api import (
     JobStatusResponse,
     ReconstructIndexResponse,
@@ -43,12 +46,13 @@ async def reconstruct_query_index(
 async def sync_index_to_query_index(
     domain: str,
     body: SyncIndexRequest,
+    db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     try:
-        job_id = await job_manager.create_job()
+        job_id = await job_manager.create_job(db)
 
         asyncio.create_task(
-            job_manager.execute_job(job_id, sync_index_to_target, domain, body.index_name, get_query_index_name())
+            job_manager.execute_job(db, job_id, sync_index_to_target, domain, body.index_name, get_query_index_name())
         )
 
         return JSONResponse(jsonable_encoder(SyncIndexResponse(job_id=job_id)))
@@ -61,9 +65,9 @@ async def sync_index_to_query_index(
 @fai_app.get(
     "/jobs/{job_id}/status", response_model=JobStatusResponse, openapi_extra={"x-fern-audiences": ["internal"]}
 )
-async def get_job_status(job_id: str) -> JSONResponse:
+async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)) -> JSONResponse:
     try:
-        job = await job_manager.get_job_status(job_id)
+        job = await job_manager.get_job_status(db, job_id)
         if not job:
             return JSONResponse(status_code=404, content={"detail": "Job not found"})
 

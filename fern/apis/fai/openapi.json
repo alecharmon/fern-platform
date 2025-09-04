@@ -183,6 +183,125 @@
         ]
       }
     },
+    "/analytics/insights/generate_all": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Generate All Insights",
+        "description": "Generate insights for all domains with queries in the specified period.",
+        "operationId": "generate_all_insights",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The start date of the period to generate insights for",
+              "title": "Start Date"
+            },
+            "description": "The start date of the period to generate insights for"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The end date of the period to generate insights for",
+              "title": "End Date"
+            },
+            "description": "The end date of the period to generate insights for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/analytics/insights/trigger_scheduled": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Trigger Scheduled Insights Generation",
+        "description": "Manually trigger the scheduled weekly insights generation job.",
+        "operationId": "trigger_scheduled_insights_generation",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/analytics/scheduler/status": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Scheduler Status",
+        "description": "Get the status of the scheduler and its jobs.",
+        "operationId": "get_scheduler_status",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
     "/chat/{domain}": {
       "post": {
         "tags": [

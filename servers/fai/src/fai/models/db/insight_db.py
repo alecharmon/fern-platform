@@ -1,0 +1,26 @@
+from datetime import datetime
+
+from sqlalchemy import (
+    JSON,
+    Column,
+    DateTime,
+    String,
+)
+
+from src.fai.db import Base
+from src.fai.models.api.analytics_api import GetInsightsResponse
+
+
+class InsightDb(Base):
+    __tablename__ = "insights"
+    __table_args__ = {"extend_existing": True}
+
+    insight_id = Column(String, primary_key=True)
+    domain = Column(String, nullable=False, index=True)
+    started_at = Column(DateTime(timezone=True), nullable=False, index=True)
+    ended_at = Column(DateTime(timezone=True), nullable=False)
+    insights_data = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+
+    def to_api(self) -> GetInsightsResponse:
+        return GetInsightsResponse(**self.insights_data)
