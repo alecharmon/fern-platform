@@ -113,7 +113,7 @@ export default async function VisualEditorPreviewLayout({
               sidebarRootNodesToChildToParentsMap
             }
           >
-            <div className="border-1 flex flex-1 flex-col overflow-hidden rounded-2xl border-gray-500 shadow-lg">
+            <div className="border-1 flex flex-1 flex-col overflow-hidden rounded-2xl rounded-b-none border-gray-500 shadow-lg">
               {/* BOUNDARY NOTE: All items within the #preview-container will be themed with domain-specific styles. */}
               <EditorRoutingProvider
                 value={{

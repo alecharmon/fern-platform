@@ -319,16 +319,133 @@
   }
 }
 
-.noise {
-  opacity: 1;
-  background-image: url(https://cdn.prod.website-files.com/67880ff570cdb1a85eee946f/6789751936e0c7bd371e8cf2_noise-full.webp);
-  background-size: 2.5rem;
+/* Animated background noise overlay */
+.noise::after {
+  content: "";
+  position: absolute;
+  height: 600vh;
+  width: 600vw;
+  top: calc(50% - 600vh / 2);
+  left: calc(50% - 600vw / 2);
+  pointer-events: none;
+  background-image: url("/noise.webp");
   background-repeat: repeat;
+  opacity: 0.6;
+  filter: invert(1) grayscale(1);
 }
 
-/* Intensify background texture in dark mode without affecting child content */
-.dark .noise {
-  opacity: 0.1;
+.noise.animate::after {
+  animation: grain 8s steps(10) infinite;
+  will-change: transform;
+}
+
+/* Dark mode tuning without affecting child content */
+.dark .noise::after {
+  opacity: 0.3;
+  filter: invert(0);
+}
+
+@keyframes grain {
+  0% {
+    transform: translate(0, 0);
+  }
+  8% {
+    transform: translate(3.2%, -5.1%);
+  }
+  17% {
+    transform: translate(-2.8%, 7.3%);
+  }
+  25% {
+    transform: translate(6.1%, 1.9%);
+  }
+  33% {
+    transform: translate(-4.7%, -8.2%);
+  }
+  42% {
+    transform: translate(1.3%, 9.6%);
+  }
+  50% {
+    transform: translate(-7.4%, -2.1%);
+  }
+  58% {
+    transform: translate(5.8%, -6.7%);
+  }
+  67% {
+    transform: translate(-1.9%, 4.5%);
+  }
+  75% {
+    transform: translate(4.3%, 8.1%);
+  }
+  83% {
+    transform: translate(-6.2%, -3.8%);
+  }
+  92% {
+    transform: translate(2.7%, -7.9%);
+  }
+  100% {
+    transform: translate(10%, -10%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noise::after {
+    animation: none;
+  }
+}
+
+/* Login page animations */
+.animate-float-sdks {
+  animation: float-sdks 4s ease-in-out infinite;
+  animation-delay: 2s;
+  transition: transform 0.3s ease-in-out;
+}
+
+.animate-float-docs {
+  animation: float-docs 6s ease-in-out infinite;
+  animation-delay: 2s;
+  transition: transform 0.3s ease-in-out;
+}
+
+.animate-float-container:hover .animate-float-sdks,
+.animate-float-container:hover .animate-float-docs {
+  animation-play-state: paused;
+}
+
+.animate-float-container:hover .animate-float-sdks {
+  transform: translateX(-1rem) translateY(-3rem) rotateX(26deg) rotateY(14deg)
+    rotateZ(3deg);
+}
+
+.animate-float-container:hover .animate-float-docs {
+  transform: translateX(1rem) translateY(-2rem) rotateX(26deg) rotateY(14deg)
+    rotateZ(3deg);
+}
+
+@keyframes float-sdks {
+  0%,
+  100% {
+    translate: 15rem 2.5rem;
+  }
+  50% {
+    translate: 15rem 3rem;
+  }
+}
+
+@keyframes float-docs {
+  0%,
+  100% {
+    translate: 0px 10rem;
+  }
+  50% {
+    translate: 0 11rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-sdks,
+  .animate-float-docs {
+    animation: none;
+  }
 }
 
 .dashboard-link {

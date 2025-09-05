@@ -20,7 +20,7 @@ export default async function Page(props: {
 
   return (
     <FeatureFlaggedServerSide
-      flag={PosthogFeatureFlag.ENABLE_DOCS_ANALYTICS_TAB}
+      flag={PosthogFeatureFlag.ENABLE_DOCS_ASK_FERN_TAB}
       redirectWhenDisabled
       orgName={params.orgName}
     >

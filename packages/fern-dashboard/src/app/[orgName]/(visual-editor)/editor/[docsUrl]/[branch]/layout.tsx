@@ -26,11 +26,7 @@ import type { EncodedDocsUrl } from "@/utils/types";
 export const experimental_ppr = true;
 
 function EditorShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="bg-background noise flex w-full flex-col overflow-hidden">
-      {children}
-    </div>
-  );
+  return <div className="flex w-full flex-col overflow-hidden">{children}</div>;
 }
 
 export default async function EditorLayout({

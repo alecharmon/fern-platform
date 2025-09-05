@@ -77,7 +77,7 @@ export async function Header({ session }: Header.Props) {
                 />
                 <ThemeToggle />
               </div>
-              <LogoutButton />
+              <LogoutButton variant="default" />
             </div>
           </PopoverContent>
         </Popover>

@@ -15,16 +15,10 @@ export async function DocsSiteNavBar({ orgName }: DocsSiteNavBar.Props) {
     <div className="flex">
       <DocsSiteNavBarItem title="Overview" href="" />
       <FeatureFlaggedServerSide
-        flag={PosthogFeatureFlag.ENABLE_DOCS_ANALYTICS_TAB}
+        flag={PosthogFeatureFlag.ENABLE_DOCS_ASK_FERN_TAB}
         orgName={orgName}
       >
-        <DocsSiteNavBarItem title="Analytics" href="analytics" />
-      </FeatureFlaggedServerSide>
-      <FeatureFlaggedServerSide
-        flag={PosthogFeatureFlag.ENABLE_DOCS_AI_SEARCH_TAB}
-        orgName={orgName}
-      >
-        <DocsSiteNavBarItem title="AI Search" href="ai-search" />
+        <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
       </FeatureFlaggedServerSide>
       <DocsSiteNavBarItem title="Settings" href="settings" />
     </div>

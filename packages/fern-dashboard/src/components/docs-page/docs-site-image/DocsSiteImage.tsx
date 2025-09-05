@@ -50,7 +50,7 @@ export function DocsSiteImage({ docsSite }: DocsSiteImage.Props) {
   }
 
   return (
-    <DocsSiteImageLayout>
+    <DocsSiteImageLayout docsUrl={docsSite.urls[0]}>
       <>
         {/*eslint-disable-next-line @next/next/no-img-element */}
         <img

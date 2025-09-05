@@ -15,7 +15,7 @@ import { WebflowLogo } from "./logos/WebflowLogo";
 export const LoginPage = () => {
   return (
     <div className="relative flex flex-1">
-      <div className="md:border-border bg-background relative flex flex-1 items-center justify-center px-4 md:mt-2 md:w-[40%] md:min-w-[350px] md:flex-initial md:rounded-t-2xl md:border-x md:border-t md:shadow-md">
+      <div className="md:border-border bg-background relative flex flex-1 items-center justify-center px-4 md:ml-2 md:mt-2 md:w-[40%] md:min-w-[350px] md:flex-initial md:rounded-t-2xl md:border-x md:border-t md:shadow-md">
         <div className="mx-4 flex w-full max-w-[400px] flex-1 flex-col items-stretch md:mx-auto">
           <div className="mb-2 text-center text-xl font-bold">
             Welcome to Fern
@@ -28,7 +28,7 @@ export const LoginPage = () => {
             <GoogleLoginButton />
           </div>
         </div>
-        <div className="absolute bottom-8 left-0 right-0 mx-[15%] text-center text-xs text-gray-900">
+        <div className="absolute bottom-16 left-0 right-0 mx-[15%] mx-auto px-4 text-center text-xs text-gray-900 md:max-w-[400px]">
           By continuing, you agree to Fern&apos;s{" "}
           <a
             href="https://buildwithfern.com/terms-of-service"

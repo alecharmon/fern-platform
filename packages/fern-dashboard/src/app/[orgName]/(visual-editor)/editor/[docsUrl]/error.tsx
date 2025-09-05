@@ -27,9 +27,9 @@ export default function Error({
   return (
     <main className="flex h-full w-full items-center justify-center">
       <div className="flex max-w-[500px] flex-col items-center justify-center gap-6 text-center">
-        <div className="flex h-36 w-36 items-center justify-center">
+        <div className="flex h-24 w-24 items-center justify-center">
           <GradientExclamation
-            colors={["var(--gray-400)", "var(--gray-500)", "var(--gray-600)"]}
+            colors={["var(--gray-500)", "var(--gray-800)", "var(--gray-1000)"]}
           />
         </div>
         <h2 className="text-muted-foreground">

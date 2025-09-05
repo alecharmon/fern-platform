@@ -3,7 +3,7 @@
 import { useDocsSite } from "@/state/useMyDocsSites";
 import { DocsUrl } from "@/utils/types";
 
-import { Page404 } from "../Page404";
+import Page404 from "../Page404";
 
 export declare namespace DocsSiteClientWrapper {
   export interface Props {

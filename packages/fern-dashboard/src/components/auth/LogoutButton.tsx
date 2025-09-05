@@ -1,8 +1,14 @@
-import { Button } from "../ui/button";
+import { type VariantProps } from "class-variance-authority";
 
-export const LogoutButton = () => {
+import { Button, buttonVariants } from "../ui/button";
+
+export const LogoutButton = ({
+  variant = "outline",
+}: {
+  variant?: VariantProps<typeof buttonVariants>["variant"];
+}) => {
   return (
-    <Button asChild className="min-w-40">
+    <Button variant={variant} asChild>
       <a href="/auth/logout">Logout</a>
     </Button>
   );

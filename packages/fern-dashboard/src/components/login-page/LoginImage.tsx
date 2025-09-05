@@ -59,18 +59,18 @@ export function LoginImage() {
   }
 
   return (
-    <div className="perspective-origin-[100%_0] perspective-[4000] transform-3d group absolute bottom-24 left-0 right-16 top-6 m-16 flex w-full">
+    <div className="animate-float-container transform-3d group absolute bottom-24 left-0 right-16 top-6 m-16 flex w-full">
       <CrossfadeThemeImage
         light={sdkPreviewLight}
         dark={sdkPreviewDark}
         alt="preview of fern docs"
-        className="z-2 object-fit rotate-x-26 rotate-y-14 rotate-z-3 rotate-345 backface-hidden animate-in fade-in absolute left-0 w-auto min-w-0 origin-top-left translate-x-60 translate-y-10 scale-[1.1] transform-gpu object-contain transition-transform duration-500 duration-700 ease-out will-change-transform group-hover:-translate-y-4"
+        className="animate-float-sdks z-2 object-fit rotate-x-26 rotate-y-14 rotate-z-3 rotate-345 backface-hidden absolute left-0 w-auto min-w-0 origin-top-left translate-x-60 translate-y-10 scale-[1.1] transform-gpu object-contain transition-transform duration-500 ease-out will-change-transform"
       />
       <CrossfadeThemeImage
         light={loginPreviewLight}
         dark={loginPreviewDark}
         alt="preview of fern docs"
-        className="z-1 object-fit rotate-x-26 rotate-y-14 rotate-z-3 rotate-345 backface-hidden group-hover:translate-y-35 animate-in fade-in absolute left-0 w-auto min-w-[800px] origin-top-left translate-y-40 transform-gpu object-contain transition-transform duration-500 duration-700 ease-out will-change-transform"
+        className="animate-float-docs z-1 object-fit rotate-x-26 rotate-y-14 rotate-z-3 rotate-345 backface-hidden absolute left-0 w-auto min-w-[800px] origin-top-left translate-y-40 transform-gpu object-contain transition-transform duration-500 ease-out will-change-transform"
       />
     </div>
   );

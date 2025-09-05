@@ -86,7 +86,7 @@ export const OrgSwitcherSelect = ({
     >
       <Button
         variant="outline"
-        className="shrink-0 justify-between md:min-w-[200px]"
+        className="shrink-0 justify-between !pl-2 md:min-w-[200px]"
         disabled={organizations.length === 0}
       >
         <div className="flex items-center gap-2">
