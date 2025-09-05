@@ -66,9 +66,13 @@ export MINIO_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
 
 # Also create the custom domain bucket if specified and not null
 if [ -n "$CUSTOM_DOMAIN" ] && [ "$CUSTOM_DOMAIN" != "null" ]; then
-    mc mb minio/${CUSTOM_DOMAIN}
-    mc anonymous set download minio/${CUSTOM_DOMAIN}
-    export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN}
+    # Remove any slashes from the custom domain bucket name
+    # Only grab the host part of the custom domain (strip protocol and path)
+    CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
+    # Use the cleaned custom domain for bucket creation and export
+    mc mb minio/${CUSTOM_DOMAIN_CLEANED}
+    mc anonymous set download minio/${CUSTOM_DOMAIN_CLEANED}
+    export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
 fi
 
 # Make bucket public
@@ -76,8 +80,15 @@ fi
 # map custom domain to local machine
 echo "127.0.0.1 $ORG_NAME.docs.buildwithfern.com.localhost" >> /etc/hosts
 echo "::1 $ORG_NAME.docs.buildwithfern.com.localhost" >> /etc/hosts
-echo "127.0.0.1 $CUSTOM_DOMAIN.localhost" >> /etc/hosts
-echo "::1 $CUSTOM_DOMAIN.localhost" >> /etc/hosts
+
+# If CUSTOM_DOMAIN is set and not null, set CUSTOM_DOMAIN_CLEANED for later use
+if [ -n "$CUSTOM_DOMAIN" ] && [ "$CUSTOM_DOMAIN" != "null" ]; then
+    CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
+    echo "127.0.0.1 $CUSTOM_DOMAIN_CLEANED.localhost" >> /etc/hosts
+    echo "::1 $CUSTOM_DOMAIN_CLEANED.localhost" >> /etc/hosts
+else
+    CUSTOM_DOMAIN_CLEANED=""
+fi
 
 # -----------  End MINIO setup  -----------
 

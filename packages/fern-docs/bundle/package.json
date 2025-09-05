@@ -99,6 +99,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "ai": "5.0.0-beta.2",
     "algoliasearch": "^5.20.3",
+    "crypto-browserify": "^3.12.1",
     "cssnano": "^6.0.3",
     "es-toolkit": "^1.32.0",
     "esbuild": "0.25.0",
