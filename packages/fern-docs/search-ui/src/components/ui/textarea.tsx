@@ -26,15 +26,17 @@ export const TextArea = forwardRef<
       maxLines,
       lineHeight = 24,
       padding = 0,
+      value,
       ...props
     },
     forwardedRef
   ) => {
     const inputRef = useRef<HTMLTextAreaElement>(null);
-    useAutosizeTextArea(inputRef, minLines, lineHeight, padding);
+    useAutosizeTextArea(inputRef, minLines, lineHeight, padding, value);
     return (
       <textarea
         ref={composeRefs(inputRef, forwardedRef)}
+        value={value}
         {...props}
         onChange={composeEventHandlers(props.onChange, (e) => {
           onValueChange?.(e.target.value);
@@ -57,7 +59,8 @@ function useAutosizeTextArea(
   textAreaRef: RefObject<HTMLTextAreaElement | null>,
   minLines: number = 1,
   lineHeight: number = 24,
-  padding: number = 0
+  padding: number = 0,
+  value: string | number | readonly string[] | undefined
 ): void {
   const minHeight =
     Math.max(minLines, 1) * Math.max(lineHeight, 10) + padding * 2;
@@ -89,5 +92,5 @@ function useAutosizeTextArea(
     return () => {
       textArea.removeEventListener("input", handleInput);
     };
-  }, [minHeight, textAreaRef]);
+  }, [minHeight, textAreaRef, value]);
 }
