@@ -12,6 +12,7 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
+import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useEditor } from "@/providers/EditorContext";
 
@@ -20,6 +21,10 @@ import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
 import CustomElement from "./extension-custom-element";
 import GlobalDataHashAttribute from "./extension-global-data-hash-attribute";
+import {
+  ConfiguredFileHandler,
+  ConfiguredImageUploadNode,
+} from "./tiptap-node/image-upload-node/configured-upload-extensions";
 
 // These node types are the ones that will have data attributes set on them
 const dataAttributeNodeTypes = [
@@ -78,7 +83,11 @@ export default function TiptapEditor({
   return (
     <EditorProvider
       autofocus={autofocus}
-      extensions={extensions}
+      extensions={[
+        ...extensions,
+        ConfiguredImageUploadNode(),
+        ConfiguredFileHandler(),
+      ]}
       content={content}
       editorProps={{
         attributes: {

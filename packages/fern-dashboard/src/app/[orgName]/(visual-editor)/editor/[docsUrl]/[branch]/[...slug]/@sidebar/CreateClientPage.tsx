@@ -240,7 +240,7 @@ export function CreateClientPage({
         title: pageTitle,
         slug: finalSlug,
       });
-      const { html, frontmatter, originalElements } = mdxToHtml(mdx);
+      const { html, frontmatter } = mdxToHtml(mdx);
 
       // Use the final slug (custom or auto-generated)
       const slug = finalSlug;
@@ -254,7 +254,6 @@ export function CreateClientPage({
       stageChanges(`${fullSlug}.mdx`, {
         html,
         frontmatter,
-        originalElements,
       });
 
       // Close popover and reset form
@@ -325,7 +324,6 @@ export function CreateClientPage({
         {
           html,
           frontmatter,
-          originalElements,
         },
         fullSlug,
         navigationContext

@@ -3,7 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
-import { Semaphore } from "es-toolkit/compat";
+import { Semaphore } from "es-toolkit";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { cacheSeed } from "@fern-api/docs-server/cache-seed";

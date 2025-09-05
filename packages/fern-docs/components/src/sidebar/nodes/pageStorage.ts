@@ -122,9 +122,7 @@ export class PageStorage {
     return (
       storedPage.html !== serverData.html ||
       JSON.stringify(storedPage.frontmatter) !==
-        JSON.stringify(serverData.frontmatter) ||
-      JSON.stringify(storedPage.originalElements) !==
-        JSON.stringify(serverData.originalElements)
+        JSON.stringify(serverData.frontmatter)
     );
   }
 

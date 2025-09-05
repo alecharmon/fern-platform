@@ -8,11 +8,7 @@ import { PageData } from "./types";
  * @returns The MDX content string
  */
 export function pageDataToMdx(pageData: PageData): string {
-  return htmlToMdx(
-    pageData.html,
-    pageData.frontmatter,
-    pageData.originalElements
-  ).mdx;
+  return htmlToMdx(pageData.html, pageData.frontmatter).mdx;
 }
 
 /**

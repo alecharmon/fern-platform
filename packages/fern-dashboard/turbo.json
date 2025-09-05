@@ -9,7 +9,8 @@
         "SENTRY_AUTH_TOKEN",
         "FERN_SUPPORT_GITHUB_TOKEN",
         "FERN_BOT_APP_ID",
-        "FERN_BOT_PRIVATE_KEY"
+        "FERN_BOT_PRIVATE_KEY",
+        "VE_IMAGES_PUBLIC_S3_BUCKET_NAME"
       ]
     },
     "compile": {

@@ -79,6 +79,7 @@
     "@tiptap/core": "3.0.5",
     "@tiptap/extension-drag-handle": "^3.0.9",
     "@tiptap/extension-drag-handle-react": "^3.0.9",
+    "@tiptap/extension-file-handler": "^3.4.1",
     "@tiptap/extension-placeholder": "^3.0.5",
     "@tiptap/extension-unique-id": "^3.0.9",
     "@tiptap/pm": "3.0.5",
@@ -139,6 +140,7 @@
     "glslify-loader": "^2.0.0",
     "prisma": "5.13.0",
     "raw-loader": "^4.0.2",
+    "sass": "^1.77.0",
     "tailwindcss": "^4.0.9",
     "typescript": "5.7.3",
     "vitest": "^3.0.5"

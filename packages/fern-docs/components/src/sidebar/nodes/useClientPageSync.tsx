@@ -25,8 +25,7 @@ export function useClientPageSync(
       !clientNodeId ||
       !branchName ||
       !pageData.html ||
-      !pageData.frontmatter ||
-      !pageData.originalElements
+      !pageData.frontmatter
     ) {
       return;
     }
@@ -34,7 +33,6 @@ export function useClientPageSync(
     const fullPageData: PageData = {
       html: pageData.html,
       frontmatter: pageData.frontmatter,
-      originalElements: pageData.originalElements,
     };
 
     // Update localStorage with the latest page data
@@ -55,7 +53,6 @@ export function useClientPageSync(
     filename,
     pageData.html,
     pageData.frontmatter,
-    pageData.originalElements,
     updateClientPageData,
     stageChanges,
   ]);

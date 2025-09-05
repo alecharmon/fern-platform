@@ -14,14 +14,12 @@ import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
 import { useMdxState } from "@/providers/MdxStateContext";
-import { useOriginalElements } from "@/providers/OriginalElementsContext";
 import { cn } from "@/utils/utils";
 
 export default function DevPanel() {
   const { panelOpen } = useDevMode();
   const { currentFilename } = useCurrentPage();
   const { allMdxFiles, stageChanges, frontmatterData } = useMdxState();
-  const { setOriginalElements } = useOriginalElements();
   const isEditingDisabled = useEditingDisabled();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
@@ -59,7 +57,7 @@ export default function DevPanel() {
 
     try {
       // Convert markdown back to HTML using mdxToHtml
-      const { html, frontmatter, originalElements } = mdxToHtml(content, {
+      const { html, frontmatter } = mdxToHtml(content, {
         treatAsCustomElement: ["code"],
         treatAsUnsupported: ["math"],
       });
@@ -79,14 +77,10 @@ export default function DevPanel() {
         }
       });
 
-      // First update the originalElements context so custom elements can render with new hashes
-      setOriginalElements(originalElements);
-
       // Then update the tiptap editor by staging changes with new HTML and originalElements
       stageChanges(activeFilename, {
         html,
         frontmatter: mergedFrontmatter,
-        originalElements,
       });
     } catch (conversionError: any) {
       WarningValidationToast(conversionError.message);

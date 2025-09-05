@@ -13,6 +13,8 @@ import { postGitCommit } from "@/app/api/post-git-commit/route";
 import { postCreateBranch } from "@/app/api/post-git-create-branch/route";
 import { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import { preloadEditorData } from "@/app/api/preload-editor-data/route";
+import { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
+import { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
 import { updatePrStatus } from "@/app/api/update-pr-status/route";
 import { updatePrTitle } from "@/app/api/update-pr-title/route";
 
@@ -73,6 +75,16 @@ export const DashboardApiClient = {
     typedFetch<updatePrTitle.Response>("/api/update-pr-title", request),
   updatePrStatus: (request: updatePrStatus.Request) =>
     typedFetch<updatePrStatus.Response>("/api/update-pr-status", request),
+  generateSignedUploadUrl: (request: generateSignedUploadUrl.Request) =>
+    typedFetch<generateSignedUploadUrl.Response>(
+      "/api/signed-image-url/generate",
+      request
+    ),
+  getSignedImageUrl: (request: getSignedImageUrl.Request) =>
+    typedFetch<getSignedImageUrl.Response>(
+      "/api/signed-image-url/get",
+      request
+    ),
 };
 
 export class ApiError extends Error {

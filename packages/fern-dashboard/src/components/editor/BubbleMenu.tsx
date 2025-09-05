@@ -64,11 +64,19 @@ export default function BubbleMenu() {
   return (
     <EditorBubbleMenu
       options={{ placement: "top-start" }}
-      shouldShow={({ editor, state }) => {
-        const { selection } = state;
+      shouldShow={({ editor: { isFocused }, state: { selection } }) => {
+        // Don't show the bubble menu if the selection is an image or image upload
+        if (
+          // @ts-expect-error - type issue with tiptap
+          selection?.node?.type?.name === "custom-element-v2" ||
+          // @ts-expect-error - type issue with tiptap
+          selection?.node?.type?.name === "imageUpload"
+        ) {
+          return false;
+        }
 
         // Check if we have an active selection
-        return editor.isFocused && !selection.empty;
+        return isFocused && !selection.empty;
       }}
     >
       <div className="border-1 rounded-2 text-gray-1100 flex items-center gap-px border-gray-500 bg-white p-1 shadow-sm">

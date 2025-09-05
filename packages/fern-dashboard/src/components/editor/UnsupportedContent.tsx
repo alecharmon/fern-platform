@@ -24,7 +24,7 @@ export const UnsupportedContent = ({
           onClick={handleToggleDevMode}
           variant="outline"
           size="sm"
-          className="w-fit bg-transparent hover:bg-gray-500/80"
+          className="w-fit bg-gray-300 hover:bg-gray-500/80"
         >
           Edit in dev mode <ArrowRight className="size-4" />
         </Button>

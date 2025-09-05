@@ -8,7 +8,6 @@ import { getChangedNodesFromHtml, mdxToHtml } from "@fern-docs/mdx";
 
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { useMdxState } from "@/providers/MdxStateContext";
-import { useOriginalElements } from "@/providers/OriginalElementsContext";
 
 export declare namespace PageEditor {
   export interface Props {
@@ -25,7 +24,6 @@ export default function PageEditor({
   initialHtml,
 }: PageEditor.Props) {
   const { stageChanges, changedMdxFiles } = useMdxState();
-  const { setOriginalElements } = useOriginalElements();
 
   // Store the first normalized HTML string from the editor
   const originalTiptapHtml = useRef(initialHtml);
@@ -69,18 +67,11 @@ export default function PageEditor({
       if (currHtmlFromMdx.html !== currentHtmlRef.current) {
         currentHtmlRef.current = currHtmlFromMdx.html;
 
-        // Only update originalElements if this change did NOT come from TipTap editing
-        // (i.e., it came from an external source like the dev panel)
-        // This prevents the originalElements from being updated when the user is typing in the editor (yields flashing)
-        if (!lastChangeFromTiptap.current) {
-          setOriginalElements(currHtmlFromMdx.originalElements);
-        }
-
         // Reset the flag for next change
         lastChangeFromTiptap.current = false;
       }
     }
-  }, [changedMdxFiles, filename, setOriginalElements]);
+  }, [changedMdxFiles, filename]);
 
   // TODO: add a loading state, possibly as a Suspense boundary
   return (

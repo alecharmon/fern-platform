@@ -9,8 +9,10 @@ export default function NodeHoverHandle() {
 
   return (
     <DragHandle editor={editor}>
-      <div className="mr-2 flex cursor-grab flex-col items-center rounded-md p-1.5 hover:bg-gray-500/40">
-        <GripVertical className="text-muted-foreground" size={16} />
+      <div className="mr-2 flex cursor-grab flex-row items-center">
+        <div className="flex cursor-grab flex-col items-center rounded-md p-1.5 hover:bg-gray-500/40">
+          <GripVertical className="text-muted-foreground" size={16} />
+        </div>
       </div>
     </DragHandle>
   );

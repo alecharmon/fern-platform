@@ -1,5 +1,4 @@
 import { FernNavigation } from "@fern-api/fdr-sdk";
-import { OriginalElements } from "@fern-docs/mdx";
 
 /**
  * Common interface for page data used across storage systems
@@ -7,7 +6,6 @@ import { OriginalElements } from "@fern-docs/mdx";
 export interface PageData {
   html: string;
   frontmatter: Record<string, any>;
-  originalElements: OriginalElements;
 }
 
 /**
@@ -23,7 +21,6 @@ export interface PageDataWithChange extends PageData {
 export interface MdxContent {
   html: string;
   frontmatter: Record<string, any>;
-  originalElements: OriginalElements;
 }
 
 /**

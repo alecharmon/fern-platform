@@ -25,7 +25,6 @@ export const DEBOUNCE_TIMEOUT_DELAY = 300;
 interface MdxDependencies {
   html?: MdxToHtmlResponse["html"];
   frontmatter?: MdxToHtmlResponse["frontmatter"];
-  originalElements?: MdxToHtmlResponse["originalElements"];
   originalFrontmatter?: MdxToHtmlResponse["originalFrontmatter"];
   /**
    * Flag if the file should be considered changed.
@@ -34,7 +33,6 @@ interface MdxDependencies {
   changed?: boolean;
   /**
    * Map of specific node that have changed.
-   * This is used to determine if we should use the original MDX content formatting from originalElements.
    */
   changedNodes?: ChangedNodes;
   /**
@@ -116,8 +114,6 @@ export function MdxStateProvider({
 
               return mergedFrontmatter;
             })(),
-            originalElements:
-              state.originalElements ?? prev[filename]?.originalElements,
             originalFrontmatter:
               state.originalFrontmatter ?? prev[filename]?.originalFrontmatter,
             changed: state.changed ?? prev[filename]?.changed,
@@ -154,16 +150,10 @@ export function MdxStateProvider({
   const changedMdxFiles = useMemo(() => {
     return Object.entries(mdxDepsStore).reduce<Record<Filename, Markdown>>(
       (acc, [filename, state]) => {
-        if (
-          state.changed &&
-          state.html &&
-          state.frontmatter &&
-          state.originalElements
-        ) {
+        if (state.changed && state.html && state.frontmatter) {
           acc[filename] = htmlToMdx(
             state.html,
             state.frontmatter,
-            state.originalElements,
             state.originalFrontmatter,
             state.changedNodes,
             // state.changedFrontmatter
@@ -180,17 +170,16 @@ export function MdxStateProvider({
   const allMdxFiles = useMemo(() => {
     return Object.entries(mdxDepsStore).reduce<Record<Filename, Markdown>>(
       (acc, [filename, state]) => {
-        if (state.html && state.frontmatter && state.originalElements) {
+        if (state.html && state.frontmatter) {
           acc[filename] = htmlToMdx(
             state.html,
             state.frontmatter,
-            state.originalElements,
             state.originalFrontmatter,
             state.changedNodes,
             // state.changedFrontmatter
             true // TODO: re-enable (force true for now, there's a bug in the loader/FDR that provides malformed frontmatter)
           ).mdx;
-        } else if (state.html || state.frontmatter || state.originalElements) {
+        } else if (state.html || state.frontmatter) {
           // Generate minimal markdown when page data is incomplete
           // Prevents dev panel from showing "// Loading content..." for partial data
           const title = state.frontmatter?.title;

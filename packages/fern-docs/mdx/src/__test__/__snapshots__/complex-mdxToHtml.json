@@ -1,53 +1,7 @@
 {
-  "html": "<h1 data-hash=\"79aeaf7ba450cdab4b13e948c49101b1de4d13e9b45e10e51ee99442c982a7e8\">Title</h1>\n<ul data-hash=\"40cd8ff294de1eae26e81eb5326e664fad5aff46263774a24c43b7bfdfbbb2aa\">\n<li data-hash=\"5805f5b230e585356035948cb3bbefd638a7c86cc2ed01f96828a9fa726392a9\">List item 1</li>\n<li data-hash=\"c24d3722fd29178a4d9a92656a07019644668c2c8efac45bc3f644db03214e7c\">List item 2</li>\n</ul>\n<custom-element data-hash=\"a279c49611e098ea6530e5378533d9ba2c40f2b85a4dbcd5cf4458a01af38065\" data-type=\"mdxJsxFlowElement\" data-name=\"Custom\">&#x3C;Custom value=\"bar\" /></custom-element>\n<h2 data-hash=\"1a03107b5226bbb0fa39b523765fe23e937fa41e7ad390a9094a85056f89e745\">Subheading</h2>\n<p data-hash=\"be590aa10690febe0403ee729b4582fdd80dd24718b17f9bb40ca69a452a5469\">Another paragraph.</p>",
+  "html": "<h1 data-hash=\"79aeaf7ba450cdab4b13e948c49101b1de4d13e9b45e10e51ee99442c982a7e8\">Title</h1>\n<ul data-hash=\"40cd8ff294de1eae26e81eb5326e664fad5aff46263774a24c43b7bfdfbbb2aa\">\n<li data-hash=\"5805f5b230e585356035948cb3bbefd638a7c86cc2ed01f96828a9fa726392a9\">List item 1</li>\n<li data-hash=\"c24d3722fd29178a4d9a92656a07019644668c2c8efac45bc3f644db03214e7c\">List item 2</li>\n</ul>\n<custom-element-v2 fve-data-hash=\"a1779ef09c452b96d083f287981d4c600dab112f4850c0716b1080e959c437b5\" fve-data-name=\"Custom\" fve-mdx-content=\"<Custom value=&#x22;bar&#x22; />\" fve-unsupported=\"true\"></custom-element-v2>\n<h2 data-hash=\"1a03107b5226bbb0fa39b523765fe23e937fa41e7ad390a9094a85056f89e745\">Subheading</h2>\n<p data-hash=\"be590aa10690febe0403ee729b4582fdd80dd24718b17f9bb40ca69a452a5469\">Another paragraph.</p>",
   "frontmatter": {
     "title": "Complex"
   },
-  "originalElements": {
-    "79aeaf7ba450cdab4b13e948c49101b1de4d13e9b45e10e51ee99442c982a7e8": {
-      "content": "# Title",
-      "type": "heading"
-    },
-    "7e8cd2056da73a7fefb6cd91f4e5d199d08d9058c517b9a2476b1b520324d674": {
-      "content": "Title",
-      "type": "text"
-    },
-    "40cd8ff294de1eae26e81eb5326e664fad5aff46263774a24c43b7bfdfbbb2aa": {
-      "content": "- List item 1\n- List item 2",
-      "type": "list"
-    },
-    "5805f5b230e585356035948cb3bbefd638a7c86cc2ed01f96828a9fa726392a9": {
-      "content": "- List item 1",
-      "type": "listItem"
-    },
-    "5ff59b08b06e8b44798aee3631ce467c9cbc0d040e73a4655102fa500b7c11db": {
-      "content": "List item 1",
-      "type": "text"
-    },
-    "c24d3722fd29178a4d9a92656a07019644668c2c8efac45bc3f644db03214e7c": {
-      "content": "- List item 2",
-      "type": "listItem"
-    },
-    "f03bcb29e8cdcda8c2694f5aa3c1b507238c32d50f44c5f6f5a0ba42f373c3f4": {
-      "content": "List item 2",
-      "type": "text"
-    },
-    "a279c49611e098ea6530e5378533d9ba2c40f2b85a4dbcd5cf4458a01af38065": {
-      "content": "<Custom value=\"bar\" />",
-      "type": "mdxJsxFlowElement",
-      "name": "Custom"
-    },
-    "1a03107b5226bbb0fa39b523765fe23e937fa41e7ad390a9094a85056f89e745": {
-      "content": "## Subheading",
-      "type": "heading"
-    },
-    "f593a11d4a56b178f469b1bf0eb813cec278ae47cd4fcce39a8d09576135341d": {
-      "content": "Subheading",
-      "type": "text"
-    },
-    "be590aa10690febe0403ee729b4582fdd80dd24718b17f9bb40ca69a452a5469": {
-      "content": "Another paragraph.",
-      "type": "text"
-    }
-  }
+  "originalFrontmatter": "title: Complex"
 }

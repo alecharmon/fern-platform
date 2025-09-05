@@ -15,7 +15,12 @@ import {
   frontmatterToMarkdown,
 } from "mdast-util-frontmatter";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
-import { mdxFromMarkdown, mdxToMarkdown } from "mdast-util-mdx";
+import {
+  MdxJsxAttribute,
+  MdxJsxFlowElement,
+  mdxFromMarkdown,
+  mdxToMarkdown,
+} from "mdast-util-mdx";
 import {
   Handler as ToHastHandler,
   State as ToHastState,
@@ -26,6 +31,8 @@ import { toMarkdown } from "mdast-util-to-markdown";
 import { frontmatter as fm } from "micromark-extension-frontmatter";
 import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
+
+import { MdxJsxElement } from "./mdast";
 
 // Options for how yaml is written to the frontmatter
 const FRONTMATTER_YAML_OPTIONS: yaml.DumpOptions = {
@@ -93,6 +100,8 @@ type BaseElementsType = Exclude<
   | "math"
   | "inlineMath"
   | "html"
+  | "image"
+  | "imageReference"
 >;
 
 // Non-custom nodes that can be hashed
@@ -112,16 +121,6 @@ type CustomElementsType = Exclude<AllElementsType, BaseElementsType>;
 // Hash of a node
 export type NodeHash = string;
 
-// Original element data
-export interface OriginalElement {
-  type: string;
-  name?: string;
-  content: string;
-}
-
-// Map of original elements by hash
-export type OriginalElements = Record<NodeHash, OriginalElement>;
-
 // Map of changed nodes by hash
 export type ChangedNodes = Record<NodeHash, boolean>;
 
@@ -132,7 +131,6 @@ export type Frontmatter = Record<string, unknown>;
 export interface MdxToHtmlResponse {
   html: string;
   frontmatter: Frontmatter;
-  originalElements: OriginalElements;
   originalFrontmatter?: string;
 }
 
@@ -176,10 +174,6 @@ export function mdxToHtml(
     ? parsedFrontmatter
     : {};
 
-  // Map of original elements by hash, including jsxElements, expressions, and esm
-  // Note: this will only include top-level elements, not nested ones
-  const originalElements: OriginalElements = {};
-
   // Default handler for base elements
   function baseElementHandler(
     state: ToHastState,
@@ -188,6 +182,7 @@ export function mdxToHtml(
   ) {
     const { type, name } = getNodeInfo(node);
     const nodeType = type as BaseElementsType;
+
     if (treatAsUnsupported.includes(nodeType)) {
       throw new Error(`Unsupported node type: ${nodeType}`);
     }
@@ -196,7 +191,6 @@ export function mdxToHtml(
       return getToHastDefaultHandler(nodeType)(state, node, parents);
     }
     const { hash, content } = getNodeContent(node, rootContent);
-    originalElements[hash] = { content, type, name };
     return mdxBaseElementNode(
       hash,
       content,
@@ -209,15 +203,50 @@ export function mdxToHtml(
   }
 
   // Default handler for custom elements
-  function customElementHandler(_: ToHastState, node: any, __?: MdastParents) {
+  function customElementHandler(
+    state: ToHastState,
+    node: any,
+    __?: MdastParents
+  ) {
     const { type, name } = getNodeInfo(node);
+
     const nodeType = type as CustomElementsType;
     if (treatAsUnsupported.includes(nodeType)) {
       throw new Error(`Unsupported node type: ${nodeType}`);
     }
-    const { hash, content } = getNodeContent(node, rootContent);
-    originalElements[hash] = { content, type, name };
-    return mdxCustomElementNode(hash, content, nodeType, name);
+
+    // Handle image-upload custom element
+    if (type === "mdxJsxFlowElement" && name === "div") {
+      const maybeDataType = node?.attributes?.find(
+        (attr: any) => attr.name === "data-type"
+      )?.value;
+      if (maybeDataType === "image-upload") {
+        return {
+          type: "element",
+          tagName: "div",
+          properties: {
+            dataType: "image-upload",
+          },
+        };
+      }
+    }
+
+    // For MDX JSX elements, use hash based only on name and props
+    // For other custom elements, use the original content-based hash
+    let hash: NodeHash;
+    let content: string;
+
+    if (isMdxJsxElement(node)) {
+      hash = getNodeHashForMdxJsxElement(node);
+      const nodeContent = getNodeContent(node, rootContent);
+      content = nodeContent.content;
+    } else {
+      const nodeContent = getNodeContent(node, rootContent);
+      hash = nodeContent.hash;
+      content = nodeContent.content;
+    }
+
+    return mdxUnsupportedCustomElementNodev2(hash, content, name);
   }
 
   // Get hast from mdast (and handle custom elements)
@@ -233,9 +262,6 @@ export function mdxToHtml(
         footnoteDefinition: baseElementHandler,
         footnoteReference: baseElementHandler,
         heading: baseElementHandler,
-        html: baseElementHandler,
-        image: baseElementHandler,
-        imageReference: baseElementHandler,
         inlineCode: baseElementHandler,
         link: baseElementHandler,
         linkReference: baseElementHandler,
@@ -260,6 +286,8 @@ export function mdxToHtml(
         math: customElementHandler,
         inlineMath: customElementHandler,
         html: customElementHandler,
+        image: customElementHandler,
+        imageReference: customElementHandler,
         ...Object.fromEntries(
           treatAsCustomElement.map((type) => [type, customElementHandler])
         ),
@@ -270,7 +298,7 @@ export function mdxToHtml(
   // Get html from hast
   const html = toHtml(hast);
 
-  return { html, frontmatter, originalFrontmatter, originalElements };
+  return { html, frontmatter, originalFrontmatter };
 }
 
 // Response from htmlToMdx
@@ -282,8 +310,7 @@ export interface HtmlToMdxResponse {
 // TODO: we might be able to further optimize by refactoring this and getChangedNodesFromHtml
 export function htmlToMdx(
   html: string,
-  frontmatter: Frontmatter,
-  originalElements: OriginalElements,
+  frontmatter?: Frontmatter,
   originalFrontmatter?: string,
   changedNodes?: ChangedNodes,
   changedFrontmatter?: boolean
@@ -291,32 +318,66 @@ export function htmlToMdx(
   // Get hast from html
   const hast = fromHtml(html);
 
+  const unsupportedMdxContent: Record<string, string> = {};
+
   // Default handler for base elements
   const baseElementHandler: ToMdastHandle = (state, element) => {
-    if (
-      element.properties?.dataHash &&
-      typeof element.properties.dataHash === "string" &&
-      typeof originalElements[element.properties.dataHash] !== "undefined" &&
-      changedNodes?.[element.properties.dataHash] === false
-    ) {
-      // Use hash as placeholder, which will be replaced with actual content
-      const placeholder = getCustomElementPlaceholder(
-        String(element.properties.dataHash)
-      );
-
-      return { type: "html", value: placeholder } as any;
+    // Handle image-upload custom element separately
+    if (element?.properties?.dataType === "image-upload") {
+      return { type: "html", value: `<div data-type="image-upload" />` } as any;
     }
     return getToMdastDefaultHandler(element.tagName as any)(state, element);
   };
 
-  // Default handler for custom elements
-  const customElementHandler: ToMdastHandle = (_, element) => {
-    // Use hash as placeholder, which will be replaced with actual content
-    const placeholder = getCustomElementPlaceholder(
-      String(element.properties.dataHash)
-    );
+  const customElementv2Handler: ToMdastHandle = (state, element) => {
+    // Parse fve-data-* properties into MDX attributes and extract name/type/hash
+    const props = element.properties || {};
+    let name: string | null = null;
+    const attributes: MdxJsxAttribute[] = [];
 
-    return { type: "html", value: placeholder } as any;
+    // Handle unsupported elements first
+    if (
+      typeof props["fve-data-hash"] === "string" &&
+      typeof props["fve-unsupported"] === "string" &&
+      props["fve-unsupported"] === "true"
+    ) {
+      const content = props["fve-mdx-content"];
+      if (typeof content !== "string") {
+        throw new Error(
+          `expected string content in fve-mdx-content, found: ${typeof content}`
+        );
+      }
+
+      const placeholder = `PLACEHOLDERV2_${props["fve-data-hash"]}`;
+      unsupportedMdxContent[placeholder] = content;
+
+      return { type: "html", value: placeholder } as any;
+    }
+
+    // Also handle fve-data-name for the element name
+    if (typeof props["fve-data-name"] === "string") {
+      name = props["fve-data-name"];
+    }
+
+    // Optionally, handle legacy fve-data-prop-* attributes (if any)
+    for (const [key, value] of Object.entries(props)) {
+      if (key.startsWith("fve-data-prop-") && typeof value === "string") {
+        // Custom prop, strip prefix
+        attributes.push({
+          type: "mdxJsxAttribute",
+          name: key.replace(/^fve-data-prop-/, ""),
+          value,
+        });
+      }
+    }
+
+    // TODO(cberry): don't coerce the type here, handle the error, with honor
+    return {
+      type: "mdxJsxFlowElement",
+      name,
+      attributes,
+      children: state.all(element),
+    } as MdxJsxFlowElement;
   };
 
   // Get mdast from hast (and handle custom elements)
@@ -458,7 +519,7 @@ export function htmlToMdx(
       tfoot: baseElementHandler,
 
       // Custom elements
-      ["custom-element"]: customElementHandler,
+      ["custom-element-v2"]: customElementv2Handler,
     } as any,
     newlines: true,
   });
@@ -484,11 +545,8 @@ export function htmlToMdx(
     finalMdx = `---\n${frontmatterYaml}---\n\n${mdx}`;
   }
 
-  // Replace custom element placeholders with actual content
-  Object.entries(originalElements).forEach(([hash, customElement]) => {
-    const placeholder = getCustomElementPlaceholder(hash);
-    const content = customElement.content;
-
+  // Replace unsupported custom element placeholders with actual content
+  Object.entries(unsupportedMdxContent).forEach(([placeholder, content]) => {
     // Escape dollar signs in content to prevent them from being treated as replacement references
     // In JavaScript string replacement, $ has special meaning:
     // - $& inserts the matched substring
@@ -497,8 +555,7 @@ export function htmlToMdx(
     // - $n inserts the nth parenthesized submatch string
     // By doubling the $ ($$), we insert a literal $ character
     const escapedContent = content.replace(/\$/g, "$$$$");
-
-    // Replace placeholder with escaped content, using replaceAll for cases where there are repeats
+    // Replace all occurrences of the placeholder with the escaped content
     finalMdx = finalMdx.replaceAll(placeholder, escapedContent);
   });
 
@@ -534,6 +591,14 @@ function getNodeInfo(node: any) {
   };
 }
 
+function isMdxJsxElement(node: any): node is MdxJsxElement {
+  return (
+    node &&
+    typeof node === "object" &&
+    (node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement")
+  );
+}
+
 // Get node content in a type-safe way
 // TODO: consider writing type guards for the node, since toHast does not type it by default
 function getNodeContent(node: any, rootContent: string) {
@@ -550,6 +615,22 @@ function getNodeContent(node: any, rootContent: string) {
   const hash: NodeHash = createHash("sha256").update(content).digest("hex");
 
   return { content, hash };
+}
+
+// Get hash for MDX JSX elements based only on name and props (excluding children)
+function getNodeHashForMdxJsxElement(node: MdxJsxElement): NodeHash {
+  // Create a hash input that only includes the name and attributes
+  const hashInput = {
+    type: node.type,
+    name: node.name,
+    attributes: node.attributes,
+  };
+
+  // Convert to a deterministic string representation for hashing
+  const hashString = JSON.stringify(hashInput, null, 0);
+  const hash: NodeHash = createHash("sha256").update(hashString).digest("hex");
+
+  return hash;
 }
 
 // TODO: we might be able to further optimize by refactoring this and htmlToMdx
@@ -572,7 +653,7 @@ export function getChangedNodesFromHtml(
   // Compare nodes with the same hash
   for (const hash of Object.keys(originalMap)) {
     if (hash in latestMap) {
-      // Compare the node contents
+      // Compare the node contents and attributes
       const originalNode = originalMap[hash];
       const latestNode = latestMap[hash];
       const { content: originalContent } = getNodeContent(
@@ -580,7 +661,33 @@ export function getChangedNodesFromHtml(
         originalHtml
       );
       const { content: latestContent } = getNodeContent(latestNode, latestHtml);
-      changedNodes[hash] = originalContent !== latestContent;
+
+      // Note: the below attribute comparison logic was claude generated
+      // Compare attributes shallowly
+      const originalAttrs = originalNode.properties || {};
+      const latestAttrs = latestNode.properties || {};
+
+      // Compare attribute keys and values
+      const originalAttrKeys = Object.keys(originalAttrs).sort();
+      const latestAttrKeys = Object.keys(latestAttrs).sort();
+
+      let attributesChanged = false;
+      if (
+        originalAttrKeys.length !== latestAttrKeys.length ||
+        !originalAttrKeys.every((key, i) => key === latestAttrKeys[i])
+      ) {
+        attributesChanged = true;
+      } else {
+        for (const key of originalAttrKeys) {
+          if (originalAttrs[key] !== latestAttrs[key]) {
+            attributesChanged = true;
+            break;
+          }
+        }
+      }
+
+      changedNodes[hash] =
+        originalContent !== latestContent || attributesChanged;
     }
   }
   return changedNodes;
@@ -627,12 +734,6 @@ function getNodeMapFromHast(hast: HastRoot) {
     }
   }
   return map;
-}
-
-// Get a placeholder for a custom element
-// Note: be careful not to use any characters that the serializer will escape
-function getCustomElementPlaceholder(hash: NodeHash) {
-  return `PLACEHOLDER${hash}`;
 }
 
 // Get the toHast default handler in a type-safe way
@@ -701,27 +802,22 @@ function mdxBaseElementNode(
   }
 }
 
-// Create node for a custom element
-function mdxCustomElementNode(
+// Create node for a custom element -- colton v2 test
+function mdxUnsupportedCustomElementNodev2(
   hash: NodeHash,
-  content: string,
-  type: CustomElementsType,
+  originalMdxContent: string,
   name: string | undefined
 ) {
   return {
     type: "element" as const,
-    tagName: "custom-element",
+    tagName: "custom-element-v2",
     // These data attributes help the client to handle the custom element
     properties: {
-      "data-hash": hash,
-      "data-type": type,
-      ...(name ? { "data-name": name } : {}),
+      "fve-data-hash": hash,
+      "fve-data-name": name,
+      "fve-mdx-content": originalMdxContent,
+      "fve-unsupported": "true",
     },
-    children: [
-      {
-        type: "text" as const,
-        value: content,
-      },
-    ],
+    children: [],
   };
 }

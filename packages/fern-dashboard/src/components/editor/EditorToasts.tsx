@@ -61,3 +61,15 @@ export function ErrorUpdatePrTitleToast() {
 export function ErrorUpdatePrStatusToast() {
   toast.error("Failed to update PR status. Please try again.");
 }
+
+export function ErrorUploadImageToast(error: Error) {
+  toast.error("Unable to upload image: " + error.message);
+}
+
+export function UploadingImageToast() {
+  toast.info("Uploading image...");
+}
+
+export function SuccessfulUploadImageToast() {
+  toast.success("Image uploaded successfully!");
+}

@@ -28,12 +28,7 @@ export function usePageSync(
 
   useEffect(() => {
     // Only sync if we have the required data
-    if (
-      !branchName ||
-      !pageData.html ||
-      !pageData.frontmatter ||
-      !pageData.originalElements
-    ) {
+    if (!branchName || !pageData.html || !pageData.frontmatter) {
       return;
     }
 
@@ -43,7 +38,6 @@ export function usePageSync(
     const currentDataHash = JSON.stringify({
       html: completePageData.html,
       frontmatter: completePageData.frontmatter,
-      originalElements: completePageData.originalElements,
     });
 
     // Skip if we've already synced this exact data
@@ -68,7 +62,6 @@ export function usePageSync(
       PageStorage.savePage(branchName, filename, {
         html: completePageData.html,
         frontmatter: completePageData.frontmatter,
-        originalElements: completePageData.originalElements,
         pageType: "server",
         serverData: serverData,
       });
@@ -90,9 +83,7 @@ export function usePageSync(
         const dataHasChanges =
           completePageData.html !== serverData.html ||
           JSON.stringify(completePageData.frontmatter) !==
-            JSON.stringify(serverData.frontmatter) ||
-          JSON.stringify(completePageData.originalElements) !==
-            JSON.stringify(serverData.originalElements);
+            JSON.stringify(serverData.frontmatter);
 
         shouldStage = hasLocalChanges || dataHasChanges;
       } else {
@@ -104,7 +95,6 @@ export function usePageSync(
         stageChanges(filename, {
           html: completePageData.html,
           frontmatter: completePageData.frontmatter,
-          originalElements: completePageData.originalElements,
           changed: true,
         });
         lastStagedDataHash.current = currentDataHash;

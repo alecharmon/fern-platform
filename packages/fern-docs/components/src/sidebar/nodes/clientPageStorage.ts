@@ -123,11 +123,7 @@ export class ClientPageStorage {
       return;
     }
 
-    if (
-      !pageData?.html ||
-      !pageData?.frontmatter ||
-      !pageData?.originalElements
-    ) {
+    if (!pageData?.html || !pageData?.frontmatter) {
       console.error("Complete page data is required for updating client page");
       return;
     }
