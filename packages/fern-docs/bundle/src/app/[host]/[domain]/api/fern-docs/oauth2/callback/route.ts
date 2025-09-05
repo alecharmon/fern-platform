@@ -100,15 +100,24 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const token_url = `${config.token_endpoint}?grant_type=authorization_code&client_id=${config.clientId}&client_secret=${config.clientSecret}&code=${code}`;
+  const token_url = config.token_endpoint;
   const issuer = config.issuer ?? "https://buildwithfern.com";
 
   try {
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      code: code,
+      ...(config.redirectUri && { redirect_uri: config.redirectUri }),
+    });
+
     const response = await fetch(token_url, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
+      body: body,
     });
 
     if (!response.ok) {
