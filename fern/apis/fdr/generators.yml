@@ -31,7 +31,8 @@ groups:
   fdr-cjs-sdk:
     generators:
       - name: fernapi/fern-typescript-node-sdk
-        version: 0.51.0
+        version: 0.51.7
+        disable-examples: true
         output:
           location: npm
           url: npm.buildwithfern.com
