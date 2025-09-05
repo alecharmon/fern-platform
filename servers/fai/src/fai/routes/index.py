@@ -52,7 +52,7 @@ async def sync_index_to_query_index(
         job_id = await job_manager.create_job(db)
 
         asyncio.create_task(
-            job_manager.execute_job(db, job_id, sync_index_to_target, domain, body.index_name, get_query_index_name())
+            job_manager.execute_job(job_id, sync_index_to_target, domain, body.index_name, get_query_index_name())
         )
 
         return JSONResponse(jsonable_encoder(SyncIndexResponse(job_id=job_id)))

@@ -17,6 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.fai.db import async_session_maker
 from src.fai.models.db.job_db import JobDb
 from src.settings import LOGGER
 
@@ -42,37 +43,38 @@ class JobManager:
         LOGGER.info(f"Created job {job_id}")
         return job_id
 
-    async def execute_job(
-        self, db: AsyncSession, job_id: str, func: Callable[..., Awaitable[Any]], *args: Any, **kwargs: Any
-    ) -> None:
-        await db.execute(
-            update(JobDb).where(JobDb.id == job_id).values(status=JobStatus.IN_PROGRESS, started_at=datetime.now(UTC))
-        )
-        await db.commit()
-
-        LOGGER.info(f"Starting job {job_id}")
-
-        try:
-            await func(*args, **kwargs)
-
+    async def execute_job(self, job_id: str, func: Callable[..., Awaitable[Any]], *args: Any, **kwargs: Any) -> None:
+        async with async_session_maker() as db:
             await db.execute(
                 update(JobDb)
                 .where(JobDb.id == job_id)
-                .values(status=JobStatus.COMPLETED, completed_at=datetime.now(UTC))
+                .values(status=JobStatus.IN_PROGRESS, started_at=datetime.now(UTC))
             )
             await db.commit()
 
-            LOGGER.info(f"Job {job_id} completed successfully")
+            LOGGER.info(f"Starting job {job_id}")
 
-        except Exception as e:
-            await db.execute(
-                update(JobDb)
-                .where(JobDb.id == job_id)
-                .values(status=JobStatus.FAILED, completed_at=datetime.now(UTC), error=str(e))
-            )
-            await db.commit()
+            try:
+                await func(*args, **kwargs)
 
-            LOGGER.exception(f"Job {job_id} failed: {e}")
+                await db.execute(
+                    update(JobDb)
+                    .where(JobDb.id == job_id)
+                    .values(status=JobStatus.COMPLETED, completed_at=datetime.now(UTC))
+                )
+                await db.commit()
+
+                LOGGER.info(f"Job {job_id} completed successfully")
+
+            except Exception as e:
+                await db.execute(
+                    update(JobDb)
+                    .where(JobDb.id == job_id)
+                    .values(status=JobStatus.FAILED, completed_at=datetime.now(UTC), error=str(e))
+                )
+                await db.commit()
+
+                LOGGER.exception(f"Job {job_id} failed: {e}")
 
     async def get_job_status(self, db: AsyncSession, job_id: str) -> JobDb | None:
         result = await db.execute(select(JobDb).where(JobDb.id == job_id))
