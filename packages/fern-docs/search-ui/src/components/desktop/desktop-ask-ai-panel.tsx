@@ -21,7 +21,7 @@ import { Components } from "react-markdown";
 import { UIMessage, useChat } from "@ai-sdk/react";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, UIDataTypes, UIMessagePart, UITools } from "ai";
 import type { Element as HastElement } from "hast";
 import {
   ArrowUp,
@@ -46,6 +46,7 @@ import { FacetFilter } from "@fern-docs/search-keyword";
 import { useEventCallback } from "@fern-ui/react-commons";
 
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
+import { isQueryIdPart } from "../../utils/query-id-part";
 import { AskAiContextPill } from "../ask-ai-context-pill";
 import { FootnoteSup, FootnotesSection } from "../chatbot/footnote";
 import { ChatbotTurnContextProvider } from "../chatbot/turn-context";
@@ -186,8 +187,9 @@ const DesktopAskAIContent = (props: {
     resetConversationId: () => void;
   };
   useQueryId: () => {
-    queryId: string | undefined;
-    setQueryId: (queryId: string | undefined) => void;
+    queryId: string;
+    setQueryId: (queryId: string) => void;
+    resetQueryId: () => void;
   };
   api?: string;
   suggestionsApi?: string;
@@ -243,8 +245,9 @@ const DesktopAskAIChat = ({
     resetConversationId: () => void;
   };
   useQueryId: () => {
-    queryId: string | undefined;
-    setQueryId: (queryId: string | undefined) => void;
+    queryId: string;
+    setQueryId: (queryId: string) => void;
+    resetQueryId: () => void;
   };
   api?: string;
   suggestionsApi?: string;
@@ -339,11 +342,11 @@ const DesktopAskAIChat = ({
         return;
       }
 
-      const queryIdPart = lastMessage.parts?.find(
-        (part: any) => part.type === "data-assistant-query-id"
+      const queryIdPart = lastMessage.parts?.find((part) =>
+        isQueryIdPart(part)
       );
 
-      if (queryIdPart?.data) {
+      if (queryIdPart) {
         setMessageQueryIds((prev) => ({
           ...prev,
           [lastMessage.id]: queryIdPart.data,
