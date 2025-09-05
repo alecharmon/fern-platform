@@ -22,6 +22,7 @@ import { InstallGithubAppButton } from "@/components/docs-page/InstallGithubAppB
 import { VEPreviewImage } from "@/components/docs-page/VEPreviewImage";
 import { WarningNote } from "@/components/docs-page/WarningNote";
 import Card from "@/components/ui/card";
+import { getValidationErrorMessage } from "@/utils/errors";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
@@ -87,6 +88,7 @@ export default async function Page(props: {
       try {
         const validation = await validateGithubRepoAccess(
           orgName,
+          docsUrl,
           {
             type: "url",
             githubUrl,
@@ -180,6 +182,7 @@ export default async function Page(props: {
                 error={githubAuthState.validationResult.error}
                 githubUrl={githubUrl}
                 orgName={orgName}
+                site={docsUrl}
               />
             ))}
         </div>
@@ -192,11 +195,12 @@ interface ValidationErrorHandlerProps {
   error: GithubRepoValidationError;
   githubUrl?: string;
   orgName: Auth0OrgName;
+  site: string;
 }
-
 function ValidationErrorHandler({
   error,
   orgName,
+  site,
   githubUrl,
 }: ValidationErrorHandlerProps) {
   switch (error.type) {
@@ -206,23 +210,24 @@ function ValidationErrorHandler({
           <p className="text-muted-foreground text-sm">
             To get started, install the Fern app on your GitHub repository.
           </p>
-          <InstallGithubAppButton orgName={orgName} githubUrl={githubUrl} />
+          <InstallGithubAppButton
+            orgName={orgName}
+            site={site}
+            githubUrl={githubUrl}
+          />
         </>
       );
 
     case "MALFORMED_GITHUB_URL":
-      return (
-        <WarningNote>
-          This repo was not found. Please check that the repo exists and that
-          you have access to it.
-        </WarningNote>
-      );
+      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
+
+    case "REPO_NOT_FOUND":
+      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
     case "FERN_CONFIG_JSON_MISSING":
       return (
         <WarningNote>
-          Your repository is missing a <code>fern.config.json</code> file.
-          Please ensure your Fern project is properly configured.
+          {getValidationErrorMessage(error)}
           {githubUrl && (
             <>
               {" "}
@@ -244,8 +249,7 @@ function ValidationErrorHandler({
     case "FERN_CONFIG_JSON_MALFORMED":
       return (
         <WarningNote>
-          Your <code>fern.config.json</code> file is malformed. Please check the
-          file syntax and ensure it follows the correct format.
+          {getValidationErrorMessage(error)}
           {githubUrl && (
             <>
               {" "}
@@ -265,21 +269,57 @@ function ValidationErrorHandler({
       );
 
     case "FERN_CONFIG_JSON_ORG_MISMATCH":
+      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
+
+    case "SITE_NOT_FOUND":
       return (
         <WarningNote>
-          The organization in your <code>fern.config.json</code> file does not
-          match your current organization.
+          {getValidationErrorMessage(error)}
+          {githubUrl && (
+            <>
+              {" "}
+              Check your repository{" "}
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary underline transition-colors"
+              >
+                here
+              </a>
+              .
+            </>
+          )}
+        </WarningNote>
+      );
+
+    case "MULTIPLE_PROJECTS_WITH_SITE":
+      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
+
+    case "NO_PROJECTS":
+      return (
+        <WarningNote>
+          {getValidationErrorMessage(error)}
+          {githubUrl && (
+            <>
+              {" "}
+              Check your repository{" "}
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary underline transition-colors"
+              >
+                here
+              </a>
+              .
+            </>
+          )}
         </WarningNote>
       );
 
     case "UNEXPECTED_ERROR":
-      return (
-        <WarningNote>
-          {
-            "An unexpected error occurred while attempting to access to this repository. Please try again or contact support if the issue persists."
-          }
-        </WarningNote>
-      );
+      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
     default:
       return (

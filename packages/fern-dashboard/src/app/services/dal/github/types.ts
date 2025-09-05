@@ -27,10 +27,12 @@ export interface GithubAccessValidationOptions {
 
 export const GithubIdentificationScheme = z.union([
   z.object({
+    site: z.string(),
     owner: z.string(),
     repo: z.string(),
   }),
   z.object({
+    site: z.string(),
     githubUrl: z.string(),
   }),
 ]);

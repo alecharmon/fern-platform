@@ -15,9 +15,11 @@ const POLLING_INTERVAL_BACKGROUND = 30 * 1000; // 30 seconds
 
 export function InstallGithubAppButton({
   orgName,
+  site,
   githubUrl,
 }: {
   orgName: string;
+  site: string;
   githubUrl?: string;
 }) {
   const [clicked, setClicked] = useState(false);
@@ -47,11 +49,11 @@ export function InstallGithubAppButton({
       console.warn("[checkIfRepoIsValid] No githubUrl to validate");
       return;
     }
-    const result = await validateGithubRepoAction(orgName, githubUrl);
+    const result = await validateGithubRepoAction(orgName, site, githubUrl);
     if (result.ok) {
       cleanUp(true);
     }
-  }, [orgName, githubUrl, cleanUp]);
+  }, [orgName, site, githubUrl, cleanUp]);
 
   const startBackgroundPoller = useCallback(() => {
     // If we don't have a github url, we can't poll

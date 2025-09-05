@@ -14,6 +14,7 @@ import { validateGithubRepoAccess } from "./validators";
 export interface ParsedRepoData {
   owner: string;
   repo: string;
+  site: string;
   githubUrl: string;
 }
 
@@ -96,7 +97,11 @@ export async function withGithubAuth(
   }
 
   // Validate GitHub access
-  const validation = await validateGithubRepoAccess(orgName, identifier);
+  const validation = await validateGithubRepoAccess(
+    orgName,
+    repoData.site,
+    identifier
+  );
 
   if (!validation.ok) {
     const { error } = validation;
@@ -130,5 +135,5 @@ export async function withGithubAuth(
   }
 
   // If we reach here, validation passed - execute the callback with parsed repo data
-  return await callback({ owner, repo, githubUrl });
+  return await callback({ owner, repo, site: repoData.site, githubUrl });
 }

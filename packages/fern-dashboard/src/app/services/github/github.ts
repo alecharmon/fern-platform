@@ -8,6 +8,7 @@ export async function handleCreatePr({
   orgName,
   branch,
   owner,
+  site,
   repo,
   baseBranch,
   title,
@@ -16,6 +17,7 @@ export async function handleCreatePr({
   orgName: Auth0OrgName;
   branch: string;
   owner: string;
+  site: string;
   repo: string;
   baseBranch: string;
   title?: string;
@@ -26,6 +28,7 @@ export async function handleCreatePr({
       orgName,
       owner,
       repo,
+      site,
       head: branch,
       base: baseBranch,
       title: title || DEFAULT_PR_TITLE,
@@ -38,6 +41,7 @@ export async function handleCreatePr({
           orgName,
           branch,
           owner,
+          site,
           repo,
           baseBranch,
         }).then((result) => {
@@ -63,12 +67,14 @@ export async function handleGeneratePrDescription({
   orgName,
   branch,
   owner,
+  site,
   repo,
   baseBranch,
 }: {
   orgName: Auth0OrgName;
   branch: string;
   owner: string;
+  site: string;
   repo: string;
   baseBranch: string;
 }): Promise<{
@@ -79,6 +85,7 @@ export async function handleGeneratePrDescription({
   return await DashboardApiClient.generatePrDescription({
     orgName,
     owner,
+    site,
     repo,
     branch,
     baseBranch,

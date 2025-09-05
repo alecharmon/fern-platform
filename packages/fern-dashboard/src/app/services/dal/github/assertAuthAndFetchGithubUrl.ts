@@ -32,7 +32,7 @@ export const assertAuthAndFetchGithubUrl = cache(
       redirect(`/${orgName}/docs`);
     }
     const githubUrl = urlResult.githubUrl;
-    await assertGithubAccessByUrl(orgName, githubUrl);
+    await assertGithubAccessByUrl(orgName, docsUrl, githubUrl);
 
     return { githubUrl, session };
   }

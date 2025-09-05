@@ -297,7 +297,7 @@ function generateSimpleHash(content: Record<string, string>): string {
 
 export function CommitButton() {
   const { changedMdxFiles, mdxSyncedStatus } = useMdxState();
-  const { gitPrUrl, setPrUrl, prTitle, refetchPrData } = useGitPrInfo();
+  const { gitPrUrl, setPrUrl, prTitle, refetchPrData, site } = useGitPrInfo();
   const { branch } = useBranch();
   const isEditingDisabled = useEditingDisabled();
   const { owner, repo, baseBranch } = useGitHubRepo();
@@ -395,6 +395,7 @@ export function CommitButton() {
         orgName,
         owner,
         repo,
+        site,
         branch,
         message: DEFAULT_COMMIT_MESSAGE,
         files: gitFiles,
@@ -441,6 +442,7 @@ export function CommitButton() {
           orgName,
           branch,
           owner,
+          site,
           repo,
           baseBranch,
           title: prTitle,
@@ -467,6 +469,7 @@ export function CommitButton() {
     prTitle,
     refetchPrData,
     owner,
+    site,
     repo,
     baseBranch,
     orgName,

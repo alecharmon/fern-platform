@@ -90,6 +90,7 @@ export function GoToEditorButton({
     DashboardApiClient.postCreateBranch({
       orgName,
       owner: sourceRepo.owner,
+      site: docsUrl,
       repo: sourceRepo.repo,
       branch: newBranchName,
       baseBranch: sourceRepo.baseBranch,
@@ -112,7 +113,7 @@ export function GoToEditorButton({
         });
         ErrorCreateBranchToast();
       });
-  }, [sourceRepo, newBranchName, editorSlug, orgName, router]);
+  }, [sourceRepo, newBranchName, editorSlug, orgName, docsUrl, router]);
 
   return (
     <div className="flex w-fit flex-row items-center gap-2">

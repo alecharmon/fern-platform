@@ -27,13 +27,18 @@ export const POST = withZodValidation(
       req,
       orgName,
       repoData,
-      async ({ owner, repo, githubUrl }) => {
+      async ({ owner, repo, site, githubUrl }) => {
         // Create GitHubLoader instance
         const gitLoader = new GitHubLoader(githubUrl);
 
         // Get the docs.yml file
-        const docsYmlContent = await gitLoader.getDocsYml(owner, repo, branch);
-        if (!docsYmlContent) {
+        const docsYmlContent = await gitLoader.getDocsYml(
+          owner,
+          repo,
+          site,
+          branch
+        );
+        if (docsYmlContent.type !== "ok") {
           return NextResponse.json(
             { error: "Failed to fetch docs.yml" },
             { status: 404 }
@@ -42,7 +47,7 @@ export const POST = withZodValidation(
 
         return NextResponse.json({
           success: true,
-          docsYmlContent,
+          docsYmlContent: docsYmlContent.result,
         });
       }
     );

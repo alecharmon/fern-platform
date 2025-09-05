@@ -23,6 +23,7 @@ export const GitPRContext = createContext<{
   prStatus: GithubPrStatus | undefined;
   setPrStatus: (status: GithubPrStatus) => void;
   prNumber: number | undefined;
+  site: string;
 }>({
   gitPrUrl: undefined,
   setPrUrl: (_url: string) => {
@@ -41,12 +42,14 @@ export const GitPRContext = createContext<{
     return;
   },
   prNumber: undefined,
+  site: "",
 });
 
 export function GitPRProvider({
   children,
   owner,
   repo,
+  site,
   branch,
   baseBranch,
 }: {
@@ -54,6 +57,7 @@ export function GitPRProvider({
   owner?: string;
   repo?: string;
   branch: string;
+  site: string;
   baseBranch?: string;
 }) {
   const [gitPrUrl, setGitPrUrl] = useState<string | undefined>(undefined);
@@ -77,6 +81,7 @@ export function GitPRProvider({
         orgName,
         owner,
         repo,
+        site,
         branch,
         baseBranch,
       });
@@ -130,7 +135,17 @@ export function GitPRProvider({
     } finally {
       setIsLoading(false);
     }
-  }, [owner, repo, branch, baseBranch, prNumber, prTitle, gitPrUrl, orgName]);
+  }, [
+    owner,
+    repo,
+    site,
+    branch,
+    baseBranch,
+    prNumber,
+    prTitle,
+    gitPrUrl,
+    orgName,
+  ]);
 
   // Fetch PR information when component mounts or dependencies change
   useEffect(() => {
@@ -157,6 +172,7 @@ export function GitPRProvider({
         refetchPrData,
         prStatus,
         setPrStatus,
+        site,
       }}
     >
       {children}

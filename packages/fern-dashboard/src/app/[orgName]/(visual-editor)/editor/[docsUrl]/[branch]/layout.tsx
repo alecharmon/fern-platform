@@ -80,6 +80,7 @@ export default async function EditorLayout({
                             repo={sourceRepo.repo}
                             baseBranch={sourceRepo.baseBranch}
                             branch={branch}
+                            site={docsUrl}
                           >
                             <HeaderToolbar
                               session={session}

@@ -28,7 +28,7 @@ export function PRStatusDropdown({
   gitPrUrl,
   baseBranch,
 }: PRStatusDropdownProps) {
-  const { prStatus, setPrStatus, loading } = useGitPrInfo();
+  const { prStatus, setPrStatus, loading, site } = useGitPrInfo();
   const orgName = useOrgName();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -51,6 +51,7 @@ export function PRStatusDropdown({
           orgName,
           owner,
           repo,
+          site,
           branch,
           status: newStatus,
           baseBranch,
@@ -68,7 +69,17 @@ export function PRStatusDropdown({
         setIsUpdating(false);
       }
     },
-    [owner, repo, branch, prStatus, gitPrUrl, setPrStatus, baseBranch, orgName]
+    [
+      owner,
+      repo,
+      branch,
+      site,
+      prStatus,
+      gitPrUrl,
+      setPrStatus,
+      baseBranch,
+      orgName,
+    ]
   );
 
   // If the PR does not yet exist, we'll pretend it's a draft

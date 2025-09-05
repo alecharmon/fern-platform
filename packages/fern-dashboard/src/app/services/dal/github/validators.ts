@@ -1,5 +1,7 @@
 import "server-only";
 
+import { FernConfigJsonErrors } from "@fern-api/docs-loader";
+
 import {
   getValidationErrorMessage,
   throwDigestibleError,
@@ -12,8 +14,7 @@ export type GithubRepoValidationError =
   | { type: "MALFORMED_GITHUB_URL"; url: string }
   | { type: "FERN_BOT_NOT_INSTALLED" }
   | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
-  | { type: "FERN_CONFIG_JSON_MISSING" }
-  | { type: "FERN_CONFIG_JSON_MALFORMED" }
+  | FernConfigJsonErrors
   | { type: "UNEXPECTED_ERROR"; message: string };
 
 export type GithubRepoValidationResult =
@@ -44,6 +45,7 @@ function deriveGithubUrl(identifier: RepoIdentifier): string {
 
 export const validateGithubRepoAccess = async (
   orgName: string,
+  site: string,
   identifier: RepoIdentifier,
   skipCache: boolean = false
 ): Promise<GithubRepoValidationResult> => {
@@ -58,7 +60,11 @@ export const validateGithubRepoAccess = async (
   const githubUrl = deriveGithubUrl(identifier);
 
   try {
-    const result = await checkOrgWritePermissionToRepo(orgName, githubUrl);
+    const result = await checkOrgWritePermissionToRepo(
+      orgName,
+      site,
+      githubUrl
+    );
 
     const validationResult: GithubRepoValidationResult = result.ok
       ? { ok: true }
@@ -97,9 +103,10 @@ export const validateGithubRepoAccess = async (
  */
 export async function assertGithubAccess(
   orgName: string,
+  site: string,
   identifier: RepoIdentifier
 ): Promise<void> {
-  const validation = await validateGithubRepoAccess(orgName, identifier);
+  const validation = await validateGithubRepoAccess(orgName, site, identifier);
 
   if (!validation.ok) {
     const { error } = validation;
@@ -112,14 +119,9 @@ export async function assertGithubAccess(
 
 export async function assertGithubAccessByUrl(
   orgName: string,
-  githubUrl?: string
+  site: string,
+  githubUrl: string
 ): Promise<void> {
-  if (githubUrl == null) {
-    throw throwDigestibleError(
-      new Error("GitHub URL is required"),
-      "GITHUB_URL_REQUIRED"
-    );
-  }
   const identifier: RepoIdentifier = { type: "url", githubUrl };
-  await assertGithubAccess(orgName, identifier);
+  await assertGithubAccess(orgName, site, identifier);
 }

@@ -28,7 +28,7 @@ export function PRTitleEditor({
   gitPrUrl,
   baseBranch,
 }: PRTitleEditorProps) {
-  const { prTitle: serverTitle, setPrTitle, loading } = useGitPrInfo();
+  const { prTitle: serverTitle, setPrTitle, loading, site } = useGitPrInfo();
   const isEditingDisabled = useEditingDisabled();
   const orgName = useOrgName();
   const [localTitle, setLocalTitle] = useState<string>(serverTitle ?? "");
@@ -63,6 +63,7 @@ export function PRTitleEditor({
           orgName,
           owner,
           repo,
+          site,
           branch,
           title: trimmedTitle,
           baseBranch,
@@ -84,6 +85,7 @@ export function PRTitleEditor({
       owner,
       repo,
       branch,
+      site,
       serverTitle,
       gitPrUrl,
       setLocalTitle,

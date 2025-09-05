@@ -29,18 +29,6 @@ class EditableDocsLoader implements DocsLoader {
     this.fern_token = docsLoader.fern_token;
   }
 
-  getDocsYml = (owner: string, repo: string, ref?: string) =>
-    this.gitLoader?.getDocsYml(owner, repo, ref) ?? Promise.resolve(null);
-
-  updateDocsYml = (
-    owner: string,
-    repo: string,
-    content: string,
-    ref?: string
-  ) =>
-    this.gitLoader?.updateDocsYml(owner, repo, content, ref) ??
-    Promise.resolve(false);
-
   getAuthConfig = () => this.readOnlyDocsLoader.getAuthConfig();
 
   getMetadata = () => this.readOnlyDocsLoader.getMetadata();
@@ -96,17 +84,102 @@ class EditableDocsLoader implements DocsLoader {
     this.readOnlyDocsLoader.getDynamicIr(apiNames);
 }
 
+interface GetFernProjectSuccess {
+  type: "ok";
+  result: {
+    defaultBranch: string;
+    project: FernProject;
+  };
+}
+
+type GetFernProjectErrors =
+  | { type: "REPO_NOT_FOUND" }
+  | { type: "SITE_NOT_FOUND" }
+  | { type: "MULTIPLE_PROJECTS_WITH_SITE" }
+  | { type: "NO_PROJECTS" };
+
+interface GetFernProjectError {
+  type: "error";
+  error: GetFernProjectErrors;
+}
+
+export type GetFernProjectResult = GetFernProjectSuccess | GetFernProjectError;
+
+type DocsYmlErrors = GetFernProjectErrors | { type: "DOCS_YML_MISSING" };
+
+interface DocsYmlError {
+  type: "error";
+  error: DocsYmlErrors;
+}
+
+interface GetDocsYmlSuccess {
+  type: "ok";
+  result: string;
+}
+
+export type GetDocsYmlResult = GetDocsYmlSuccess | DocsYmlError;
+
+interface UpdateDocsYmlSuccess {
+  type: "ok";
+}
+
+export type UpdateDocsYmlResult = UpdateDocsYmlSuccess | DocsYmlError;
+
+export type FernConfigJsonErrors =
+  | GetFernProjectErrors
+  | { type: "FERN_CONFIG_JSON_MALFORMED"; parsingErrorMessage: string }
+  | { type: "FERN_CONFIG_JSON_MISSING" };
+
+interface FernConfigJsonStructure {
+  organization: string;
+}
+
+interface FernConfigJsonSuccess {
+  type: "ok";
+  result: FernConfigJsonStructure;
+}
+
+interface FernConfigJsonError {
+  type: "error";
+  error: FernConfigJsonErrors;
+}
+
+export type GetFernConfigJsonResult =
+  | FernConfigJsonSuccess
+  | FernConfigJsonError;
+
+export interface FernProject {
+  docsYmlPath: string;
+  fernConfigJsonPath: string;
+}
+
 /**
  * The GitLoader is used to get and update docs.yml from a remote git repository.
  */
 export interface GitLoader {
-  getDocsYml(owner: string, repo: string, ref?: string): Promise<string | null>;
+  getFernProjectBySite(
+    owner: string,
+    repo: string,
+    site: string
+  ): Promise<GetFernProjectResult>;
+  getDocsYml(
+    owner: string,
+    repo: string,
+    site: string,
+    ref?: string
+  ): Promise<GetDocsYmlResult>;
   updateDocsYml(
     owner: string,
     repo: string,
+    site: string,
     content: string,
     ref?: string
-  ): Promise<boolean>;
+  ): Promise<UpdateDocsYmlResult>;
+  getFernConfigJson(
+    owner: string,
+    repo: string,
+    site: string
+  ): Promise<GetFernConfigJsonResult>;
 }
 
 export const createEditableDocsLoader = cache(
