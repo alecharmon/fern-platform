@@ -280,7 +280,7 @@ export async function GET(
                   controller.enqueue(`revalidated:${url}\n`);
                 } catch (e) {
                   console.error(
-                    `[revalidate:page-revalidate] error: ${JSON.stringify(e)}`
+                    `[revalidate:page-revalidate] error: url=${url}; error=${JSON.stringify((e as Error)?.message)}`
                   );
                   controller.enqueue(
                     `revalidate-failed:url=${url}:error=${escapeRegExp(String(e))}\n`
@@ -317,10 +317,7 @@ export async function GET(
                   authorization: authHeader,
                 },
                 body: JSON.stringify({
-                  url: new URL(
-                    docs.baseUrl.basePath ?? "",
-                    docs.baseUrl.domain
-                  ).toString(),
+                  url: `${docs.baseUrl.domain.replace(/\/$/, "")}${docs.baseUrl.basePath ?? ""}`,
                 }),
                 signal: AbortSignal.timeout(600_000),
               }
