@@ -44,11 +44,20 @@ export default function ChangelogEntryPage({
             as="article"
             id={node.date}
             stickyContent={
-              <Badge asChild>
-                <FernLink href={slugToHref(node.slug)} scroll={true}>
-                  {node.title}
-                </FernLink>
-              </Badge>
+              <div className="fern-changelog-label">
+                <Badge asChild>
+                  <FernLink href={slugToHref(node.slug)} scroll={true}>
+                    {node.title}
+                  </FernLink>
+                </Badge>
+                <div className="flex flex-row gap-2">
+                  {node.tags?.map((tag) => (
+                    <Badge key={tag} variant="outlined-subtle">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             }
           >
             {children}

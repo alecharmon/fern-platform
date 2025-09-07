@@ -10,6 +10,7 @@ import { MdxSerializer } from "@/server/mdx-serializer";
 
 import { FernBreadcrumbs } from "./FernBreadcrumbs";
 import { PageActionsDropdown } from "./PageActionsDropdown";
+import { PageFilters } from "./PageFilters";
 import { RSSFeedButton } from "./RSSFeedButton";
 
 export function PageHeader({
@@ -25,6 +26,7 @@ export function PageHeader({
   markdown,
   includeDropdown,
   showRssFeedButton,
+  filters,
 }: {
   slug: string;
   serialize: MdxSerializer;
@@ -38,6 +40,8 @@ export function PageHeader({
   markdown?: string;
   includeDropdown?: boolean;
   showRssFeedButton?: boolean;
+  // tags for the changelog section
+  filters?: string[];
 }) {
   return (
     <header className="my-8 space-y-2">
@@ -94,6 +98,13 @@ export function PageHeader({
             />
           </React.Suspense>
         </div>
+      )}
+
+      {filters && filters.length > 0 && (
+        <>
+          <hr className="my-4" />
+          <PageFilters filters={filters} />
+        </>
       )}
 
       {children}

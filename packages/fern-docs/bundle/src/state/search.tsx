@@ -102,3 +102,13 @@ export function useToggleSearchDialog(): () => void {
   const setSearchDialogState = useSetAtom(searchDialogOpenAtom);
   return () => setSearchDialogState((prev) => !prev);
 }
+
+export const selectedFiltersAtom = atom<string[]>([]);
+
+export const useSelectedFilters = () => {
+  return useAtomValue(selectedFiltersAtom);
+};
+
+export const useSetSelectedFilters = () => {
+  return useSetAtom(selectedFiltersAtom);
+};

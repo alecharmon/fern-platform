@@ -20,6 +20,10 @@
         @apply flex lg:hidden;
       }
 
+      .fern-changelog-label {
+        @apply flex flex-row gap-2 lg:flex-col;
+      }
+
       .fern-changelog-content > aside {
         @apply sticky hidden h-fit lg:flex lg:justify-end;
       }
