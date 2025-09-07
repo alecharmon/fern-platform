@@ -21,6 +21,7 @@ function sectionNode(
     noindex: undefined,
     pointsTo: undefined,
     featureFlags: undefined,
+    availability: undefined,
     ...section,
   };
 }
@@ -41,6 +42,7 @@ function pageNode(
     orphaned: undefined,
     noindex: undefined,
     featureFlags: undefined,
+    availability: undefined,
     ...page,
   };
 }

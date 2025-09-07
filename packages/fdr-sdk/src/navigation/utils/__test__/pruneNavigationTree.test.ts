@@ -23,6 +23,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -36,6 +37,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     };
 
     const result = Pruner.from(root)
@@ -65,6 +67,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -78,6 +81,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     });
   });
 
@@ -102,6 +106,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -115,6 +120,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     };
 
     const result = Pruner.from(root)
@@ -146,6 +152,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -158,6 +165,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     };
 
     const result = Pruner.from(root)
@@ -188,6 +196,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -200,6 +209,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     });
   });
 
@@ -225,6 +235,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -237,6 +248,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     };
 
     const result = Pruner.from(root)
@@ -263,6 +275,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     });
   });
 
@@ -288,6 +301,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -300,6 +314,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     };
 
     const result = Pruner.from(root)
@@ -330,6 +345,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -342,6 +358,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     });
   });
 
@@ -374,6 +391,7 @@ describe("pruneNavigationTree", () => {
               viewers: undefined,
               orphaned: undefined,
               featureFlags: undefined,
+              availability: undefined,
             },
           ],
           collapsed: undefined,
@@ -386,6 +404,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
         {
           type: "page",
@@ -401,6 +420,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -413,6 +433,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
     };
 
     const result = Pruner.from(root)
@@ -443,6 +464,7 @@ describe("pruneNavigationTree", () => {
           viewers: undefined,
           orphaned: undefined,
           featureFlags: undefined,
+          availability: undefined,
         },
       ],
       collapsed: undefined,
@@ -454,6 +476,7 @@ describe("pruneNavigationTree", () => {
       viewers: undefined,
       orphaned: undefined,
       featureFlags: undefined,
+      availability: undefined,
       // NOTE: points to is updated!
       pointsTo: "root/page",
     });
@@ -518,6 +541,7 @@ describe("pruneNavigationTree", () => {
                       viewers: undefined,
                       orphaned: undefined,
                       featureFlags: undefined,
+                      availability: undefined,
                     },
                   ],
                   collapsed: undefined,
@@ -530,6 +554,7 @@ describe("pruneNavigationTree", () => {
                   viewers: undefined,
                   orphaned: undefined,
                   featureFlags: undefined,
+                  availability: undefined,
                 },
               ],
             },
@@ -590,6 +615,7 @@ describe("pruneNavigationTree", () => {
                       viewers: undefined,
                       orphaned: undefined,
                       featureFlags: undefined,
+                      availability: undefined,
                     },
                   ],
                   collapsed: undefined,
@@ -602,6 +628,7 @@ describe("pruneNavigationTree", () => {
                   viewers: undefined,
                   orphaned: undefined,
                   featureFlags: undefined,
+                  availability: undefined,
                 },
               ],
             },
@@ -729,6 +756,7 @@ describe("pruneNavigationTree", () => {
                       viewers: undefined,
                       orphaned: undefined,
                       featureFlags: undefined,
+                      availability: undefined,
                     },
                   ],
                   collapsed: undefined,
@@ -741,6 +769,7 @@ describe("pruneNavigationTree", () => {
                   viewers: undefined,
                   orphaned: undefined,
                   featureFlags: undefined,
+                  availability: undefined,
                 },
               ],
             },

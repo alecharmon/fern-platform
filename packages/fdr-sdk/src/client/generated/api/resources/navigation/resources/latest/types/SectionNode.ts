@@ -11,4 +11,5 @@ export interface SectionNode
     type: "section";
     collapsed: boolean | undefined;
     children: FernRegistry.navigation.latest.NavigationChild[];
+    availability: FernRegistry.Availability | undefined;
 }

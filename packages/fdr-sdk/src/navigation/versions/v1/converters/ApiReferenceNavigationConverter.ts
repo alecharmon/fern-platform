@@ -450,6 +450,7 @@ export class ApiReferenceNavigationConverter {
                 viewers: undefined,
                 orphaned: undefined,
                 featureFlags: undefined,
+                availability: undefined,
               };
             })
           );

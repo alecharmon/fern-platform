@@ -165,6 +165,8 @@ types:
       contentAlignment: optional<ContentAlignment>
       headerPosition: optional<HeaderPosition>
       disableHeader: optional<boolean>
+      hideNavLinks: optional<boolean>
+      hideFeedback: optional<boolean>
 
   SearchbarPlacement:
     enum:

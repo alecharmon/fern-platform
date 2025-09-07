@@ -8,4 +8,5 @@ export interface PageNode
     extends FernRegistry.navigation.latest.WithNodeMetadata,
         FernRegistry.navigation.latest.WithPage {
     type: "page";
+    availability: FernRegistry.Availability | undefined;
 }

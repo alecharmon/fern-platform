@@ -4,4 +4,5 @@
 import * as FernRegistry from "../../../../../index";
 export interface PageNode extends FernRegistry.navigation.v1.WithNodeMetadata, FernRegistry.navigation.v1.WithPage {
     type: "page";
+    availability: FernRegistry.navigation.v1.NavigationV1Availability | undefined;
 }

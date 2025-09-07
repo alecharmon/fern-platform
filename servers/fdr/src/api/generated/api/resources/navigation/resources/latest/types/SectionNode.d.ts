@@ -6,4 +6,5 @@ export interface SectionNode extends FernRegistry.navigation.latest.WithNodeMeta
     type: "section";
     collapsed: boolean | undefined;
     children: FernRegistry.navigation.latest.NavigationChild[];
+    availability: FernRegistry.Availability | undefined;
 }

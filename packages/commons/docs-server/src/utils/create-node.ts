@@ -174,6 +174,7 @@ export function createPageNode(
     orphaned: undefined,
     noindex: false,
     featureFlags: [],
+    availability: undefined,
   };
 }
 
@@ -199,6 +200,7 @@ export function createSectionNode(
     overviewPageId: PageId("1.mdx"),
     pointsTo: undefined,
     featureFlags: [],
+    availability: undefined,
   };
 }
 
@@ -224,6 +226,7 @@ export function createNestedSectionNode(
     collapsed: false,
     pointsTo: undefined,
     featureFlags: [],
+    availability: undefined,
   };
 }
 

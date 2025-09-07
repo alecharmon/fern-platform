@@ -324,6 +324,7 @@ export class NavigationConfigConverter {
             viewers: undefined,
             orphaned: undefined,
             featureFlags: undefined,
+            availability: undefined,
           };
         }),
       link: (link) =>
@@ -375,6 +376,7 @@ export class NavigationConfigConverter {
             viewers: undefined,
             orphaned: undefined,
             featureFlags: undefined,
+            availability: undefined,
           };
         }),
       api: (apiSection) => {

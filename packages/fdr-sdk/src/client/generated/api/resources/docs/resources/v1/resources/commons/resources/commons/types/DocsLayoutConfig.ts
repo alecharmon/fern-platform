@@ -14,4 +14,6 @@ export interface DocsLayoutConfig {
     contentAlignment: FernRegistry.docs.v1.commons.ContentAlignment | undefined;
     headerPosition: FernRegistry.docs.v1.commons.HeaderPosition | undefined;
     disableHeader: boolean | undefined;
+    hideNavLinks: boolean | undefined;
+    hideFeedback: boolean | undefined;
 }

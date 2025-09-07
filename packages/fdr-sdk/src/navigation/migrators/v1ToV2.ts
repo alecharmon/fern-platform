@@ -385,6 +385,7 @@ export class FernNavigationV1ToLatest {
       viewers: node.viewers,
       orphaned: node.orphaned,
       featureFlags: node.featureFlags,
+      availability: this.#availability(node.availability),
     };
     return latest;
   };
@@ -423,6 +424,7 @@ export class FernNavigationV1ToLatest {
       viewers: node.viewers,
       orphaned: node.orphaned,
       featureFlags: node.featureFlags,
+      availability: this.#availability(node.availability),
     };
     return latest;
   };

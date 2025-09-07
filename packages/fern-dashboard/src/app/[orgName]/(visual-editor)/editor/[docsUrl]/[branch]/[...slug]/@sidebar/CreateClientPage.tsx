@@ -314,6 +314,7 @@ export function CreateClientPage({
         orphaned: undefined,
         featureFlags: undefined,
         noindex: undefined,
+        availability: undefined,
       };
 
       // Cache the client node and the sidebar root node with page data
