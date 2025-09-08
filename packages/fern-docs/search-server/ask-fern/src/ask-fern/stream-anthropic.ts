@@ -276,13 +276,17 @@ export async function runRouteForAnthropic({
           console.error(
             `Encountered a ${errorKind} for query '${lastUserMessage}: ${JSON.stringify(error)}'`
           );
+
+          const { activeLanguageModel, activeModelProvider } =
+            getModelUsageInfo(languageModel);
+
           let errorString = JSON.stringify(error);
           if (errorString.length > 1000) {
             errorString = errorString.slice(0, 1000) + "...";
           }
           postToSlack(
             "#search-notifs",
-            `:rotating_light: [${domain}] [source: ${chatSource}] [languageModel: ${JSON.stringify(languageModel)}] [conversationId: ${conversationId}] \`Ask AI\` encountered a ${errorKind}: \`${errorString}\``
+            `:rotating_light: [${domain}] [source: ${chatSource}] [languageModel: ${activeLanguageModel}] [provider: ${activeModelProvider}] [conversationId: ${conversationId}] \`Ask AI\` encountered a ${errorKind}: \`${errorString}\``
           );
         },
         onFinish: async (e) => {
