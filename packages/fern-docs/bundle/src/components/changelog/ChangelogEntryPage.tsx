@@ -14,6 +14,7 @@ import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { MdxSerializer } from "@/server/mdx-serializer";
 
+import { PageFilters } from "../PageFilters";
 import { ChangelogContentLayout } from "./ChangelogContentLayout";
 
 // sidebar is always hidden on changelog entry pages
@@ -50,12 +51,8 @@ export default function ChangelogEntryPage({
                     {node.title}
                   </FernLink>
                 </Badge>
-                <div className="flex flex-row gap-2">
-                  {node.tags?.map((tag) => (
-                    <Badge key={tag} variant="outlined-subtle">
-                      {tag}
-                    </Badge>
-                  ))}
+                <div className="flex flex-row gap-2 pt-2">
+                  <PageFilters filters={node.tags ?? []} forcePillDisplay />
                 </div>
               </div>
             }

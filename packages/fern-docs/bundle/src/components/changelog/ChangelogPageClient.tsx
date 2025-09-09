@@ -22,6 +22,7 @@ import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { useSelectedFilters } from "@/state/search";
 
+import { PageFilters } from "../PageFilters";
 import { BottomNavigationClient } from "../bottom-nav-client";
 import { ChangelogContentLayout } from "./ChangelogContentLayout";
 
@@ -187,12 +188,11 @@ export default function ChangelogPageClient({
                             {entry.title}
                           </FernLink>
                         </Badge>
-                        <div className="flex flex-row gap-2">
-                          {entry.tags?.map((tag) => (
-                            <Badge key={tag} variant="outlined-subtle">
-                              {tag}
-                            </Badge>
-                          ))}
+                        <div className="filter-row">
+                          <PageFilters
+                            filters={entry.tags ?? []}
+                            forcePillDisplay
+                          />
                         </div>
                       </div>
                     }

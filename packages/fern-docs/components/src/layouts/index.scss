@@ -18,14 +18,26 @@
 
       .eyebrow {
         @apply flex lg:hidden;
+
+        .filter-row {
+          @apply flex-nowrap! min-w-0;
+        }
       }
 
       .fern-changelog-label {
-        @apply flex flex-row gap-2 lg:flex-col;
+        @apply flex w-full flex-row gap-2 lg:flex-col;
+
+        .filter-row {
+          @apply flex flex-row flex-wrap gap-2;
+        }
+      }
+
+      .fern-filter-badge {
+        @apply inline max-w-full cursor-pointer truncate;
       }
 
       .fern-changelog-content > aside {
-        @apply sticky hidden h-fit lg:flex lg:justify-end;
+        @apply sticky hidden h-fit min-w-0 lg:flex lg:justify-end;
       }
     }
 
