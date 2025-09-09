@@ -96,8 +96,17 @@ async function FooterLayoutWithEditThisPageUrl({
   });
   const editThisPageUrl =
     mdx?.frontmatter?.["edit-this-page-url"] ?? page.editThisPageUrl;
+
+  const configLayout = await loader.getLayout();
+
   return (
     <FooterLayout
+      hideFeedback={
+        mdx?.frontmatter?.["hide-feedback"] ?? configLayout.hideFeedback
+      }
+      hideNavLinks={
+        mdx?.frontmatter?.["hide-nav-links"] ?? configLayout.hideNavLinks
+      }
       bottomNavigation={bottomNavigation}
       editThisPageUrl={editThisPageUrl}
     />

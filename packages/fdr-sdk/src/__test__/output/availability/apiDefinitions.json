@@ -1,0 +1,4431 @@
+[
+  {
+    "id": "68959464-61a0-46a4-b0ed-340397f889dd",
+    "endpoints": {
+      "endpoint_users.getUsers": {
+        "id": "endpoint_users.getUsers",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Get all users",
+        "operationId": "get-users",
+        "description": "Retrieve a paginated list of all users in the system",
+        "method": "GET",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "queryParameters": [
+          {
+            "key": "idempotency_key",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "optional",
+                "shape": {
+                  "type": "alias",
+                  "value": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Idempotency key for the request"
+          },
+          {
+            "key": "page",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "optional",
+                "shape": {
+                  "type": "alias",
+                  "value": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "default": 1
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "key": "limit",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "optional",
+                "shape": {
+                  "type": "alias",
+                  "value": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "default": 20
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "key": "sort",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "optional",
+                "shape": {
+                  "type": "alias",
+                  "value": {
+                    "type": "id",
+                    "id": "UsersGetParametersSort"
+                  }
+                }
+              }
+            },
+            "description": "Sort field"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "Successful response",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Users_getUsers_Response_200"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "data": [
+                  {
+                    "id": 1,
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "role": "user",
+                    "created_at": "2024-01-15T10:30:00Z"
+                  },
+                  {
+                    "id": 2,
+                    "name": "Jane Smith",
+                    "email": "jane@example.com",
+                    "role": "user",
+                    "created_at": "2024-01-16T14:20:00Z"
+                  }
+                ],
+                "pagination": {
+                  "page": 1,
+                  "limit": 20,
+                  "total": 150,
+                  "total_pages": 8
+                }
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 400,
+            "pathParameters": {},
+            "queryParameters": {
+              "idempotency_key": "string",
+              "page": 0
+            },
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -G https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -d idempotency_key=string \\\n     -d page=0",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 500,
+            "pathParameters": {},
+            "queryParameters": {
+              "idempotency_key": "string",
+              "page": 0
+            },
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -G https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -d idempotency_key=string \\\n     -d page=0",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.createUser": {
+        "id": "endpoint_users.createUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Create a new user",
+        "operationId": "create-user",
+        "description": "Create a new user account with the provided information",
+        "method": "POST",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "requests": [
+          {
+            "contentType": "application/json",
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "CreateUserRequest"
+              }
+            }
+          }
+        ],
+        "responses": [
+          {
+            "description": "User created successfully",
+            "statusCode": 201,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "User with this email already exists",
+            "name": "Conflict Error",
+            "statusCode": 409,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users",
+            "responseStatusCode": 201,
+            "description": "",
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "Alice Johnson",
+                "email": "alice@example.com",
+                "password": "securepassword123",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 3,
+                "name": "Alice Johnson",
+                "email": "alice@example.com",
+                "role": "user",
+                "created_at": "2024-01-17T09:15:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"Alice Johnson\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"securepassword123\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 400,
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "password": "string"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 409,
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "password": "string"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 500,
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "password": "string"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.getUser": {
+        "id": "endpoint_users.getUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Get a specific user",
+        "operationId": "get-user",
+        "description": "Retrieve a specific user by ID",
+        "method": "GET",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to retrieve"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "User retrieved successfully",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "role": "user",
+                "created_at": "2024-01-15T10:30:00Z",
+                "status": "active",
+                "updated_at": "2024-01-16T14:20:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.replaceUser": {
+        "id": "endpoint_users.replaceUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Replace a user",
+        "operationId": "replace-user",
+        "description": "Replace all user data with the provided information",
+        "method": "PUT",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to replace"
+          }
+        ],
+        "requests": [
+          {
+            "contentType": "application/json",
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "ReplaceUserRequest"
+              }
+            }
+          }
+        ],
+        "responses": [
+          {
+            "description": "User replaced successfully",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "Bob Wilson",
+                "email": "bob@example.com",
+                "role": "admin",
+                "status": "active"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "role": "user",
+                "created_at": "2024-01-15T10:30:00Z",
+                "status": "active",
+                "updated_at": "2024-01-16T14:20:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"Bob Wilson\",\n  \"email\": \"bob@example.com\",\n  \"role\": \"admin\",\n  \"status\": \"active\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 400,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.deleteUser": {
+        "id": "endpoint_users.deleteUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Delete a user",
+        "operationId": "delete-user",
+        "description": "Permanently delete a user from the system",
+        "method": "DELETE",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to delete"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "User deleted successfully",
+            "statusCode": 204,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Users_deleteUser_Response_204"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 204,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {}
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X DELETE https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X DELETE https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X DELETE https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.updateUser": {
+        "id": "endpoint_users.updateUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Update a user",
+        "operationId": "update-user",
+        "description": "Update specific fields of a user",
+        "method": "PATCH",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to update"
+          }
+        ],
+        "requests": [
+          {
+            "contentType": "application/json",
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "UpdateUserRequest"
+              }
+            }
+          }
+        ],
+        "responses": [
+          {
+            "description": "User updated successfully",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "Updated Name",
+                "status": "inactive"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "role": "user",
+                "created_at": "2024-01-15T10:30:00Z",
+                "status": "active",
+                "updated_at": "2024-01-16T14:20:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"Updated Name\",\n  \"status\": \"inactive\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 400,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {}
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {}
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {}
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{}'",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.checkUserExists": {
+        "id": "endpoint_users.checkUserExists",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Check user existence",
+        "operationId": "check-user-exists",
+        "description": "Check if a user exists without returning the user data",
+        "method": "HEAD",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to check"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "User exists",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Users_checkUserExists_Response_200"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "User does not exist",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "unknown"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {}
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X HEAD https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {}
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X HEAD https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X HEAD https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      }
+    },
+    "websockets": {},
+    "webhooks": {},
+    "types": {
+      "UserRole": {
+        "name": "UserRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "UserStatus": {
+        "name": "UserStatus",
+        "description": "Current status of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "active"
+            },
+            {
+              "value": "inactive"
+            },
+            {
+              "value": "suspended"
+            }
+          ]
+        }
+      },
+      "User": {
+        "name": "User",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "id",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "description": "Unique identifier for the user"
+            },
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "id",
+                  "id": "UserRole"
+                }
+              },
+              "description": "Role of the user"
+            },
+            {
+              "key": "status",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "UserStatus"
+                    }
+                  }
+                }
+              },
+              "description": "Current status of the user"
+            },
+            {
+              "key": "created_at",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "description": "When the user was created"
+            },
+            {
+              "key": "updated_at",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "When the user was last updated"
+            }
+          ]
+        }
+      },
+      "CreateUserRequestRole": {
+        "name": "CreateUserRequestRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "default": "user",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "CreateUserRequest": {
+        "name": "CreateUserRequest",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "password",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "minLength": 8
+                  }
+                }
+              },
+              "description": "Password for the user account"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "CreateUserRequestRole"
+                    }
+                  }
+                }
+              },
+              "description": "Role of the user"
+            }
+          ]
+        }
+      },
+      "ReplaceUserRequestRole": {
+        "name": "ReplaceUserRequestRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "ReplaceUserRequestStatus": {
+        "name": "ReplaceUserRequestStatus",
+        "description": "Current status of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "active"
+            },
+            {
+              "value": "inactive"
+            },
+            {
+              "value": "suspended"
+            }
+          ]
+        }
+      },
+      "ReplaceUserRequest": {
+        "name": "ReplaceUserRequest",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "id",
+                  "id": "ReplaceUserRequestRole"
+                }
+              },
+              "description": "Role of the user"
+            },
+            {
+              "key": "status",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "ReplaceUserRequestStatus"
+                    }
+                  }
+                }
+              },
+              "description": "Current status of the user"
+            }
+          ]
+        }
+      },
+      "UpdateUserRequestRole": {
+        "name": "UpdateUserRequestRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "UpdateUserRequestStatus": {
+        "name": "UpdateUserRequestStatus",
+        "description": "Current status of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "active"
+            },
+            {
+              "value": "inactive"
+            },
+            {
+              "value": "suspended"
+            }
+          ]
+        }
+      },
+      "UpdateUserRequest": {
+        "name": "UpdateUserRequest",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "UpdateUserRequestRole"
+                    }
+                  }
+                }
+              },
+              "description": "Role of the user"
+            },
+            {
+              "key": "status",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "UpdateUserRequestStatus"
+                    }
+                  }
+                }
+              },
+              "description": "Current status of the user"
+            }
+          ]
+        }
+      },
+      "Pagination": {
+        "name": "Pagination",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "page",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              },
+              "description": "Current page number"
+            },
+            {
+              "key": "limit",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  }
+                }
+              },
+              "description": "Number of items per page"
+            },
+            {
+              "key": "total",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "description": "Total number of items"
+            },
+            {
+              "key": "total_pages",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "description": "Total number of pages"
+            }
+          ]
+        }
+      },
+      "ErrorDetails": {
+        "name": "ErrorDetails",
+        "description": "Additional error details",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": []
+        }
+      },
+      "Error": {
+        "name": "Error",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "error",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Error message"
+            },
+            {
+              "key": "code",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Error code"
+            },
+            {
+              "key": "details",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "ErrorDetails"
+                    }
+                  }
+                }
+              },
+              "description": "Additional error details"
+            }
+          ]
+        }
+      },
+      "UsersGetParametersSort": {
+        "name": "UsersGetParametersSort",
+        "shape": {
+          "type": "enum",
+          "default": "id",
+          "values": [
+            {
+              "value": "id"
+            },
+            {
+              "value": "name"
+            },
+            {
+              "value": "email"
+            },
+            {
+              "value": "created_at"
+            }
+          ]
+        }
+      },
+      "Users_getUsers_Response_200": {
+        "name": "Users_getUsers_Response_200",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "data",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "list",
+                      "itemShape": {
+                        "type": "alias",
+                        "value": {
+                          "type": "id",
+                          "id": "User"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "Users_deleteUser_Response_204": {
+        "name": "Users_deleteUser_Response_204",
+        "description": "Empty response body",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": []
+        }
+      },
+      "Users_checkUserExists_Response_200": {
+        "name": "Users_checkUserExists_Response_200",
+        "description": "Empty response body",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": []
+        }
+      }
+    },
+    "subpackages": {
+      "subpackage_users": {
+        "id": "subpackage_users",
+        "name": "users"
+      }
+    },
+    "auths": {
+      "default": {
+        "type": "bearerAuth",
+        "tokenName": "token"
+      }
+    }
+  },
+  {
+    "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+    "endpoints": {
+      "endpoint_users.getUsers": {
+        "id": "endpoint_users.getUsers",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Get all users",
+        "operationId": "get-users",
+        "description": "Retrieve a paginated list of all users in the system",
+        "method": "GET",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "queryParameters": [
+          {
+            "key": "page",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "optional",
+                "shape": {
+                  "type": "alias",
+                  "value": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "default": 1
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "key": "limit",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "optional",
+                "shape": {
+                  "type": "alias",
+                  "value": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100,
+                      "default": 20
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "key": "sort",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "optional",
+                "shape": {
+                  "type": "alias",
+                  "value": {
+                    "type": "id",
+                    "id": "UsersGetParametersSort"
+                  }
+                }
+              }
+            },
+            "description": "Sort field"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "Successful response",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Users_getUsers_Response_200"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "data": [
+                  {
+                    "id": 1,
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "role": "user",
+                    "created_at": "2024-01-15T10:30:00Z"
+                  },
+                  {
+                    "id": 2,
+                    "name": "Jane Smith",
+                    "email": "jane@example.com",
+                    "role": "user",
+                    "created_at": "2024-01-16T14:20:00Z"
+                  }
+                ],
+                "pagination": {
+                  "page": 1,
+                  "limit": 20,
+                  "total": 150,
+                  "total_pages": 8
+                }
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 400,
+            "pathParameters": {},
+            "queryParameters": {
+              "page": 0,
+              "limit": 0
+            },
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -G https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -d page=0 \\\n     -d limit=0",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 500,
+            "pathParameters": {},
+            "queryParameters": {
+              "page": 0,
+              "limit": 0
+            },
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -G https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -d page=0 \\\n     -d limit=0",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.createUser": {
+        "id": "endpoint_users.createUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Create a new user",
+        "operationId": "create-user",
+        "description": "Create a new user account with the provided information",
+        "method": "POST",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "requests": [
+          {
+            "contentType": "application/json",
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "CreateUserRequest"
+              }
+            }
+          }
+        ],
+        "responses": [
+          {
+            "description": "User created successfully",
+            "statusCode": 201,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "User with this email already exists",
+            "name": "Conflict Error",
+            "statusCode": 409,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users",
+            "responseStatusCode": 201,
+            "description": "",
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "Alice Johnson",
+                "email": "alice@example.com",
+                "password": "securepassword123",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 3,
+                "name": "Alice Johnson",
+                "email": "alice@example.com",
+                "role": "user",
+                "created_at": "2024-01-17T09:15:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"Alice Johnson\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"securepassword123\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 400,
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "password": "string"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 409,
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "password": "string"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users",
+            "responseStatusCode": 500,
+            "pathParameters": {},
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "password": "string"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X POST https://prod.example.com/v1/users \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.getUser": {
+        "id": "endpoint_users.getUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Get a specific user",
+        "operationId": "get-user",
+        "description": "Retrieve a specific user by ID",
+        "method": "GET",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to retrieve"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "User retrieved successfully",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "role": "user",
+                "created_at": "2024-01-15T10:30:00Z",
+                "status": "active",
+                "updated_at": "2024-01-16T14:20:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.replaceUser": {
+        "id": "endpoint_users.replaceUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Replace a user",
+        "operationId": "replace-user",
+        "description": "Replace all user data with the provided information",
+        "method": "PUT",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to replace"
+          }
+        ],
+        "requests": [
+          {
+            "contentType": "application/json",
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "ReplaceUserRequest"
+              }
+            }
+          }
+        ],
+        "responses": [
+          {
+            "description": "User replaced successfully",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "Bob Wilson",
+                "email": "bob@example.com",
+                "role": "admin",
+                "status": "active"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "role": "user",
+                "created_at": "2024-01-15T10:30:00Z",
+                "status": "active",
+                "updated_at": "2024-01-16T14:20:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"Bob Wilson\",\n  \"email\": \"bob@example.com\",\n  \"role\": \"admin\",\n  \"status\": \"active\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 400,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "string",
+                "email": "string",
+                "role": "user"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PUT https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"string\",\n  \"email\": \"string\",\n  \"role\": \"user\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.deleteUser": {
+        "id": "endpoint_users.deleteUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Delete a user",
+        "operationId": "delete-user",
+        "description": "Permanently delete a user from the system",
+        "method": "DELETE",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to delete"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "User deleted successfully",
+            "statusCode": 204,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Users_deleteUser_Response_204"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 204,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {}
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X DELETE https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X DELETE https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X DELETE https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.updateUser": {
+        "id": "endpoint_users.updateUser",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Update a user",
+        "operationId": "update-user",
+        "description": "Update specific fields of a user",
+        "method": "PATCH",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to update"
+          }
+        ],
+        "requests": [
+          {
+            "contentType": "application/json",
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "UpdateUserRequest"
+              }
+            }
+          }
+        ],
+        "responses": [
+          {
+            "description": "User updated successfully",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "User"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "Bad request - invalid input data",
+            "name": "Bad Request Error",
+            "statusCode": 400,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Resource not found",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {
+                "name": "Updated Name",
+                "status": "inactive"
+              }
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "role": "user",
+                "created_at": "2024-01-15T10:30:00Z",
+                "status": "active",
+                "updated_at": "2024-01-16T14:20:00Z"
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n  \"name\": \"Updated Name\",\n  \"status\": \"inactive\"\n}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 400,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {}
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {}
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{}'",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "requestBody": {
+              "type": "json",
+              "value": {}
+            },
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X PATCH https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{}'",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      },
+      "endpoint_users.checkUserExists": {
+        "id": "endpoint_users.checkUserExists",
+        "namespace": [
+          "subpackage_users"
+        ],
+        "displayName": "Check user existence",
+        "operationId": "check-user-exists",
+        "description": "Check if a user exists without returning the user data",
+        "method": "HEAD",
+        "path": [
+          {
+            "type": "literal",
+            "value": "/users/"
+          },
+          {
+            "type": "pathParameter",
+            "value": "userId"
+          }
+        ],
+        "auth": [
+          "default"
+        ],
+        "defaultEnvironment": "Production server",
+        "environments": [
+          {
+            "id": "Production server",
+            "baseUrl": "https://prod.example.com/v1"
+          },
+          {
+            "id": "Development server",
+            "baseUrl": "https://dev.example.com/v1"
+          },
+          {
+            "id": "Localhost server",
+            "baseUrl": "http://localhost:3000/v1"
+          }
+        ],
+        "pathParameters": [
+          {
+            "key": "userId",
+            "valueShape": {
+              "type": "alias",
+              "value": {
+                "type": "primitive",
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "description": "The ID of the user to check"
+          }
+        ],
+        "requests": [],
+        "responses": [
+          {
+            "description": "User exists",
+            "statusCode": 200,
+            "body": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Users_checkUserExists_Response_200"
+              }
+            }
+          }
+        ],
+        "errors": [
+          {
+            "description": "User does not exist",
+            "name": "Not Found Error",
+            "statusCode": 404,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "unknown"
+              }
+            },
+            "examples": []
+          },
+          {
+            "description": "Internal server error",
+            "name": "Internal Server Error",
+            "statusCode": 500,
+            "shape": {
+              "type": "alias",
+              "value": {
+                "type": "id",
+                "id": "Error"
+              }
+            },
+            "examples": []
+          }
+        ],
+        "examples": [
+          {
+            "path": "/users/1",
+            "responseStatusCode": 200,
+            "description": "",
+            "pathParameters": {
+              "userId": 1
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {}
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X HEAD https://prod.example.com/v1/users/1 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 404,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {}
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X HEAD https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          },
+          {
+            "path": "/users/0",
+            "responseStatusCode": 500,
+            "pathParameters": {
+              "userId": 0
+            },
+            "queryParameters": {},
+            "headers": {},
+            "responseBody": {
+              "type": "json",
+              "value": {
+                "error": "string",
+                "code": "string",
+                "details": {}
+              }
+            },
+            "snippets": {
+              "curl": [
+                {
+                  "language": "curl",
+                  "code": "curl -X HEAD https://prod.example.com/v1/users/0 \\\n     -H \"Authorization: Bearer <token>\"",
+                  "generated": true
+                }
+              ]
+            }
+          }
+        ],
+        "protocol": {
+          "type": "rest"
+        }
+      }
+    },
+    "websockets": {},
+    "webhooks": {},
+    "types": {
+      "UserRole": {
+        "name": "UserRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "UserStatus": {
+        "name": "UserStatus",
+        "description": "Current status of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "active"
+            },
+            {
+              "value": "inactive"
+            },
+            {
+              "value": "suspended"
+            }
+          ]
+        }
+      },
+      "User": {
+        "name": "User",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "id",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "description": "Unique identifier for the user"
+            },
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "id",
+                  "id": "UserRole"
+                }
+              },
+              "description": "Role of the user"
+            },
+            {
+              "key": "status",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "UserStatus"
+                    }
+                  }
+                }
+              },
+              "description": "Current status of the user"
+            },
+            {
+              "key": "created_at",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "description": "When the user was created"
+            },
+            {
+              "key": "updated_at",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "When the user was last updated"
+            }
+          ]
+        }
+      },
+      "CreateUserRequestRole": {
+        "name": "CreateUserRequestRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "default": "user",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "CreateUserRequest": {
+        "name": "CreateUserRequest",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "password",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "minLength": 8
+                  }
+                }
+              },
+              "description": "Password for the user account"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "CreateUserRequestRole"
+                    }
+                  }
+                }
+              },
+              "description": "Role of the user"
+            }
+          ]
+        }
+      },
+      "ReplaceUserRequestRole": {
+        "name": "ReplaceUserRequestRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "ReplaceUserRequestStatus": {
+        "name": "ReplaceUserRequestStatus",
+        "description": "Current status of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "active"
+            },
+            {
+              "value": "inactive"
+            },
+            {
+              "value": "suspended"
+            }
+          ]
+        }
+      },
+      "ReplaceUserRequest": {
+        "name": "ReplaceUserRequest",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "id",
+                  "id": "ReplaceUserRequestRole"
+                }
+              },
+              "description": "Role of the user"
+            },
+            {
+              "key": "status",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "ReplaceUserRequestStatus"
+                    }
+                  }
+                }
+              },
+              "description": "Current status of the user"
+            }
+          ]
+        }
+      },
+      "UpdateUserRequestRole": {
+        "name": "UpdateUserRequestRole",
+        "description": "Role of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "user"
+            },
+            {
+              "value": "admin"
+            },
+            {
+              "value": "moderator"
+            }
+          ]
+        }
+      },
+      "UpdateUserRequestStatus": {
+        "name": "UpdateUserRequestStatus",
+        "description": "Current status of the user",
+        "shape": {
+          "type": "enum",
+          "values": [
+            {
+              "value": "active"
+            },
+            {
+              "value": "inactive"
+            },
+            {
+              "value": "suspended"
+            }
+          ]
+        }
+      },
+      "UpdateUserRequest": {
+        "name": "UpdateUserRequest",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "name",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Full name of the user"
+            },
+            {
+              "key": "email",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Email address of the user"
+            },
+            {
+              "key": "role",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "UpdateUserRequestRole"
+                    }
+                  }
+                }
+              },
+              "description": "Role of the user"
+            },
+            {
+              "key": "status",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "UpdateUserRequestStatus"
+                    }
+                  }
+                }
+              },
+              "description": "Current status of the user"
+            }
+          ]
+        }
+      },
+      "Pagination": {
+        "name": "Pagination",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "page",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              },
+              "description": "Current page number"
+            },
+            {
+              "key": "limit",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  }
+                }
+              },
+              "description": "Number of items per page"
+            },
+            {
+              "key": "total",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "description": "Total number of items"
+            },
+            {
+              "key": "total_pages",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "description": "Total number of pages"
+            }
+          ]
+        }
+      },
+      "ErrorDetails": {
+        "name": "ErrorDetails",
+        "description": "Additional error details",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": []
+        }
+      },
+      "Error": {
+        "name": "Error",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "error",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Error message"
+            },
+            {
+              "key": "code",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "primitive",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Error code"
+            },
+            {
+              "key": "details",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "id",
+                      "id": "ErrorDetails"
+                    }
+                  }
+                }
+              },
+              "description": "Additional error details"
+            }
+          ]
+        }
+      },
+      "UsersGetParametersSort": {
+        "name": "UsersGetParametersSort",
+        "shape": {
+          "type": "enum",
+          "default": "id",
+          "values": [
+            {
+              "value": "id"
+            },
+            {
+              "value": "name"
+            },
+            {
+              "value": "email"
+            },
+            {
+              "value": "created_at"
+            }
+          ]
+        }
+      },
+      "Users_getUsers_Response_200": {
+        "name": "Users_getUsers_Response_200",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": [
+            {
+              "key": "data",
+              "valueShape": {
+                "type": "alias",
+                "value": {
+                  "type": "optional",
+                  "shape": {
+                    "type": "alias",
+                    "value": {
+                      "type": "list",
+                      "itemShape": {
+                        "type": "alias",
+                        "value": {
+                          "type": "id",
+                          "id": "User"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "Users_deleteUser_Response_204": {
+        "name": "Users_deleteUser_Response_204",
+        "description": "Empty response body",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": []
+        }
+      },
+      "Users_checkUserExists_Response_200": {
+        "name": "Users_checkUserExists_Response_200",
+        "description": "Empty response body",
+        "shape": {
+          "type": "object",
+          "extends": [],
+          "properties": []
+        }
+      }
+    },
+    "subpackages": {
+      "subpackage_users": {
+        "id": "subpackage_users",
+        "name": "users"
+      }
+    },
+    "auths": {
+      "default": {
+        "type": "bearerAuth",
+        "tokenName": "token"
+      }
+    }
+  }
+]

@@ -7,4 +7,6 @@ export interface FernLayoutConfig {
   tabsPlacement: "SIDEBAR" | "HEADER";
   searchbarPlacement: "SIDEBAR" | "HEADER" | "HEADER_TABS";
   isHeaderDisabled: boolean;
+  hideNavLinks: boolean;
+  hideFeedback: boolean;
 }

@@ -972,6 +972,8 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
       tabsPlacement,
       searchbarPlacement,
       isHeaderDisabled: config.layout?.disableHeader ?? false,
+      hideNavLinks: config.layout?.hideNavLinks ?? false,
+      hideFeedback: config.layout?.hideFeedback ?? false,
     };
   });
 

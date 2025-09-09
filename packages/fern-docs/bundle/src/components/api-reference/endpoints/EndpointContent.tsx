@@ -28,6 +28,7 @@ export async function EndpointContent({
   breadcrumb,
   action,
   bottomNavigation,
+  hideFeedback,
 }: {
   serialize: MdxSerializer;
   showErrors: boolean;
@@ -36,6 +37,7 @@ export async function EndpointContent({
   breadcrumb: readonly FernNavigation.BreadcrumbItem[];
   action?: React.ReactNode;
   bottomNavigation?: React.ReactNode;
+  hideFeedback: boolean;
 }) {
   const { node, endpoint, types } = context;
 
@@ -84,7 +86,12 @@ export async function EndpointContent({
             </TypeDefinitionSlotsServer>
           </TypeDefinitionRoot>
         }
-        footer={<FooterLayout bottomNavigation={bottomNavigation} />}
+        footer={
+          <FooterLayout
+            bottomNavigation={bottomNavigation}
+            hideFeedback={hideFeedback}
+          />
+        }
       >
         <PlaygroundKeyboardTrigger />
         <MdxServerComponentProseSuspense mdx={endpoint.description} />

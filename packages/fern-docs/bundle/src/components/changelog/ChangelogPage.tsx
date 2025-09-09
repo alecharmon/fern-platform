@@ -32,6 +32,7 @@ export default async function ChangelogPage({
   isFullPage: boolean;
 }) {
   const node = await loader.getNavigationNode(nodeId);
+  const configLayout = await loader.getLayout();
   if (node.type !== "changelog") {
     console.error(
       `[${loader.domain}] Found non-changelog node for nodeId: ${nodeId}`
@@ -100,6 +101,7 @@ export default async function ChangelogPage({
         })
       )}
       isFullPage={isFullPage}
+      configLayout={configLayout}
     />
   );
 }

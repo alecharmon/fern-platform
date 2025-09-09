@@ -52,11 +52,13 @@ export async function LayoutEvaluator({
   const title = frontmatter?.title ?? fallbackTitle;
   const subtitle = frontmatter?.subtitle ?? frontmatter?.excerpt;
 
-  let layout = frontmatter?.layout ?? "guide";
+  let frontmatterLayout = frontmatter?.layout ?? "guide";
   const hasAside = mdx && exports?.Aside;
   if (hasAside) {
-    layout = "reference";
+    frontmatterLayout = "reference";
   }
+
+  const configLayout = await loader.getLayout();
 
   const pageHeader = (
     <PageHeader
@@ -66,14 +68,17 @@ export async function LayoutEvaluator({
       breadcrumb={breadcrumb}
       slug={slug}
       markdown={markdown}
-      includeDropdown={layout !== "reference"}
+      includeDropdown={frontmatterLayout !== "reference"}
     />
   );
 
+  // prefer frontmatter values over global config
   const footer = (
     <FooterLayout
-      hideFeedback={frontmatter?.["hide-feedback"]}
-      hideNavLinks={frontmatter?.["hide-nav-links"]}
+      hideFeedback={frontmatter?.["hide-feedback"] ?? configLayout.hideFeedback}
+      hideNavLinks={
+        frontmatter?.["hide-nav-links"] ?? configLayout.hideNavLinks
+      }
       editThisPageUrl={frontmatter?.["edit-this-page-url"]}
       bottomNavigation={bottomNavigation}
     />

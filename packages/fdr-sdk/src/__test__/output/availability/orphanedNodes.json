@@ -1,0 +1,32 @@
+[
+  {
+    "id": "7aa2bdb0d372d12d6d29e3162b99c2c0dbaafbdb92abef003abeb0ae54aa9459",
+    "slug": "",
+    "title": "Docs",
+    "type": "tab"
+  },
+  {
+    "id": "60b8a45f2222f50fe17940e04edd132e1e56dc44a0a749b1413b8d8beb0acf04",
+    "slug": "title",
+    "title": "Hello",
+    "type": "page"
+  },
+  {
+    "id": "c1e8524a65a51fb6e8c3d3a485b4c715ef62b20eb518c94d7513a81941ac7ff4",
+    "slug": "title",
+    "title": "Bingo",
+    "type": "page"
+  },
+  {
+    "id": "82c0586945b33705f2af2ce9ce0300bfc7e8bf121a45e06416a3f5ab1e2f5b99",
+    "slug": "",
+    "title": "API",
+    "type": "tab"
+  },
+  {
+    "id": "da566601eefc545e7b55045aa766b68d136194805d7098f0ec17d4860f997d51",
+    "slug": "",
+    "title": "Reference",
+    "type": "tab"
+  }
+]

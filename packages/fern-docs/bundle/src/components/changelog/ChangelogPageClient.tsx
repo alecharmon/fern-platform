@@ -6,6 +6,7 @@ import { chunk } from "es-toolkit/array";
 import { useAtomValue } from "jotai";
 
 import { slugToHref } from "@fern-api/docs-utils";
+import { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
 import { Badge } from "@fern-docs/components";
@@ -50,12 +51,14 @@ export default function ChangelogPageClient({
   overview,
   entries,
   isFullPage,
+  configLayout,
 }: {
   node: FernNavigation.ChangelogNode;
   anchorIds: Record<string, FernNavigation.PageId>;
   overview: React.ReactNode;
   entries: Record<string, React.ReactNode>;
   isFullPage: boolean;
+  configLayout: FernLayoutConfig;
 }): ReactElement<any> {
   const selectedFilters = useSelectedFilters();
   const flattenedEntries = useMemo(
@@ -203,7 +206,9 @@ export default function ChangelogPageClient({
           <FooterLayout
             hideFeedback
             bottomNavigation={
-              <BottomNavigationClient prev={prev} next={next} />
+              configLayout.hideNavLinks ? undefined : (
+                <BottomNavigationClient prev={prev} next={next} />
+              )
             }
           />
         </article>

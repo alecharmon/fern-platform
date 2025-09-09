@@ -38,14 +38,19 @@ export default async function ApiEndpointPage({
     createPruneKey(node)
   );
 
+  const configLayout = await loader.getLayout();
+
   return (
     <ApiEndpointContent
       serialize={serialize}
       node={node}
       apiDefinition={apiDefinition}
       breadcrumb={breadcrumb}
-      bottomNavigation={bottomNavigation}
+      bottomNavigation={
+        configLayout.hideNavLinks ? undefined : bottomNavigation
+      }
       action={action}
+      hideFeedback={configLayout.hideFeedback}
     />
   );
 }
@@ -57,6 +62,7 @@ async function ApiEndpointContent({
   apiDefinition,
   breadcrumb,
   bottomNavigation,
+  hideFeedback,
 }: {
   serialize: MdxSerializer;
   node: FernNavigation.NavigationNodeApiLeaf;
@@ -64,6 +70,7 @@ async function ApiEndpointContent({
   apiDefinition: ApiDefinition;
   breadcrumb: readonly FernNavigation.BreadcrumbItem[];
   bottomNavigation?: React.ReactNode;
+  hideFeedback: boolean;
 }) {
   switch (node.type) {
     case "endpoint": {
@@ -80,6 +87,7 @@ async function ApiEndpointContent({
           showErrors
           bottomNavigation={bottomNavigation}
           showAuth
+          hideFeedback={hideFeedback}
         />
       );
     }
@@ -95,6 +103,7 @@ async function ApiEndpointContent({
           context={context}
           action={action}
           bottomNavigation={bottomNavigation}
+          hideFeedback={hideFeedback}
         />
       );
     }
@@ -110,6 +119,7 @@ async function ApiEndpointContent({
           context={context}
           action={action}
           bottomNavigation={bottomNavigation}
+          hideFeedback={hideFeedback}
         />
       );
     }
@@ -125,6 +135,7 @@ async function ApiEndpointContent({
           context={context}
           action={action}
           bottomNavigation={bottomNavigation}
+          hideFeedback={hideFeedback}
         />
       );
     }

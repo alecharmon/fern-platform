@@ -1,0 +1,4946 @@
+{
+  "orgId": "catcatcat",
+  "baseUrl": {
+    "domain": "catcatcat.docs.buildwithfern.com"
+  },
+  "definition": {
+    "pages": {
+      "pages/title.mdx": {
+        "markdown": "---\nslug: /title\n---\n\n# page: \"here\"\n\nhello world\n",
+        "rawMarkdown": "---\nslug: /title\n---\n\n# page: \"here\"\n\nhello world"
+      },
+      "pages/welcome.mdx": {
+        "markdown": "---\ntitle: Welcome\n---\n\n<StickyTable>\n| Name | Age |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |\n|------|-----| --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |\n| John | 25  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jane | 30  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jim  | 35  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jack | 45  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| John | 25  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jane | 30  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jim  | 35  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jack | 45  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n</StickyTable>\n\nImage: \n<img src=\"file:b5d38798-b35f-448a-b494-0140e8178e4c\" alt=\"Scared Hamster\" />\n\n\n\nThis is the welcome page.\n\n<CodeBlock>\n```python\nprint(\"Hello, World!\")\n```\n</CodeBlock>\n\n```python\nprint(\"Hello, World!\")\n```\n\n<CodeBlock maxLines={10}>\n```python\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```\n</CodeBlock>\n\n```python maxLines={10}\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```\n\n<CodeBlock title=\"Hello, World!\">\n```python\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```\n</CodeBlock>\n\n```python title=\"Hello, World!\"\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```\n",
+        "rawMarkdown": "---\ntitle: Welcome\n---\n\n<StickyTable>\n| Name | Age |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |    Job    |\n|------|-----| --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |\n| John | 25  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jane | 30  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jim  | 35  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jack | 45  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| John | 25  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jane | 30  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jim  | 35  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jack | 45  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n| Jill | 40  | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer | Developer |\n</StickyTable>\n\nImage: \n<img src=\"../assets/scared-hamster.jpeg\" alt=\"Scared Hamster\" />\n\n\n\nThis is the welcome page.\n\n<CodeBlock>\n```python\nprint(\"Hello, World!\")\n```\n</CodeBlock>\n\n```python\nprint(\"Hello, World!\")\n```\n\n<CodeBlock maxLines={10}>\n```python\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```\n</CodeBlock>\n\n```python maxLines={10}\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```\n\n<CodeBlock title=\"Hello, World!\">\n```python\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```\n</CodeBlock>\n\n```python title=\"Hello, World!\"\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\nprint(\"Hello, World!\")\n```"
+      },
+      "changelog/2025-08-21.mdx": {
+        "markdown": "---\ntitle: mmhmmmmmmm\ntags:\n  - hello\n  - world\n---\n\nlorem ipsum dolor sit amet\nlorem ipsum dolor sit amet\n",
+        "rawMarkdown": "---\ntitle: mmhmmmmmmm\ntags:\n  - hello\n  - world\n---\n\nlorem ipsum dolor sit amet\nlorem ipsum dolor sit amet"
+      },
+      "changelog/2025-08-22.mdx": {
+        "markdown": "---\ntitle: blah blah blah\ntags:\n  - tuna\n  - fish\n---\n\nlorem ipsum dolor sit amet\nlorem ipsum dolor sit amet\n",
+        "rawMarkdown": "---\ntitle: blah blah blah\ntags:\n  - tuna\n  - fish\n---\n\nlorem ipsum dolor sit amet\nlorem ipsum dolor sit amet"
+      },
+      "changelog/2025-08-23.mdx": {
+        "markdown": "---\ntitle: 'Hello, today'\ntags:\n  - you\n  - me\n  - us\n---\n\nThis is a changelog.\n\n## Hello, today\n\nThis is a changelog.\n\n## Hello, today\n",
+        "rawMarkdown": "---\ntitle: Hello, today\ntags:\n  - you\n  - me\n  - us\n---\n\nThis is a changelog.\n\n## Hello, today\n\nThis is a changelog.\n\n## Hello, today"
+      }
+    },
+    "apis": {
+      "68959464-61a0-46a4-b0ed-340397f889dd": {
+        "id": "68959464-61a0-46a4-b0ed-340397f889dd",
+        "rootPackage": {
+          "endpoints": [],
+          "subpackages": ["subpackage_users"],
+          "types": [
+            "User",
+            "CreateUserRequest",
+            "ReplaceUserRequest",
+            "UpdateUserRequest",
+            "Pagination",
+            "Error"
+          ],
+          "webhooks": [],
+          "websockets": []
+        },
+        "types": {
+          "UserRole": {
+            "description": "Role of the user",
+            "name": "UserRole",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "UserStatus": {
+            "description": "Current status of the user",
+            "name": "UserStatus",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "active"
+                },
+                {
+                  "value": "inactive"
+                },
+                {
+                  "value": "suspended"
+                }
+              ]
+            }
+          },
+          "User": {
+            "name": "User",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Unique identifier for the user",
+                  "key": "id",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "id",
+                    "value": "UserRole"
+                  }
+                },
+                {
+                  "description": "Current status of the user",
+                  "key": "status",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "UserStatus"
+                    }
+                  }
+                },
+                {
+                  "description": "When the user was created",
+                  "key": "created_at",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                },
+                {
+                  "description": "When the user was last updated",
+                  "key": "updated_at",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "CreateUserRequestRole": {
+            "description": "Role of the user",
+            "name": "CreateUserRequestRole",
+            "shape": {
+              "type": "enum",
+              "default": "user",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "CreateUserRequest": {
+            "name": "CreateUserRequest",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                {
+                  "description": "Password for the user account",
+                  "key": "password",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "minLength": 8
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "CreateUserRequestRole"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "ReplaceUserRequestRole": {
+            "description": "Role of the user",
+            "name": "ReplaceUserRequestRole",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "ReplaceUserRequestStatus": {
+            "description": "Current status of the user",
+            "name": "ReplaceUserRequestStatus",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "active"
+                },
+                {
+                  "value": "inactive"
+                },
+                {
+                  "value": "suspended"
+                }
+              ]
+            }
+          },
+          "ReplaceUserRequest": {
+            "name": "ReplaceUserRequest",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "id",
+                    "value": "ReplaceUserRequestRole"
+                  }
+                },
+                {
+                  "description": "Current status of the user",
+                  "key": "status",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "ReplaceUserRequestStatus"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "UpdateUserRequestRole": {
+            "description": "Role of the user",
+            "name": "UpdateUserRequestRole",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "UpdateUserRequestStatus": {
+            "description": "Current status of the user",
+            "name": "UpdateUserRequestStatus",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "active"
+                },
+                {
+                  "value": "inactive"
+                },
+                {
+                  "value": "suspended"
+                }
+              ]
+            }
+          },
+          "UpdateUserRequest": {
+            "name": "UpdateUserRequest",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "UpdateUserRequestRole"
+                    }
+                  }
+                },
+                {
+                  "description": "Current status of the user",
+                  "key": "status",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "UpdateUserRequestStatus"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "Pagination": {
+            "name": "Pagination",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Current page number",
+                  "key": "page",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                },
+                {
+                  "description": "Number of items per page",
+                  "key": "limit",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100
+                    }
+                  }
+                },
+                {
+                  "description": "Total number of items",
+                  "key": "total",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                },
+                {
+                  "description": "Total number of pages",
+                  "key": "total_pages",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "ErrorDetails": {
+            "description": "Additional error details",
+            "name": "ErrorDetails",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": []
+            }
+          },
+          "Error": {
+            "name": "Error",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Error message",
+                  "key": "error",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "description": "Error code",
+                  "key": "code",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "description": "Additional error details",
+                  "key": "details",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "ErrorDetails"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "UsersGetParametersSort": {
+            "name": "UsersGetParametersSort",
+            "shape": {
+              "type": "enum",
+              "default": "id",
+              "values": [
+                {
+                  "value": "id"
+                },
+                {
+                  "value": "name"
+                },
+                {
+                  "value": "email"
+                },
+                {
+                  "value": "created_at"
+                }
+              ]
+            }
+          },
+          "Users_getUsers_Response_200": {
+            "name": "Users_getUsers_Response_200",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "key": "data",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "list",
+                      "itemType": {
+                        "type": "id",
+                        "value": "User"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "Users_deleteUser_Response_204": {
+            "description": "Empty response body",
+            "name": "Users_deleteUser_Response_204",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": []
+            }
+          },
+          "Users_checkUserExists_Response_200": {
+            "description": "Empty response body",
+            "name": "Users_checkUserExists_Response_200",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": []
+            }
+          }
+        },
+        "subpackages": {
+          "subpackage_users": {
+            "subpackageId": "subpackage_users",
+            "name": "users",
+            "endpoints": [
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "get-users",
+                "migratedFromUrlSlugs": ["get-all-users"],
+                "method": "GET",
+                "id": "getUsers",
+                "originalEndpointId": "endpoint_users.getUsers",
+                "name": "Get all users",
+                "path": {
+                  "pathParameters": [],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users"
+                    }
+                  ]
+                },
+                "queryParameters": [
+                  {
+                    "description": "Idempotency key for the request",
+                    "key": "idempotency_key",
+                    "type": {
+                      "type": "optional",
+                      "itemType": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "Page number for pagination",
+                    "key": "page",
+                    "type": {
+                      "type": "optional",
+                      "itemType": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "default": 1
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "Number of items per page",
+                    "key": "limit",
+                    "type": {
+                      "type": "optional",
+                      "itemType": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100,
+                          "default": 20
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "Sort field",
+                    "key": "sort",
+                    "type": {
+                      "type": "optional",
+                      "itemType": {
+                        "type": "id",
+                        "value": "UsersGetParametersSort"
+                      }
+                    }
+                  }
+                ],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "Users_getUsers_Response_200"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "Successful response"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Users_getUsers_Response_200"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "Successful response"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "data": [
+                        {
+                          "id": 1,
+                          "name": "John Doe",
+                          "email": "john@example.com",
+                          "role": "user",
+                          "created_at": "2024-01-15T10:30:00Z"
+                        },
+                        {
+                          "id": 2,
+                          "name": "Jane Smith",
+                          "email": "jane@example.com",
+                          "role": "user",
+                          "created_at": "2024-01-16T14:20:00Z"
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "limit": 20,
+                        "total": 150,
+                        "total_pages": 8
+                      }
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "data": [
+                          {
+                            "id": 1,
+                            "name": "John Doe",
+                            "email": "john@example.com",
+                            "role": "user",
+                            "created_at": "2024-01-15T10:30:00Z"
+                          },
+                          {
+                            "id": 2,
+                            "name": "Jane Smith",
+                            "email": "jane@example.com",
+                            "role": "user",
+                            "created_at": "2024-01-16T14:20:00Z"
+                          }
+                        ],
+                        "pagination": {
+                          "page": 1,
+                          "limit": 20,
+                          "total": 150,
+                          "total_pages": 8
+                        }
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {
+                      "idempotency_key": "string",
+                      "page": 0
+                    },
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {
+                      "idempotency_key": "string",
+                      "page": 0
+                    },
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Retrieve a paginated list of all users in the system",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "create-user",
+                "migratedFromUrlSlugs": ["create-a-new-user"],
+                "method": "POST",
+                "id": "createUser",
+                "originalEndpointId": "endpoint_users.createUser",
+                "name": "Create a new user",
+                "path": {
+                  "pathParameters": [],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users"
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "request": {
+                  "contentType": "application/json",
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "CreateUserRequest"
+                    }
+                  }
+                },
+                "requestsV2": {
+                  "requests": [
+                    {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "CreateUserRequest"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 201,
+                  "description": "User created successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 201,
+                      "description": "User created successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 409,
+                    "description": "User with this email already exists",
+                    "name": "Conflict Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "requestBody": {
+                      "name": "Alice Johnson",
+                      "email": "alice@example.com",
+                      "password": "securepassword123",
+                      "role": "user"
+                    },
+                    "responseStatusCode": 201,
+                    "responseBody": {
+                      "id": 3,
+                      "name": "Alice Johnson",
+                      "email": "alice@example.com",
+                      "role": "user",
+                      "created_at": "2024-01-17T09:15:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "Alice Johnson",
+                        "email": "alice@example.com",
+                        "password": "securepassword123",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 3,
+                        "name": "Alice Johnson",
+                        "email": "alice@example.com",
+                        "role": "user",
+                        "created_at": "2024-01-17T09:15:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "password": "string"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 409,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "password": "string"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "password": "string"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Create a new user account with the provided information",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "get-user",
+                "migratedFromUrlSlugs": ["get-a-specific-user"],
+                "method": "GET",
+                "id": "getUser",
+                "originalEndpointId": "endpoint_users.getUser",
+                "name": "Get a specific user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to retrieve",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User retrieved successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User retrieved successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "id": 1,
+                      "name": "John Doe",
+                      "email": "john@example.com",
+                      "role": "user",
+                      "status": "active",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-16T14:20:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 1,
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "role": "user",
+                        "status": "active",
+                        "created_at": "2024-01-15T10:30:00Z",
+                        "updated_at": "2024-01-16T14:20:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Retrieve a specific user by ID",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "replace-user",
+                "migratedFromUrlSlugs": ["replace-a-user"],
+                "method": "PUT",
+                "id": "replaceUser",
+                "originalEndpointId": "endpoint_users.replaceUser",
+                "name": "Replace a user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to replace",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "request": {
+                  "contentType": "application/json",
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "ReplaceUserRequest"
+                    }
+                  }
+                },
+                "requestsV2": {
+                  "requests": [
+                    {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "ReplaceUserRequest"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User replaced successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User replaced successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "requestBody": {
+                      "name": "Bob Wilson",
+                      "email": "bob@example.com",
+                      "role": "admin",
+                      "status": "active"
+                    },
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "id": 1,
+                      "name": "John Doe",
+                      "email": "john@example.com",
+                      "role": "user",
+                      "status": "active",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-16T14:20:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "Bob Wilson",
+                        "email": "bob@example.com",
+                        "role": "admin",
+                        "status": "active"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 1,
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "role": "user",
+                        "status": "active",
+                        "created_at": "2024-01-15T10:30:00Z",
+                        "updated_at": "2024-01-16T14:20:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Replace all user data with the provided information",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "delete-user",
+                "migratedFromUrlSlugs": ["delete-a-user"],
+                "method": "DELETE",
+                "id": "deleteUser",
+                "originalEndpointId": "endpoint_users.deleteUser",
+                "name": "Delete a user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to delete",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "Users_deleteUser_Response_204"
+                    }
+                  },
+                  "statusCode": 204,
+                  "description": "User deleted successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Users_deleteUser_Response_204"
+                        }
+                      },
+                      "statusCode": 204,
+                      "description": "User deleted successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 204,
+                    "responseBody": {},
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Permanently delete a user from the system",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "update-user",
+                "migratedFromUrlSlugs": ["update-a-user"],
+                "method": "PATCH",
+                "id": "updateUser",
+                "originalEndpointId": "endpoint_users.updateUser",
+                "name": "Update a user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to update",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "request": {
+                  "contentType": "application/json",
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "UpdateUserRequest"
+                    }
+                  }
+                },
+                "requestsV2": {
+                  "requests": [
+                    {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "UpdateUserRequest"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User updated successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User updated successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "requestBody": {
+                      "name": "Updated Name",
+                      "status": "inactive"
+                    },
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "id": 1,
+                      "name": "John Doe",
+                      "email": "john@example.com",
+                      "role": "user",
+                      "status": "active",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-16T14:20:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "Updated Name",
+                        "status": "inactive"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 1,
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "role": "user",
+                        "status": "active",
+                        "created_at": "2024-01-15T10:30:00Z",
+                        "updated_at": "2024-01-16T14:20:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Update specific fields of a user",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "check-user-exists",
+                "migratedFromUrlSlugs": ["check-user-existence"],
+                "method": "HEAD",
+                "id": "checkUserExists",
+                "originalEndpointId": "endpoint_users.checkUserExists",
+                "name": "Check user existence",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to check",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "Users_checkUserExists_Response_200"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User exists"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Users_checkUserExists_Response_200"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User exists"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "unknown"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "User does not exist",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 200,
+                    "responseBody": {},
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Check if a user exists without returning the user data",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              }
+            ],
+            "types": [],
+            "subpackages": [],
+            "urlSlug": "users",
+            "webhooks": [],
+            "websockets": []
+          }
+        },
+        "auth": {
+          "type": "bearerAuth",
+          "tokenName": "token"
+        },
+        "hasMultipleBaseUrls": false,
+        "globalHeaders": []
+      },
+      "a8c7404c-e16b-4ecf-97c4-c51193853b15": {
+        "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+        "rootPackage": {
+          "endpoints": [],
+          "subpackages": ["subpackage_users"],
+          "types": [
+            "User",
+            "CreateUserRequest",
+            "ReplaceUserRequest",
+            "UpdateUserRequest",
+            "Pagination",
+            "Error"
+          ],
+          "webhooks": [],
+          "websockets": []
+        },
+        "types": {
+          "UserRole": {
+            "description": "Role of the user",
+            "name": "UserRole",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "UserStatus": {
+            "description": "Current status of the user",
+            "name": "UserStatus",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "active"
+                },
+                {
+                  "value": "inactive"
+                },
+                {
+                  "value": "suspended"
+                }
+              ]
+            }
+          },
+          "User": {
+            "name": "User",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Unique identifier for the user",
+                  "key": "id",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "id",
+                    "value": "UserRole"
+                  }
+                },
+                {
+                  "description": "Current status of the user",
+                  "key": "status",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "UserStatus"
+                    }
+                  }
+                },
+                {
+                  "description": "When the user was created",
+                  "key": "created_at",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                },
+                {
+                  "description": "When the user was last updated",
+                  "key": "updated_at",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "CreateUserRequestRole": {
+            "description": "Role of the user",
+            "name": "CreateUserRequestRole",
+            "shape": {
+              "type": "enum",
+              "default": "user",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "CreateUserRequest": {
+            "name": "CreateUserRequest",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                {
+                  "description": "Password for the user account",
+                  "key": "password",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "minLength": 8
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "CreateUserRequestRole"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "ReplaceUserRequestRole": {
+            "description": "Role of the user",
+            "name": "ReplaceUserRequestRole",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "ReplaceUserRequestStatus": {
+            "description": "Current status of the user",
+            "name": "ReplaceUserRequestStatus",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "active"
+                },
+                {
+                  "value": "inactive"
+                },
+                {
+                  "value": "suspended"
+                }
+              ]
+            }
+          },
+          "ReplaceUserRequest": {
+            "name": "ReplaceUserRequest",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "id",
+                    "value": "ReplaceUserRequestRole"
+                  }
+                },
+                {
+                  "description": "Current status of the user",
+                  "key": "status",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "ReplaceUserRequestStatus"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "UpdateUserRequestRole": {
+            "description": "Role of the user",
+            "name": "UpdateUserRequestRole",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "user"
+                },
+                {
+                  "value": "admin"
+                },
+                {
+                  "value": "moderator"
+                }
+              ]
+            }
+          },
+          "UpdateUserRequestStatus": {
+            "description": "Current status of the user",
+            "name": "UpdateUserRequestStatus",
+            "shape": {
+              "type": "enum",
+              "values": [
+                {
+                  "value": "active"
+                },
+                {
+                  "value": "inactive"
+                },
+                {
+                  "value": "suspended"
+                }
+              ]
+            }
+          },
+          "UpdateUserRequest": {
+            "name": "UpdateUserRequest",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Full name of the user",
+                  "key": "name",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    }
+                  }
+                },
+                {
+                  "description": "Email address of the user",
+                  "key": "email",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "primitive",
+                      "value": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                },
+                {
+                  "description": "Role of the user",
+                  "key": "role",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "UpdateUserRequestRole"
+                    }
+                  }
+                },
+                {
+                  "description": "Current status of the user",
+                  "key": "status",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "UpdateUserRequestStatus"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "Pagination": {
+            "name": "Pagination",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Current page number",
+                  "key": "page",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                },
+                {
+                  "description": "Number of items per page",
+                  "key": "limit",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100
+                    }
+                  }
+                },
+                {
+                  "description": "Total number of items",
+                  "key": "total",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                },
+                {
+                  "description": "Total number of pages",
+                  "key": "total_pages",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "ErrorDetails": {
+            "description": "Additional error details",
+            "name": "ErrorDetails",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": []
+            }
+          },
+          "Error": {
+            "name": "Error",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "description": "Error message",
+                  "key": "error",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "description": "Error code",
+                  "key": "code",
+                  "valueType": {
+                    "type": "primitive",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "description": "Additional error details",
+                  "key": "details",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "id",
+                      "value": "ErrorDetails"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "UsersGetParametersSort": {
+            "name": "UsersGetParametersSort",
+            "shape": {
+              "type": "enum",
+              "default": "id",
+              "values": [
+                {
+                  "value": "id"
+                },
+                {
+                  "value": "name"
+                },
+                {
+                  "value": "email"
+                },
+                {
+                  "value": "created_at"
+                }
+              ]
+            }
+          },
+          "Users_getUsers_Response_200": {
+            "name": "Users_getUsers_Response_200",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": [
+                {
+                  "key": "data",
+                  "valueType": {
+                    "type": "optional",
+                    "itemType": {
+                      "type": "list",
+                      "itemType": {
+                        "type": "id",
+                        "value": "User"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "Users_deleteUser_Response_204": {
+            "description": "Empty response body",
+            "name": "Users_deleteUser_Response_204",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": []
+            }
+          },
+          "Users_checkUserExists_Response_200": {
+            "description": "Empty response body",
+            "name": "Users_checkUserExists_Response_200",
+            "shape": {
+              "type": "object",
+              "extends": [],
+              "properties": []
+            }
+          }
+        },
+        "subpackages": {
+          "subpackage_users": {
+            "subpackageId": "subpackage_users",
+            "name": "users",
+            "endpoints": [
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "get-users",
+                "migratedFromUrlSlugs": ["get-all-users"],
+                "method": "GET",
+                "id": "getUsers",
+                "originalEndpointId": "endpoint_users.getUsers",
+                "name": "Get all users",
+                "path": {
+                  "pathParameters": [],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users"
+                    }
+                  ]
+                },
+                "queryParameters": [
+                  {
+                    "description": "Page number for pagination",
+                    "key": "page",
+                    "type": {
+                      "type": "optional",
+                      "itemType": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "default": 1
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "Number of items per page",
+                    "key": "limit",
+                    "type": {
+                      "type": "optional",
+                      "itemType": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100,
+                          "default": 20
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "Sort field",
+                    "key": "sort",
+                    "type": {
+                      "type": "optional",
+                      "itemType": {
+                        "type": "id",
+                        "value": "UsersGetParametersSort"
+                      }
+                    }
+                  }
+                ],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "Users_getUsers_Response_200"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "Successful response"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Users_getUsers_Response_200"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "Successful response"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "data": [
+                        {
+                          "id": 1,
+                          "name": "John Doe",
+                          "email": "john@example.com",
+                          "role": "user",
+                          "created_at": "2024-01-15T10:30:00Z"
+                        },
+                        {
+                          "id": 2,
+                          "name": "Jane Smith",
+                          "email": "jane@example.com",
+                          "role": "user",
+                          "created_at": "2024-01-16T14:20:00Z"
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "limit": 20,
+                        "total": 150,
+                        "total_pages": 8
+                      }
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "data": [
+                          {
+                            "id": 1,
+                            "name": "John Doe",
+                            "email": "john@example.com",
+                            "role": "user",
+                            "created_at": "2024-01-15T10:30:00Z"
+                          },
+                          {
+                            "id": 2,
+                            "name": "Jane Smith",
+                            "email": "jane@example.com",
+                            "role": "user",
+                            "created_at": "2024-01-16T14:20:00Z"
+                          }
+                        ],
+                        "pagination": {
+                          "page": 1,
+                          "limit": 20,
+                          "total": 150,
+                          "total_pages": 8
+                        }
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {
+                      "page": 0,
+                      "limit": 0
+                    },
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {
+                      "page": 0,
+                      "limit": 0
+                    },
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Retrieve a paginated list of all users in the system",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "create-user",
+                "migratedFromUrlSlugs": ["create-a-new-user"],
+                "method": "POST",
+                "id": "createUser",
+                "originalEndpointId": "endpoint_users.createUser",
+                "name": "Create a new user",
+                "path": {
+                  "pathParameters": [],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users"
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "request": {
+                  "contentType": "application/json",
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "CreateUserRequest"
+                    }
+                  }
+                },
+                "requestsV2": {
+                  "requests": [
+                    {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "CreateUserRequest"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 201,
+                  "description": "User created successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 201,
+                      "description": "User created successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 409,
+                    "description": "User with this email already exists",
+                    "name": "Conflict Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "requestBody": {
+                      "name": "Alice Johnson",
+                      "email": "alice@example.com",
+                      "password": "securepassword123",
+                      "role": "user"
+                    },
+                    "responseStatusCode": 201,
+                    "responseBody": {
+                      "id": 3,
+                      "name": "Alice Johnson",
+                      "email": "alice@example.com",
+                      "role": "user",
+                      "created_at": "2024-01-17T09:15:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "Alice Johnson",
+                        "email": "alice@example.com",
+                        "password": "securepassword123",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 3,
+                        "name": "Alice Johnson",
+                        "email": "alice@example.com",
+                        "role": "user",
+                        "created_at": "2024-01-17T09:15:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "password": "string"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 409,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "password": "string"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users",
+                    "pathParameters": {},
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "password": "string"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Create a new user account with the provided information",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "get-user",
+                "migratedFromUrlSlugs": ["get-a-specific-user"],
+                "method": "GET",
+                "id": "getUser",
+                "originalEndpointId": "endpoint_users.getUser",
+                "name": "Get a specific user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to retrieve",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User retrieved successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User retrieved successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "id": 1,
+                      "name": "John Doe",
+                      "email": "john@example.com",
+                      "role": "user",
+                      "status": "active",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-16T14:20:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 1,
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "role": "user",
+                        "status": "active",
+                        "created_at": "2024-01-15T10:30:00Z",
+                        "updated_at": "2024-01-16T14:20:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Retrieve a specific user by ID",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "replace-user",
+                "migratedFromUrlSlugs": ["replace-a-user"],
+                "method": "PUT",
+                "id": "replaceUser",
+                "originalEndpointId": "endpoint_users.replaceUser",
+                "name": "Replace a user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to replace",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "request": {
+                  "contentType": "application/json",
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "ReplaceUserRequest"
+                    }
+                  }
+                },
+                "requestsV2": {
+                  "requests": [
+                    {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "ReplaceUserRequest"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User replaced successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User replaced successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "requestBody": {
+                      "name": "Bob Wilson",
+                      "email": "bob@example.com",
+                      "role": "admin",
+                      "status": "active"
+                    },
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "id": 1,
+                      "name": "John Doe",
+                      "email": "john@example.com",
+                      "role": "user",
+                      "status": "active",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-16T14:20:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "Bob Wilson",
+                        "email": "bob@example.com",
+                        "role": "admin",
+                        "status": "active"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 1,
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "role": "user",
+                        "status": "active",
+                        "created_at": "2024-01-15T10:30:00Z",
+                        "updated_at": "2024-01-16T14:20:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "string",
+                        "email": "string",
+                        "role": "user"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Replace all user data with the provided information",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "delete-user",
+                "migratedFromUrlSlugs": ["delete-a-user"],
+                "method": "DELETE",
+                "id": "deleteUser",
+                "originalEndpointId": "endpoint_users.deleteUser",
+                "name": "Delete a user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to delete",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "Users_deleteUser_Response_204"
+                    }
+                  },
+                  "statusCode": 204,
+                  "description": "User deleted successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Users_deleteUser_Response_204"
+                        }
+                      },
+                      "statusCode": 204,
+                      "description": "User deleted successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 204,
+                    "responseBody": {},
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Permanently delete a user from the system",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "update-user",
+                "migratedFromUrlSlugs": ["update-a-user"],
+                "method": "PATCH",
+                "id": "updateUser",
+                "originalEndpointId": "endpoint_users.updateUser",
+                "name": "Update a user",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to update",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "request": {
+                  "contentType": "application/json",
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "UpdateUserRequest"
+                    }
+                  }
+                },
+                "requestsV2": {
+                  "requests": [
+                    {
+                      "contentType": "application/json",
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "UpdateUserRequest"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "User"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User updated successfully"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "User"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User updated successfully"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 400,
+                    "description": "Bad request - invalid input data",
+                    "name": "Bad Request Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "Resource not found",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "requestBody": {
+                      "name": "Updated Name",
+                      "status": "inactive"
+                    },
+                    "responseStatusCode": 200,
+                    "responseBody": {
+                      "id": 1,
+                      "name": "John Doe",
+                      "email": "john@example.com",
+                      "role": "user",
+                      "status": "active",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "updated_at": "2024-01-16T14:20:00Z"
+                    },
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "name": "Updated Name",
+                        "status": "inactive"
+                      }
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "id": 1,
+                        "name": "John Doe",
+                        "email": "john@example.com",
+                        "role": "user",
+                        "status": "active",
+                        "created_at": "2024-01-15T10:30:00Z",
+                        "updated_at": "2024-01-16T14:20:00Z"
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 400,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "requestBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Update specific fields of a user",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              },
+              {
+                "environments": [
+                  {
+                    "id": "Production server",
+                    "baseUrl": "https://prod.example.com/v1"
+                  },
+                  {
+                    "id": "Development server",
+                    "baseUrl": "https://dev.example.com/v1"
+                  },
+                  {
+                    "id": "Localhost server",
+                    "baseUrl": "http://localhost:3000/v1"
+                  }
+                ],
+                "defaultEnvironment": "Production server",
+                "urlSlug": "check-user-exists",
+                "migratedFromUrlSlugs": ["check-user-existence"],
+                "method": "HEAD",
+                "id": "checkUserExists",
+                "originalEndpointId": "endpoint_users.checkUserExists",
+                "name": "Check user existence",
+                "path": {
+                  "pathParameters": [
+                    {
+                      "description": "The ID of the user to check",
+                      "key": "userId",
+                      "type": {
+                        "type": "primitive",
+                        "value": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "parts": [
+                    {
+                      "type": "literal",
+                      "value": ""
+                    },
+                    {
+                      "type": "literal",
+                      "value": "/users/"
+                    },
+                    {
+                      "type": "pathParameter",
+                      "value": "userId"
+                    },
+                    {
+                      "type": "literal",
+                      "value": ""
+                    }
+                  ]
+                },
+                "queryParameters": [],
+                "headers": [],
+                "response": {
+                  "type": {
+                    "type": "reference",
+                    "value": {
+                      "type": "id",
+                      "value": "Users_checkUserExists_Response_200"
+                    }
+                  },
+                  "statusCode": 200,
+                  "description": "User exists"
+                },
+                "responsesV2": {
+                  "responses": [
+                    {
+                      "type": {
+                        "type": "reference",
+                        "value": {
+                          "type": "id",
+                          "value": "Users_checkUserExists_Response_200"
+                        }
+                      },
+                      "statusCode": 200,
+                      "description": "User exists"
+                    }
+                  ]
+                },
+                "errors": [],
+                "errorsV2": [
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "unknown"
+                      }
+                    },
+                    "statusCode": 404,
+                    "description": "User does not exist",
+                    "name": "Not Found Error",
+                    "examples": []
+                  },
+                  {
+                    "type": {
+                      "type": "alias",
+                      "value": {
+                        "type": "id",
+                        "value": "Error"
+                      }
+                    },
+                    "statusCode": 500,
+                    "description": "Internal server error",
+                    "name": "Internal Server Error",
+                    "examples": []
+                  }
+                ],
+                "examples": [
+                  {
+                    "description": "",
+                    "path": "/users/1",
+                    "pathParameters": {
+                      "userId": 1
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 200,
+                    "responseBody": {},
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 404,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {}
+                    },
+                    "codeSamples": []
+                  },
+                  {
+                    "path": "/users/0",
+                    "pathParameters": {
+                      "userId": 0
+                    },
+                    "queryParameters": {},
+                    "headers": {},
+                    "responseStatusCode": 500,
+                    "codeExamples": {
+                      "nodeAxios": ""
+                    },
+                    "responseBodyV3": {
+                      "type": "json",
+                      "value": {
+                        "error": "string",
+                        "code": "string",
+                        "details": {}
+                      }
+                    },
+                    "codeSamples": []
+                  }
+                ],
+                "description": "Check if a user exists without returning the user data",
+                "authed": true,
+                "protocol": {
+                  "type": "rest"
+                }
+              }
+            ],
+            "types": [],
+            "subpackages": [],
+            "urlSlug": "users",
+            "webhooks": [],
+            "websockets": []
+          }
+        },
+        "auth": {
+          "type": "bearerAuth",
+          "tokenName": "token"
+        },
+        "hasMultipleBaseUrls": false,
+        "globalHeaders": []
+      }
+    },
+    "apisV2": {},
+    "files": {
+      "b5d38798-b35f-448a-b494-0140e8178e4c": "https://fdr-prod-docs-files.s3.us-east-1.amazonaws.com/https%3A//catcatcat.docs.buildwithfern.com/2025-09-07T23%3A57%3A23.194Z/assets/scared-hamster.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6KXJSKKNNKMPZQ4P%2F20250907%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250907T235724Z&X-Amz-Expires=604800&X-Amz-Signature=2b69e750933e1f834596a5e1f561ae3fa5618155877f7f98853e62a0e847debc&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+    },
+    "filesV2": {
+      "b5d38798-b35f-448a-b494-0140e8178e4c": {
+        "type": "image",
+        "width": 1152,
+        "height": 2048,
+        "url": "https://files.buildwithfern.com/https://catcatcat.docs.buildwithfern.com/2025-09-07T23:57:23.194Z/assets/scared-hamster.jpeg"
+      }
+    },
+    "jsFiles": {},
+    "id": "docs_definition_35fb913e-c5ee-42e9-b220-a475ecb903a2",
+    "config": {
+      "root": {
+        "type": "root",
+        "version": "v1",
+        "id": "d0b6b951d313294318002dfa2c33f529a0d58113d36dc35e0a83bb1e0f8638ec",
+        "child": {
+          "type": "unversioned",
+          "id": "c2c16f227d081a4aebef6d1ac541e8dd264d911a6e7de72d7e8c3276a8bcea24",
+          "child": {
+            "type": "tabbed",
+            "id": "c8121862041af6daab2b3d47009b7ec97e2b1d360a4dfb4e33d8c2eb2b553f64",
+            "children": [
+              {
+                "type": "tab",
+                "id": "7aa2bdb0d372d12d6d29e3162b99c2c0dbaafbdb92abef003abeb0ae54aa9459",
+                "title": "Docs",
+                "slug": "",
+                "icon": "fa-solid fa-book",
+                "child": {
+                  "type": "sidebarRoot",
+                  "id": "e8648c40556ffcaad8e849fe85451c00a1332026d08e601664cb985fd87e0049",
+                  "children": [
+                    {
+                      "id": "6b5abc9475f204424d6e56d62eaf88a0a9dc2d084f6bbfe39afce43296058085",
+                      "type": "sidebarGroup",
+                      "children": [
+                        {
+                          "id": "877e498f25df07ec1fb382f59567067bb4c4607668c666b85e8dc28c19527f69",
+                          "type": "page",
+                          "slug": "title",
+                          "title": "Title",
+                          "icon": "fa-solid fa-book",
+                          "pageId": "pages/title.mdx"
+                        },
+                        {
+                          "id": "d3453a683ec5e2b7a0091626b50c2733ad51dcc6db539bc42ce89d92cd26f090",
+                          "type": "page",
+                          "slug": "welcome",
+                          "title": "Welcome",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/welcome.mdx",
+                          "availability": "beta"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "fa69b4b21e7e69d2d777aa6922bd24870fc9e853cc1d2fd3885874c0ffe8148c",
+                      "type": "section",
+                      "slug": "ga",
+                      "title": "GA",
+                      "children": [
+                        {
+                          "id": "60b8a45f2222f50fe17940e04edd132e1e56dc44a0a749b1413b8d8beb0acf04",
+                          "type": "page",
+                          "slug": "title",
+                          "title": "Hello",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/title.mdx"
+                        },
+                        {
+                          "id": "c1e8524a65a51fb6e8c3d3a485b4c715ef62b20eb518c94d7513a81941ac7ff4",
+                          "type": "page",
+                          "slug": "title",
+                          "title": "Bingo",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/title.mdx"
+                        }
+                      ],
+                      "availability": "generally-available"
+                    },
+                    {
+                      "id": "85adb3fd371bdc278e18756869598d8435123eea87bb6848b4d0f9c2814871a3",
+                      "type": "sidebarGroup",
+                      "children": [
+                        {
+                          "id": "9dcfc602c520395211ce8600b929643d3b68d20b888936e3afaf8aee93861162",
+                          "type": "page",
+                          "slug": "hello",
+                          "title": "Hello",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/welcome.mdx"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "tab",
+                "id": "82c0586945b33705f2af2ce9ce0300bfc7e8bf121a45e06416a3f5ab1e2f5b99",
+                "title": "API",
+                "slug": "",
+                "icon": "fa-solid fa-code",
+                "child": {
+                  "type": "sidebarRoot",
+                  "id": "dbc7615cf757168de824704f6487c1f5b905c715d46b36bfef99995460142a57",
+                  "children": [
+                    {
+                      "id": "4319cfa5c41e6599dec4b4e2fb229ae8f318bf469a3f2ef563573a3f5c4a9681",
+                      "type": "sidebarGroup",
+                      "children": [
+                        {
+                          "id": "3a12ffe0d035e4bc91a46a6dda9e0ab468aacd9d59bfc88309efccbfefdcaf57",
+                          "type": "page",
+                          "slug": "hello-welcome",
+                          "title": "HelloWelcome",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/welcome.mdx"
+                        },
+                        {
+                          "id": "2e8fe51d8cb5023e0a3de5217cc2d8dc009fc77a5aa77def2c77f2c9aff0133b",
+                          "type": "page",
+                          "slug": "hello-welcome-welcome",
+                          "title": "HelloWelcomeWelcome",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/welcome.mdx"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "850e1215b87023e28cfde491ce81dc7748b24ab4ef586956cb5bb13c0eb532e8",
+                      "type": "apiReference",
+                      "title": "rock",
+                      "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                      "paginated": false,
+                      "slug": "rock",
+                      "hideTitle": false,
+                      "showErrors": true,
+                      "children": [
+                        {
+                          "id": "68959464-61a0-46a4-b0ed-340397f889dd:subpackage_users",
+                          "type": "apiPackage",
+                          "children": [
+                            {
+                              "id": "68959464-61a0-46a4-b0ed-340397f889dd:endpoint_users.getUsers",
+                              "type": "endpoint",
+                              "method": "GET",
+                              "endpointId": "endpoint_users.getUsers",
+                              "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                              "isResponseStream": false,
+                              "title": "Get all users",
+                              "slug": "rock/users/get-users"
+                            },
+                            {
+                              "id": "68959464-61a0-46a4-b0ed-340397f889dd:endpoint_users.createUser",
+                              "type": "endpoint",
+                              "method": "POST",
+                              "endpointId": "endpoint_users.createUser",
+                              "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                              "isResponseStream": false,
+                              "title": "Create a new user",
+                              "slug": "rock/users/create-user"
+                            },
+                            {
+                              "id": "68959464-61a0-46a4-b0ed-340397f889dd:endpoint_users.getUser",
+                              "type": "endpoint",
+                              "method": "GET",
+                              "endpointId": "endpoint_users.getUser",
+                              "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                              "isResponseStream": false,
+                              "title": "Get a specific user",
+                              "slug": "rock/users/get-user"
+                            },
+                            {
+                              "id": "68959464-61a0-46a4-b0ed-340397f889dd:endpoint_users.replaceUser",
+                              "type": "endpoint",
+                              "method": "PUT",
+                              "endpointId": "endpoint_users.replaceUser",
+                              "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                              "isResponseStream": false,
+                              "title": "Replace a user",
+                              "slug": "rock/users/replace-user"
+                            },
+                            {
+                              "id": "68959464-61a0-46a4-b0ed-340397f889dd:endpoint_users.deleteUser",
+                              "type": "endpoint",
+                              "method": "DELETE",
+                              "endpointId": "endpoint_users.deleteUser",
+                              "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                              "isResponseStream": false,
+                              "title": "Delete a user",
+                              "slug": "rock/users/delete-user"
+                            },
+                            {
+                              "id": "68959464-61a0-46a4-b0ed-340397f889dd:endpoint_users.updateUser",
+                              "type": "endpoint",
+                              "method": "PATCH",
+                              "endpointId": "endpoint_users.updateUser",
+                              "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                              "isResponseStream": false,
+                              "title": "Update a user",
+                              "slug": "rock/users/update-user"
+                            },
+                            {
+                              "id": "68959464-61a0-46a4-b0ed-340397f889dd:endpoint_users.checkUserExists",
+                              "type": "endpoint",
+                              "method": "HEAD",
+                              "endpointId": "endpoint_users.checkUserExists",
+                              "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd",
+                              "isResponseStream": false,
+                              "title": "Check user existence",
+                              "slug": "rock/users/check-user-exists"
+                            }
+                          ],
+                          "title": "Users",
+                          "slug": "rock/users",
+                          "apiDefinitionId": "68959464-61a0-46a4-b0ed-340397f889dd"
+                        }
+                      ],
+                      "availability": "in-development",
+                      "pointsTo": "rock/users/get-users"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "tab",
+                "id": "da566601eefc545e7b55045aa766b68d136194805d7098f0ec17d4860f997d51",
+                "title": "Reference",
+                "slug": "",
+                "icon": "fa-solid fa-book",
+                "child": {
+                  "type": "sidebarRoot",
+                  "id": "2512984ea602967579eb7ec2419818a8a6f4f196dc7040a958b54f6e8c035dc4",
+                  "children": [
+                    {
+                      "id": "21882b9adb39aed53d295fa807cec21f6c3cda64a13f1f26cee502d2df539678",
+                      "type": "sidebarGroup",
+                      "children": [
+                        {
+                          "id": "a54c809ffa40b32570367e3107e4dced7237b81ed2e55dc943d4ecb630f2f1c3",
+                          "type": "page",
+                          "slug": "welcome-hello-hello",
+                          "title": "WelcomeHelloHello",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/welcome.mdx"
+                        },
+                        {
+                          "id": "fcefdbdb09c8c7be267e991f4e34899861452e74c04ce8958fa459632625e4dd",
+                          "type": "page",
+                          "slug": "hello-hello",
+                          "title": "HelloHello",
+                          "icon": "fa-brands fa-flutter",
+                          "pageId": "pages/welcome.mdx"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "c670d89e2d6f0137ef6bc546125603370a40c5c41f947f065fa8e9775012fef8",
+                      "type": "apiReference",
+                      "title": "tree",
+                      "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                      "paginated": false,
+                      "slug": "tree",
+                      "hideTitle": false,
+                      "showErrors": true,
+                      "children": [
+                        {
+                          "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:subpackage_users",
+                          "type": "apiPackage",
+                          "children": [
+                            {
+                              "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:endpoint_users.getUsers",
+                              "type": "endpoint",
+                              "method": "GET",
+                              "endpointId": "endpoint_users.getUsers",
+                              "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                              "isResponseStream": false,
+                              "title": "Get all users",
+                              "slug": "tree/users/get-users"
+                            },
+                            {
+                              "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:endpoint_users.createUser",
+                              "type": "endpoint",
+                              "method": "POST",
+                              "endpointId": "endpoint_users.createUser",
+                              "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                              "isResponseStream": false,
+                              "title": "Create a new user",
+                              "slug": "tree/users/create-user"
+                            },
+                            {
+                              "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:endpoint_users.getUser",
+                              "type": "endpoint",
+                              "method": "GET",
+                              "endpointId": "endpoint_users.getUser",
+                              "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                              "isResponseStream": false,
+                              "title": "Get a specific user",
+                              "slug": "tree/users/get-user"
+                            },
+                            {
+                              "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:endpoint_users.replaceUser",
+                              "type": "endpoint",
+                              "method": "PUT",
+                              "endpointId": "endpoint_users.replaceUser",
+                              "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                              "isResponseStream": false,
+                              "title": "Replace a user",
+                              "slug": "tree/users/replace-user"
+                            },
+                            {
+                              "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:endpoint_users.deleteUser",
+                              "type": "endpoint",
+                              "method": "DELETE",
+                              "endpointId": "endpoint_users.deleteUser",
+                              "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                              "isResponseStream": false,
+                              "title": "Delete a user",
+                              "slug": "tree/users/delete-user"
+                            },
+                            {
+                              "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:endpoint_users.updateUser",
+                              "type": "endpoint",
+                              "method": "PATCH",
+                              "endpointId": "endpoint_users.updateUser",
+                              "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                              "isResponseStream": false,
+                              "title": "Update a user",
+                              "slug": "tree/users/update-user"
+                            },
+                            {
+                              "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15:endpoint_users.checkUserExists",
+                              "type": "endpoint",
+                              "method": "HEAD",
+                              "endpointId": "endpoint_users.checkUserExists",
+                              "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
+                              "isResponseStream": false,
+                              "title": "Check user existence",
+                              "slug": "tree/users/check-user-exists"
+                            }
+                          ],
+                          "title": "Users",
+                          "slug": "tree/users",
+                          "apiDefinitionId": "a8c7404c-e16b-4ecf-97c4-c51193853b15"
+                        }
+                      ],
+                      "pointsTo": "tree/users/get-users"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "a4b079beee3b863ac3f0ea3cd834348912bf3476dd69e24f7c575c7c330a02f6",
+                "type": "changelog",
+                "title": "Changelog",
+                "slug": "changelog",
+                "icon": "fa-solid fa-book",
+                "children": [
+                  {
+                    "id": "379f6d44abaa33bf5938dd9db875b80b524887a9110223523bceb004f94411e9",
+                    "type": "changelogYear",
+                    "title": "2025",
+                    "year": 2025,
+                    "slug": "changelog/2025",
+                    "children": [
+                      {
+                        "id": "7f43c1d4594353814e47bbd26c7ea6701af0684faa4564f032ec7d3a91c8c8ca",
+                        "type": "changelogMonth",
+                        "title": "August 1900",
+                        "month": 8,
+                        "slug": "changelog/8",
+                        "children": [
+                          {
+                            "id": "55510eb8ba6385b449fad9ffb68006947f40e1ed533cf9afef4406fe999e5a98",
+                            "type": "changelogEntry",
+                            "title": "August 23, 2025",
+                            "slug": "changelog/2025/8/23",
+                            "date": "2025-08-23T00:00:00.000Z",
+                            "pageId": "changelog/2025-08-23.mdx",
+                            "tags": ["you", "me", "us"]
+                          },
+                          {
+                            "id": "ca348860c9f5f590974bcac539a53bdb4969cf659a2a29245c275b1df7894bbb",
+                            "type": "changelogEntry",
+                            "title": "August 22, 2025",
+                            "slug": "changelog/2025/8/22",
+                            "date": "2025-08-22T00:00:00.000Z",
+                            "pageId": "changelog/2025-08-22.mdx",
+                            "tags": ["tuna", "fish"]
+                          },
+                          {
+                            "id": "9a7661407ea49162ebab03102ec1793e2ec1344743e1d89e4d94e69bdfaf9da1",
+                            "type": "changelogEntry",
+                            "title": "August 21, 2025",
+                            "slug": "changelog/2025/8/21",
+                            "date": "2025-08-21T00:00:00.000Z",
+                            "pageId": "changelog/2025-08-21.mdx",
+                            "tags": ["hello", "world"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "slug": "",
+        "title": "Documentation",
+        "hidden": false
+      },
+      "colorsV3": {
+        "type": "darkAndLight",
+        "light": {
+          "accentPrimary": {
+            "r": 81,
+            "g": 194,
+            "b": 51,
+            "a": 1
+          },
+          "background": {
+            "type": "solid",
+            "r": 255,
+            "g": 255,
+            "b": 255,
+            "a": 1
+          }
+        },
+        "dark": {
+          "accentPrimary": {
+            "r": 81,
+            "g": 194,
+            "b": 51,
+            "a": 1
+          },
+          "background": {
+            "type": "solid",
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          }
+        }
+      },
+      "title": "Documentation",
+      "layout": {
+        "searchbarPlacement": "SIDEBAR",
+        "tabsPlacement": "HEADER",
+        "contentAlignment": "CENTER",
+        "headerPosition": "FIXED",
+        "disableHeader": false,
+        "hideNavLinks": true,
+        "hideFeedback": true
+      },
+      "js": {
+        "files": []
+      },
+      "integrations": {},
+      "analyticsConfig": {}
+    }
+  },
+  "lightModeEnabled": true
+}

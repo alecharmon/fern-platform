@@ -24,12 +24,14 @@ export async function GrpcContent({
   breadcrumb,
   action,
   bottomNavigation,
+  hideFeedback,
 }: {
   serialize: MdxSerializer;
   context: GrpcContext;
   breadcrumb: readonly FernNavigation.BreadcrumbItem[];
   action?: React.ReactNode;
   bottomNavigation?: React.ReactNode;
+  hideFeedback: boolean;
 }) {
   const { node, grpc, types } = context;
 
@@ -63,7 +65,12 @@ export async function GrpcContent({
             </TypeDefinitionSlotsServer>
           </TypeDefinitionRoot>
         }
-        footer={<FooterLayout bottomNavigation={bottomNavigation} />}
+        footer={
+          <FooterLayout
+            bottomNavigation={bottomNavigation}
+            hideFeedback={hideFeedback}
+          />
+        }
       >
         <MdxServerComponentProseSuspense mdx={grpc.description} />
       </ReferenceLayout>

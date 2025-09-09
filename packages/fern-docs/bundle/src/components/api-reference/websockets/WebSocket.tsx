@@ -40,12 +40,14 @@ export async function WebSocketContent({
   breadcrumb,
   bottomNavigation,
   action,
+  hideFeedback,
 }: {
   serialize: MdxSerializer;
   context: WebSocketContext;
   breadcrumb: readonly FernNavigation.BreadcrumbItem[];
   bottomNavigation: React.ReactNode;
   action?: React.ReactNode;
+  hideFeedback: boolean;
 }) {
   const { channel, node, types, globalHeaders } = context;
 
@@ -267,7 +269,12 @@ export async function WebSocketContent({
           </TypeDefinitionSlotsServer>
         </TypeDefinitionRoot>
       }
-      footer={<FooterLayout bottomNavigation={bottomNavigation} />}
+      footer={
+        <FooterLayout
+          bottomNavigation={bottomNavigation}
+          hideFeedback={hideFeedback}
+        />
+      }
     >
       <PlaygroundKeyboardTrigger />
       <MdxServerComponentProseSuspense

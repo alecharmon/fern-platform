@@ -29,12 +29,14 @@ export async function WebhookContent({
   breadcrumb,
   bottomNavigation,
   action,
+  hideFeedback,
 }: {
   serialize: MdxSerializer;
   context: ApiDefinition.WebhookContext;
   breadcrumb: readonly FernNavigation.BreadcrumbItem[];
   bottomNavigation: React.ReactNode;
   action?: React.ReactNode;
+  hideFeedback: boolean;
 }) {
   const { node, webhook, types } = context;
 
@@ -107,7 +109,12 @@ export async function WebhookContent({
           </TypeDefinitionSlotsServer>
         </TypeDefinitionRoot>
       }
-      footer={<FooterLayout bottomNavigation={bottomNavigation} />}
+      footer={
+        <FooterLayout
+          bottomNavigation={bottomNavigation}
+          hideFeedback={hideFeedback}
+        />
+      }
     >
       <MdxServerComponentProseSuspense mdx={webhook.description} />
     </ReferenceLayout>

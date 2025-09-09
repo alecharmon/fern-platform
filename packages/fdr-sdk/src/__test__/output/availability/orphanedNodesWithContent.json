@@ -1,0 +1,20 @@
+[
+  {
+    "canonicalSlug": "title",
+    "icon": "fa-brands fa-flutter",
+    "id": "60b8a45f2222f50fe17940e04edd132e1e56dc44a0a749b1413b8d8beb0acf04",
+    "pageId": "pages/title.mdx",
+    "slug": "title",
+    "title": "Hello",
+    "type": "page"
+  },
+  {
+    "canonicalSlug": "title",
+    "icon": "fa-brands fa-flutter",
+    "id": "c1e8524a65a51fb6e8c3d3a485b4c715ef62b20eb518c94d7513a81941ac7ff4",
+    "pageId": "pages/title.mdx",
+    "slug": "title",
+    "title": "Bingo",
+    "type": "page"
+  }
+]
