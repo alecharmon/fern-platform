@@ -11,6 +11,7 @@ import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import getGithubSourceMetadata from "@/app/api/get-github-source-metadata/handler";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
+import createBranchIfNotExists from "@/app/services/dal/github/createBranchIfNotExists";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { PreviewOnlyNotification } from "@/components/editor/PreviewOnlyNotification";
 import { BranchProvider } from "@/providers/BranchContext";
@@ -53,6 +54,44 @@ export default async function EditorLayout({
     userId: session.user.sub,
   });
 
+  if (
+    sourceRepo.owner == null ||
+    sourceRepo.repo == null ||
+    sourceRepo.baseBranch == null
+  ) {
+    console.error("Source repo is not set");
+    throw new Error("Source repo is not set");
+  }
+
+  let branchFailed = false;
+
+  // On first load, create the branch if it doesn't exist. We don't want to await this
+  // since it will block the first render.
+  createBranchIfNotExists({
+    orgName,
+    site: docsUrl,
+    owner: sourceRepo.owner,
+    repo: sourceRepo.repo,
+    branch,
+    baseBranch: sourceRepo.baseBranch,
+  })
+    .then((result) => {
+      if (!result.success) {
+        branchFailed = true;
+      }
+    })
+    .catch((e) => {
+      console.error("Error creating branch:", {
+        error: e,
+        orgName,
+        owner: sourceRepo?.owner,
+        repo: sourceRepo?.repo,
+        branch,
+        baseBranch: sourceRepo?.baseBranch,
+      });
+      branchFailed = true;
+    });
+
   return (
     <EditorShell>
       <ThemeProvider
@@ -69,7 +108,10 @@ export default async function EditorLayout({
                 <DevModeProvider>
                   <MdxStateProvider docsUrl={docsUrl}>
                     <CurrentPageProvider>
-                      <BranchProvider branch={branch}>
+                      <BranchProvider
+                        branch={branch}
+                        branchFailed={branchFailed}
+                      >
                         <EditorProvider>
                           <GitPRProvider
                             owner={sourceRepo.owner}

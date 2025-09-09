@@ -20,7 +20,6 @@ import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
 import { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 
 import {
-  ErrorCreateBranchToast,
   ErrorNoBaseBranchToast,
   ErrorNoGithubSourceToast,
 } from "../editor/EditorToasts";
@@ -75,7 +74,7 @@ export function GoToEditorButton({
     }
   }, [docsUrl, disabled, router, editorSlug]);
 
-  const createBranch = useCallback(() => {
+  const goToEditor = useCallback(() => {
     if (sourceRepo?.owner == null || sourceRepo.repo == null) {
       ErrorNoGithubSourceToast();
       return;
@@ -85,35 +84,8 @@ export function GoToEditorButton({
       return;
     }
 
-    // Very important - the branch creation needs to be finished before navigation
-    // TODO: Move the branch creation logic into the editor page
-    DashboardApiClient.postCreateBranch({
-      orgName,
-      owner: sourceRepo.owner,
-      site: docsUrl,
-      repo: sourceRepo.repo,
-      branch: newBranchName,
-      baseBranch: sourceRepo.baseBranch,
-    })
-      .then((response) => {
-        if (response.success) {
-          router.push(editorSlug);
-        } else {
-          throw new Error();
-        }
-      })
-      .catch((e) => {
-        console.error("Error creating branch in GoToEditorButton:", {
-          error: e,
-          orgName,
-          owner: sourceRepo?.owner,
-          repo: sourceRepo?.repo,
-          branch: newBranchName,
-          baseBranch: sourceRepo?.baseBranch,
-        });
-        ErrorCreateBranchToast();
-      });
-  }, [sourceRepo, newBranchName, editorSlug, orgName, docsUrl, router]);
+    router.push(editorSlug);
+  }, [sourceRepo, editorSlug, router]);
 
   return (
     <div className="flex w-fit flex-row items-center gap-2">
@@ -129,7 +101,7 @@ export function GoToEditorButton({
             <Button
               onClick={() => {
                 setIsLoading(true);
-                createBranch();
+                goToEditor();
               }}
               disabled={isLoading || disabled || isValidatingSource}
               asChild={!disabled}

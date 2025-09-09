@@ -1,5 +1,6 @@
 "use client";
 
+import { useBranch } from "@/providers/BranchContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 
 /**
@@ -8,6 +9,9 @@ import { useGitPrInfo } from "@/providers/GitPRContext";
  */
 export function useEditingDisabled(): boolean {
   const { prStatus } = useGitPrInfo();
+  const { branchFailed } = useBranch();
 
-  return !prStatus || prStatus === "closed" || prStatus === "merged";
+  return (
+    branchFailed || !prStatus || prStatus === "closed" || prStatus === "merged"
+  );
 }

@@ -3,17 +3,22 @@
 import { Lock } from "lucide-react";
 
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
+import { useBranch } from "@/providers/BranchContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 
 export function PreviewOnlyNotification() {
   const isEditingDisabled = useEditingDisabled();
   const { loading, prStatus } = useGitPrInfo();
+  const { branchFailed } = useBranch();
 
   if (!isEditingDisabled) {
     return null;
   }
 
   const getNotificationText = () => {
+    if (branchFailed) {
+      return "Editor disabled since branch was not created.";
+    }
     if (loading || !prStatus) {
       return "Editor disabled while loading";
     }
