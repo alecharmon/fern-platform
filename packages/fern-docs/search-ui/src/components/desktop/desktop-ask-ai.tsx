@@ -28,7 +28,7 @@ export const DesktopCommandWithAskAI = forwardRef<
     prefetch?: (path: string) => Promise<void>;
     composerActions?: ReactNode;
     domain: string;
-    renderActions?: (message: SqueezedMessage) => ReactNode;
+    renderActions?: (message: SqueezedMessage, queryId?: string) => ReactNode;
     children?: ReactNode;
     darkCodeEnabled?: boolean;
     useConversationId: () => {

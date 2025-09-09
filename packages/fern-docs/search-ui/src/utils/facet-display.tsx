@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 import {
   AvailabilityBadge,
@@ -357,7 +357,10 @@ export function getFacetDisplay(
   {
     small = false,
     titleCase = false,
-  }: { small?: boolean; titleCase?: boolean } = {}
+  }: {
+    small?: boolean;
+    titleCase?: boolean;
+  } = {}
 ): ReactNode {
   return (
     (small ? FACET_SMALL_DISPLAY_MAP : FACET_DISPLAY_MAP)[facet]?.[value] ??

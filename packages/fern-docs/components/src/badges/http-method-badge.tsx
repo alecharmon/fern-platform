@@ -1,5 +1,7 @@
 import { forwardRef } from "react";
 
+import { ChevronDown, ChevronUp } from "lucide-react";
+
 import { GrpcMethod, HttpOrWssOrGrpc } from "@fern-api/docs-utils";
 
 import { UIColor } from "../colors";
@@ -51,13 +53,17 @@ const GRPC_STREAM_ICONS: Partial<Record<HttpOrWssOrGrpc, string>> = {
 
 export interface HttpOrWSSOrGrpcBadgeProps extends Omit<BadgeProps, "color"> {
   method: HttpOrWssOrGrpc;
+  chevronProps?: {
+    show: boolean;
+    isOpen: boolean;
+  };
 }
 
 export const HttpMethodBadge = forwardRef<
   HTMLSpanElement & HTMLButtonElement,
   HttpOrWSSOrGrpcBadgeProps
 >((props, ref) => {
-  const { method, ...rest } = props;
+  const { method, chevronProps, ...rest } = props;
   const icon = GRPC_STREAM_ICONS[method];
 
   return (
@@ -67,12 +73,19 @@ export const HttpMethodBadge = forwardRef<
       data-badge-type="http-method"
       data-http-method={method}
       color={METHOD_COLOR_SCHEMES[method]}
+      className={`${rest.className || ""} ${chevronProps?.show ? "inline-flex w-auto items-center gap-1" : ""}`}
     >
       {icon && <FaIcon icon={icon} className="grpc-streaming-arrow" />}
       {props.children ??
         (rest.size === "sm" || method in GrpcMethod
           ? ABBREVIATED_METHODS[method]
           : method)}
+      {chevronProps?.show &&
+        (chevronProps.isOpen ? (
+          <ChevronUp className="size-3 flex-shrink-0" />
+        ) : (
+          <ChevronDown className="size-3 flex-shrink-0" />
+        ))}
     </Badge>
   );
 });

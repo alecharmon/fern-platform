@@ -2,6 +2,7 @@ import { cloneElement, isValidElement, useState } from "react";
 
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 
+import { cn } from "@fern-docs/components";
 import { Badge } from "@fern-docs/components/badges";
 import { FacetFilter } from "@fern-docs/search-keyword";
 
@@ -27,14 +28,25 @@ export function DesktopFilterDropdownMenu({
   removeFilter,
   updateFilter,
   onCloseAutoFocus,
+  inSidePanel = false,
+  className,
+  open,
+  onOpenChange,
 }: {
   filter: FacetFilter;
   removeFilter?: () => void;
   updateFilter?: (value: string) => void;
   filters: readonly FacetFilter[];
   onCloseAutoFocus?: (event: Event) => void;
+  inSidePanel?: boolean;
+  className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const isDropdownOpen = open !== undefined ? open : isOpen;
+  const handleOpenChange = onOpenChange || setIsOpen;
   const otherFilters = filters.filter((f) => f.facet !== filter.facet);
 
   const { facets } = useFacets(otherFilters);
@@ -47,32 +59,34 @@ export function DesktopFilterDropdownMenu({
   });
 
   return (
-    <DropdownMenu onOpenChange={setIsOpen}>
+    <DropdownMenu open={isDropdownOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <span className="flex items-center gap-1">
-          {isValidElement<{ interactive?: boolean }>(facetDisplay) ? (
-            cloneElement(facetDisplay, { interactive: true })
+        <span className="flex min-w-0 items-center gap-1">
+          {isValidElement<{
+            interactive?: boolean;
+            height?: string;
+            chevronProps?: { show: boolean; isOpen: boolean };
+          }>(facetDisplay) ? (
+            cloneElement(facetDisplay, {
+              interactive: true,
+              height: inSidePanel ? "sm" : undefined,
+              chevronProps: { show: true, isOpen: isDropdownOpen },
+            })
           ) : (
-            <Badge
-              variant="outlined-subtle"
-              size="sm"
-              className="fern-search-facet-filter-menu-button"
-              interactive
-            >
+            <Badge variant="outlined-subtle" size="sm" interactive>
               {facetDisplay}
-              {options.length >= 2 &&
-                (isOpen ? (
-                  <ChevronUp className="size-3" />
-                ) : (
-                  <ChevronDown className="size-3" />
-                ))}
+              {isDropdownOpen ? (
+                <ChevronUp className="size-3" />
+              ) : (
+                <ChevronDown className="size-3" />
+              )}
             </Badge>
           )}
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
         <DropdownMenuContent
-          className="min-w-[200px]"
+          className={cn("min-w-[200px]", className)}
           onKeyDownCapture={(e) => {
             if (e.key === "Backspace") {
               removeFilter?.();
@@ -96,10 +110,7 @@ export function DesktopFilterDropdownMenu({
                     value={option.value}
                     autoFocus={option.value === filter.value}
                   >
-                    {getFacetDisplay(filter.facet, option.value, {
-                      small: true,
-                      titleCase: true,
-                    })}
+                    {getFacetDisplay(filter.facet, option.value)}
                     <Badge size="sm" rounded className="ml-auto">
                       {option.count}
                     </Badge>
@@ -117,7 +128,7 @@ export function DesktopFilterDropdownMenu({
             >
               <Minus className="size-4" />
               Remove filter
-              <DropdownMenuShortcut>Del</DropdownMenuShortcut>
+              {!inSidePanel && <DropdownMenuShortcut>Del</DropdownMenuShortcut>}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

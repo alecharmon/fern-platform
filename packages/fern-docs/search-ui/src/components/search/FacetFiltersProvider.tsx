@@ -1,16 +1,11 @@
 import React, { useCallback, useMemo, useRef } from "react";
 
-import { useSetAtom } from "jotai";
-import { atomWithDefault } from "jotai/utils";
 import { preload } from "swr";
 
 import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
 import { FacetFilter, FacetsResponse } from "@fern-docs/search-keyword";
 import { FacetName } from "@fern-docs/search-keyword";
-import {
-  useDeepCompareEffectNoCheck,
-  useEventCallback,
-} from "@fern-ui/react-commons";
+import { useDeepCompareEffectNoCheck } from "@fern-ui/react-commons";
 
 import { isFacetName } from "../../types";
 import { toAlgoliaFacetFilters } from "../../utils/facet-filters";

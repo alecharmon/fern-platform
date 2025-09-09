@@ -8,7 +8,12 @@ import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { z } from "zod";
 
 import { cn } from "@fern-docs/components";
-import { DesktopAskAiPanel } from "@fern-docs/search-ui";
+import { useFernUser } from "@fern-docs/components/state/fern-user";
+import {
+  AlgoliaSearchClientRoot,
+  DesktopAskAiPanel,
+  SEARCH_INDEX,
+} from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";
 
 import { useApiRoute } from "@/components/hooks/useApiRoute";
@@ -74,6 +79,7 @@ export const SearchPanel = React.memo(function SearchPanel({
 }) {
   const isDarkCodeEnabled = useIsDarkCode();
   const userToken = useAlgoliaUserToken();
+  const user = useFernUser();
 
   const [isOpen, setIsOpen] = useCommandTrigger();
   const isResizing = useIsSearchPanelResizing();
@@ -185,6 +191,8 @@ export const SearchPanel = React.memo(function SearchPanel({
     router.push(path, { scroll: true });
   });
 
+  const facetApiEndpoint = useApiRoute("/api/fern-docs/search/v2/facet");
+
   const setInitialized = useSetAtom(searchPanelInitializedAtom);
   // initialize the search dialog when the data is loaded
   React.useEffect(() => {
@@ -192,79 +200,106 @@ export const SearchPanel = React.memo(function SearchPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  const facetFetcher = React.useCallback(
+    async (filters: readonly string[]) => {
+      if (!data) {
+        return {};
+      }
+      const searchParams = new URLSearchParams();
+      searchParams.append("apiKey", data.apiKey);
+      filters.forEach((filter) => searchParams.append("filters", filter));
+      const search = String(searchParams);
+      const res = await fetch(`${facetApiEndpoint}?${search}`, {
+        method: "GET",
+      });
+      return res.json();
+    },
+    [data, facetApiEndpoint]
+  );
+
   if (!data) {
     return null;
   }
 
-  const { apiKey } = data;
+  const { apiKey, appId } = data;
 
   return (
-    <div
-      className={cn(
-        "bg-background border-border-default fixed inset-y-0 right-0 z-50 flex flex-col border-l transition-all duration-500 ease-out",
-        "max-sm:inset-0 max-sm:!w-full max-sm:border-l-0", // Full screen on mobile
-        isOpen ? "translate-x-0" : "translate-x-full",
-        isResizing && "transition-none" // Disable transition while resizing
-      )}
-      style={{ width: `${width}px` }}
+    <AlgoliaSearchClientRoot
+      appId={appId}
+      apiKey={apiKey}
+      domain={domain}
+      indexName={SEARCH_INDEX}
+      fetchFacets={facetFetcher}
+      authenticatedUserToken={user?.email}
+      analyticsTags={["search-v2-dialog"]}
     >
-      {/* Resize Handle - Hidden on mobile */}
       <div
         className={cn(
-          "absolute bottom-0 left-0 top-0 z-10 w-2 cursor-col-resize bg-transparent",
-          "max-sm:hidden", // Hide resize handle on mobile
-          isResizing && "bg-primary/30",
-          "-translate-x-1 transition-transform"
+          "bg-background border-border-default fixed inset-y-0 right-0 z-50 flex flex-col border-l transition-all duration-500 ease-out",
+          "max-sm:inset-0 max-sm:!w-full max-sm:border-l-0", // Full screen on mobile
+          isOpen ? "translate-x-0" : "translate-x-full",
+          isResizing && "transition-none" // Disable transition while resizing
         )}
-        onMouseDown={handleMouseDown}
-        style={{ pointerEvents: "auto" }}
-      />
-
-      <div className="flex-1 overflow-y-auto">
-        <DesktopAskAiPanel
-          useConversationId={() => conversationIdHook}
-          useQueryId={() => queryIdHook}
-          domain={domain}
-          api={chatEndpoint}
-          headers={{
-            "X-Fern-Host": domain,
-          }}
-          suggestionsApi={suggestEndpoint}
-          initialInput={initialInput}
-          setInitialInput={setInitialInput}
-          body={{ algoliaSearchKey: apiKey }}
-          onSelectHit={handleNavigate}
-          onEscapeKeyDown={() => setIsOpen(false)}
-          renderActions={({ user, assistant }, queryId) => {
-            if (!assistant) {
-              return null;
-            }
-            return (
-              <Feedback
-                feedbackQuestion="Was this response helpful?"
-                type="conversational-search"
-                metadata={() => ({
-                  user: user?.content,
-                  assistant: assistant.content,
-                  assistantId: assistant.id,
-                  conversationId: conversationIdHook.conversationId,
-                  queryId: queryId || queryIdHook.queryId,
-                  domain,
-                })}
-                feedbackSource="ask-fern"
-              />
-            );
-          }}
-          darkCodeEnabled={isDarkCodeEnabled}
-          className="shadow-xl"
-          onClose={() => setIsOpen(false)}
-          pageContext={pageContext}
-          onRemovePageContext={() => setPageContext(null)}
-          searchDialogOpen={searchDialogOpen}
-          panelWidth={width}
+        style={{ width: `${width}px` }}
+      >
+        {/* Resize Handle - Hidden on mobile */}
+        <div
+          className={cn(
+            "absolute bottom-0 left-0 top-0 z-10 w-2 cursor-col-resize bg-transparent",
+            "max-sm:hidden", // Hide resize handle on mobile
+            isResizing && "bg-primary/30",
+            "-translate-x-1 transition-transform"
+          )}
+          onMouseDown={handleMouseDown}
+          style={{ pointerEvents: "auto" }}
         />
+
+        <div className="flex-1 overflow-y-auto">
+          <DesktopAskAiPanel
+            useConversationId={() => conversationIdHook}
+            useQueryId={() => queryIdHook}
+            domain={domain}
+            api={chatEndpoint}
+            headers={{
+              "X-Fern-Host": domain,
+            }}
+            suggestionsApi={suggestEndpoint}
+            initialInput={initialInput}
+            setInitialInput={setInitialInput}
+            body={{ algoliaSearchKey: apiKey }}
+            onSelectHit={handleNavigate}
+            onEscapeKeyDown={() => setIsOpen(false)}
+            renderActions={({ user, assistant }, queryId) => {
+              if (!assistant) {
+                return null;
+              }
+              return (
+                <Feedback
+                  feedbackQuestion="Was this response helpful?"
+                  type="conversational-search"
+                  metadata={() => ({
+                    user: user?.content,
+                    assistant: assistant.content,
+                    assistantId: assistant.id,
+                    conversationId: conversationIdHook.conversationId,
+                    queryId: queryId || queryIdHook.queryId,
+                    domain,
+                  })}
+                  feedbackSource="ask-fern"
+                />
+              );
+            }}
+            darkCodeEnabled={isDarkCodeEnabled}
+            className="shadow-xl"
+            onClose={() => setIsOpen(false)}
+            pageContext={pageContext}
+            onRemovePageContext={() => setPageContext(null)}
+            searchDialogOpen={searchDialogOpen}
+            panelWidth={width}
+          />
+        </div>
       </div>
-    </div>
+    </AlgoliaSearchClientRoot>
   );
 }, isEqual);
 

@@ -21,7 +21,7 @@ import { Components } from "react-markdown";
 import { UIMessage, useChat } from "@ai-sdk/react";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
-import { DefaultChatTransport, UIDataTypes, UIMessagePart, UITools } from "ai";
+import { DefaultChatTransport } from "ai";
 import type { Element as HastElement } from "hast";
 import {
   ArrowUp,
@@ -66,6 +66,7 @@ import { useFacetFilters } from "../search/useFacetFilters";
 import { TextArea } from "../ui/textarea";
 import { DesktopCommandInput } from "./desktop-command-input";
 import { DesktopCommandRoot } from "./desktop-command-root";
+import { FilterDropdownMenu, FilterManager } from "./filter-components";
 import { FootnoteCommands } from "./footnote-commands";
 import { HideHeadersInUserMessage } from "./hide-headers-in-user-messages";
 import { Suggestions } from "./suggestions";
@@ -600,6 +601,7 @@ const DesktopAskAIChat = ({
           setQueryId(crypto.randomUUID());
         }}
         onSend={askAI}
+        filters={filters}
         onKeyDown={useEventCallback((e) => {
           if (e.key === "ArrowUp" || e.key === "ArrowDown") {
             setUserScrolled(true);
@@ -619,10 +621,20 @@ const AskAIComposer = forwardRef<
     stop?: () => void;
     onSend?: (message: string) => void;
     onPopState?: KeyboardEventHandler<HTMLTextAreaElement>;
+    filters?: readonly FacetFilter[];
   }
 >(
   (
-    { error, onError, isLoading, stop, onSend, onPopState, ...props },
+    {
+      error,
+      onError,
+      isLoading,
+      stop,
+      onSend,
+      onPopState,
+      filters = [],
+      ...props
+    },
     forwardedRef
   ) => {
     const value = typeof props.value === "string" ? props.value : "";
@@ -634,83 +646,104 @@ const AskAIComposer = forwardRef<
         .filter((word) => word.length > 0).length >= 1 && !isOverLimit;
     const inputRef = useRef<HTMLTextAreaElement>(null);
     return (
-      <div
-        className="border-border-default relative cursor-text p-4"
-        onClick={() => inputRef.current?.focus()}
-      >
-        <DesktopCommandInput asChild>
-          <TextArea
-            id={FERN_ASK_AI_PANEL_INPUT_ID}
-            ref={composeRefs(forwardedRef, inputRef)}
-            autoFocus
-            placeholder="Ask AI a question..."
-            minLines={1}
-            lineHeight={24}
-            maxLines={10}
-            padding={15}
-            {...props}
-            className={cn(
-              "block w-full resize-none focus:outline-none",
-              props.className
-            )}
-            style={{
-              fontSize: "14px",
-              lineHeight: "24px",
-              height: "54px",
-              border: "1px solid var(--color-border-default)",
-              borderRadius: "16px",
-              padding: "14px 46px 16px 16px",
-              ...props.style,
-            }}
-            onKeyDown={composeEventHandlers(
-              props.onKeyDown,
-              (e) => {
-                if (e.key === "Enter") {
-                  if (value.length === 0) {
-                    return;
-                  } else if (isLoading) {
-                  } else {
-                    if (!e.shiftKey && canSubmit) {
-                      onSend?.(value);
-                      e.preventDefault();
+      <div className="relative p-4">
+        <div
+          className="relative cursor-text border border-b-0 pl-3 pt-3"
+          onClick={() => inputRef.current?.focus()}
+          style={{
+            borderColor: "var(--color-border-default)",
+            borderRadius: "16px 16px 0 0",
+          }}
+        >
+          <DesktopCommandInput asChild>
+            <TextArea
+              id={FERN_ASK_AI_PANEL_INPUT_ID}
+              ref={composeRefs(forwardedRef, inputRef)}
+              autoFocus
+              placeholder="Ask AI a question..."
+              minLines={1}
+              lineHeight={18}
+              maxLines={8}
+              padding={6}
+              maxLength={MAX_AI_CHAT_MESSAGE_LENGTH}
+              {...props}
+              className={cn(
+                "block w-full resize-none focus:outline-none",
+                props.className
+              )}
+              style={{
+                fontSize: "15px",
+                lineHeight: "18px",
+                maxHeight: "192px",
+                border: "none",
+                borderRadius: "0",
+                padding: "0",
+                paddingRight: "11px",
+                backgroundColor: "transparent",
+                ...props.style,
+              }}
+              onKeyDown={composeEventHandlers(
+                props.onKeyDown,
+                (e) => {
+                  if (e.key === "Enter") {
+                    if (value.length === 0) {
+                      return;
+                    } else if (isLoading) {
+                    } else {
+                      if (!e.shiftKey && canSubmit) {
+                        onSend?.(value);
+                        e.preventDefault();
+                      }
                     }
-                  }
 
-                  // Only stop propagation if we actually handled the event
-                  if (value.length > 0) {
+                    // Only stop propagation if we actually handled the event
+                    if (value.length > 0) {
+                      e.stopPropagation();
+                    }
+                  } else if (
+                    value.length > 0 &&
+                    (e.key === "ArrowUp" || e.key === "ArrowDown")
+                  ) {
                     e.stopPropagation();
+                  } else if (
+                    value.length === 0 &&
+                    e.key === "Backspace" &&
+                    (e.ctrlKey || e.metaKey)
+                  ) {
+                    onPopState?.(e);
                   }
-                } else if (
-                  value.length > 0 &&
-                  (e.key === "ArrowUp" || e.key === "ArrowDown")
-                ) {
-                  e.stopPropagation();
-                } else if (
-                  value.length === 0 &&
-                  e.key === "Backspace" &&
-                  (e.ctrlKey || e.metaKey)
-                ) {
-                  onPopState?.(e);
-                }
-              },
-              { checkForDefaultPrevented: false }
-            )}
-          />
-        </DesktopCommandInput>
+                },
+                { checkForDefaultPrevented: false }
+              )}
+            />
+          </DesktopCommandInput>
+        </div>
 
-        {/* Button positioned absolutely inside the text area */}
-        <div className="pointer-events-auto absolute right-7 top-1/2 -translate-y-1/2 transform">
-          <FernTooltip
-            content={
-              isOverLimit
-                ? `Message must be ${MAX_AI_CHAT_MESSAGE_LENGTH} characters or fewer`
-                : error
-                  ? "An error occurred - click to reset the conversation."
-                  : undefined
-            }
-            side="top"
-          >
-            <span className="pointer-events-auto cursor-pointer">
+        <div
+          className="pointer-events-none flex items-center justify-between border border-t-0 pb-3 pl-3 pr-3 pt-1"
+          style={{
+            borderColor: "var(--color-border-default)",
+            borderRadius: "0 0 16px 16px",
+          }}
+        >
+          <div className="pointer-events-auto flex min-w-0 flex-1 items-center">
+            {filters.length === 0 ? (
+              <FilterDropdownMenu filters={filters} />
+            ) : (
+              <FilterManager filters={filters} />
+            )}
+          </div>
+          <div className="pointer-events-auto flex items-center gap-2 pt-0.5">
+            <FernTooltip
+              content={
+                isOverLimit
+                  ? `Message must be ${MAX_AI_CHAT_MESSAGE_LENGTH} characters or fewer`
+                  : error
+                    ? "An error occurred - click to reset the conversation."
+                    : undefined
+              }
+              side="top"
+            >
               <Button
                 size="icon"
                 className="h-[32px] w-[32px]"
@@ -740,8 +773,8 @@ const AskAIComposer = forwardRef<
                   <ArrowUp size={16} />
                 )}
               </Button>
-            </span>
-          </FernTooltip>
+            </FernTooltip>
+          </div>
         </div>
       </div>
     );
