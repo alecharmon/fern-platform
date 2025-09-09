@@ -12,6 +12,10 @@ export function SuccessfulEditSourceToast() {
   return toast.success("Successfully linked your repository!");
 }
 
+export function ErrorInvalidGithubUrlToast() {
+  return toast.error("Invalid Github URL. Please update and try again.");
+}
+
 export function ErrorEditSourceToast() {
   return toast.error("Failed to link your repository. Please try again.");
 }

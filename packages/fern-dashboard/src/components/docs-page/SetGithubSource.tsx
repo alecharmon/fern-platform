@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import { DocsUrl } from "@/utils/types";
 
 import {
   ErrorEditSourceToast,
+  ErrorInvalidGithubUrlToast,
   SuccessfulEditSourceToast,
 } from "../editor/EditorToasts";
 import { Button } from "../ui/button";
@@ -34,6 +35,11 @@ export function SetGithubSourcePopover({
 
   const handleConnectRepo = useCallback(
     async (repoUrl: string) => {
+      if (!validateUrlIsGithubUrl(repoUrl)) {
+        ErrorInvalidGithubUrlToast();
+        return;
+      }
+
       try {
         setIsSaving(true);
         setIsPopoverOpen(false);
@@ -62,12 +68,7 @@ export function SetGithubSourcePopover({
     [docsUrl, queryClient, setIsSaving, router]
   );
 
-  const inputUrlIsGithubUrl = useMemo(() => {
-    if (inputUrl === "") {
-      return true; // Don't validate empty input
-    }
-    return validateUrlIsGithubUrl(inputUrl);
-  }, [inputUrl]);
+  const urlIsValid = validateUrlIsGithubUrl(inputUrl);
 
   return (
     <Popover
@@ -98,11 +99,14 @@ export function SetGithubSourcePopover({
                 }}
                 className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
               />
-              {!inputUrlIsGithubUrl && (
-                <ExclamationCircleIcon className="size-4" />
+              {inputUrl !== "" && !urlIsValid && (
+                <ExclamationCircleIcon className="mr-1.5 size-4 text-red-500" />
               )}
             </div>
-            <Button onClick={() => void handleConnectRepo(inputUrl)}>
+            <Button
+              onClick={() => void handleConnectRepo(inputUrl)}
+              disabled={!urlIsValid}
+            >
               Save
             </Button>
           </div>

@@ -93,16 +93,26 @@ export async function handleGeneratePrDescription({
 }
 
 export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
-  const [owner, repo] = githubUrl.split("/").slice(-2);
+  const piecesAfterGithubCom = githubUrl.split("github.com/")[1];
+  if (piecesAfterGithubCom == null) {
+    return { owner: null, repo: null };
+  }
+  const [owner, repo] = piecesAfterGithubCom.split("/").slice(0, 2);
   return { owner, repo };
 }
 
 export function getRepoDisplayNameFromUrl(githubUrl: string) {
   const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+  if (owner == null || repo == null) {
+    return githubUrl;
+  }
   return `${owner}/${repo}`;
 }
 
 export function validateUrlIsGithubUrl(inputUrl: string): boolean {
+  if (inputUrl === "") {
+    return false;
+  }
   // Check if URL starts with http/https
   if (!inputUrl.startsWith("https://") && !inputUrl.startsWith("http://")) {
     return false;

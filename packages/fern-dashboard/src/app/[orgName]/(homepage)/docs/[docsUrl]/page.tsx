@@ -11,6 +11,7 @@ import {
   GithubRepoValidationError,
   validateGithubRepoAccess,
 } from "@/app/services/dal/github/validators";
+import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import { BetaBadge } from "@/components/docs-page/BetaBadge";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import {
@@ -208,7 +209,22 @@ function ValidationErrorHandler({
       return (
         <>
           <p className="text-muted-foreground text-sm">
-            To get started, install the Fern app on your GitHub repository.
+            {githubUrl ? (
+              <>
+                To get started, install the Fern app on{" "}
+                <a
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary underline transition-colors"
+                >
+                  {getRepoDisplayNameFromUrl(githubUrl)}
+                </a>
+              </>
+            ) : (
+              "To get started, connect a Github repo above and install the Fern app on your chosen repository."
+            )}
+            .
           </p>
           <InstallGithubAppButton
             orgName={orgName}
