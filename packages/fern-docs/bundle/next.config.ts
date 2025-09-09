@@ -233,6 +233,8 @@ const nextConfig: NextConfig = {
       config.externals = config.externals || [];
       config.externals.push("esbuild");
       config.externals.push("@typescript/vfs");
+      // emits .map files for server
+      config.devtool = "source-map";
     }
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -274,7 +276,7 @@ function withVercelEnv(config: NextConfig): NextConfig {
     reactProductionProfiling: false,
     experimental: {
       ...config.experimental,
-      serverSourceMaps: false,
+      serverSourceMaps: true,
     },
   };
 }
