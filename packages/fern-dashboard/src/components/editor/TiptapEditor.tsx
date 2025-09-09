@@ -15,6 +15,7 @@ import StarterKit from "@tiptap/starter-kit";
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useEditor } from "@/providers/EditorContext";
+import { cn } from "@/utils/utils";
 
 import BubbleMenu from "./BubbleMenu";
 import FloatingMenu from "./FloatingMenu";
@@ -42,7 +43,12 @@ const dataAttributeNodeTypes = [
 
 // Configure Tiptap extensions
 const extensions = [
-  StarterKit,
+  StarterKit.configure({
+    dropcursor: {
+      color: "var(--grayscale-a11)",
+    },
+    gapcursor: false,
+  }),
   CustomElement,
   UniqueID.configure({
     types: dataAttributeNodeTypes,
@@ -98,7 +104,9 @@ export default function TiptapEditor({
         // Required to preserve formatting in custom element previews
         preserveWhitespace: true,
       }}
-      editorContainerProps={{ className }}
+      editorContainerProps={{
+        className: cn(className, "relative"),
+      }}
       immediatelyRender={false}
       onCreate={onCreate}
       onUpdate={onUpdate}

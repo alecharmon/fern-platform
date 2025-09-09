@@ -30,21 +30,4 @@
     position: absolute;
     background-attachment: scroll;
   }
-
-  /* This makes sure that the header stays within the bounds of our preview page */
-  #fern-header {
-    position: sticky;
-    @apply sticky top-0;
-  }
-
-  #fern-sidebar[data-state="fixed"] {
-    position: absolute;
-    @apply top-0;
-    height: var(--preview-container-height);
-  }
-
-  /* This makes sure that the main content is not pushed down by the header, since the header is no longer fixed in this layout. */
-  main {
-    @apply mt-0 h-full;
-  }
 }

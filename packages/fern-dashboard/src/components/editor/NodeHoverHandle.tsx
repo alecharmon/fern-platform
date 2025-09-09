@@ -8,9 +8,12 @@ export default function NodeHoverHandle() {
   if (!editor) return null;
 
   return (
-    <DragHandle editor={editor}>
-      <div className="mr-2 flex cursor-grab flex-row items-center">
-        <div className="flex cursor-grab flex-col items-center rounded-md p-1.5 hover:bg-gray-500/40">
+    <DragHandle
+      editor={editor}
+      computePositionConfig={{ placement: "left-start", strategy: "absolute" }}
+    >
+      <div className="pr-2">
+        <div className="flex flex-col items-center rounded-md p-1.5 hover:bg-gray-500/40">
           <GripVertical className="text-muted-foreground" size={16} />
         </div>
       </div>
