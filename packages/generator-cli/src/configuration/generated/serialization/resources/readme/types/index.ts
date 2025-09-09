@@ -1,4 +1,5 @@
 export * from "./ReadmeConfig";
+export * from "./CustomSection";
 export * from "./Remote";
 export * from "./GithubRemote";
 export * from "./ReadmeFeature";

@@ -38,9 +38,9 @@ export class BlockMerger {
     }
 
     // Add any new blocks from updated that weren't processed
-    for (const updatedBlock of this.updated) {
+    for (const [index, updatedBlock] of this.updated.reverse().entries()) {
       if (!processedUpdated.has(updatedBlock.id)) {
-        merged.addBlock(updatedBlock);
+        merged.insertBlock(updatedBlock, this.updated[index - 1]?.id);
       }
     }
 
@@ -67,6 +67,35 @@ class BlockList {
     }
     this.ids.add(block.id);
     this.blocks.push(block);
+  }
+
+  // private addBlockToFront(block: Block): void {
+  //   if (this.hasBlock(block.id)) {
+  //     throw new Error(`block with id "${block.id}" already exists`);
+  //   }
+  //   this.ids.add(block.id);
+  //   this.blocks.unshift(block);
+  // }
+
+  public insertBlock(block: Block, precedingBlockId?: string): void {
+    if (this.hasBlock(block.id)) {
+      throw new Error(`block with id "${block.id}" already exists`);
+    }
+    if (precedingBlockId === undefined) {
+      this.addBlock(block);
+      return;
+    }
+    if (!this.hasBlock(precedingBlockId)) {
+      throw new Error(
+        `preceding block with id "${precedingBlockId}" does not exist`
+      );
+    }
+    this.ids.add(block.id);
+    this.blocks.splice(
+      this.blocks.findIndex((b) => b.id === precedingBlockId),
+      0,
+      block
+    );
   }
 
   public hasBlock(id: string): boolean {

@@ -1,3 +1,4 @@
+import { template } from "es-toolkit/compat";
 import { camelCase, upperFirst } from "es-toolkit/string";
 import type fs from "fs";
 
@@ -88,6 +89,22 @@ export class ReadmeGenerator {
           referenceFile: this.readmeConfig.referenceMarkdownPath,
         })
       );
+    }
+
+    if (this.readmeConfig.customSections != null) {
+      const templateOptions = this.getCustomSectionTemplateOptions();
+      for (const customSection of this.readmeConfig.customSections.filter(
+        (section) =>
+          section.language.toLowerCase() ===
+          this.readmeConfig.language.type.toLowerCase()
+      )) {
+        blocks.push(
+          await this.generateCustomSection({
+            customSection,
+            templateOptions,
+          })
+        );
+      }
     }
 
     const coreFeatures =
@@ -330,6 +347,51 @@ export class ReadmeGenerator {
     await writer.writeLine();
     return new Block({
       id: "REFERENCE",
+      content: writer.toString(),
+    });
+  }
+
+  private getCustomSectionTemplateOptions(): Record<string, string> {
+    let options: Record<string, string> = {
+      apiName: this.apiName,
+    };
+    if (this.readmeConfig.language.publishInfo != null) {
+      options = {
+        ...options,
+        ...this.readmeConfig.language.publishInfo,
+      };
+    }
+    return options;
+  }
+
+  private applyTemplateOptions(
+    content: string,
+    options: Record<string, string>
+  ): string {
+    try {
+      return template(content, { interpolate: /{{([^}]+)}}/g })(options);
+    } catch (error) {
+      console.error(`[templates] ${JSON.stringify(error)}`);
+      return content;
+    }
+  }
+
+  private async generateCustomSection({
+    customSection,
+    templateOptions,
+  }: {
+    customSection: FernGeneratorCli.CustomSection;
+    templateOptions: Record<string, string>;
+  }): Promise<Block> {
+    const writer = new StringWriter();
+    await writer.writeLine(`## ${customSection.name}`);
+    await writer.writeLine();
+    await writer.writeLine(
+      this.applyTemplateOptions(customSection.content, templateOptions)
+    );
+    await writer.writeLine();
+    return new Block({
+      id: toScreamingSnakeCase(customSection.name),
       content: writer.toString(),
     });
   }
@@ -925,4 +987,8 @@ function getMajorVersion(version: string): string {
 
 function assertNever(x: never): never {
   throw new Error(`unexpected value: ${JSON.stringify(x)}`);
+}
+
+function toScreamingSnakeCase(s: string): string {
+  return s.toUpperCase().replace(/ /g, "_");
 }

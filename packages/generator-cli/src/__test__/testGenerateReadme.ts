@@ -46,7 +46,9 @@ export function testGenerateReadme({
         );
       }
       const { stdout } = await execa("node", args);
-      expect(stdout).toMatchFileSnapshot(`__snapshots__/${fixtureName}.md`);
+      await expect(stdout).toMatchFileSnapshot(
+        `__snapshots__/${fixtureName}.md`
+      );
     });
   });
 }

@@ -24,6 +24,7 @@
     "fdr:generate": "pnpm fern generate --api fdr --local && pnpm turbo --filter=@fern-api/fdr-sdk compile",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
+    "generator-cli:generate": "pnpm fern generate --api generator-cli --local && pnpm turbo --filter=@fern-api/generator-cli compile",
     "preinstall": "npx only-allow pnpm",
     "lint": "pnpm lint:eslint && pnpm lint:style && pnpm format:check",
     "lint:eslint": "turbo lint:eslint",

@@ -2,6 +2,7 @@
 
 imports:
   feature: feature.yml
+  reference: reference.yml
 
 types:
   ReadmeConfig:
@@ -25,11 +26,18 @@ types:
       requirements: optional<list<string>>
       disabledFeatures: optional<list<feature.FeatureId>>
       whiteLabel: optional<boolean>
+      customSections: optional<list<CustomSection>>
       features:
         docs: |
           Specifies the list of features supported by a specific generator.
           The features are rendered in the order they're specified.
         type: optional<list<ReadmeFeature>>
+
+  CustomSection:
+    properties:
+      name: string
+      language: reference.Language
+      content: string
 
   Remote:
     docs: |

@@ -8,6 +8,7 @@ import * as core from "../../../../core";
 import { Remote } from "./Remote";
 import { LanguageInfo } from "./LanguageInfo";
 import { FeatureId } from "../../feature/types/FeatureId";
+import { CustomSection } from "./CustomSection";
 import { ReadmeFeature } from "./ReadmeFeature";
 
 export const ReadmeConfig: core.serialization.ObjectSchema<
@@ -25,6 +26,7 @@ export const ReadmeConfig: core.serialization.ObjectSchema<
     requirements: core.serialization.list(core.serialization.string()).optional(),
     disabledFeatures: core.serialization.list(FeatureId).optional(),
     whiteLabel: core.serialization.boolean().optional(),
+    customSections: core.serialization.list(CustomSection).optional(),
     features: core.serialization.list(ReadmeFeature).optional(),
 });
 
@@ -41,6 +43,7 @@ export declare namespace ReadmeConfig {
         requirements?: string[] | null;
         disabledFeatures?: FeatureId.Raw[] | null;
         whiteLabel?: boolean | null;
+        customSections?: CustomSection.Raw[] | null;
         features?: ReadmeFeature.Raw[] | null;
     }
 }
