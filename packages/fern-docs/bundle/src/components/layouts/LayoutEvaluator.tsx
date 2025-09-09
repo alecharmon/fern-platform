@@ -5,6 +5,10 @@ import React from "react";
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import {
+  Availability,
+  AvailabilityBadge,
+} from "@fern-docs/components/badges/availability-badge";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 
 import { MdxAside } from "@/mdx/bundler/component";
@@ -24,6 +28,7 @@ export async function LayoutEvaluator({
   breadcrumb,
   bottomNavigation,
   slug,
+  availability,
 }: {
   loader: DocsLoader;
   serialize: MdxSerializer;
@@ -32,6 +37,7 @@ export async function LayoutEvaluator({
   breadcrumb: readonly FernNavigation.BreadcrumbItem[];
   bottomNavigation?: React.ReactNode;
   slug: string;
+  availability?: Availability;
 }) {
   const { filename, markdown, editThisPageUrl } = await loader.getPage(pageId);
   const mdx = await serialize(markdown, {
@@ -69,6 +75,11 @@ export async function LayoutEvaluator({
       slug={slug}
       markdown={markdown}
       includeDropdown={frontmatterLayout !== "reference"}
+      tags={
+        availability && (
+          <AvailabilityBadge availability={availability} rounded />
+        )
+      }
     />
   );
 
