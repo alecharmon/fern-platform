@@ -733,7 +733,7 @@ const AskAIComposer = forwardRef<
               <FilterManager filters={filters} />
             )}
           </div>
-          <div className="pointer-events-auto flex items-center gap-2 pt-0.5">
+          <div className="pointer-events-auto flex items-center gap-2">
             <FernTooltip
               content={
                 isOverLimit
