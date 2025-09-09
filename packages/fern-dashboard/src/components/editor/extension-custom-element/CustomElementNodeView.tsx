@@ -9,6 +9,7 @@ import { bundleMDX } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[bra
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { MDX_COMPONENTS } from "@/docs/mdx/components";
+import { useFileResolver } from "@/providers/FileResolverContext";
 
 import { UnsupportedContent } from "../UnsupportedContent";
 import { useCSS } from "./CSSContext";
@@ -34,7 +35,8 @@ interface MDXWrapperProps {
 const MDXWrapper = ({ code, hash, components }: MDXWrapperProps) => {
   const MDXComponent = useMemo(() => {
     try {
-      return getMDXComponent(code);
+      const MDXComponent = getMDXComponent(code);
+      return MDXComponent;
     } catch (error) {
       console.warn(
         "[CustomElementNodeView] Failed to create MDX component:",
@@ -217,17 +219,36 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
   const hash = attrs["fve-data-hash"];
   const textContent = attrs["fve-mdx-content"];
 
+  const { resolveFileSrc } = useFileResolver();
+
+  // Pre-process MDX to resolve image sources
+  const processedMdx = useMemo(() => {
+    if (!mdx || name !== "img") return mdx;
+    // Match img tags and resolve their src attributes
+    const imgRegex = /<img\s+([^>]*?)src=["']([^"']+)["']([^>]*?)>/g;
+    const processed = mdx.replace(
+      imgRegex,
+      (_match: string, beforeSrc: string, src: string, afterSrc: string) => {
+        const resolvedFileData = resolveFileSrc(src);
+        const resolvedSrc = resolvedFileData?.src || src;
+
+        return `<img ${beforeSrc}src="${resolvedSrc}"${afterSrc}>`;
+      }
+    );
+    return processed;
+  }, [mdx, name, resolveFileSrc]);
+
   useEffect(() => {
     void (async () => {
       try {
-        const result = await bundleMDX(mdx);
+        const result = await bundleMDX(processedMdx);
         setState({ type: "BUNDLED", code: result.code });
       } catch (error) {
         console.error("Error bundling MDX:", error);
         setState({ type: "ERROR", message: String(error) });
       }
     })();
-  }, [mdx, setState]);
+  }, [processedMdx, setState]);
 
   const cssConfig = useCSS();
   const components = useMDXComponents();
