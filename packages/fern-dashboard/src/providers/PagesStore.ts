@@ -17,6 +17,7 @@ import {
   createPageKey,
   createPageMetadata,
 } from "../utils/pagesStoreUtils";
+import { SaveEvent } from "./types";
 
 type Filename = string;
 
@@ -66,6 +67,7 @@ export class PagesStore {
   private _lastServerSnapshot: PagesSnapshot | null = null;
   private _version = 0;
   private _initializedPages = new Set<string>();
+  private _saveEventListeners = new Set<(event: SaveEvent) => void>();
 
   constructor(navigationStore?: NavigationStore) {
     this._navigationStore = navigationStore || null;
@@ -90,6 +92,17 @@ export class PagesStore {
   subscribe(listener: () => void): () => void {
     this._listeners.add(listener);
     return () => this._listeners.delete(listener);
+  }
+
+  /** Subscribe to save events */
+  subscribeSaveEvent(listener: (event: SaveEvent) => void): () => void {
+    this._saveEventListeners.add(listener);
+    return () => this._saveEventListeners.delete(listener);
+  }
+
+  /** Emit a save event to all listeners */
+  emitSaveEvent(event: SaveEvent): void {
+    this._saveEventListeners.forEach((listener) => listener(event));
   }
 
   private _notify(): void {

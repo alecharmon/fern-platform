@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { Editor, EditorEvents } from "@tiptap/react";
 
@@ -23,10 +23,22 @@ export default function PageEditor({
   filename,
   initialHtml,
 }: PageEditor.Props) {
-  const { updatePage } = usePages();
-
   const editorRef = useRef<Editor | null>(null);
   const latestTiptapHtml = useRef<string>(initialHtml || "");
+
+  const { updatePage, subscribeSaveEvent } = usePages();
+
+  // Subscribe to save events
+  useEffect(() => {
+    const unsubscribe = subscribeSaveEvent((event) => {
+      if (event.fileName === filename) {
+        editorRef.current?.commands.setContent(event.html);
+        latestTiptapHtml.current = event.html;
+      }
+    });
+
+    return unsubscribe;
+  }, [filename, subscribeSaveEvent]);
 
   function onTiptapEditorCreate(props: EditorEvents["create"]) {
     latestTiptapHtml.current = props.editor.getHTML();

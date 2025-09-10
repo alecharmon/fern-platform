@@ -66,6 +66,8 @@ export function usePages(): PagesSnapshot & {
   initializePage: PagesStore["initializePage"];
   applyPageChange: PagesStore["applyPageChange"];
   updatePage: PagesStore["updatePage"];
+  emitSaveEvent: PagesStore["emitSaveEvent"];
+  subscribeSaveEvent: PagesStore["subscribeSaveEvent"];
 } {
   const store = usePagesStore();
   const snapshot = useSyncExternalStore(
@@ -86,5 +88,7 @@ export function usePages(): PagesSnapshot & {
     initializePage: store.initializePage.bind(store),
     applyPageChange: store.applyPageChange.bind(store),
     updatePage: store.updatePage.bind(store),
+    emitSaveEvent: store.emitSaveEvent.bind(store),
+    subscribeSaveEvent: store.subscribeSaveEvent.bind(store),
   };
 }
