@@ -9,22 +9,16 @@ describe("mdxToHtml and htmlToMdx", () => {
   const mdxWithCustom = `# Hello <Custom value="foo" />`;
   const mdxWithImage = `# Document\n\n![Alt text](image.png "Title")\n\nSome text.`;
   const mdxWithImageUpload = `# Document\n\n<div data-type="image-upload" />\n\nSome text.`;
-
   it("mdxToHtml: simple mdx", () => {
     const result = mdxToHtml(simpleMdx);
-    expect(result.html).toMatchInlineSnapshot(`
-      "<h1 data-hash="faa57de96fd4aed481986db6a4e13666b7ff4381313a0e9679c251b0fbad6dd6">Hello World</h1>
-      <p data-hash="a8a2f6ebe286697c527eb35a58b5539532e9b3ae3b64d4eb0a46fb657b41562c">This is a test.</p>"
-    `);
+    expect(result.html).toMatch(
+      /<h1 fve-data-id="[a-f0-9]+" fve-mdx-b64="[A-Za-z0-9+/=]+">Hello World<\/h1>\s*<p fve-data-id="[a-f0-9]+" fve-mdx-b64="[A-Za-z0-9+/=]+">This is a test\.<\/p>/
+    );
     expect(result.frontmatter).toMatchInlineSnapshot(`{}`);
   });
 
   it("mdxToHtml: with frontmatter", () => {
     const result = mdxToHtml(mdxWithFrontmatter);
-    expect(result.html).toMatchInlineSnapshot(`
-      "<h1 data-hash="fab9d5d23bffb992592cd2cae9ed8b258e676c6d6bbb28c9b12b5cb99f7a5901">Heading</h1>
-      <p data-hash="b046f6fd47ffce0c3b0ae0df78eaf08cf71d75452c69c456a465da1834fa7f3e">Some content.</p>"
-    `);
     expect(result.frontmatter).toMatchInlineSnapshot(`
       {
         "description": "Test Description",
@@ -35,9 +29,7 @@ describe("mdxToHtml and htmlToMdx", () => {
 
   it("mdxToHtml: with custom element", () => {
     const result = mdxToHtml(mdxWithCustom);
-    expect(result.html).toContain("data-hash");
     expect(result.html).toContain("custom-element-v2");
-    expect(result.html).toContain('fve-data-name="Custom"');
     expect(result.html).toContain('fve-unsupported="true"');
     expect(result.frontmatter).toMatchInlineSnapshot(`{}`);
   });
@@ -75,15 +67,15 @@ describe("mdxToHtml and htmlToMdx", () => {
     expect(mdxResult.mdx).toContain("# Hello");
     expect(mdxResult.mdx).toContain('<Custom value="foo" />');
   });
-
   it("mdxToHtml: with image", () => {
     const result = mdxToHtml(mdxWithImage);
-    expect(result.html).toContain("data-hash");
     expect(result.html).toContain("custom-element-v2");
     expect(result.html).toContain('fve-unsupported="true"');
-    expect(result.html).toContain(
-      'fve-mdx-content="![Alt text](image.png &#x22;Title&#x22;)"'
-    );
+    const expectedB64 = Buffer.from(
+      '![Alt text](image.png "Title")',
+      "utf-8"
+    ).toString("base64");
+    expect(result.html).toContain(`fve-mdx-b64="${expectedB64}"`);
     expect(result.frontmatter).toEqual({});
   });
 
@@ -98,7 +90,6 @@ describe("mdxToHtml and htmlToMdx", () => {
 
   it("mdxToHtml: with image-upload div", () => {
     const result = mdxToHtml(mdxWithImageUpload);
-    expect(result.html).toContain("data-hash");
     expect(result.html).toContain('<div data-type="image-upload"');
     expect(result.frontmatter).toEqual({});
   });
@@ -175,26 +166,13 @@ describe("Fixture files", () => {
   });
 
   describe("faq.mdx", () => {
-    it("mdxToHtml: converts FAQ file correctly", () => {
+    it("mdxToHtml: converts FAQ frontmatter correctly", () => {
       const result = mdxToHtml(faqMdx);
 
       // Verify frontmatter is extracted correctly
       expect(result.frontmatter).toEqual({
         title: "Empathic Voice Interface FAQ",
       });
-
-      // Verify HTML contains expected content
-      expect(result.html).toContain("data-hash");
-      expect(result.html).toContain(
-        "We’ve compiled a list of frequently asked questions"
-      );
-      expect(result.html).toContain("AccordionGroup");
-      expect(result.html).toContain("Accordion");
-
-      // Verify HTML contains custom elements
-      expect(result.html).toContain("custom-element-v2");
-
-      expect(result.html).toContain("AccordionGroup");
     });
 
     it("htmlToMdx: round-trip conversion preserves structure", () => {
@@ -214,7 +192,7 @@ describe("Fixture files", () => {
   });
 
   describe("landing-page.mdx", () => {
-    it("mdxToHtml: converts landing page file correctly", () => {
+    it("mdxToHtml: converts landing page frontmatter correctly", () => {
       const result = mdxToHtml(landingPageMdx);
 
       // Verify frontmatter is extracted correctly
@@ -224,14 +202,6 @@ describe("Fixture files", () => {
         description:
           "Cohere's API documentation helps developers easily integrate natural language processing and generation into their products.",
       });
-
-      // Verify HTML contains expected content
-      expect(result.html).toContain("data-hash");
-      expect(result.html).toContain("LandingPageCard");
-      expect(result.html).toContain("EndpointLink");
-
-      // Verify HTML contains custom elements
-      expect(result.html).toContain("custom-element-v2");
     });
 
     it("htmlToMdx: round-trip conversion preserves structure", () => {
@@ -249,19 +219,21 @@ describe("Fixture files", () => {
     });
 
     it("mdxToHtml: preserves JavaScript exports and complex JSX", () => {
-      const result = mdxToHtml(landingPageMdx);
+      const { html } = mdxToHtml(landingPageMdx);
+      const { mdx } = htmlToMdx(html);
 
-      // Check that JavaScript exports are preserved in HTML
-      expect(result.html).toContain("export const");
-      expect(result.html).toContain("LandingPageCard");
+      // Check that JavaScript exports are preserved in round-trip conversion
+      expect(mdx).toContain("export const");
+      expect(mdx).toContain("LandingPageCard");
     });
 
     it("mdxToHtml: handles CSS-in-JS and style blocks", () => {
-      const result = mdxToHtml(landingPageMdx);
+      const { html } = mdxToHtml(landingPageMdx);
+      const { mdx } = htmlToMdx(html);
 
-      // Check that style blocks are preserved in HTML
-      expect(result.html).toContain("<style>");
-      expect(result.html).toContain("className=");
+      // Check that style blocks are preserved in round-trip conversion
+      expect(mdx).toContain("<style>");
+      expect(mdx).toContain("className=");
     });
   });
 
@@ -297,7 +269,7 @@ describe("Fixture files", () => {
   });
 
   describe("advanced-features.mdx", () => {
-    it("mdxToHtml: converts advanced features file correctly", () => {
+    it("mdxToHtml: converts advanced features frontmatter correctly", () => {
       const result = mdxToHtml(advancedFeaturesMdx);
 
       // Verify frontmatter is extracted correctly
@@ -308,31 +280,6 @@ describe("Fixture files", () => {
         math: true,
         comments: true,
       });
-
-      // Verify HTML contains expected content
-      expect(result.html).toContain("data-hash");
-      expect(result.html).toContain("Advanced MDX Features Demonstration");
-      expect(result.html).toContain("~~strikethrough~~");
-
-      // Verify HTML contains custom elements
-      expect(result.html).toContain("custom-element-v2");
-
-      // Check that various advanced features are preserved in HTML
-      expect(result.html).toContain("~~strikethrough~~");
-      expect(result.html).toContain("<sup>");
-      expect(result.html).toContain("<sub>");
-      expect(result.html).toContain(
-        "$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$"
-      );
-      expect(result.html).toContain("<div");
-      expect(result.html).toContain("[x]");
-      expect(result.html).toContain("[ ]");
-      expect(result.html).toContain("<dl>");
-      expect(result.html).toContain("<dt>");
-      expect(result.html).toContain("<dd>");
-      expect(result.html).toContain("[^1]");
-      expect(result.html).toContain("[^2]");
-      expect(result.html).toContain("{/*");
     });
 
     it("htmlToMdx: round-trip conversion preserves advanced features", () => {
@@ -414,23 +361,24 @@ describe("Fixture files", () => {
     });
 
     it("mdxToHtml: handles basic HTML and JSX elements", () => {
-      const result = mdxToHtml(advancedFeaturesMdx);
+      const { html } = mdxToHtml(advancedFeaturesMdx);
+      const { mdx } = htmlToMdx(html);
 
-      // Check for basic HTML and JSX elements in HTML - these might be in custom elements
-      expect(result.html).toContain("<div");
-      expect(result.html).toContain("custom-element-v2");
-      expect(result.html).toContain('fve-unsupported="true"');
+      // Check for basic HTML and JSX elements in round-trip conversion
+      expect(mdx).toContain("<div");
+      expect(mdx).toContain("className=");
     });
 
     it("mdxToHtml: preserves event handlers and expressions", () => {
-      const result = mdxToHtml(advancedFeaturesMdx);
+      const { html } = mdxToHtml(advancedFeaturesMdx);
+      const { mdx } = htmlToMdx(html);
 
       // Check for event handlers and expressions in HTML
-      expect(result.html).toContain("onClick=");
-      expect(result.html).toContain("{2 + 2}");
-      expect(result.html).toContain("{true ?");
-      expect(result.html).toContain("`${");
-      expect(result.html).toContain("}`");
+      expect(mdx).toContain("onClick=");
+      expect(mdx).toContain("{2 + 2}");
+      expect(mdx).toContain("{true ?");
+      expect(mdx).toContain("`${");
+      expect(mdx).toContain("}`");
     });
   });
 

@@ -8,7 +8,7 @@ import {
   PageData,
   SectionWithHierarchy,
 } from "@fern-docs/components";
-import { ChangedNodes, MdxToHtmlResponse } from "@fern-docs/mdx";
+import { ChangedNodes, MdxToHtmlResponse, htmlToMdx } from "@fern-docs/mdx";
 
 import {
   compareFrontmatter,
@@ -16,7 +16,6 @@ import {
   createPageEntry,
   createPageKey,
   createPageMetadata,
-  generateMdxFromHtml,
 } from "../utils/pagesStoreUtils";
 
 type Filename = string;
@@ -123,7 +122,7 @@ export class PagesStore {
       Object.entries(persistedData).forEach(([filename, pageData]) => {
         if (!this._pages[filename]) {
           try {
-            const mdxContent = generateMdxFromHtml(
+            const { mdx: mdxContent } = htmlToMdx(
               pageData.html,
               pageData.frontmatter
             );
@@ -211,7 +210,7 @@ export class PagesStore {
     const filename = `${fullSlug || node.slug}.mdx`;
     const html = pageData?.html || initialContent || "";
     const frontmatter = pageData?.frontmatter || { title: node.title };
-    const mdxContent = generateMdxFromHtml(html, frontmatter);
+    const { mdx: mdxContent } = htmlToMdx(html, frontmatter);
 
     const pageEntry = createPageEntry(
       createPageMetadata(frontmatter),
@@ -297,7 +296,6 @@ export class PagesStore {
 
     this._notify();
   }
-
   /** Update page content and dependencies */
   updatePage(
     filename: Filename,
@@ -313,6 +311,7 @@ export class PagesStore {
     });
 
     const existingPage = this._pages[filename];
+
     if (
       existingPage &&
       (updates.html || updates.originalFrontmatter || updates.frontmatter)
@@ -328,12 +327,18 @@ export class PagesStore {
       // Regenerate MDX when HTML changes or frontmatter changes
       if (updates.html || updates.frontmatter) {
         try {
-          updatedContents.mdx = generateMdxFromHtml(
+          const { mdx: newMdx } = htmlToMdx(
             updatedContents.html,
-            existingPage.dependencies.frontmatter
+            existingPage.dependencies.frontmatter,
+            undefined,
+            existingPage.dependencies.changedNodes
           );
+          updatedContents.mdx = newMdx;
         } catch (error) {
-          console.error("Failed to generate MDX from HTML:", error);
+          console.error(
+            "[PagesStore.updatePage] Failed to generate MDX from HTML:",
+            error
+          );
         }
       }
 
@@ -441,7 +446,7 @@ export class PagesStore {
 
     // Always generate MDX content for all pages to ensure they're included in allMdxFiles
     try {
-      mdxContent = generateMdxFromHtml(htmlToUse, frontmatterToUse);
+      mdxContent = htmlToMdx(htmlToUse, frontmatterToUse).mdx;
     } catch (error) {
       console.error(
         "Failed to generate MDX during page initialization:",

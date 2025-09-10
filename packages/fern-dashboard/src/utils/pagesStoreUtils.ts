@@ -1,5 +1,5 @@
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
-import { MdxToHtmlResponse, htmlToMdx } from "@fern-docs/mdx";
+import { MdxToHtmlResponse } from "@fern-docs/mdx";
 
 import {
   PageContents,
@@ -30,18 +30,6 @@ export function compareFrontmatter(
   initial: PageMetadata
 ): boolean {
   return JSON.stringify(current) === JSON.stringify(initial);
-}
-
-export function generateMdxFromHtml(
-  html: string,
-  frontmatter: PageMetadata
-): string {
-  try {
-    return htmlToMdx(html, frontmatter).mdx;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to generate MDX from HTML: ${errorMessage}`);
-  }
 }
 
 export function createPageKey(filename: string, clientNodeId?: NodeId): string {

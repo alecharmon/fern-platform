@@ -28,11 +28,10 @@ LoadingComponent.displayName = "LoadingComponent";
 
 interface MDXWrapperProps {
   code: string;
-  hash: string;
   components: ReturnType<typeof useMDXComponents>;
 }
 
-const MDXWrapper = ({ code, hash, components }: MDXWrapperProps) => {
+const MDXWrapper = ({ code, components }: MDXWrapperProps) => {
   const MDXComponent = useMemo(() => {
     try {
       const MDXComponent = getMDXComponent(code);
@@ -40,14 +39,12 @@ const MDXWrapper = ({ code, hash, components }: MDXWrapperProps) => {
     } catch (error) {
       console.warn(
         "[CustomElementNodeView] Failed to create MDX component:",
-        "with hash:",
-        hash,
         "Error:",
         error
       );
       throw error;
     }
-  }, [code, hash]);
+  }, [code]);
 
   return <MDXComponent components={components} />;
 };
@@ -58,12 +55,12 @@ interface HTMLWrapperProps {
   content: string;
   css: string[];
   inlineCss: string[];
-  hash: string;
   name?: string;
+  id: string;
 }
 
 const HTMLWrapper = React.memo(
-  ({ content, css, inlineCss, hash }: HTMLWrapperProps) => {
+  ({ content, css, inlineCss, id }: HTMLWrapperProps) => {
     return (
       <>
         <StyleInjector
@@ -72,9 +69,9 @@ const HTMLWrapper = React.memo(
             ...css,
             "html-content comment { display: none; }",
           ].join("\n")}
-          id={hash}
+          id={id}
         />
-        <div id={`custom-element-${hash}`} className="custom-element-container">
+        <div id={`custom-element-${id}`} className="custom-element-container">
           <div
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(content),
@@ -122,9 +119,9 @@ interface CustomElementRendererProps {
   code: string | undefined;
   htmlContent: { content: string; css: string[] } | null;
   inlineCss: string[];
-  hash: string;
   components: ReturnType<typeof useMDXComponents>;
   textContent: string;
+  id: string;
 }
 
 const CustomElementRenderer = React.memo(
@@ -133,20 +130,18 @@ const CustomElementRenderer = React.memo(
     code,
     htmlContent,
     inlineCss,
-    hash,
     components,
     textContent,
+    id,
   }: CustomElementRendererProps) => {
     // Step 1: Try MDX rendering if we have code AND a valid MDX component name
     if (code != null && typeof MDX_COMPONENTS[name] !== "undefined") {
       try {
-        return <MDXWrapper code={code} hash={hash} components={components} />;
+        return <MDXWrapper code={code} components={components} />;
       } catch (error) {
         console.warn(
           "[CustomElementNodeView] Failed to create MDX component:",
           name,
-          "with hash:",
-          hash,
           "Error:",
           error
         );
@@ -155,9 +150,7 @@ const CustomElementRenderer = React.memo(
     } else if (code != null && typeof MDX_COMPONENTS[name] === "undefined") {
       console.warn(
         "[CustomElementNodeView] MDX component name not found in MDX_COMPONENTS:",
-        name,
-        "with hash:",
-        hash
+        name
       );
     }
 
@@ -168,17 +161,15 @@ const CustomElementRenderer = React.memo(
           content={htmlContent.content}
           css={htmlContent.css}
           inlineCss={inlineCss}
-          hash={hash}
           name={name}
+          id={id}
         />
       );
     }
 
     // Step 3: Fallback to unsupported content
     console.warn(
-      "[CustomElementNodeView] Falling back to unsupported content for element with hash:",
-      hash,
-      "name:",
+      "[CustomElementNodeView] Falling back to unsupported content for element with name:",
       name,
       "textContent:",
       textContent
@@ -214,10 +205,11 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
   const { node } = props;
   const { attrs } = node;
 
-  const mdx = attrs["fve-mdx-content"];
+  const mdxb64 = attrs["fve-mdx-b64"];
+  const mdx = Buffer.from(mdxb64, "base64").toString("utf-8");
   const name = attrs["fve-data-name"];
-  const hash = attrs["fve-data-hash"];
-  const textContent = attrs["fve-mdx-content"];
+  const id = attrs["fve-data-id"];
+  const textContent = mdx;
 
   const { resolveFileSrc } = useFileResolver();
 
@@ -307,9 +299,9 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
             code={state.code}
             htmlContent={htmlContent}
             inlineCss={inlineCss}
-            hash={hash}
             components={components}
             textContent={textContent}
+            id={id}
           />
         )}
       </NodeViewWrapper>

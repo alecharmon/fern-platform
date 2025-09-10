@@ -119,10 +119,10 @@ function isHashableBaseElementsType(
 type CustomElementsType = Exclude<AllElementsType, BaseElementsType>;
 
 // Hash of a node
-export type NodeHash = string;
+export type NodeId = string;
 
 // Map of changed nodes by hash
-export type ChangedNodes = Record<NodeHash, boolean>;
+export type ChangedNodes = Record<NodeId, boolean>;
 
 // Frontmatter included in mdx
 export type Frontmatter = Record<string, unknown>;
@@ -180,7 +180,7 @@ export function mdxToHtml(
     node: any,
     parents?: MdastParents
   ) {
-    const { type, name } = getNodeInfo(node);
+    const { type, name, positionStart, positionEnd } = getNodeInfo(node);
     const nodeType = type as BaseElementsType;
 
     if (treatAsUnsupported.includes(nodeType)) {
@@ -190,9 +190,9 @@ export function mdxToHtml(
       // Early return if the node is not hashable
       return getToHastDefaultHandler(nodeType)(state, node, parents);
     }
-    const { hash, content } = getNodeContent(node, rootContent);
+    const { content } = getNodeContent(node, rootContent);
     return mdxBaseElementNode(
-      hash,
+      generateContentHash(positionStart, positionEnd, content),
       content,
       nodeType,
       name,
@@ -208,7 +208,7 @@ export function mdxToHtml(
     node: any,
     __?: MdastParents
   ) {
-    const { type, name } = getNodeInfo(node);
+    const { type, name, positionStart, positionEnd } = getNodeInfo(node);
 
     const nodeType = type as CustomElementsType;
     if (treatAsUnsupported.includes(nodeType)) {
@@ -233,20 +233,21 @@ export function mdxToHtml(
 
     // For MDX JSX elements, use hash based only on name and props
     // For other custom elements, use the original content-based hash
-    let hash: NodeHash;
     let content: string;
 
     if (isMdxJsxElement(node)) {
-      hash = getNodeHashForMdxJsxElement(node);
       const nodeContent = getNodeContent(node, rootContent);
       content = nodeContent.content;
     } else {
       const nodeContent = getNodeContent(node, rootContent);
-      hash = nodeContent.hash;
       content = nodeContent.content;
     }
 
-    return mdxUnsupportedCustomElementNodev2(hash, content, name);
+    return mdxUnsupportedCustomElementNodev2(
+      generateContentHash(positionStart, positionEnd, content),
+      content,
+      name
+    );
   }
 
   // Get hast from mdast (and handle custom elements)
@@ -318,7 +319,7 @@ export function htmlToMdx(
   // Get hast from html
   const hast = fromHtml(html);
 
-  const unsupportedMdxContent: Record<string, string> = {};
+  const placeholders: Record<string, string> = {};
 
   // Default handler for base elements
   const baseElementHandler: ToMdastHandle = (state, element) => {
@@ -326,6 +327,25 @@ export function htmlToMdx(
     if (element?.properties?.dataType === "image-upload") {
       return { type: "html", value: `<div data-type="image-upload" />` } as any;
     }
+
+    // If a node has not been changed, we use the original MDX content
+    if (
+      typeof element.properties?.["fve-mdx-b64"] === "string" &&
+      typeof element.properties?.["fve-data-id"] === "string" &&
+      !changedNodes?.[element.properties["fve-data-id"]]
+    ) {
+      const originalMdx = Buffer.from(
+        element.properties["fve-mdx-b64"],
+        "base64"
+      ).toString("utf-8");
+
+      const id = Math.random().toString().slice(2, 14);
+      const placeholder = `PLACEHOLDERV2_${id}`;
+      placeholders[placeholder] = originalMdx;
+
+      return { type: "html", value: placeholder } as any;
+    }
+
     return getToMdastDefaultHandler(element.tagName as any)(state, element);
   };
 
@@ -334,22 +354,22 @@ export function htmlToMdx(
     const props = element.properties || {};
     let name: string | null = null;
     const attributes: MdxJsxAttribute[] = [];
-
     // Handle unsupported elements first
     if (
-      typeof props["fve-data-hash"] === "string" &&
       typeof props["fve-unsupported"] === "string" &&
       props["fve-unsupported"] === "true"
     ) {
-      const content = props["fve-mdx-content"];
+      const content = props["fve-mdx-b64"];
       if (typeof content !== "string") {
         throw new Error(
-          `expected string content in fve-mdx-content, found: ${typeof content}`
+          `expected string content in fve-mdx-b64, found: ${typeof content}`
         );
       }
 
-      const placeholder = `PLACEHOLDERV2_${props["fve-data-hash"]}`;
-      unsupportedMdxContent[placeholder] = content;
+      const originalMdx = Buffer.from(content, "base64").toString("utf-8");
+      const id = Math.random().toString().slice(2, 14);
+      const placeholder = `PLACEHOLDERV2_${id}`;
+      placeholders[placeholder] = originalMdx;
 
       return { type: "html", value: placeholder } as any;
     }
@@ -545,8 +565,8 @@ export function htmlToMdx(
     finalMdx = `---\n${frontmatterYaml}---\n\n${mdx}`;
   }
 
-  // Replace unsupported custom element placeholders with actual content
-  Object.entries(unsupportedMdxContent).forEach(([placeholder, content]) => {
+  // Replace placeholders with actual content
+  Object.entries(placeholders).forEach(([placeholder, content]) => {
     // Escape dollar signs in content to prevent them from being treated as replacement references
     // In JavaScript string replacement, $ has special meaning:
     // - $& inserts the matched substring
@@ -585,9 +605,17 @@ function getNodeInfo(node: any) {
   if (node.name && typeof node.name !== "string") {
     throw new Error("mdast node name is not of type string");
   }
+  const positionStart = node.position?.start?.offset;
+  const positionEnd = node.position?.end?.offset;
+  if (positionStart == null || positionEnd == null) {
+    throw new Error("mdast node unexpectedly does not have a position");
+  }
+
   return {
     type: node.type as string,
     name: node.name as string | undefined,
+    positionStart: positionStart as number,
+    positionEnd: positionEnd as number,
   };
 }
 
@@ -612,25 +640,33 @@ function getNodeContent(node: any, rootContent: string) {
     node.position.start.offset,
     node.position.end.offset
   );
-  const hash: NodeHash = createHash("sha256").update(content).digest("hex");
 
-  return { content, hash };
+  return { content };
 }
 
-// Get hash for MDX JSX elements based only on name and props (excluding children)
-function getNodeHashForMdxJsxElement(node: MdxJsxElement): NodeHash {
-  // Create a hash input that only includes the name and attributes
-  const hashInput = {
-    type: node.type,
-    name: node.name,
-    attributes: node.attributes,
-  };
+// Strip all attributes from a node for comparison purposes
+function stripNodeAttributes(node: any): any {
+  if (!node || typeof node !== "object") {
+    return node;
+  }
 
-  // Convert to a deterministic string representation for hashing
-  const hashString = JSON.stringify(hashInput, null, 0);
-  const hash: NodeHash = createHash("sha256").update(hashString).digest("hex");
+  if (Array.isArray(node)) {
+    return node.map(stripNodeAttributes);
+  }
 
-  return hash;
+  const stripped = { ...node };
+
+  // Remove all properties (which include attributes in hast nodes)
+  if (stripped.type === "element") {
+    stripped.properties = {};
+  }
+
+  // Recursively strip attributes from children
+  if (stripped.children && Array.isArray(stripped.children)) {
+    stripped.children = stripped.children.map(stripNodeAttributes);
+  }
+
+  return stripped;
 }
 
 // TODO: we might be able to further optimize by refactoring this and htmlToMdx
@@ -646,57 +682,35 @@ export function getChangedNodesFromHtml(
 
   // Default to all nodes being changed until we can compare them
   const changedNodes: ChangedNodes = {
-    ...Object.fromEntries(Object.keys(originalMap).map((hash) => [hash, true])),
-    ...Object.fromEntries(Object.keys(latestMap).map((hash) => [hash, true])),
+    ...Object.fromEntries(Object.keys(originalMap).map((id) => [id, true])),
+    ...Object.fromEntries(Object.keys(latestMap).map((id) => [id, true])),
   };
 
   // Compare nodes with the same hash
-  for (const hash of Object.keys(originalMap)) {
-    if (hash in latestMap) {
-      // Compare the node contents and attributes
-      const originalNode = originalMap[hash];
-      const latestNode = latestMap[hash];
-      const { content: originalContent } = getNodeContent(
-        originalNode,
-        originalHtml
-      );
-      const { content: latestContent } = getNodeContent(latestNode, latestHtml);
+  for (const id of Object.keys(originalMap)) {
+    if (id in latestMap) {
+      // Compare the nodes without attributes
+      const originalNode = originalMap[id];
+      const latestNode = latestMap[id];
 
-      // Note: the below attribute comparison logic was claude generated
-      // Compare attributes shallowly
-      const originalAttrs = originalNode.properties || {};
-      const latestAttrs = latestNode.properties || {};
+      // Strip attributes from both nodes before comparison
+      const strippedOriginal = stripNodeAttributes(originalNode);
+      const strippedLatest = stripNodeAttributes(latestNode);
 
-      // Compare attribute keys and values
-      const originalAttrKeys = Object.keys(originalAttrs).sort();
-      const latestAttrKeys = Object.keys(latestAttrs).sort();
+      // Convert to HTML strings for comparison (without attributes)
+      const originalContent = toHtml(strippedOriginal);
+      const latestContent = toHtml(strippedLatest);
 
-      let attributesChanged = false;
-      if (
-        originalAttrKeys.length !== latestAttrKeys.length ||
-        !originalAttrKeys.every((key, i) => key === latestAttrKeys[i])
-      ) {
-        attributesChanged = true;
-      } else {
-        for (const key of originalAttrKeys) {
-          if (originalAttrs[key] !== latestAttrs[key]) {
-            attributesChanged = true;
-            break;
-          }
-        }
-      }
-
-      changedNodes[hash] =
-        originalContent !== latestContent || attributesChanged;
+      changedNodes[id] = originalContent !== latestContent;
     }
   }
+
   return changedNodes;
 }
 
-// Helper to get first-level elements with data-hash (dataHash) under root -> html -> body
 // TODO: consider writing type guards for the hast nodes, since toHast does not type it by default
 function getNodeMapFromHast(hast: HastRoot) {
-  const map: Record<NodeHash, any> = {};
+  const map: Record<NodeId, any> = {};
   let bodyChildren: any[] | undefined;
   if (hast && Array.isArray(hast.children)) {
     // Find the <html> element
@@ -727,9 +741,9 @@ function getNodeMapFromHast(hast: HastRoot) {
         node &&
         node.type === "element" &&
         node.properties &&
-        typeof node.properties.dataHash === "string"
+        typeof node.properties["fve-data-id"] === "string"
       ) {
-        map[node.properties.dataHash] = node;
+        map[node.properties["fve-data-id"]] = node;
       }
     }
   }
@@ -748,8 +762,8 @@ function getToMdastDefaultHandler(type: ToMdastDefaultHandlersType) {
 
 // Create node for a base element
 function mdxBaseElementNode(
-  hash: NodeHash,
-  _: string,
+  id: string,
+  content: string,
   type: HashableBaseElementsType,
   __: string | undefined,
   state: ToHastState,
@@ -764,12 +778,12 @@ function mdxBaseElementNode(
         return defaultNode;
       } else if (defaultNode.type === "element") {
         // Expects defaultNode: Element
-        // Note: we add a data-hash property to the element for the client's reference
         return {
           ...defaultNode,
           properties: {
             ...defaultNode.properties,
-            "data-hash": hash,
+            "fve-data-id": id,
+            "fve-mdx-b64": Buffer.from(content, "utf-8").toString("base64"),
           },
         };
       } else if (
@@ -804,7 +818,7 @@ function mdxBaseElementNode(
 
 // Create node for a custom element -- colton v2 test
 function mdxUnsupportedCustomElementNodev2(
-  hash: NodeHash,
+  id: string,
   originalMdxContent: string,
   name: string | undefined
 ) {
@@ -813,11 +827,24 @@ function mdxUnsupportedCustomElementNodev2(
     tagName: "custom-element-v2",
     // These data attributes help the client to handle the custom element
     properties: {
-      "fve-data-hash": hash,
+      "fve-data-id": id,
       "fve-data-name": name,
-      "fve-mdx-content": originalMdxContent,
+      "fve-mdx-b64": Buffer.from(originalMdxContent, "utf-8").toString(
+        "base64"
+      ),
       "fve-unsupported": "true",
     },
     children: [],
   };
+}
+
+// Generate a random 16-digit number string
+function generateContentHash(
+  positionStart: number,
+  positionEnd: number,
+  content: string
+): string {
+  return createHash("sha256")
+    .update(`${positionStart}_${positionEnd}_${content}`)
+    .digest("hex");
 }

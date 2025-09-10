@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import Placeholder from "@tiptap/extension-placeholder";
-import UniqueID from "@tiptap/extension-unique-id";
 import {
   EditorProvider,
   EditorProviderProps,
@@ -21,7 +20,7 @@ import BubbleMenu from "./BubbleMenu";
 import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
 import CustomElement from "./extension-custom-element";
-import GlobalDataHashAttribute from "./extension-global-data-hash-attribute";
+import { FVEAttributesExtension } from "./extension-fve-attributes";
 import {
   ConfiguredFileHandler,
   ConfiguredImageUploadNode,
@@ -29,6 +28,8 @@ import {
 
 // These node types are the ones that will have data attributes set on them
 const dataAttributeNodeTypes = [
+  "div",
+  "img",
   "doc",
   "paragraph",
   "heading",
@@ -49,13 +50,10 @@ const extensions = [
     },
     gapcursor: false,
   }),
+  FVEAttributesExtension.configure({
+    types: dataAttributeNodeTypes,
+  }),
   CustomElement,
-  UniqueID.configure({
-    types: dataAttributeNodeTypes,
-  }),
-  GlobalDataHashAttribute.configure({
-    types: dataAttributeNodeTypes,
-  }),
   Placeholder.configure({
     placeholder: "Write or press `/` for components",
     emptyEditorClass: "is-empty",
@@ -68,7 +66,7 @@ export declare namespace TiptapEditor {
     className?: string;
     disableFloatingMenu?: boolean;
     disableBubbleMenu?: boolean;
-    content?: EditorProviderProps["content"];
+    initialContent: string;
     onCreate?: EditorProviderProps["onCreate"];
     onUpdate?: EditorProviderProps["onUpdate"];
   }
@@ -80,7 +78,7 @@ export default function TiptapEditor({
   className,
   disableFloatingMenu,
   disableBubbleMenu,
-  content,
+  initialContent,
   onCreate,
   onUpdate,
 }: TiptapEditor.Props) {
@@ -94,7 +92,6 @@ export default function TiptapEditor({
         ConfiguredImageUploadNode(),
         ConfiguredFileHandler(),
       ]}
-      content={content}
       editorProps={{
         attributes: {
           class: "prose prose-md p-7 -m-2 focus:outline-none max-w-none",
@@ -104,6 +101,7 @@ export default function TiptapEditor({
         // Required to preserve formatting in custom element previews
         preserveWhitespace: true,
       }}
+      content={initialContent}
       editorContainerProps={{
         className: cn(className, "relative"),
       }}
@@ -112,7 +110,7 @@ export default function TiptapEditor({
       onUpdate={onUpdate}
     >
       <EditorContextUpdater />
-      <TipTapContentUpdateListener content={content} />
+      <TipTapEditingDisabledListener />
       {!disableFloatingMenu && !isEditingDisabled && <FloatingMenu />}
       {!disableBubbleMenu && !isEditingDisabled && <BubbleMenu />}
       <NodeHoverHandle />
@@ -137,14 +135,9 @@ function EditorContextUpdater() {
   return <></>;
 }
 
-function TipTapContentUpdateListener({
-  content,
-}: {
-  content: EditorProviderProps["content"];
-}) {
+function TipTapEditingDisabledListener() {
   const { editor } = useCurrentEditor();
   const isEditingDisabled = useEditingDisabled();
-  const lastSetContentRef = useRef<string | null>(null);
 
   // Ensure the editor stays in sync with editability status
   useEffect(() => {
@@ -154,33 +147,6 @@ function TipTapContentUpdateListener({
       editor?.setEditable(true, false);
     }
   }, [isEditingDisabled, editor]);
-
-  // Monitor content changes and update editor imperatively when needed
-  useEffect(() => {
-    if (!editor || isEditingDisabled) return;
-
-    // Don't update if the editor is focused (user is typing)
-    if (editor.isFocused) return;
-    const contentStr =
-      typeof content === "string" ? content : JSON.stringify(content);
-
-    if (!contentStr) return;
-
-    const currContent = editor.getHTML();
-
-    // Don't update if this content was the last thing we set
-    // This prevents infinite loops when user types in editor
-    if (lastSetContentRef.current === contentStr) {
-      return;
-    }
-
-    if (contentStr !== currContent) {
-      lastSetContentRef.current = contentStr;
-      editor.commands.setContent(contentStr, {
-        emitUpdate: false, // Don't emit update events since we don't want to trigger the onUpdate callback
-      });
-    }
-  }, [content, editor, isEditingDisabled]);
 
   return <></>;
 }

@@ -44,7 +44,7 @@ export const CustomElement = Node.create<CustomElementOptions>({
    */
   addAttributes() {
     return {
-      "fve-data-hash": {
+      "fve-data-id": {
         default: null,
       },
       "fve-data-type": {
@@ -53,7 +53,7 @@ export const CustomElement = Node.create<CustomElementOptions>({
       "fve-data-name": {
         default: null,
       },
-      "fve-mdx-content": {
+      "fve-mdx-b64": {
         default: null,
       },
       "fve-unsupported": {
