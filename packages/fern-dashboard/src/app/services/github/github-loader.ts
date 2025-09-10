@@ -372,11 +372,14 @@ export class GitHubLoader implements GitLoader {
       };
     }
 
+    const pathToFernConfigJson =
+      projectResult.result.project.fernConfigJsonPath;
+
     const content = await this.getFileContent(
       owner,
       repo,
       projectResult.result.defaultBranch,
-      projectResult.result.project.fernConfigJsonPath
+      pathToFernConfigJson
     );
     if (!content) {
       return {
@@ -412,11 +415,15 @@ export class GitHubLoader implements GitLoader {
 
     return {
       type: "ok",
-      result: maybeConfig.data,
+      result: {
+        ...maybeConfig.data,
+        pathToFernConfigJson,
+      },
     };
   }
 }
 
 const fernConfigSchema = z.object({
   organization: z.string(),
+  version: z.string(),
 });

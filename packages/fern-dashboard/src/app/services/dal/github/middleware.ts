@@ -3,19 +3,151 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getValidationErrorMessage } from "@/utils/errors";
 
 import { getOwnerAndRepoFromGithubUrl } from "../../github/github";
 import { assertUserHasOrganizationAccess } from "../organization";
 import type { GithubIdentificationSchemeType, RepoIdentifier } from "./types";
-import { validateGithubRepoAccess } from "./validators";
+import {
+  GithubRepoValidationError,
+  validateGithubRepoAccess,
+} from "./validators";
 
 export interface ParsedRepoData {
   owner: string;
   repo: string;
   site: string;
   githubUrl: string;
+}
+
+export type AuthError =
+  | { type: "SESSION_ERROR"; message: string }
+  | { type: "ORG_ACCESS_ERROR"; message: string }
+  | { type: "GITHUB_URL_ERROR"; message: string }
+  | {
+      type: "GITHUB_ACCESS_ERROR";
+      validationError: GithubRepoValidationError;
+    };
+
+export type AuthResult =
+  | { ok: true; value: ParsedRepoData }
+  | { ok: false; error: AuthError };
+
+export async function withGithubAuth<T>(
+  userId: Auth0UserID,
+  orgName: Auth0OrgName,
+  repoData: GithubIdentificationSchemeType,
+  callback: (authResult: AuthResult) => Promise<T>
+): Promise<T> {
+  // Build the AuthResult by running all validations
+  let authResult: AuthResult;
+
+  // Validate user organization membership
+  try {
+    await assertUserHasOrganizationAccess({ userId, orgName });
+
+    // Parse the repo data to create a RepoIdentifier and extract information
+    let identifier: RepoIdentifier;
+    let owner: string;
+    let repo: string;
+    let githubUrl: string;
+
+    if ("githubUrl" in repoData) {
+      // It's a GitHub URL
+      githubUrl = repoData.githubUrl;
+      identifier = { type: "url", githubUrl };
+
+      const parsed = getOwnerAndRepoFromGithubUrl(githubUrl);
+
+      if (parsed.owner == null || parsed.repo == null) {
+        authResult = {
+          ok: false,
+          error: {
+            type: "GITHUB_URL_ERROR",
+            message: "Invalid GitHub URL format",
+          },
+        };
+      } else {
+        owner = parsed.owner;
+        repo = parsed.repo;
+
+        // Validate GitHub access
+        const validation = await validateGithubRepoAccess(
+          orgName,
+          repoData.site,
+          identifier
+        );
+
+        if (!validation.ok) {
+          authResult = {
+            ok: false,
+            error: {
+              type: "GITHUB_ACCESS_ERROR",
+              validationError: validation.error,
+            },
+          };
+        } else {
+          // All validations passed
+          authResult = {
+            ok: true,
+            value: {
+              owner,
+              repo,
+              site: repoData.site,
+              githubUrl,
+            },
+          };
+        }
+      }
+    } else {
+      // It's an object with owner and repo
+      owner = repoData.owner;
+      repo = repoData.repo;
+      githubUrl = `https://github.com/${owner}/${repo}`;
+      identifier = { type: "owner-repo", owner, repo };
+
+      // Validate GitHub access
+      const validation = await validateGithubRepoAccess(
+        orgName,
+        repoData.site,
+        identifier
+      );
+
+      if (!validation.ok) {
+        authResult = {
+          ok: false,
+          error: {
+            type: "GITHUB_ACCESS_ERROR",
+            validationError: validation.error,
+          },
+        };
+      } else {
+        // All validations passed
+        authResult = {
+          ok: true,
+          value: {
+            owner,
+            repo,
+            site: repoData.site,
+            githubUrl,
+          },
+        };
+      }
+    }
+  } catch (_) {
+    authResult = {
+      ok: false,
+      error: {
+        type: "ORG_ACCESS_ERROR",
+        message: "User is not a member of the specified organization",
+      },
+    };
+  }
+
+  // Execute the callback with the AuthResult
+  const result = await callback(authResult);
+  return result;
 }
 
 /**
@@ -38,102 +170,84 @@ export interface ParsedRepoData {
  *
  * @example
  * const { orgName, ...repoData } = validatedBody;
- * return withGithubAuth(req, orgName, repoData, async ({ owner, repo, githubUrl }) => {
+ * return withGithubAuthNextRoute(req, orgName, repoData, async ({ owner, repo, githubUrl }) => {
  *   const result = await someGitOperation({ owner, repo });
  *   return NextResponse.json(result);
  * });
  */
-export async function withGithubAuth(
+export async function withGithubAuthNextRoute(
   req: NextRequest,
   orgName: Auth0OrgName,
   repoData: GithubIdentificationSchemeType,
-  callback: (parsedRepo: ParsedRepoData) => Promise<NextResponse> | NextResponse
+  callback: (parsedRepo: ParsedRepoData) => Promise<NextResponse>
 ): Promise<NextResponse> {
   // Validate user session
   const sessionResult = await maybeGetCurrentSession(req);
   if (sessionResult.errorResponse != null) {
     return sessionResult.errorResponse;
   }
-  const { userId } = sessionResult.data;
 
-  // Validate user organization membership
-  try {
-    await assertUserHasOrganizationAccess({ userId, orgName });
-  } catch (_) {
-    return NextResponse.json(
-      { error: "User is not a member of the specified organization" },
-      { status: 403 }
-    );
-  }
-
-  // Parse the repo data to create a RepoIdentifier and extract information
-  let identifier: RepoIdentifier;
-  let owner: string;
-  let repo: string;
-  let githubUrl: string;
-
-  if ("githubUrl" in repoData) {
-    // It's a GitHub URL
-    githubUrl = repoData.githubUrl;
-    identifier = { type: "url", githubUrl };
-
-    const parsed = getOwnerAndRepoFromGithubUrl(githubUrl);
-
-    if (parsed.owner == null || parsed.repo == null) {
-      return NextResponse.json(
-        { error: "Invalid GitHub URL format" },
-        { status: 400 }
-      );
-    } else {
-      owner = parsed.owner;
-      repo = parsed.repo;
-    }
-  } else {
-    // It's an object with owner and repo
-    owner = repoData.owner;
-    repo = repoData.repo;
-    githubUrl = `https://github.com/${owner}/${repo}`;
-    identifier = { type: "owner-repo", owner, repo };
-  }
-
-  // Validate GitHub access
-  const validation = await validateGithubRepoAccess(
+  return withGithubAuth(
+    sessionResult.data.userId,
     orgName,
-    repoData.site,
-    identifier
-  );
+    repoData,
+    async (authResult) => {
+      // Check if the authResult contains an error
+      if (!authResult.ok) {
+        const { error } = authResult;
+        let status: number;
+        let message: string;
 
-  if (!validation.ok) {
-    const { error } = validation;
-    const message = getValidationErrorMessage(error);
-    let status: number;
+        switch (error.type) {
+          case "SESSION_ERROR":
+            status = 401;
+            message = error.message;
+            break;
+          case "ORG_ACCESS_ERROR":
+            status = 403;
+            message = error.message;
+            break;
+          case "GITHUB_URL_ERROR":
+            status = 400;
+            message = error.message;
+            break;
+          case "GITHUB_ACCESS_ERROR":
+            message = getValidationErrorMessage(error.validationError);
+            // Map validation error types to HTTP status codes
+            switch (error.validationError.type) {
+              case "FERN_BOT_NOT_INSTALLED":
+                status = 403;
+                break;
+              case "FERN_CONFIG_JSON_ORG_MISMATCH":
+                status = 403;
+                break;
+              case "FERN_CONFIG_JSON_MISSING":
+                status = 404;
+                break;
+              case "FERN_CONFIG_JSON_MALFORMED":
+                status = 400;
+                break;
+              case "MALFORMED_GITHUB_URL":
+                status = 400;
+                break;
+              case "UNEXPECTED_ERROR":
+                status = 500;
+                break;
+              default:
+                status = 500;
+            }
+            break;
+          default:
+            status = 500;
+            message = "Unknown error";
+        }
 
-    switch (error.type) {
-      case "FERN_BOT_NOT_INSTALLED":
-        status = 403;
-        break;
-      case "FERN_CONFIG_JSON_ORG_MISMATCH":
-        status = 403;
-        break;
-      case "FERN_CONFIG_JSON_MISSING":
-        status = 404;
-        break;
-      case "FERN_CONFIG_JSON_MALFORMED":
-        status = 400;
-        break;
-      case "MALFORMED_GITHUB_URL":
-        status = 400;
-        break;
-      case "UNEXPECTED_ERROR":
-        status = 500;
-        break;
-      default:
-        status = 500;
+        return NextResponse.json({ error: message }, { status });
+      }
+
+      // Otherwise, we have valid parsed repo data - call the original callback
+      const result = await callback(authResult.value);
+      return result;
     }
-
-    return NextResponse.json({ error: message }, { status });
-  }
-
-  // If we reach here, validation passed - execute the callback with parsed repo data
-  return await callback({ owner, repo, site: repoData.site, githubUrl });
+  );
 }

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { orgNameValidator } from "@/app/api/utils/validators";
-import { withGithubAuth } from "@/app/services/dal/github/middleware";
+import { withGithubAuthNextRoute } from "@/app/services/dal/github/middleware";
 import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { ResolvedReturnType } from "@/utils/types";
@@ -54,15 +54,20 @@ export const POST = withZodValidation(
   ) => {
     const { orgName, branch, message, files, ...repoData } = validatedBody;
 
-    return withGithubAuth(req, orgName, repoData, async ({ owner, repo }) => {
-      const result = await handler({
-        owner,
-        repo,
-        branch,
-        message,
-        files,
-      });
-      return NextResponse.json(result);
-    });
+    return withGithubAuthNextRoute(
+      req,
+      orgName,
+      repoData,
+      async ({ owner, repo }) => {
+        const result = await handler({
+          owner,
+          repo,
+          branch,
+          message,
+          files,
+        });
+        return NextResponse.json(result);
+      }
+    );
   }
 );

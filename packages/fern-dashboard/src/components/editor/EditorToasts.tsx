@@ -77,3 +77,7 @@ export function UploadingImageToast() {
 export function SuccessfulUploadImageToast() {
   toast.success("Image uploaded successfully!");
 }
+
+export function ErrorUpgradeFernCliVersionToast(error: string = "") {
+  toast.error("Failed to upgrade Fern CLI version. Please try again. " + error);
+}

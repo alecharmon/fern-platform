@@ -38,3 +38,10 @@ export function normalizeRepoData(identifier: RepoIdentifier): RepoData {
     githubUrl: `https://github.com/${identifier.owner}/${identifier.repo}`,
   };
 }
+
+export function getUpgradePrBranchName(
+  currentVersion: string,
+  latestVersion: string
+): string {
+  return `upgrade-fern-${currentVersion}-to-${latestVersion}`;
+}

@@ -31,6 +31,7 @@ export function GoToEditorButton({
   sourceRepo,
   disabled = false,
   isValidatingSource,
+  primary = true,
 }: {
   docsUrl: DocsUrl;
   session: Auth0SessionData;
@@ -38,6 +39,7 @@ export function GoToEditorButton({
   disabled?: boolean;
   disabledReason?: string;
   isValidatingSource?: boolean;
+  primary?: boolean;
 }) {
   const orgName = useOrgName();
   const [isLoading, setIsLoading] = useState(false);
@@ -103,6 +105,7 @@ export function GoToEditorButton({
                 setIsLoading(true);
                 goToEditor();
               }}
+              variant={primary ? "default" : "outline"}
               disabled={isLoading || disabled || isValidatingSource}
               asChild={!disabled}
             >

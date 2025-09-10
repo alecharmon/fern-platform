@@ -6,7 +6,9 @@ import getGithubSourceMetadataHandler from "@/app/api/get-github-source-metadata
 import getMyDocsSitesHandler from "@/app/api/get-my-docs-sites/handler";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { checkUpgradePrStatus } from "@/app/services/dal/github/checkUpgradePrStatus";
 import getDocsGithubUrl from "@/app/services/dal/github/getDocsGithubUrl";
+import { getFernVersionFromRepo } from "@/app/services/dal/github/getFernVersionFromRepo";
 import {
   GithubRepoValidationError,
   validateGithubRepoAccess,
@@ -20,10 +22,16 @@ import {
 } from "@/components/docs-page/GithubSource";
 import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
 import { InstallGithubAppButton } from "@/components/docs-page/InstallGithubAppButton";
+import { UpgradeFernButton } from "@/components/docs-page/UpgradeFernButton";
 import { VEPreviewImage } from "@/components/docs-page/VEPreviewImage";
 import { WarningNote } from "@/components/docs-page/WarningNote";
 import Card from "@/components/ui/card";
 import { getValidationErrorMessage } from "@/utils/errors";
+import {
+  MIN_VE_CLI_VERSION,
+  compareVersions,
+  getLatestFernCliVersion,
+} from "@/utils/fernCliVersion";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
@@ -76,6 +84,21 @@ export default async function Page(props: {
     isLoading: false,
   };
 
+  // Fern version upgrade check
+  let fernVersionInfo:
+    | {
+        current: string;
+        latest: string;
+        needsUpgrade: boolean;
+        isBelowMinimum: boolean;
+        existingPr?: {
+          exists: boolean;
+          prUrl?: string;
+          prNumber?: number;
+        };
+      }
+    | undefined;
+
   try {
     const urlResult = await getDocsGithubUrl({
       url: encodedDocsUrl,
@@ -106,6 +129,47 @@ export default async function Page(props: {
               githubUrl,
               userId: session.user.sub,
             });
+
+            // Check for Fern version upgrade if we have successful validation
+            try {
+              const [fernVersionResult, latestVersion] = await Promise.all([
+                getFernVersionFromRepo(githubUrl, docsUrl),
+                getLatestFernCliVersion(),
+              ]);
+
+              if (fernVersionResult.ok && sourceRepo?.baseBranch) {
+                const needsUpgrade = compareVersions(
+                  fernVersionResult.version,
+                  latestVersion
+                );
+                const isBelowMinimum = compareVersions(
+                  fernVersionResult.version,
+                  MIN_VE_CLI_VERSION
+                );
+
+                // Show version info if any update is available
+                if (needsUpgrade) {
+                  // Check if there's already an existing upgrade PR
+                  const existingPr = await checkUpgradePrStatus(
+                    githubUrl,
+                    fernVersionResult.version,
+                    latestVersion,
+                    sourceRepo.baseBranch
+                  );
+
+                  fernVersionInfo = {
+                    current: fernVersionResult.version,
+                    latest: latestVersion,
+                    needsUpgrade,
+                    isBelowMinimum,
+                    existingPr,
+                  };
+                }
+              }
+            } catch (error) {
+              console.error("Failed to check Fern version:", error);
+              // Silently fail - upgrade check is not critical
+            }
           } catch (error) {
             console.error("Failed to fetch source repo metadata:", error);
           }
@@ -125,6 +189,7 @@ export default async function Page(props: {
     console.error(error);
   }
 
+  const criticalCLIUpdateNeeded = fernVersionInfo?.isBelowMinimum;
   return (
     <div className="flex w-full flex-col gap-4">
       <DocsSiteOverviewCard
@@ -160,11 +225,35 @@ export default async function Page(props: {
           {githubUrl != null &&
             (githubAuthState.validationResult.ok ? (
               <>
-                <GoToEditorButton
-                  docsUrl={docsUrl}
-                  session={session}
-                  sourceRepo={githubAuthState.sourceRepo}
-                />
+                {criticalCLIUpdateNeeded && (
+                  <WarningNote>
+                    For optimal functionality, please upgrade your Fern CLI to
+                    at least {MIN_VE_CLI_VERSION}. Current version:{" "}
+                    {fernVersionInfo?.current}
+                  </WarningNote>
+                )}
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <GoToEditorButton
+                    docsUrl={docsUrl}
+                    session={session}
+                    sourceRepo={githubAuthState.sourceRepo}
+                    primary={!criticalCLIUpdateNeeded}
+                  />
+                  {fernVersionInfo?.needsUpgrade &&
+                    githubAuthState.sourceRepo?.baseBranch && (
+                      <UpgradeFernButton
+                        orgName={orgName}
+                        docsUrl={docsUrl}
+                        githubUrl={githubUrl}
+                        currentVersion={fernVersionInfo.current}
+                        latestVersion={fernVersionInfo.latest}
+                        baseBranch={githubAuthState.sourceRepo.baseBranch}
+                        existingPr={fernVersionInfo.existingPr}
+                        primary={criticalCLIUpdateNeeded}
+                      />
+                    )}
+                </div>
+
                 <p className="text-muted-foreground text-sm">
                   All sessions will turn into PRs in your Github repo{" "}
                   <a

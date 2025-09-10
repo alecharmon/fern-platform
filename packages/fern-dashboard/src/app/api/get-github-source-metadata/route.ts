@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { orgNameValidator } from "@/app/api/utils/validators";
-import { withGithubAuth } from "@/app/services/dal/github/middleware";
+import { withGithubAuthNextRoute } from "@/app/services/dal/github/middleware";
 import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { ResolvedReturnType } from "@/utils/types";
@@ -30,18 +30,23 @@ export const POST = withZodValidation(
   ) => {
     const { orgName, skipCache, ...repoData } = validatedBody;
 
-    return withGithubAuth(req, orgName, repoData, async ({ githubUrl }) => {
-      const { maybeGetCurrentSession } = await import(
-        "@/app/api/utils/maybeGetCurrentSession"
-      );
-      const sessionResult = await maybeGetCurrentSession(req);
-      if (sessionResult.errorResponse != null) {
-        return sessionResult.errorResponse;
-      }
-      const { userId } = sessionResult.data;
+    return withGithubAuthNextRoute(
+      req,
+      orgName,
+      repoData,
+      async ({ githubUrl }) => {
+        const { maybeGetCurrentSession } = await import(
+          "@/app/api/utils/maybeGetCurrentSession"
+        );
+        const sessionResult = await maybeGetCurrentSession(req);
+        if (sessionResult.errorResponse != null) {
+          return sessionResult.errorResponse;
+        }
+        const { userId } = sessionResult.data;
 
-      const response = await handler({ userId, githubUrl, skipCache });
-      return NextResponse.json(response);
-    });
+        const response = await handler({ userId, githubUrl, skipCache });
+        return NextResponse.json(response);
+      }
+    );
   }
 );

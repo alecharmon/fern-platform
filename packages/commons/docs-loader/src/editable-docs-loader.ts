@@ -132,11 +132,14 @@ export type FernConfigJsonErrors =
 
 interface FernConfigJsonStructure {
   organization: string;
+  version: string;
 }
 
 interface FernConfigJsonSuccess {
   type: "ok";
-  result: FernConfigJsonStructure;
+  result: FernConfigJsonStructure & {
+    pathToFernConfigJson: string;
+  };
 }
 
 interface FernConfigJsonError {
