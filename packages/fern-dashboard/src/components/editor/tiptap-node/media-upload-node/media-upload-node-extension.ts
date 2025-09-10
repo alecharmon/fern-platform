@@ -2,7 +2,7 @@ import type { NodeType } from "@tiptap/pm/model";
 import { Node, mergeAttributes } from "@tiptap/react";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
-import { ImageUploadNode as ImageUploadNodeComponent } from "@/components/editor/tiptap-node/image-upload-node/image-upload-node";
+import { MediaUploadNode as MediaUploadNodeComponent } from "@/components/editor/tiptap-node/media-upload-node/media-upload-node";
 
 /**
  * This file is boilerplate from Tiptap's image-upload-node.
@@ -13,7 +13,7 @@ export type UploadFunction = (
   abortSignal?: AbortSignal
 ) => Promise<string>;
 
-export interface ImageUploadNodeOptions {
+export interface MediaUploadNodeOptions {
   /**
    * The type of the node.
    * @default 'image'
@@ -21,7 +21,7 @@ export interface ImageUploadNodeOptions {
   type?: string | NodeType | undefined;
   /**
    * Acceptable file types for upload.
-   * @default 'image/*'
+   * @default 'image/*,video/*'
    */
   accept?: string;
   /**
@@ -57,8 +57,8 @@ export interface ImageUploadNodeOptions {
 
 declare module "@tiptap/react" {
   interface Commands<ReturnType> {
-    imageUpload: {
-      setImageUploadNode: (options?: ImageUploadNodeOptions) => ReturnType;
+    mediaUpload: {
+      setMediaUploadNode: (options?: MediaUploadNodeOptions) => ReturnType;
     };
   }
 }
@@ -67,8 +67,8 @@ declare module "@tiptap/react" {
  * A Tiptap node extension that creates an image upload component.
  * @see registry/tiptap-node/image-upload-node/image-upload-node
  */
-export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
-  name: "imageUpload",
+export const MediaUploadNode = Node.create<MediaUploadNodeOptions>({
+  name: "mediaUpload",
 
   group: "block",
 
@@ -78,8 +78,8 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
 
   addOptions() {
     return {
-      type: "image",
-      accept: "image/*",
+      type: "media",
+      accept: "image/*,video/*",
       limit: 1,
       maxSize: 0,
       upload: undefined,
@@ -115,12 +115,12 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(ImageUploadNodeComponent);
+    return ReactNodeViewRenderer(MediaUploadNodeComponent);
   },
 
   addCommands() {
     return {
-      setImageUploadNode:
+      setMediaUploadNode:
         (options) =>
         ({ commands }) => {
           return commands.insertContent({
@@ -142,8 +142,8 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
 
         if (
           nodeAfter &&
-          nodeAfter.type.name === "imageUpload" &&
-          editor.isActive("imageUpload")
+          nodeAfter.type.name === "mediaUpload" &&
+          editor.isActive("mediaUpload")
         ) {
           const nodeEl = editor.view.nodeDOM(selection.$from.pos);
           if (nodeEl && nodeEl instanceof HTMLElement) {
@@ -161,4 +161,4 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
   },
 });
 
-export default ImageUploadNode;
+export default MediaUploadNode;

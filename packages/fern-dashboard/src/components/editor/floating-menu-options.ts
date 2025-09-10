@@ -9,7 +9,7 @@ export type FloatingMenuAction =
   | "toggleQuote"
   | "setLink"
   | "plainText"
-  | "toggleImage";
+  | "toggleMedia";
 
 export interface MenuItem {
   title: string;
@@ -64,7 +64,13 @@ export const menuItems: MenuItem[] = [
   {
     title: "Image",
     iconProps: { variant: "Image" },
-    action: "toggleImage",
+    action: "toggleMedia",
     keywords: ["image", "img", "picture"],
+  },
+  {
+    title: "Video",
+    iconProps: { variant: "Video" },
+    action: "toggleMedia",
+    keywords: ["video", "embed", "iframe"],
   },
 ];

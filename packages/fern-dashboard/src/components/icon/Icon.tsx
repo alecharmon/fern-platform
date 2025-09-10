@@ -1,5 +1,6 @@
 import {
   Bold,
+  Clapperboard,
   Code,
   Heading1,
   Heading2,
@@ -38,6 +39,7 @@ const ICONS = {
   Type,
   Underline,
   HeadingDropdown,
+  Video: Clapperboard,
 };
 
 // Infer icon names type

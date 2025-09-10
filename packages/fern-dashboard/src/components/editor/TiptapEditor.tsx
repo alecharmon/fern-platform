@@ -23,8 +23,8 @@ import CustomElement from "./extension-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
 import {
   ConfiguredFileHandler,
-  ConfiguredImageUploadNode,
-} from "./tiptap-node/image-upload-node/configured-upload-extensions";
+  ConfiguredMediaUploadNode,
+} from "./tiptap-node/media-upload-node/configured-upload-extensions";
 
 // These node types are the ones that will have data attributes set on them
 const dataAttributeNodeTypes = [
@@ -89,7 +89,7 @@ export default function TiptapEditor({
       autofocus={autofocus}
       extensions={[
         ...extensions,
-        ConfiguredImageUploadNode(),
+        ConfiguredMediaUploadNode(),
         ConfiguredFileHandler(),
       ]}
       editorProps={{

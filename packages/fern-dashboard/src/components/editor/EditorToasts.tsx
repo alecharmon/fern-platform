@@ -66,16 +66,16 @@ export function ErrorUpdatePrStatusToast() {
   toast.error("Failed to update PR status. Please try again.");
 }
 
-export function ErrorUploadImageToast(error: Error) {
-  toast.error("Unable to upload image: " + error.message);
+export function ErrorUploadMediaToast(error: Error) {
+  toast.error("Unable to upload media: " + error.message);
 }
 
-export function UploadingImageToast() {
-  toast.info("Uploading image...");
+export function UploadingMediaToast() {
+  toast.info("Uploading media...");
 }
 
-export function SuccessfulUploadImageToast() {
-  toast.success("Image uploaded successfully!");
+export function SuccessfulUploadMediaToast() {
+  toast.success("Media uploaded successfully!");
 }
 
 export function ErrorUpgradeFernCliVersionToast(error: string = "") {

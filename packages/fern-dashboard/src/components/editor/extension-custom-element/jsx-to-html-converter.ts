@@ -35,6 +35,7 @@ const BOOLEAN_ATTRIBUTES = [
 const HTML_TAGS = [
   "div",
   "img",
+  "video",
   "span",
   "p",
   "a",

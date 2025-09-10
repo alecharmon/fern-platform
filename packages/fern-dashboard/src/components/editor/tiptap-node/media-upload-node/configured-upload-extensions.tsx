@@ -6,14 +6,14 @@ import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
 import {
-  ErrorUploadImageToast,
-  SuccessfulUploadImageToast,
-  UploadingImageToast,
+  ErrorUploadMediaToast,
+  SuccessfulUploadMediaToast,
+  UploadingMediaToast,
 } from "../../EditorToasts";
 import { createCustomElementNode } from "../../extension-custom-element/create-custom-element-node";
-import ImageUploadNode from "./image-upload-node-extension";
+import MediaUploadNode from "./media-upload-node-extension";
 
-const private_handleImageUpload = async ({
+const private_handleMediaUpload = async ({
   file,
   onProgress,
   signal,
@@ -60,7 +60,7 @@ const private_handleImageUpload = async ({
   return response.imageUrl;
 };
 
-export const ConfiguredImageUploadNode = () => {
+export const ConfiguredMediaUploadNode = () => {
   const { slug: slugArray, docsUrl: docsUrlParam } = useParams();
 
   const docsUrl = parseDocsUrlParam({ docsUrl: String(docsUrlParam) });
@@ -68,8 +68,8 @@ export const ConfiguredImageUploadNode = () => {
     ? slugArray?.join("/")
     : String(slugArray);
 
-  return ImageUploadNode.configure({
-    accept: "image/*",
+  return MediaUploadNode.configure({
+    accept: "image/*,video/*",
     maxSize: 1024 * 1024 * 5, // 5MB
     upload: async (
       file: File,
@@ -77,7 +77,7 @@ export const ConfiguredImageUploadNode = () => {
       signal?: AbortSignal
     ) => {
       try {
-        return await private_handleImageUpload({
+        return await private_handleMediaUpload({
           file,
           onProgress,
           signal,
@@ -91,8 +91,29 @@ export const ConfiguredImageUploadNode = () => {
         throw new Error("Upload failed");
       }
     },
-    onError: (error) => ErrorUploadImageToast(error),
+    onError: (error) => ErrorUploadMediaToast(error),
   });
+};
+
+// Helper functions for file type detection
+const isVideo = (file: File): boolean => {
+  return file.type.startsWith("video/");
+};
+
+const createMediaNode = (file: File, mediaUrl: string) => {
+  const filename = file.name.replace(/\.[^/.]+$/, "") || "unknown";
+
+  if (isVideo(file)) {
+    return createCustomElementNode(
+      "video",
+      `<video src="${mediaUrl}" title="${filename}" controls></video>`
+    );
+  } else {
+    return createCustomElementNode(
+      "img",
+      `<img src="${mediaUrl}" alt="${filename}" title="${filename}" />`
+    );
+  }
 };
 
 export const ConfiguredFileHandler = () => {
@@ -104,7 +125,18 @@ export const ConfiguredFileHandler = () => {
     : String(slugArray);
 
   return FileHandler.configure({
-    allowedMimeTypes: ["image/png", "image/jpeg", "image/avif", "image/webp"],
+    allowedMimeTypes: [
+      "image/png",
+      "image/jpeg",
+      "image/avif",
+      "image/webp",
+      "image/gif",
+      "video/mp4",
+      "video/webm",
+      "video/ogg",
+      "video/avi",
+      "video/mov",
+    ],
     onDrop: (currentEditor, files, pos) => {
       files.forEach((file) => {
         const fileReader = new FileReader();
@@ -112,20 +144,17 @@ export const ConfiguredFileHandler = () => {
         fileReader.readAsDataURL(file);
         fileReader.onload = async () => {
           try {
-            UploadingImageToast();
-            const imageUrl = await private_handleImageUpload({
+            UploadingMediaToast();
+            const mediaUrl = await private_handleMediaUpload({
               file,
               docsUrl,
               slug,
             });
-            const imageNode = createCustomElementNode(
-              "img",
-              `<img src="${imageUrl}" alt="${file.name}" title="${file.name}" />`
-            );
-            currentEditor.chain().focus().insertContentAt(pos, imageNode).run();
-            SuccessfulUploadImageToast();
+            const mediaNode = createMediaNode(file, mediaUrl);
+            currentEditor.chain().focus().insertContentAt(pos, mediaNode).run();
+            SuccessfulUploadMediaToast();
           } catch (error) {
-            ErrorUploadImageToast(
+            ErrorUploadMediaToast(
               error instanceof Error ? error : new Error("Upload failed")
             );
           }
@@ -145,24 +174,21 @@ export const ConfiguredFileHandler = () => {
         fileReader.readAsDataURL(file);
         fileReader.onload = async () => {
           try {
-            UploadingImageToast();
-            const imageUrl = await private_handleImageUpload({
+            UploadingMediaToast();
+            const mediaUrl = await private_handleMediaUpload({
               file,
               docsUrl,
               slug,
             });
-            const imageNode = createCustomElementNode(
-              "img",
-              `<img src="${imageUrl}" alt="${file.name}" title="${file.name}" />`
-            );
+            const mediaNode = createMediaNode(file, mediaUrl);
             currentEditor
               .chain()
               .focus()
-              .insertContentAt(currentEditor.state.selection.anchor, imageNode)
+              .insertContentAt(currentEditor.state.selection.anchor, mediaNode)
               .run();
-            SuccessfulUploadImageToast();
+            SuccessfulUploadMediaToast();
           } catch (error) {
-            ErrorUploadImageToast(
+            ErrorUploadMediaToast(
               error instanceof Error ? error : new Error("Upload failed")
             );
           }

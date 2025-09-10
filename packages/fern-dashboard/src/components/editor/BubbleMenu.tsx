@@ -70,7 +70,7 @@ export default function BubbleMenu() {
           // @ts-expect-error - type issue with tiptap
           selection?.node?.type?.name === "custom-element-v2" ||
           // @ts-expect-error - type issue with tiptap
-          selection?.node?.type?.name === "imageUpload"
+          selection?.node?.type?.name === "mediaUpload"
         ) {
           return false;
         }

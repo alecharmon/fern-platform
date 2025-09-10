@@ -6,7 +6,7 @@ import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
 
-import "@/components/editor/tiptap-node/image-upload-node/image-upload-node.scss";
+import "@/components/editor/tiptap-node/media-upload-node/media-upload-node.scss";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -222,7 +222,7 @@ function useFileUpload(options: UploadOptions) {
   };
 }
 
-interface ImageUploadDragAreaProps {
+interface MediaUploadDragAreaProps {
   /**
    * Callback function triggered when files are dropped or selected
    * @param {File[]} files - Array of File objects that were dropped or selected
@@ -237,9 +237,9 @@ interface ImageUploadDragAreaProps {
 }
 
 /**
- * A component that creates a drag-and-drop area for image uploads
+ * A component that creates a drag-and-drop area for media uploads (images and videos)
  */
-const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
+const MediaUploadDragArea: React.FC<MediaUploadDragAreaProps> = ({
   onFile,
   children,
 }) => {
@@ -292,7 +292,7 @@ const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
   );
 };
 
-interface ImageUploadPreviewProps {
+interface MediaUploadPreviewProps {
   /**
    * The file item to preview
    */
@@ -300,9 +300,9 @@ interface ImageUploadPreviewProps {
 }
 
 /**
- * Component that displays a preview of an uploading file with progress
+ * Component that displays a preview of an uploading media file with progress
  */
-const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
+const MediaUploadPreview: React.FC<MediaUploadPreviewProps> = ({
   fileItem,
 }) => {
   const formatFileSize = (bytes: number) => {
@@ -348,7 +348,7 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   );
 };
 
-export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
+export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
   const { accept, limit, maxSize } = props.node.attrs;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const extension = props.extension;
@@ -365,6 +365,10 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
 
   const { fileItems, uploadFiles } = useFileUpload(uploadOptions);
 
+  const isVideo = (file: File): boolean => {
+    return file.type.startsWith("video/");
+  };
+
   const handleUpload = async (files: File[]) => {
     const urls = await uploadFiles(files);
 
@@ -372,21 +376,28 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       const pos = props.getPos();
 
       if (pos != null) {
-        const imageNodes = urls.map((url, index) => {
-          const filename =
-            files[index]?.name.replace(/\.[^/.]+$/, "") || "unknown";
+        const mediaNodes = urls.map((url, index) => {
+          const file = files[index];
+          const filename = file?.name.replace(/\.[^/.]+$/, "") || "unknown";
 
-          return createCustomElementNode(
-            "img",
-            `<img src="${url}" alt="${filename}" title="${filename}" />`
-          );
+          if (file && isVideo(file)) {
+            return createCustomElementNode(
+              "video",
+              `<video src="${url}" title="${filename}" controls></video>`
+            );
+          } else {
+            return createCustomElementNode(
+              "img",
+              `<img src="${url}" alt="${filename}" title="${filename}" />`
+            );
+          }
         });
 
         props.editor
           .chain()
           .focus()
           .deleteRange({ from: pos, to: pos + props.node.nodeSize })
-          .insertContentAt(pos, imageNodes)
+          .insertContentAt(pos, mediaNodes)
           .run();
       }
     }
@@ -401,11 +412,26 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     void handleUpload(Array.from(files));
   };
 
+  const isVideoUrl = (url: string): boolean => {
+    const videoExtensions = [
+      ".mp4",
+      ".webm",
+      ".ogg",
+      ".avi",
+      ".mov",
+      ".wmv",
+      ".flv",
+      ".mkv",
+    ];
+    const lowerUrl = url.toLowerCase();
+    return videoExtensions.some((ext) => lowerUrl.includes(ext));
+  };
+
   // Handles URL submission via input field in URL tab
   const handleUrlSubmit = () => {
     const pos = props.getPos();
     if (imageUrl.trim() == null) {
-      extension.options.onError?.(new Error("No image URL provided"));
+      extension.options.onError?.(new Error("No media URL provided"));
       return;
     }
     if (pos == null) {
@@ -413,15 +439,18 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       return;
     }
 
-    const newImageNode = createCustomElementNode(
-      "img",
-      `<img src="${imageUrl}" />`
-    );
+    const newMediaNode = isVideoUrl(imageUrl)
+      ? createCustomElementNode(
+          "video",
+          `<video src="${imageUrl}" controls></video>`
+        )
+      : createCustomElementNode("img", `<img src="${imageUrl}" />`);
+
     props.editor
       .chain()
       .focus()
       .deleteRange({ from: pos, to: pos + props.node.nodeSize })
-      .insertContentAt(pos, newImageNode)
+      .insertContentAt(pos, newMediaNode)
       .run();
   };
 
@@ -432,14 +461,14 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       {!hasFiles && (
         <Popover>
           <PopoverTrigger className="w-full">
-            <ImageUploadDragArea onFile={(files) => void handleUpload(files)}>
+            <MediaUploadDragArea onFile={(files) => void handleUpload(files)}>
               <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-3">
                 <div className="tiptap-image-upload-text flex items-center gap-2">
                   <CloudArrowUpIcon className="size-8" />
-                  <p>Add an image</p>
+                  <p>Add media</p>
                 </div>
               </div>
-            </ImageUploadDragArea>
+            </MediaUploadDragArea>
           </PopoverTrigger>
           <PopoverContent className="w-[300px]">
             <TabGroup>
@@ -449,7 +478,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
                     Upload file
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/*,video/*"
                       onChange={(e) => {
                         const files = e.target.files;
                         if (!files || files.length === 0) {
@@ -469,7 +498,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
                 <div className="-mt-3 flex flex-col gap-2">
                   <Input
                     type="url"
-                    placeholder="Paste in https://..."
+                    placeholder="Paste image or video URL..."
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     className="w-full"
@@ -479,7 +508,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
                     disabled={!imageUrl.trim()}
                     className="w-full"
                   >
-                    Embed image
+                    Embed media
                   </Button>
                 </div>
               </Tab>
@@ -491,7 +520,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       {hasFiles && (
         <div className="tiptap-image-upload-previews">
           {fileItems.map((fileItem) => (
-            <ImageUploadPreview key={fileItem.id} fileItem={fileItem} />
+            <MediaUploadPreview key={fileItem.id} fileItem={fileItem} />
           ))}
         </div>
       )}
