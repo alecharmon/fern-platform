@@ -5,11 +5,11 @@ import React, { useCallback, useMemo, useState } from "react";
 
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import {
-  type DocsYmlPageEntry,
-  DocsYmlStorage,
   NavigationContext,
+  UNNAMED_SECTION_DISPLAY_NAMES,
+  createMdxFrontmatter,
 } from "@fern-docs/components";
-import { useSidebarClientNavigation } from "@fern-docs/components/sidebar/nodes/SidebarClientNavigationProvider";
+import { SectionWithHierarchy, getAllSections } from "@fern-docs/components";
 import { mdxToHtml } from "@fern-docs/mdx";
 
 import { Auth0OrgName } from "@/app/services/auth0/types";
@@ -28,8 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
-import { useMdxState } from "@/providers/MdxStateContext";
-import { createMdxFrontmatter } from "@/utils/createMdxFrontmatter";
+import { useGitPrInfo } from "@/providers/GitPRContext";
+import { usePages } from "@/providers/PagesStoreContext";
 import { constructEditorSlug } from "@/utils/editor-routing";
 import { pageTitleToSlug } from "@/utils/pageTitleToSlug";
 import { EncodedDocsUrl } from "@/utils/types";
@@ -51,71 +51,26 @@ export function CreateClientPage({
   const [pageTitle, setPageTitle] = useState("");
   const [pageSlug, setPageSlug] = useState("");
   const [selectedSection, setSelectedSection] =
-    useState<FernNavigation.SectionNode | null>(null);
+    useState<SectionWithHierarchy | null>(null);
   const [error, setError] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
-  const { stageChanges } = useMdxState();
   const { owner, repo, branch } = useGitHubRepo();
+  const { site } = useGitPrInfo();
   const router = useRouter();
   const params = useParams();
 
-  const { prependClientNode, clientNodes } = useSidebarClientNavigation();
-
-  // Interface to track section with its parent hierarchy
-  interface SectionWithHierarchy extends FernNavigation.SectionNode {
-    parentTitles: string[];
-  }
-
-  // Recursively find all section nodes in the navigation tree with parent hierarchy
-  const getAllSections = useCallback(
-    (
-      nodes: FernNavigation.NavigationNode[],
-      parentTitles: string[] = []
-    ): SectionWithHierarchy[] => {
-      const sections: SectionWithHierarchy[] = [];
-
-      for (const node of nodes) {
-        if (node.type === "section") {
-          const sectionNode = node as FernNavigation.SectionNode;
-          const sectionWithHierarchy: SectionWithHierarchy = {
-            ...sectionNode,
-            parentTitles,
-          };
-          sections.push(sectionWithHierarchy);
-
-          // Recursively search nested sections, adding current section to parent chain
-          if ("children" in node && node.children) {
-            const currentTitle =
-              sectionNode.title || sectionNode.slug || "Untitled";
-            sections.push(
-              ...getAllSections(node.children, [...parentTitles, currentTitle])
-            );
-          }
-        } else if ("children" in node && node.children) {
-          // For non-section nodes, add their title to parent chain if they have one
-          const nodeTitle = "title" in node && node.title ? node.title : null;
-          const newParentTitles = nodeTitle
-            ? [...parentTitles, nodeTitle]
-            : parentTitles;
-          sections.push(...getAllSections(node.children, newParentTitles));
-        }
-      }
-
-      return sections;
-    },
-    []
-  );
+  const { setDocsYmlBaseContent, createPage, clientNodes } = usePages();
 
   // Get all sections from the navigation tree (including nested ones)
   const allSections = useMemo(
-    () => (root?.children ? getAllSections(root.children) : []),
-    [root, getAllSections]
+    () => (root?.children ? getAllSections(root.children, [], root.id) : []),
+    [root]
   );
 
   // Set default section on first load
   React.useEffect(() => {
     if (allSections.length > 0 && !selectedSection) {
-      setSelectedSection(allSections[0] as FernNavigation.SectionNode);
+      setSelectedSection(allSections[0] ?? null);
     }
   }, [allSections, selectedSection]);
 
@@ -174,51 +129,46 @@ export function CreateClientPage({
     return true;
   }, [pageTitle, selectedSection, finalSlug, clientNodes]);
 
-  const updateDocsYml = useCallback(
-    async (sectionTitle: string, pageEntry: DocsYmlPageEntry) => {
-      try {
-        // First get the current docs.yml content
-        // TODO: we cannot assume that the whole navigation structure lives in one file
-        const response = await fetch("/api/get-docs-yml", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            owner,
-            repo,
-            branch,
-            orgName: params.orgName,
-          }),
-        });
+  const updateDocsYmlBaseContent = useCallback(async () => {
+    try {
+      // First get the current docs.yml content
+      // TODO: we cannot assume that the whole navigation structure lives in one file
+      const response = await fetch("/api/get-docs-yml", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          owner,
+          repo,
+          site,
+          branch,
+          orgName: params.orgName,
+        }),
+      });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(
-            "API response error:",
-            response.status,
-            response.statusText,
-            errorText
-          );
-          throw new Error(
-            `Failed to get docs.yml: ${response.status} ${response.statusText} - ${errorText}`
-          );
-        }
-
-        const { docsYmlContent } = await response.json();
-
-        // Set the base content and add the update
-        DocsYmlStorage.setBaseContent(branch, docsYmlContent);
-        DocsYmlStorage.addUpdate(branch, sectionTitle, pageEntry);
-
-        return true;
-      } catch (error) {
-        console.error("Error updating docs.yml:", error);
-        return false;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          "API response error:",
+          response.status,
+          response.statusText,
+          errorText
+        );
+        throw new Error(
+          `Failed to get docs.yml: ${response.status} ${response.statusText} - ${errorText}`
+        );
       }
-    },
-    [owner, repo, branch, params.orgName]
-  );
+
+      const { docsYmlContent } = await response.json();
+      setDocsYmlBaseContent(docsYmlContent);
+
+      return true;
+    } catch (error) {
+      console.error("Error updating docs.yml:", error);
+      return false;
+    }
+  }, [owner, repo, site, branch, params.orgName, setDocsYmlBaseContent]);
 
   const handleCreatePage = useCallback(async () => {
     if (!validateForm()) {
@@ -250,22 +200,12 @@ export function CreateClientPage({
         ? `docs/pages/${selectedSection.slug}/${slug}`
         : slug;
 
-      // Stage the changes
-      stageChanges(`${fullSlug}.mdx`, {
-        html,
-        frontmatter,
-      });
-
       // Close popover and reset form
       setIsPopoverOpen(false);
       setPageTitle("");
       setPageSlug("");
       setError("");
-      setSelectedSection(
-        allSections.length > 0
-          ? (allSections[0] as FernNavigation.SectionNode)
-          : null
-      );
+      setSelectedSection(allSections[0] || null);
 
       // Navigate to the new page using the proper editor routing
       const orgName = params.orgName as Auth0OrgName;
@@ -280,31 +220,22 @@ export function CreateClientPage({
         slug: fullSlug,
       });
 
-      // Update docs.yml with the new page
-      const pageEntry: DocsYmlPageEntry = {
-        page: pageTitle,
-        path: `${fullSlug}.mdx`,
-      };
-
-      const docsYmlUpdateSuccessful = await updateDocsYml(
-        selectedSection.title,
-        pageEntry
-      );
+      const docsYmlUpdateSuccessful = await updateDocsYmlBaseContent();
 
       if (!docsYmlUpdateSuccessful) {
         console.warn("Failed to update docs.yml, but page was created locally");
       }
 
       // Create a client node for the new page
-      const nodeId = `client-${crypto.randomUUID()}` as FernNavigation.NodeId;
+      const nodeId =
+        `client-${finalSlug}-${Date.now()}` as FernNavigation.NodeId;
       const pageId = `${fullSlug}.mdx` as FernNavigation.PageId;
-      const nodeSlug = slug as FernNavigation.Slug;
 
       const clientNode: FernNavigation.PageNode = {
         type: "page",
         id: nodeId,
-        pageId: pageId,
-        slug: nodeSlug,
+        pageId,
+        slug: slug as FernNavigation.Slug,
         title: pageTitle,
         canonicalSlug: undefined,
         icon: undefined,
@@ -317,21 +248,37 @@ export function CreateClientPage({
         availability: undefined,
       };
 
-      // Cache the client node and the sidebar root node with page data
-      prependClientNode?.(
-        selectedSection.id,
-        clientNode,
-        root,
-        {
-          html,
-          frontmatter,
-        },
-        fullSlug,
-        navigationContext
-      );
+      // Use the real parent ID for unnamed sections, otherwise use the section ID
+      const parentNodeId = selectedSection.realParentId || selectedSection.id;
 
-      // Navigate to the new page
-      router.push(`${clientPagePath}?client-node-id=${clientNode.id}`);
+      try {
+        createPage(
+          parentNodeId,
+          clientNode,
+          root,
+          {
+            html,
+            frontmatter,
+          },
+          fullSlug,
+          navigationContext,
+          undefined, // initialContent
+          // Pass the selected section for proper docs.yml section title
+          selectedSection
+        );
+
+        // Navigate to the new page
+        router.push(`${clientPagePath}?client-node-id=${clientNode.id}`);
+      } catch (pageCreationError) {
+        console.error("Failed to create page in store:", pageCreationError);
+        throw new Error(
+          `Failed to create page in navigation: ${
+            pageCreationError instanceof Error
+              ? pageCreationError.message
+              : "Unknown error"
+          }`
+        );
+      }
     } catch (err) {
       console.error("Failed to create client page:", err);
       setError(
@@ -347,13 +294,12 @@ export function CreateClientPage({
     selectedSection,
     pageTitle,
     finalSlug,
-    stageChanges,
-    prependClientNode,
+    createPage,
     root,
     allSections,
     router,
     params,
-    updateDocsYml,
+    updateDocsYmlBaseContent,
     navigationContext,
   ]);
 
@@ -368,11 +314,7 @@ export function CreateClientPage({
           setPageSlug("");
           setError("");
           setIsCreating(false);
-          setSelectedSection(
-            allSections.length > 0
-              ? (allSections[0] as FernNavigation.SectionNode)
-              : null
-          );
+          setSelectedSection(allSections[0] || null);
         }
       }}
     >
@@ -411,7 +353,7 @@ export function CreateClientPage({
                 setPageSlug(e.target.value);
                 setError("");
               }}
-              className="w-full font-mono text-xs text-gray-800"
+              className="w-full font-mono text-xs placeholder:text-gray-800"
             />
           </div>
 
@@ -427,9 +369,7 @@ export function CreateClientPage({
               <Select
                 value={selectedSection?.id || ""}
                 onValueChange={(value) => {
-                  const section = allSections.find(
-                    (s) => (s as FernNavigation.SectionNode).id === value
-                  );
+                  const section = allSections.find((s) => s.id === value);
                   if (!section) {
                     return;
                   }
@@ -442,15 +382,31 @@ export function CreateClientPage({
                 </SelectTrigger>
                 <SelectContent className="border-border">
                   {allSections.map((section) => {
+                    // Filter out generic parent titles like "Root" or "Untitled Section"
+                    // that don't provide meaningful hierarchy information
+                    const meaningfulParentTitles = section.parentTitles.filter(
+                      (title) =>
+                        title !== UNNAMED_SECTION_DISPLAY_NAMES.ROOT &&
+                        title !== UNNAMED_SECTION_DISPLAY_NAMES.UNNAMED
+                    );
+
                     return (
                       <SelectItem key={section.id} value={section.id}>
                         <div className="flex items-center">
-                          {section.parentTitles.length > 0 && (
+                          {meaningfulParentTitles.length > 0 && (
                             <span className="text-muted-foreground mr-1">
-                              {section.parentTitles.join(" / ")} /
+                              {meaningfulParentTitles.join(" / ")} /
                             </span>
                           )}
-                          <span>{getSectionDisplayName(section)}</span>
+                          <span
+                            className={
+                              section.isUnnamed
+                                ? "text-muted-foreground"
+                                : undefined
+                            }
+                          >
+                            {getSectionDisplayName(section)}
+                          </span>
                         </div>
                       </SelectItem>
                     );
@@ -499,5 +455,5 @@ function getSectionDisplayName(section: FernNavigation.SectionNode): string {
       .join(" ");
   }
 
-  return "Untitled Section";
+  return UNNAMED_SECTION_DISPLAY_NAMES.UNNAMED;
 }

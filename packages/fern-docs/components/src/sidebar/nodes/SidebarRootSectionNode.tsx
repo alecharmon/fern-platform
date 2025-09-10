@@ -40,7 +40,7 @@ export function SidebarRootSectionNode({
       <SidebarRootHeading node={node} className={className} icon={icon} />
 
       <ul className="fern-sidebar-group">
-        {/* Depends on SidebarClientNavigationProvider for client nodes, no-op when provider isn't available */}
+        {/* Inject client nodes for this root section */}
         <SidebarClientNavigationChildInjector
           parentNodeId={node.id}
           childDepth={1}

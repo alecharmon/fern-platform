@@ -144,6 +144,7 @@ function FloatingMenuItem({
     <button
       className="rounded-1 flex h-8 cursor-pointer items-center gap-2 px-3 transition-colors hover:bg-gray-300 hover:transition-none"
       onClick={onClick}
+      onMouseDown={(e) => e.preventDefault()}
     >
       <div className="flex size-4 items-center justify-center">
         <Icon size={size} {...restIconProps} />

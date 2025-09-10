@@ -1,7 +1,7 @@
 "use client";
 
 import { FernNavigation } from "@fern-api/fdr-sdk";
-import { NavigationContext } from "@fern-docs/components";
+import { NavigationContext, getAllSections } from "@fern-docs/components";
 
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { Icon } from "@/components/icon/Icon";
@@ -23,26 +23,34 @@ export function CreatePageButton({
   const { prStatus } = useGitPrInfo();
   const isEditingDisabled = useEditingDisabled();
 
+  // Check if there are sections available for creating pages
+  const hasNoSections =
+    !root?.children || getAllSections(root.children, [], root.id).length === 0;
+
   return (
-    <DashboardTooltip
-      content={
-        isEditingDisabled && (prStatus === "merged" || prStatus === "closed")
-          ? "Cannot create pages when PR is closed or merged"
-          : undefined
-      }
-    >
-      <CreateClientPage
-        root={root}
-        disabled={isEditingDisabled}
-        navigationContext={navigationContext}
+    !hasNoSections && (
+      <DashboardTooltip
+        content={
+          isEditingDisabled && prStatus === "merged"
+            ? "Cannot create page - PR has already been merged"
+            : isEditingDisabled && prStatus === "closed"
+              ? "Cannot create page - PR has been closed"
+              : undefined
+        }
       >
-        <Button
-          className="mb-2 flex w-full items-center justify-center gap-2 self-stretch rounded-lg border border-dashed border-[var(--grayscale-a6)] p-2 text-sm text-[var(--grayscale-a11)] hover:bg-[var(--grayscale-a3)] hover:text-[var(--grayscale-a12)]"
-          variant="ghost"
+        <CreateClientPage
+          root={root}
+          disabled={isEditingDisabled}
+          navigationContext={navigationContext}
         >
-          <Icon variant="Plus" /> Create new page
-        </Button>
-      </CreateClientPage>
-    </DashboardTooltip>
+          <Button
+            className="mb-2 flex w-full items-center justify-center gap-2 self-stretch rounded-lg border border-dashed border-[var(--grayscale-a6)] p-2 text-sm text-[var(--grayscale-a11)] hover:bg-[var(--grayscale-a3)] hover:text-[var(--grayscale-a12)]"
+            variant="ghost"
+          >
+            <Icon variant="Plus" /> Create new page
+          </Button>
+        </CreateClientPage>
+      </DashboardTooltip>
+    )
   );
 }

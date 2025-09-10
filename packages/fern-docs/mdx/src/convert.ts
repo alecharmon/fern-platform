@@ -146,7 +146,7 @@ interface MdxToHtmlOptions {
   treatAsUnsupported?: AllElementsType[];
 }
 
-// Convert mdx to html, frontmatter, and original elements
+// Convert mdx to html and frontmatter
 export function mdxToHtml(
   rootContent: string,
   options?: MdxToHtmlOptions

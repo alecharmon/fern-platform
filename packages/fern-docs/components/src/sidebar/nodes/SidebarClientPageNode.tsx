@@ -1,17 +1,17 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ReactNode, useRef } from "react";
+import { ReactNode, useMemo, useRef } from "react";
 
 import { MinusCircleIcon } from "lucide-react";
 
+import { NodeId } from "@fern-api/fdr-sdk/navigation";
+
 import { useScrollSidebarNodeIntoView } from "../../hooks/sidebar-scroll";
+import { useSafeNavigation } from "../../navigation";
 import { useIsSelectedSidebarNode } from "../../state/navigation";
 import { SidebarLink } from "../SidebarLink";
-import { useSidebarClientNavigation } from "./SidebarClientNavigationProvider";
 import { SidebarPageNodeProps } from "./SidebarPageNode";
-import { ClientPageStorage } from "./clientPageStorage";
-import { DocsYmlStorage } from "./docsYmlStorage";
 
 // Mirror the SidebarPageNodeProps interface
 interface SidebarClientPageNodeProps extends SidebarPageNodeProps {}
@@ -24,7 +24,18 @@ export function SidebarClientPageNode({
 }: SidebarClientPageNodeProps): ReactNode {
   const ref = useRef<HTMLAnchorElement>(null);
   const params = useParams();
-  const { removeClientNode } = useSidebarClientNavigation();
+  const navigation = useSafeNavigation();
+  const loadClientPageData = navigation?.loadClientPageData;
+
+  const { loadClientPages, removeClientNodeWithUpdate } = useMemo(() => {
+    return (
+      loadClientPageData?.(node.id) || {
+        loadClientPages: () => ({}) as Record<NodeId, any>,
+        removeClientNodeWithUpdate: undefined,
+      }
+    );
+  }, [loadClientPageData, node.id]);
+
   useScrollSidebarNodeIntoView(ref, node.id);
   const selected = useIsSelectedSidebarNode(node.id);
   const router = useRouter();
@@ -38,8 +49,8 @@ export function SidebarClientPageNode({
       const branch = params.branch as string;
 
       // Get the stored full slug from localStorage
-      const storedPages = ClientPageStorage.loadClientPages(branch);
-      const storedPage = storedPages[node.id];
+      const storedPages = loadClientPages();
+      const storedPage = storedPages?.[node.id];
       const fullSlug = storedPage?.fullSlug || node.slug;
 
       // Navigate directly without loading states since all data is client-side
@@ -52,21 +63,15 @@ export function SidebarClientPageNode({
     e.preventDefault();
     e.stopPropagation();
 
-    if (params?.branch && removeClientNode) {
-      const branch = params.branch as string;
-
+    if (params?.branch && removeClientNodeWithUpdate) {
       // Get the stored page data to extract the full path
-      const storedPages = ClientPageStorage.loadClientPages(branch);
-      const storedPage = storedPages[node.id];
+      const storedPages = loadClientPages();
+      const storedPage = storedPages?.[node.id];
       const pagePath = storedPage?.fullSlug
         ? `${storedPage.fullSlug}.mdx`
         : `${node.slug}.mdx`;
 
-      // Add a removal update to DocsYmlStorage
-      DocsYmlStorage.addRemovalUpdate(branch, pagePath);
-
-      // Remove the client node from the sidebar
-      removeClientNode(node.id);
+      removeClientNodeWithUpdate(pagePath, node.id);
 
       // Navigate directly to special "root" page, use router.push instead of window.location.href so navigation happens instantly
       // TODO: clean this up

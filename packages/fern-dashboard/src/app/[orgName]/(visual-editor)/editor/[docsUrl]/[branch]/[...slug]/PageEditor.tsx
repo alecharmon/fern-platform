@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { EditorEvents } from "@tiptap/react";
 
 import { getChangedNodesFromHtml, mdxToHtml } from "@fern-docs/mdx";
 
 import TiptapEditor from "@/components/editor/TiptapEditor";
-import { useMdxState } from "@/providers/MdxStateContext";
+import { usePages } from "@/providers/PagesStoreContext";
 
 export declare namespace PageEditor {
   export interface Props {
@@ -23,14 +23,14 @@ export default function PageEditor({
   filename,
   initialHtml,
 }: PageEditor.Props) {
-  const { stageChanges, changedMdxFiles } = useMdxState();
+  const { updatePage, changedMdxFiles } = usePages();
 
   // Store the first normalized HTML string from the editor
   const originalTiptapHtml = useRef(initialHtml);
   // Store whether this is the first update from the editor
   // (Kind of a hack to make sure the HTML is normalized by Tiptap before we make it available for comparison)
   const isFirstUpdate = useRef(true);
-  const currentHtmlRef = useRef(initialHtml);
+  const [currentHtml, setCurrentHtml] = useState(initialHtml);
 
   // Track whether the last change came from internal TipTap editing or external source
   const lastChangeFromTiptap = useRef(false);
@@ -51,7 +51,10 @@ export default function PageEditor({
         originalTiptapHtml.current,
         latestTiptapHtml
       );
-      stageChanges(filename, { html: latestTiptapHtml, changedNodes });
+      updatePage(filename, {
+        html: latestTiptapHtml,
+        changedNodes,
+      });
     } else {
       isFirstUpdate.current = false;
     }
@@ -64,21 +67,21 @@ export default function PageEditor({
         treatAsUnsupported: ["math"],
       });
 
-      if (currHtmlFromMdx.html !== currentHtmlRef.current) {
-        currentHtmlRef.current = currHtmlFromMdx.html;
+      if (currHtmlFromMdx.html !== currentHtml) {
+        setCurrentHtml(currHtmlFromMdx.html);
 
         // Reset the flag for next change
         lastChangeFromTiptap.current = false;
       }
     }
-  }, [changedMdxFiles, filename]);
+  }, [changedMdxFiles, currentHtml, filename]);
 
   // TODO: add a loading state, possibly as a Suspense boundary
   return (
     <TiptapEditor
       autofocus={true}
       className={className}
-      content={currentHtmlRef.current || ""}
+      content={currentHtml}
       onCreate={onTiptapEditorCreate}
       onUpdate={onTiptapEditorUpdate}
     />

@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
-import { useMdxState } from "@/providers/MdxStateContext";
+import { usePages } from "@/providers/PagesStoreContext";
 import { cn } from "@/utils/utils";
 
 export default function DevPanel() {
   const { panelOpen } = useDevMode();
   const { currentFilename } = useCurrentPage();
-  const { allMdxFiles, stageChanges, frontmatterData } = useMdxState();
+  const { allMdxFiles, updatePage, frontmatterData } = usePages();
   const isEditingDisabled = useEditingDisabled();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
@@ -77,8 +77,8 @@ export default function DevPanel() {
         }
       });
 
-      // Then update the tiptap editor by staging changes with new HTML and originalElements
-      stageChanges(activeFilename, {
+      // Then update the tiptap editor by updating the page with new HTML
+      updatePage(activeFilename, {
         html,
         frontmatter: mergedFrontmatter,
       });

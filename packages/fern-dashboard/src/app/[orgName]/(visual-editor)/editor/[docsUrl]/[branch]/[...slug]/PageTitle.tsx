@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { AutoResizingInput } from "@/components/input/AutoResizingInput";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
-import { useMdxState } from "@/providers/MdxStateContext";
+import { usePages } from "@/providers/PagesStoreContext";
 
 export declare namespace PageTitle {
   export interface Props {
@@ -22,7 +22,7 @@ export default function PageTitle({
   const [text, setText] = useState(initialText ?? "");
   const isEditingDisabled = useEditingDisabled();
 
-  const { stageChanges, frontmatterData } = useMdxState();
+  const { updatePage, frontmatterData } = usePages();
 
   // Watch for frontmatter changes from dev panel and update text accordingly
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function PageTitle({
   function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     const nextText = e.target.value;
     setText(nextText);
-    stageChanges(filename, {
+    updatePage(filename, {
       frontmatter: { title: nextText },
     });
   }

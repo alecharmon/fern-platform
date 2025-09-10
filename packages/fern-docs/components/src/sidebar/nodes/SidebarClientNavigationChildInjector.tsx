@@ -1,11 +1,11 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
 
+import { useSafeNavigation } from "../../navigation";
 import { SidebarClientNavigationChild } from "./SidebarClientNavigationChild";
-import { useSidebarClientNavigation } from "./SidebarClientNavigationProvider";
 
 interface SidebarClientNavigationChildInjectorProps {
   childDepth: number;
@@ -16,7 +16,20 @@ export function SidebarClientNavigationChildInjector({
   childDepth,
   parentNodeId,
 }: SidebarClientNavigationChildInjectorProps): ReactNode {
-  const { clientNodes } = useSidebarClientNavigation();
+  const navigation = useSafeNavigation();
+  const clientNodes = navigation?.clientNodes;
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Prevent hydration mismatch by only rendering client nodes after hydration
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Don't render client pages during SSR to avoid hydration mismatch
+  if (!isHydrated) {
+    return null;
+  }
+
   const children = clientNodes?.[parentNodeId];
 
   return (

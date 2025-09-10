@@ -6,7 +6,7 @@ import { cn } from "@fern-docs/components";
 
 import { AutoResizingInput } from "@/components/input/AutoResizingInput";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
-import { useMdxState } from "@/providers/MdxStateContext";
+import { usePages } from "@/providers/PagesStoreContext";
 
 export declare namespace PageSubtitle {
   export interface Props {
@@ -24,7 +24,7 @@ export default function PageSubtitle({
   const [text, setText] = useState(initialText);
   const isEditingDisabled = useEditingDisabled();
 
-  const { stageChanges, frontmatterData } = useMdxState();
+  const { updatePage, frontmatterData } = usePages();
 
   // Watch for frontmatter changes from dev panel and update text accordingly
   useEffect(() => {
@@ -50,11 +50,11 @@ export default function PageSubtitle({
     // If the text is empty, we want to remove the subtitle field entirely
     // We can do this by passing undefined, which will be filtered out when converting back to MDX
     if (nextText.trim() === "") {
-      stageChanges(filename, {
+      updatePage(filename, {
         frontmatter: { subtitle: undefined },
       });
     } else {
-      stageChanges(filename, {
+      updatePage(filename, {
         frontmatter: { subtitle: nextText },
       });
     }

@@ -3,8 +3,7 @@ import "server-only";
 import { ThemeProvider } from "next-themes";
 import type React from "react";
 
-import { ClientPageManager } from "@fern-docs/components/sidebar/nodes/ClientPageManager";
-import { SidebarClientNavigationProvider } from "@fern-docs/components/sidebar/nodes/SidebarClientNavigationProvider";
+import { NavigationStoreProvider } from "@fern-docs/components";
 
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";
 import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
@@ -20,7 +19,7 @@ import { DevModeProvider } from "@/providers/DevModeProvider";
 import { EditorProvider } from "@/providers/EditorContext";
 import { GitHubRepoProvider } from "@/providers/GitHubRepoContext";
 import { GitPRProvider } from "@/providers/GitPRContext";
-import { MdxStateProvider } from "@/providers/MdxStateContext";
+import { PagesStoreProvider } from "@/providers/PagesStoreContext";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 
@@ -101,17 +100,13 @@ export default async function EditorLayout({
         disableTransitionOnChange
       >
         <OrgNameProvider orgName={orgName}>
-          <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo}>
-            <SidebarClientNavigationProvider branchName={branch}>
-              <ClientPageManager branchName={branch} />
-              <ClientMDXProvider>
-                <DevModeProvider>
-                  <MdxStateProvider docsUrl={docsUrl}>
-                    <CurrentPageProvider>
-                      <BranchProvider
-                        branch={branch}
-                        branchFailed={branchFailed}
-                      >
+          <BranchProvider branch={branch} branchFailed={branchFailed}>
+            <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo}>
+              <NavigationStoreProvider branchName={branch}>
+                <PagesStoreProvider branchName={branch}>
+                  <CurrentPageProvider>
+                    <ClientMDXProvider>
+                      <DevModeProvider>
                         <EditorProvider>
                           <GitPRProvider
                             owner={sourceRepo.owner}
@@ -128,13 +123,13 @@ export default async function EditorLayout({
                             {children}
                           </GitPRProvider>
                         </EditorProvider>
-                      </BranchProvider>
-                    </CurrentPageProvider>
-                  </MdxStateProvider>
-                </DevModeProvider>
-              </ClientMDXProvider>
-            </SidebarClientNavigationProvider>
-          </GitHubRepoProvider>
+                      </DevModeProvider>
+                    </ClientMDXProvider>
+                  </CurrentPageProvider>
+                </PagesStoreProvider>
+              </NavigationStoreProvider>
+            </GitHubRepoProvider>
+          </BranchProvider>
         </OrgNameProvider>
       </ThemeProvider>
     </EditorShell>

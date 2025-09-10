@@ -60,25 +60,64 @@ export default async function postGitCommit(request: {
     }
     const baseTreeSha = commitResponse.data.tree.sha;
 
-    // Create a new tree with the files
-    const tree = request.files.map((file) => {
-      if (file.delete) {
-        // For deletions, we set sha to null
-        return {
-          path: file.path,
-          mode: "100644" as const,
-          type: "blob" as const,
-          sha: null,
-        };
-      } else {
-        return {
-          path: file.path,
-          mode: file.mode || ("100644" as const),
-          type: "blob" as const,
-          content: file.content,
-        };
+    // Get the base tree to check which files actually exist
+    const baseTreeResponse = await octokit.request(
+      "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+      {
+        owner: request.owner,
+        repo: request.repo,
+        tree_sha: baseTreeSha,
+        recursive: "true", // Get all files recursively
       }
-    });
+    );
+
+    // Create a set of existing file paths for quick lookup
+    const existingFiles = new Set(
+      baseTreeResponse.data.tree
+        ?.filter((item) => item.type === "blob")
+        .map((item) => item.path) || []
+    );
+
+    // Create a new tree with the files
+    const tree = request.files
+      .map((file) => {
+        if (file.delete) {
+          // Only include deletion entries for files that actually exist in the base tree
+          if (!existingFiles.has(file.path)) {
+            return null;
+          }
+          // For deletions of existing files, GitHub still requires mode and type
+          return {
+            path: file.path,
+            mode: (file.mode || "100644") as
+              | "100644"
+              | "100755"
+              | "040000"
+              | "160000"
+              | "120000",
+            type: "blob" as const,
+            sha: null,
+          };
+        } else {
+          // Validate file content exists
+          if (file.content == null) {
+            throw new Error(`File ${file.path} has no content`);
+          }
+
+          return {
+            path: file.path,
+            mode: (file.mode || "100644") as
+              | "100644"
+              | "100755"
+              | "040000"
+              | "160000"
+              | "120000",
+            type: "blob" as const,
+            content: file.content,
+          };
+        }
+      })
+      .filter((item) => item != null); // Remove null entries
 
     const {
       data: { sha: newTreeSha },

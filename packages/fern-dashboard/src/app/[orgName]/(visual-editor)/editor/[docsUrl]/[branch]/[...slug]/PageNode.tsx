@@ -1,32 +1,17 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useMemo } from "react";
 
-import { FernNavigation } from "@fern-api/fdr-sdk";
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
-import { ClientPageStorage, PageStorage } from "@fern-docs/components";
-import { useSidebarClientNavigation } from "@fern-docs/components/sidebar/nodes/SidebarClientNavigationProvider";
+import { SerializableFoundNode } from "@fern-docs/components";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
-import { MdxToHtmlResponse, mdxToHtml } from "@fern-docs/mdx";
+import { MdxToHtmlResponse } from "@fern-docs/mdx";
 
 import { UnsupportedContent } from "@/components/editor/UnsupportedContent";
 import { CSSProvider } from "@/components/editor/extension-custom-element/CSSContext";
-import { createMdxFrontmatter } from "@/utils/createMdxFrontmatter";
+import { usePages } from "@/providers/PagesStoreContext";
 
 import PageContents from "./PageContents";
-
-type SerializableFoundNode = Pick<
-  FernNavigation.utils.Node.Found,
-  | "type"
-  | "node"
-  | "sidebar"
-  | "currentTab"
-  | "currentProduct"
-  | "currentVersion"
-  | "isCurrentVersionDefault"
-  | "isCurrentProductDefault"
->;
 
 export declare namespace PageNode {
   export interface Props {
@@ -45,80 +30,33 @@ export default function PageNode({
   clientNodeId,
   ...props
 }: PageNode.Props) {
-  const params = useParams();
-  const branchName = params.branch as string;
-  const { clientFoundNodes } = useSidebarClientNavigation();
-  const clientFoundNode = clientNodeId
-    ? clientFoundNodes?.[clientNodeId]
-    : undefined;
+  const { buildPageDataFromSources } = usePages();
 
-  const foundNode:
-    | SerializableFoundNode
-    | FernNavigation.utils.Node.Found
-    | undefined = serializableFoundNode || clientFoundNode;
-
-  if (!foundNode) {
-    throw new Error("No node data provided by the server or client");
-  }
-
-  const initialFilename =
-    props.initialFilename ??
-    ((foundNode.node.type === "page" && foundNode.node.pageId) ||
-      foundNode.node.slug);
-
-  let initialHtml = props.initialHtml;
-  let initialFrontmatter = props.initialFrontmatter;
-  const initialOriginalFrontmatter = props.initialOriginalFrontmatter;
-
-  // Store server data for comparison (before we potentially override it with localStorage)
-  // Memoize to keep object reference stable if there are no changes
-  const serverData = useMemo(() => {
-    return initialHtml && initialFrontmatter
-      ? {
-          html: initialHtml,
-          frontmatter: initialFrontmatter,
-        }
-      : undefined;
-  }, [initialHtml, initialFrontmatter]);
-
-  if (clientNodeId) {
-    // For client pages, ALWAYS use localStorage data (latest version) over any other data
-    const storedPages = ClientPageStorage.loadClientPages(branchName);
-    const storedPage = storedPages[clientNodeId];
-
-    if (storedPage?.pageData) {
-      initialHtml = storedPage.pageData.html;
-      initialFrontmatter = storedPage.pageData.frontmatter;
-    }
-  } else if (initialFilename) {
-    // For server pages, prefer localStorage data if it exists and is newer
-    const storedPage = PageStorage.getPage(branchName, initialFilename);
-
-    if (storedPage && storedPage.pageType === "server") {
-      // Use localStorage data as it represents the latest edited version
-      initialHtml = storedPage.html;
-      initialFrontmatter = storedPage.frontmatter;
-    }
-  }
-
-  // No initial data provided, so we need to generate it
-  if (!initialHtml || !initialFrontmatter) {
-    // Generate default MDX when server data is missing/incomplete
-    // Common for client pages where server has no initial content to provide
-    const initialMdx = createMdxFrontmatter({
-      title: foundNode.node.title,
-      slug: foundNode.node.slug,
-    });
-    const { html, frontmatter } = mdxToHtml(initialMdx, {
-      treatAsCustomElement: ["code"],
-      treatAsUnsupported: ["math"],
-    });
-    initialHtml = html;
-    initialFrontmatter = frontmatter;
-  }
+  const {
+    initialFilename,
+    initialHtml,
+    initialFrontmatter,
+    initialOriginalFrontmatter,
+    foundNode,
+  } = useMemo(
+    () =>
+      buildPageDataFromSources({
+        ...props,
+        serializableFoundNode,
+        clientNodeId,
+      }),
+    [buildPageDataFromSources, props, serializableFoundNode, clientNodeId]
+  );
 
   const isUnsupportedNode =
-    foundNode.node.type !== "page" && foundNode.node.type !== "section";
+    foundNode?.node.type !== "page" && foundNode?.node.type !== "section";
+
+  // Early return if foundNode is not available or initial data is not available
+  if (!foundNode) {
+    return (
+      <UnsupportedContent>Page data could not be loaded.</UnsupportedContent>
+    );
+  }
 
   return (
     <>
@@ -141,11 +79,10 @@ export default function PageNode({
         ) : (
           <PageContents
             filename={initialFilename || foundNode.node.slug || "untitled"}
-            initialHtml={initialHtml}
-            initialFrontmatter={initialFrontmatter}
+            initialHtml={initialHtml ?? ""}
+            initialFrontmatter={initialFrontmatter ?? {}}
             initialOriginalFrontmatter={initialOriginalFrontmatter}
             clientNodeId={clientNodeId}
-            serverData={serverData}
           />
         )}
       </CSSProvider>
