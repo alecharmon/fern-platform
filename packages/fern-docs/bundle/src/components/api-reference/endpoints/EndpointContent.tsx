@@ -20,6 +20,16 @@ import { EndpointContentLeft } from "./EndpointContentLeft";
 import { EndpointContextProvider } from "./EndpointContext";
 import { EndpointUrlWithPlaygroundBaseUrl } from "./EndpointUrlWithPlaygroundBaseUrl";
 
+function getAvailabilityBadge(
+  endpoint: EndpointContext["endpoint"],
+  node: EndpointContext["node"]
+) {
+  const availability = endpoint.availability ?? node.availability;
+  return availability ? (
+    <AvailabilityBadge availability={availability} rounded />
+  ) : null;
+}
+
 export async function EndpointContent({
   serialize,
   showErrors,
@@ -50,14 +60,7 @@ export async function EndpointContent({
             breadcrumb={breadcrumb}
             title={node.title}
             action={action}
-            tags={
-              endpoint.availability != null && (
-                <AvailabilityBadge
-                  availability={endpoint.availability}
-                  rounded
-                />
-              )
-            }
+            tags={getAvailabilityBadge(endpoint, node)}
             slug={node.slug}
           >
             <EndpointUrlWithPlaygroundBaseUrl

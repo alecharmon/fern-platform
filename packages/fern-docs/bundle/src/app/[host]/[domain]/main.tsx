@@ -125,7 +125,11 @@ export async function DocsMainContent({
         breadcrumb={breadcrumb}
         bottomNavigation={bottomNavigation}
         slug={node.slug}
-        availability={node.type === "page" ? node.availability : undefined}
+        availability={
+          node.type === "page" || node.type === "section"
+            ? node.availability
+            : undefined
+        }
       />
     );
   }
