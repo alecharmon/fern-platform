@@ -16,12 +16,7 @@ export function Navbar({ orgName }: Navbar.Props) {
   return (
     <div className="flex h-full w-fit max-w-full flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--sidebar)] md:w-[var(--sidebar-width)] md:border-0 md:py-6 md:pl-4 md:transition-[width]">
       <div className="flex gap-8 overflow-y-auto px-8 md:flex-col md:gap-0 md:px-0 md:pb-4">
-        <FeatureFlaggedServerSide
-          flag={PosthogFeatureFlag.ENABLE_DOCS_PAGE}
-          orgName={orgName}
-        >
-          <DocsNavbarItems />
-        </FeatureFlaggedServerSide>
+        <DocsNavbarItems />
         <FeatureFlaggedServerSide
           flag={PosthogFeatureFlag.ENABLE_SDKS_PAGE}
           orgName={orgName}
