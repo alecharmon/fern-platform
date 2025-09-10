@@ -77,10 +77,11 @@ export default function DevPanel() {
           mergedFrontmatter[key] = frontmatter[key];
         }
       });
-      // Then update the tiptap editor by updating the page with new HTML
+
       updatePage(activeFilename, {
         html,
         frontmatter: mergedFrontmatter,
+        changedNodes: {},
       });
 
       // Emit save event

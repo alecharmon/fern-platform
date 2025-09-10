@@ -24,6 +24,7 @@ export default function PageEditor({
   initialHtml,
 }: PageEditor.Props) {
   const editorRef = useRef<Editor | null>(null);
+  const skipNormalUpdateBecauseUpdateIsFromDevPanel = useRef(false);
   const latestTiptapHtml = useRef<string>(initialHtml || "");
 
   const { updatePage, subscribeSaveEvent } = usePages();
@@ -31,14 +32,12 @@ export default function PageEditor({
   // Subscribe to save events
   useEffect(() => {
     const unsubscribe = subscribeSaveEvent((event) => {
-      if (event.fileName === filename) {
-        editorRef.current?.commands.setContent(event.html);
-        latestTiptapHtml.current = event.html;
-      }
+      skipNormalUpdateBecauseUpdateIsFromDevPanel.current = true;
+      editorRef.current?.commands.setContent(event.html);
     });
 
     return unsubscribe;
-  }, [filename, subscribeSaveEvent]);
+  }, [filename, subscribeSaveEvent, latestTiptapHtml, editorRef]);
 
   function onTiptapEditorCreate(props: EditorEvents["create"]) {
     latestTiptapHtml.current = props.editor.getHTML();
@@ -48,15 +47,19 @@ export default function PageEditor({
   function onTiptapEditorUpdate(props: EditorEvents["update"]) {
     const html = props.editor.getHTML();
 
-    const changedNodes = getChangedNodesFromHtml(
-      latestTiptapHtml.current,
-      html
-    );
+    if (!skipNormalUpdateBecauseUpdateIsFromDevPanel.current) {
+      const changedNodes = getChangedNodesFromHtml(
+        latestTiptapHtml.current,
+        html
+      );
 
-    updatePage(filename, {
-      html,
-      changedNodes,
-    });
+      updatePage(filename, {
+        html,
+        changedNodes,
+      });
+    } else {
+      skipNormalUpdateBecauseUpdateIsFromDevPanel.current = false;
+    }
 
     latestTiptapHtml.current = html;
   }
