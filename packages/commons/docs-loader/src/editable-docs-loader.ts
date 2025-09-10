@@ -80,8 +80,8 @@ class EditableDocsLoader implements DocsLoader {
 
   getBaseUrl = () => this.readOnlyDocsLoader.getBaseUrl();
 
-  getDynamicIr = (apiNames: string[]) =>
-    this.readOnlyDocsLoader.getDynamicIr(apiNames);
+  getDynamicIr = (apiName: string) =>
+    this.readOnlyDocsLoader.getDynamicIr(apiName);
 }
 
 interface GetFernProjectSuccess {

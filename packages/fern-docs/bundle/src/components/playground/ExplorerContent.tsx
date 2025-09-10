@@ -34,10 +34,7 @@ export async function ExplorerContent({
 
     if (edgeFlags.isDynamicSnippetsEnabled) {
       try {
-        const dynamicIRsByApi = await loader.getDynamicIr([
-          node.apiDefinitionId,
-        ]);
-        dynamicIRsByLanguage = dynamicIRsByApi?.[node.apiDefinitionId];
+        dynamicIRsByLanguage = await loader.getDynamicIr(node.apiDefinitionId);
       } catch (error) {
         console.error(`[dynamic-ir] ${JSON.stringify(error)}`);
       }

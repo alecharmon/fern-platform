@@ -977,14 +977,14 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
     };
   });
 
-const getDynamicIr = (apiNames: string[]) =>
+const getDynamicIr = (apiName: string) =>
   cache(async (orgId: string) => {
     "use cache";
     unstable_cacheTag(orgId, "getDynamicIr");
 
     const response = await loadDynamicIRWithUrl({
       orgId,
-      apiNames,
+      apiName,
     });
 
     if (response) {
@@ -1126,9 +1126,9 @@ export const createCachedDocsLoader = async (
       const m = await metadata;
       return `https://${m.domain}${m.basePath}`;
     },
-    getDynamicIr: async (apiNames: string[]) => {
+    getDynamicIr: async (apiName: string) => {
       const m = await metadata;
-      return getDynamicIr(apiNames)(m.org);
+      return getDynamicIr(apiName)(m.org);
     },
     clearKvCache: () => clearKvCache(domain),
   };

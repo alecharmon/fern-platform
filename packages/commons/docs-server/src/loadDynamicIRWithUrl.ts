@@ -13,11 +13,11 @@ export type DynamicIRsByAPI = Record<string, DynamicIRsByLanguage>;
 export const loadDynamicIRWithUrl = cache(
   async ({
     orgId,
-    apiNames,
+    apiName,
   }: {
     orgId: string;
-    apiNames: string[];
-  }): Promise<DynamicIRsByAPI | undefined> => {
+    apiName: string;
+  }): Promise<DynamicIRsByLanguage | undefined> => {
     return unstable_cache(
       async () => {
         // todo: support dynamic snippets in local dev
@@ -30,31 +30,23 @@ export const loadDynamicIRWithUrl = cache(
           return undefined;
         }
 
-        const dynamicIRsByApi: DynamicIRsByAPI = {};
-
-        for (const apiName of apiNames) {
-          try {
-            const response = await loadDynamicIRFromS3(
-              orgId,
-              apiName,
-              getDynamicIRBucketName()
-            );
-            if (response != null) {
-              dynamicIRsByApi[apiName] = response as DynamicIRsByLanguage;
-            }
-          } catch (error) {
-            console.error("Failed to load dynamic IR:", error);
+        try {
+          const response = await loadDynamicIRFromS3(
+            orgId,
+            apiName,
+            getDynamicIRBucketName()
+          );
+          if (response != null && Object.keys(response).length > 0) {
+            return response;
           }
-        }
-
-        if (Object.keys(dynamicIRsByApi).length > 0) {
-          return dynamicIRsByApi;
+        } catch (error) {
+          console.error("Failed to load dynamic IR:", error);
         }
 
         return undefined;
       },
-      [orgId],
-      { tags: ["loadDynamicIRWithUrl", orgId] }
+      [orgId, apiName],
+      { tags: ["loadDynamicIRWithUrl", orgId, apiName] }
     )();
   }
 );

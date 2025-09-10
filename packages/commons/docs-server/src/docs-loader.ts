@@ -19,7 +19,7 @@ import { Slug } from "@fern-api/fdr-sdk/navigation";
 
 import { AuthState } from "./auth/getAuthState";
 import { FernFonts } from "./generateFonts";
-import { DynamicIRsByAPI } from "./loadDynamicIRWithUrl";
+import { DynamicIRsByLanguage } from "./loadDynamicIRFromS3";
 
 export const DocsMetadataSchema = z.object({
   domain: z.string(),
@@ -140,5 +140,5 @@ export interface DocsLoader {
 
   getBaseUrl: () => Promise<string>;
 
-  getDynamicIr: (apiNames: string[]) => Promise<DynamicIRsByAPI | undefined>;
+  getDynamicIr: (apiName: string) => Promise<DynamicIRsByLanguage | undefined>;
 }

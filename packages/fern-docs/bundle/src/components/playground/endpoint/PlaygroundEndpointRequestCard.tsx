@@ -87,9 +87,10 @@ export function PlaygroundEndpointRequestCard({
   const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
   const dynamicPreviewRef = useRef<PlaygroundDynamicRequestPreviewRef>(null);
 
+  const isHeadRequest = context.endpoint.method === "HEAD";
   const shouldUseDynamicSnippets =
     dynamicIRsByLanguage?.[requestType as DynamicSnippetLanguage] &&
-    !(context.endpoint.method === "HEAD");
+    !isHeadRequest;
 
   const getFallbackRequestType = (): "curl" | "typescript" | "python" => {
     if (requestType === "typescript") return "typescript";
@@ -131,7 +132,7 @@ export function PlaygroundEndpointRequestCard({
           >
             Python
           </FernButton>
-          {dynamicIRsByLanguage?.java && shouldUseDynamicSnippets && (
+          {dynamicIRsByLanguage?.java && !isHeadRequest && (
             <FernButton
               onClick={() => setRequestType("java")}
               size="small"
@@ -142,7 +143,7 @@ export function PlaygroundEndpointRequestCard({
               Java
             </FernButton>
           )}
-          {dynamicIRsByLanguage?.ruby && shouldUseDynamicSnippets && (
+          {dynamicIRsByLanguage?.ruby && !isHeadRequest && (
             <FernButton
               onClick={() => setRequestType("ruby")}
               size="small"
@@ -153,7 +154,7 @@ export function PlaygroundEndpointRequestCard({
               Ruby
             </FernButton>
           )}
-          {dynamicIRsByLanguage?.csharp && shouldUseDynamicSnippets && (
+          {dynamicIRsByLanguage?.csharp && !isHeadRequest && (
             <FernButton
               onClick={() => setRequestType("csharp")}
               size="small"
@@ -164,7 +165,7 @@ export function PlaygroundEndpointRequestCard({
               C#
             </FernButton>
           )}
-          {dynamicIRsByLanguage?.go && shouldUseDynamicSnippets && (
+          {dynamicIRsByLanguage?.go && !isHeadRequest && (
             <FernButton
               onClick={() => setRequestType("go")}
               size="small"
