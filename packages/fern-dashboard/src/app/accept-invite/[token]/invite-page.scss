@@ -1,0 +1,6 @@
+/* Target the login SDKs image to make it smaller and float to the right */
+.animate-float-container .animate-float-sdks {
+  height: 300px;
+  right: 465px !important;
+  left: unset !important;
+}

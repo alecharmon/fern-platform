@@ -5,9 +5,14 @@ import {
   GetMembers200ResponseOneOfInner,
   ManagementClient,
 } from "auth0";
+import { randomUUID } from "node:crypto";
 
 import { AsyncRedisCache } from "../redis/AsyncRedisCache";
-import { RedisCacheKey, RedisCacheKeyType } from "../redis/cacheKey";
+import {
+  InviteToken,
+  RedisCacheKey,
+  RedisCacheKeyType,
+} from "../redis/cacheKey";
 import {
   Auth0OrgID,
   Auth0OrgName,
@@ -72,6 +77,11 @@ const ORGANIZATION_INVITATIONS_CACHE = new AsyncRedisCache(
   { ttlInSeconds: 10 }
 );
 
+const INVITE_TOKEN_CACHE = new AsyncRedisCache(
+  RedisCacheKeyType.INVITE_TOKEN,
+  { ttlInSeconds: 24 * 60 * 60 } // 24 hours
+);
+
 /**********************
  * cache invalidators *
  **********************/
@@ -102,9 +112,35 @@ export async function invalidateCachesAfterRescindingInvitation(
   );
 }
 
+export async function invalidateInviteToken(token: string) {
+  await INVITE_TOKEN_CACHE.invalidate(RedisCacheKey.inviteToken(token));
+}
+
 /***********
  * helpers *
  ***********/
+
+export async function getInviteToken(token: string) {
+  return await INVITE_TOKEN_CACHE.getDirectly(RedisCacheKey.inviteToken(token));
+}
+
+export async function createInviteToken(
+  orgName: Auth0OrgName,
+  inviterId: string
+) {
+  const token = randomUUID();
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+  const inviteToken: InviteToken = {
+    orgName,
+    inviterId,
+    createdAt: now.toISOString(),
+    expiresAt: expiresAt.toISOString(),
+  };
+  await INVITE_TOKEN_CACHE.set(RedisCacheKey.inviteToken(token), inviteToken);
+
+  return { token, expiresAt: expiresAt.toISOString() };
+}
 
 export async function getOrganization(orgName: Auth0OrgName) {
   return await ORGANIZATIONS_CACHE.get(

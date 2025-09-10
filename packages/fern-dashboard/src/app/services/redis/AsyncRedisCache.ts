@@ -42,6 +42,21 @@ export class AsyncRedisCache<T extends RedisCacheKeyType> {
     return newValue;
   }
 
+  public async set(
+    key: RedisCacheKey<T>,
+    value: inferCachedData<T>
+  ): Promise<void> {
+    await redisSet(key, value, {
+      ttlInSeconds: this.ttlInSeconds,
+    });
+  }
+
+  public async getDirectly(
+    key: RedisCacheKey<T>
+  ): Promise<inferCachedData<T> | undefined> {
+    return await redisGet(key);
+  }
+
   public async invalidate(key: RedisCacheKey<T>) {
     await redisDel(key);
   }

@@ -18,8 +18,6 @@ import { Tab, TabGroup } from "@/docs/mdx/components/tabs";
 
 import { createCustomElementNode } from "../../extension-custom-element/create-custom-element-node";
 
-// import { focusNextNode, isValidPosition } from "@/utils/tiptap-utils";
-
 export interface FileItem {
   /**
    * Unique identifier for the file item
