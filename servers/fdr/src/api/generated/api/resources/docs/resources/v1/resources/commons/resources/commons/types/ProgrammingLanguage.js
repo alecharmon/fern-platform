@@ -9,6 +9,8 @@ export const ProgrammingLanguage = {
     Go: "go",
     Ruby: "ruby",
     Csharp: "csharp",
+    Php: "php",
+    Swift: "swift",
     Nodets: "nodets",
     Nodejs: "nodejs",
     Dotnet: "dotnet",

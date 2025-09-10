@@ -78,6 +78,8 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
           goSdk: undefined,
           rubySdk: undefined,
           csharpSdk: undefined,
+          phpSdk: undefined,
+          swiftSdk: undefined,
         };
 
       const snippetsConfigurationWithSdkIds = await app.dao

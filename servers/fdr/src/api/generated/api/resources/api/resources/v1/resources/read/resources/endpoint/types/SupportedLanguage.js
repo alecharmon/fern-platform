@@ -12,4 +12,6 @@ export const SupportedLanguage = {
     Go: "go",
     Ruby: "ruby",
     Csharp: "csharp",
+    Php: "php",
+    Swift: "swift",
 };

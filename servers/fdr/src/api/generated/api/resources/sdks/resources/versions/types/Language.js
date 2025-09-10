@@ -8,4 +8,6 @@ export const Language = {
     Python: "Python",
     Csharp: "Csharp",
     Ruby: "Ruby",
+    Php: "Php",
+    Swift: "Swift",
 };

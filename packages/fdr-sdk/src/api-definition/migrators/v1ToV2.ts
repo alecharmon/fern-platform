@@ -115,7 +115,7 @@ export class ApiDefinitionV1ToLatest {
           this.v1.subpackages
         );
         pkg.endpoints.forEach((endpoint) => {
-          let id =
+          const id =
             endpoint.protocol?.type === "grpc"
               ? ApiDefinitionV1ToLatest.createGrpcEndpointId(
                   endpoint,

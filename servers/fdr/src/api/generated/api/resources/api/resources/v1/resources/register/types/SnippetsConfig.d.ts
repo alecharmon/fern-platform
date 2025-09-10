@@ -9,4 +9,6 @@ export interface SnippetsConfig {
     javaSdk: FernRegistry.api.v1.register.JavaCoordinate | undefined;
     rubySdk: FernRegistry.api.v1.register.RubyGem | undefined;
     csharpSdk: FernRegistry.api.v1.register.NugetPackage | undefined;
+    phpSdk: FernRegistry.api.v1.register.ComposerPackage | undefined;
+    swiftSdk: FernRegistry.api.v1.register.SwiftPackage | undefined;
 }

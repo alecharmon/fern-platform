@@ -44,6 +44,8 @@ types:
       - Python
       - Csharp
       - Ruby
+      - Php
+      - Swift
 
   VersionBump:
     enum:

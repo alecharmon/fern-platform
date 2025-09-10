@@ -15,6 +15,8 @@ export * from "./GoModule.js";
 export * from "./JavaCoordinate.js";
 export * from "./RubyGem.js";
 export * from "./NugetPackage.js";
+export * from "./ComposerPackage.js";
+export * from "./SwiftPackage.js";
 export * from "./ApiDefinitionPackage.js";
 export * from "./ApiDefinitionSubpackage.js";
 export * from "./ApiAuth.js";

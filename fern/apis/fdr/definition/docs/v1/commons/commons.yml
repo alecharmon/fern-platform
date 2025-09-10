@@ -45,6 +45,8 @@ types:
       - go
       - ruby
       - csharp
+      - php
+      - swift
       - nodets
       - nodejs
       - dotnet

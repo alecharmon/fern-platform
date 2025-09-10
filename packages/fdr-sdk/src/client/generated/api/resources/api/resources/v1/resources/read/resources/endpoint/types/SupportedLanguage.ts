@@ -12,7 +12,9 @@ export type SupportedLanguage =
     | "ts"
     | "go"
     | "ruby"
-    | "csharp";
+    | "csharp"
+    | "php"
+    | "swift";
 export const SupportedLanguage = {
     Curl: "curl",
     Python: "python",
@@ -24,4 +26,6 @@ export const SupportedLanguage = {
     Go: "go",
     Ruby: "ruby",
     Csharp: "csharp",
+    Php: "php",
+    Swift: "swift",
 } as const;

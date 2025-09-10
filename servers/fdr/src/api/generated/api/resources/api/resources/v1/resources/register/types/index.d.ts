@@ -15,6 +15,8 @@ export * from "./GoModule";
 export * from "./JavaCoordinate";
 export * from "./RubyGem";
 export * from "./NugetPackage";
+export * from "./ComposerPackage";
+export * from "./SwiftPackage";
 export * from "./ApiDefinitionPackage";
 export * from "./ApiDefinitionSubpackage";
 export * from "./ApiAuth";

@@ -108,6 +108,8 @@ types:
       javaSdk: optional<JavaCoordinate>
       rubySdk: optional<RubyGem>
       csharpSdk: optional<NugetPackage>
+      phpSdk: optional<ComposerPackage>
+      swiftSdk: optional<SwiftPackage>
 
   TypescriptPackage:
     properties:
@@ -135,6 +137,16 @@ types:
       version: optional<string>
 
   NugetPackage:
+    properties:
+      package: string
+      version: optional<string>
+
+  ComposerPackage:
+    properties:
+      package: string
+      version: optional<string>
+      
+  SwiftPackage: 
     properties:
       package: string
       version: optional<string>

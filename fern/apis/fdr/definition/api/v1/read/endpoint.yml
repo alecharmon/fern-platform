@@ -236,6 +236,8 @@ types:
       - go
       - ruby
       - csharp
+      - php
+      - swift
 
   ExampleEndpointRequest:
     union:
