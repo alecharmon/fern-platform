@@ -9,7 +9,7 @@ import path from "path";
 
 import { EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 
-const LOCAL_PREVIEW_BUNDLE_OUT_DIR = path.resolve(
+export const LOCAL_PREVIEW_BUNDLE_OUT_DIR = path.resolve(
   __dirname,
   "../../fern-docs/bundle/.next"
 );
@@ -49,31 +49,9 @@ export class DocsFeStack extends Stack {
       })
     );
 
-    const local_preview_bundle_dist_tar = path.resolve(
-      __dirname,
-      "../../fern-docs/bundle/next.tar.gz"
-    );
-    if (
-      !fs.existsSync(LOCAL_PREVIEW_BUNDLE_OUT_DIR) ||
-      !fs.lstatSync(LOCAL_PREVIEW_BUNDLE_OUT_DIR).isDirectory()
-    ) {
-      throw new Error(
-        `Local preview bundle not found at ${LOCAL_PREVIEW_BUNDLE_OUT_DIR}`
-      );
-    }
+    const local_preview_bundle_dist_tar = resolveLocalPreviewBundleTarPath();
 
-    // Copy install-esbuild.js into the .next folder
-    fs.promises
-      .copyFile(
-        path.resolve(__dirname, "../utilities/install-esbuild.js"),
-        path.join(LOCAL_PREVIEW_BUNDLE_OUT_DIR, "install-esbuild.js")
-      )
-      .then(() => {
-        return zipFolder(
-          LOCAL_PREVIEW_BUNDLE_OUT_DIR,
-          local_preview_bundle_dist_tar
-        );
-      })
+    zipLocalBundle(local_preview_bundle_dist_tar)
       .then(() => {
         new BucketDeployment(this, "deploy-local-preview-bundle4", {
           sources: [Source.asset(local_preview_bundle_dist_tar)],
@@ -117,4 +95,34 @@ async function zipFolder(sourceFolder: string, zipFilePath: string) {
     archive.directory(sourceFolder, false);
     void archive.finalize();
   });
+}
+
+export async function zipLocalBundle(zipFilePath: string): Promise<void> {
+  if (
+    !fs.existsSync(LOCAL_PREVIEW_BUNDLE_OUT_DIR) ||
+    !fs.lstatSync(LOCAL_PREVIEW_BUNDLE_OUT_DIR).isDirectory()
+  ) {
+    throw new Error(
+      `Local preview bundle not found at ${LOCAL_PREVIEW_BUNDLE_OUT_DIR}`
+    );
+  }
+
+  // Copy install-esbuild.js into the .next folder
+  return fs.promises
+    .copyFile(
+      path.resolve(__dirname, "../utilities/install-esbuild.js"),
+      path.join(LOCAL_PREVIEW_BUNDLE_OUT_DIR, "install-esbuild.js")
+    )
+    .then(() => {
+      return zipFolder(LOCAL_PREVIEW_BUNDLE_OUT_DIR, zipFilePath);
+    });
+}
+
+export function resolveLocalPreviewBundleTarPath(zipFilePath?: string) {
+  if (!zipFilePath) {
+    return path.resolve(__dirname, "../../fern-docs/bundle/next.tar.gz");
+  }
+  return path.isAbsolute(zipFilePath)
+    ? zipFilePath
+    : path.resolve(__dirname, zipFilePath);
 }

@@ -280,6 +280,9 @@ importers:
       aws-cdk:
         specifier: ^2.197.0
         version: 2.1026.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.15))(@types/node@22.15.29)(typescript@5.7.3)
       typescript:
         specifier: 5.7.3
         version: 5.7.3
@@ -21206,7 +21209,7 @@ snapshots:
       '@babel/parser': 7.27.2
       '@babel/types': 7.27.1
       '@jridgewell/gen-mapping': 0.3.8
-      '@jridgewell/trace-mapping': 0.3.25
+      '@jridgewell/trace-mapping': 0.3.29
       jsesc: 3.1.0
 
   '@babel/generator@7.27.1':
@@ -23544,8 +23547,8 @@ snapshots:
   '@jridgewell/gen-mapping@0.3.8':
     dependencies:
       '@jridgewell/set-array': 1.2.1
-      '@jridgewell/sourcemap-codec': 1.5.0
-      '@jridgewell/trace-mapping': 0.3.25
+      '@jridgewell/sourcemap-codec': 1.5.4
+      '@jridgewell/trace-mapping': 0.3.29
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -23563,7 +23566,7 @@ snapshots:
   '@jridgewell/trace-mapping@0.3.25':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.4
 
   '@jridgewell/trace-mapping@0.3.29':
     dependencies:
@@ -23573,7 +23576,7 @@ snapshots:
   '@jridgewell/trace-mapping@0.3.9':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.4
 
   '@jsep-plugin/assignment@1.3.0(jsep@1.4.0)':
     dependencies:
@@ -30129,7 +30132,7 @@ snapshots:
 
   acorn-globals@7.0.1:
     dependencies:
-      acorn: 8.14.1
+      acorn: 8.15.0
       acorn-walk: 8.3.4
 
   acorn-import-attributes@1.9.5(acorn@8.14.1):
@@ -30157,7 +30160,7 @@ snapshots:
 
   acorn-walk@8.3.4:
     dependencies:
-      acorn: 8.14.1
+      acorn: 8.15.0
 
   acorn@8.14.0: {}
 
@@ -34738,15 +34741,15 @@ snapshots:
 
   import-in-the-middle@1.12.0:
     dependencies:
-      acorn: 8.14.1
-      acorn-import-attributes: 1.9.5(acorn@8.14.1)
+      acorn: 8.15.0
+      acorn-import-attributes: 1.9.5(acorn@8.15.0)
       cjs-module-lexer: 1.3.1
       module-details-from-path: 1.0.3
 
   import-in-the-middle@1.14.2:
     dependencies:
-      acorn: 8.14.1
-      acorn-import-attributes: 1.9.5(acorn@8.14.1)
+      acorn: 8.15.0
+      acorn-import-attributes: 1.9.5(acorn@8.15.0)
       cjs-module-lexer: 1.4.3
       module-details-from-path: 1.0.3
 
@@ -36273,11 +36276,11 @@ snapshots:
 
   magic-string@0.27.0:
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.4
 
   magic-string@0.30.10:
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.4
 
   magic-string@0.30.17:
     dependencies:
@@ -37338,7 +37341,7 @@ snapshots:
   miniflare@3.20250129.0(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      acorn: 8.14.1
+      acorn: 8.15.0
       acorn-walk: 8.3.4
       exit-hook: 2.2.1
       glob-to-regexp: 0.4.1
@@ -37409,7 +37412,7 @@ snapshots:
 
   mlly@1.7.4:
     dependencies:
-      acorn: 8.14.1
+      acorn: 8.15.0
       pathe: 2.0.3
       pkg-types: 1.3.1
       ufo: 1.6.1
@@ -41496,7 +41499,7 @@ snapshots:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
       '@types/node': 22.15.29
-      acorn: 8.14.1
+      acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
@@ -41938,7 +41941,7 @@ snapshots:
 
   unplugin@1.0.1:
     dependencies:
-      acorn: 8.14.1
+      acorn: 8.15.0
       chokidar: 3.6.0
       webpack-sources: 3.2.3
       webpack-virtual-modules: 0.5.0
@@ -42475,7 +42478,7 @@ snapshots:
   webpack-bundle-analyzer@4.10.1(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      acorn: 8.14.1
+      acorn: 8.15.0
       acorn-walk: 8.3.4
       commander: 7.2.0
       debounce: 1.2.1
