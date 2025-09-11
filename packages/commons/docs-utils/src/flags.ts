@@ -15,7 +15,6 @@ export interface EdgeFlags {
   scrollInContainerEnabled: boolean;
   isBatchStreamToggleDisabled: boolean;
   isAuthEnabledInDocs: boolean;
-  isAskAiEnabled: boolean;
   isAudioFileDownloadSpanSummary: boolean;
   isDocsLogoTextEnabled: boolean;
   isAudioExampleInternal: boolean;
@@ -54,7 +53,6 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
   scrollInContainerEnabled: false,
   isBatchStreamToggleDisabled: false,
   isAuthEnabledInDocs: false,
-  isAskAiEnabled: false,
   isAudioFileDownloadSpanSummary: false,
   isDocsLogoTextEnabled: false,
   isAudioExampleInternal: false,

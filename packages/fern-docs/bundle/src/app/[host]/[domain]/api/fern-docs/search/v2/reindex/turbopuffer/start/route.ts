@@ -26,8 +26,6 @@ import {
   turbopufferUpsertTask,
 } from "@fern-docs/search-ask-fern";
 
-import { getFaiClient } from "@/getFaiClient";
-
 export const maxDuration = 800; // 13 minutes
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -58,10 +56,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (metadata.isPreview) {
       return NextResponse.json(
         {
-          added: 0,
-          updated: 0,
-          deleted: 0,
-          unindexable: 0,
+          job_id: null,
+          message: "Preview sites are not indexed",
         },
         { status: 200 }
       );
@@ -72,19 +68,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       getEdgeFlags(domain),
     ]);
 
-    const isAskAiEnabled = (
-      await getFaiClient({
-        token: process.env.FERN_TOKEN ?? "",
-      }).settings.getSettings({ domain })
-    ).ask_ai_enabled;
-
-    if (!isAskAiEnabled) {
-      return NextResponse.json("Ask Fern is not enabled for this domain", {
-        status: 404,
-      });
-    }
-
-    const start = Date.now();
+    // Run the turbopuffer upsert task
     const numInserted = await turbopufferUpsertTask({
       apiKey: turbopufferApiKey(),
       namespace,
@@ -106,6 +90,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       },
       deleteExisting,
     });
+
     const faiClient = new FernAIClient({
       baseUrl: getFaiOrigin(),
     });
@@ -114,47 +99,25 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       index_name: fernDocsIndexName,
     });
 
-    const pollJobStatus = async (jobId: string): Promise<void> => {
-      while (true) {
-        const statusResponse = await faiClient.index.getJobStatus(jobId);
-        const { status, success, error } = statusResponse;
-
-        if (status === "completed") {
-          if (success === false) {
-            throw new Error(`Sync job failed: ${error || "Unknown error"}`);
-          }
-          break;
-        } else if (status === "failed") {
-          throw new Error(`Sync job failed: ${error || "Unknown error"}`);
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 15000));
-      }
-    };
-
-    await pollJobStatus(syncResponse.job_id);
-
-    const end = Date.now();
-
-    track("turbopuffer_reindex", {
+    track("turbopuffer_reindex_started", {
       embeddingModel: embeddingModel.modelId,
-      durationMs: end - start,
       domain,
       namespace,
       added: numInserted,
-      job_id: syncResponse.job_id,
     });
 
     return NextResponse.json(
       {
+        job_id: syncResponse.job_id,
         added: numInserted,
+        message: "Reindex started successfully",
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error(`[turbopuffer] ${JSON.stringify(error)}`);
+    console.error(`[turbopuffer-start] ${JSON.stringify(error)}`);
 
-    track("turbopuffer_reindex_error", {
+    track("turbopuffer_reindex_start_error", {
       embeddingModel: embeddingModel.modelId,
       domain,
       namespace,
@@ -163,8 +126,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     postToSlack(
       "#search-notifs",
-      `:rotating_light: [TURBOPUFFER] Failed to reindex ${domain} with the following error: ${String(error)}`,
-      "turbopuffer-reindex"
+      `:rotating_light: [TURBOPUFFER-START] Failed to start reindex for ${domain} with the following error: ${String(error)}`,
+      "turbopuffer-reindex-start"
     );
 
     return NextResponse.json(`Internal server error, error: ${String(error)}`, {

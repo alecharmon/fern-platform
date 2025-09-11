@@ -16,6 +16,7 @@ import { Health } from "./api/resources/health/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
 import { Mcp } from "./api/resources/mcp/client/Client.js";
 import { Query } from "./api/resources/query/client/Client.js";
+import { Settings } from "./api/resources/settings/client/Client.js";
 
 export declare namespace FernAIClient {
     export interface Options {
@@ -53,6 +54,7 @@ export class FernAIClient {
     protected _index: Index | undefined;
     protected _mcp: Mcp | undefined;
     protected _query: Query | undefined;
+    protected _settings: Settings | undefined;
 
     constructor(_options: FernAIClient.Options = {}) {
         this._options = {
@@ -110,5 +112,9 @@ export class FernAIClient {
 
     public get query(): Query {
         return (this._query ??= new Query(this._options));
+    }
+
+    public get settings(): Settings {
+        return (this._settings ??= new Settings(this._options));
     }
 }

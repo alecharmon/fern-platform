@@ -11,6 +11,7 @@ from src.fai.models.db.guidance_db import GuidanceDb  # noqa: F401
 from src.fai.models.db.insight_db import InsightDb  # noqa: F401
 from src.fai.models.db.job_db import JobDb  # noqa: F401
 from src.fai.models.db.query_db import QueryDb  # noqa: F401
+from src.fai.models.db.settings_db import SettingsDb  # noqa: F401
 
 
 async def init() -> None:

@@ -20,7 +20,7 @@ import {
   Auth0UserID,
 } from "./types";
 
-const FERN_ORG_NAME = Auth0OrgName("fern");
+export const FERN_ORG_NAME = Auth0OrgName("fern");
 
 /****************************
  * getAuth0ManagementClient *

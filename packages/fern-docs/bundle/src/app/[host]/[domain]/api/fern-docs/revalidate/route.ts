@@ -18,7 +18,6 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
 import { pruneWithAuthState } from "@fern-api/docs-server/withRbac";
 import {
-  EdgeFlags,
   HEADER_X_FERN_HOST,
   slugToHref,
   withoutStaging,
@@ -34,6 +33,7 @@ import {
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 
+import { getFaiClient } from "@/getFaiClient";
 import {
   queueAlgoliaReindex,
   queueTurbopufferReindex,
@@ -94,7 +94,7 @@ export async function GET(
           // reindex unless explicitly disabled
           req.nextUrl.searchParams.get("reindex") !== "false"
         ) {
-          reindexPromise = reindex(docs, host, domain, edgeFlags)
+          reindexPromise = reindex(docs, host, domain)
             .then((services) => {
               controller.enqueue(
                 `reindex-queued:services=${services.join(",")}\n`
@@ -358,13 +358,19 @@ export async function GET(
 async function reindex(
   docs: DocsV2Read.LoadDocsForUrlResponse,
   host: string,
-  domain: string,
-  edgeFlags: EdgeFlags
+  domain: string
 ) {
   const { basePath } = docs.baseUrl;
 
   await queueAlgoliaReindex(host, withoutStaging(domain), basePath);
-  if (edgeFlags.isAskAiEnabled) {
+
+  const isAskAiEnabled = (
+    await getFaiClient({
+      token: process.env.FERN_TOKEN ?? "",
+    }).settings.getSettings({ domain })
+  ).ask_ai_enabled;
+
+  if (isAskAiEnabled) {
     await queueTurbopufferReindex(host, withoutStaging(domain), basePath);
     return ["algolia", "turbopuffer"];
   }

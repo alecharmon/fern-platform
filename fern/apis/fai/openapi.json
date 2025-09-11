@@ -1704,6 +1704,208 @@
           "internal"
         ]
       }
+    },
+    "/settings/ask-ai": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Get Settings",
+        "description": "Get settings for a domain and organization.",
+        "operationId": "get_settings",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSettingsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/settings/ask-ai/toggle": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Toggle Ask Ai",
+        "description": "Toggle Ask AI setting and return job_id for tracking.",
+        "operationId": "toggle_ask_ai",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          },
+          {
+            "name": "org_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Org Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleAskAiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/settings/ask-ai/reindex": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Reindex Ask Ai",
+        "description": "Manually trigger reindex for an already enabled Ask AI setup.",
+        "operationId": "reindex_ask_ai",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          },
+          {
+            "name": "org_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Org Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleAskAiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/settings/ask-ai/toggle/status": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Get Toggle Status",
+        "description": "Get the status of Ask AI toggle operation.",
+        "operationId": "get_toggle_status",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
     }
   },
   "components": {
@@ -2474,6 +2676,32 @@
         ],
         "title": "GetQueriesResponse"
       },
+      "GetSettingsResponse": {
+        "properties": {
+          "ask_ai_enabled": {
+            "type": "boolean",
+            "title": "Ask Ai Enabled",
+            "description": "Whether Ask AI is enabled"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id",
+            "description": "Active job ID if reindexing is in progress"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ask_ai_enabled"
+        ],
+        "title": "GetSettingsResponse"
+      },
       "GitHubFileInfoRequest": {
         "properties": {
           "url": {
@@ -2917,6 +3145,94 @@
           "job_id"
         ],
         "title": "SyncIndexResponse"
+      },
+      "ToggleAskAiResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Whether the toggle operation was successful"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id",
+            "description": "Job ID for tracking reindex progress (only when enabling Ask AI)"
+          },
+          "ask_ai_enabled": {
+            "type": "boolean",
+            "title": "Ask Ai Enabled",
+            "description": "Current state of Ask AI (true if enabled, false if disabled)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "ask_ai_enabled"
+        ],
+        "title": "ToggleAskAiResponse"
+      },
+      "ToggleStatusResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current job status (running, completed, failed, etc.)"
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed",
+            "description": "Whether the job has completed successfully"
+          },
+          "failed": {
+            "type": "boolean",
+            "title": "Failed",
+            "description": "Whether the job has failed"
+          },
+          "ask_ai_enabled": {
+            "type": "boolean",
+            "title": "Ask Ai Enabled",
+            "description": "Current state of Ask AI"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id",
+            "description": "Current job ID (null if no active job)"
+          },
+          "last_reindex_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Reindex Time",
+            "description": "ISO timestamp of last reindex"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "completed",
+          "failed",
+          "ask_ai_enabled"
+        ],
+        "title": "ToggleStatusResponse"
       },
       "UpdateDocumentRequest": {
         "properties": {

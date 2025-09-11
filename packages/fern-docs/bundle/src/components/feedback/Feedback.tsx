@@ -97,7 +97,7 @@ export const Feedback: FC<FeedbackProps> = ({
         const queryId = metadataObj?.queryId as string;
         if (domain != null && conversationId != null) {
           try {
-            faiClient.feedback.createFeedback(domain, {
+            void faiClient.feedback.createFeedback(domain, {
               conversation_id: conversationId,
               query_id: queryId,
               domain,

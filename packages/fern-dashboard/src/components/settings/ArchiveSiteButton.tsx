@@ -48,6 +48,7 @@ export function ArchiveSiteButton({ docsUrl }: ArchiveSiteButton.Props) {
         void archive();
       }}
       loading={isArchiving}
+      className="w-24"
     >
       Archive site
     </Button>

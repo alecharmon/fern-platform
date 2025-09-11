@@ -12,12 +12,13 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
-import { getEdgeFlags } from "@fern-docs/edge-config";
 import {
   SuggestionsSchema,
   getLanguageModel,
 } from "@fern-docs/search-ask-fern";
 import { type AlgoliaRecord, SEARCH_INDEX } from "@fern-docs/search-keyword";
+
+import { getFaiClient } from "@/getFaiClient";
 
 const DEPLOYMENT_ID = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
 const PREFIX = `docs:${DEPLOYMENT_ID}`;
@@ -40,10 +41,15 @@ export async function POST(req: NextRequest): Promise<Response> {
   const { model: languageModel, provider: _ } = getLanguageModel("claude-4");
 
   const domain = getDocsDomainEdge(req);
-  const edgeFlags = await getEdgeFlags(domain);
   const cookieJar = await cookies();
 
-  if (!edgeFlags.isAskAiEnabled) {
+  const isAskAiEnabled = (
+    await getFaiClient({
+      token: process.env.FERN_TOKEN ?? "",
+    }).settings.getSettings({ domain })
+  ).ask_ai_enabled;
+
+  if (!isAskAiEnabled) {
     throw new Error(`Ask AI is not enabled for ${domain}`);
   }
 

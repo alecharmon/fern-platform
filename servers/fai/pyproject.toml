@@ -8,6 +8,11 @@ packages = [
     { include = "fai", from = "src" }
 ]
 
+[[tool.poetry.source]]
+name = "fern"
+url = "https://pypi.buildwithfern.com"
+priority = "supplemental"
+
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
 fastapi = "^0.115.2"
@@ -33,6 +38,7 @@ anthropic = "^0.57.1"
 turbopuffer = "^0.5.14"
 cohere = "^5.17.0"
 apscheduler = "^3.11.0"
+fern-fern-venus-sdk = { version = "*", source = "fern" }
 
 [tool.poetry.scripts]
 start = "src.fai.main:start"

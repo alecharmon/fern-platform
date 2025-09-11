@@ -38,6 +38,7 @@ import { FernUser } from "@/components/fern-user";
 import SearchV2 from "@/components/search";
 import { generateMetadataFromConfig } from "@/components/seo";
 import { withJsConfig } from "@/components/with-js-config";
+import { getFaiClient } from "@/getFaiClient";
 import { SetColors } from "@/state/colors";
 import { DarkCode } from "@/state/dark-code";
 import { DefaultLanguage } from "@/state/language";
@@ -78,6 +79,12 @@ export default async function Layout({
     deprecated_getCustomerAnalytics(domain),
     getLaunchDarklyInfo(loader),
   ]);
+
+  const isAskAiEnabled = (
+    await getFaiClient({
+      token: process.env.FERN_TOKEN ?? "",
+    }).settings.getSettings({ domain })
+  ).ask_ai_enabled;
 
   generatePreloadHrefs(config.typographyV2, files);
   const { VERCEL_ENV } = getEnv();
@@ -125,7 +132,7 @@ export default async function Layout({
         <DarkCode value={edgeFlags.isDarkCodeEnabled} />
         <Whitelabeled value={edgeFlags.isWhitelabeled} />
         <SetColors colors={colors} />
-        <SetIsAskAiEnabled isAskAiEnabled={edgeFlags.isAskAiEnabled} />
+        <SetIsAskAiEnabled isAskAiEnabled={isAskAiEnabled} />
         <SetIsDefaultSearchFilterOn
           isDefaultSearchFilterOn={edgeFlags.isDefaultSearchFilterOn}
         />

@@ -14,7 +14,6 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { FernAIClient } from "@fern-api/fai-sdk";
-import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import {
   getLanguageModel,
   getQueryIndexName,
@@ -25,6 +24,8 @@ import {
 import { FacetFilter } from "@fern-docs/search-keyword";
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "@fern-docs/search-ui";
 import { createDelimitedRolesetCombinations } from "@fern-docs/search-utils";
+
+import { getFaiClient } from "@/getFaiClient";
 
 export const maxDuration = 60;
 export const revalidate = 0;
@@ -60,12 +61,13 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const [_, edgeFlags] = await Promise.all([
-    getAuthEdgeConfig(domain),
-    getEdgeFlags(domain),
-  ]);
+  const isAskAiEnabled = (
+    await getFaiClient({
+      token: process.env.FERN_TOKEN ?? "",
+    }).settings.getSettings({ domain })
+  ).ask_ai_enabled;
 
-  if (!edgeFlags.isAskAiEnabled) {
+  if (!isAskAiEnabled) {
     return NextResponse.json("Ask AI is not enabled for this domain", {
       status: 404,
     });
