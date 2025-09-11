@@ -399,3 +399,61 @@ export function buildClientNodesByParent(
 
   return result;
 }
+
+/**
+ * Handles complex redirect logic for client pages that need tab context detection.
+ * This utility is used by @sidebar/page.tsx for handling client pages that don't exist in server navigation.
+ *
+ * @param root - The root navigation node
+ * @param slug - The original slug that was not found
+ * @param initialRedirect - The initial redirect target from findNode
+ * @returns The appropriate redirect target slug
+ */
+export function getClientPageRedirectTarget(
+  root: FernNavigation.RootNode,
+  slug: string,
+  initialRedirect: string
+): string {
+  // First, try to understand what tab we should be in based on the original slug
+  const originalFound = FernNavigation.utils.findNode(
+    root,
+    FernNavigation.Slug(slug)
+  );
+  let targetTabSlug = initialRedirect;
+
+  // If we can determine the tab context from the slug structure, find the default page for that specific tab
+  if (originalFound.type === "notFound") {
+    // Try to find which tab this slug would belong to by checking tab prefixes
+    const collector = FernNavigation.NodeCollector.collect(root);
+    const tabNodes = collector
+      .getNodesInOrder()
+      .filter((node) => node.type === "tab") as FernNavigation.TabNode[];
+
+    const slugParts = slug.split("/");
+    for (const tab of tabNodes) {
+      // Check if this client page belongs to this tab
+      const tabSlugInPath = slugParts.includes(tab.slug);
+
+      if (tabSlugInPath) {
+        // Found the tab this client page should belong to
+        let tabChildFound = FernNavigation.utils.findNode(root, tab.slug);
+
+        // If the tab redirects (which is normal), follow the redirect
+        if (tabChildFound.type === "redirect" && tabChildFound.redirect) {
+          tabChildFound = FernNavigation.utils.findNode(
+            root,
+            tabChildFound.redirect
+          );
+        }
+
+        if (tabChildFound.type === "found" && tabChildFound.sidebar) {
+          // Use the found node's slug as the target to get the correct sidebar context
+          targetTabSlug = tabChildFound.node.slug;
+          break;
+        }
+      }
+    }
+  }
+
+  return targetTabSlug;
+}

@@ -73,11 +73,38 @@ export function SidebarClientPageNode({
 
       removeClientNodeWithUpdate(pagePath, node.id);
 
-      // Navigate directly to special "root" page, use router.push instead of window.location.href so navigation happens instantly
-      // TODO: clean this up
-      const rootPageUrl = `/${params.orgName}/editor/${params.docsUrl}/${params.branch}/root`;
+      // Determine the appropriate redirect target based on navigation context
+      let redirectTarget = "root"; // Default fallback
+
+      if (storedPage?.navigationContext) {
+        const { currentProduct, currentVersion, currentTab } =
+          storedPage.navigationContext;
+
+        // Build the redirect path based on the navigation context
+        const pathParts = [];
+
+        if (currentProduct?.slug) {
+          pathParts.push(currentProduct.slug);
+        }
+
+        if (currentVersion?.slug) {
+          pathParts.push(currentVersion.slug);
+        }
+
+        if (currentTab && "slug" in currentTab && currentTab.slug) {
+          pathParts.push(currentTab.slug);
+        }
+
+        // If we have context information, use it to build the redirect target
+        if (pathParts.length > 0) {
+          redirectTarget = pathParts.join("/");
+        }
+      }
+
+      // TODO: move constructEditorSlug to docs utils
+      const redirectUrl = `/${params.orgName}/editor/${params.docsUrl}/${params.branch}/${redirectTarget}`;
       setTimeout(() => {
-        router.push(rootPageUrl);
+        router.push(redirectUrl);
       }, 0);
     }
   };

@@ -5,6 +5,7 @@ import {
 } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
+import { getClientPageRedirectTarget } from "@fern-docs/components";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SidebarTabsRootServer } from "@fern-docs/components/sidebar/SidebarTabsRootServer";
 import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
@@ -45,45 +46,15 @@ export default async function SidebarPage({
     // For client pages that don't exist in server navigation, we need to understand
     // the current tab context and use the default page for that tab as the foundNode
     if (found.redirect && clientNodeId) {
-      // First, try to understand what tab we should be in based on the original slug
-      const originalFound = FernNavigation.utils.findNode(root, slug);
-      let targetTabSlug = found.redirect;
-
-      // If we can determine the tab context from the slug structure, find the default page for that specific tab
-      if (originalFound.type === "notFound") {
-        // Try to find which tab this slug would belong to by checking tab prefixes
-        const collector = FernNavigation.NodeCollector.collect(root);
-        const tabNodes = collector
-          .getNodesInOrder()
-          .filter((node) => node.type === "tab") as FernNavigation.TabNode[];
-
-        const slugParts = slug.split("/");
-        for (const tab of tabNodes) {
-          // Check if this client page belongs to this tab
-          const tabSlugInPath = slugParts.includes(tab.slug);
-
-          if (tabSlugInPath) {
-            // Found the tab this client page should belong to
-            let tabChildFound = FernNavigation.utils.findNode(root, tab.slug);
-
-            // If the tab redirects (which is normal), follow the redirect
-            if (tabChildFound.type === "redirect" && tabChildFound.redirect) {
-              tabChildFound = FernNavigation.utils.findNode(
-                root,
-                tabChildFound.redirect
-              );
-            }
-
-            if (tabChildFound.type === "found" && tabChildFound.sidebar) {
-              // Use the found node's slug as the target to get the correct sidebar context
-              targetTabSlug = tabChildFound.node.slug;
-              break;
-            }
-          }
-        }
-      }
-
-      found = FernNavigation.utils.findNode(root, targetTabSlug);
+      const targetTabSlug = getClientPageRedirectTarget(
+        root,
+        slug,
+        found.redirect
+      );
+      found = FernNavigation.utils.findNode(
+        root,
+        FernNavigation.Slug(targetTabSlug)
+      );
     } else if (found.redirect) {
       // Regular redirect logic for non-client pages
       found = FernNavigation.utils.findNode(root, found.redirect);
