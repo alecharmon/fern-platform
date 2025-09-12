@@ -14,7 +14,7 @@ export function useMinWidth(breakpoint: number): boolean {
 
   useIsomorphicLayoutEffect(() => {
     const cancelAnimationFrame = isomorphicRequestAnimationFrame(() => {
-      window.innerWidth >= breakpoint;
+      setLargerThanBreakpoint(window.innerWidth >= breakpoint);
     });
 
     const mql = window.matchMedia(`(min-width: ${breakpoint}px)`);
@@ -37,5 +37,29 @@ export function useIsMobile(): boolean {
 }
 
 export function useIsDesktop(): boolean {
-  return useMinWidth(DESKTOP_BREAKPOINT);
+  const [sidePanelWidth, setSidePanelWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const checkPanelWidth = () => {
+        const panelWidth = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--ask-ai-panel-width");
+
+        setSidePanelWidth(parseInt(panelWidth) || 0);
+      };
+
+      checkPanelWidth();
+      const observer = new MutationObserver(checkPanelWidth);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["style"],
+      });
+
+      return () => observer.disconnect();
+    }
+    return undefined;
+  }, []);
+
+  return useMinWidth(DESKTOP_BREAKPOINT + sidePanelWidth);
 }

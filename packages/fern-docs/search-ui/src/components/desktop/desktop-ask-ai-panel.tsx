@@ -73,6 +73,8 @@ import { Suggestions } from "./suggestions";
 
 type PropsWithElement<T> = T & { node: HastElement };
 
+export const MIN_ASK_FERN_PANEL_WIDTH = 344;
+
 export const DesktopAskAiPanel = forwardRef<
   HTMLDivElement,
   Omit<ComponentPropsWithoutRef<typeof DesktopCommandRoot>, "children"> & {
@@ -103,6 +105,7 @@ export const DesktopAskAiPanel = forwardRef<
     pageContext?: { title: string; url: string } | null;
     onRemovePageContext?: () => void;
     searchDialogOpen: boolean;
+    isSidePanelOpen?: boolean;
     panelWidth: number;
   }
 >(
@@ -128,6 +131,7 @@ export const DesktopAskAiPanel = forwardRef<
       pageContext,
       onRemovePageContext,
       searchDialogOpen,
+      isSidePanelOpen = false,
       panelWidth,
       ...props
     },
@@ -148,6 +152,10 @@ export const DesktopAskAiPanel = forwardRef<
         escapeKeyShouldPopState={false}
         data-fern-search="desktop-command"
         data-mode={"ask-ai"}
+        style={{
+          minWidth: `${MIN_ASK_FERN_PANEL_WIDTH - 48}px`,
+        }}
+        className=""
       >
         <DesktopAskAIContent
           useConversationId={useConversationId}
@@ -169,6 +177,7 @@ export const DesktopAskAiPanel = forwardRef<
           pageContext={pageContext}
           onRemovePageContext={onRemovePageContext}
           searchDialogOpen={searchDialogOpen}
+          isSidePanelOpen={isSidePanelOpen}
           panelWidth={panelWidth}
         />
       </DesktopCommandRoot>
@@ -206,6 +215,7 @@ const DesktopAskAIContent = (props: {
   pageContext?: { title: string; url: string } | null;
   onRemovePageContext?: () => void;
   searchDialogOpen: boolean;
+  isSidePanelOpen?: boolean;
   panelWidth: number;
 }) => {
   return (
@@ -235,6 +245,7 @@ const DesktopAskAIChat = ({
   pageContext,
   onRemovePageContext,
   searchDialogOpen,
+  isSidePanelOpen = false,
   panelWidth,
 }: {
   initialInput?: string;
@@ -264,6 +275,7 @@ const DesktopAskAIChat = ({
   pageContext?: { title: string; url: string } | null;
   onRemovePageContext?: () => void;
   searchDialogOpen: boolean;
+  isSidePanelOpen?: boolean;
   panelWidth: number;
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -275,12 +287,31 @@ const DesktopAskAIChat = ({
   const [messageQueryIds, setMessageQueryIds] = useState<
     Record<string, string>
   >({});
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (!queryId) {
       setQueryId(crypto.randomUUID());
     }
   }, [queryId, setQueryId]);
+
+  // Trigger animation every time side panel is open
+  useEffect(() => {
+    if (isSidePanelOpen === true) {
+      setIsAnimating(true);
+
+      // Reset after animation completes
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 500);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    } else {
+      setIsAnimating(false);
+    }
+  }, [isSidePanelOpen]);
 
   const defaultTransportBody = useMemo(() => {
     return {
@@ -316,7 +347,10 @@ const DesktopAskAIChat = ({
   useEffect(() => {
     if (window !== undefined) {
       const vw = window.innerWidth;
-      if (panelWidth <= (0.4 * vw + Math.min(344, vw * 0.2)) / 2) {
+      if (
+        panelWidth <=
+        (0.4 * vw + Math.min(MIN_ASK_FERN_PANEL_WIDTH, vw * 0.2)) / 2
+      ) {
         setShowMaximizeOption(true);
       } else {
         setShowMaximizeOption(false);
@@ -495,7 +529,11 @@ const DesktopAskAIChat = ({
           }
         }}
         tabIndex={-1}
-        className={cn(isScrolled && "mask-grad-top-3")}
+        className={cn(
+          isScrolled && "mask-grad-top-3",
+          isAnimating && "slide-in-active"
+        )}
+        data-is-animating={isAnimating}
         data-disable-animation={chat.status !== "ready" ? "" : undefined}
       >
         <AskAICommandItems

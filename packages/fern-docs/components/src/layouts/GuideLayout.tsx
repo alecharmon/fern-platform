@@ -18,7 +18,7 @@ export function GuideLayout({
     <>
       <SetLayout value="guide" />
       {toc}
-      <div className="fern-layout-guide">
+      <div className="fern-layout-guide transition-all duration-500 ease-out">
         <article className="w-content-width max-w-full">
           {header}
           <Prose className="prose-h1:mt-[1.5em] first:prose-h1:mt-0 max-w-full">

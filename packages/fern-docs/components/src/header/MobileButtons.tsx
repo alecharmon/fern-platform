@@ -10,7 +10,7 @@ export function MobileMenuButton({ className }: { className?: string }) {
   const [open, setOpen] = useIsDismissableSidebarOpen();
   return (
     <Button
-      className={cn("shrink-0 lg:hidden", className)}
+      className={cn("shrink-0", className)}
       onClick={() => setOpen((prev) => !prev)}
       variant={open ? "default" : "ghost"}
       size="icon"

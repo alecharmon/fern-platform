@@ -12,6 +12,7 @@ export function SidebarNav({
   mobileClassName,
   desktopClassName,
   fixed,
+  isSidePanelOpen,
   ...props
 }: {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ export function SidebarNav({
   desktopClassName?: string;
   fixed?: boolean;
   "data-theme"?: string;
+  isSidePanelOpen?: boolean;
 }) {
   const isDesktop = useIsDesktop();
 
@@ -38,6 +40,7 @@ export function SidebarNav({
   return (
     <MobileMenu
       className={cn(className, mobileClassName, { hidden: isDesktop })}
+      isSidePanelOpen={isSidePanelOpen}
       {...props}
     >
       {children}

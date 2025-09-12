@@ -68,17 +68,21 @@ export function AbstractHeaderContent({
 
         {(showSearchBar || !isDesktop) && !headerDisabled && searchBar}
 
-        <FernButtonGroup asChild>
-          <nav className="fern-header-navbar-links" aria-label="Navbar links">
-            {navbarLinks}
-            {loginButton}
-            {themeSwitch}
-          </nav>
-        </FernButtonGroup>
+        {isDesktop && (
+          <FernButtonGroup asChild>
+            <nav className="fern-header-navbar-links" aria-label="Navbar links">
+              {navbarLinks}
+              {loginButton}
+              {themeSwitch}
+            </nav>
+          </FernButtonGroup>
+        )}
 
-        <div className="fern-header-mobile-menu-button">
-          <MobileMenuButton />
-        </div>
+        {!isDesktop && (
+          <div className="fern-header-mobile-menu-button">
+            <MobileMenuButton />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1072,7 +1072,7 @@ Input.displayName = "CommandInput";
  * Use the `--cmdk-list-height` CSS variable to animate height based on the number of results.
  */
 const List = forwardRef<HTMLDivElement, ListProps>((props, forwardedRef) => {
-  const { children, label = "Suggestions", ...etc } = props;
+  const { children, label = "Suggestions", className, ...etc } = props;
   const ref = useRef<HTMLDivElement>(null);
   const height = useRef<HTMLDivElement>(null);
   const context = useCommand();
@@ -1104,6 +1104,7 @@ const List = forwardRef<HTMLDivElement, ListProps>((props, forwardedRef) => {
     <Primitive.div
       ref={mergeRefs([ref, forwardedRef])}
       {...etc}
+      className={className}
       data-cmdk-list=""
       role="listbox"
       aria-label={label}

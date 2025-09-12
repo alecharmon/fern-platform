@@ -23,11 +23,18 @@ export const Suggestions = ({
   askAI: (suggestion: string) => void;
 }): ReactNode => {
   const [isLoading, setIsLoading] = useState(true);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
   const { object, submit } = experimental_useObject({
     api,
     schema: SuggestionsSchema,
     headers,
-    onFinish: () => setIsLoading(false),
+    onFinish: () => {
+      setIsLoading(false);
+      // Trigger cascading animation after suggestions are loaded
+      requestAnimationFrame(() => {
+        setShouldAnimate(true);
+      });
+    },
   });
 
   const debouncedSubmit = useMemo(
@@ -49,13 +56,20 @@ export const Suggestions = ({
 
   return (
     <Command.Group forceMount heading="Suggestions">
-      {suggestions.map((suggestion) => {
+      {suggestions.map((suggestion, index) => {
         return (
           <Command.Item
             key={suggestion}
             value={suggestion}
             onSelect={() => askAI(suggestion)}
-            className="text-(color:--accent) bg-transparent text-[12px] font-semibold hover:cursor-pointer hover:underline"
+            className={`text-(color:--accent) bg-transparent text-[12px] font-semibold transition-all duration-300 ease-out hover:cursor-pointer hover:underline ${
+              shouldAnimate
+                ? "translate-x-0 opacity-100"
+                : "translate-x-4 opacity-0"
+            }`}
+            style={{
+              transitionDelay: shouldAnimate ? `${index * 100}ms` : "0ms",
+            }}
             forceMount
           >
             {suggestion}

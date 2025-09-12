@@ -339,3 +339,20 @@
 @utility animate-popover {
   @apply data-[side=top]:animate-slide-down-and-fade data-[side=right]:animate-slide-left-and-fade data-[side=bottom]:animate-slide-up-and-fade data-[side=left]:animate-slide-right-and-fade;
 }
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(3rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-active {
+  animation: slideInFromRight 200ms ease-out forwards !important;
+  animation-delay: 300ms !important;
+  opacity: 0;
+}

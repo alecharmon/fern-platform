@@ -24,6 +24,7 @@ import {
   pageContextAtom,
   searchPanelInitialInputAtom,
   searchPanelInitializedAtom,
+  useIsSearchPanelOpen,
   useIsSearchPanelResizing,
   usePageContext,
   useSetSearchPanelResizing,
@@ -83,6 +84,7 @@ export const SearchPanel = React.memo(function SearchPanel({
 
   const [isOpen, setIsOpen] = useCommandTrigger();
   const isResizing = useIsSearchPanelResizing();
+  const isSidePanelOpen = useIsSearchPanelOpen();
   const setIsResizing = useSetSearchPanelResizing();
   const searchDialogOpen = useIsSearchDialogOpen();
   const [width, setWidth] = useAtom(widthAtom);
@@ -296,6 +298,7 @@ export const SearchPanel = React.memo(function SearchPanel({
             onRemovePageContext={() => setPageContext(null)}
             searchDialogOpen={searchDialogOpen}
             panelWidth={width}
+            isSidePanelOpen={isSidePanelOpen}
           />
         </div>
       </div>

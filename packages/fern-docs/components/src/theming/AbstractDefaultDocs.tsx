@@ -51,6 +51,16 @@ export default function AbstractDefaultDocs({
   const sidebarClassName =
     resolvedTheme === "dark" ? darkSidebarClassName : lightSidebarClassName;
   const mainRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (isSidePanelOpen) {
+        document.documentElement.style.setProperty("--page-margin", "0px");
+      } else {
+        document.documentElement.style.removeProperty("--page-margin");
+      }
+    }
+  }, [isSidePanelOpen]);
   return (
     <div
       className={cn(
@@ -86,13 +96,30 @@ export default function AbstractDefaultDocs({
       <MainCtx.Provider value={mainRef}>
         <main
           ref={mainRef}
-          className="mt-(--header-height) relative z-0 flex"
+          className={cn(
+            "mt-(--header-height) relative z-0 flex transition-all duration-500 ease-out",
+            {
+              "mx-auto": isSidePanelOpen,
+            }
+          )}
+          style={{
+            maxWidth: isSidePanelOpen
+              ? "calc(var(--page-width) + 3rem)"
+              : "inherit",
+            transition: "max-width 500ms ease-out",
+          }}
           data-theme="default"
         >
           <SidebarNav
-            className={sidebarClassName}
+            className={cn(
+              sidebarClassName,
+              isSidePanelOpen && "w-[var(--spacing-sidebar-width)]",
+              // !isSidePanelOpen && "transition-all duration-500 ease-out",
+              isSidePanelResizing && "!transition-none"
+            )}
             data-theme="default"
             fixed={isSidebarFixed}
+            isSidePanelOpen={isSidePanelOpen}
           >
             <div
               className={cn("fern-header-switchers px-2 py-4 lg:hidden", {

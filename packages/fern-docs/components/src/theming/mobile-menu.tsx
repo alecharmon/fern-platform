@@ -40,11 +40,13 @@ const transition = {
 export function MobileMenu({
   children,
   className,
+  isSidePanelOpen,
   ...props
 }: {
   children: React.ReactNode;
   className?: string;
   "data-theme"?: string;
+  isSidePanelOpen?: boolean;
 }) {
   const [open, setOpen] = useIsDismissableSidebarOpen();
 
@@ -157,6 +159,11 @@ export function MobileMenu({
         return;
       }
 
+      // Don't allow gesture if side panel is open
+      if (isSidePanelOpen) {
+        return;
+      }
+
       if (Math.abs(event.movementY) > 10) {
         maybeIsDragging = false;
         return;
@@ -191,7 +198,7 @@ export function MobileMenu({
       document.removeEventListener("pointermove", handlePointerMove);
       document.removeEventListener("selectionchange", handleCancelDrag);
     };
-  }, [dragControls, open, setOpen]);
+  }, [dragControls, open, setOpen, isSidePanelOpen]);
 
   return (
     <RemoveScroll
