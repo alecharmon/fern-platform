@@ -12,13 +12,16 @@ export function testGenerateReadme({
   fixtureName,
   config,
   originalReadme,
+  skip,
 }: {
   fixtureName: string;
   config: FernGeneratorCli.ReadmeConfig;
   originalReadme?: string;
+  skip?: boolean;
 }): void {
   describe(fixtureName, () => {
-    it("generate readme", async () => {
+    const itFunction = skip ? it.skip : it;
+    itFunction("generate readme", async () => {
       const file = await tmp.file();
       const json = JSON.stringify(
         await serializers.ReadmeConfig.jsonOrThrow(config),

@@ -224,7 +224,10 @@ export class ReadmeGenerator {
       content: originalReadmeContent,
     });
     const merger = new BlockMerger({
-      original: parsed.blocks,
+      original: parsed.blocks.filter(
+        (block) =>
+          !this.readmeConfig.disabledFeatures?.includes(block.id.toUpperCase())
+      ),
       updated: blocks,
     });
     return merger.merge();
