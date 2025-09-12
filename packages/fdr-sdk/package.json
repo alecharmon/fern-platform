@@ -49,6 +49,7 @@
     "test:update": "vitest --run  --passWithNoTests --globals -u"
   },
   "dependencies": {
+    "@fern-api/snippets": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@ungap/structured-clone": "^1.2.0",
     "dayjs": "^1.11.11",

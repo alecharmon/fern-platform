@@ -176,6 +176,17 @@ export function PlaygroundEndpointRequestCard({
               Go
             </FernButton>
           )}
+          {dynamicIRsByLanguage?.php && !isHeadRequest && (
+            <FernButton
+              onClick={() => setRequestType("php")}
+              size="small"
+              variant="minimal"
+              intent={requestType === "php" ? "primary" : "none"}
+              active={requestType === "php"}
+            >
+              PHP
+            </FernButton>
+          )}
         </FernButtonGroup>
         <CopyToClipboardButton
           content={() => {

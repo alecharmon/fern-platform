@@ -369,7 +369,13 @@ const createGetPrunedApiCached = (
             cacheConfig.cacheKeySuffix
           );
           if (cached != null) {
-            return await backfillSnippets(cached, await flagsPromise);
+            const metadata = await getMetadata(cacheConfig)(domain);
+            const dynamicIr = await getDynamicIr(id)(metadata.org);
+            return await backfillSnippets(
+              cached,
+              dynamicIr,
+              await flagsPromise
+            );
           }
         }
       } catch (error) {
@@ -405,7 +411,9 @@ const createGetPrunedApiCached = (
           cacheConfig.cacheKeySuffix
         );
       }
-      return backfillSnippets(pruned, await flagsPromise);
+      const metadata = await getMetadata(cacheConfig)(domain);
+      const dynamicIr = await getDynamicIr(id)(metadata.org);
+      return backfillSnippets(pruned, dynamicIr, await flagsPromise);
     },
     [domain, cacheSeed(), cacheConfig.cacheKeySuffix],
     { tags: [domain, "api"] }

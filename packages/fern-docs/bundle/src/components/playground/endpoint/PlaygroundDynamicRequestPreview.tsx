@@ -27,7 +27,8 @@ export type DynamicSnippetLanguage =
   | "java"
   | "ruby"
   | "csharp"
-  | "go";
+  | "go"
+  | "php";
 
 interface PlaygroundDynamicRequestPreviewProps {
   context: EndpointContext;
@@ -105,6 +106,13 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         });
       }
 
+      if (dynamicIRsByLanguage.php) {
+        snippetInputs.push({
+          language: "php" as const,
+          ir: dynamicIRsByLanguage.php as any,
+        });
+      }
+
       const snippetResolver = new SnippetResolver({ snippetInputs });
 
       // create endpoint generators only for languages that have IR data
@@ -145,6 +153,11 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
       if (dynamicIRsByLanguage.go) {
         const goSdk = snippetResolver.sdk("go");
         generators.go = goSdk?.endpoint(endpointPath);
+      }
+
+      if (dynamicIRsByLanguage.php) {
+        const phpSdk = snippetResolver.sdk("php");
+        generators.php = phpSdk?.endpoint(endpointPath);
       }
 
       return generators;

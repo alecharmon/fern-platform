@@ -112,10 +112,11 @@ describe("backfillSnippets", () => {
     const flags = {
       usesApplicationJsonInFormDataValue: false,
       isHttpSnippetsEnabled: true,
+      isDynamicSnippetsEnabled: false,
       alwaysEnableJavaScriptFetch: true,
     };
 
-    const result = await backfillSnippets(apiDefinition, flags);
+    const result = await backfillSnippets(apiDefinition, undefined, flags);
 
     // Verify the result has the expected structure
     const endpoint = result.endpoints[EndpointId("search")];
