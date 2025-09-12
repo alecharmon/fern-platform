@@ -158,11 +158,6 @@ async function backfillSnippetsForExample(
   }
 
   for (const [language, generator] of Object.entries(dynamicGenerators)) {
-    const clientConfig = CLIENTS.find((client) => client.targetId === language);
-    if (!clientConfig) {
-      continue;
-    }
-
     if (!generator) {
       continue;
     }
