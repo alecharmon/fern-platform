@@ -237,8 +237,28 @@ export class GitHubLoader implements GitLoader {
       if (docsYmlContent) {
         const urls = this.parseUrlsFromDocsYml(docsYmlContent);
 
+        // Strip https:// or http://
+        /* this isn't the most efficient way to do this, but this isn't a frequently executed code path so it is okay */
+        const HTTP = "http://";
+        const HTTPS = "https://";
+
+        const strippedUrls = urls.map((url) => {
+          if (url.startsWith(HTTPS)) {
+            return url.slice(HTTPS.length);
+          } else if (url.startsWith(HTTP)) {
+            return url.slice(HTTP.length);
+          }
+          return url;
+        });
+
+        const strippedSite = site.startsWith(HTTPS)
+          ? site.slice(HTTPS.length)
+          : site.startsWith(HTTP)
+            ? site.slice(HTTP.length)
+            : site;
+
         // Check if any URL matches the site
-        if (urls.includes(site)) {
+        if (strippedUrls.includes(strippedSite)) {
           matchingProjects.push(project);
         }
       }
