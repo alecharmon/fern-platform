@@ -32,6 +32,7 @@
     "@fern-api/docs-auth": "workspace:*",
     "@fern-api/docs-server": "workspace:*",
     "@fern-api/docs-utils": "workspace:*",
+    "@fern-api/fai-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
     "@types/react": "19.0.10",

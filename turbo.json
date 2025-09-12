@@ -71,6 +71,7 @@
         "EDGE_CONFIG",
         "ENABLE_ROOT_PATH_BUILD_CACHE",
         "ENABLE_SOURCE_MAPS",
+        "FAI_SERVER_URL",
         "FERN_TOKEN",
         "HIGHLIGHT_PROJECT_ID_FERN_APP",
         "JWT_SECRET_KEY",

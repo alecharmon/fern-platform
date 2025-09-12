@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 import { FernAIClient } from "@fern-api/fai-sdk";
 
 export function getFaiClient({ token }: { token: string }): FernAIClient {

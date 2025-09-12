@@ -38,7 +38,6 @@ import { FernUser } from "@/components/fern-user";
 import SearchV2 from "@/components/search";
 import { generateMetadataFromConfig } from "@/components/seo";
 import { withJsConfig } from "@/components/with-js-config";
-import { getFaiClient } from "@/getFaiClient";
 import { SetColors } from "@/state/colors";
 import { DarkCode } from "@/state/dark-code";
 import { DefaultLanguage } from "@/state/language";
@@ -65,6 +64,7 @@ export default async function Layout({
     colors,
     layout,
     fonts,
+    isAskAiEnabled,
     deprecated_customerAnalytics,
     launchDarkly,
   ] = await Promise.all([
@@ -76,19 +76,10 @@ export default async function Layout({
     loader.getColors(),
     loader.getLayout(),
     loader.getFonts(),
+    loader.isAskAiEnabled(),
     deprecated_getCustomerAnalytics(domain),
     getLaunchDarklyInfo(loader),
   ]);
-
-  let isAskAiEnabled = false;
-
-  if (!isLocal() && !isSelfHosted()) {
-    isAskAiEnabled = (
-      await getFaiClient({
-        token: process.env.FERN_TOKEN ?? "",
-      }).settings.getSettings({ domain })
-    ).ask_ai_enabled;
-  }
 
   generatePreloadHrefs(config.typographyV2, files);
   const { VERCEL_ENV } = getEnv();

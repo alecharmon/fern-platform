@@ -1,5 +1,9 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+
+import { kv } from "@vercel/kv";
+
 import { getFaiClient } from "../services/fai/getFaiClient";
 
 export async function toggleAskAi({
@@ -18,6 +22,16 @@ export async function toggleAskAi({
     domain,
     org_name: orgName,
   });
+
+  if (response.success) {
+    revalidateTag(`${domain}_askAiEnabled`);
+    try {
+      await kv.hdel(domain, "askAiEnabled");
+    } catch (error) {
+      console.warn("Failed to clear askAiEnabled cache:", error);
+    }
+  }
+
   return {
     success: response.success || false,
     job_id: response.job_id,

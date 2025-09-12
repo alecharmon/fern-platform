@@ -49,6 +49,7 @@ import {
 } from "@fern-api/docs-utils";
 import type { HttpMethod } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
+import { FernAIClient } from "@fern-api/fai-sdk";
 import {
   type ApiDefinition,
   type DocsV1Read,
@@ -1038,6 +1039,57 @@ function calcDefaultPageWidth(sidebarWidth: number, contentWidth: number) {
 
 const getAuthConfig = getAuthEdgeConfig;
 
+const getAskAiEnabled = (cacheConfig: Required<CacheConfig>) =>
+  cache(async (domain: string) => {
+    "use cache";
+    unstable_cacheTag(`${domain}_askAiEnabled`);
+
+    if (isLocal() || isSelfHosted()) {
+      return false;
+    }
+
+    try {
+      const cached = await kvGet<boolean>(
+        domain,
+        "askAiEnabled",
+        cacheConfig.cacheKeySuffix
+      );
+      if (cached != null) {
+        console.log("[getAskAiEnabled] cache hit:", cached);
+        return cached;
+      }
+    } catch (error) {
+      console.warn(
+        `Failed to get askAiEnabled for ${domain}, fallback to uncached`,
+        error
+      );
+    }
+
+    let result = false;
+    try {
+      result = (
+        await new FernAIClient({
+          baseUrl:
+            process.env.FAI_SERVER_URL ?? "https://fai.buildwithfern.com",
+          headers: {
+            Authorization: `Bearer ${process.env.FERN_TOKEN ?? ""}`,
+          },
+        }).settings.getSettings({ domain })
+      ).ask_ai_enabled;
+
+      kvSet(
+        domain,
+        "askAiEnabled",
+        result,
+        cacheConfig.kvTtl,
+        cacheConfig.cacheKeySuffix
+      );
+    } catch (error) {
+      console.warn(`Failed to fetch askAiEnabled for ${domain}`, error);
+    }
+    return result;
+  });
+
 export type DocsLoaderOptions = {
   cacheConfig?: CacheConfig;
   skipAuth?: boolean;
@@ -1055,7 +1107,12 @@ export const createCachedDocsLoader = async (
   domain: string,
   fern_token?: string,
   options?: DocsLoaderOptions
-): Promise<DocsLoader & { clearKvCache: () => Promise<void> }> => {
+): Promise<
+  DocsLoader & {
+    clearKvCache: () => Promise<void>;
+    isAskAiEnabled: () => Promise<boolean>;
+  }
+> => {
   assertDocsDomain(domain);
 
   const config = { ...DEFAULT_CACHE_CONFIG, ...options?.cacheConfig };
@@ -1139,6 +1196,7 @@ export const createCachedDocsLoader = async (
       return getDynamicIr(apiName)(m.org);
     },
     clearKvCache: () => clearKvCache(domain),
+    isAskAiEnabled: () => getAskAiEnabled(config)(domain),
   };
 };
 
