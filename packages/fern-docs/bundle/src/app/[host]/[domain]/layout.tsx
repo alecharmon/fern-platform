@@ -80,11 +80,15 @@ export default async function Layout({
     getLaunchDarklyInfo(loader),
   ]);
 
-  const isAskAiEnabled = (
-    await getFaiClient({
-      token: process.env.FERN_TOKEN ?? "",
-    }).settings.getSettings({ domain })
-  ).ask_ai_enabled;
+  let isAskAiEnabled = false;
+
+  if (!isLocal() && !isSelfHosted()) {
+    isAskAiEnabled = (
+      await getFaiClient({
+        token: process.env.FERN_TOKEN ?? "",
+      }).settings.getSettings({ domain })
+    ).ask_ai_enabled;
+  }
 
   generatePreloadHrefs(config.typographyV2, files);
   const { VERCEL_ENV } = getEnv();
