@@ -101,7 +101,7 @@ async def toggle_ask_ai(
 
             # Start reindex and get job_id
             try:
-                async with httpx.AsyncClient(timeout=60.0) as client:
+                async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
                     response = await client.get(
                         f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start"
                     )
@@ -197,7 +197,7 @@ async def reindex_ask_ai(
         # Start reindex and get job_id
         job_id = None
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
                 response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
                 if response.status_code == 200:
                     job_id = response.json().get("job_id", None)
@@ -285,7 +285,7 @@ async def get_toggle_status(
 
         # Check job status using the turbopuffer status endpoint
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                 response = await client.get(
                     f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/status?job_id={existing_record.job_id}"
                 )
