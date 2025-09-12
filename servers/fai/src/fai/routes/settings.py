@@ -134,12 +134,13 @@ async def toggle_ask_ai(
                 db.add(new_record)
                 await db.commit()
                 await db.refresh(new_record)
+                existing_record = new_record  # Update reference to the new record
                 LOGGER.info(f"Created new record for domain {stripped_domain}")
 
             LOGGER.info(f"Enabled Ask AI for domain {stripped_domain}")
 
         # Determine if Ask AI is now enabled based on whether we have a last_reindex_time
-        ask_ai_now_enabled = job_id is not None  # If we got a job_id, we're enabling; if not, we're disabling
+        ask_ai_now_enabled = existing_record.last_reindex_time is not None
 
         return JSONResponse(
             content=jsonable_encoder(

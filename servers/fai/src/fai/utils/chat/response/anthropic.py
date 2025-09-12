@@ -25,13 +25,13 @@ async def get_anthropic_response(
     system_prompt = (
         maybe_system_prompt if maybe_system_prompt else build_anthropic_system_prompt(domain, "\n\n".join(rag_records))
     )
-    
+
     async with AsyncAnthropic(api_key=VARIABLES.ANTHROPIC_API_KEY) as anthropic_client:
         output = []
         citations = [*rag_records]
-        
+
         current_messages = messages.copy()
-        
+
         while True:
             response = await anthropic_client.messages.create(
                 system=system_prompt,
@@ -40,29 +40,27 @@ async def get_anthropic_response(
                 max_tokens=1000,
                 tools=[SEARCH_TOOL_ANTHROPIC],
             )
-            
+
             for turn in response.content:
                 if turn.type == "text":
                     output.append({"type": "text", "text": turn.text})
-            
+
             tool_uses = [turn for turn in response.content if turn.type == "tool_use"]
-            
+
             if not tool_uses:
                 break
-            
+
             tool_results = []
             for tool_use in tool_uses:
                 if tool_use.name == "search":
                     tool_use_id, search_rag_records = await _handle_anthropic_tool_use(tool_use, domain)
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": tool_use_id,
-                        "content": "\n\n".join(search_rag_records)
-                    })
+                    tool_results.append(
+                        {"type": "tool_result", "tool_use_id": tool_use_id, "content": "\n\n".join(search_rag_records)}
+                    )
                     citations.extend(search_rag_records)
-            
+
             current_messages.append({"role": "assistant", "content": response.content})
-            
+
             current_messages.append({"role": "user", "content": tool_results})
-        
+
         return output, citations
