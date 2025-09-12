@@ -42,7 +42,6 @@
     "@babel/preset-typescript": "^7.26.0",
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/github": "workspace:*",
-    "@fern-api/template-resolver": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-api/venus-api-sdk": "^0.10.1-5-ged06d22",
     "@fern-docs/search-ask-fern": "workspace:*",

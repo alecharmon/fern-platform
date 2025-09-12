@@ -40,7 +40,6 @@ const nextConfig: NextConfig = {
      * pnpm list --filter=@fern-docs/bundle --only-projects --prod --recursive --depth=Infinity --json | jq -r '[.. | objects | select(.version | .!=null) | select(.version | startswith("link:")) | .from] | unique'
      */
     "@fern-api/fdr-sdk",
-    "@fern-api/template-resolver",
     "@fern-api/ui-core-utils",
     "@fern-api/docs-loader",
     "@fern-api/docs-server",

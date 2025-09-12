@@ -62,7 +62,6 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/next-mdx-remote": "^5.0.0",
     "@fern-api/snippets": "workspace:*",
-    "@fern-api/template-resolver": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/components": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
