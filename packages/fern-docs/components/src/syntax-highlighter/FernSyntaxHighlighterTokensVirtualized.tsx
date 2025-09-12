@@ -127,6 +127,14 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
             });
           }
         },
+        scrollToLine(lineNumber) {
+          if (virtuosoRef.current) {
+            virtuosoRef.current?.scrollToIndex({
+              index: lineNumber,
+              behavior: "auto",
+            });
+          }
+        },
         get clientHeight() {
           return scrollerRef instanceof HTMLElement
             ? scrollerRef.clientHeight

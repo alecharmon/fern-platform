@@ -1,4 +1,4 @@
-import React from "react";
+import { ComponentProps, ReactNode, RefObject, useEffect, useRef } from "react";
 
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
 import {
@@ -9,6 +9,7 @@ import {
 import {
   CodeBlockWithClipboardButton,
   FernSyntaxHighlighter,
+  ScrollToHandle,
 } from "@fern-docs/components/syntax-highlighter";
 
 import { useIsDarkCode } from "@/state/dark-code";
@@ -49,7 +50,11 @@ export function CodeBlock(props: {
   /**
    * enables rendering tooltips on handlebars in the code
    */
-  tooltips?: Record<string, React.ReactNode>;
+  tooltips?: Record<string, ReactNode>;
+  /**
+   * automatically scrolls to the specified line number (1-based) when the component mounts
+   */
+  startLine?: number;
 }) {
   const {
     className,
@@ -68,6 +73,16 @@ export function CodeBlock(props: {
   // merge context templates with the ones passed in
   const template = { ...useTemplate().template, ...templateProp };
   const tooltips = { ...useTemplate().tooltips, ...tooltipsProp };
+
+  const viewportRef = useRef<ScrollToHandle>(null);
+
+  useEffect(() => {
+    const { current } = viewportRef;
+    if (current && props.startLine != null) {
+      // Convert to 0-based index
+      current.scrollToLine(props.startLine - 1);
+    }
+  }, [props.startLine, viewportRef]);
 
   if (!code) {
     return null;
@@ -104,7 +119,12 @@ export function CodeBlock(props: {
           </div>
         </div>
         <FernSyntaxHighlighter
-          {...toSyntaxHighlighterProps({ ...props, template, tooltips })}
+          {...toSyntaxHighlighterProps({
+            ...props,
+            template,
+            tooltips,
+            viewportRef,
+          })}
           className="rounded-b-[inherit]"
         />
       </div>
@@ -119,15 +139,22 @@ export function CodeBlock(props: {
       language={language}
     >
       <FernSyntaxHighlighter
-        {...toSyntaxHighlighterProps({ ...props, template, tooltips })}
+        {...toSyntaxHighlighterProps({
+          ...props,
+          template,
+          tooltips,
+          viewportRef,
+        })}
       />
     </CodeBlockWithClipboardButton>
   );
 }
 
 export function toSyntaxHighlighterProps(
-  props: React.ComponentProps<typeof CodeBlock>
-): React.ComponentProps<typeof FernSyntaxHighlighter> {
+  props: ComponentProps<typeof CodeBlock> & {
+    viewportRef?: RefObject<ScrollToHandle | null>;
+  }
+): ComponentProps<typeof FernSyntaxHighlighter> {
   const highlight = props.highlight ?? props.focus ?? [];
   return {
     language: cleanLanguage(props.language ?? "plaintext"),
@@ -138,5 +165,6 @@ export function toSyntaxHighlighterProps(
     wordWrap: props.wordWrap,
     template: props.template,
     tooltips: props.tooltips,
+    viewportRef: props.viewportRef,
   };
 }

@@ -20,6 +20,7 @@ import {
 export interface ScrollToHandle {
   scrollTo: (options: ScrollToOptions) => void;
   scrollToLast: (options?: ScrollOptions) => void;
+  scrollToLine: (line: number) => void;
   clientHeight: number;
   scrollHeight: number;
 }
@@ -87,6 +88,21 @@ export const FernSyntaxHighlighterTokens = memo(
                 scrollAreaRef.current.scrollHeight -
                 scrollAreaRef.current.clientHeight,
               ...options,
+            });
+          }
+        },
+        scrollToLine(lineNumber) {
+          if (scrollAreaRef.current) {
+            const scrollArea = scrollAreaRef.current;
+
+            const firstLineElement =
+              scrollArea.querySelector(".code-block-line");
+            if (!firstLineElement || !(firstLineElement instanceof HTMLElement))
+              return;
+
+            scrollArea.scrollTo({
+              top: Math.max(0, lineNumber * firstLineElement.offsetHeight),
+              behavior: "smooth",
             });
           }
         },
