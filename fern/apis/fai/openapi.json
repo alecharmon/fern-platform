@@ -3185,32 +3185,10 @@
             "title": "Status",
             "description": "Current job status (running, completed, failed, etc.)"
           },
-          "completed": {
-            "type": "boolean",
-            "title": "Completed",
-            "description": "Whether the job has completed successfully"
-          },
-          "failed": {
-            "type": "boolean",
-            "title": "Failed",
-            "description": "Whether the job has failed"
-          },
           "ask_ai_enabled": {
             "type": "boolean",
             "title": "Ask Ai Enabled",
             "description": "Current state of Ask AI"
-          },
-          "job_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Job Id",
-            "description": "Current job ID (null if no active job)"
           },
           "last_reindex_time": {
             "anyOf": [
@@ -3228,8 +3206,6 @@
         "type": "object",
         "required": [
           "status",
-          "completed",
-          "failed",
           "ask_ai_enabled"
         ],
         "title": "ToggleStatusResponse"

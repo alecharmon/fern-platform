@@ -57,7 +57,7 @@ export function ToggleAskAiButton({
     try {
       const status = await getToggleStatus({ domain: docsUrl });
 
-      if (status.completed) {
+      if (status === "completed") {
         setIsReindexing(false);
         toast.success(
           "Ask AI enabled successfully! Documentation has been reindexed."
@@ -69,7 +69,7 @@ export function ToggleAskAiButton({
         }
 
         await fetchSettings();
-      } else if (status.failed) {
+      } else if (status === "failed") {
         setIsReindexing(false);
         toast.error(
           "Failed to reindex documentation. Ask AI may not work properly."

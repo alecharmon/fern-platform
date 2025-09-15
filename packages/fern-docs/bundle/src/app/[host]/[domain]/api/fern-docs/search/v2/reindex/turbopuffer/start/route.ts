@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createOpenAI } from "@ai-sdk/openai";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { track } from "@fern-api/docs-server/analytics/posthog";
 import {
   fdrEnvironment,
   fernToken_admin,
@@ -26,6 +25,8 @@ import {
   turbopufferUpsertTask,
 } from "@fern-docs/search-ask-fern";
 
+import { JobManager, createJobResponse } from "@/jobs";
+
 export const maxDuration = 800; // 13 minutes
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -36,9 +37,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const openai = createOpenAI({ apiKey: openaiApiKey() });
-  const embeddingModel = openai.embedding("text-embedding-3-large");
-
   const host = req.nextUrl.host;
   const domain = getDocsDomainEdge(req);
   const deleteExisting =
@@ -47,91 +45,102 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const fernDocsIndexName = getFernDocsIndexName();
   const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
 
-  try {
-    const loader = await createCachedDocsLoader(host, domain);
-    const metadata = await loader.getMetadata();
-    if (metadata == null) {
-      return NextResponse.json("Not found", { status: 404 });
-    }
-    if (metadata.isPreview) {
-      return NextResponse.json(
-        {
-          job_id: null,
+  const job_id = await JobManager.createJob(domain);
+
+  JobManager.executeJob(domain, async () => {
+    const openai = createOpenAI({ apiKey: openaiApiKey() });
+    const embeddingModel = openai.embedding("text-embedding-3-large");
+
+    try {
+      const loader = await createCachedDocsLoader(host, domain);
+      const metadata = await loader.getMetadata();
+      if (metadata == null) {
+        throw new Error("Documentation not found");
+      }
+      if (metadata.isPreview) {
+        return {
           message: "Preview sites are not indexed",
+          added: 0,
+          domain,
+          namespace,
+        };
+      }
+
+      const [authEdgeConfig, edgeFlags] = await Promise.all([
+        getAuthEdgeConfig(domain),
+        getEdgeFlags(domain),
+      ]);
+
+      const numInserted = await turbopufferUpsertTask({
+        apiKey: turbopufferApiKey(),
+        namespace,
+        payload: {
+          environment: fdrEnvironment(),
+          fernToken: fernToken_admin(),
+          domain: withoutStaging(domain),
+          ...edgeFlags,
         },
-        { status: 200 }
-      );
-    }
+        vectorizer: getTurbopufferVectorizer(embeddingModel),
+        authed: (node) => {
+          if (authEdgeConfig == null) {
+            return false;
+          }
+          return (
+            withBasicTokenAnonymous(authEdgeConfig, slugToHref(node.slug)) ===
+            Gate.DENY
+          );
+        },
+        deleteExisting,
+      });
 
-    const [authEdgeConfig, edgeFlags] = await Promise.all([
-      getAuthEdgeConfig(domain),
-      getEdgeFlags(domain),
-    ]);
+      const faiClient = new FernAIClient({
+        baseUrl: getFaiOrigin(),
+      });
 
-    // Run the turbopuffer upsert task
-    const numInserted = await turbopufferUpsertTask({
-      apiKey: turbopufferApiKey(),
-      namespace,
-      payload: {
-        environment: fdrEnvironment(),
-        fernToken: fernToken_admin(),
-        domain: withoutStaging(domain),
-        ...edgeFlags,
-      },
-      vectorizer: getTurbopufferVectorizer(embeddingModel),
-      authed: (node) => {
-        if (authEdgeConfig == null) {
-          return false;
+      const syncResponse = await faiClient.index.syncIndexToQueryIndex(domain, {
+        index_name: fernDocsIndexName,
+      });
+
+      const pollJobStatus = async (jobId: string): Promise<void> => {
+        while (true) {
+          const statusResponse = await faiClient.index.getJobStatus(jobId);
+          const { status, success, error } = statusResponse;
+
+          if (status === "completed") {
+            if (success === false) {
+              throw new Error(`Sync job failed: ${error || "Unknown error"}`);
+            }
+            break;
+          } else if (status === "failed") {
+            throw new Error(`Sync job failed: ${error || "Unknown error"}`);
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 15000));
         }
-        return (
-          withBasicTokenAnonymous(authEdgeConfig, slugToHref(node.slug)) ===
-          Gate.DENY
-        );
-      },
-      deleteExisting,
-    });
+      };
 
-    const faiClient = new FernAIClient({
-      baseUrl: getFaiOrigin(),
-    });
+      await pollJobStatus(syncResponse.job_id);
 
-    const syncResponse = await faiClient.index.syncIndexToQueryIndex(domain, {
-      index_name: fernDocsIndexName,
-    });
-
-    track("turbopuffer_reindex_started", {
-      embeddingModel: embeddingModel.modelId,
-      domain,
-      namespace,
-      added: numInserted,
-    });
-
-    return NextResponse.json(
-      {
-        job_id: syncResponse.job_id,
+      return {
         added: numInserted,
-        message: "Reindex started successfully",
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error(`[turbopuffer-start] ${JSON.stringify(error)}`);
+        domain,
+        namespace,
+        message: "Turbopuffer reindex completed successfully",
+      };
+    } catch (error) {
+      console.error(`[turbopuffer-start] ${JSON.stringify(error)}`);
 
-    track("turbopuffer_reindex_start_error", {
-      embeddingModel: embeddingModel.modelId,
-      domain,
-      namespace,
-      error: String(error),
-    });
+      postToSlack(
+        "#search-notifs",
+        `:rotating_light: [TURBOPUFFER-START] Failed to reindex for ${domain} with the following error: ${String(error)}`,
+        "turbopuffer-reindex-start"
+      );
 
-    postToSlack(
-      "#search-notifs",
-      `:rotating_light: [TURBOPUFFER-START] Failed to start reindex for ${domain} with the following error: ${String(error)}`,
-      "turbopuffer-reindex-start"
-    );
+      throw error;
+    }
+  }).catch((error) => {
+    console.error(`Job ${job_id} execution failed:`, error);
+  });
 
-    return NextResponse.json(`Internal server error, error: ${String(error)}`, {
-      status: 500,
-    });
-  }
+  return createJobResponse("Turbopuffer reindex job started", job_id);
 }

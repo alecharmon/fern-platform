@@ -24,8 +24,5 @@ class ToggleAskAiResponse(BaseModel):
 
 class ToggleStatusResponse(BaseModel):
     status: str = Field(description="Current job status (running, completed, failed, etc.)")
-    completed: bool = Field(description="Whether the job has completed successfully")
-    failed: bool = Field(description="Whether the job has failed")
     ask_ai_enabled: bool = Field(description="Current state of Ask AI")
-    job_id: str | None = Field(None, description="Current job ID (null if no active job)")
     last_reindex_time: str | None = Field(None, description="ISO timestamp of last reindex")

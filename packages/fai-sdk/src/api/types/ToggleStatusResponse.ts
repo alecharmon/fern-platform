@@ -5,14 +5,8 @@
 export interface ToggleStatusResponse {
     /** Current job status (running, completed, failed, etc.) */
     status: string;
-    /** Whether the job has completed successfully */
-    completed: boolean;
-    /** Whether the job has failed */
-    failed: boolean;
     /** Current state of Ask AI */
     ask_ai_enabled: boolean;
-    /** Current job ID (null if no active job) */
-    job_id?: string;
     /** ISO timestamp of last reindex */
     last_reindex_time?: string;
 }

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getFaiOrigin } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-import { FernAIClient } from "@fern-api/fai-sdk";
+import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
+
+import { JobManager, createJobStatusResponse } from "@/jobs";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  console.log("CHECK REINDEX STATUS");
+  console.log("CHECK TURBOPUFFER REINDEX STATUS");
 
   if (isLocal() || isSelfHosted()) {
     return NextResponse.json(
@@ -15,7 +16,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // Get job_id from query parameters
   const jobId = req.nextUrl.searchParams.get("job_id");
 
   if (!jobId) {
@@ -25,35 +25,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  try {
-    const faiClient = new FernAIClient({
-      baseUrl: getFaiOrigin(),
-    });
-
-    const statusResponse = await faiClient.index.getJobStatus(jobId);
-    const { status, success, error } = statusResponse;
-
-    return NextResponse.json(
-      {
-        job_id: jobId,
-        status,
-        success,
-        error,
-        completed: status === "completed",
-        failed: status === "failed",
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error(`[turbopuffer-status] ${JSON.stringify(error)}`);
-
-    return NextResponse.json(
-      {
-        error: `Failed to get job status: ${String(error)}`,
-        job_id: jobId,
-        status: "error",
-      },
-      { status: 500 }
-    );
-  }
+  const domain = getDocsDomainEdge(req);
+  const job = await JobManager.getJobStatus(domain);
+  return createJobStatusResponse(job);
 }

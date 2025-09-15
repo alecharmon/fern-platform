@@ -98,15 +98,13 @@ async def toggle_ask_ai(
         else:
             # Enable Ask AI - either create new record or update existing one
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
-
-            # Start reindex and get job_id
             try:
-                async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
+                async with httpx.AsyncClient(follow_redirects=True) as client:
                     response = await client.get(
                         f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start"
                     )
                     if response.status_code == 200:
-                        job_id = response.json().get("job_id", None)
+                        job_id = response.json().get("job_id", None) # Job ID for upsert task
                         LOGGER.info(
                             f"Successfully started turbopuffer reindex for domain {stripped_domain}, job_id: {job_id}"
                         )
@@ -121,7 +119,6 @@ async def toggle_ask_ai(
 
             if existing_record:
                 existing_record.job_id = job_id
-                # Don't set last_reindex_time here - only when job completes
                 await db.commit()
                 LOGGER.info(f"Updated existing record for domain {stripped_domain}")
             else:
@@ -134,12 +131,9 @@ async def toggle_ask_ai(
                 db.add(new_record)
                 await db.commit()
                 await db.refresh(new_record)
-                existing_record = new_record  # Update reference to the new record
+                existing_record = new_record
                 LOGGER.info(f"Created new record for domain {stripped_domain}")
 
-            LOGGER.info(f"Enabled Ask AI for domain {stripped_domain}")
-
-        # Determine if Ask AI is now enabled based on whether we have a last_reindex_time
         ask_ai_now_enabled = existing_record.last_reindex_time is not None
 
         return JSONResponse(
@@ -197,7 +191,7 @@ async def reindex_ask_ai(
         # Start reindex and get job_id
         job_id = None
         try:
-            async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
                 if response.status_code == 200:
                     job_id = response.json().get("job_id", None)
@@ -243,7 +237,7 @@ async def get_toggle_status(
         if token is None:
             return JSONResponse(
                 content=jsonable_encoder(
-                    ToggleStatusResponse(status="error", completed=False, failed=True, ask_ai_enabled=False)
+                    ToggleStatusResponse(status="error", ask_ai_enabled=False)
                 )
             )
 
@@ -252,7 +246,7 @@ async def get_toggle_status(
         if not is_fern_member:
             return JSONResponse(
                 content=jsonable_encoder(
-                    ToggleStatusResponse(status="error", completed=False, failed=True, ask_ai_enabled=False)
+                    ToggleStatusResponse(status="error", ask_ai_enabled=False)
                 )
             )
 
@@ -262,21 +256,25 @@ async def get_toggle_status(
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
-        if not existing_record or not existing_record.job_id:
+        if not existing_record:
+            return JSONResponse(
+                content=jsonable_encoder(
+                    ToggleStatusResponse(status="error", ask_ai_enabled=False)
+                )
+            )
+
+        if not existing_record.job_id:
             # Ask AI is enabled if record exists AND has a non-null last_reindex_time
-            ask_ai_enabled = existing_record is not None and existing_record.last_reindex_time is not None
+            ask_ai_enabled = existing_record.last_reindex_time is not None
 
             return JSONResponse(
                 content=jsonable_encoder(
                     ToggleStatusResponse(
                         status="completed",
-                        completed=True,
-                        failed=False,
                         ask_ai_enabled=ask_ai_enabled,
-                        job_id=None,
                         last_reindex_time=(
                             existing_record.last_reindex_time.isoformat()
-                            if existing_record and existing_record.last_reindex_time
+                            if existing_record.last_reindex_time
                             else None
                         ),
                     )
@@ -284,64 +282,48 @@ async def get_toggle_status(
             )
 
         # Check job status using the turbopuffer status endpoint
-        try:
-            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-                response = await client.get(
-                    f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/status?job_id={existing_record.job_id}"
-                )
-                if response.status_code == 200:
-                    status_data = response.json()
-
-                    # If job is completed, clear the job_id and set completion time
-                    if status_data.get("completed", False):
-                        existing_record.job_id = None
-                        existing_record.last_reindex_time = datetime.utcnow()
-                        await db.commit()
-
-                    return JSONResponse(
-                        content=jsonable_encoder(
-                            ToggleStatusResponse(
-                                status=status_data.get("status", "unknown"),
-                                completed=status_data.get("completed", False),
-                                failed=status_data.get("failed", False),
-                                ask_ai_enabled=True,
-                                job_id=existing_record.job_id,
-                                last_reindex_time=(
-                                    existing_record.last_reindex_time.isoformat()
-                                    if existing_record.last_reindex_time
-                                    else None
-                                ),
-                            )
-                        )
-                    )
-                else:
-                    LOGGER.error(f"Failed to get job status: {response.status_code}")
-                    return JSONResponse(
-                        content=jsonable_encoder(
-                            ToggleStatusResponse(
-                                status="error",
-                                completed=False,
-                                failed=True,
-                                ask_ai_enabled=True,
-                                job_id=existing_record.job_id,
-                            )
-                        )
-                    )
-        except Exception as e:
-            LOGGER.error(f"Failed to check job status: {e}")
-            return JSONResponse(
-                content=jsonable_encoder(
-                    ToggleStatusResponse(
-                        status="error", completed=False, failed=True, ask_ai_enabled=True, job_id=existing_record.job_id
-                    )
-                )
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            response = await client.get(
+                f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/status?job_id={existing_record.job_id}"
             )
+            if response.status_code == 200:
+                status_data = response.json()
+
+                # If job is completed, clear the job_id and set completion time
+                if status_data.get("completed", False):
+                    existing_record.job_id = None
+                    existing_record.last_reindex_time = datetime.utcnow()
+                    await db.commit()
+
+                return JSONResponse(
+                    content=jsonable_encoder(
+                        ToggleStatusResponse(
+                            status=status_data.get("status", "unknown"),
+                            ask_ai_enabled=True,
+                            last_reindex_time=(
+                                existing_record.last_reindex_time.isoformat()
+                                if existing_record.last_reindex_time
+                                else None
+                            ),
+                        )
+                    )
+                )
+            else:
+                LOGGER.error(f"Failed to get job status: {response.status_code}")
+                return JSONResponse(
+                    content=jsonable_encoder(
+                        ToggleStatusResponse(
+                            status="error",
+                            ask_ai_enabled=True,
+                        )
+                    )
+                )
 
     except Exception:
         LOGGER.exception("Failed to get toggle status")
         return JSONResponse(
             content=jsonable_encoder(
-                ToggleStatusResponse(status="error", completed=False, failed=True, ask_ai_enabled=False)
+                ToggleStatusResponse(status="error", ask_ai_enabled=False)
             )
         )
 

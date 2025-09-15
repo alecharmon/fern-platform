@@ -2,8 +2,6 @@
 
 import { revalidateTag } from "next/cache";
 
-import { kv } from "@vercel/kv";
-
 import { getFaiClient } from "../services/fai/getFaiClient";
 
 export async function toggleAskAi({
@@ -25,11 +23,6 @@ export async function toggleAskAi({
 
   if (response.success) {
     revalidateTag(`${domain}_askAiEnabled`);
-    try {
-      await kv.hdel(domain, "askAiEnabled");
-    } catch (error) {
-      console.warn("Failed to clear askAiEnabled cache:", error);
-    }
   }
 
   return {
@@ -75,22 +68,12 @@ export async function reindexAskAi({
   };
 }
 
-export async function getToggleStatus({ domain }: { domain: string }): Promise<{
-  status: string;
-  completed: boolean;
-  failed: boolean;
-  ask_ai_enabled: boolean;
-  job_id?: string;
-  last_reindex_time?: string;
-}> {
+export async function getToggleStatus({
+  domain,
+}: {
+  domain: string;
+}): Promise<string> {
   const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
   const response = await faiClient.settings.getToggleStatus({ domain });
-  return {
-    status: response.status || "unknown",
-    completed: response.completed || false,
-    failed: response.failed || false,
-    ask_ai_enabled: response.ask_ai_enabled || false,
-    job_id: response.job_id,
-    last_reindex_time: response.last_reindex_time,
-  };
+  return response.status || "unknown";
 }
