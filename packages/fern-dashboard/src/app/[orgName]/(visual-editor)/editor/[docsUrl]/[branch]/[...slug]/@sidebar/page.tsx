@@ -1,4 +1,7 @@
-import { createEditableDocsLoader } from "@fern-api/docs-loader";
+import {
+  PrefetchedDocsLoader,
+  createEditableDocsLoader,
+} from "@fern-api/docs-loader";
 import {
   getIsSidebarFixed,
   getIsSingleOverviewPage,
@@ -6,9 +9,9 @@ import {
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { getClientPageRedirectTarget } from "@fern-docs/components";
+import { SidebarClientTabsRoot } from "@fern-docs/components/sidebar/SidebarClientTabsRoot";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
-import { SidebarTabsRootServer } from "@fern-docs/components/sidebar/SidebarTabsRootServer";
-import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
+import { SidebarClientRootNode } from "@fern-docs/components/sidebar/nodes/SidebarClientRootNode";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
@@ -34,10 +37,19 @@ export default async function SidebarPage({
     docsUrl,
     session?.accessToken
   );
-  const [config, root] = await Promise.all([
+  const [config, root, authState, edgeFlags, layout] = await Promise.all([
     loader.getConfig(),
     loader.getRoot(),
+    loader.getAuthState(),
+    loader.getEdgeFlags(),
+    loader.getLayout(),
   ]);
+  const prefetchedLoaderData = new PrefetchedDocsLoader({
+    domain: loader.domain,
+    authState,
+    edgeFlags,
+    layout,
+  }).serializable();
 
   const slug = slugjoin(slugArray);
   let found = FernNavigation.utils.findNode(root, slug);
@@ -74,9 +86,9 @@ export default async function SidebarPage({
   return (
     <>
       {found.tabs && found.tabs.length > 0 && (
-        <SidebarTabsRootServer loader={loader}>
+        <SidebarClientTabsRoot loaderData={prefetchedLoaderData}>
           <SidebarTabsList tabs={found.tabs} />
-        </SidebarTabsRootServer>
+        </SidebarClientTabsRoot>
       )}
       {isSingleOverviewPage && !isSidebarFixed ? (
         <HiddenSidebar />
@@ -92,10 +104,10 @@ export default async function SidebarPage({
               isCurrentProductDefault: found.isCurrentProductDefault,
             }}
           />
-          <SidebarRootNode
+          <SidebarClientRootNode
             root={found.sidebar}
             visibleNodeIds={visibleNodeIds}
-            loader={loader}
+            loaderData={prefetchedLoaderData}
           />
         </>
       )}

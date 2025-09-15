@@ -9,7 +9,7 @@ import {
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
-import { SidebarTabsRootServer } from "@fern-docs/components/sidebar/SidebarTabsRootServer";
+import { SidebarTabsRoot } from "@fern-docs/components/sidebar/SidebarTabsRoot";
 import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 
@@ -55,9 +55,9 @@ export default async function SidebarPage({
   return (
     <>
       {tabs && tabs.length > 0 && (
-        <SidebarTabsRootServer loader={loader}>
+        <SidebarTabsRoot loader={loader}>
           <SidebarTabsList tabs={tabs} />
-        </SidebarTabsRootServer>
+        </SidebarTabsRoot>
       )}
       {isSingleOverviewPage && !isSidebarFixed ? (
         <HiddenSidebar />

@@ -1606,6 +1606,9 @@ importers:
       '@fern-api/docs-auth':
         specifier: workspace:*
         version: link:../../commons/docs-auth
+      '@fern-api/docs-loader':
+        specifier: workspace:*
+        version: link:../../commons/docs-loader
       '@fern-api/docs-server':
         specifier: workspace:*
         version: link:../../commons/docs-server

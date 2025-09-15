@@ -1,5 +1,3 @@
-import "server-only";
-
 import { UnreachableCaseError } from "ts-essentials";
 
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";

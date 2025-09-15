@@ -1,5 +1,3 @@
-import "server-only";
-
 import * as Tabs from "@radix-ui/react-tabs";
 import { Lock } from "lucide-react";
 

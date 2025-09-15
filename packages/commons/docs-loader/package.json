@@ -9,6 +9,18 @@
   },
   "sideEffects": false,
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/index.client.d.ts",
+      "import": "./dist/index.client.js",
+      "require": "./dist/index.client.js"
+    }
+  },
   "main": "src/index.ts",
   "module": "src/index.ts",
   "source": "src/index.ts",

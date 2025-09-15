@@ -1,5 +1,3 @@
-import "server-only";
-
 import { ReactNode } from "react";
 
 import { UnreachableCaseError } from "ts-essentials";

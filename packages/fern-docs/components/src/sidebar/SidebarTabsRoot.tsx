@@ -1,26 +1,15 @@
-"use client";
+import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 
-import * as Tabs from "@radix-ui/react-tabs";
+import { SidebarTabsRootImpl } from "./SidebarTabsRootImpl";
 
-import { cn } from "../cn";
-import { useCurrentTabId } from "../state/navigation";
-
-export function SidebarTabsRoot({
+export async function SidebarTabsRoot({
+  loader,
   children,
-  mobileOnly,
 }: {
+  loader: DocsLoader;
   children: React.ReactNode;
-  mobileOnly?: boolean;
 }) {
-  const currentTabId = useCurrentTabId();
-  return (
-    <Tabs.Root
-      value={currentTabId}
-      className={cn({
-        "lg:hidden": mobileOnly,
-      })}
-    >
-      {children}
-    </Tabs.Root>
-  );
+  const layout = await loader.getLayout();
+
+  return <SidebarTabsRootImpl layout={layout}>{children}</SidebarTabsRootImpl>;
 }

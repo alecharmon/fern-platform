@@ -1,19 +1,25 @@
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+"use client";
+
+import {
+  DangerousTransmittableDocsLoaderData,
+  PrefetchedDocsLoader,
+} from "@fern-api/docs-loader/client";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { SidebarRootNodeImpl } from "./SidebarRootNodeImpl";
 
-export async function SidebarRootNode({
+export function SidebarClientRootNode({
   root,
   visibleNodeIds,
-  loader,
+  loaderData,
 }: {
   root: FernNavigation.SidebarRootNode | undefined;
   visibleNodeIds: FernNavigation.NodeId[] | undefined;
-  loader: DocsLoader;
+  loaderData: DangerousTransmittableDocsLoaderData;
 }) {
-  const authState = await loader.getAuthState();
-  const edgeFlags = await loader.getEdgeFlags();
+  const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
+  const authState = loader.getAuthState();
+  const edgeFlags = loader.getEdgeFlags();
 
   return (
     <SidebarRootNodeImpl

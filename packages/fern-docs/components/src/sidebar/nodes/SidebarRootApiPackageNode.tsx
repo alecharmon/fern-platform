@@ -1,5 +1,3 @@
-import "server-only";
-
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { cn } from "../../cn";

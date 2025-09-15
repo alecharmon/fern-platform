@@ -21,6 +21,14 @@ import { AuthState } from "./auth/getAuthState";
 import { FernFonts } from "./generateFonts";
 import { DynamicIRsByLanguage } from "./loadDynamicIRFromS3";
 
+/**
+ * Conditionally wraps type T in Promise based on IsAsync flag.
+ * Allows DocsLoader implementations to be either async by default (network calls) or sync (prefetched data).
+ */
+type MaybePromise<T, IsAsync extends boolean> = IsAsync extends true
+  ? Promise<T>
+  : T;
+
 export const DocsMetadataSchema = z.object({
   domain: z.string(),
   basePath: z.string(),
@@ -31,26 +39,31 @@ export const DocsMetadataSchema = z.object({
 
 export type DocsMetadata = z.infer<typeof DocsMetadataSchema>;
 
-export interface DocsLoader {
+export interface DocsLoader<IsAsync extends boolean = true> {
+  getAuthConfig: () => MaybePromise<AuthEdgeConfig | undefined, IsAsync>;
+  getMetadata: () => MaybePromise<DocsMetadata, IsAsync>;
+}
+
+export interface DocsLoader<IsAsync extends boolean = true> {
   domain: string;
   fern_token: string | undefined;
 
-  getAuthConfig: () => Promise<AuthEdgeConfig | undefined>;
+  getAuthConfig: () => MaybePromise<AuthEdgeConfig | undefined, IsAsync>;
 
   /**
    * @returns the metadata for the given url, including the domain, base path, url, org, and isPreview
    */
-  getMetadata: () => Promise<DocsMetadata>;
+  getMetadata: () => MaybePromise<DocsMetadata, IsAsync>;
 
   /**
    * @returns a map of file names to their contents
    */
-  getFiles: () => Promise<Record<string, FileData>>;
+  getFiles: () => MaybePromise<Record<string, FileData>, IsAsync>;
 
   /**
    * @returns a map of mdx bundler files
    */
-  getMdxBundlerFiles: () => Promise<Record<string, string>>;
+  getMdxBundlerFiles: () => MaybePromise<Record<string, string>, IsAsync>;
 
   /**
    * @returns the api definition for the given id, pruned to the given nodes
@@ -58,7 +71,7 @@ export interface DocsLoader {
   getPrunedApi: (
     id: string,
     ...nodes: PruningNodeType[]
-  ) => Promise<ApiDefinition.ApiDefinition>;
+  ) => MaybePromise<ApiDefinition.ApiDefinition, IsAsync>;
 
   /**
    * @returns the endpoint definition for the given api definition id and endpoint id
@@ -66,13 +79,16 @@ export interface DocsLoader {
   getEndpointById: (
     apiDefinitionId: string,
     endpointId: EndpointId
-  ) => Promise<{
-    endpoint: ApiDefinition.EndpointDefinition;
-    nodes: FernNavigation.EndpointNode[];
-    globalHeaders: ObjectProperty[];
-    authSchemes: AuthScheme[];
-    types: Record<TypeId, TypeDefinition>;
-  }>;
+  ) => MaybePromise<
+    {
+      endpoint: ApiDefinition.EndpointDefinition;
+      nodes: FernNavigation.EndpointNode[];
+      globalHeaders: ObjectProperty[];
+      authSchemes: AuthScheme[];
+      types: Record<TypeId, TypeDefinition>;
+    },
+    IsAsync
+  >;
 
   /**
    * @returns the endpoint definition for the given endpoint locator
@@ -85,60 +101,74 @@ export interface DocsLoader {
      * the example can be used to disambiguate between them
      */
     example?: string
-  ) => Promise<{
-    apiDefinitionId: ApiDefinition.ApiDefinitionId;
-    endpoint: ApiDefinition.EndpointDefinition;
-    slugs: Slug[];
-  }>;
+  ) => MaybePromise<
+    {
+      apiDefinitionId: ApiDefinition.ApiDefinitionId;
+      endpoint: ApiDefinition.EndpointDefinition;
+      slugs: Slug[];
+    },
+    IsAsync
+  >;
 
   /**
    * @returns the root node of the docs (aware of authentication)
    */
-  getRoot: () => Promise<FernNavigation.RootNode>;
+  getRoot: () => MaybePromise<FernNavigation.RootNode, IsAsync>;
 
   /**
    * @returns the navigation node for the given id
    */
-  getNavigationNode: (id: string) => Promise<FernNavigation.NavigationNode>;
+  getNavigationNode: (
+    id: string
+  ) => MaybePromise<FernNavigation.NavigationNode, IsAsync>;
 
   /**
    * DO NOT USE THIS UNLESS YOU KNOW WHAT YOU ARE DOING.
    * This should never be exposed to the client, and should only be used for revalidation.
    * @returns the full root node of the docs (ignoring authentication)
    */
-  unsafe_getFullRoot: () => Promise<FernNavigation.RootNode>;
+  unsafe_getFullRoot: () => MaybePromise<FernNavigation.RootNode, IsAsync>;
 
   /**
    * @returns the config of the docs
    */
-  getConfig: () => Promise<
-    Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">
+  getConfig: () => MaybePromise<
+    Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">,
+    IsAsync
   >;
 
   /**
    * @returns the markdown content for the given page id
    */
-  getPage: (pageId: string) => Promise<{
-    filename: string;
-    markdown: string;
-    editThisPageUrl?: string;
-    rawMarkdown?: string;
-  }>;
+  getPage: (pageId: string) => MaybePromise<
+    {
+      filename: string;
+      markdown: string;
+      editThisPageUrl?: string;
+      rawMarkdown?: string;
+    },
+    IsAsync
+  >;
 
-  getColors: () => Promise<{
-    light?: FernColorTheme;
-    dark?: FernColorTheme;
-  }>;
+  getColors: () => MaybePromise<
+    {
+      light?: FernColorTheme;
+      dark?: FernColorTheme;
+    },
+    IsAsync
+  >;
 
-  getFonts: () => Promise<FernFonts>;
+  getFonts: () => MaybePromise<FernFonts, IsAsync>;
 
-  getLayout: () => Promise<FernLayoutConfig>;
+  getLayout: () => MaybePromise<FernLayoutConfig, IsAsync>;
 
-  getAuthState: (pathname?: string) => Promise<AuthState>;
+  getAuthState: (pathname?: string) => MaybePromise<AuthState, IsAsync>;
 
-  getEdgeFlags: () => Promise<EdgeFlags>;
+  getEdgeFlags: () => MaybePromise<EdgeFlags, IsAsync>;
 
-  getBaseUrl: () => Promise<string>;
+  getBaseUrl: () => MaybePromise<string, IsAsync>;
 
-  getDynamicIr: (apiName: string) => Promise<DynamicIRsByLanguage | undefined>;
+  getDynamicIr: (
+    apiName: string
+  ) => MaybePromise<DynamicIRsByLanguage | undefined, IsAsync>;
 }
