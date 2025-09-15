@@ -8,6 +8,7 @@ import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { PostHogIdentify } from "@/components/posthog/PostHogIdentify";
 import { PostHogPageView } from "@/components/posthog/PostHogPageView";
+import { PostHogSuperProperties } from "@/components/posthog/PostHogSuperProperties";
 import { isProduction } from "@/utils/environment";
 
 export declare namespace PostHogProvider {
@@ -35,7 +36,6 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
 
     if (!isPosthogTrackingEnabled) {
       posthog.opt_out_capturing();
-      posthog.set_config({ disable_session_recording: true });
     }
 
     posthog.setPersonPropertiesForFlags({
@@ -49,6 +49,7 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
         <>
           <PostHogPageView />
           <PostHogIdentify user={session?.user} />
+          <PostHogSuperProperties />
         </>
       )}
       {children}
