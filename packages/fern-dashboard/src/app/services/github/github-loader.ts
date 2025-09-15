@@ -237,25 +237,9 @@ export class GitHubLoader implements GitLoader {
       if (docsYmlContent) {
         const urls = this.parseUrlsFromDocsYml(docsYmlContent);
 
-        // Strip https:// or http://
-        /* this isn't the most efficient way to do this, but this isn't a frequently executed code path so it is okay */
-        const HTTP = "http://";
-        const HTTPS = "https://";
+        const strippedUrls = urls.map(stripAndSanitizeUrl);
 
-        const strippedUrls = urls.map((url) => {
-          if (url.startsWith(HTTPS)) {
-            return url.slice(HTTPS.length);
-          } else if (url.startsWith(HTTP)) {
-            return url.slice(HTTP.length);
-          }
-          return url;
-        });
-
-        const strippedSite = site.startsWith(HTTPS)
-          ? site.slice(HTTPS.length)
-          : site.startsWith(HTTP)
-            ? site.slice(HTTP.length)
-            : site;
+        const strippedSite = stripAndSanitizeUrl(site);
 
         // Check if any URL matches the site
         if (strippedUrls.includes(strippedSite)) {
@@ -447,3 +431,17 @@ const fernConfigSchema = z.object({
   organization: z.string(),
   version: z.string(),
 });
+
+/**
+ * Strips protocol prefix and normalizes URL for comparison by removing protocol,
+ * converting to lowercase, and sanitizing to keep only safe URL characters.
+ */
+function stripAndSanitizeUrl(str: string): string {
+  // Remove http:// or https:// (case-insensitive), lowercase, then allow only specific characters
+  const withoutProtocol = str.replace(/^https?:\/\//i, "");
+  const lowercased = withoutProtocol.toLowerCase();
+  return lowercased.replace(
+    /[^a-z0-9\s\-_.,!?@#$%^&*()+=[\]{};:'"<>/\\|`~%]/g,
+    ""
+  );
+}
