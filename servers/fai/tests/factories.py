@@ -8,6 +8,7 @@ from typing import Any
 from src.fai.models.api.chat_api import PostChatCompletionRequest
 from src.fai.models.api.document_api import (
     CreateDocumentRequest,
+    DeleteDocumentRequest,
     UpdateDocumentRequest,
 )
 from src.fai.models.api.guidance_api import (
@@ -83,6 +84,12 @@ class UpdateDocumentRequestFactory:
             keywords=keywords,
             authed=authed,
         )
+
+
+class DeleteDocumentRequestFactory:
+    @classmethod
+    def build(cls, document_id: str) -> DeleteDocumentRequest:
+        return DeleteDocumentRequest(document_id=document_id)
 
 
 class CreateGuidanceRequestFactory:

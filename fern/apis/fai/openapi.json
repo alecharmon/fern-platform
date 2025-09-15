@@ -442,7 +442,74 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateDocumentResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateDocumentResponse"
+                  },
+                  "title": "Response Create Document Document  Domain  Create Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
+      }
+    },
+    "/document/{domain}/batch-create": {
+      "post": {
+        "tags": [
+          "Document"
+        ],
+        "summary": "Batch Create Document",
+        "operationId": "batch_create_document",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CreateDocumentRequest"
+                },
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateDocumentResponse"
+                  },
+                  "title": "Response Batch Create Document Document  Domain  Batch Create Post"
                 }
               }
             }
@@ -526,58 +593,6 @@
           "customers"
         ]
       },
-      "delete": {
-        "tags": [
-          "Document"
-        ],
-        "summary": "Delete Document By Id",
-        "operationId": "delete_document_by_id",
-        "parameters": [
-          {
-            "name": "domain",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Domain"
-            }
-          },
-          {
-            "name": "document_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Document Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteDocumentResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "x-fern-audiences": [
-          "customers"
-        ]
-      },
       "get": {
         "tags": [
           "Document"
@@ -611,6 +626,120 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetDocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
+      }
+    },
+    "/document/{domain}/delete": {
+      "delete": {
+        "tags": [
+          "Document"
+        ],
+        "summary": "Delete Document By Id",
+        "operationId": "delete_document_by_id",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDocumentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteDocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
+      }
+    },
+    "/document/{domain}/batch-delete": {
+      "delete": {
+        "tags": [
+          "Document"
+        ],
+        "summary": "Batch Delete Document",
+        "operationId": "batch_delete_document",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DeleteDocumentRequest"
+                },
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteDocumentResponse"
                 }
               }
             }
@@ -692,6 +821,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetDocumentsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "customers"
+        ]
+      }
+    },
+    "/document/{domain}/delete-all": {
+      "delete": {
+        "tags": [
+          "Document"
+        ],
+        "summary": "Delete All Documents",
+        "operationId": "delete_all_documents",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteDocumentResponse"
                 }
               }
             }
@@ -2269,12 +2443,26 @@
         ],
         "title": "CreateQueryResponse"
       },
+      "DeleteDocumentRequest": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "description": "The unique identifier of the document to delete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id"
+        ],
+        "title": "DeleteDocumentRequest"
+      },
       "DeleteDocumentResponse": {
         "properties": {
           "success": {
             "type": "boolean",
             "title": "Success",
-            "description": "Whether the document was successfully deleted"
+            "description": "Whether the documents was successfully deleted"
           }
         },
         "type": "object",

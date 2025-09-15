@@ -100,11 +100,9 @@ async def toggle_ask_ai(
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
                 async with httpx.AsyncClient(follow_redirects=True) as client:
-                    response = await client.get(
-                        f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start"
-                    )
+                    response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
                     if response.status_code == 200:
-                        job_id = response.json().get("job_id", None) # Job ID for upsert task
+                        job_id = response.json().get("job_id", None)  # Job ID for upsert task
                         LOGGER.info(
                             f"Successfully started turbopuffer reindex for domain {stripped_domain}, job_id: {job_id}"
                         )
@@ -235,20 +233,12 @@ async def get_toggle_status(
     try:
         token = get_token_from_auth_header(request.headers.get("Authorization"))
         if token is None:
-            return JSONResponse(
-                content=jsonable_encoder(
-                    ToggleStatusResponse(status="error", ask_ai_enabled=False)
-                )
-            )
+            return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
 
         venus_client = get_venus_client(token=token)
         is_fern_member = "fern" in venus_client.organization.get_org_ids_from_token()
         if not is_fern_member:
-            return JSONResponse(
-                content=jsonable_encoder(
-                    ToggleStatusResponse(status="error", ask_ai_enabled=False)
-                )
-            )
+            return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
 
         stripped_domain = strip_domain(domain)
 
@@ -257,11 +247,7 @@ async def get_toggle_status(
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
-            return JSONResponse(
-                content=jsonable_encoder(
-                    ToggleStatusResponse(status="error", ask_ai_enabled=False)
-                )
-            )
+            return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
 
         if not existing_record.job_id:
             # Ask AI is enabled if record exists AND has a non-null last_reindex_time
@@ -273,9 +259,7 @@ async def get_toggle_status(
                         status="completed",
                         ask_ai_enabled=ask_ai_enabled,
                         last_reindex_time=(
-                            existing_record.last_reindex_time.isoformat()
-                            if existing_record.last_reindex_time
-                            else None
+                            existing_record.last_reindex_time.isoformat() if existing_record.last_reindex_time else None
                         ),
                     )
                 )
@@ -321,11 +305,7 @@ async def get_toggle_status(
 
     except Exception:
         LOGGER.exception("Failed to get toggle status")
-        return JSONResponse(
-            content=jsonable_encoder(
-                ToggleStatusResponse(status="error", ask_ai_enabled=False)
-            )
-        )
+        return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
 
 
 def get_token_from_auth_header(auth_header: str) -> str | None:

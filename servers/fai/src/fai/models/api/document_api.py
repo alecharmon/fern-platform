@@ -53,6 +53,10 @@ class CreateDocumentResponse(BaseModel):
     document_id: str = Field(description="The unique identifier of the created document")
 
 
+class DeleteDocumentRequest(BaseModel):
+    document_id: str = Field(description="The unique identifier of the document to delete")
+
+
 class UpdateDocumentRequest(BaseModel):
     document: str | None = Field(
         default=None,
@@ -98,7 +102,7 @@ class UpdateDocumentResponse(BaseModel):
 
 
 class DeleteDocumentResponse(BaseModel):
-    success: bool = Field(description="Whether the document was successfully deleted")
+    success: bool = Field(description="Whether the documents was successfully deleted")
 
 
 class GetDocumentResponse(BaseModel):

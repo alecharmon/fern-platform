@@ -54,7 +54,7 @@ export class Document {
         domain: string,
         request: FernAI.CreateDocumentRequest,
         requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.CreateDocumentResponse> {
+    ): core.HttpResponsePromise<FernAI.CreateDocumentResponse[]> {
         return core.HttpResponsePromise.fromPromise(this.__createDocument(domain, request, requestOptions));
     }
 
@@ -62,7 +62,7 @@ export class Document {
         domain: string,
         request: FernAI.CreateDocumentRequest,
         requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.CreateDocumentResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.CreateDocumentResponse[]>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
@@ -82,7 +82,7 @@ export class Document {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.CreateDocumentResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.CreateDocumentResponse[], rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -110,6 +110,88 @@ export class Document {
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /document/{domain}/create.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
+     * @param {FernAI.CreateDocumentRequest[]} request
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.document.batchCreateDocument("domain", [{
+     *             document: "document"
+     *         }])
+     */
+    public batchCreateDocument(
+        domain: string,
+        request: FernAI.CreateDocumentRequest[],
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.CreateDocumentResponse[]> {
+        return core.HttpResponsePromise.fromPromise(this.__batchCreateDocument(domain, request, requestOptions));
+    }
+
+    private async __batchCreateDocument(
+        domain: string,
+        request: FernAI.CreateDocumentRequest[],
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.CreateDocumentResponse[]>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/batch-create`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.CreateDocumentResponse[], rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling POST /document/{domain}/batch-create.",
+                );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
@@ -186,83 +268,6 @@ export class Document {
             case "timeout":
                 throw new errors.FernAITimeoutError(
                     "Timeout exceeded when calling GET /document/{domain}/{document_id}.",
-                );
-            case "unknown":
-                throw new errors.FernAIError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * @param {string} domain
-     * @param {string} documentId
-     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link FernAI.UnprocessableEntityError}
-     *
-     * @example
-     *     await client.document.deleteDocumentById("domain", "document_id")
-     */
-    public deleteDocumentById(
-        domain: string,
-        documentId: string,
-        requestOptions?: Document.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.DeleteDocumentResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__deleteDocumentById(domain, documentId, requestOptions));
-    }
-
-    private async __deleteDocumentById(
-        domain: string,
-        documentId: string,
-        requestOptions?: Document.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.DeleteDocumentResponse>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernAIEnvironment.Production,
-                `document/${encodeURIComponent(domain)}/${encodeURIComponent(documentId)}`,
-            ),
-            method: "DELETE",
-            headers: _headers,
-            queryParameters: requestOptions?.queryParams,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as FernAI.DeleteDocumentResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 422:
-                    throw new FernAI.UnprocessableEntityError(
-                        _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.FernAIError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernAIError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling DELETE /document/{domain}/{document_id}.",
                 );
             case "unknown":
                 throw new errors.FernAIError({
@@ -357,6 +362,168 @@ export class Document {
 
     /**
      * @param {string} domain
+     * @param {FernAI.DeleteDocumentRequest} request
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.document.deleteDocumentById("domain", {
+     *         document_id: "document_id"
+     *     })
+     */
+    public deleteDocumentById(
+        domain: string,
+        request: FernAI.DeleteDocumentRequest,
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.DeleteDocumentResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteDocumentById(domain, request, requestOptions));
+    }
+
+    private async __deleteDocumentById(
+        domain: string,
+        request: FernAI.DeleteDocumentRequest,
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.DeleteDocumentResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/delete`,
+            ),
+            method: "DELETE",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.DeleteDocumentResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling DELETE /document/{domain}/delete.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
+     * @param {FernAI.DeleteDocumentRequest[]} request
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.document.batchDeleteDocument("domain", [{
+     *             document_id: "document_id"
+     *         }])
+     */
+    public batchDeleteDocument(
+        domain: string,
+        request: FernAI.DeleteDocumentRequest[],
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.DeleteDocumentResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__batchDeleteDocument(domain, request, requestOptions));
+    }
+
+    private async __batchDeleteDocument(
+        domain: string,
+        request: FernAI.DeleteDocumentRequest[],
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.DeleteDocumentResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/batch-delete`,
+            ),
+            method: "DELETE",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.DeleteDocumentResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling DELETE /document/{domain}/batch-delete.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
      * @param {FernAI.GetDocumentsRequest} request
      * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -432,6 +599,80 @@ export class Document {
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /document/{domain}.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * @param {string} domain
+     * @param {Document.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.document.deleteAllDocuments("domain")
+     */
+    public deleteAllDocuments(
+        domain: string,
+        requestOptions?: Document.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.DeleteDocumentResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteAllDocuments(domain, requestOptions));
+    }
+
+    private async __deleteAllDocuments(
+        domain: string,
+        requestOptions?: Document.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.DeleteDocumentResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `document/${encodeURIComponent(domain)}/delete-all`,
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.DeleteDocumentResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling DELETE /document/{domain}/delete-all.",
+                );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,

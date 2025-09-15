@@ -56,12 +56,16 @@ async def sync_document_db_to_tpuf(domain: str, db: AsyncSession) -> None:
             tbuf_records = []
             for document in documents:
                 tbuf_records.append(await document.to_tpuf_record(openai_client))
-            await target_ns.write(
-                upsert_rows=[jsonable_encoder(record) for record in tbuf_records],
-                distance_metric="cosine_distance",
-                schema=get_data_index_tpuf_schema(),
-            )
-            LOGGER.info(f"Wrote {len(documents)} documents to {target_namespace_id}")
+
+            if tbuf_records:
+                await target_ns.write(
+                    upsert_rows=[jsonable_encoder(record) for record in tbuf_records],
+                    distance_metric="cosine_distance",
+                    schema=get_data_index_tpuf_schema(),
+                )
+                LOGGER.info(f"Wrote {len(documents)} documents to {target_namespace_id}")
+            else:
+                LOGGER.info(f"No documents to write to {target_namespace_id}")
 
 
 async def sync_code_db_to_tpuf(domain: str, db: AsyncSession) -> None:
@@ -124,29 +128,29 @@ async def sync_index_to_target(domain: str, source_index_name: str, target_index
     ) as tpuf_client:
         source_ns = tpuf_client.namespace(source_namespace_id)
         target_ns = tpuf_client.namespace(target_namespace_id)
-
         await target_ns.write(delete_by_filter=["source", "Eq", source_index_name])
+        source_ns_exists = await source_ns.exists()
+        if source_ns_exists:
+            last_id = None
+            while True:
+                result = await source_ns.query(
+                    rank_by=("id", "asc"),
+                    top_k=1000,
+                    include_attributes=True,
+                    filters=("id", "Gt", last_id) if last_id is not None else NOT_GIVEN,
+                )
 
-        last_id = None
-        while True:
-            result = await source_ns.query(
-                rank_by=("id", "asc"),
-                top_k=1000,
-                include_attributes=True,
-                filters=("id", "Gt", last_id) if last_id is not None else NOT_GIVEN,
-            )
+                prefixed_rows = []
+                for row in result.rows:
+                    new_row = Row.from_dict(row.model_dump())
+                    new_row.id = prefixed_id(source_namespace_id, row.id)
+                    new_row.source = source_index_name
+                    prefixed_rows.append(new_row)
 
-            prefixed_rows = []
-            for row in result.rows:
-                new_row = Row.from_dict(row.model_dump())
-                new_row.id = prefixed_id(source_namespace_id, row.id)
-                new_row.source = source_index_name
-                prefixed_rows.append(new_row)
+                await target_ns.write(
+                    upsert_rows=prefixed_rows, distance_metric="cosine_distance", schema=get_query_index_tpuf_schema()
+                )
 
-            await target_ns.write(
-                upsert_rows=prefixed_rows, distance_metric="cosine_distance", schema=get_query_index_tpuf_schema()
-            )
-
-            if len(result.rows) < 1000:
-                break
-            last_id = result.rows[-1].id
+                if len(result.rows) < 1000:
+                    break
+                last_id = result.rows[-1].id

@@ -3,6 +3,6 @@
  */
 
 export interface DeleteDocumentResponse {
-    /** Whether the document was successfully deleted */
+    /** Whether the documents was successfully deleted */
     success: boolean;
 }

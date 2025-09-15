@@ -56,7 +56,7 @@ export const AskAiContextPill = ({
           className="hover:bg-(color:--accent-a20) rounded p-1 transition-colors hover:cursor-pointer"
           title="Remove context"
         >
-          <X size={16} />
+          <X size={16} color="var(--accent-contrast)" />
         </button>
       )}
     </div>
