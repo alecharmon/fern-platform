@@ -1,4 +1,4 @@
-name: CI
+name: Run self-hosted tests
 
 on:
   push:
