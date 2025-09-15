@@ -28,6 +28,58 @@ main();
 "
 `;
 
+exports[`Integration Tests > should generate snippets for multiple languages > csharp-snippet 1`] = `
+"using global::System.Threading.Tasks;
+using Cat;
+
+namespace Usage;
+
+public class Example
+{
+    public async global::System.Threading.Tasks.Task Do() {
+        var client = new CatcatcatTreeClient(
+            token: "123",
+            clientOptions: new ClientOptions{
+                BaseUrl = "https://api.example.com"
+            }
+        );
+
+        await client.Users.GetUsersAsync(
+            new GetUsersRequest()
+        );
+    }
+
+}
+"
+`;
+
+exports[`Integration Tests > should generate snippets for multiple languages > go-snippet 1`] = `
+"package example
+
+import (
+    client "github.com/fern-demo/cat-demo-go/v/client"
+    option "github.com/fern-demo/cat-demo-go/v/option"
+    context "context"
+    v "github.com/fern-demo/cat-demo-go/v"
+)
+
+func do() () {
+    client := client.NewClient(
+        option.WithBaseURL(
+            "https://api.example.com",
+        ),
+        option.WithToken(
+            "123",
+        ),
+    )
+    client.Users.GetUsers(
+        context.TODO(),
+        &v.GetUsersRequest{},
+    )
+}
+"
+`;
+
 exports[`Integration Tests > should generate snippets for multiple languages > java-snippet 1`] = `
 "package com.example.usage;
 
@@ -51,6 +103,26 @@ public class Example {
 }"
 `;
 
+exports[`Integration Tests > should generate snippets for multiple languages > php-snippet 1`] = `
+"<?php
+
+namespace Example;
+
+use Cat\\CatClient;
+use Cat\\Users\\Requests\\GetUsersRequest;
+
+$client = new CatClient(
+    token: '123',
+    options: [
+        'baseUrl' => 'https://api.example.com',
+    ],
+);
+$client->users->getUsers(
+    new GetUsersRequest([]),
+);
+"
+`;
+
 exports[`Integration Tests > should generate snippets for multiple languages > python-snippet 1`] = `
 "from catcatcat import CatClient
 
@@ -60,6 +132,18 @@ client = CatClient(
 )
 
 client.users.get_users()
+"
+`;
+
+exports[`Integration Tests > should generate snippets for multiple languages > ruby-snippet 1`] = `
+"require "catcatcat"
+
+client = catcatcat::Client.new(
+    token: '123',
+    base_url: 'https://api.example.com'
+);
+
+client.users.get_users({});
 "
 `;
 

@@ -3280,15 +3280,12 @@
   "generatorConfig": {
     "apiName": "tree",
     "organization": "catcatcat",
-    "customConfig": {
-      "client_class_name": "CatClient"
-    },
     "outputConfig": {
       "value": {
-        "version": "4.3.13",
-        "packageName": "treetreetree",
-        "repoUrl": "https://github.com/fern-demo/cat-demo-python",
-        "type": "pypi"
+        "version": "0.9.0-rc2",
+        "packageName": "cat.rb",
+        "repoUrl": "https://github.com/fern-demo/cat-demo-ruby",
+        "type": "rubygems"
       },
       "type": "publish"
     }

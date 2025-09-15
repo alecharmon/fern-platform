@@ -83,8 +83,8 @@
               "safeName": "ID"
             },
             "pascalCase": {
-              "unsafeName": "Id",
-              "safeName": "Id"
+              "unsafeName": "ID",
+              "safeName": "ID"
             }
           },
           "wireValue": "id"
@@ -1204,8 +1204,8 @@
                 "safeName": "ID"
               },
               "pascalCase": {
-                "unsafeName": "Id",
-                "safeName": "Id"
+                "unsafeName": "ID",
+                "safeName": "ID"
               }
             },
             "wireValue": "id"
@@ -1542,11 +1542,11 @@
           "originalName": "Error",
           "camelCase": {
             "unsafeName": "error",
-            "safeName": "error"
+            "safeName": "error_"
           },
           "snakeCase": {
             "unsafeName": "error",
-            "safeName": "error"
+            "safeName": "error_"
           },
           "screamingSnakeCase": {
             "unsafeName": "ERROR",
@@ -1569,11 +1569,11 @@
               "originalName": "error",
               "camelCase": {
                 "unsafeName": "error",
-                "safeName": "error"
+                "safeName": "error_"
               },
               "snakeCase": {
                 "unsafeName": "error",
-                "safeName": "error"
+                "safeName": "error_"
               },
               "screamingSnakeCase": {
                 "unsafeName": "ERROR",
@@ -2313,8 +2313,8 @@
               "name": {
                 "originalName": "userId",
                 "camelCase": {
-                  "unsafeName": "userId",
-                  "safeName": "userId"
+                  "unsafeName": "userID",
+                  "safeName": "userID"
                 },
                 "snakeCase": {
                   "unsafeName": "user_id",
@@ -2325,8 +2325,8 @@
                   "safeName": "USER_ID"
                 },
                 "pascalCase": {
-                  "unsafeName": "UserId",
-                  "safeName": "UserId"
+                  "unsafeName": "UserID",
+                  "safeName": "UserID"
                 }
               },
               "wireValue": "userId"
@@ -2505,8 +2505,8 @@
               "name": {
                 "originalName": "userId",
                 "camelCase": {
-                  "unsafeName": "userId",
-                  "safeName": "userId"
+                  "unsafeName": "userID",
+                  "safeName": "userID"
                 },
                 "snakeCase": {
                   "unsafeName": "user_id",
@@ -2517,8 +2517,8 @@
                   "safeName": "USER_ID"
                 },
                 "pascalCase": {
-                  "unsafeName": "UserId",
-                  "safeName": "UserId"
+                  "unsafeName": "UserID",
+                  "safeName": "UserID"
                 }
               },
               "wireValue": "userId"
@@ -2759,8 +2759,8 @@
               "name": {
                 "originalName": "userId",
                 "camelCase": {
-                  "unsafeName": "userId",
-                  "safeName": "userId"
+                  "unsafeName": "userID",
+                  "safeName": "userID"
                 },
                 "snakeCase": {
                   "unsafeName": "user_id",
@@ -2771,8 +2771,8 @@
                   "safeName": "USER_ID"
                 },
                 "pascalCase": {
-                  "unsafeName": "UserId",
-                  "safeName": "UserId"
+                  "unsafeName": "UserID",
+                  "safeName": "UserID"
                 }
               },
               "wireValue": "userId"
@@ -2951,8 +2951,8 @@
               "name": {
                 "originalName": "userId",
                 "camelCase": {
-                  "unsafeName": "userId",
-                  "safeName": "userId"
+                  "unsafeName": "userID",
+                  "safeName": "userID"
                 },
                 "snakeCase": {
                   "unsafeName": "user_id",
@@ -2963,8 +2963,8 @@
                   "safeName": "USER_ID"
                 },
                 "pascalCase": {
-                  "unsafeName": "UserId",
-                  "safeName": "UserId"
+                  "unsafeName": "UserID",
+                  "safeName": "UserID"
                 }
               },
               "wireValue": "userId"
@@ -3214,8 +3214,8 @@
               "name": {
                 "originalName": "userId",
                 "camelCase": {
-                  "unsafeName": "userId",
-                  "safeName": "userId"
+                  "unsafeName": "userID",
+                  "safeName": "userID"
                 },
                 "snakeCase": {
                   "unsafeName": "user_id",
@@ -3226,8 +3226,8 @@
                   "safeName": "USER_ID"
                 },
                 "pascalCase": {
-                  "unsafeName": "UserId",
-                  "safeName": "UserId"
+                  "unsafeName": "UserID",
+                  "safeName": "UserID"
                 }
               },
               "wireValue": "userId"
@@ -3256,11 +3256,11 @@
             "originalName": "Default",
             "camelCase": {
               "unsafeName": "default",
-              "safeName": "default"
+              "safeName": "default_"
             },
             "snakeCase": {
               "unsafeName": "default",
-              "safeName": "default"
+              "safeName": "default_"
             },
             "screamingSnakeCase": {
               "unsafeName": "DEFAULT",
@@ -3281,14 +3281,13 @@
     "apiName": "tree",
     "organization": "catcatcat",
     "customConfig": {
-      "client_class_name": "CatClient"
+      "packageName": "catGo"
     },
     "outputConfig": {
       "value": {
-        "version": "4.3.13",
-        "packageName": "treetreetree",
-        "repoUrl": "https://github.com/fern-demo/cat-demo-python",
-        "type": "pypi"
+        "version": "1.5.0",
+        "repoUrl": "https://github.com/fern-demo/cat-demo-go",
+        "type": "go"
       },
       "type": "publish"
     }

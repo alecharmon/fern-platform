@@ -4,8 +4,12 @@ import { dynamic } from "@fern-api/dynamic-ir-sdk/api";
 
 import { SnippetResolver } from "../SnippetResolver";
 import { SnippetInput } from "../types";
+import csharpFixture from "./fixtures/demo/csharp.json";
+import goFixture from "./fixtures/demo/go.json";
 import javaFixture from "./fixtures/demo/java.json";
+import phpFixture from "./fixtures/demo/php.json";
 import pythonFixture from "./fixtures/demo/python.json";
+import rubyFixture from "./fixtures/demo/ruby.json";
 import typescriptFixture from "./fixtures/demo/typescript.json";
 
 describe("Integration Tests", () => {
@@ -22,6 +26,22 @@ describe("Integration Tests", () => {
       language: "java",
       ir: javaFixture as unknown as dynamic.DynamicIntermediateRepresentation,
     },
+    {
+      language: "csharp",
+      ir: csharpFixture as unknown as dynamic.DynamicIntermediateRepresentation,
+    },
+    {
+      language: "go",
+      ir: goFixture as unknown as dynamic.DynamicIntermediateRepresentation,
+    },
+    {
+      language: "php",
+      ir: phpFixture as unknown as dynamic.DynamicIntermediateRepresentation,
+    },
+    {
+      language: "ruby",
+      ir: rubyFixture as unknown as dynamic.DynamicIntermediateRepresentation,
+    },
   ];
 
   it("should generate snippets for multiple languages", () => {
@@ -31,10 +51,18 @@ describe("Integration Tests", () => {
     const typescriptSDK = resolver.sdk("typescript");
     const pythonSDK = resolver.sdk("python");
     const javaSDK = resolver.sdk("java");
+    const csharpSDK = resolver.sdk("csharp");
+    const goSDK = resolver.sdk("go");
+    const phpSDK = resolver.sdk("php");
+    const rubySDK = resolver.sdk("ruby");
 
     const tsEndpoint = typescriptSDK.endpoint("GET /users");
     const pyEndpoint = pythonSDK.endpoint("GET /users");
-    const javaEnpoint = javaSDK.endpoint("GET /users");
+    const javaEndpoint = javaSDK.endpoint("GET /users");
+    const csharpEndpoint = csharpSDK.endpoint("GET /users");
+    const goEndpoint = goSDK.endpoint("GET /users");
+    const phpEndpoint = phpSDK.endpoint("GET /users");
+    const rubyEndpoint = rubySDK.endpoint("GET /users");
 
     // Provide custom requests since fixtures don't have default examples
     const request = {
@@ -51,17 +79,29 @@ describe("Integration Tests", () => {
 
     const tsSnippet = tsEndpoint.generateSync(request);
     const pySnippet = pyEndpoint.generateSync(request);
-    const javaSnippet = javaEnpoint.generateSync(request);
+    const javaSnippet = javaEndpoint.generateSync(request);
+    const csharpSnippet = csharpEndpoint.generateSync(request);
+    const goSnippet = goEndpoint.generateSync(request);
+    const phpSnippet = phpEndpoint.generateSync(request);
+    const rubySnippet = rubyEndpoint.generateSync(request);
 
     expect(tsSnippet).toBeDefined();
     expect(pySnippet).toBeDefined();
     expect(javaSnippet).toBeDefined();
+    expect(csharpSnippet).toBeDefined();
+    expect(goSnippet).toBeDefined();
+    expect(phpSnippet).toBeDefined();
+    expect(rubySnippet).toBeDefined();
     expect(tsSnippet.snippet).not.toBe(pySnippet.snippet);
 
     // Snapshot testing for each language
     expect(tsSnippet.snippet).toMatchSnapshot("typescript-snippet");
     expect(pySnippet.snippet).toMatchSnapshot("python-snippet");
     expect(javaSnippet.snippet).toMatchSnapshot("java-snippet");
+    expect(csharpSnippet.snippet).toMatchSnapshot("csharp-snippet");
+    expect(goSnippet.snippet).toMatchSnapshot("go-snippet");
+    expect(phpSnippet.snippet).toMatchSnapshot("php-snippet");
+    expect(rubySnippet.snippet).toMatchSnapshot("ruby-snippet");
   });
 
   it("should generate different snippets for different endpoints", () => {

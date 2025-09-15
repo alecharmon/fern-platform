@@ -3256,11 +3256,11 @@
             "originalName": "Default",
             "camelCase": {
               "unsafeName": "default",
-              "safeName": "default"
+              "safeName": "default_"
             },
             "snakeCase": {
               "unsafeName": "default",
-              "safeName": "default"
+              "safeName": "default_"
             },
             "screamingSnakeCase": {
               "unsafeName": "DEFAULT",
@@ -3281,14 +3281,15 @@
     "apiName": "tree",
     "organization": "catcatcat",
     "customConfig": {
-      "client_class_name": "CatClient"
+      "namespace": "Cat",
+      "package-id": "Cat"
     },
     "outputConfig": {
       "value": {
-        "version": "4.3.13",
-        "packageName": "treetreetree",
-        "repoUrl": "https://github.com/fern-demo/cat-demo-python",
-        "type": "pypi"
+        "version": "1.15.14",
+        "packageName": "Cat",
+        "repoUrl": "https://github.com/fern-demo/cat-demo-dotnet",
+        "type": "nuget"
       },
       "type": "publish"
     }

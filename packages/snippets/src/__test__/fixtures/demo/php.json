@@ -3256,11 +3256,11 @@
             "originalName": "Default",
             "camelCase": {
               "unsafeName": "default",
-              "safeName": "default"
+              "safeName": "default_"
             },
             "snakeCase": {
               "unsafeName": "default",
-              "safeName": "default"
+              "safeName": "default_"
             },
             "screamingSnakeCase": {
               "unsafeName": "DEFAULT",
@@ -3268,7 +3268,7 @@
             },
             "pascalCase": {
               "unsafeName": "Default",
-              "safeName": "Default"
+              "safeName": "Default_"
             }
           },
           "url": "https://prod.example.com/v1"
@@ -3281,16 +3281,12 @@
     "apiName": "tree",
     "organization": "catcatcat",
     "customConfig": {
-      "client_class_name": "CatClient"
+      "clientName": "CatClient",
+      "namespace": "Cat",
+      "packageName": "cat/cat"
     },
     "outputConfig": {
-      "value": {
-        "version": "4.3.13",
-        "packageName": "treetreetree",
-        "repoUrl": "https://github.com/fern-demo/cat-demo-python",
-        "type": "pypi"
-      },
-      "type": "publish"
+      "type": "local"
     }
   }
 }

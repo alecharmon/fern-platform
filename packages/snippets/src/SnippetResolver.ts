@@ -121,6 +121,9 @@ export class SnippetResolver {
       ) {
         config.output.mode.publishInfo.packageName =
           customConfig.outputConfig.value.packageName;
+      } else if (language === "go") {
+        config.output.mode.repoUrl =
+          customConfig.outputConfig.value.repoUrl ?? "";
       }
     }
 
