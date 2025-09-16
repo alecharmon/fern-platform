@@ -4,8 +4,7 @@ import { after } from "next/server";
 import { cache } from "react";
 
 import { kv } from "@vercel/kv";
-import { Semaphore } from "es-toolkit";
-import { mapValues } from "es-toolkit/object";
+import { Semaphore, mapValues } from "es-toolkit";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
 import type { AuthEdgeConfig } from "@fern-api/docs-auth";
@@ -75,10 +74,53 @@ import {
 } from "@fern-api/fdr-sdk/navigation";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
+import { visualEditorStorage } from "@fern-api/visual-editor-server";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 
-const loadWithUrl = uncachedLoadWithUrl;
+const loadWithUrl = async (
+  domainKey: string
+): Promise<DocsV2Read.LoadDocsForUrlResponse> => {
+  const { domain, branchName } = decodeDocsLoaderDomainKey(domainKey);
+  if (branchName) {
+    try {
+      const associatedBranchFdr = await visualEditorStorage.getFdrSnapshot(
+        domain,
+        branchName
+      );
+      if (associatedBranchFdr) {
+        return associatedBranchFdr;
+      }
+    } catch (error) {
+      console.warn(
+        `Failed to get FDR snapshot for ${domain}:${branchName}, fallback to uncached`,
+        error
+      );
+    }
+  }
+  const response = await uncachedLoadWithUrl(domain);
+  if (branchName) {
+    await visualEditorStorage.storeFdrSnapshot(domain, branchName, response);
+  }
+  return response;
+};
 const loadDynamicIRWithUrl = uncachedLoadDynamicIRWithUrl;
+
+/*
+ * Domain key decoder/encoder functions
+ */
+export function encodeDocsLoaderDomain(domain: string, branchName?: string) {
+  return branchName ? `${domain}::${branchName}` : domain;
+}
+
+function decodeDocsLoaderDomainKey(domainKey: string) {
+  const [domain = domainKey, branchName] = domainKey.split("::");
+  return { domain, branchName };
+}
+
+function deriveDomainFromDomainKey(domainKey: string) {
+  const { domain } = decodeDocsLoaderDomainKey(domainKey);
+  return domain;
+}
 
 // Add cache configuration interface
 export interface CacheConfig {
@@ -96,7 +138,8 @@ const DEFAULT_CACHE_CONFIG: Required<CacheConfig> = {
   cacheKeySuffix: "",
 };
 
-function assertDocsDomain(domain: string) {
+function assertDocsDomain(domainKey: string) {
+  const domain = deriveDomainFromDomainKey(domainKey);
   if (FERN_DOCS_ORIGINS.includes(domain) || domain.endsWith(".vercel.app")) {
     console.error(`[assertDocsDomain:${domain}] Found unexpected domain`);
     notFound();
@@ -106,7 +149,7 @@ function assertDocsDomain(domain: string) {
 const setMonitor = new Semaphore(10);
 
 function kvSet(
-  domain: string,
+  domainKey: string,
   key: string,
   value: unknown,
   ttl?: number,
@@ -122,16 +165,16 @@ function kvSet(
     await setMonitor.acquire();
     try {
       if (ttl && ttl > 0) {
-        await kv.hset(domain, { [finalKey]: value });
+        await kv.hset(domainKey, { [finalKey]: value });
         // Set expiration for the hash field (note: Redis doesn't support per-field TTL in hashes)
         // So we'll use a separate key for TTL tracking
         await kv.setex(
-          `${domain}:ttl:${finalKey}`,
+          `${domainKey}:ttl:${finalKey}`,
           ttl,
           Date.now() + ttl * 1000
         );
       } else {
-        await kv.hset(domain, { [finalKey]: value });
+        await kv.hset(domainKey, { [finalKey]: value });
       }
     } catch (error) {
       console.warn(`Failed to set kv key ${finalKey}: ${value}`, error);
@@ -144,7 +187,7 @@ function kvSet(
 const getMonitor = new Semaphore(10);
 
 async function kvGet<T>(
-  domain: string,
+  domainKey: string,
   key: string,
   cacheKeySuffix?: string
 ): Promise<T | null> {
@@ -157,17 +200,17 @@ async function kvGet<T>(
   await getMonitor.acquire();
   try {
     // Check if the key has expired
-    const ttlKey = `${domain}:ttl:${finalKey}`;
+    const ttlKey = `${domainKey}:ttl:${finalKey}`;
     const expiration = await kv.get<number>(ttlKey);
 
     if (expiration && Date.now() > expiration) {
       // Key has expired, delete it
-      await kv.hdel(domain, finalKey);
+      await kv.hdel(domainKey, finalKey);
       await kv.del(ttlKey);
       return null;
     }
 
-    return await kv.hget<T>(domain, finalKey);
+    return await kv.hget<T>(domainKey, finalKey);
   } catch (error) {
     console.warn(`Failed to get kv key ${finalKey}`, error);
     return null;
@@ -176,47 +219,50 @@ async function kvGet<T>(
   }
 }
 
-async function clearKvCache(domain: string) {
+async function clearKvCache(domainKey: string) {
   if (isLocal() || isSelfHosted()) {
     return;
   }
 
   try {
-    // Clear KV cache for domain
-    const keys = await kv.hkeys(domain);
+    // Clear KV cache for domainKey
+    const keys = await kv.hkeys(domainKey);
     if (keys.length > 0) {
-      await kv.hdel(domain, ...keys);
+      await kv.hdel(domainKey, ...keys);
     }
 
     // Clear TTL tracking keys
-    const ttlKeys = await kv.keys(`${domain}:ttl:*`);
+    const ttlKeys = await kv.keys(`${domainKey}:ttl:*`);
     if (ttlKeys.length > 0) {
       await kv.del(...ttlKeys);
     }
 
-    console.log(`KV cache cleared for domain: ${domain}`);
+    console.log(`KV cache cleared for domainKey: ${domainKey}`);
   } catch (error) {
-    console.error(`Failed to clear KV cache for domain ${domain}:`, error);
+    console.error(
+      `Failed to clear KV cache for domainKey ${domainKey}:`,
+      error
+    );
   }
 }
 
-const cachedGetEdgeFlags = cache(async (domain: string) => {
+const cachedGetEdgeFlags = cache(async (domainKey: string) => {
   if (isLocal()) {
     return DEFAULT_LOCAL_EDGE_FLAGS;
   } else if (isSelfHosted()) {
     return DEFAULT_SELF_HOSTED_EDGE_FLAGS;
   }
-  return await getEdgeFlags(domain);
+  return await getEdgeFlags(domainKey);
 });
 
 export const getMetadataFromResponse = async (
-  domain: string,
+  domainKey: string,
   responsePromise: AsyncOrSync<DocsV2Read.LoadDocsForUrlResponse>
 ): Promise<DocsMetadata> => {
-  assertDocsDomain(domain);
+  assertDocsDomain(domainKey);
   const [response, docsUrlMetadata] = await Promise.all([
     responsePromise,
-    getDocsUrlMetadata(domain),
+    getDocsUrlMetadata(deriveDomainFromDomainKey(domainKey)),
   ]);
 
   return {
@@ -229,15 +275,15 @@ export const getMetadataFromResponse = async (
 };
 
 export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
-  cache(async (domain: string): Promise<DocsMetadata> => {
+  cache(async (domainKey: string): Promise<DocsMetadata> => {
     "use cache";
-    unstable_cacheTag(domain, "getMetadata");
-    assertDocsDomain(domain);
+    unstable_cacheTag(domainKey, "getMetadata");
+    assertDocsDomain(domainKey);
 
     try {
       const cached = DocsMetadataSchema.safeParse(
         await kvGet<DocsMetadata>(
-          domain,
+          domainKey,
           "metadata",
           cacheConfig.cacheKeySuffix
         )
@@ -248,14 +294,17 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
       }
     } catch (error) {
       console.warn(
-        `Failed to get metadata for ${domain} from kv, fallback to uncached`,
+        `Failed to get metadata for ${domainKey} from kv, fallback to uncached`,
         error
       );
     }
 
-    const metadata = await getMetadataFromResponse(domain, loadWithUrl(domain));
+    const metadata = await getMetadataFromResponse(
+      domainKey,
+      loadWithUrl(domainKey)
+    );
     kvSet(
-      domain,
+      domainKey,
       "metadata",
       metadata,
       cacheConfig.kvTtl,
@@ -326,10 +375,10 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
   });
 
 // the api reference may be too large to cache, so we don't cache it in the KV store
-const getApi = async (domain: string, id: string) => {
+const getApi = async (domainKey: string, id: string) => {
   "use cache";
-  unstable_cacheTag(domain, "getApi", id);
-  const response = await loadWithUrl(domain);
+  unstable_cacheTag(domainKey, "getApi", id);
+  const response = await loadWithUrl(domainKey);
   const latest = response.definition.apisV2[ApiDefinitionId(id)];
   if (latest != null) {
     return latest;
@@ -346,12 +395,12 @@ const getApi = async (domain: string, id: string) => {
       notFound();
     }
   }
-  const flags = await cachedGetEdgeFlags(domain);
+  const flags = await cachedGetEdgeFlags(domainKey);
   return ApiDefinitionV1ToLatest.from(v1, flags).migrate();
 };
 
 const createGetPrunedApiCached = (
-  domain: string,
+  domainKey: string,
   cacheConfig: Required<CacheConfig>
 ) =>
   unstable_cache(
@@ -359,18 +408,18 @@ const createGetPrunedApiCached = (
       id: string,
       ...nodes: PruningNodeType[]
     ): Promise<ApiDefinition.ApiDefinition> => {
-      const flagsPromise = cachedGetEdgeFlags(domain);
+      const flagsPromise = cachedGetEdgeFlags(domainKey);
       // if there is only one node, and it's an endpoint, try to load from cache
       try {
         if (nodes.length === 1 && nodes[0]) {
           const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
           const cached = await kvGet<ApiDefinition.ApiDefinition>(
-            domain,
+            domainKey,
             key,
             cacheConfig.cacheKeySuffix
           );
           if (cached != null) {
-            const metadata = await getMetadata(cacheConfig)(domain);
+            const metadata = await getMetadata(cacheConfig)(domainKey);
             const dynamicIr = await getDynamicIr(id)(metadata.org);
             return await backfillSnippets(
               cached,
@@ -381,12 +430,12 @@ const createGetPrunedApiCached = (
         }
       } catch (error) {
         console.warn(
-          `Failed to get pruned api for ${domain}:${id}, fallback to uncached`,
+          `Failed to get pruned api for ${domainKey}:${id}, fallback to uncached`,
           error
         );
       }
 
-      const api = await getApi(domain, id);
+      const api = await getApi(domainKey, id);
       const pruned = prune(api, ...nodes);
       for (const endpointK of Object.keys(pruned.endpoints)) {
         if (
@@ -405,19 +454,19 @@ const createGetPrunedApiCached = (
       if (nodes.length === 1 && nodes[0]) {
         const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
         kvSet(
-          domain,
+          domainKey,
           key,
           pruned,
           cacheConfig.kvTtl,
           cacheConfig.cacheKeySuffix
         );
       }
-      const metadata = await getMetadata(cacheConfig)(domain);
+      const metadata = await getMetadata(cacheConfig)(domainKey);
       const dynamicIr = await getDynamicIr(id)(metadata.org);
       return backfillSnippets(pruned, dynamicIr, await flagsPromise);
     },
-    [domain, cacheSeed(), cacheConfig.cacheKeySuffix],
-    { tags: [domain, "api"] }
+    [domainKey, cacheSeed(), cacheConfig.cacheKeySuffix],
+    { tags: [domainKey, "api"] }
   );
 
 export function createEndpointCacheKey(pruneType: PruningNodeType) {
@@ -436,28 +485,28 @@ export function createEndpointCacheKey(pruneType: PruningNodeType) {
 }
 
 const getAllApisForDomain = async (
-  domain: string
+  domainKey: string
 ): Promise<ApiDefinition.ApiDefinition[]> => {
-  const response = await loadWithUrl(domain);
+  const response = await loadWithUrl(domainKey);
   if (
     response.definition.apisV2 &&
     Object.keys(response.definition.apisV2).length > 0
   ) {
     return Object.values(response.definition.apisV2);
   }
-  const flags = await cachedGetEdgeFlags(domain);
+  const flags = await cachedGetEdgeFlags(domainKey);
   return Object.values(response.definition.apis).map((v1) =>
     ApiDefinitionV1ToLatest.from(v1, flags).migrate()
   );
 };
 
 const getEndpointById = async ({
-  domain,
+  domainKey,
   apiDefinitionId,
   endpointId,
   cacheConfig,
 }: {
-  domain: string;
+  domainKey: string;
   apiDefinitionId: string;
   endpointId: EndpointId;
   cacheConfig: Required<CacheConfig>;
@@ -469,9 +518,9 @@ const getEndpointById = async ({
   types: Record<TypeId, TypeDefinition>;
 }> => {
   "use cache";
-  unstable_cacheTag(domain, "getEndpointById", apiDefinitionId, endpointId);
+  unstable_cacheTag(domainKey, "getEndpointById", apiDefinitionId, endpointId);
 
-  const api = await createGetPrunedApiCached(domain, cacheConfig)(
+  const api = await createGetPrunedApiCached(domainKey, cacheConfig)(
     apiDefinitionId,
     {
       type: "endpoint",
@@ -485,7 +534,7 @@ const getEndpointById = async ({
     notFound();
   }
 
-  const root = await unsafe_getFullRoot(domain);
+  const root = await unsafe_getFullRoot(domainKey);
   return {
     endpoint,
     nodes: FernNavigation.NodeCollector.collect(root)
@@ -505,7 +554,7 @@ const getEndpointById = async ({
 };
 
 const getEndpointByLocator = async (
-  domain: string,
+  domainKey: string,
   method: HttpMethod,
   path: string,
   example?: string
@@ -514,7 +563,7 @@ const getEndpointByLocator = async (
   endpoint: ApiDefinition.EndpointDefinition;
   slugs: Slug[];
 }> => {
-  const apis = await getAllApisForDomain(domain);
+  const apis = await getAllApisForDomain(domainKey);
   for (const api of apis) {
     const endpoint = findEndpoint({
       apiDefinition: api,
@@ -523,7 +572,7 @@ const getEndpointByLocator = async (
       example,
     });
     if (endpoint != null) {
-      const root = await unsafe_getFullRoot(domain);
+      const root = await unsafe_getFullRoot(domainKey);
       const slugs = FernNavigation.NodeCollector.collect(root)
         .getNodesInOrder()
         .filter(FernNavigation.hasMetadata)
@@ -575,37 +624,37 @@ export function convertResponseToRootNode(
   return root;
 }
 
-const unsafe_getFullRoot = async (domain: string) => {
+const unsafe_getFullRoot = async (domainKey: string) => {
   try {
-    const cached = await kvGet<FernNavigation.RootNode>(domain, "root");
+    const cached = await kvGet<FernNavigation.RootNode>(domainKey, "root");
     if (cached != null) {
       return cached;
     }
   } catch (error) {
     console.warn(
-      `Failed to get full root for ${domain}, fallback to uncached`,
+      `Failed to get full root for ${domainKey}, fallback to uncached`,
       error
     );
   }
-  const response = await loadWithUrl(domain);
+  const response = await loadWithUrl(domainKey);
   const root = convertResponseToRootNode(
     response,
-    await cachedGetEdgeFlags(domain)
+    await cachedGetEdgeFlags(domainKey)
   );
   if (root == null) {
-    console.error("Could not find root node for domain", domain);
+    console.error("Could not find root node for domainKey", domainKey);
     notFound();
   }
   return root;
 };
 
 const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
-  cache(async (domain: string) => {
+  cache(async (domainKey: string) => {
     return await unstable_cache(
-      async (domain: string) => {
+      async (domainKey: string) => {
         try {
           const cached = await kvGet<FernNavigation.RootNode>(
-            domain,
+            domainKey,
             "root",
             cacheConfig.cacheKeySuffix
           );
@@ -614,17 +663,17 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
           }
         } catch (error) {
           console.warn(
-            `Failed to get full root for ${domain}, fallback to uncached`,
+            `Failed to get full root for ${domainKey}, fallback to uncached`,
             error
           );
         }
 
         // Get fresh data
-        const root = await unsafe_getFullRoot(domain);
+        const root = await unsafe_getFullRoot(domainKey);
 
         // Cache the result
         kvSet(
-          domain,
+          domainKey,
           "root",
           root,
           cacheConfig.kvTtl,
@@ -634,17 +683,17 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
         return root;
       },
       ["unsafe_getRoot", cacheSeed(), cacheConfig.cacheKeySuffix],
-      { tags: [domain, "unsafe_getRoot"] }
-    )(domain);
+      { tags: [domainKey, "unsafe_getRoot"] }
+    )(domainKey);
   });
 
 const getRoot = async (
-  domain: string,
+  domainKey: string,
   authState: AuthState,
   authConfig: AuthEdgeConfig | undefined,
   cacheConfig: Required<CacheConfig>
 ) => {
-  let root = await unsafe_getRootCached(cacheConfig)(domain);
+  let root = await unsafe_getRootCached(cacheConfig)(domainKey);
   if (authConfig) {
     root = pruneWithAuthState(authState, authConfig, root);
   }
@@ -655,39 +704,39 @@ const getRoot = async (
 const getRootCached = (cacheConfig: Required<CacheConfig>) =>
   cache(
     async (
-      domain: string,
+      domainKey: string,
       authState: AuthState,
       authConfig: AuthEdgeConfig | undefined
     ) => {
       return await unstable_cache(
         (
-          domain: string,
+          domainKey: string,
           authState: AuthState,
           authConfig: AuthEdgeConfig | undefined
-        ) => getRoot(domain, authState, authConfig, cacheConfig),
-        [domain, cacheSeed(), cacheConfig.cacheKeySuffix],
-        { tags: [domain, "getRoot"] }
-      )(domain, authState, authConfig);
+        ) => getRoot(domainKey, authState, authConfig, cacheConfig),
+        [domainKey, cacheSeed(), cacheConfig.cacheKeySuffix],
+        { tags: [domainKey, "getRoot"] }
+      )(domainKey, authState, authConfig);
     }
   );
 
 const getNavigationNode = (cacheConfig: Required<CacheConfig>) =>
   cache(
     async (
-      domain: string,
+      domainKey: string,
       id: string,
       authState: AuthState,
       authConfig: AuthEdgeConfig | undefined
     ) => {
       const root = await getRootCached(cacheConfig)(
-        domain,
+        domainKey,
         authState,
         authConfig
       );
       const collector = FernNavigation.NodeCollector.collect(root);
       const node = collector.get(FernNavigation.NodeId(id));
       if (node == null) {
-        console.error(`Could not find node ${id} for domain ${domain}`);
+        console.error(`Could not find node ${id} for domainKey ${domainKey}`);
         notFound();
       }
       return node;
@@ -695,25 +744,25 @@ const getNavigationNode = (cacheConfig: Required<CacheConfig>) =>
   );
 
 const getConfig = (cacheConfig: Required<CacheConfig>) =>
-  cache(async (domain: string) => {
+  cache(async (domainKey: string) => {
     try {
       const cached = await kvGet<
         Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">
-      >(domain, "config", cacheConfig.cacheKeySuffix);
+      >(domainKey, "config", cacheConfig.cacheKeySuffix);
       if (cached != null) {
         return cached;
       }
     } catch (error) {
       console.warn(
-        `Failed to get config for ${domain}, fallback to uncached`,
+        `Failed to get config for ${domainKey}, fallback to uncached`,
         error
       );
     }
 
-    const response = await loadWithUrl(domain);
+    const response = await loadWithUrl(domainKey);
     const { navigation, root, ...config } = response.definition.config;
     kvSet(
-      domain,
+      domainKey,
       "config",
       config,
       cacheConfig.kvTtl,
@@ -725,18 +774,18 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
 const getPage = (cacheConfig: Required<CacheConfig>) =>
   cache(
     async (
-      domain: string,
+      domainKey: string,
       pageId: string,
       returnRawMarkdown: boolean = false
     ) => {
       try {
         const page = await kvGet<DocsV1Read.PageContent>(
-          domain,
+          domainKey,
           `page:${pageId}`,
           cacheConfig.cacheKeySuffix
         );
         if (page != null && isPlainObject(page) && "markdown" in page) {
-          const config = await getConfig(cacheConfig)(domain);
+          const config = await getConfig(cacheConfig)(domainKey);
           return {
             filename: pageId,
             markdown: page.markdown,
@@ -747,12 +796,12 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
         }
       } catch (error) {
         console.warn(
-          `Failed to get page for ${domain}:${pageId}, fallback to uncached`,
+          `Failed to get page for ${domainKey}:${pageId}, fallback to uncached`,
           error
         );
       }
 
-      const response = await loadWithUrl(domain);
+      const response = await loadWithUrl(domainKey);
       const page = response.definition.pages[pageId as PageId];
       if (page == null) {
         console.error(`Could not find page with ID ${pageId}`);
@@ -760,7 +809,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
       }
 
       kvSet(
-        domain,
+        domainKey,
         `page:${pageId}`,
         page,
         cacheConfig.kvTtl,
@@ -777,13 +826,13 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
   );
 
 const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
-  cache(async (domain: string) => {
+  cache(async (domainKey: string) => {
     "use cache";
-    unstable_cacheTag(domain, "getMdxBundlerFiles");
+    unstable_cacheTag(domainKey, "getMdxBundlerFiles");
 
     try {
       const cached = await kvGet<Record<string, string>>(
-        domain,
+        domainKey,
         "mdx-bundler-files",
         cacheConfig.cacheKeySuffix
       );
@@ -792,15 +841,15 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
       }
     } catch (error) {
       console.warn(
-        `Failed to get mdx bundler files for ${domain}, fallback to uncached`,
+        `Failed to get mdx bundler files for ${domainKey}, fallback to uncached`,
         error
       );
     }
 
-    const response = await loadWithUrl(domain);
+    const response = await loadWithUrl(domainKey);
     const files = response.definition.jsFiles ?? {};
     kvSet(
-      domain,
+      domainKey,
       "mdx-bundler-files",
       files,
       cacheConfig.kvTtl,
@@ -810,28 +859,28 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
   });
 
 const getColors = (cacheConfig: Required<CacheConfig>) =>
-  cache(async (domain: string) => {
+  cache(async (domainKey: string) => {
     "use cache";
-    unstable_cacheTag(domain, "getColors");
+    unstable_cacheTag(domainKey, "getColors");
 
     try {
       const cached = await kvGet<{
         light: FernColorTheme | undefined;
         dark: FernColorTheme | undefined;
-      }>(domain, "colors", cacheConfig.cacheKeySuffix);
+      }>(domainKey, "colors", cacheConfig.cacheKeySuffix);
       if (cached) {
         return cached;
       }
     } catch (error) {
       console.warn(
-        `Failed to get colors for ${domain}, fallback to uncached`,
+        `Failed to get colors for ${domainKey}, fallback to uncached`,
         error
       );
     }
 
     const [config, files] = await Promise.all([
-      getConfig(cacheConfig)(domain),
-      getFiles(cacheConfig)(domain),
+      getConfig(cacheConfig)(domainKey),
+      getFiles(cacheConfig)(domainKey),
     ]);
 
     if (!config) {
@@ -896,7 +945,7 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
     };
 
     kvSet(
-      domain,
+      domainKey,
       "colors",
       colors,
       cacheConfig.kvTtl,
@@ -906,13 +955,13 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
   });
 
 const getFonts = (cacheConfig: Required<CacheConfig>) =>
-  cache(async (domain: string) => {
+  cache(async (domainKey: string) => {
     "use cache";
-    unstable_cacheTag(domain, "getFonts");
+    unstable_cacheTag(domainKey, "getFonts");
 
     try {
       const cached = await kvGet<FernFonts>(
-        domain,
+        domainKey,
         "fonts",
         cacheConfig.cacheKeySuffix
       );
@@ -921,18 +970,18 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
       }
     } catch (error) {
       console.warn(
-        `Failed to get fonts for ${domain}, fallback to uncached`,
+        `Failed to get fonts for ${domainKey}, fallback to uncached`,
         error
       );
     }
 
-    const response = await loadWithUrl(domain);
+    const response = await loadWithUrl(domainKey);
     const fonts = generateFonts(
       response.definition.config.typographyV2,
-      await getFiles(cacheConfig)(domain)
+      await getFiles(cacheConfig)(domainKey)
     );
     kvSet(
-      domain,
+      domainKey,
       "fonts",
       fonts,
       cacheConfig.kvTtl,
@@ -942,13 +991,13 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
   });
 
 const getLayout = (cacheConfig: Required<CacheConfig>) =>
-  cache(async (domain: string) => {
+  cache(async (domainKey: string) => {
     "use cache";
-    unstable_cacheTag(domain, "getLayout");
+    unstable_cacheTag(domainKey, "getLayout");
 
-    const config = await getConfig(cacheConfig)(domain);
+    const config = await getConfig(cacheConfig)(domainKey);
     if (!config) {
-      console.error("Could not find config for domain", domain);
+      console.error("Could not find config for domainKey", domainKey);
       notFound();
     }
 
@@ -966,11 +1015,11 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
       toPx(config.layout?.headerHeight) ?? DEFAULT_HEADER_HEIGHT;
     const tabsPlacement = config.layout?.disableHeader
       ? "SIDEBAR"
-      : (config.layout?.tabsPlacement ?? defaultTabsPlacement(domain));
+      : (config.layout?.tabsPlacement ?? defaultTabsPlacement(domainKey));
     const searchbarPlacement = config.layout?.disableHeader
       ? "SIDEBAR"
       : (config.layout?.searchbarPlacement ??
-        defaultSearchbarPlacement(domain));
+        defaultSearchbarPlacement(domainKey));
 
     return {
       logoHeight,
@@ -1003,14 +1052,16 @@ const getDynamicIr = (apiName: string) =>
     return undefined;
   });
 
-function defaultTabsPlacement(domain: string) {
+function defaultTabsPlacement(domainKey: string) {
+  const domain = deriveDomainFromDomainKey(domainKey);
   if (domain.includes("cohere")) {
     return "HEADER";
   }
   return "SIDEBAR";
 }
 
-function defaultSearchbarPlacement(domain: string) {
+function defaultSearchbarPlacement(domainKey: string) {
+  const domain = deriveDomainFromDomainKey(domainKey);
   if (domain.includes("cohere")) {
     return "HEADER_TABS";
   }
@@ -1104,7 +1155,7 @@ export type DocsLoaderOptions = {
  */
 export const createCachedDocsLoader = async (
   host: string,
-  domain: string,
+  domainKey: string,
   fern_token?: string,
   options?: DocsLoaderOptions
 ): Promise<
@@ -1113,19 +1164,19 @@ export const createCachedDocsLoader = async (
     isAskAiEnabled: () => Promise<boolean>;
   }
 > => {
-  assertDocsDomain(domain);
+  assertDocsDomain(domainKey);
 
   const config = { ...DEFAULT_CACHE_CONFIG, ...options?.cacheConfig };
 
   // Force revalidation if requested - only clear KV cache here
   if (config.forceRevalidate) {
-    await clearKvCache(domain);
+    await clearKvCache(domainKey);
   }
 
   const authConfig = options?.skipAuth
     ? Promise.resolve(undefined)
-    : getAuthConfig(domain);
-  const metadata = getMetadata(config)(withoutStaging(domain));
+    : getAuthConfig(domainKey);
+  const metadata = getMetadata(config)(withoutStaging(domainKey));
 
   const getAuthState = options?.skipAuth
     ? async (_pathname?: string) => ({
@@ -1137,7 +1188,7 @@ export const createCachedDocsLoader = async (
     : cache(async (pathname?: string) => {
         const { getAuthState } = await createGetAuthState(
           host,
-          domain,
+          domainKey,
           fern_token,
           await authConfig,
           await metadata
@@ -1146,16 +1197,16 @@ export const createCachedDocsLoader = async (
       });
 
   return {
-    domain,
+    domain: deriveDomainFromDomainKey(domainKey),
     fern_token,
     getAuthConfig: () => authConfig,
     getMetadata: () => metadata,
-    getFiles: () => getFiles(config)(domain),
-    getMdxBundlerFiles: () => getMdxBundlerFiles(config)(domain),
-    getPrunedApi: cache(createGetPrunedApiCached(domain, config)),
+    getFiles: () => getFiles(config)(domainKey),
+    getMdxBundlerFiles: () => getMdxBundlerFiles(config)(domainKey),
+    getPrunedApi: cache(createGetPrunedApiCached(domainKey, config)),
     getEndpointById: cache((apiDefinitionId: string, endpointId: EndpointId) =>
       getEndpointById({
-        domain,
+        domainKey,
         apiDefinitionId,
         endpointId,
         cacheConfig: config,
@@ -1164,29 +1215,29 @@ export const createCachedDocsLoader = async (
     getEndpointByLocator: cache(
       unstable_cache(
         (method: HttpMethod, path: string, example?: string) =>
-          getEndpointByLocator(domain, method, path, example),
-        [domain, cacheSeed(), config.cacheKeySuffix],
-        { tags: [domain, "endpointByLocator"] }
+          getEndpointByLocator(domainKey, method, path, example),
+        [domainKey, cacheSeed(), config.cacheKeySuffix],
+        { tags: [domainKey, "endpointByLocator"] }
       )
     ),
     getRoot: async () =>
-      getRootCached(config)(domain, await getAuthState(), await authConfig),
+      getRootCached(config)(domainKey, await getAuthState(), await authConfig),
     getNavigationNode: async (id: string) =>
       getNavigationNode(config)(
-        domain,
+        domainKey,
         id,
         await getAuthState(),
         await authConfig
       ),
-    unsafe_getFullRoot: () => unsafe_getRootCached(config)(domain),
-    getConfig: () => getConfig(config)(domain),
+    unsafe_getFullRoot: () => unsafe_getRootCached(config)(domainKey),
+    getConfig: () => getConfig(config)(domainKey),
     getPage: (pageId) =>
-      getPage(config)(domain, pageId, options?.returnRawMarkdown),
-    getColors: () => getColors(config)(domain),
-    getLayout: () => getLayout(config)(domain),
-    getFonts: () => getFonts(config)(domain),
+      getPage(config)(domainKey, pageId, options?.returnRawMarkdown),
+    getColors: () => getColors(config)(domainKey),
+    getLayout: () => getLayout(config)(domainKey),
+    getFonts: () => getFonts(config)(domainKey),
     getAuthState,
-    getEdgeFlags: () => cachedGetEdgeFlags(domain),
+    getEdgeFlags: () => cachedGetEdgeFlags(domainKey),
     getBaseUrl: async () => {
       const m = await metadata;
       return `https://${m.domain}${m.basePath}`;
@@ -1195,8 +1246,8 @@ export const createCachedDocsLoader = async (
       const m = await metadata;
       return getDynamicIr(apiName)(m.org);
     },
-    clearKvCache: () => clearKvCache(domain),
-    isAskAiEnabled: () => getAskAiEnabled(config)(domain),
+    clearKvCache: () => clearKvCache(domainKey),
+    isAskAiEnabled: () => getAskAiEnabled(config)(domainKey),
   };
 };
 

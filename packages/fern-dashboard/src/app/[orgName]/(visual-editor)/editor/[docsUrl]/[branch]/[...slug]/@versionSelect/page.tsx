@@ -16,16 +16,17 @@ import { EncodedDocsUrl } from "@/utils/types";
 export default async function VersionSelectPage({
   params,
 }: {
-  params: Promise<{ docsUrl: EncodedDocsUrl; slug: string }>;
+  params: Promise<{ docsUrl: EncodedDocsUrl; slug: string; branch: string }>;
 }) {
   const session = await getCurrentSession();
-  const { docsUrl, slug } = await params;
+  const { docsUrl, slug, branch } = await params;
   const host = await getHostFromHeaders();
-  const loader = await createEditableDocsLoader(
+  const loader = await createEditableDocsLoader({
     host,
-    docsUrl,
-    session?.accessToken
-  );
+    encodedDocsUrl: docsUrl,
+    fernToken: session?.accessToken,
+    branchName: branch,
+  });
 
   // preload:
   const [layout, _auth, _flags, root] = await Promise.all([

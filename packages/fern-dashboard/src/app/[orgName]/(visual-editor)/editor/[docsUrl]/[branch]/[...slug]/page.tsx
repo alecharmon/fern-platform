@@ -46,12 +46,14 @@ export default async function Page({
 
   const slugAlias = slugArray.join("/");
 
-  const loader = await createEditableDocsLoader(
+  const loader = await createEditableDocsLoader({
     host,
-    docsUrl,
-    session.accessToken,
-    new GitHubLoader(githubUrl)
-  );
+    encodedDocsUrl: docsUrl,
+    fernToken: session.accessToken,
+    gitLoader: new GitHubLoader(githubUrl),
+    branchName: branch,
+  });
+
   const root = await loader.getRoot();
 
   const slug = slugAlias === ROOT_SLUG_ALIAS ? root.slug : slugAlias;

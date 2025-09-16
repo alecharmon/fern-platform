@@ -24,19 +24,20 @@ export default async function SidebarPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ docsUrl: EncodedDocsUrl; slug: string[] }>;
+  params: Promise<{ docsUrl: EncodedDocsUrl; slug: string[]; branch: string }>;
   searchParams: Promise<Record<string, string>>;
 }) {
-  const { docsUrl, slug: slugArray } = await params;
+  const { docsUrl, slug: slugArray, branch } = await params;
   const resolvedSearchParams = await searchParams;
   const clientNodeId = resolvedSearchParams["client-node-id"];
   const session = await getCurrentSession();
   const host = await getHostFromHeaders();
-  const loader = await createEditableDocsLoader(
+  const loader = await createEditableDocsLoader({
     host,
-    docsUrl,
-    session?.accessToken
-  );
+    encodedDocsUrl: docsUrl,
+    fernToken: session?.accessToken,
+    branchName: branch,
+  });
   const [config, root, authState, edgeFlags, layout] = await Promise.all([
     loader.getConfig(),
     loader.getRoot(),

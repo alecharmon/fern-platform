@@ -61,12 +61,13 @@ export default async function VisualEditorPreviewLayout({
   const host = await getHostFromHeaders();
 
   // TODO: createEditableDocsLoader should be called here once, and data passed to child pages (@...) rather than called in those places as well
-  const loader = await createEditableDocsLoader(
+  const loader = await createEditableDocsLoader({
     host,
-    docsUrl,
-    session.accessToken,
-    new GitHubLoader(githubUrl)
-  );
+    encodedDocsUrl: docsUrl,
+    fernToken: session.accessToken,
+    gitLoader: new GitHubLoader(githubUrl),
+    branchName: branch,
+  });
 
   const [colors, layout, fonts, config, root, unsafe_fullRoot, files] =
     await Promise.all([

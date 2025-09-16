@@ -46,6 +46,7 @@
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/fai-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
+    "@fern-api/visual-editor-server": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
     "@types/react": "19.0.10",
     "@vercel/kv": "^2.0.0",

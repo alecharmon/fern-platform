@@ -16,13 +16,12 @@ export default async function preloadEditorData(request: {
 
   try {
     // Preload the critical data that the editor will need
-    const loader = await createEditableDocsLoader(
-      request.host, // Use the host from the request parameter instead of trying to get it from headers
-      request.docsUrl,
-      session.accessToken,
-      undefined, // No GitHubLoader for preload since we don't have orgName context
-      true // force revalidate when preloading
-    );
+    const loader = await createEditableDocsLoader({
+      host: request.host, // Use the host from the request parameter instead of trying to get it from headers
+      encodedDocsUrl: request.docsUrl,
+      fernToken: session.accessToken,
+      forceRevalidate: true, // force revalidate when preloading
+    });
 
     // Preload root and config in parallel
     await Promise.all([

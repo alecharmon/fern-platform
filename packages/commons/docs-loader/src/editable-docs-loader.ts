@@ -8,7 +8,10 @@ import type {
   PruningNodeType,
 } from "@fern-api/fdr-sdk/api-definition";
 
-import { createCachedDocsLoader } from "./readonly-docs-loader";
+import {
+  createCachedDocsLoader,
+  encodeDocsLoaderDomain,
+} from "./readonly-docs-loader";
 
 /**
  * The EditableDocsLoader combines a read-only docs loader with a git loader.
@@ -186,18 +189,26 @@ export interface GitLoader {
 }
 
 export const createEditableDocsLoader = cache(
-  async (
-    host: string,
-    encodedDocsUrl: string,
-    fern_token?: string,
-    gitLoader?: GitLoader,
-    forceRevalidate?: boolean
-  ) => {
-    // TODO: derive the domain from the workspace
+  async ({
+    host,
+    encodedDocsUrl,
+    fernToken,
+    gitLoader,
+    forceRevalidate,
+    branchName,
+  }: {
+    host: string;
+    encodedDocsUrl: string;
+    fernToken?: string;
+    gitLoader?: GitLoader;
+    forceRevalidate?: boolean;
+    branchName?: string;
+  }) => {
+    const domain = decodeURIComponent(encodedDocsUrl);
     const docsLoader = await createCachedDocsLoader(
       host,
-      decodeURIComponent(encodedDocsUrl),
-      fern_token,
+      encodeDocsLoaderDomain(domain, branchName),
+      fernToken,
       {
         returnRawMarkdown: true,
         cacheConfig: {
