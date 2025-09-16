@@ -96,8 +96,14 @@ async function serializeMdxImpl(
   content = sanitizeBreaks(content);
   content = sanitizeMdxExpression(content)[0];
 
-  // Process twoslash blocks if present
-  content = await processTwoslashBlocks(content);
+  const startTime = Date.now();
+  console.log("[serializeMdx] processing twoslash...");
+  const processedContent = await processTwoslashBlocks(content);
+  console.log(
+    "[serializeMdx] processing twoslash took ",
+    Date.now() - startTime,
+    "ms"
+  );
 
   let cwd: string | undefined;
   if (filename != null) {
@@ -138,10 +144,9 @@ async function serializeMdxImpl(
     return filename;
   });
 
-  const bundled = await bundleMDX({
-    source: content,
+  const createBundleConfig = (source: string) => ({
+    source,
     files,
-
     globals: {
       "@mdx-js/react": {
         varName: "MdxJsReact",
@@ -149,8 +154,7 @@ async function serializeMdxImpl(
         defaultExport: false,
       },
     },
-
-    mdxOptions: (o) => {
+    mdxOptions: (o: any) => {
       o.remarkRehypeOptions = {
         handlers: { heading: customHeadingHandler },
       };
@@ -232,44 +236,67 @@ async function serializeMdxImpl(
             },
           },
         ],
-
         rehypeExtractAsides,
         rehypeLog,
       ];
 
       o.remarkPlugins = remarkPlugins;
       o.rehypePlugins = rehypePlugins;
-
       o.development = process.env.NODE_ENV === "development";
 
       return o;
     },
-
-    esbuildOptions: (o) => {
+    esbuildOptions: (o: any) => {
       o.minify = process.env.NODE_ENV === "production";
       o.sourcemap = false;
-
-      o.logLevel = "error"; // Reduce logging overhead
-
-      o.logLimit = 0; // Disable logging to reduce file operations
-      o.metafile = false; // Don't generate metafile (reduces file operations)
-
-      // Add write to memory instead of disk when possible
+      o.logLevel = "error";
+      o.logLimit = 0;
+      o.metafile = false;
       o.write = false;
 
-      // Create a restricted define object that excludes process.env
       const restrictedDefine = {
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
       };
 
       o.define = restrictedDefine;
-
-      // Prevent direct process access
-      o.inject = o.inject?.filter((path) => !path.includes("process"));
+      o.inject = o.inject?.filter((path: string) => !path.includes("process"));
 
       return o;
     },
   });
+
+  let bundled: Awaited<ReturnType<typeof bundleMDX>> | null = null;
+  let lastError: Error | null = null;
+
+  // try with processedContent first, then fallback to original content
+  const sources = [processedContent, content];
+
+  for (const source of sources) {
+    try {
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("BundleMDX timed out after 5 seconds")),
+          5_000
+        )
+      );
+
+      bundled = await Promise.race([
+        bundleMDX(createBundleConfig(source)),
+        timeoutPromise,
+      ]);
+      break;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.warn(
+        `BundleMDX failed with ${source === processedContent ? "processed" : "original"} content:`,
+        lastError.message
+      );
+    }
+  }
+
+  if (!bundled) {
+    throw lastError || new Error("BundleMDX failed with all retry attempts");
+  }
 
   if (bundled.errors.length > 0) {
     bundled.errors.forEach((error) => {
@@ -278,12 +305,12 @@ async function serializeMdxImpl(
           "#docs-notifs",
           `:rotating_light: Error serializing mdx for ${domain}${path ? "/" + path : ""} with ${String(error)}`,
           "mdx-serializer",
-          { message: content, mrkdwn: true }
+          { message: processedContent, mrkdwn: true }
         );
       }
       console.error(`[serializer:bundle-mdx] ${JSON.stringify(error)}`);
     });
-    console.debug("content", content, "code", bundled.code);
+    console.debug("content", processedContent, "code", bundled.code);
   }
 
   const frontmatter = getMDXExport(bundled)?.frontmatter as
@@ -445,6 +472,7 @@ export async function processTwoslashBlocks(content: string): Promise<string> {
             content = content.replace(block.fullMatch, twoSlashContent);
           } catch (error) {
             console.error("Error processing twoslash block:", error);
+            return originalContent;
           }
         })
       ),
@@ -452,6 +480,7 @@ export async function processTwoslashBlocks(content: string): Promise<string> {
     ]);
   } catch (error) {
     console.error("TwoSlash processing timed out:", error);
+    return originalContent;
   }
 
   if (content.includes("<CodeBlocks>") && content.includes("<TwoSlash")) {
