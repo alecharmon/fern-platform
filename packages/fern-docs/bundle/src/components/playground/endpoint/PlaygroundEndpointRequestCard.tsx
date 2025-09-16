@@ -12,6 +12,7 @@ import {
 } from "@fern-docs/components";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 
+import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
 import { isFileForgeHackEnabledAtom } from "@/state/api-explorer-flags";
 import { useProgrammingLanguage } from "@/state/language";
 import {
@@ -87,6 +88,7 @@ export function PlaygroundEndpointRequestCard({
   const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
   const dynamicPreviewRef = useRef<PlaygroundDynamicRequestPreviewRef>(null);
 
+  const hasDynamicIr = Object.keys(dynamicIRsByLanguage ?? {}).length > 0;
   const isHeadRequest = context.endpoint.method === "HEAD";
   const shouldUseDynamicSnippets =
     dynamicIRsByLanguage?.[requestType as DynamicSnippetLanguage] &&
@@ -104,108 +106,66 @@ export function PlaygroundEndpointRequestCard({
         <span className="text-(color:--grayscale-a11) text-xs uppercase">
           Request
         </span>
-        <FernButtonGroup>
-          <FernButton
-            onClick={() => setRequestType("curl")}
-            size="small"
-            variant="minimal"
-            intent={requestType === "curl" ? "primary" : "none"}
-            active={requestType === "curl"}
-          >
-            cURL
-          </FernButton>
-          <FernButton
-            onClick={() => setRequestType("typescript")}
-            size="small"
-            variant="minimal"
-            intent={requestType === "typescript" ? "primary" : "none"}
-            active={requestType === "typescript"}
-          >
-            TypeScript
-          </FernButton>
-          <FernButton
-            onClick={() => setRequestType("python")}
-            size="small"
-            variant="minimal"
-            intent={requestType === "python" ? "primary" : "none"}
-            active={requestType === "python"}
-          >
-            Python
-          </FernButton>
-          {dynamicIRsByLanguage?.java && !isHeadRequest && (
+        {!hasDynamicIr && (
+          <FernButtonGroup>
             <FernButton
-              onClick={() => setRequestType("java")}
+              onClick={() => setRequestType("curl")}
               size="small"
               variant="minimal"
-              intent={requestType === "java" ? "primary" : "none"}
-              active={requestType === "java"}
+              intent={requestType === "curl" ? "primary" : "none"}
+              active={requestType === "curl"}
             >
-              Java
+              cURL
             </FernButton>
-          )}
-          {dynamicIRsByLanguage?.ruby && !isHeadRequest && (
             <FernButton
-              onClick={() => setRequestType("ruby")}
+              onClick={() => setRequestType("typescript")}
               size="small"
               variant="minimal"
-              intent={requestType === "ruby" ? "primary" : "none"}
-              active={requestType === "ruby"}
+              intent={requestType === "typescript" ? "primary" : "none"}
+              active={requestType === "typescript"}
             >
-              Ruby
+              TypeScript
             </FernButton>
-          )}
-          {dynamicIRsByLanguage?.csharp && !isHeadRequest && (
             <FernButton
-              onClick={() => setRequestType("csharp")}
+              onClick={() => setRequestType("python")}
               size="small"
               variant="minimal"
-              intent={requestType === "csharp" ? "primary" : "none"}
-              active={requestType === "csharp"}
+              intent={requestType === "python" ? "primary" : "none"}
+              active={requestType === "python"}
             >
-              C#
+              Python
             </FernButton>
+          </FernButtonGroup>
+        )}
+        <div className="flex items-center gap-2">
+          {hasDynamicIr && (
+            <CodeExampleClientDropdown
+              languages={["curl", ...Object.keys(dynamicIRsByLanguage ?? {})]}
+              value={requestType}
+              onValueChange={(language) => {
+                setRequestType(language as RequestType);
+              }}
+            />
           )}
-          {dynamicIRsByLanguage?.go && !isHeadRequest && (
-            <FernButton
-              onClick={() => setRequestType("go")}
-              size="small"
-              variant="minimal"
-              intent={requestType === "go" ? "primary" : "none"}
-              active={requestType === "go"}
-            >
-              Go
-            </FernButton>
-          )}
-          {dynamicIRsByLanguage?.php && !isHeadRequest && (
-            <FernButton
-              onClick={() => setRequestType("php")}
-              size="small"
-              variant="minimal"
-              intent={requestType === "php" ? "primary" : "none"}
-              active={requestType === "php"}
-            >
-              PHP
-            </FernButton>
-          )}
-        </FernButtonGroup>
-        <CopyToClipboardButton
-          content={() => {
-            // if using dynamic snippets, get the code from the dynamic preview
-            if (shouldUseDynamicSnippets && dynamicPreviewRef.current) {
-              return dynamicPreviewRef.current.getCurrentCode();
-            }
+          <CopyToClipboardButton
+            content={() => {
+              // if using dynamic snippets, get the code from the dynamic preview
+              if (shouldUseDynamicSnippets && dynamicPreviewRef.current) {
+                return dynamicPreviewRef.current.getCurrentCode();
+              }
 
-            // otherwise, use the fallback resolver
-            const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
-            const resolver = new PlaygroundCodeSnippetResolverBuilder(
-              context,
-              true,
-              isFileForgeHackEnabled
-            ).create(authState, formState, baseUrl, setOAuthValue);
-            return resolver.resolve(getFallbackRequestType());
-          }}
-          className="-mr-2"
-        />
+              // otherwise, use the fallback resolver
+              const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
+              const resolver = new PlaygroundCodeSnippetResolverBuilder(
+                context,
+                true,
+                isFileForgeHackEnabled
+              ).create(authState, formState, baseUrl, setOAuthValue);
+              return resolver.resolve(getFallbackRequestType());
+            }}
+            className="-mr-2"
+          />
+        </div>
       </div>
       {shouldUseDynamicSnippets ? (
         <PlaygroundDynamicRequestPreview
