@@ -15,7 +15,7 @@ export declare namespace getPrForBranch {
   export type Response = ResolvedReturnType<typeof handler>;
 }
 
-export const GetPrForBranchRequest = GithubIdentificationScheme.and(
+const GetPrForBranchRequest = GithubIdentificationScheme.and(
   z.object({
     orgName: orgNameValidator,
     branch: z.string(),

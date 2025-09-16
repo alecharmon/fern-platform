@@ -14,7 +14,7 @@ export declare namespace getMyDocsSites {
   export type Response = ResolvedReturnType<typeof handler>;
 }
 
-export const GetMyDocSitesRequest = z.object({
+const GetMyDocSitesRequest = z.object({
   orgName: orgNameValidator,
 });
 

@@ -17,7 +17,7 @@ export async function Settings({ docsUrl, hasFernEmail }: Settings.Props) {
     : null;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-1 flex-col items-center gap-4">
       <div className="border-border mx-auto mt-6 flex w-full max-w-[750px] flex-1 flex-col rounded-xl border bg-gray-100 p-4 sm:mt-8 md:mt-10">
         <div className="flex flex-col gap-1">
           <div className="font-bold">Archive site</div>

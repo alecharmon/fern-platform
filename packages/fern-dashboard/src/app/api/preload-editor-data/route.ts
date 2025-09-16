@@ -13,7 +13,7 @@ export declare namespace preloadEditorData {
   export type Response = ResolvedReturnType<typeof handler>;
 }
 
-export const PostPreloadEditorData = z.object({
+const PostPreloadEditorData = z.object({
   docsUrl: z.string(),
 });
 
