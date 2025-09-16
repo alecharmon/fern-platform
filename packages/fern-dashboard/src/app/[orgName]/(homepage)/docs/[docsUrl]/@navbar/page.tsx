@@ -1,16 +1,12 @@
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { FeatureFlaggedServerSide } from "@/components/posthog/feature-flags/server-side";
 
-import { PosthogFeatureFlag } from "../posthog/feature-flags/flags";
-import { FeatureFlaggedServerSide } from "../posthog/feature-flags/server-side";
-import { DocsSiteNavBarItem } from "./DocsSiteNavBarItem";
-
-export declare namespace DocsSiteNavBar {
-  export interface Props {
-    orgName: Auth0OrgName;
-  }
-}
-
-export async function DocsSiteNavBar({ orgName }: DocsSiteNavBar.Props) {
+export default async function DocsSiteNavbar({
+  params,
+}: Readonly<{ params: Promise<{ orgName: Auth0OrgName }> }>) {
+  const { orgName } = await params;
   return (
     <div className="flex">
       <DocsSiteNavBarItem title="Overview" href="" />

@@ -1,15 +1,28 @@
-"use client";
+import "server-only";
 
-import { getLoadableValue } from "@fern-ui/loadable";
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { Auth0OrgName } from "@/app/services/auth0/types";
+import getAvailableOrgsForUser from "@/app/services/dal/fdr/getAvailableOrgsForUser";
 
-import { useOrganizations } from "@/state/useOrganizations";
+import { OrgSwitcherClient } from "./OrgSwitcherClient";
 
-import { OrgSwitcherSelect } from "./OrgSwitcherSelect";
-
-export function OrgSwitcher() {
-  const organizations = useOrganizations();
+export async function OrgSwitcher({
+  currentOrgName,
+}: {
+  currentOrgName: Auth0OrgName;
+}) {
+  const session = await getCurrentSession();
+  if (session == null) {
+    return null;
+  }
+  const organizations = await getAvailableOrgsForUser({
+    userId: session.user.sub,
+  });
 
   return (
-    <OrgSwitcherSelect organizations={getLoadableValue(organizations) ?? []} />
+    <OrgSwitcherClient
+      organizations={organizations}
+      currentOrgName={currentOrgName}
+    />
   );
 }

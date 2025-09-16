@@ -1,11 +1,14 @@
-"use client";
+import "server-only";
 
-import { useParams } from "next/navigation";
+import { Auth0OrgName } from "@/app/services/auth0/types";
+import { DocsUrl } from "@/utils/types";
 
 import { DocsSiteSwitcher } from "./DocsSiteSwitcher";
 
-export function MaybeDocsHeaderItems() {
-  const { docsUrl } = useParams();
+export async function MaybeDocsHeaderItems({
+  docsUrl,
+  orgName,
+}: Readonly<{ docsUrl?: DocsUrl; orgName: Auth0OrgName }>) {
   if (docsUrl == null) {
     return null;
   }
@@ -13,7 +16,7 @@ export function MaybeDocsHeaderItems() {
     <>
       <div className="flex items-center md:hidden">/</div>
       <div className="flex min-w-0 md:hidden">
-        <DocsSiteSwitcher />
+        <DocsSiteSwitcher orgName={orgName} docsUrl={docsUrl} />
       </div>
     </>
   );

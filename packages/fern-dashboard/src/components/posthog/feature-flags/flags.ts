@@ -6,6 +6,7 @@ export const PosthogFeatureFlag = {
   ENABLE_DOCS_ANALYTICS_TAB: "dashboard-enable-docs-analytics-tab",
   ENABLE_DOCS_ASK_FERN_TAB: "dashboard-enable-docs-ask-fern-tab",
   ENABLE_DOCS_ASK_FERN_BILLING: "dashboard-enable-docs-ask-fern-billing",
+  ENABLE_VE_BRANCH_PRS: "dashboard-enable-ve-branch-prs",
 } as const;
 
 export type PosthogFeatureFlag =

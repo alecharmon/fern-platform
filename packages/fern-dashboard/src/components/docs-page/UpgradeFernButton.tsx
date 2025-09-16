@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { ExternalLink, Loader2, SparklesIcon } from "lucide-react";
+import { SparklesIcon } from "@heroicons/react/24/outline";
+import { ExternalLink, Loader2 } from "lucide-react";
 
 import { upgradeFernVersionAction } from "@/app/actions/upgradeFernVersion";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsUrl } from "@/utils/types";
+import { cn } from "@/utils/utils";
 
 import { ErrorUpgradeFernCliVersionToast } from "../editor/EditorToasts";
 import { Button } from "../ui/button";
+
+type UpgradeFernButtonVariant = "outline" | "black";
 
 interface UpgradeFernButtonProps {
   orgName: Auth0OrgName;
@@ -23,7 +27,8 @@ interface UpgradeFernButtonProps {
     prUrl?: string;
     prNumber?: number;
   };
-  primary?: boolean;
+  variant?: UpgradeFernButtonVariant;
+  abbreviateText?: boolean;
 }
 
 export function UpgradeFernButton({
@@ -34,7 +39,8 @@ export function UpgradeFernButton({
   latestVersion,
   baseBranch,
   existingPr,
-  primary = false,
+  variant = "outline",
+  abbreviateText = false,
 }: UpgradeFernButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>("");
@@ -101,29 +107,41 @@ export function UpgradeFernButton({
 
   const hasExistingPr = currentPr?.exists && currentPr?.prUrl;
 
+  const buttonText = useMemo(() => {
+    if (isLoading) {
+      return loadingStep;
+    }
+    if (abbreviateText) {
+      return hasExistingPr ? "Finish upgrade" : "Upgrade";
+    }
+
+    return hasExistingPr ? "Finish CLI upgrade" : `Upgrade to ${latestVersion}`;
+  }, [isLoading, loadingStep, hasExistingPr, latestVersion, abbreviateText]);
+
   return (
     <Button
       onClick={hasExistingPr ? handleViewPr : () => void handleUpgrade()}
       disabled={isLoading}
-      variant={primary ? "default" : "outline"}
-      className="flex items-center gap-2"
+      variant={variant === "black" ? "default" : "outline"}
+      size={variant === "black" ? "default" : "xs"}
+      className={cn(
+        "flex items-center gap-1",
+        variant === "black" &&
+          "bg-black text-white hover:bg-black/70 dark:bg-white dark:text-black dark:hover:bg-white/70"
+      )}
     >
       {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <Loader2 className="size-4 animate-spin" />
       ) : hasExistingPr ? (
-        <ExternalLink className="h-4 w-4" />
+        <ExternalLink className="size-4" />
       ) : (
-        <SparklesIcon className="h-4 w-4" />
+        <SparklesIcon className="size-4" />
       )}
       <span
         className="transition-opacity duration-300 ease-in-out"
         style={{ opacity: textOpacity }}
       >
-        {isLoading
-          ? loadingStep
-          : hasExistingPr
-            ? "Finish CLI upgrade"
-            : `Upgrade CLI to ${latestVersion}`}
+        {buttonText}
       </span>
     </Button>
   );

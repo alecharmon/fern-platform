@@ -1,15 +1,18 @@
 import { GithubPrStatus } from "@/app/services/github/types";
 import { cn } from "@/utils/utils";
 
-export type StatusBadgeType = "live" | "loading" | GithubPrStatus;
+export type StatusBadgeType =
+  | "live"
+  | "loading"
+  | "uncommitted"
+  | GithubPrStatus;
 
 interface StatusBadgeProps {
   status: StatusBadgeType;
-  showChevron?: boolean;
   onClick?: () => void;
-  asButton?: boolean;
   className?: string;
   afterSlot?: React.ReactNode;
+  hideDot?: boolean;
 }
 
 const statusConfig: Record<
@@ -57,6 +60,12 @@ const statusConfig: Record<
     textColor: "text-gray-900",
     label: "Loading",
   },
+  uncommitted: {
+    containerClass: "bg-blue-200 border border-blue-900",
+    dotColor: "bg-blue-900",
+    textColor: "text-blue-900",
+    label: "Uncommitted Changes",
+  },
 };
 
 export function StatusBadge({
@@ -64,6 +73,7 @@ export function StatusBadge({
   className,
   onClick,
   afterSlot,
+  hideDot,
 }: StatusBadgeProps) {
   const config = statusConfig[status];
 
@@ -76,7 +86,9 @@ export function StatusBadge({
       )}
       onClick={onClick}
     >
-      <div className={cn("size-2 rounded-full", config.dotColor)} />
+      {!hideDot && (
+        <div className={cn("size-2 rounded-full", config.dotColor)} />
+      )}
       <div className={cn("mb-0.5 text-sm leading-none", config.textColor)}>
         {config.label}
       </div>

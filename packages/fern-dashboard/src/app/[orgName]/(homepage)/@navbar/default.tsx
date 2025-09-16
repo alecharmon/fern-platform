@@ -1,22 +1,29 @@
+import { Suspense } from "react";
+
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { DocsNavbarItem } from "@/components/navbar/DocsNavbarItem";
+import { DocsNavbarItems } from "@/components/navbar/DocsNavbarItems";
+import { NavbarItem } from "@/components/navbar/NavbarItem";
+import { NavbarSectionTitle } from "@/components/navbar/NavbarSectionTitle";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { FeatureFlaggedServerSide } from "@/components/posthog/feature-flags/server-side";
 
-import { PosthogFeatureFlag } from "../posthog/feature-flags/flags";
-import { FeatureFlaggedServerSide } from "../posthog/feature-flags/server-side";
-import { DocsNavbarItems } from "./DocsNavbarItems";
-import { NavbarItem } from "./NavbarItem";
-import { NavbarSectionTitle } from "./NavbarSectionTitle";
-
-export declare namespace Navbar {
-  export interface Props {
-    orgName: Auth0OrgName;
+export default async function Navbar({
+  params,
+}: Readonly<{ params: Promise<{ orgName: Auth0OrgName }> }>) {
+  const { orgName } = await params;
+  const session = await getCurrentSession();
+  if (session == null) {
+    return null;
   }
-}
 
-export function Navbar({ orgName }: Navbar.Props) {
   return (
     <div className="flex h-full w-fit max-w-full flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--sidebar)] md:w-[var(--sidebar-width)] md:border-0 md:py-6 md:pl-4 md:transition-[width]">
       <div className="flex gap-8 overflow-y-auto px-8 md:flex-col md:gap-0 md:px-0 md:pb-4">
-        <DocsNavbarItems />
+        <Suspense fallback={<DocsNavbarItem />}>
+          <DocsNavbarItems orgName={orgName} />
+        </Suspense>
         <FeatureFlaggedServerSide
           flag={PosthogFeatureFlag.ENABLE_SDKS_PAGE}
           orgName={orgName}

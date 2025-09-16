@@ -2,41 +2,28 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
+import { FdrAPI } from "@fern-api/fdr-sdk";
+
 import getGithubSourceMetadataHandler from "@/app/api/get-github-source-metadata/handler";
-import getMyDocsSitesHandler from "@/app/api/get-my-docs-sites/handler";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
-import { checkUpgradePrStatus } from "@/app/services/dal/github/checkUpgradePrStatus";
+import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import getDocsGithubUrl from "@/app/services/dal/github/getDocsGithubUrl";
-import { getFernVersionFromRepo } from "@/app/services/dal/github/getFernVersionFromRepo";
-import {
-  GithubRepoValidationError,
-  validateGithubRepoAccess,
-} from "@/app/services/dal/github/validators";
-import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
-import { BetaBadge } from "@/components/docs-page/BetaBadge";
+import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
+import { FernCliVersionDisplay } from "@/components/docs-page/FernCliVersionDisplay";
 import {
   GithubAuthState,
   GithubSource,
 } from "@/components/docs-page/GithubSource";
-import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
-import { InstallGithubAppButton } from "@/components/docs-page/InstallGithubAppButton";
-import { UpgradeFernButton } from "@/components/docs-page/UpgradeFernButton";
-import { VEPreviewImage } from "@/components/docs-page/VEPreviewImage";
-import { WarningNote } from "@/components/docs-page/WarningNote";
-import Card from "@/components/ui/card";
-import { getValidationErrorMessage } from "@/utils/errors";
-import {
-  MIN_VE_CLI_VERSION,
-  compareVersions,
-  getLatestFernCliVersion,
-} from "@/utils/fernCliVersion";
+import { VisualEditorSection } from "@/components/docs-page/visual-editor-section/VisualEditorSection";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
 
 export const dynamic = "force-dynamic";
+export const experimental_ppr = true;
 
 export default async function Page(props: {
   params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
@@ -50,19 +37,24 @@ export default async function Page(props: {
   const { orgName, docsUrl: encodedDocsUrl } = await props.params;
   const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
+  await assertUserHasOrganizationAccess({
+    userId: session.user.sub,
+    orgName,
+  });
+
+  let currentDocsSite: FdrAPI.dashboard.DocsSite | undefined;
+
   // Validate that the docsUrl belongs to this organization so that we avoid errors in the page
   try {
-    const docsSites = await getMyDocsSitesHandler({
+    const docsSites = await getDocsSitesForOrg({
       orgName,
       token: session.accessToken,
     });
 
-    const docsUrlsInOrg = docsSites.docsSites.map((site) =>
-      getDocsSiteUrl(site)
+    currentDocsSite = docsSites.docsSites.find(
+      (site) => getDocsSiteUrl(site) === docsUrl
     );
-    const isValidDocsUrl = docsUrlsInOrg.includes(docsUrl);
-
-    if (!isValidDocsUrl) {
+    if (currentDocsSite == null) {
       redirect(`/${orgName}/docs`);
     }
   } catch (error) {
@@ -83,21 +75,6 @@ export default async function Page(props: {
     sourceRepo: undefined,
     isLoading: false,
   };
-
-  // Fern version upgrade check
-  let fernVersionInfo:
-    | {
-        current: string;
-        latest: string;
-        needsUpgrade: boolean;
-        isBelowMinimum: boolean;
-        existingPr?: {
-          exists: boolean;
-          prUrl?: string;
-          prNumber?: number;
-        };
-      }
-    | undefined;
 
   try {
     const urlResult = await getDocsGithubUrl({
@@ -129,47 +106,6 @@ export default async function Page(props: {
               githubUrl,
               userId: session.user.sub,
             });
-
-            // Check for Fern version upgrade if we have successful validation
-            try {
-              const [fernVersionResult, latestVersion] = await Promise.all([
-                getFernVersionFromRepo(githubUrl, docsUrl),
-                getLatestFernCliVersion(),
-              ]);
-
-              if (fernVersionResult.ok && sourceRepo?.baseBranch) {
-                const needsUpgrade = compareVersions(
-                  fernVersionResult.version,
-                  latestVersion
-                );
-                const isBelowMinimum = compareVersions(
-                  fernVersionResult.version,
-                  MIN_VE_CLI_VERSION
-                );
-
-                // Show version info if any update is available
-                if (needsUpgrade) {
-                  // Check if there's already an existing upgrade PR
-                  const existingPr = await checkUpgradePrStatus(
-                    githubUrl,
-                    fernVersionResult.version,
-                    latestVersion,
-                    sourceRepo.baseBranch
-                  );
-
-                  fernVersionInfo = {
-                    current: fernVersionResult.version,
-                    latest: latestVersion,
-                    needsUpgrade,
-                    isBelowMinimum,
-                    existingPr,
-                  };
-                }
-              }
-            } catch (error) {
-              console.error("Failed to check Fern version:", error);
-              // Silently fail - upgrade check is not critical
-            }
           } catch (error) {
             console.error("Failed to fetch source repo metadata:", error);
           }
@@ -188,250 +124,32 @@ export default async function Page(props: {
   } catch (error) {
     console.error(error);
   }
-
-  const criticalCLIUpdateNeeded = fernVersionInfo?.isBelowMinimum;
   return (
     <div className="flex w-full flex-col gap-4">
       <DocsSiteOverviewCard
-        docsUrl={docsUrl}
+        docsSite={currentDocsSite}
         githubProtectedArea={
-          <div className="flex w-fit flex-col gap-2">
-            <p>Source</p>
-            <GithubSource docsUrl={docsUrl} githubUrl={githubUrl} />
+          <div className="flex flex-wrap gap-x-10 gap-y-4">
+            <div className="flex w-fit flex-col gap-2">
+              <p>Source</p>
+              <GithubSource docsUrl={docsUrl} githubUrl={githubUrl} />
+            </div>
+            <FernCliVersionDisplay
+              orgName={orgName}
+              docsUrl={docsUrl}
+              githubUrl={githubUrl}
+              baseBranch={githubAuthState.sourceRepo?.baseBranch}
+            />
           </div>
         }
       />
-
-      <Card className="relative flex h-[300px] flex-col-reverse gap-0 !p-0 lg:flex-row">
-        <div className="lg:max-w-1/2 h-full w-full">
-          <VEPreviewImage className="h-full w-full" />
-        </div>
-        <div className="flex flex-col items-center justify-center gap-4 p-6 md:flex-1 lg:items-start">
-          <div className="flex flex-col items-center lg:items-start">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              Fern Visual Editor
-              <BetaBadge />
-            </div>
-            <p className="text-muted-foreground text-sm">
-              Modify your documentation without touching code.
-            </p>
-            {githubUrl == null && (
-              <p className="text-muted-foreground text-sm">
-                Connect your repository above to get started.
-              </p>
-            )}
-          </div>
-
-          {githubUrl != null &&
-            (githubAuthState.validationResult.ok ? (
-              <>
-                {criticalCLIUpdateNeeded && (
-                  <WarningNote>
-                    For optimal functionality, please upgrade your Fern CLI to
-                    at least {MIN_VE_CLI_VERSION}. Current version:{" "}
-                    {fernVersionInfo?.current}
-                  </WarningNote>
-                )}
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <GoToEditorButton
-                    docsUrl={docsUrl}
-                    session={session}
-                    sourceRepo={githubAuthState.sourceRepo}
-                    primary={!criticalCLIUpdateNeeded}
-                  />
-                  {fernVersionInfo?.needsUpgrade &&
-                    githubAuthState.sourceRepo?.baseBranch && (
-                      <UpgradeFernButton
-                        orgName={orgName}
-                        docsUrl={docsUrl}
-                        githubUrl={githubUrl}
-                        currentVersion={fernVersionInfo.current}
-                        latestVersion={fernVersionInfo.latest}
-                        baseBranch={githubAuthState.sourceRepo.baseBranch}
-                        existingPr={fernVersionInfo.existingPr}
-                        primary={criticalCLIUpdateNeeded}
-                      />
-                    )}
-                </div>
-
-                <p className="text-muted-foreground text-sm">
-                  All sessions will turn into PRs in your Github repo{" "}
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary underline transition-colors"
-                  >
-                    here
-                  </a>
-                  .
-                </p>
-              </>
-            ) : (
-              <ValidationErrorHandler
-                error={githubAuthState.validationResult.error}
-                githubUrl={githubUrl}
-                orgName={orgName}
-                site={docsUrl}
-              />
-            ))}
-        </div>
-      </Card>
+      <VisualEditorSection
+        docsUrl={docsUrl}
+        session={session}
+        orgName={orgName}
+        githubAuthState={githubAuthState}
+        githubUrl={githubUrl}
+      />
     </div>
   );
-}
-
-interface ValidationErrorHandlerProps {
-  error: GithubRepoValidationError;
-  githubUrl?: string;
-  orgName: Auth0OrgName;
-  site: string;
-}
-function ValidationErrorHandler({
-  error,
-  orgName,
-  site,
-  githubUrl,
-}: ValidationErrorHandlerProps) {
-  switch (error.type) {
-    case "FERN_BOT_NOT_INSTALLED":
-      return (
-        <>
-          <p className="text-muted-foreground text-sm">
-            {githubUrl ? (
-              <>
-                To get started, install the Fern app on{" "}
-                <a
-                  href={githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary underline transition-colors"
-                >
-                  {getRepoDisplayNameFromUrl(githubUrl)}
-                </a>
-              </>
-            ) : (
-              "To get started, connect a Github repo above and install the Fern app on your chosen repository."
-            )}
-            .
-          </p>
-          <InstallGithubAppButton
-            orgName={orgName}
-            site={site}
-            githubUrl={githubUrl}
-          />
-        </>
-      );
-
-    case "MALFORMED_GITHUB_URL":
-      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
-
-    case "REPO_NOT_FOUND":
-      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
-
-    case "FERN_CONFIG_JSON_MISSING":
-      return (
-        <WarningNote>
-          {getValidationErrorMessage(error)}
-          {githubUrl && (
-            <>
-              {" "}
-              Check your repository{" "}
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary underline transition-colors"
-              >
-                here
-              </a>
-              .
-            </>
-          )}
-        </WarningNote>
-      );
-
-    case "FERN_CONFIG_JSON_MALFORMED":
-      return (
-        <WarningNote>
-          {getValidationErrorMessage(error)}
-          {githubUrl && (
-            <>
-              {" "}
-              Check your repository{" "}
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary underline transition-colors"
-              >
-                here
-              </a>
-              .
-            </>
-          )}
-        </WarningNote>
-      );
-
-    case "FERN_CONFIG_JSON_ORG_MISMATCH":
-      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
-
-    case "SITE_NOT_FOUND":
-      return (
-        <WarningNote>
-          {getValidationErrorMessage(error)}
-          {githubUrl && (
-            <>
-              {" "}
-              Check your repository{" "}
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary underline transition-colors"
-              >
-                here
-              </a>
-              .
-            </>
-          )}
-        </WarningNote>
-      );
-
-    case "MULTIPLE_PROJECTS_WITH_SITE":
-      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
-
-    case "NO_PROJECTS":
-      return (
-        <WarningNote>
-          {getValidationErrorMessage(error)}
-          {githubUrl && (
-            <>
-              {" "}
-              Check your repository{" "}
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary underline transition-colors"
-              >
-                here
-              </a>
-              .
-            </>
-          )}
-        </WarningNote>
-      );
-
-    case "UNEXPECTED_ERROR":
-      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
-
-    default:
-      return (
-        <WarningNote>
-          We were unable to validate access to this repo. Please try again or
-          contact support if the issue persists.
-        </WarningNote>
-      );
-  }
 }

@@ -14,17 +14,15 @@ import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 
 import { OrgLogo } from "./org-logo/OrgLogo";
 
-export declare namespace OrgSwitcherSelect {
-  export interface Props {
-    organizations: Auth0Organization[];
-  }
-}
-
-export const OrgSwitcherSelect = ({
+export const OrgSwitcherClient = ({
   organizations,
-}: OrgSwitcherSelect.Props) => {
+  currentOrgName,
+}: {
+  organizations: Auth0Organization[];
+  currentOrgName: Auth0OrgName;
+}) => {
   const orgName = useOrgNameFromPathname();
-  const [localOrgName, setLocalOrgName] = useState(orgName);
+  const [localOrgName, setLocalOrgName] = useState(currentOrgName);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {

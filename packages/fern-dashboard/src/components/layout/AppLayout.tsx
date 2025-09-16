@@ -1,28 +1,24 @@
-import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
-
-import { Navbar } from "../navbar/Navbar";
 import { AnimatedSidepanelContainer } from "./AnimatedSidepanelContainer";
-import { Header } from "./Header";
 import { Footer } from "./footer/Footer";
 
 export declare namespace AppLayout {
   export interface Props {
     children: React.JSX.Element;
     sidepanel: React.ReactNode;
-    orgName: Auth0OrgName;
+    navbar: React.ReactNode;
+    header: React.ReactNode;
   }
 }
 
 export async function AppLayout({
   children,
   sidepanel,
-  orgName,
+  navbar,
+  header,
 }: AppLayout.Props) {
-  const session = await getCurrentSessionOrThrow();
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <Header session={session} />
+      {header}
       <div className="flex min-h-0 flex-1 flex-col md:flex-row-reverse">
         <div className="relative flex flex-1 overflow-hidden">
           <div className="flex min-w-0 flex-1 md:pr-2">
@@ -38,7 +34,7 @@ export async function AppLayout({
           <AnimatedSidepanelContainer>{sidepanel}</AnimatedSidepanelContainer>
         </div>
         <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-2 pb-2 md:relative md:w-fit">
-          <Navbar orgName={orgName} />
+          {navbar}
         </div>
       </div>
     </div>

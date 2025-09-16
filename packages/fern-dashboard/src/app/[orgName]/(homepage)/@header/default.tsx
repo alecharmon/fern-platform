@@ -1,37 +1,49 @@
+import { Suspense } from "react";
+
 import { PopoverArrow } from "@radix-ui/react-popover";
 import { Book, RotateCcw } from "lucide-react";
 
-import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { Auth0OrgName } from "@/app/services/auth0/types";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import { OrgSwitcher } from "@/components/auth/OrgSwitcher";
+import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
+import { MaybeDocsHeaderItems } from "@/components/layout/MaybeDocsHeaderItems";
+import { ProfileImage } from "@/components/layout/ProfileImage";
+import { SupportHeaderLink } from "@/components/layout/SupportHeaderLink";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { DocsUrl } from "@/utils/types";
 
-import { LogoutButton } from "../auth/LogoutButton";
-import { OrgSwitcher } from "../auth/OrgSwitcher";
-import { ThemeToggle } from "../theme/ThemeToggle";
-import { ThemedFernLogo } from "../theme/ThemedFernLogo";
-import { HeaderLinkButton } from "./HeaderLinkButton";
-import { MaybeDocsHeaderItems } from "./MaybeDocsHeaderItems";
-import { ProfileImage } from "./ProfileImage";
-import { SupportHeaderLink } from "./SupportHeaderLink";
+export const experimental_ppr = true;
 
-export declare namespace Header {
-  export interface Props {
-    session: Auth0SessionData;
+export default async function HeaderLayout({
+  params,
+}: Readonly<{
+  params: Promise<{ docsUrl?: DocsUrl; orgName: Auth0OrgName }>;
+}>) {
+  const { orgName, docsUrl } = await params;
+  const session = await getCurrentSession();
+  if (session == null) {
+    return null;
   }
-}
-
-export async function Header({ session }: Header.Props) {
   const { name, email, picture } = session.user;
 
   return (
     <div className="flex justify-between gap-4 p-4">
       <div className="flex min-w-0 items-center gap-4">
         <ThemedFernLogo className="w-16" />
-        <OrgSwitcher />
-        <MaybeDocsHeaderItems />
+        <Suspense fallback={null}>
+          <OrgSwitcher currentOrgName={orgName} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <MaybeDocsHeaderItems docsUrl={docsUrl} orgName={orgName} />
+        </Suspense>
       </div>
       <div className="flex shrink-0 gap-2">
         <div className="hidden items-center md:flex">

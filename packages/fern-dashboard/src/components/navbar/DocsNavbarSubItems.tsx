@@ -1,21 +1,20 @@
 "use client";
 
-import { useMyDocsSites } from "@/state/useMyDocsSites";
+import { FdrAPI } from "@fern-api/fdr-sdk";
+
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 
 import { NavbarSubItem } from "./NavbarSubItem";
 
-export function DocsNavbarSubItems() {
-  const docsSites = useMyDocsSites();
-
-  if (docsSites.type !== "loaded") {
-    return null;
-  }
-
+export function DocsNavbarSubItems({
+  docsSites,
+}: {
+  docsSites: FdrAPI.dashboard.DocsSite[];
+}) {
   return (
     <>
-      {docsSites.value.docsSites.map((docsSite) => {
+      {docsSites.map((docsSite) => {
         const url = getDocsSiteUrl(docsSite);
         return (
           <NavbarSubItem

@@ -11,6 +11,7 @@ import {
   FernTooltip,
   FernTooltipProvider,
 } from "@fern-docs/components/FernTooltip";
+import { generateBranchName } from "@fern-docs/components/navigation/local-storage";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -31,7 +32,6 @@ export function GoToEditorButton({
   sourceRepo,
   disabled = false,
   isValidatingSource,
-  primary = true,
 }: {
   docsUrl: DocsUrl;
   session: Auth0SessionData;
@@ -39,22 +39,15 @@ export function GoToEditorButton({
   disabled?: boolean;
   disabledReason?: string;
   isValidatingSource?: boolean;
-  primary?: boolean;
 }) {
   const orgName = useOrgName();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const newBranchName = useMemo(() => {
-    const randomHexString = crypto.randomUUID().split("-")[0];
-    return (
-      new Date().toISOString().split("T")[0] +
-      "-" +
-      sanitizeGitHubUsername(session.user.name ?? "") +
-      "-" +
-      randomHexString
-    );
-  }, [session.user.name]);
+  const newBranchName = useMemo(
+    () => generateBranchName(session.user.sub, session.user.name),
+    [session.user.name, session.user.sub]
+  );
 
   const editorSlug = useMemo(() => {
     return constructEditorSlug({
@@ -105,7 +98,6 @@ export function GoToEditorButton({
                 setIsLoading(true);
                 goToEditor();
               }}
-              variant={primary ? "default" : "outline"}
               disabled={isLoading || disabled || isValidatingSource}
               asChild={!disabled}
             >
@@ -125,9 +117,4 @@ export function GoToEditorButton({
       </FernTooltipProvider>
     </div>
   );
-}
-
-// Ensures branch name is url encodable
-function sanitizeGitHubUsername(name: string) {
-  return name.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
 }

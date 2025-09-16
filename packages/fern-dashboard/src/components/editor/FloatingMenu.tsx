@@ -93,7 +93,7 @@ export default function FloatingMenu() {
         <FloatingMenuHeading title="Basics" />
         {menuItems.map((item) => (
           <FloatingMenuItem
-            key={item.action}
+            key={item.action + item.title}
             title={item.title}
             iconProps={item.iconProps}
             onClick={menuItemClickHandler(item.action)}

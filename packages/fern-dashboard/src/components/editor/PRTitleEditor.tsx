@@ -10,6 +10,7 @@ import { TeleprompterTextOnHover } from "@/components/ui/TeleprompterTextOnHover
 import { Input } from "@/components/ui/input";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useGitPrInfo } from "@/providers/GitPRContext";
+import { cn } from "@/utils/utils";
 
 import { ErrorUpdatePrTitleToast } from "./EditorToasts";
 
@@ -19,6 +20,8 @@ interface PRTitleEditorProps {
   branch: string | null;
   gitPrUrl: string | undefined;
   baseBranch?: string;
+  className?: string;
+  hideIcon?: boolean;
 }
 
 export function PRTitleEditor({
@@ -27,6 +30,8 @@ export function PRTitleEditor({
   branch,
   gitPrUrl,
   baseBranch,
+  className,
+  hideIcon = false,
 }: PRTitleEditorProps) {
   const { prTitle: serverTitle, setPrTitle, loading, site } = useGitPrInfo();
   const isEditingDisabled = useEditingDisabled();
@@ -119,15 +124,19 @@ export function PRTitleEditor({
   );
 
   return (
-    <div className="flex w-fit items-center">
+    <div className={cn("flex w-fit items-center", className)}>
       {loading ? (
         <div className="flex items-center gap-1.5">
-          <GitPullRequest className="text-muted-foreground size-4" />
+          {!hideIcon && (
+            <GitPullRequest className="text-muted-foreground size-4" />
+          )}
           <p className="px-2 text-gray-600">Loading title...</p>
         </div>
       ) : !isEditingDisabled && isEditing ? (
         <div className="flex items-center gap-1.5">
-          <GitPullRequest className="text-muted-foreground size-4" />
+          {!hideIcon && (
+            <GitPullRequest className="text-muted-foreground size-4" />
+          )}
           <Input
             autoFocus
             disabled={isSaving}
@@ -146,7 +155,9 @@ export function PRTitleEditor({
             disabled={isSaving || isEditingDisabled}
           >
             <div className="flex items-center gap-1.5">
-              <GitPullRequest className="text-muted-foreground size-4" />
+              {!hideIcon && (
+                <GitPullRequest className="text-muted-foreground size-4" />
+              )}
               <TeleprompterTextOnHover containerClassName="flex-1">
                 {localTitle || serverTitle || "Click to edit PR title"}
               </TeleprompterTextOnHover>

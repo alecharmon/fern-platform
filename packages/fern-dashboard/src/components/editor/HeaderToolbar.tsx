@@ -19,6 +19,7 @@ import { DocsUrl } from "@/utils/types";
 
 import { ProfileImage } from "../layout/ProfileImage";
 import { Button } from "../ui/button";
+import { ClickablePrNumber } from "./ClickablePrNumber";
 import { CommitButton } from "./CommitButton";
 import { DashboardTooltip } from "./DashboardTooltip";
 import { DevModeSwitcher } from "./DevModeSwitcher";
@@ -33,7 +34,7 @@ export function HeaderToolbar({
   docsUrl: DocsUrl;
 }) {
   const { name, picture } = session.user;
-  const { gitPrUrl, setPrUrl, prNumber } = useGitPrInfo();
+  const { gitPrUrl, setPrUrl } = useGitPrInfo();
   const { branch } = useBranch();
   const { editor } = useEditor();
   const isEditingDisabled = useEditingDisabled();
@@ -66,8 +67,8 @@ export function HeaderToolbar({
   const canRedo = (editor?.can().redo() ?? false) && !isEditingDisabled;
 
   return (
-    <div className="bg-background flex h-[var(--header-toolbar-height)] flex-wrap items-center justify-center gap-2 border-b border-gray-500 px-2 py-2 shadow-sm md:py-1">
-      <div className="flex flex-1 items-center gap-1 text-left">
+    <div className="bg-background flex h-[var(--header-toolbar-height-mobile)] flex-wrap items-center justify-center gap-2 border-b border-gray-500 px-2 py-2 shadow-sm md:h-[var(--header-toolbar-height)] md:py-1">
+      <div className="flex w-full flex-1 items-center gap-1 text-left md:w-auto">
         <Button className="px-2" variant="ghost" size="iconSm" asChild>
           <a href={`/${orgName}/docs/${encodeURIComponent(docsUrl)}`}>
             <ArrowLeftIcon />
@@ -80,22 +81,7 @@ export function HeaderToolbar({
           branch={branch}
           gitPrUrl={gitPrUrl}
         />
-        {gitPrUrl && prNumber && (
-          <Button
-            disabled={!gitPrUrl}
-            variant="ghost"
-            size="sm"
-            asChild={!!gitPrUrl}
-          >
-            <a
-              href={gitPrUrl ?? ""}
-              target="_blank"
-              className="text-muted-foreground -ml-2 flex items-center pl-1.5 pr-1.5"
-            >
-              <span className="text-[16px]">#{prNumber}</span>
-            </a>
-          </Button>
-        )}
+        <ClickablePrNumber />
         <PRStatusDropdown
           owner={owner}
           repo={repo}
@@ -139,12 +125,12 @@ export function HeaderToolbar({
           </DashboardTooltip>
         </div>
       </div>
-      <div className="flex flex-1 shrink-0 items-center justify-between gap-1 lg:justify-end">
+      <div className="flex items-center justify-end gap-1 sm:flex-1 sm:shrink-0">
         <DashboardTooltip
           content="Enable dev mode to edit the source code"
           hideInnerSpan
         >
-          <div className="pointer-events-auto mr-3 flex items-center justify-center">
+          <div className="pointer-events-auto mr-3 hidden items-center justify-center md:flex">
             <DevModeSwitcher />
           </div>
         </DashboardTooltip>

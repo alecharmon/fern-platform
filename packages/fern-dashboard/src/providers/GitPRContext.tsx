@@ -24,6 +24,8 @@ export const GitPRContext = createContext<{
   setPrStatus: (status: GithubPrStatus) => void;
   prNumber: number | undefined;
   site: string;
+  owner: string | undefined;
+  repo: string | undefined;
 }>({
   gitPrUrl: undefined,
   setPrUrl: (_url: string) => {
@@ -43,6 +45,8 @@ export const GitPRContext = createContext<{
   },
   prNumber: undefined,
   site: "",
+  owner: undefined,
+  repo: undefined,
 });
 
 export function GitPRProvider({
@@ -173,6 +177,8 @@ export function GitPRProvider({
         prStatus,
         setPrStatus,
         site,
+        owner,
+        repo,
       }}
     >
       {children}

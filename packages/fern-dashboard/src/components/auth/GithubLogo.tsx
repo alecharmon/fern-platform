@@ -1,8 +1,11 @@
-export const GithubLogo = () => {
+export const GithubLogo = ({
+  width = 18,
+  height = 20,
+}: { width?: number; height?: number } = {}) => {
   return (
     <svg
-      width="18"
-      height="20"
+      width={width}
+      height={height}
       viewBox="0 0 18 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

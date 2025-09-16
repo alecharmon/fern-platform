@@ -1,6 +1,7 @@
+import { getBranchNameFromStorageKey } from "./localStorageUtils";
 import { StoredNavigationData } from "./types";
 
-const NAVIGATION_STORAGE_KEY = "fern-navigation-storage:";
+export const NAVIGATION_STORAGE_KEY = "fern-navigation-storage:";
 
 export class NavigationStorage {
   constructor(private readonly _storage: Storage) {}
@@ -63,6 +64,13 @@ export class NavigationStorage {
       lastCommittedHash: undefined,
     };
   }
+
+  getAllStoredBranches(): string[] {
+    return this._storage
+      .getAllKeys()
+      .map((key) => getBranchNameFromStorageKey(key))
+      .filter((key) => key !== undefined);
+  }
 }
 
 export function createNavigationLocalStorage() {
@@ -78,6 +86,7 @@ interface Storage {
   set(key: string, value: string): void;
   remove(key: string): void;
   clear(): void;
+  getAllKeys(): string[];
 }
 
 class LocalStorage implements Storage {
@@ -108,6 +117,19 @@ class LocalStorage implements Storage {
     this.safeOperation(() => {
       localStorage.setItem(this._storageKey + key, value);
     }, undefined);
+  }
+
+  getAllKeys(): string[] {
+    return this.safeOperation(() => {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(this._storageKey)) {
+          keys.push(key);
+        }
+      }
+      return keys;
+    }, []);
   }
 
   remove(key: string): void {
@@ -143,5 +165,9 @@ class MapStorage implements Storage {
 
   clear(): void {
     this._map.clear();
+  }
+
+  getAllKeys(): string[] {
+    return Array.from(this._map.keys());
   }
 }

@@ -81,7 +81,9 @@ export function GithubSource({
                   variant="outline"
                   disabled={isSaving}
                 >
-                  <GithubLogo />
+                  <span className="text-gray-1100">
+                    <GithubLogo />
+                  </span>
                   {isSaving ? "Saving..." : "Connect Repo"}
                 </Button>
               </SetGithubSourcePopover>

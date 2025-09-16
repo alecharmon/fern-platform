@@ -1,27 +1,31 @@
-"use client";
+import "server-only";
 
-import { useParams } from "next/navigation";
-
-import { useMyDocsSites } from "@/state/useMyDocsSites";
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { Auth0OrgName } from "@/app/services/auth0/types";
+import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
 import { DocsSiteSelect } from "./DocsSiteSelect";
 
-export function DocsSiteSwitcher() {
-  const docsSites = useMyDocsSites();
-
-  const params = useParams<{ docsUrl?: string }>();
-  if (params.docsUrl == null) {
+export async function DocsSiteSwitcher({
+  orgName,
+  docsUrl,
+}: Readonly<{ orgName: Auth0OrgName; docsUrl?: string }>) {
+  const session = await getCurrentSession();
+  if (session == null) {
     return null;
   }
 
+  const { docsSites } = await getDocsSitesForOrg({
+    orgName,
+    token: session.accessToken,
+  });
+
   return (
     <DocsSiteSelect
-      docsSites={docsSites.type === "loaded" ? docsSites.value.docsSites : []}
+      docsSites={docsSites}
       currentDocsUrl={
-        params.docsUrl != null
-          ? parseDocsUrlParam({ docsUrl: params.docsUrl })
-          : undefined
+        docsUrl != null ? parseDocsUrlParam({ docsUrl: docsUrl }) : undefined
       }
     />
   );

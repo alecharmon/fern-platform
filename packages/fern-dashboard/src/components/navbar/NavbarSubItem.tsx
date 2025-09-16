@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import React from "react";
 
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
-import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
 
 export declare namespace NavbarSubItem {
@@ -17,8 +17,10 @@ export declare namespace NavbarSubItem {
 
 export const NavbarSubItem = ({ title, icon, href }: NavbarSubItem.Props) => {
   const orgName = useOrgNameFromPathname();
-  const pathname = usePathnameWithoutOrgName();
-  const isSelected = pathname.startsWith(href);
+  const params = useParams();
+  const isSelected = params.docsUrl
+    ? href.endsWith(String(params.docsUrl))
+    : false;
 
   const className = cn(
     "hidden md:flex",

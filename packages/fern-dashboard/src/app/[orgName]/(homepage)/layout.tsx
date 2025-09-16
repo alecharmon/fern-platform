@@ -12,10 +12,14 @@ export default async function AuthedLayout({
   params,
   children,
   sidepanel,
+  navbar,
+  header,
 }: Readonly<{
   params: Promise<{ orgName: Auth0OrgName }>;
   children: React.JSX.Element;
   sidepanel: React.ReactNode;
+  navbar: React.ReactNode;
+  header: React.ReactNode;
 }>) {
   const { orgName } = await params;
 
@@ -31,7 +35,7 @@ export default async function AuthedLayout({
         >
           <OrgNameProvider orgName={orgName}>
             <SidepanelProvider>
-              <AppLayout sidepanel={sidepanel} orgName={orgName}>
+              <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
                 {children}
               </AppLayout>
             </SidepanelProvider>
