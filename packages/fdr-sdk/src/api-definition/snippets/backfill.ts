@@ -126,6 +126,15 @@ async function backfillSnippetsForExample(
       }
 
       /**
+       * If dynamic snippets are available for this language, skip generating HTTP snippets
+       */
+      if (
+        dynamicGenerators[targetId === "javascript" ? "typescript" : targetId]
+      ) {
+        continue;
+      }
+
+      /**
        * If alwaysEnableJavaScriptFetch is disabled, skip generating JavaScript snippets if TypeScript snippets are available
        */
       if (
@@ -221,16 +230,14 @@ async function backfillSnippetsForExample(
       const result = generator.generateSync(request);
 
       if (result?.snippet) {
-        snippets[language] = [
-          {
-            name: undefined,
-            language,
-            install: undefined,
-            code: result.snippet,
-            generated: true,
-            description: undefined,
-          },
-        ];
+        pushSnippet({
+          name: undefined,
+          language,
+          install: undefined,
+          code: result.snippet,
+          generated: true,
+          description: undefined,
+        });
       }
     } catch (error) {
       console.error(`Error generating ${language} snippet:`, error);

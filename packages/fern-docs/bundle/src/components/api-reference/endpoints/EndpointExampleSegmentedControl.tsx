@@ -22,7 +22,11 @@ export function EndpointExampleSegmentedControl({
   selectedExample: CodeExample | undefined;
   onSelectExample: (exampleKey: string) => void;
 }): ReactElement<any> {
-  if (segmentedControlExamples.length >= 8) {
+  if (
+    segmentedControlExamples.length >= 8 ||
+    segmentedControlExamples.flatMap(({ examples }) => examples).join("")
+      .length >= 80
+  ) {
     return (
       <div className="w-full min-w-0">
         <FernDropdown
