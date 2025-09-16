@@ -274,3 +274,12 @@ it("should serialize twoslash-code-spaces.mdx", async () => {
     join(__dirname, "__snapshots__", "twoslash-code-spaces.js")
   );
 }, 50000);
+
+it("should fallback on twoslash that doesn't work", async () => {
+  const result = await serializeMdx(
+    readFileSync(join(__dirname, "tests", "broken-twoslash.mdx"), "utf-8")
+  );
+  await expect(deterministic(result?.code)).toMatchFileSnapshot(
+    join(__dirname, "__snapshots__", "broken-twoslash.js")
+  );
+}, 50000);
