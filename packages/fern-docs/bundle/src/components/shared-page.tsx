@@ -53,12 +53,28 @@ export default async function SharedPage({
   const authStatePromise = loader.getAuthState(slugToHref(slug));
   const edgeFlagsPromise = loader.getEdgeFlags();
 
-  const config = await configPromise;
+  // Await configPromise with timing
+  let config;
+  {
+    const start = Date.now();
+    config = await configPromise;
+    const end = Date.now();
+    console.log(`[SharedPage] loader.getConfig() took ${end - start}ms`);
+  }
+
+  // Await baseUrlPromise with timing for getRedirectForPath
+  let baseUrl;
+  {
+    const start = Date.now();
+    baseUrl = await baseUrlPromise;
+    const end = Date.now();
+    console.log(`[SharedPage] loader.getMetadata() took ${end - start}ms`);
+  }
 
   // check for redirects
   const configuredRedirect = getRedirectForPath(
     slugToHref(slug),
-    await baseUrlPromise,
+    baseUrl,
     config.redirects
   );
 
@@ -69,8 +85,14 @@ export default async function SharedPage({
     redirectFn(prepareRedirect(configuredRedirect.destination));
   }
 
-  // get the root node
-  let root: FernNavigation.RootNode | undefined = await rootPromise;
+  // get the root node with timing
+  let root: FernNavigation.RootNode | undefined;
+  {
+    const start = Date.now();
+    root = await rootPromise;
+    const end = Date.now();
+    console.log(`[SharedPage] loader.getRoot() took ${end - start}ms`);
+  }
 
   // always match the basepath of the root node
   if (!slug.startsWith(root.slug)) {
@@ -82,7 +104,14 @@ export default async function SharedPage({
     .getSlugMapWithParents()
     .get(slug);
 
-  const authState = await authStatePromise;
+  // Await authStatePromise with timing
+  let authState;
+  {
+    const start = Date.now();
+    authState = await authStatePromise;
+    const end = Date.now();
+    console.log(`[SharedPage] loader.getAuthState() took ${end - start}ms`);
+  }
 
   // this is a special case for when the user is not authenticated, but the not-found status originates from an authed node
   // must be checked before pruning auth tree
@@ -100,7 +129,14 @@ export default async function SharedPage({
   ]);
 
   // prune the tree so that neighbors don't include authed nodes or hidden nodes
-  root = await withPrunedNavigationLoader(root, loader, visibleNodeIds);
+  {
+    const start = Date.now();
+    root = await withPrunedNavigationLoader(root, loader, visibleNodeIds);
+    const end = Date.now();
+    console.log(
+      `[SharedPage] withPrunedNavigationLoader() took ${end - start}ms`
+    );
+  }
 
   if (root == null) {
     console.error(`[SharedPage:${loader.domain}] Could not find root`);
@@ -110,7 +146,14 @@ export default async function SharedPage({
   // find the node that is currently being viewed
   const found = FernNavigation.utils.findNode(root, slug);
 
-  const edgeFlags = await edgeFlagsPromise;
+  // Await edgeFlagsPromise with timing
+  let edgeFlags;
+  {
+    const start = Date.now();
+    edgeFlags = await edgeFlagsPromise;
+    const end = Date.now();
+    console.log(`[SharedPage] loader.getEdgeFlags() took ${end - start}ms`);
+  }
 
   if (found.type === "notFound") {
     console.error(`[${loader.domain}] Not found: ${slug}`);
@@ -182,11 +225,17 @@ export default async function SharedPage({
 
   // even if nav-links are globally disabled, we should calculate the neighbors
   // in case the page overrides this global setting
-  const neighborsPromise = getNeighbors(
-    loader,
-    serializeNextMdx ?? serialize,
-    found
-  );
+  const neighborsPromise = (async () => {
+    const start = Date.now();
+    const result = await getNeighbors(
+      loader,
+      serializeNextMdx ?? serialize,
+      found
+    );
+    const end = Date.now();
+    console.log(`[SharedPage] getNeighbors() took ${end - start}ms`);
+    return result;
+  })();
 
   // if the current node requires authentication and the user is not authenticated, redirect to the auth page
   if (found.node.authed && !authState.authed) {
@@ -204,7 +253,8 @@ export default async function SharedPage({
     redirect(prepareRedirect(authState.authorizationUrl));
   }
 
-  const { isPreview } = await baseUrlPromise;
+  // isPreview is from baseUrl
+  const isPreview = baseUrl.isPreview;
 
   // handle authed preview pages
   if (!authState.authed && edgeFlags.isAuthedPreview && isPreview) {
@@ -216,7 +266,14 @@ export default async function SharedPage({
   }
 
   // TODO: parallelize this with the other edge config calls:
-  const [_, flagPredicate] = await withLaunchDarkly(loader, found);
+  let flagPredicate;
+  {
+    const start = Date.now();
+    const launchDarklyResult = await withLaunchDarkly(loader, found);
+    flagPredicate = launchDarklyResult[1];
+    const end = Date.now();
+    console.log(`[SharedPage] withLaunchDarkly() took ${end - start}ms`);
+  }
 
   if (
     ![...found.parents, found.node]
@@ -237,6 +294,17 @@ export default async function SharedPage({
     ? FeedbackPopover
     : React.Fragment;
 
+  // Await neighborsPromise with timing
+  let neighbors;
+  {
+    const start = Date.now();
+    neighbors = await neighborsPromise;
+    const end = Date.now();
+    console.log(
+      `[SharedPage] neighborsPromise (getNeighbors) took ${end - start}ms`
+    );
+  }
+
   return (
     <FeedbackPopoverProvider>
       <SetCurrentNavigationNode
@@ -248,7 +316,7 @@ export default async function SharedPage({
         versionId={found.currentVersion?.versionId}
         versionSlug={found.currentVersion?.slug}
         versionIsDefault={found.isCurrentVersionDefault}
-        productIsDefault={found.isCurrentProductDefault}
+        productIsDefault={found.isCurrentProductIsDefault}
       />
       <DocsMainContent
         loader={loader}
@@ -256,7 +324,7 @@ export default async function SharedPage({
         serializeNextMdx={serializeNextMdx}
         node={found.node}
         parents={found.parents}
-        neighbors={await neighborsPromise}
+        neighbors={neighbors}
         breadcrumb={found.breadcrumb}
         globalLayout={config.layout}
       />
@@ -298,12 +366,27 @@ async function getNeighbor(
     };
   }
   try {
-    const page = await loader.getPage(pageId);
-    const mdx = await serialize(page.markdown, {
-      filename: page.filename,
-      slug: node.slug,
-      toc: true, // this is probably already cached with toc: true
-    });
+    let page, mdx;
+    {
+      const start = Date.now();
+      page = await loader.getPage(pageId);
+      const end = Date.now();
+      console.log(
+        `[getNeighbor] loader.getPage(${pageId}) took ${end - start}ms`
+      );
+    }
+    {
+      const start = Date.now();
+      mdx = await serialize(page.markdown, {
+        filename: page.filename,
+        slug: node.slug,
+        toc: true, // this is probably already cached with toc: true
+      });
+      const end = Date.now();
+      console.log(
+        `[getNeighbor] serialize() for ${node.slug} took ${end - start}ms`
+      );
+    }
     const excerpt = mdx?.frontmatter?.subtitle ?? mdx?.frontmatter?.excerpt;
     return {
       href: slugToHref(node.slug),
@@ -338,9 +421,15 @@ async function getNeighbors(
     excerpt?: string;
   };
 }> {
-  const [prev, next] = await Promise.all([
-    getNeighbor(loader, serialize, neighbors.prev),
-    getNeighbor(loader, serialize, neighbors.next),
-  ]);
+  let prev, next;
+  {
+    const start = Date.now();
+    [prev, next] = await Promise.all([
+      getNeighbor(loader, serialize, neighbors.prev),
+      getNeighbor(loader, serialize, neighbors.next),
+    ]);
+    const end = Date.now();
+    console.log(`[getNeighbors] getNeighbor() calls took ${end - start}ms`);
+  }
   return { prev, next };
 }
