@@ -24,8 +24,11 @@ export function EndpointExampleSegmentedControl({
 }): ReactElement<any> {
   if (
     segmentedControlExamples.length >= 8 ||
-    segmentedControlExamples.flatMap(({ examples }) => examples).join("")
-      .length >= 80
+    segmentedControlExamples
+      .flatMap(({ examples }) => examples)
+      .filter((ex) => ex.exampleCall.responseStatusCode < 400)
+      .map(({ name }) => name)
+      .join("").length >= 80
   ) {
     return (
       <div className="w-full min-w-0">
