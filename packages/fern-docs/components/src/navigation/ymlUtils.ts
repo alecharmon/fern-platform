@@ -7,8 +7,16 @@ export function buildDocsYmlWithUpdates(
 ): string {
   const { baseContent, pendingUpdates } = navigationData.docsYmlState;
 
-  if (!baseContent || Object.keys(pendingUpdates).length === 0) {
+  // If there are no pending updates, return the base content
+  if (Object.keys(pendingUpdates).length === 0) {
     return baseContent;
+  }
+
+  // If there are pending updates but no base content, we cannot safely apply updates
+  if (!baseContent) {
+    throw new Error(
+      "Cannot build docs.yml: base content not available but pending updates exist. Please ensure docs.yml is loaded before committing."
+    );
   }
 
   try {

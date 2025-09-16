@@ -212,6 +212,16 @@ export function CreateClientPage({
       const docsUrl = params.docsUrl as EncodedDocsUrl;
       const branch = params.branch as string;
 
+      // Ensure docs.yml base content is loaded before creating the page
+      // NOTE: the tradeoff is there will be a small delay in the UI when creating a page
+      const docsYmlUpdateSuccessful = await updateDocsYmlBaseContent();
+
+      if (!docsYmlUpdateSuccessful) {
+        setError("Failed to load docs.yml. Please try again.");
+        setIsCreating(false);
+        return;
+      }
+
       // Use constructEditorSlug to build the proper URL
       const clientPagePath = constructEditorSlug({
         orgName,
@@ -219,12 +229,6 @@ export function CreateClientPage({
         branchName: branch,
         slug: fullSlug,
       });
-
-      const docsYmlUpdateSuccessful = await updateDocsYmlBaseContent();
-
-      if (!docsYmlUpdateSuccessful) {
-        console.warn("Failed to update docs.yml, but page was created locally");
-      }
 
       // Create a client node for the new page
       const nodeId =

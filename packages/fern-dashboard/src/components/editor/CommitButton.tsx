@@ -71,7 +71,18 @@ export function CommitButton() {
     }
 
     // Collect all files to commit using PagesStore (delegates to NavigationStore) including MDX files and docs.yml
-    const { changedFiles, deletedFiles } = prepareCommit(changedMdxFiles);
+    let changedFiles: Record<string, string>;
+    let deletedFiles: string[];
+    try {
+      const commitData = prepareCommit(changedMdxFiles);
+      changedFiles = commitData.changedFiles;
+      deletedFiles = commitData.deletedFiles;
+    } catch (error) {
+      ErrorFullCommitToast();
+      console.error("Failed to prepare commit:", error);
+      return;
+    }
+
     const allFilesToCommit = { ...changedFiles };
 
     if (
