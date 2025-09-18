@@ -28,6 +28,9 @@ TEST_ANTHROPIC_API_KEY = "test-anthropic-api-key"
 TEST_COHERE_API_KEY = "test-cohere-api-key"
 TEST_OPENAI_API_KEY = "test-openai-api-key"
 TEST_TURBOPUFFER_API_KEY = "test-turbopuffer-api-key"
+TEST_SLACK_CLIENT_ID = "test-slack-client-id"
+TEST_SLACK_CLIENT_SECRET = "test-slack-client-secret"
+TEST_SLACK_SIGNING_SECRET = "test-slack-signing-secret"
 
 ROUTES_PACKAGE_NAME = "src.fai.routes"
 
@@ -78,6 +81,9 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["TURBOPUFFER_API_KEY"] = TEST_TURBOPUFFER_API_KEY
     os.environ["OPENAI_API_KEY"] = TEST_OPENAI_API_KEY
     os.environ["FERN_API_KEY"] = TEST_FERN_TOKEN
+    os.environ["SLACK_CLIENT_ID"] = TEST_SLACK_CLIENT_ID
+    os.environ["SLACK_CLIENT_SECRET"] = TEST_SLACK_CLIENT_SECRET
+    os.environ["SLACK_SIGNING_SECRET"] = TEST_SLACK_SIGNING_SECRET
 
     yield
 

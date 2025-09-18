@@ -21,6 +21,10 @@ class Variables:
     TURBOPUFFER_API_KEY: str | None = os.environ.get("TURBOPUFFER_API_KEY")
     IS_LOCAL: bool = os.environ.get("IS_LOCAL", "false").lower() == "true"
 
+    SLACK_CLIENT_ID: str | None = os.environ.get("SLACK_CLIENT_ID")
+    SLACK_CLIENT_SECRET: str | None = os.environ.get("SLACK_CLIENT_SECRET")
+    SLACK_SIGNING_SECRET: str | None = os.environ.get("SLACK_SIGNING_SECRET")
+
     @classmethod
     def validate_env_variables(cls) -> None:
         for attr_name, attr_value in vars(cls).items():

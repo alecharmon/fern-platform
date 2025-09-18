@@ -3,6 +3,10 @@ from typing import Any
 from anthropic import AsyncAnthropic
 from turbopuffer.types.row import Row
 
+from src.fai.models.utils.chat import (
+    ChatMode,
+    format_record,
+)
 from src.fai.utils.chat.prompts.anthropic import build_anthropic_system_prompt
 from src.fai.utils.chat.retrieve.v1_retrieve import v1_retrieve
 from src.fai.utils.chat.tools import SEARCH_TOOL_ANTHROPIC
@@ -15,15 +19,18 @@ async def get_anthropic_response(
     messages: list[dict[str, Any]],
     domain: str,
     rag_records: list[str],
+    mode: ChatMode = ChatMode.MARKDOWN,
 ) -> tuple[list[dict[str, str]], list[str]]:
     async def _handle_anthropic_tool_use(tool_use: Any, domain: str) -> tuple[str, list[str]]:
         query = tool_use.input["query"]
         query_results: list[Row] = await v1_retrieve(query, domain)
-        rag_records = [result.document for result in query_results]
+        rag_records = [format_record(result) for result in query_results]
         return tool_use.id, rag_records
 
     system_prompt = (
-        maybe_system_prompt if maybe_system_prompt else build_anthropic_system_prompt(domain, "\n\n".join(rag_records))
+        maybe_system_prompt
+        if maybe_system_prompt
+        else build_anthropic_system_prompt(domain, mode, "\n\n".join(rag_records))
     )
 
     async with AsyncAnthropic(api_key=VARIABLES.ANTHROPIC_API_KEY) as anthropic_client:

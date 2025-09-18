@@ -36,6 +36,9 @@ async function main() {
             OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
             ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
             COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
+            SLACK_CLIENT_ID: getEnvVarOrThrow("SLACK_CLIENT_ID"),
+            SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
+            SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
           },
           {
             env: { account: "985111089818", region: "us-east-1" },
@@ -58,6 +61,9 @@ async function main() {
             OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
             ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
             COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
+            SLACK_CLIENT_ID: getEnvVarOrThrow("SLACK_CLIENT_ID"),
+            SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
+            SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
           },
           {
             env: { account: "985111089818", region: "us-east-1" },
@@ -80,6 +86,9 @@ async function main() {
             OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
             ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
             COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
+            SLACK_CLIENT_ID: getEnvVarOrThrow("SLACK_CLIENT_ID"),
+            SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
+            SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
           },
           {
             env: { account: "985111089818", region: "us-east-1" },

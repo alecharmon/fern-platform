@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from turbopuffer.types.row import Row
 
+from fai.models.utils.chat import format_record
 from src.fai.app import fai_app
 from src.fai.models.api.chat_api import (
     PostChatCompletionRequest,
@@ -33,7 +34,7 @@ async def post_chat_completion(
         rag_records: list[str] = []
         if last_user_message:
             query_results: list[Row] = await v1_retrieve(last_user_message["content"], domain)
-            rag_records.extend([result.document for result in query_results])
+            rag_records.extend([format_record(result) for result in query_results])
 
         maybe_system_prompt = request.system_prompt
         model = request.model or "claude-4-sonnet-20250514"

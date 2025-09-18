@@ -14,8 +14,7 @@ from src.settings import (
     VARIABLES,
 )
 
-# TODO: This should be "document"
-DOCUMENT_ATTRIBUTES = ["chunk", "url", "version", "title", "keywords"]
+DOCUMENT_ATTRIBUTES = ["document", "chunk", "url", "version", "title", "keywords"]
 
 
 class TPUFRow:
@@ -31,6 +30,10 @@ class TPUFRow:
     @property
     def chunk(self) -> str | None:
         return self.attributes.get("chunk")
+
+    @property
+    def url(self) -> str | None:
+        return self.attributes.get("url")
 
 
 def _normalize_rows(rows: Iterable[Any]) -> list[TPUFRow]:

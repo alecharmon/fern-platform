@@ -28,6 +28,6 @@ async def v1_retrieve(query: str, domain: str) -> list[Row]:
             query_results = await tpuf_ns.query(
                 rank_by=("vector", "ANN", vector.data[0].embedding),
                 top_k=5,
-                include_attributes=["document"],
+                include_attributes=["document", "url"],
             )
             return query_results.rows

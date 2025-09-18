@@ -29,6 +29,9 @@ export interface FernAiEnvVariables {
   ANTHROPIC_API_KEY: string;
   COHERE_API_KEY: string;
   TURBOPUFFER_API_KEY: string;
+  SLACK_CLIENT_ID: string;
+  SLACK_CLIENT_SECRET: string;
+  SLACK_SIGNING_SECRET: string;
   [key: string]: string;
 }
 

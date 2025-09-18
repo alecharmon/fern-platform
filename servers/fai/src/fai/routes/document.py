@@ -29,9 +29,7 @@ from src.fai.models.api.document_api import (
     UpdateDocumentResponse,
 )
 from src.fai.models.db.document_db import DocumentDb
-from src.fai.utils.document.token_utils import (
-    maybe_chunk_document,
-)
+from src.fai.utils.document.token_utils import maybe_chunk_document
 from src.fai.utils.turbopuffer.namespace import (
     get_document_index_name,
     get_query_index_name,
