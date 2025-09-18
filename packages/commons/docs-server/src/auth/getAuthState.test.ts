@@ -364,6 +364,95 @@ describe("getAuthState", () => {
     expect(authStateGoodToken.ok).toBe(true);
   });
 
+  it("should handle generalized oauth2 with authorize query params", async () => {
+    const GENERAL_OAUTH_CONFIG = {
+      type: "oauth2" as const,
+      partner: "custom" as const,
+      clientId: "test_client_id",
+      clientSecret: "test_client_secret",
+      auth_endpoint:
+        "https://auth.example.com/oauth/authorize?audience=https%3A%2F%2Fdemo.com",
+      token_endpoint: "https://auth.example.com/oauth/token",
+      scope: ["read", "write"],
+      issuer: "https://example.com",
+    };
+
+    const authStateBadToken = await getAuthStateInternal({
+      host,
+      domain,
+      fernToken: "bad_token",
+      authConfig: GENERAL_OAUTH_CONFIG,
+    }).then((get) => get());
+    expect(authStateBadToken.authed).toBe(false);
+    expect(authStateBadToken.ok).toBe(true);
+    if (!authStateBadToken.authed) {
+      const authorizationUrl = new URL(
+        authStateBadToken.authorizationUrl ?? "http://f"
+      );
+
+      expect(authorizationUrl.origin).toBe("https://auth.example.com");
+      expect(authorizationUrl.pathname).toBe("/oauth/authorize");
+      expect(authorizationUrl.searchParams.get("audience")).toBe(
+        "https://demo.com"
+      );
+      expect(authorizationUrl.searchParams.get("response_type")).toBe("code");
+      expect(authorizationUrl.searchParams.get("client_id")).toBe(
+        GENERAL_OAUTH_CONFIG.clientId
+      );
+      expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+        "https://docs.test.com/api/fern-docs/oauth2/callback"
+      );
+      expect(authorizationUrl.searchParams.get("state")).toBe(
+        "https://docs.test.com"
+      );
+      expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
+    }
+
+    const authStateBadTokenWithPathname = await getAuthStateInternal({
+      host,
+      domain,
+      fernToken: "bad_token",
+      authConfig: GENERAL_OAUTH_CONFIG,
+    }).then((get) => get("/docs/test"));
+
+    expect(authStateBadTokenWithPathname.authed).toBe(false);
+    expect(authStateBadTokenWithPathname.ok).toBe(true);
+    if (!authStateBadTokenWithPathname.authed) {
+      const authorizationUrl = new URL(
+        authStateBadTokenWithPathname.authorizationUrl ?? "http://f"
+      );
+
+      expect(authorizationUrl.origin).toBe("https://auth.example.com");
+      expect(authorizationUrl.pathname).toBe("/oauth/authorize");
+      expect(authorizationUrl.searchParams.get("response_type")).toBe("code");
+      expect(authorizationUrl.searchParams.get("client_id")).toBe(
+        GENERAL_OAUTH_CONFIG.clientId
+      );
+      expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+        "https://docs.test.com/api/fern-docs/oauth2/callback"
+      );
+      expect(authorizationUrl.searchParams.get("state")).toBe(
+        "https://docs.test.com/docs/test"
+      );
+      expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
+    }
+
+    const authStateGoodToken = await getAuthStateInternal({
+      host,
+      domain,
+      // Note: this is a valid Fern JWT, but it's not a valid OAuth2 JWT
+      fernToken: await signFernJWT(
+        {},
+        { secret: TEST_JWT_SECRET, issuer: ISSUER }
+      ),
+      authConfig: GENERAL_OAUTH_CONFIG,
+    }).then((get) => get());
+
+    // even if the JWT is a valid Fern JWT, at the moment we don't support Fern tokens generated from OAuth2
+    expect(authStateGoodToken.authed).toBe(false);
+    expect(authStateGoodToken.ok).toBe(true);
+  });
+
   it("should handle sso with workos", async () => {
     const WORKOS_AUTH_CONFIG = {
       type: "sso" as const,
