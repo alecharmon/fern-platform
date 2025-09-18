@@ -37,6 +37,6 @@
     "depcheck": "^1.4.7",
     "stylelint": "^16.1.0",
     "typescript": "^5",
-    "vitest": "^3.0.5"
+    "vitest": "^3.2.4"
   }
 }
