@@ -55,6 +55,9 @@ export function VisualEditorValidationErrorHandler({
     case "REPO_NOT_FOUND":
       return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
+    case "REPO_NOT_CONNECTED":
+      return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
+
     case "FERN_CONFIG_JSON_MISSING":
       return (
         <WarningNote>
@@ -152,12 +155,11 @@ export function VisualEditorValidationErrorHandler({
     case "UNEXPECTED_ERROR":
       return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
-    default:
-      return (
-        <WarningNote>
-          We were unable to validate access to this repo. Please try again or
-          contact support if the issue persists.
-        </WarningNote>
-      );
+    default: {
+      // This ensures we handle all cases exhaustively
+      // If a new error type is added, TypeScript will error here
+      const _exhaustiveCheck: never = error;
+      return _exhaustiveCheck;
+    }
   }
 }

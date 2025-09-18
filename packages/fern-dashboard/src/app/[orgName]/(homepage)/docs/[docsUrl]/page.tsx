@@ -82,10 +82,24 @@ export default async function Page(props: {
       token: session.accessToken,
     });
 
-    githubUrl = urlResult.success ? urlResult.githubUrl : undefined;
+    if (!urlResult.success) {
+      if (urlResult.error.type === "DOMAIN_NOT_REGISTERED") {
+        githubAuthState.validationResult = {
+          ok: false,
+          error: {
+            type: "UNEXPECTED_ERROR",
+            message: "Domain not registered.",
+          },
+        };
+      } else {
+        githubAuthState.validationResult = {
+          ok: false,
+          error: urlResult.error,
+        };
+      }
+    } else {
+      githubUrl = urlResult.githubUrl;
 
-    // If we have a GitHub URL, validate the auth state
-    if (githubUrl) {
       try {
         const validation = await validateGithubRepoAccess(
           orgName,
@@ -124,6 +138,7 @@ export default async function Page(props: {
   } catch (error) {
     console.error(error);
   }
+
   return (
     <div className="flex w-full flex-col gap-4">
       <DocsSiteOverviewCard

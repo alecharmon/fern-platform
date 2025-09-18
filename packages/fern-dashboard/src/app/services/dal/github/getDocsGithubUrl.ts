@@ -4,15 +4,27 @@ import { fernToken_admin } from "@fern-api/docs-server";
 
 import { getDocsUrlMetadata } from "@/app/api/utils/getDocsUrlMetadata";
 
+interface GetDocsGithubUrlSuccess {
+  success: true;
+  githubUrl: string;
+}
+
+interface GetDocsGithubUrlError {
+  success: false;
+  error:
+    | { type: "MALFORMED_GITHUB_URL"; url: string }
+    | { type: "DOMAIN_NOT_REGISTERED" }
+    | { type: "REPO_NOT_CONNECTED" };
+}
+
+type GetDocsGithubUrlResult = GetDocsGithubUrlSuccess | GetDocsGithubUrlError;
 export default async function getDocsGithubUrl({
   url,
   token,
 }: {
   url: string;
   token: string;
-}): Promise<
-  { success: true; githubUrl: string } | { success: false; error: string }
-> {
+}): Promise<GetDocsGithubUrlResult> {
   const docsUrlMetadata = await getDocsUrlMetadata({
     url: decodeURIComponent(url),
     token: fernToken_admin() ?? token,
@@ -22,7 +34,7 @@ export default async function getDocsGithubUrl({
     // doesn't exist
     if (docsUrlMetadata.error.error === "DomainNotRegisteredError") {
       // Don't cache this failure, so throw to skip cache
-      return { success: false, error: "DomainNotRegisteredError" };
+      return { success: false, error: { type: "DOMAIN_NOT_REGISTERED" } };
     }
 
     console.error(
@@ -31,21 +43,22 @@ export default async function getDocsGithubUrl({
     );
     return {
       success: false,
-      error: `Unable to find that domain. Please check that the domain "${decodeURIComponent(
-        url
-      )}" is correct.`,
+      error: { type: "MALFORMED_GITHUB_URL", url: decodeURIComponent(url) },
     };
   }
 
   if (docsUrlMetadata.body.gitUrl == null) {
     // Don't cache this failure, so throw to skip cache
-    return { success: false, error: "NoGitUrl" };
+    return { success: false, error: { type: "REPO_NOT_CONNECTED" } };
   }
 
   const [owner, repo] = docsUrlMetadata.body.gitUrl.split("/").slice(-2);
   if (owner == null || repo == null) {
     // Don't cache this failure, so throw to skip cache
-    return { success: false, error: "InvalidGitUrl" };
+    return {
+      success: false,
+      error: { type: "MALFORMED_GITHUB_URL", url: docsUrlMetadata.body.gitUrl },
+    };
   }
 
   return { success: true, githubUrl: docsUrlMetadata.body.gitUrl };

@@ -20,8 +20,9 @@ export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
     "We were unable to find your working branch. Please confirm that the Github branch exists and has not been deleted.",
   BASE_BRANCH_NOT_SET:
     "Looks like your source repo is not configured correctly. Please set a base branch on your GitHub repo.",
+  REPO_NOT_CONNECTED: "Please connect your GitHub repo above.",
   REPO_NOT_FOUND:
-    "We were unable to find a GitHub repo for this Fern domain. Please confirm that you have linked a GitHub repo to this domain.",
+    "We were unable to locate the GitHub repo connected to this site. Please contact support.",
   USER_NOT_IN_ORG:
     "You do not have access to this organization. Please contact an organization admin to be added.",
   FERN_BOT_NOT_INSTALLED:
@@ -51,6 +52,8 @@ export function getValidationErrorMessage(
   error: GithubRepoValidationError
 ): string {
   switch (error.type) {
+    case "REPO_NOT_CONNECTED":
+      return ERROR_DIGEST_MESSAGES.REPO_NOT_CONNECTED;
     case "MALFORMED_GITHUB_URL":
       return `${ERROR_DIGEST_MESSAGES.MALFORMED_GITHUB_URL} URL: ${error.url}`;
     case "FERN_BOT_NOT_INSTALLED":
@@ -71,8 +74,12 @@ export function getValidationErrorMessage(
       return ERROR_DIGEST_MESSAGES.NO_PROJECTS;
     case "UNEXPECTED_ERROR":
       return `${ERROR_DIGEST_MESSAGES.UNEXPECTED_ERROR} Details: ${error.message}`;
-    default:
-      return ERROR_DIGEST_MESSAGES.UNEXPECTED_ERROR;
+    default: {
+      // This ensures we handle all cases exhaustively
+      // If a new error type is added, TypeScript will error here
+      const _exhaustiveCheck: never = error;
+      throw new TypeError(`Unhandled error type: ${JSON.stringify(error)}`);
+    }
   }
 }
 
