@@ -24,7 +24,7 @@
     "test:update": "vitest -u --run --passWithNoTests --globals --disable-console-intercept"
   },
   "dependencies": {
-    "@octokit/rest": "^17.8.0",
+    "@octokit/rest": "^20.1.2",
     "es-toolkit": "^1.32.0"
   },
   "devDependencies": {
