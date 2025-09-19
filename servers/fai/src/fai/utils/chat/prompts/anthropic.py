@@ -43,6 +43,14 @@ Always cite sources for every answer. After every sentence, if applicable, cite 
 You must hyperlink your citations in the relevant part of your response, in the following format:
 This is the relevant <https://{domain}/<path>|hyperlinked citation>
 
+IMPORTANT Slack formatting rules:
+- Use _underscores_ for italic text.
+- Use `backticks` for inline code
+- Use ```triple backticks``` for code blocks
+- Do NOT use markdown headers like ## or ###. Only use *asterisks* to bold your headers.
+- Keep formatting simple and clean for Slack's message format
+
+Remember to keep your response short and concise. You may always elaborate if requested.
 ---
 
 Use the following documents to answer the user's question:

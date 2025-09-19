@@ -54,3 +54,25 @@ async def add_reaction(channel: str, timestamp: str, reaction: str, bot_token: s
     except Exception as e:
         LOGGER.error(f"Error adding reaction: {e}")
         return False
+
+
+async def remove_reaction(channel: str, timestamp: str, reaction: str, bot_token: str) -> bool:
+    """Remove a reaction from a Slack message."""
+    try:
+        client = AsyncWebClient(token=bot_token)
+        response = await client.reactions_remove(channel=channel, timestamp=timestamp, name=reaction)
+        if response["ok"]:
+            LOGGER.info(f"Successfully removed {reaction} reaction")
+            return True
+        else:
+            LOGGER.error(f"Failed to remove reaction: {response}")
+            return False
+    except SlackApiError as e:
+        if e.response["error"] == "no_reaction":
+            LOGGER.info(f"No {reaction} reaction to remove")
+            return True
+        LOGGER.error(f"Slack API error removing reaction: {e.response['error']}")
+        return False
+    except Exception as e:
+        LOGGER.error(f"Error removing reaction: {e}")
+        return False

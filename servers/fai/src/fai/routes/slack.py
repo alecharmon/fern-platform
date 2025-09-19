@@ -33,6 +33,7 @@ from src.fai.models.types.slack_integration_types import (
 )
 from src.fai.utils.slack.client import (
     add_reaction,
+    remove_reaction,
     send_error_message,
     send_slack_message,
 )
@@ -283,6 +284,10 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
 
     success = await send_slack_message(response.channel, response.response_text, response.bot_token, response.thread_ts)
 
+    if integration and integration.slack_bot_token and message_ts and channel:
+        await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
+        await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
+
     if not success:
         await send_error_message(response.channel, response.bot_token, response.thread_ts)
 
@@ -306,6 +311,10 @@ async def handle_message(event: dict[str, Any], team_id: str) -> None:
         return
 
     success = await send_slack_message(response.channel, response.response_text, response.bot_token, response.thread_ts)
+
+    if integration and integration.slack_bot_token and message_ts and channel:
+        await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
+        await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
 
     if not success:
         await send_error_message(response.channel, response.bot_token, response.thread_ts)
