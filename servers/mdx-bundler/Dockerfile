@@ -1,5 +1,4 @@
-FROM node:22.19-alpine
-RUN apk upgrade --no-cache
+FROM node:22.10-alpine
 
 # install python and build tools for native dependencies
 RUN apk add --no-cache python3 make g++ linux-headers eudev-dev

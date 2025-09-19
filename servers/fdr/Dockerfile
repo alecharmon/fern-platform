@@ -1,5 +1,4 @@
-FROM node:22.19-alpine AS base
-RUN apk upgrade --no-cache
+FROM node:22.10-alpine3.20 AS base
 
 FROM base AS builder
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.

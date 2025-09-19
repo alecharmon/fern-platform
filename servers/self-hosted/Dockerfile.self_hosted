@@ -1,5 +1,4 @@
 FROM cgr.dev/chainguard/wolfi-base:latest
-RUN apk upgrade --no-cache
 
 # Install Node.js and npm
 RUN apk add --no-cache nodejs npm
