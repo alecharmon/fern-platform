@@ -7,8 +7,6 @@ import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { JobManager, createJobStatusResponse } from "@/jobs";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  console.log("CHECK TURBOPUFFER REINDEX STATUS");
-
   if (isLocal() || isSelfHosted()) {
     return NextResponse.json(
       "turbopuffer status check is not accessible in local preview mode",

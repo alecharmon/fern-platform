@@ -71,6 +71,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         getEdgeFlags(domain),
       ]);
 
+      console.log("Starting turbopuffer upsert for namespace: ", namespace);
+
       const numInserted = await turbopufferUpsertTask({
         apiKey: turbopufferApiKey(),
         namespace,
@@ -97,9 +99,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         baseUrl: getFaiOrigin(),
       });
 
+      console.log("Syncing index to query index for domain: ", domain);
+
       const syncResponse = await faiClient.index.syncIndexToQueryIndex(domain, {
         index_name: fernDocsIndexName,
       });
+
+      console.log("Synced finished for domain: ", domain);
 
       const pollJobStatus = async (jobId: string): Promise<void> => {
         while (true) {

@@ -10,6 +10,8 @@ import { createTurbopufferRecords } from "../records/create-turbopuffer-records"
 import { vectorizeTurbopufferRecords } from "../records/vectorize-turbopuffer-records";
 import { FernTurbopufferAttributeSchema } from "../types";
 
+const UPSERT_BATCH_SIZE = 2000;
+
 interface TurbopufferIndexerTaskOptions {
   apiKey: string;
   namespace: string;
@@ -62,20 +64,42 @@ export async function turbopufferUpsertTask({
     splitText,
   });
 
+  console.log("Created turbopuffer records for domain: ", domain);
+
   const records = await vectorizeTurbopufferRecords(
     unvectorizedRecords,
     vectorizer
   );
 
+  console.log("Vectorized turbopuffer records for domain: ", domain);
+
   if (deleteExisting) {
     await ns.deleteAll();
   }
 
-  await ns.upsert({
-    vectors: records,
-    distance_metric: "cosine_distance",
-    schema: FernTurbopufferAttributeSchema,
-  });
+  console.log("Deleted existing records for domain: ", domain);
 
+  try {
+    // Upsert records in batches of UPSERT_BATCH_SIZE to avoid exceeding 256MB payload size limit
+    for (let i = 0; i < records.length; i += UPSERT_BATCH_SIZE) {
+      const batch = records.slice(i, i + UPSERT_BATCH_SIZE);
+      await ns.upsert({
+        vectors: batch,
+        distance_metric: "cosine_distance",
+        schema: FernTurbopufferAttributeSchema,
+      });
+      console.log(
+        `Upserted batch ${Math.floor(i / UPSERT_BATCH_SIZE) + 1}: ${batch.length} records`
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Error upserting records to turbopuffer ",
+      error instanceof Error ? error.message : String(error)
+    );
+    throw error;
+  }
+
+  console.log("Finished upserting records to turbopuffer for domain: ", domain);
   return records.length;
 }
