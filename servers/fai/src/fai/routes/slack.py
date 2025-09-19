@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import hmac
 import json
@@ -33,13 +34,17 @@ from src.fai.models.types.slack_integration_types import (
 )
 from src.fai.utils.slack.client import (
     add_reaction,
+    open_modal,
     remove_reaction,
     send_error_message,
     send_slack_message,
+    update_modal,
 )
 from src.fai.utils.slack.message_handler import (
     get_slack_integration,
+    get_thread_history,
     handle_slack_message,
+    process_message,
 )
 from src.settings import (
     LOGGER,
@@ -254,6 +259,13 @@ async def handle_slack_interactions(request: Request) -> JSONResponse:
             view = payload.get("view", {})
             LOGGER.info(f"Processing view submission: {view.get('callback_id')}")
 
+        elif interaction_type == "message_action":
+            callback_id = payload.get("callback_id")
+            LOGGER.info(f"Processing message action: {callback_id}")
+
+            if callback_id == "draft_ask_fern_reply":
+                return await handle_draft_reply_action(payload)
+
         return JSONResponse(content={"status": "ok"})
 
     except Exception as e:
@@ -290,6 +302,196 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
 
     if not success:
         await send_error_message(response.channel, response.bot_token, response.thread_ts)
+
+
+async def handle_draft_reply_action(payload: dict[str, Any]) -> JSONResponse:
+    """Handle the 'Draft Ask Fern reply' message action."""
+    try:
+        trigger_id = payload.get("trigger_id")
+        user = payload.get("user", {})
+        user_id = user.get("id")
+        team = payload.get("team", {})
+        team_id = team.get("id")
+        channel = payload.get("channel", {})
+        channel_id = channel.get("id")
+        message = payload.get("message", {})
+        message_ts = message.get("ts")
+        message_text = message.get("text", "")
+
+        LOGGER.info(f"Drafting reply for message: {message_text[:100]}... in channel {channel_id}")
+
+        if not trigger_id:
+            LOGGER.error("No trigger_id in payload")
+            return JSONResponse(content={"text": "Unable to open modal: missing trigger_id"}, status_code=200)
+
+        integration = await get_slack_integration(team_id)
+        if not integration or not integration.slack_bot_token:
+            LOGGER.error(f"No integration or bot token found for team {team_id}")
+            return JSONResponse(content={"text": "Unable to draft reply: bot not configured"}, status_code=200)
+
+        loading_modal = {
+            "type": "modal",
+            "callback_id": "draft_reply_modal",
+            "title": {"type": "plain_text", "text": "Draft Reply"},
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Original Message:*",
+                    },
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"> {message_text[:500]}{'...' if len(message_text) > 500 else ''}",
+                    },
+                },
+                {"type": "divider"},
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": (
+                            ":hourglass_flowing_sand: *Generating your draft reply...*\n\n"
+                            "_This may take a few moments._"
+                        ),
+                    },
+                },
+            ],
+            "close": {"type": "plain_text", "text": "Cancel"},
+        }
+
+        view_id = await open_modal(trigger_id, loading_modal, integration.slack_bot_token)
+
+        if not view_id:
+            LOGGER.error("Failed to open modal")
+            return JSONResponse(content={"text": "Unable to open modal"}, status_code=200)
+
+        asyncio.create_task(
+            generate_and_update_modal(
+                view_id,
+                message_text,
+                message_ts,
+                message.get("thread_ts"),
+                channel_id,
+                team_id,
+                integration,
+            )
+        )
+
+        return JSONResponse(content={"status": "ok"})
+
+    except Exception as e:
+        LOGGER.error(f"Error handling draft reply action: {e}")
+        return JSONResponse(
+            content={"text": "Sorry, an error occurred while drafting the reply."},
+            status_code=200,
+        )
+
+
+async def generate_and_update_modal(
+    view_id: str,
+    message_text: str,
+    message_ts: str,
+    thread_ts: str | None,
+    channel_id: str,
+    team_id: str,
+    integration: Any,
+) -> None:
+    """Generate the AI response and update the modal with the result."""
+    try:
+        actual_thread_ts = thread_ts or message_ts
+        message_history = None
+        if actual_thread_ts:
+            message_history = await get_thread_history(
+                channel_id, actual_thread_ts, integration.slack_bot_token, integration.slack_bot_user_id
+            )
+
+        conversation_id = f"slack_draft_{team_id}_{channel_id}_{actual_thread_ts}"
+        response_text = await process_message(
+            message_text,
+            integration.domain,
+            None,
+            message_history,
+            conversation_id=conversation_id,
+        )
+
+        updated_modal = {
+            "type": "modal",
+            "callback_id": "draft_reply_modal",
+            "title": {"type": "plain_text", "text": "Draft Reply"},
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Original Message:*",
+                    },
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"> {message_text[:500]}{'...' if len(message_text) > 500 else ''}",
+                    },
+                },
+                {"type": "divider"},
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Draft Reply:*",
+                    },
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": response_text[:3000],
+                    },
+                },
+                {"type": "divider"},
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "_Copy this text and send it as your own message, or close to dismiss._",
+                        }
+                    ],
+                },
+            ],
+            "close": {"type": "plain_text", "text": "Close"},
+        }
+
+        await update_modal(view_id, updated_modal, integration.slack_bot_token)
+
+    except Exception as e:
+        LOGGER.error(f"Error generating/updating draft reply: {e}")
+        try:
+            error_modal = {
+                "type": "modal",
+                "callback_id": "draft_reply_modal",
+                "title": {"type": "plain_text", "text": "Draft Reply"},
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": (
+                                ":warning: *An error occurred while generating the draft.*\n\n"
+                                "Please try again later."
+                            ),
+                        },
+                    },
+                ],
+                "close": {"type": "plain_text", "text": "Close"},
+            }
+            await update_modal(view_id, error_modal, integration.slack_bot_token)
+        except Exception as update_error:
+            LOGGER.error(f"Failed to update modal with error: {update_error}")
 
 
 async def handle_message(event: dict[str, Any], team_id: str) -> None:

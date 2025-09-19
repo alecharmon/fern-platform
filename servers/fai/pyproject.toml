@@ -41,6 +41,7 @@ apscheduler = "^3.11.0"
 fern-fern-venus-sdk = { version = "*", source = "fern" }
 tiktoken = "^0.11.0"
 slack-sdk = "^3.36.0"
+python-multipart = "^0.0.20"
 
 [tool.poetry.scripts]
 start = "src.fai.main:start"

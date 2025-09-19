@@ -1,3 +1,5 @@
+from typing import Any
+
 from slack_sdk.errors import SlackApiError
 from slack_sdk.web.async_client import AsyncWebClient
 
@@ -8,7 +10,13 @@ async def send_slack_message(channel: str, text: str, bot_token: str, thread_ts:
     try:
         client = AsyncWebClient(token=bot_token)
 
-        response = await client.chat_postMessage(channel=channel, text=text, thread_ts=thread_ts)
+        response = await client.chat_postMessage(
+            channel=channel,
+            text=text,
+            thread_ts=thread_ts,
+            unfurl_links=False,
+            unfurl_media=False,
+        )
 
         if response["ok"]:
             LOGGER.info("Successfully sent response to Slack")
@@ -75,4 +83,68 @@ async def remove_reaction(channel: str, timestamp: str, reaction: str, bot_token
         return False
     except Exception as e:
         LOGGER.error(f"Error removing reaction: {e}")
+        return False
+
+
+async def send_ephemeral_message(channel: str, user: str, text: str, bot_token: str) -> bool:
+    """Send an ephemeral message visible only to a specific user."""
+    try:
+        client = AsyncWebClient(token=bot_token)
+        response = await client.chat_postEphemeral(
+            channel=channel,
+            user=user,
+            text=text,
+            unfurl_links=False,
+            unfurl_media=False,
+        )
+        if response["ok"]:
+            LOGGER.info("Successfully sent ephemeral message")
+            return True
+        else:
+            LOGGER.error(f"Failed to send ephemeral message: {response}")
+            return False
+    except SlackApiError as e:
+        LOGGER.error(f"Slack API error sending ephemeral message: {e.response['error']}")
+        return False
+    except Exception as e:
+        LOGGER.error(f"Error sending ephemeral message: {e}")
+        return False
+
+
+async def open_modal(trigger_id: str, view: dict[str, Any], bot_token: str) -> str | None:
+    """Open a modal dialog in Slack. Returns view_id if successful."""
+    try:
+        client = AsyncWebClient(token=bot_token)
+        response = await client.views_open(trigger_id=trigger_id, view=view)
+        if response["ok"]:
+            view_id = response.get("view", {}).get("id")
+            LOGGER.info(f"Successfully opened modal with view_id: {view_id}")
+            return view_id
+        else:
+            LOGGER.error(f"Failed to open modal: {response}")
+            return None
+    except SlackApiError as e:
+        LOGGER.error(f"Slack API error opening modal: {e.response['error']}")
+        return None
+    except Exception as e:
+        LOGGER.error(f"Error opening modal: {e}")
+        return None
+
+
+async def update_modal(view_id: str, view: dict[str, Any], bot_token: str) -> bool:
+    """Update an existing modal dialog in Slack."""
+    try:
+        client = AsyncWebClient(token=bot_token)
+        response = await client.views_update(view_id=view_id, view=view)
+        if response["ok"]:
+            LOGGER.info("Successfully updated modal")
+            return True
+        else:
+            LOGGER.error(f"Failed to update modal: {response}")
+            return False
+    except SlackApiError as e:
+        LOGGER.error(f"Slack API error updating modal: {e.response['error']}")
+        return False
+    except Exception as e:
+        LOGGER.error(f"Error updating modal: {e}")
         return False
