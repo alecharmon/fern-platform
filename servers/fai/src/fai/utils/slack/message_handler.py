@@ -1,10 +1,16 @@
 from dataclasses import dataclass
+from datetime import (
+    UTC,
+    datetime,
+)
 from typing import Any
+from uuid import uuid4
 
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
 from src.fai.db import async_session_maker
+from src.fai.models.db.query_db import QueryDb
 from src.fai.models.db.slack_integration_db import SlackIntegrationDb
 from src.fai.models.utils.chat import ChatMode
 from src.fai.utils.chat.response.anthropic import get_anthropic_response
@@ -65,6 +71,32 @@ async def get_thread_history(
         return []
 
 
+async def log_query_to_db(
+    query_text: str,
+    domain: str,
+    conversation_id: str,
+    role: str = "USER",
+    source: str = "SLACK",
+) -> None:
+    try:
+        async with async_session_maker() as session:
+            db_query = QueryDb(
+                query_id=str(uuid4()),
+                conversation_id=conversation_id,
+                domain=domain,
+                text=query_text,
+                role=role,
+                source=source,
+                created_at=datetime.now(UTC),
+                time_to_first_token=None,
+            )
+            session.add(db_query)
+            await session.commit()
+            LOGGER.info(f"Logged Slack query to database: {db_query.query_id}")
+    except Exception as e:
+        LOGGER.error(f"Failed to log query to database: {e}")
+
+
 async def process_message(
     text: str,
     domain: str,
@@ -72,12 +104,16 @@ async def process_message(
     message_history: list[dict[str, str]] | None = None,
     model: str = "claude-4-sonnet-20250514",
     top_k: int = 5,
+    conversation_id: str | None = None,
 ) -> str:
     if bot_user_id and text:
         text = text.replace(f"<@{bot_user_id}>", "").strip()
 
     if not text:
         return "I need a message to respond to. Please ask me a question!"
+
+    if conversation_id:
+        await log_query_to_db(text, domain, conversation_id, role="USER", source="SLACK")
 
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
@@ -107,7 +143,10 @@ async def process_message(
         )
 
         if output_turns and len(output_turns) > 0:
-            return "\n\n".join([turn["text"] for turn in output_turns])
+            response = "\n\n".join([turn["text"] for turn in output_turns])
+            if conversation_id:
+                await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="SLACK")
+            return response
 
         return "I couldn't find any relevant information to answer your question."
 
@@ -147,11 +186,14 @@ async def handle_slack_message(
         )
         LOGGER.info(f"Retrieved {len(message_history)} messages from thread history")
 
+    conversation_id = f"slack_{context.team_id}_{context.channel}_{context.thread_ts or context.user or 'direct'}"
+
     response_text = await process_message(
         context.text,
         integration.domain,
         integration.slack_bot_user_id if context.is_app_mention else None,
         message_history,
+        conversation_id=conversation_id,
     )
 
     return SlackMessageResponse(
