@@ -1,23 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
-
-import * as Sentry from "@sentry/nextjs";
-
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
 
 import ReturnHomeButton from "@/components/ReturnHomeButton";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
 export default function Error({
-  error,
+  error: _error,
 }: {
   error: Error & { digest?: string };
 }) {
-  useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
-
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-2">
       <div className="flex h-24 w-24 items-center justify-center">

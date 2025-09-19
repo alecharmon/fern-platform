@@ -2,9 +2,6 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
-
-import * as Sentry from "@sentry/nextjs";
 
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
 
@@ -19,11 +16,8 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
-
   const { orgName } = useParams();
+
   return (
     <main className="flex h-full w-full items-center justify-center">
       <div className="flex max-w-[500px] flex-col items-center justify-center gap-6 text-center">

@@ -1,16 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-
-import * as Sentry from "@sentry/nextjs";
-
 import { UnsupportedContent } from "@/components/editor/UnsupportedContent";
 
-export default function Error({ error }: { error: Error }) {
-  useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
-
+export default function Error({ error: _error }: { error: Error }) {
   // TODO: We should make this error message more specific to the error thrown. Right now this
   // is a catch-all for any error that occurs in the editor's markdown page.
   return (

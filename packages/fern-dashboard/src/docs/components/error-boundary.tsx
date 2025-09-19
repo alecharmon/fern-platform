@@ -1,8 +1,9 @@
 "use client";
 
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useEffect } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
+import * as Sentry from "@sentry/nextjs";
 import { RefreshCcw } from "lucide-react";
 
 import {
@@ -21,6 +22,12 @@ export function ErrorBoundaryFallback({
   error: Error & { digest?: string };
   resetErrorBoundary?: () => void;
 }) {
+  // React Error Boundaries require manual Sentry integration because
+  // Sentry's automatic client-side capture doesn't extend to caught React errors
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   console.error(`[error-boundary-fallback] ${JSON.stringify(error)}`);
   const errorBadge = (
     <SemanticBadge

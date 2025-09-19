@@ -20,8 +20,7 @@
     ".next/types/**/*.ts",
     "src/**/*",
     "vitest.config.ts",
-    "sentry.server.config.ts",
-    "sentry.edge.config.ts"
+    "sentry.*.config.ts"
   ],
   "references": [
     {
