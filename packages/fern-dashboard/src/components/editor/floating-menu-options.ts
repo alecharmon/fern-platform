@@ -1,76 +1,167 @@
-import { Icon } from "../icon/Icon";
+import { Editor } from "@tiptap/react";
+import {
+  ChevronDown,
+  ChevronsDown,
+  Clapperboard,
+  Code2,
+  Grid2X2,
+  Image,
+  List,
+  ListOrderedIcon,
+  Megaphone,
+  Square,
+} from "lucide-react";
 
-export type FloatingMenuAction =
-  | "toggleHeading1"
-  | "toggleHeading2"
-  | "toggleHeading3"
-  | "toggleBulletList"
-  | "toggleOrderedList"
-  | "toggleQuote"
-  | "setLink"
-  | "plainText"
-  | "toggleMedia";
+import {
+  EMPTY_ACCORDION_CONTENT,
+  EMPTY_ACCORDION_GROUP_CONTENT,
+} from "@/docs/mdx/components/accordion";
+import { EMPTY_CALLOUT_CONTENT } from "@/docs/mdx/components/callout/Callout";
+import {
+  EMPTY_CARD_CONTENT,
+  EMPTY_CARD_GROUP_CONTENT,
+} from "@/docs/mdx/components/card/CardGroup";
+import { EMPTY_PARAM_FIELD_CONTENT } from "@/docs/mdx/components/parameters/ParamField";
+import { EMPTY_STEPS_CONTENT } from "@/docs/mdx/components/steps";
 
-export interface MenuItem {
-  title: string;
-  iconProps: Icon.Props;
-  action: FloatingMenuAction;
-  keywords: string[];
-}
+import { SuggestionItem } from "../tiptap-ui-utils/suggestion-menu";
+import { createCustomElementNode } from "./extension-custom-element/create-custom-element-node";
 
-export const menuItems: MenuItem[] = [
+const handleCustomNodeInsert = (
+  editor: Editor,
+  tagName: string,
+  content: string
+) => {
+  editor
+    .chain()
+    .focus()
+    .insertContent(createCustomElementNode(tagName, content))
+    .run();
+};
+
+export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
+  // Basic formatting items
   {
-    title: "Text",
-    iconProps: { variant: "Type" },
-    action: "plainText",
-    keywords: ["text", "paragraph", "p"],
+    title: "Code Block",
+    subtext: "Add a code block",
+    aliases: ["code", "code block"],
+    badge: Code2,
+    group: "Style",
+    keywords: ["code", "code block"],
+    onSelect: ({ editor }) => {
+      editor
+        .chain()
+        .focus()
+        .setCodeBlock()
+        .insertContent("console.log('Hello world!');")
+        .run();
+    },
   },
-  {
-    title: "Heading 1",
-    iconProps: { variant: "Heading1" },
-    action: "toggleHeading1",
-    keywords: ["heading", "h1", "header", "title"],
-  },
-  {
-    title: "Heading 2",
-    iconProps: { variant: "Heading2" },
-    action: "toggleHeading2",
-    keywords: ["heading", "h2", "header", "subtitle"],
-  },
-  {
-    title: "Heading 3",
-    iconProps: { variant: "Heading3" },
-    action: "toggleHeading3",
-    keywords: ["heading", "h3", "header"],
-  },
-  {
-    title: "Bulleted list",
-    iconProps: { variant: "List" },
-    action: "toggleBulletList",
-    keywords: ["list", "bullet", "ul", "unordered"],
-  },
-  {
-    title: "Numbered list",
-    iconProps: { variant: "ListOrdered" },
-    action: "toggleOrderedList",
-    keywords: ["list", "number", "ol", "ordered"],
-  },
-  {
-    title: "Quote",
-    iconProps: { variant: "MessageSquareQuote" },
-    action: "toggleQuote",
-    keywords: ["quote", "blockquote", "citation"],
-  },
+
+  // Media items
   {
     title: "Image",
-    iconProps: { variant: "Image" },
-    action: "toggleMedia",
-    keywords: ["image", "img", "picture"],
+    subtext: "Add an image",
+    aliases: ["image", "img", "picture"],
+    badge: Image,
+    group: "Media",
+    keywords: ["image", "img", "picture", "media"],
+    onSelect: ({ editor }) => {
+      editor.chain().focus().setMediaUploadNode().run();
+    },
   },
   {
     title: "Video",
-    iconProps: { variant: "Video" },
-    action: "toggleMedia",
-    keywords: ["video", "embed", "iframe"],
+    subtext: "Add a video",
+    aliases: ["video", "embed", "iframe"],
+    badge: Clapperboard,
+    group: "Media",
+    keywords: ["video", "embed", "iframe", "media"],
+    onSelect: ({ editor }) => {
+      editor.chain().focus().setMediaUploadNode().run();
+    },
+  },
+
+  // Component items
+  {
+    title: "Accordion",
+    subtext: "Add an accordion",
+    aliases: ["accordion"],
+    badge: ChevronDown,
+    group: "Components",
+    keywords: ["accordion", "accordion group"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "Accordion", EMPTY_ACCORDION_CONTENT);
+    },
+  },
+  {
+    title: "Accordion Group",
+    subtext: "Add an accordion group",
+    aliases: ["accordion", "accordion group"],
+    badge: ChevronsDown,
+    group: "Components",
+    keywords: ["accordion", "accordion group"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(
+        editor,
+        "AccordionGroup",
+        EMPTY_ACCORDION_GROUP_CONTENT
+      );
+    },
+  },
+  {
+    title: "Callout",
+    subtext: "Add a callout",
+    aliases: ["callout", "tip", "note", "warning", "error", "success"],
+    badge: Megaphone,
+    group: "Components",
+    keywords: ["callout", "tip", "note", "warning", "error", "success"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "Callout", EMPTY_CALLOUT_CONTENT);
+    },
+  },
+  {
+    title: "Card",
+    subtext: "Add a card",
+    aliases: ["card"],
+    badge: Square,
+    group: "Components",
+    keywords: ["card"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "Card", EMPTY_CARD_CONTENT);
+    },
+  },
+  {
+    title: "Card Group",
+    subtext: "Add a card group",
+    aliases: ["card", "card group"],
+    badge: Grid2X2,
+    group: "Components",
+    keywords: ["card", "card group"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "CardGroup", EMPTY_CARD_GROUP_CONTENT);
+    },
+  },
+  {
+    title: "Parameter Field",
+    subtext: "Add a parameter field",
+    aliases: ["parameter", "parameter field"],
+    badge: List,
+    group: "Components",
+    keywords: ["parameter", "parameter field"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "ParamField", EMPTY_PARAM_FIELD_CONTENT);
+    },
+  },
+  {
+    title: "Steps",
+    subtext: "Add step-by-step instructions",
+    aliases: ["steps", "step", "step group"],
+    badge: ListOrderedIcon,
+    group: "Components",
+    keywords: ["steps", "step", "step group"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "Steps", EMPTY_STEPS_CONTENT);
+    },
   },
 ];

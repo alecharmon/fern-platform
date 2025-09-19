@@ -1,4 +1,10 @@
-import { FC, PropsWithChildren, ReactElement, isValidElement } from "react";
+import {
+  FC,
+  PropsWithChildren,
+  ReactElement,
+  isValidElement,
+  useRef,
+} from "react";
 
 import {
   Bell,
@@ -14,6 +20,22 @@ import {
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { cn } from "@fern-docs/components";
 import { FaIcon } from "@fern-docs/components";
+
+import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
+import {
+  EditorComponentPopoverButton,
+  EditorComponentPopoverProvider,
+} from "@/components/editor/editor-component/EditorComponentPopover";
+import {
+  SelectControl,
+  TextInputControl,
+} from "@/components/editor/editor-component/controls";
+
+export const EMPTY_CALLOUT_CONTENT = `
+<Callout intent="info">
+  Content
+</Callout>
+`;
 
 type Intent =
   | "info"
@@ -48,8 +70,19 @@ export const Callout: FC<PropsWithChildren<Callout.Props>> = ({
   icon,
 }) => {
   const intent = parseIntent(intentRaw);
-  return (
-    <div data-intent={intent} className="fern-callout">
+  const { isWithinEditor } = useEditorComponent();
+
+  const calloutRef = useRef<HTMLDivElement>(null);
+
+  const calloutContent = (
+    <div
+      ref={calloutRef}
+      data-intent={intent}
+      className="fern-callout relative"
+    >
+      {isWithinEditor && (
+        <EditorComponentPopoverButton className="absolute right-2 top-2" />
+      )}
       <div className="flex items-start space-x-4">
         <div className="[&_svg]:size-icon-md mt-0.5 w-4">
           {typeof icon === "string" ? (
@@ -73,15 +106,51 @@ export const Callout: FC<PropsWithChildren<Callout.Props>> = ({
 
         <div
           className={cn(
-            "-my-4 flex-1 overflow-x-auto text-sm before:mb-4 before:block after:mt-4 after:block" // ::after margin ensures that bottom padding overlaps with botttom margins of internal content
+            "-my-4 flex-1 overflow-x-auto text-sm before:mb-4 before:block after:mt-4 after:block", // ::after margin ensures that bottom padding overlaps with botttom margins of internal content
+            isWithinEditor && "solid-hover-handle overflow-visible"
           )}
         >
-          <h5 className="leading-snug">{title}</h5>
-          {children}
+          <h5 className={cn("leading-snug", isWithinEditor && "mb-2")}>
+            {title}
+          </h5>
+
+          {isWithinEditor ? (
+            <div className="-ml-8 -mt-4">{children}</div>
+          ) : (
+            children
+          )}
         </div>
       </div>
     </div>
   );
+
+  if (isWithinEditor) {
+    return (
+      <EditorComponentPopoverProvider
+        attributes={{
+          title: new TextInputControl({ defaultValue: title }),
+          intent: new SelectControl({
+            options: [
+              "info",
+              "warning",
+              "success",
+              "error",
+              "note",
+              "launch",
+              "tip",
+              "check",
+            ],
+            defaultValue: intent,
+          }),
+        }}
+        targetRef={calloutRef}
+      >
+        {calloutContent}
+      </EditorComponentPopoverProvider>
+    );
+  }
+
+  return calloutContent;
 };
 
 // aliases

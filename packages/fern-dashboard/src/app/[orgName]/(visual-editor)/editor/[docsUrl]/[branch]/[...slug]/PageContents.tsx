@@ -58,7 +58,7 @@ export default function PageContents({
   ]);
 
   return (
-    <div className="max-w-content-width-wide mx-auto w-full">
+    <div className="max-w-content-width-wide mx-auto w-full pb-64">
       <PageTitle
         className="w-full"
         filename={filename}
@@ -70,7 +70,7 @@ export default function PageContents({
         initialText={subtitle ? String(subtitle) : undefined}
       />
       <PageEditor
-        className="w-full"
+        className="-m-2 w-full p-3"
         filename={filename}
         initialHtml={initialHtml}
       />

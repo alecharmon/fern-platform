@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { Root as HastRoot } from "hast";
+import { ElementContent, Root as HastRoot } from "hast";
 import { fromHtml } from "hast-util-from-html";
 import { toHtml } from "hast-util-to-html";
 import {
@@ -8,7 +8,7 @@ import {
   defaultHandlers as toMdastDefaultHandlers,
 } from "hast-util-to-mdast";
 import yaml from "js-yaml";
-import { Parents as MdastParents } from "mdast";
+import { Parents as MdastParents, Nodes, Root } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import {
   frontmatterFromMarkdown,
@@ -127,6 +127,20 @@ export type ChangedNodes = Record<NodeId, boolean>;
 // Frontmatter included in mdx
 export type Frontmatter = Record<string, unknown>;
 
+// Re-export mdast types for external use
+export type {
+  Node as MdastNode,
+  Nodes as MdastNodes,
+  Content as MdastContent,
+} from "mdast";
+
+// Response from mdxToAST
+export interface MdxToASTResponse {
+  mdast: Root;
+  frontmatter: Frontmatter;
+  originalFrontmatter?: string;
+}
+
 // Response from mdxToHtml
 export interface MdxToHtmlResponse {
   html: string;
@@ -146,13 +160,8 @@ interface MdxToHtmlOptions {
   treatAsUnsupported?: AllElementsType[];
 }
 
-// Convert mdx to html and frontmatter
-export function mdxToHtml(
-  rootContent: string,
-  options?: MdxToHtmlOptions
-): MdxToHtmlResponse {
-  const { treatAsCustomElement = [], treatAsUnsupported = [] } = options ?? {};
-
+// Convert mdx to AST with frontmatter extraction
+export function mdxToAST(rootContent: string): MdxToASTResponse {
   // Get mdast from root mdx content
   const mdast = fromMarkdown(rootContent, {
     extensions: [mdxjs(), fm(["yaml"]), math()],
@@ -173,6 +182,42 @@ export function mdxToHtml(
   const frontmatter = isValidFrontmatter(parsedFrontmatter)
     ? parsedFrontmatter
     : {};
+
+  return { mdast, frontmatter, originalFrontmatter };
+}
+
+// Convert AST back to MDX string
+export function astToMDX(mdast: Nodes, originalFrontmatter?: string): string {
+  // Start with frontmatter if it exists
+  let mdxContent = "";
+
+  if (originalFrontmatter) {
+    mdxContent = `---\n${originalFrontmatter}\n---\n\n`;
+  }
+
+  // Convert mdast back to MDX string
+  const mdxBody = toMarkdown(mdast, {
+    extensions: [
+      mdxToMarkdown(),
+      frontmatterToMarkdown(["yaml"]),
+      mathToMarkdown(),
+    ],
+  });
+
+  mdxContent += mdxBody;
+
+  return mdxContent;
+}
+
+// Convert mdx to html, frontmatter, and original elements
+export function mdxToHtml(
+  rootContent: string,
+  options?: MdxToHtmlOptions
+): MdxToHtmlResponse {
+  const { treatAsCustomElement = [], treatAsUnsupported = [] } = options ?? {};
+
+  // Get mdast and frontmatter from mdx content
+  const { mdast, frontmatter, originalFrontmatter } = mdxToAST(rootContent);
 
   // Default handler for base elements
   function baseElementHandler(
@@ -330,9 +375,10 @@ export function htmlToMdx(
 
     // If a node has not been changed, we use the original MDX content
     if (
+      changedNodes != null &&
       typeof element.properties?.["fve-mdx-b64"] === "string" &&
       typeof element.properties?.["fve-data-id"] === "string" &&
-      !changedNodes?.[element.properties["fve-data-id"]]
+      !changedNodes[element.properties["fve-data-id"]]
     ) {
       const originalMdx = Buffer.from(
         element.properties["fve-mdx-b64"],
@@ -590,9 +636,6 @@ function isValidFrontmatter(
     !!frontmatter &&
     typeof frontmatter === "object" &&
     !Array.isArray(frontmatter);
-  if (!isValid) {
-    console.warn("Invalid or missing frontmatter", frontmatter);
-  }
   return isValid;
 }
 
@@ -644,8 +687,8 @@ function getNodeContent(node: any, rootContent: string) {
   return { content };
 }
 
-// Strip all attributes from a node for comparison purposes
-function stripNodeAttributes(node: any): any {
+// Strip fve- attributes from a node for comparison purposes
+function stripNodeAttributes(node: ElementContent): any {
   if (!node || typeof node !== "object") {
     return node;
   }
@@ -656,13 +699,22 @@ function stripNodeAttributes(node: any): any {
 
   const stripped = { ...node };
 
-  // Remove all properties (which include attributes in hast nodes)
-  if (stripped.type === "element") {
-    stripped.properties = {};
+  // Remove only fve- properties (which include attributes in hast nodes)
+  if (stripped.type === "element" && stripped.properties) {
+    const filteredProperties: Record<string, any> = {};
+    for (const [key, value] of Object.entries(stripped.properties)) {
+      if (!key.startsWith("fve-")) {
+        filteredProperties[key] = value;
+      }
+    }
+    stripped.properties = filteredProperties;
   }
-
   // Recursively strip attributes from children
-  if (stripped.children && Array.isArray(stripped.children)) {
+  if (
+    "children" in stripped &&
+    stripped.children &&
+    Array.isArray(stripped.children)
+  ) {
     stripped.children = stripped.children.map(stripNodeAttributes);
   }
 
@@ -689,9 +741,15 @@ export function getChangedNodesFromHtml(
   // Compare nodes with the same hash
   for (const id of Object.keys(originalMap)) {
     if (id in latestMap) {
-      // Compare the nodes without attributes
+      // Compare the nodes without "fve-" attributes
       const originalNode = originalMap[id];
       const latestNode = latestMap[id];
+
+      if (originalNode == null || latestNode == null) {
+        throw new Error(
+          `Node with id "${id}" exists in both maps but one of the nodes is null/undefined. Original: ${originalNode}, Latest: ${latestNode}`
+        );
+      }
 
       // Strip attributes from both nodes before comparison
       const strippedOriginal = stripNodeAttributes(originalNode);
@@ -710,8 +768,8 @@ export function getChangedNodesFromHtml(
 
 // TODO: consider writing type guards for the hast nodes, since toHast does not type it by default
 function getNodeMapFromHast(hast: HastRoot) {
-  const map: Record<NodeId, any> = {};
-  let bodyChildren: any[] | undefined;
+  const map: Record<NodeId, ElementContent> = {};
+  let bodyChildren: ElementContent[] | undefined;
   if (hast && Array.isArray(hast.children)) {
     // Find the <html> element
     const htmlNode = hast.children.find(

@@ -277,7 +277,6 @@ function createFoundNode(
 function generateDefaultPageData(title: string, slug: string) {
   const initialMdx = createMdxFrontmatter({ title, slug });
   return mdxToHtml(initialMdx, {
-    treatAsCustomElement: ["code"],
     treatAsUnsupported: ["math"],
   });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Editor, EditorEvents } from "@tiptap/react";
 
@@ -26,6 +26,7 @@ export default function PageEditor({
   const editorRef = useRef<Editor | null>(null);
   const skipNormalUpdateBecauseUpdateIsFromDevPanel = useRef(false);
   const latestTiptapHtml = useRef<string>(initialHtml || "");
+  const [saveCounter, setSaveCounter] = useState(0);
 
   const { updatePage, subscribeSaveEvent } = usePages();
 
@@ -34,10 +35,19 @@ export default function PageEditor({
     const unsubscribe = subscribeSaveEvent((event) => {
       skipNormalUpdateBecauseUpdateIsFromDevPanel.current = true;
       editorRef.current?.commands.setContent(event.html);
+      setSaveCounter((c) => {
+        return c + 1;
+      });
     });
 
     return unsubscribe;
-  }, [filename, subscribeSaveEvent, latestTiptapHtml, editorRef]);
+  }, [
+    filename,
+    subscribeSaveEvent,
+    latestTiptapHtml,
+    editorRef,
+    setSaveCounter,
+  ]);
 
   function onTiptapEditorCreate(props: EditorEvents["create"]) {
     latestTiptapHtml.current = props.editor.getHTML();
@@ -66,12 +76,14 @@ export default function PageEditor({
 
   // TODO: add a loading state, possibly as a Suspense boundary
   return (
-    <TiptapEditor
-      autofocus={true}
-      className={className}
-      initialContent={initialHtml || ""}
-      onCreate={onTiptapEditorCreate}
-      onUpdate={onTiptapEditorUpdate}
-    />
+    <div key={saveCounter} className="relative">
+      <TiptapEditor
+        autofocus={true}
+        className={className}
+        initialContent={initialHtml || ""}
+        onCreate={onTiptapEditorCreate}
+        onUpdate={onTiptapEditorUpdate}
+      />
+    </div>
   );
 }

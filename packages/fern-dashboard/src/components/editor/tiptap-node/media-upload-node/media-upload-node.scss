@@ -23,7 +23,7 @@
 }
 
 .tiptap-image-upload {
-  margin: 2rem 0;
+  margin: 1rem 0;
   font-family: gtPlanar;
 
   input[type="file"] {
@@ -159,7 +159,8 @@
 }
 
 .tiptap.ProseMirror.ProseMirror-focused {
-  .ProseMirror-selectednode .tiptap-image-upload-drag-area {
+  .ProseMirror-selectednode:not(:has(.ProseMirror-selectednode))
+    .tiptap-image-upload-drag-area {
     border-color: var(--tiptap-image-upload-active);
   }
 }

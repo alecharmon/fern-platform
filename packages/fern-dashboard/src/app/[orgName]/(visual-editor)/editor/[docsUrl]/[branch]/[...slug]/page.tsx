@@ -105,12 +105,10 @@ export default async function Page({
   // from the server as a fallback.
   const { html, frontmatter, originalFrontmatter } = rawMarkdown
     ? mdxToHtml(rawMarkdown, {
-        treatAsCustomElement: ["code"],
         treatAsUnsupported: ["math"],
       })
     : mdx
       ? mdxToHtml(mdx, {
-          treatAsCustomElement: ["code"],
           treatAsUnsupported: ["math"],
         })
       : {};

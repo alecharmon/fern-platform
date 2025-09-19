@@ -10,7 +10,8 @@
     "@tailwindcss/typography",
     "glslify-import",
     "glslify-loader",
-    "raw-loader"
+    "raw-loader",
+    "aws4"
   ],
   "ignore-patterns": ["dist"]
 }

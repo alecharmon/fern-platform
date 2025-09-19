@@ -59,7 +59,6 @@ export default function DevPanel() {
     try {
       // Convert markdown back to HTML using mdxToHtml
       const { html, frontmatter } = mdxToHtml(content, {
-        treatAsCustomElement: ["code"],
         treatAsUnsupported: ["math"],
       });
 

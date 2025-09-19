@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useRef } from "react";
 
 import { Prose } from "@fern-docs/components/mdx/prose";
 
+import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
+import {
+  EditorComponentPopoverButton,
+  EditorComponentPopoverProvider,
+} from "@/components/editor/editor-component/EditorComponentPopover";
+import {
+  CheckboxControl,
+  TextInputControl,
+} from "@/components/editor/editor-component/controls";
 import { FernAnchor } from "@/docs/components/FernAnchor";
+
+export const EMPTY_PARAM_FIELD_CONTENT = `
+<ParamField path="parameter name" type="string" required={true}>
+  Description
+</ParamField>
+`;
 
 export const ParamField: React.FC<
   React.PropsWithChildren<{
@@ -37,6 +52,9 @@ export const ParamField: React.FC<
   title,
   ...props
 }) => {
+  const { isWithinEditor } = useEditorComponent();
+  const popoverRef = useRef<HTMLDivElement>(null);
+
   // use title prop if available, otherwise fall back to extracting from props
   const name =
     title ||
@@ -48,17 +66,35 @@ export const ParamField: React.FC<
           ? props.body
           : props.header);
 
-  return (
-    <div className="fern-api-property border-border-default border-b">
+  // Determine the parameter type for the attributes
+  const paramType =
+    "query" in props
+      ? "query"
+      : "path" in props
+        ? "path"
+        : "body" in props
+          ? "body"
+          : "header";
+
+  const paramField = (
+    <div
+      className="fern-api-property border-border-default relative border-b"
+      ref={popoverRef}
+    >
+      {isWithinEditor && (
+        <EditorComponentPopoverButton className="absolute right-0 top-0 mr-2 mt-2" />
+      )}
       <div className="fern-api-property-header">
-        {toc ? (
+        {toc && !isWithinEditor ? (
           <FernAnchor href={`#${id}`} asChild>
             <h6 className="fern-api-property-key" id={id}>
               {name}
             </h6>
           </FernAnchor>
         ) : (
-          <div className="fern-api-property-key">{name}</div>
+          <div className="fern-api-property-key" id={toc ? id : undefined}>
+            {name}
+          </div>
         )}
         <div className="fern-api-property-meta">
           <span>{type}</span>
@@ -69,7 +105,43 @@ export const ParamField: React.FC<
           {required && <span className="text-(color:--red-a11)">Required</span>}
         </div>
       </div>
-      {children && <Prose size="sm">{children}</Prose>}
+      {children &&
+        (isWithinEditor ? (
+          <div className="solid-hover-handle -my-6 -ml-8 text-sm">
+            {children}
+          </div>
+        ) : (
+          <Prose size="sm">{children}</Prose>
+        ))}
     </div>
+  );
+
+  if (!isWithinEditor) {
+    return paramField;
+  }
+
+  return (
+    <EditorComponentPopoverProvider
+      attributes={{
+        [paramType]: new TextInputControl({ defaultValue: name }),
+        type: new TextInputControl({ defaultValue: type }),
+        default: new TextInputControl({ defaultValue: defaultProp || "" }),
+        required: new CheckboxControl({
+          defaultValue: required || false,
+          label: "Required",
+        }),
+        deprecated: new CheckboxControl({
+          defaultValue: deprecated || false,
+          label: "Deprecated",
+        }),
+        toc: new CheckboxControl({
+          defaultValue: toc || false,
+          label: "Show in table of contents",
+        }),
+      }}
+      targetRef={popoverRef}
+    >
+      {paramField}
+    </EditorComponentPopoverProvider>
   );
 };

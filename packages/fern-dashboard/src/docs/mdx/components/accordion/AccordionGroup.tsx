@@ -1,39 +1,113 @@
-import React, { useEffect } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import { CirclePlusIcon } from "lucide-react";
 
 import * as AccordionComponent from "@fern-docs/components";
+import { Button } from "@fern-docs/components";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 
-import { unwrapChildren } from "@/docs/mdx/common/unwrap-children";
+import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
+import {
+  EditorComponentPopoverButton,
+  EditorComponentPopoverProvider,
+} from "@/components/editor/editor-component/EditorComponentPopover";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
+import { cn } from "@/utils/utils";
 
 export interface AccordionGroupProps {
   children: React.ReactNode;
   toc?: boolean;
 }
 
-export function AccordionGroup({ children }: AccordionGroupProps) {
-  const [activeTabs, setActiveTabs] = React.useState<string[]>([]);
-  const anchor = useCurrentAnchor();
-  const [updatedUrl, setUpdatedUrl] = React.useState<string | null>(null);
-  const [isProgrammaticUpdate, setIsProgrammaticUpdate] = React.useState(false);
-  const items = unwrapChildren(children, Accordion);
+export const EMPTY_ACCORDION_CONTENT = `
+<Accordion title="Untitled">
 
-  const findParentAccordion = React.useCallback(
+</Accordion>
+`;
+
+export const EMPTY_ACCORDION_GROUP_CONTENT = `
+<AccordionGroup>
+  ${EMPTY_ACCORDION_CONTENT}
+</AccordionGroup>
+`;
+
+interface AccordionData {
+  id: string;
+  title: string;
+  toc?: boolean;
+  nestedHeaders?: string[];
+}
+
+interface AccordionContextType {
+  registerAccordion: (accordion: AccordionData) => void;
+  unregisterAccordion: (id: string) => void;
+  accordions: AccordionData[];
+}
+
+const AccordionContext = createContext<AccordionContextType | undefined>(
+  undefined
+);
+
+function useAccordionContext() {
+  const context = useContext(AccordionContext);
+  return context;
+}
+
+export function AccordionGroup({ children }: AccordionGroupProps) {
+  const [accordions, setAccordions] = useState<AccordionData[]>([]);
+  const [activeTabs, setActiveTabs] = useState<string[]>([]);
+  const anchor = useCurrentAnchor();
+  const [updatedUrl, setUpdatedUrl] = useState<string | null>(null);
+  const [isProgrammaticUpdate, setIsProgrammaticUpdate] = useState(false);
+
+  const registerAccordion = useCallback((accordion: AccordionData) => {
+    setAccordions((prevAccordions) => {
+      // Check if accordion already exists
+      const existingIndex = prevAccordions.findIndex(
+        (a) => a.id === accordion.id
+      );
+      if (existingIndex >= 0) {
+        // Update existing accordion
+        const newAccordions = [...prevAccordions];
+        newAccordions[existingIndex] = accordion;
+        return newAccordions;
+      }
+      // Add new accordion
+      return [...prevAccordions, accordion];
+    });
+  }, []);
+
+  const unregisterAccordion = useCallback((id: string) => {
+    setAccordions((prevAccordions) =>
+      prevAccordions.filter((accordion) => accordion.id !== id)
+    );
+  }, []);
+
+  const findParentAccordion = useCallback(
     (anchor: string) => {
-      if (items.some((tab) => tab.props.id === anchor)) {
+      if (accordions.some((accordion) => accordion.id === anchor)) {
         return anchor;
       }
 
-      const parentAccordion = items.find((tab) =>
-        tab.props.nestedHeaders?.includes(anchor)
+      const parentAccordion = accordions.find((accordion) =>
+        accordion.nestedHeaders?.includes(anchor)
       );
 
       if (parentAccordion) {
-        return parentAccordion.props.id;
+        return parentAccordion.id;
       }
 
       return undefined;
     },
-    [items]
+    [accordions]
   );
 
   React.useEffect(() => {
@@ -86,32 +160,55 @@ export function AccordionGroup({ children }: AccordionGroupProps) {
     }
   }, [updatedUrl]);
 
+  const contextValue = useMemo(
+    () => ({
+      registerAccordion,
+      unregisterAccordion,
+      accordions,
+    }),
+    [registerAccordion, unregisterAccordion, accordions]
+  );
+
+  const { appendChildrenMdx, isWithinEditor } = useEditorComponent();
+
   return (
-    <AccordionComponent.Accordion
-      type="multiple"
-      value={activeTabs}
-      onValueChange={handleValueChange}
-      className="m-mdx"
-    >
-      {children}
-    </AccordionComponent.Accordion>
+    <>
+      <AccordionContext.Provider value={contextValue}>
+        <AccordionComponent.Accordion
+          type="multiple"
+          value={activeTabs}
+          onValueChange={handleValueChange}
+          className="m-mdx"
+        >
+          {children}
+          {isWithinEditor && (
+            <div className="bg-(color:--grayscale-a1) flex justify-center border-dashed p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  appendChildrenMdx(EMPTY_ACCORDION_CONTENT);
+                }}
+              >
+                <CirclePlusIcon />
+                Add accordion
+              </Button>
+            </div>
+          )}
+        </AccordionComponent.Accordion>
+      </AccordionContext.Provider>
+    </>
   );
 }
 
-export function Accordion({
-  title = "Untitled",
-  id = "",
-  children,
-  nestedHeaders,
-}: {
+interface AccordionProps {
   /**
    * the title of the accordion
    * @default "Untitled"
    */
   title?: string;
   /**
-   * he id of the accordion. this must be unique, and should have been set using the rehypeSlug plugin
-   * @default ""
+   * the id of the accordion. this must be unique, and should have been set using the rehypeSlug plugin
    */
   id?: string;
   /**
@@ -126,22 +223,115 @@ export function Accordion({
    * the headers nested within the accordion
    */
   nestedHeaders?: string[];
-}) {
+}
+
+function AccordionItem({
+  title = "Untitled",
+  id,
+  toc,
+  children,
+  nestedHeaders,
+  registerAccordion,
+  unregisterAccordion,
+  accordions,
+}: AccordionProps & AccordionContextType) {
+  const uniqueId = React.useId();
+  const accordionId = id || `accordion-${uniqueId}`;
+
+  useEffect(() => {
+    registerAccordion({
+      id: accordionId,
+      title,
+      toc,
+      nestedHeaders,
+    });
+
+    return () => {
+      unregisterAccordion(accordionId);
+    };
+  }, [
+    accordionId,
+    title,
+    toc,
+    nestedHeaders,
+    registerAccordion,
+    unregisterAccordion,
+  ]);
+
+  const { isWithinEditor } = useEditorComponent();
+  const popoverRef = useRef<HTMLButtonElement>(null);
+
   if (!children) {
     return null;
   }
-  return (
+
+  const accordionContent = (
     <AccordionComponent.AccordionItem
-      id={id}
-      value={id}
+      id={accordionId}
+      value={accordionId}
       nestedHeaders={nestedHeaders}
+      className="relative !overflow-visible"
     >
-      <AccordionComponent.AccordionTrigger>
+      <AccordionComponent.AccordionTrigger ref={popoverRef}>
         {title}
+        {isWithinEditor && (
+          <EditorComponentPopoverButton
+            className="absolute right-2 top-2 h-auto w-auto px-2"
+            disableDelete={accordions.length === 1}
+          />
+        )}
       </AccordionComponent.AccordionTrigger>
-      <AccordionComponent.AccordionContent>
-        <div className="px-5">{children}</div>
+      <AccordionComponent.AccordionContent
+        className={isWithinEditor ? "!overflow-visible" : undefined}
+      >
+        <div className={cn("px-5", isWithinEditor && "pl-3")}>{children}</div>
       </AccordionComponent.AccordionContent>
     </AccordionComponent.AccordionItem>
   );
+
+  if (!isWithinEditor) {
+    return accordionContent;
+  }
+
+  return (
+    <EditorComponentPopoverProvider
+      attributes={{
+        title: new TextInputControl({ defaultValue: title }),
+      }}
+      targetRef={popoverRef}
+    >
+      {accordionContent}
+    </EditorComponentPopoverProvider>
+  );
+}
+
+export function Accordion(props: AccordionProps) {
+  const accordionContext = useAccordionContext();
+
+  if (accordionContext == null) {
+    return (
+      <AccordionComponent.Accordion
+        type="multiple"
+        className="m-mdx"
+        defaultValue={[props.id || ""]}
+      >
+        <AccordionItem
+          {...props}
+          registerAccordion={() => {
+            console.error(
+              "[registerAccordion] AccordionItem is not within an AccordionContext"
+            );
+          }}
+          unregisterAccordion={() => {
+            console.error(
+              "[unregisterAccordion] AccordionItem is not within an AccordionContext"
+            );
+          }}
+          accordions={[{ id: props.id || "", title: props.title || "" }]}
+        />
+      </AccordionComponent.Accordion>
+    );
+  }
+
+  return <AccordionItem {...props} {...accordionContext} />;
 }

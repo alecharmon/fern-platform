@@ -82,7 +82,7 @@ const FERN_COMPONENTS = {
   Mermaid,
   ParamField,
   Step,
-  StepGroup,
+  Steps: StepGroup,
   Tab,
   TabGroup,
   Template,

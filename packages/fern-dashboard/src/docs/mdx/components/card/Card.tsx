@@ -1,13 +1,20 @@
-import { isValidElement } from "react";
+import { isValidElement, useEffect, useRef } from "react";
 
 import { cn } from "@fern-docs/components";
 import { FaIcon, FernCard } from "@fern-docs/components";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
 
+import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
+import {
+  EditorComponentPopoverButton,
+  EditorComponentPopoverProvider,
+} from "@/components/editor/editor-component/EditorComponentPopover";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { DisableFernAnchor } from "@/docs/components/FernAnchor";
 import { FernLinkCard } from "@/docs/components/FernLinkCard";
 
 import { Badge } from "../badge";
+import { useCardGroup } from "./CardGroupContext";
 
 export declare namespace Card {
   export interface Props {
@@ -39,6 +46,21 @@ export const Card: React.FC<Card.Props> = ({
   href,
   badge,
 }) => {
+  const { isWithinEditor } = useEditorComponent();
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const cardGroup = useCardGroup();
+
+  // Register/unregister with CardGroup if within one
+  useEffect(() => {
+    if (cardGroup) {
+      cardGroup.registerCard();
+      return () => {
+        cardGroup.unregisterCard();
+      };
+    }
+    return undefined;
+  }, [cardGroup]);
+
   if (isNaN(iconSize)) {
     iconSize = 8;
   }
@@ -48,12 +70,11 @@ export const Card: React.FC<Card.Props> = ({
   );
 
   const content = (
-    <>
-      {badge != null && (
-        <Badge intent="primary" className="absolute -right-2 -top-2">
-          {badge}
-        </Badge>
-      )}
+    <div ref={popoverRef} className="relative">
+      <div className="absolute -right-4 -top-4 flex items-center gap-1">
+        {isWithinEditor && <EditorComponentPopoverButton className="h-full" />}
+        {badge != null && <Badge intent="primary">{badge}</Badge>}
+      </div>
       <div
         className={cn("flex items-start", {
           "flex-col space-y-3": iconPosition === "top",
@@ -80,24 +101,52 @@ export const Card: React.FC<Card.Props> = ({
             <NoZoom>{icon}</NoZoom>
           </span>
         ) : null}
-        <div className="w-full space-y-1 overflow-hidden">
+        <div className="w-full space-y-1">
           <div className="text-body text-base font-semibold">{title}</div>
           {children != null && (
-            <div className="text-(color:--grayscale-a11)">{children}</div>
+            <div
+              className={cn(
+                "text-(color:--grayscale-a11)",
+                isWithinEditor && "solid-hover-handle -ml-8 -mt-2"
+              )}
+            >
+              {children}
+            </div>
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 
-  if (href != null) {
-    return (
+  const cardElement =
+    href != null && !isWithinEditor ? (
       <FernLinkCard className={className} scroll={true} href={href}>
         <NoZoom>
           <DisableFernAnchor>{content}</DisableFernAnchor>
         </NoZoom>
       </FernLinkCard>
+    ) : (
+      <FernCard className={className}>{content}</FernCard>
     );
+
+  if (!isWithinEditor) {
+    return cardElement;
   }
-  return <FernCard className={className}>{content}</FernCard>;
+
+  return (
+    <EditorComponentPopoverProvider
+      attributes={{
+        title: new TextInputControl({ defaultValue: title }),
+        icon: new TextInputControl({
+          defaultValue: typeof icon === "string" ? icon : "",
+        }),
+        href: new TextInputControl({ defaultValue: href || "" }),
+        badge: new TextInputControl({ defaultValue: badge || "" }),
+      }}
+      targetRef={popoverRef}
+      hoverSlopThreshold={20}
+    >
+      {cardElement}
+    </EditorComponentPopoverProvider>
+  );
 };

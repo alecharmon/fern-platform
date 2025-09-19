@@ -2,14 +2,18 @@
 
 import { useEffect } from "react";
 
+import CodeBlock from "@tiptap/extension-code-block";
 import Placeholder from "@tiptap/extension-placeholder";
 import {
+  EditorContent,
   EditorProvider,
   EditorProviderProps,
   Extension,
+  ReactNodeViewRenderer,
   useCurrentEditor,
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { all, createLowlight } from "lowlight";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
@@ -19,8 +23,10 @@ import { cn } from "@/utils/utils";
 import BubbleMenu from "./BubbleMenu";
 import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
+import CodeBlockComponent from "./extension-code-block/CodeBlockComponent";
 import CustomElement from "./extension-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
+import { LowlightPlugin } from "./tiptap-node/lowlight/lowlight-plugin";
 import {
   ConfiguredFileHandler,
   ConfiguredMediaUploadNode,
@@ -42,6 +48,8 @@ const dataAttributeNodeTypes = [
   "listItem",
 ];
 
+const lowlight = createLowlight(all);
+
 // Configure Tiptap extensions
 const extensions = [
   StarterKit.configure({
@@ -49,6 +57,7 @@ const extensions = [
       color: "var(--grayscale-a11)",
     },
     gapcursor: false,
+    codeBlock: false,
   }),
   FVEAttributesExtension.configure({
     types: dataAttributeNodeTypes,
@@ -59,13 +68,21 @@ const extensions = [
     emptyEditorClass: "is-empty",
     emptyNodeClass: "is-empty",
   }),
+  CodeBlock.configure({ enableTabIndentation: true }).extend({
+    addNodeView() {
+      return ReactNodeViewRenderer(CodeBlockComponent);
+    },
+    addProseMirrorPlugins() {
+      return [
+        LowlightPlugin({ name: "codeBlock", lowlight, defaultLanguage: null }),
+      ];
+    },
+  }),
 ] as Extension[];
 export declare namespace TiptapEditor {
   export interface Props {
     autofocus?: boolean;
     className?: string;
-    disableFloatingMenu?: boolean;
-    disableBubbleMenu?: boolean;
     initialContent: string;
     onCreate?: EditorProviderProps["onCreate"];
     onUpdate?: EditorProviderProps["onUpdate"];
@@ -76,8 +93,6 @@ export declare namespace TiptapEditor {
 export default function TiptapEditor({
   autofocus,
   className,
-  disableFloatingMenu,
-  disableBubbleMenu,
   initialContent,
   onCreate,
   onUpdate,
@@ -94,7 +109,7 @@ export default function TiptapEditor({
       ]}
       editorProps={{
         attributes: {
-          class: "prose prose-md p-7 -m-2 focus:outline-none max-w-none",
+          class: "prose prose-md focus:outline-none max-w-none p-4",
         },
       }}
       parseOptions={{
@@ -108,11 +123,32 @@ export default function TiptapEditor({
       immediatelyRender={false}
       onCreate={onCreate}
       onUpdate={onUpdate}
+      onFocus={({ editor }) => {
+        // Clear selection from all other ProseMirror editors when this editor is focused
+        const allEditors = document.querySelectorAll(".ProseMirror");
+        allEditors.forEach((editorElement) => {
+          if (editorElement !== editor.view.dom) {
+            // Clear selection by removing ProseMirror-selectednode class from all nodes in other editors
+            const selectedNodes = editorElement.querySelectorAll(
+              ".ProseMirror-selectednode"
+            );
+            selectedNodes.forEach((node) => {
+              node.classList.remove("ProseMirror-selectednode");
+            });
+          }
+        });
+      }}
     >
+      <div>
+        {/* DEV NOTE: The floating menu and bubble menu MUST be rendered before the editor content to reconcile
+        a dom bug with tiptap's floating menus.
+        Context here: https://github.com/ueberdosis/tiptap/issues/4619#issuecomment-1869042861 */}
+        {!isEditingDisabled && <FloatingMenu />}
+        {!isEditingDisabled && <BubbleMenu />}
+        <EditorContent editor={null} />
+      </div>
       <EditorContextUpdater />
       <TipTapEditingDisabledListener />
-      {!disableFloatingMenu && !isEditingDisabled && <FloatingMenu />}
-      {!disableBubbleMenu && !isEditingDisabled && <BubbleMenu />}
       <NodeHoverHandle />
     </EditorProvider>
   );

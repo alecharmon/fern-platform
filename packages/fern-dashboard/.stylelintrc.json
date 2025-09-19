@@ -1,1 +1,8 @@
-{ "extends": ["../../shared/stylelintrc.shared.json"] }
+{
+  "extends": ["../../shared/stylelintrc.shared.json"],
+  "ignoreFiles": [
+    "src/components/tiptap-ui-primitive/**/*.scss",
+    "src/styles/_keyframe-animations.scss",
+    "src/styles/_variables.scss"
+  ]
+}

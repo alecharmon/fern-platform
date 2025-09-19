@@ -47,11 +47,14 @@ export function SearchableDropdown<T>({
       }}
     >
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="border-border w-80 border p-0" align="start">
+      <PopoverContent
+        className="w-80 border border-[var(--border,var(--gray-500))] p-0"
+        align="start"
+      >
         <div className="flex flex-col">
           {shouldShowSearch && (
-            <div className="flex items-center border-b p-2">
-              <div className="border-border flex flex-1 items-center rounded-md border px-3">
+            <div className="flex items-center border-b border-[var(--border,var(--gray-500))] p-2">
+              <div className="flex flex-1 items-center rounded-md border border-[var(--border,var(--gray-500))] px-3">
                 <SearchIcon className="h-4 w-4 shrink-0 opacity-50" />
                 <Input
                   placeholder={searchPlaceholder}
@@ -64,7 +67,7 @@ export function SearchableDropdown<T>({
               </div>
             </div>
           )}
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto p-1">
             {items.length === 0 ? (
               <div className="p-4 text-center text-sm text-gray-500">
                 {isLoading

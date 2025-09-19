@@ -31,6 +31,12 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning className={gtPlanar.className}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-dark.min.css"
+        ></link>
+      </head>
       <PylonScript />
       <body
         // id is used to remove the hidePylon class programatically

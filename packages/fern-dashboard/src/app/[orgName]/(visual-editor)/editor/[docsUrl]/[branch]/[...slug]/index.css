@@ -19,6 +19,7 @@
   container-type: inline-size;
   @import "../../../../../../../../../fern-docs/bundle/src/components/css/base.scss";
   @import "../../../../../../../../../fern-docs/bundle/src/components/css/components.scss";
+  @import "../../../../../../../../../fern-docs/bundle/src/components/FernAnchor.scss";
   @import "../../../../../../../docs/mdx/components/index.scss";
 
   @apply font-body text-body bg-background text-base;
@@ -30,5 +31,21 @@
     overflow: hidden;
     position: absolute;
     background-attachment: scroll;
+  }
+
+  .solid-hover-handle {
+    .fern-hover-handle {
+      @apply bg-(color:--grayscale-4) hover:bg-(color:--grayscale-5);
+    }
+  }
+  .ProseMirror {
+    ul {
+      list-style-type: none;
+      @apply pl-1;
+    }
+    li ::before {
+      content: "-   ";
+      color: var(--grayscale-11);
+    }
   }
 }
