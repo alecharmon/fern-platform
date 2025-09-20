@@ -158,7 +158,7 @@ export class ApiDefinitionV1ToLatest {
       subpackages: this.subpackages,
       auths: this.v1.auth ? { [AUTH_SCHEME_ID]: this.v1.auth } : {},
       globalHeaders: this.migrateParameters(this.v1.globalHeaders),
-      snippetsConfiguration: undefined,
+      snippetsConfiguration: this.v1.snippetsConfiguration,
     };
   };
 

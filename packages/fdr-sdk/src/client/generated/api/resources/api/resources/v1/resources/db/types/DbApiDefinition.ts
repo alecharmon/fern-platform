@@ -9,6 +9,7 @@ export interface DbApiDefinition {
     rootPackage: FernRegistry.api.v1.db.DbApiDefinitionPackage;
     types: Record<FernRegistry.TypeId, FernRegistry.api.v1.read.TypeDefinition>;
     subpackages: Record<FernRegistry.api.v1.SubpackageId, FernRegistry.api.v1.db.DbApiDefinitionSubpackage>;
+    snippetsConfiguration: FernRegistry.api.v1.register.SnippetsConfig | undefined;
     auth: FernRegistry.api.v1.read.ApiAuth | undefined;
     /**
      * Whether or not endpoints are being served at different

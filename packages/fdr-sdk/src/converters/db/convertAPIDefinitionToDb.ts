@@ -77,6 +77,7 @@ export function convertAPIDefinitionToDb(
       });
       return subpackages;
     }, {}),
+    snippetsConfiguration: writeShape.snippetsConfiguration,
     auth: writeShape.auth,
     globalHeaders: writeShape.globalHeaders,
     hasMultipleBaseUrls: context.hasMultipleBaseUrls(),

@@ -7,6 +7,7 @@ imports:
   commons: ../commons.yml
   webhook: webhook.yml
   websocket: websocket.yml
+  registerRoot: ../register/__package__.yml
 
 service:
   base-path: /registry/api
@@ -31,6 +32,7 @@ types:
       rootPackage: ApiDefinitionPackage
       types: map<rootCommons.TypeId, type.TypeDefinition>
       subpackages: map<commons.SubpackageId, ApiDefinitionSubpackage>
+      snippetsConfiguration: optional<registerRoot.SnippetsConfig>
       auth: optional<ApiAuth>
       hasMultipleBaseUrls:
         type: optional<boolean>

@@ -80,6 +80,7 @@ exports[`transformApiDefinitionToDb > {"name":"candid"} 1`] = `
     "webhooks": [],
     "websockets": [],
   },
+  "snippetsConfiguration": undefined,
   "subpackages": {
     "subpackage_adjustments": {
       "description": undefined,
@@ -79487,6 +79488,7 @@ exports[`transformApiDefinitionToDb > {"name":"cyclical-1"} 1`] = `
     "webhooks": [],
     "websockets": [],
   },
+  "snippetsConfiguration": undefined,
   "subpackages": {
     "subpackage_transactions": {
       "description": undefined,
@@ -79705,6 +79707,7 @@ exports[`transformApiDefinitionToDb > {"name":"realtime"} 1`] = `
     "webhooks": [],
     "websockets": [],
   },
+  "snippetsConfiguration": {},
   "subpackages": {
     "subpackage_realtime": {
       "description": undefined,
@@ -79876,6 +79879,7 @@ exports[`transformApiDefinitionToDb > {"name":"string"} 1`] = `
     "webhooks": [],
     "websockets": [],
   },
+  "snippetsConfiguration": undefined,
   "subpackages": {
     "subpackage_lcf": {
       "description": undefined,
@@ -82627,6 +82631,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
     "webhooks": [],
     "websockets": [],
   },
+  "snippetsConfiguration": undefined,
   "subpackages": {
     "subpackage_deployments": {
       "description": undefined,

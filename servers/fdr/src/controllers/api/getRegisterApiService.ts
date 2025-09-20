@@ -70,17 +70,16 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
         | undefined;
 
       const snippetsConfiguration = req.body.definition
-        ?.snippetsConfiguration ??
-        req.body.definitionV2?.snippetsConfiguration ?? {
-          typescriptSdk: undefined,
-          pythonSdk: undefined,
-          javaSdk: undefined,
-          goSdk: undefined,
-          rubySdk: undefined,
-          csharpSdk: undefined,
-          phpSdk: undefined,
-          swiftSdk: undefined,
-        };
+        ?.snippetsConfiguration ?? {
+        typescriptSdk: undefined,
+        pythonSdk: undefined,
+        javaSdk: undefined,
+        goSdk: undefined,
+        rubySdk: undefined,
+        csharpSdk: undefined,
+        phpSdk: undefined,
+        swiftSdk: undefined,
+      };
 
       const snippetsConfigurationWithSdkIds = await app.dao
         .sdks()

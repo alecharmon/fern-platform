@@ -34,6 +34,7 @@ export function convertDbAPIDefinitionToRead(
         return [id, transformSubpackage({ dbShape: subpackage })];
       })
     ),
+    snippetsConfiguration: dbShape.snippetsConfiguration,
     auth: dbShape.auth,
     hasMultipleBaseUrls: dbShape.hasMultipleBaseUrls,
     navigation: dbShape.navigation,

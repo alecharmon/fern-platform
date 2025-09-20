@@ -9,6 +9,7 @@ imports:
   readWebhook: ../read/webhook.yml
   readWebsocket: ../read/websocket.yml
   readEndpoint: ../read/endpoint.yml
+  registerRoot: ../register/__package__.yml
 
 types:
   DbApiDefinition:
@@ -17,6 +18,7 @@ types:
       rootPackage: DbApiDefinitionPackage
       types: map<rootCommons.TypeId, readType.TypeDefinition>
       subpackages: map<commons.SubpackageId, DbApiDefinitionSubpackage>
+      snippetsConfiguration: optional<registerRoot.SnippetsConfig>
       auth: optional<readRoot.ApiAuth>
       hasMultipleBaseUrls:
         type: boolean
