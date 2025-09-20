@@ -766,9 +766,6 @@ importers:
 
   packages/fdr-sdk:
     dependencies:
-      '@fern-api/snippets':
-        specifier: workspace:*
-        version: link:../snippets
       '@fern-api/ui-core-utils':
         specifier: workspace:*
         version: link:../commons/core-utils
@@ -821,6 +818,9 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.26.0
         version: 7.26.0(@babel/core@7.28.4)
+      '@fern-api/snippets':
+        specifier: workspace:*
+        version: link:../snippets
       '@fern-platform/configs':
         specifier: workspace:*
         version: link:../configs
