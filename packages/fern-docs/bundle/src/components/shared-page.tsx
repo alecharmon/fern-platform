@@ -26,7 +26,6 @@ import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 
 import FeedbackPopover from "@/components/feedback/FeedbackPopover";
-import { QueryParamProcessor } from "@/hooks/QueryParamProcessor";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import {
   MdxSerializer,
@@ -333,7 +332,6 @@ export default async function SharedPage({
         versionIsDefault={found.isCurrentVersionDefault}
         productIsDefault={found.isCurrentProductIsDefault}
       />
-      <QueryParamProcessor />
       <DocsMainContent
         loader={loader}
         serialize={serialize}

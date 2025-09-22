@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
 import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import { z } from "zod";
@@ -71,7 +73,8 @@ export function useSetProgrammingLanguage() {
 export function useProgrammingLanguage() {
   const value = useProgrammingLanguageValue();
   const setValue = useSetProgrammingLanguage();
-  return [value, setValue] as const;
+  const searchParamLanguage = useSearchParams().get("language");
+  return [searchParamLanguage ?? value, setValue] as const;
 }
 
 /**
