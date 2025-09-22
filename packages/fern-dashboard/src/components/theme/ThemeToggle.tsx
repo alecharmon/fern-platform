@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import * as React from "react";
+import React, { useLayoutEffect, useState } from "react";
 
 import { Monitor, Moon, Sun } from "lucide-react";
 
@@ -16,6 +16,16 @@ import {
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
+  /**
+   * Prevent hydration mismatch by deferring theme-dependent rendering until after mount.
+   * Server cannot access localStorage/user preferences, so theme is undefined during SSR,
+   * but has actual value on client after hydration.
+   */
+  const [hasMounted, setHasMounted] = useState(false);
+  const mountedTheme = hasMounted && theme ? theme : "system";
+
+  useLayoutEffect(() => setHasMounted(true), []);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -24,9 +34,15 @@ export function ThemeToggle() {
           variant="ghost"
           className="w-fit justify-start px-0 text-left hover:px-2 has-[>svg]:px-0 hover:has-[>svg]:px-2 md:w-8 md:justify-center"
         >
-          {theme === "light" && <Sun className="h-[1.2rem] w-[1.2rem]" />}
-          {theme === "dark" && <Moon className="h-[1.2rem] w-[1.2rem]" />}
-          {theme === "system" && <Monitor className="h-[1.2rem] w-[1.2rem]" />}
+          {mountedTheme === "light" && (
+            <Sun className="h-[1.2rem] w-[1.2rem]" />
+          )}
+          {mountedTheme === "dark" && (
+            <Moon className="h-[1.2rem] w-[1.2rem]" />
+          )}
+          {mountedTheme === "system" && (
+            <Monitor className="h-[1.2rem] w-[1.2rem]" />
+          )}
           <span className="sr-only">Toggle theme</span>
           <span className="block md:hidden">Theme</span>
         </Button>

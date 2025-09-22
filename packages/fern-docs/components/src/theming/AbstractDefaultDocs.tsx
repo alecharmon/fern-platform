@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import React from "react";
+import React, { Fragment } from "react";
 
 import { Separator } from "../Separator";
 import { cn } from "../cn";
@@ -89,7 +89,7 @@ export default function AbstractDefaultDocs({
         {announcement}
         <div className="width-before-scroll-bar">
           <div className="fern-header-content">{header}</div>
-          {headerTabs}
+          <Fragment key="header-tabs">{headerTabs}</Fragment>
         </div>
       </FernHeader>
 
@@ -134,7 +134,6 @@ export default function AbstractDefaultDocs({
                 hidden: !hasProductsOrVersions,
               })}
             />
-
             {sidebar}
           </SidebarNav>
           {children}
