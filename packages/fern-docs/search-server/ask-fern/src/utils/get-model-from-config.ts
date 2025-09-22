@@ -28,11 +28,16 @@ const CLAUDE_3_7_MODEL_CONFIG = {
   region: "us-east-1",
 };
 
-const DEFAULT_MODEL_CONFIG: ModelConfig = CLAUDE_3_5_MODEL_CONFIG;
+const CLAUDE_4_MODEL_CONFIG = {
+  modelId: "us.anthropic.claude-sonnet-4-20250514-v1:0",
+  region: "us-east-1",
+};
 
-const FALLBACK_MODEL_CONFIG: ModelConfig = CLAUDE_3_5_MODEL_CONFIG;
+const DEFAULT_MODEL_CONFIG: ModelConfig = CLAUDE_3_7_MODEL_CONFIG;
 
-const FALLBACK_MODEL_CONFIG_2: ModelConfig = CLAUDE_3_7_MODEL_CONFIG;
+const FALLBACK_MODEL_CONFIG: ModelConfig = CLAUDE_3_7_MODEL_CONFIG;
+
+const FALLBACK_MODEL_CONFIG_2: ModelConfig = CLAUDE_3_5_MODEL_CONFIG;
 
 const modelMap: Record<ModelId, ModelConfig> = {
   "claude-3.5": CLAUDE_3_5_MODEL_CONFIG,
@@ -63,6 +68,11 @@ export function getLanguageModel(model: string | undefined): {
   const modelConfig = getModelConfig(model ?? "claude-3.5");
   if (model === "claude-4") {
     const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
+    const bedrock_4 = createAmazonBedrock({
+      region: FALLBACK_MODEL_CONFIG.region,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    });
     const bedrock_3_5 = createAmazonBedrock({
       region: FALLBACK_MODEL_CONFIG.region,
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -76,9 +86,10 @@ export function getLanguageModel(model: string | undefined): {
     return {
       model: createFallback({
         models: [
+          bedrock_4(CLAUDE_4_MODEL_CONFIG.modelId),
+          bedrock_3_7(FALLBACK_MODEL_CONFIG.modelId),
+          bedrock_3_5(FALLBACK_MODEL_CONFIG_2.modelId),
           anthropic("claude-4-sonnet-20250514"),
-          bedrock_3_5(FALLBACK_MODEL_CONFIG.modelId),
-          bedrock_3_7(FALLBACK_MODEL_CONFIG_2.modelId),
         ],
       }),
       provider: "anthropic",
