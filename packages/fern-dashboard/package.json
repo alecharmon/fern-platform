@@ -9,7 +9,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "clean": "rm -rf ./lib ./dist && tsc --build --clean",
+    "clean": "rm -rf ./lib ./dist ./.next && tsc --build --clean",
     "compile": "tsc --build",
     "dashboard:build": "next build",
     "dashboard:dev": "next dev",
