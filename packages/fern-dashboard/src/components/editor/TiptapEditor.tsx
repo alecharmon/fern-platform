@@ -13,7 +13,7 @@ import {
   useCurrentEditor,
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { all, createLowlight } from "lowlight";
+import { createLowlight } from "lowlight";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
@@ -23,7 +23,8 @@ import { cn } from "@/utils/utils";
 import BubbleMenu from "./BubbleMenu";
 import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
-import CodeBlockComponent from "./extension-code-block/CodeBlockComponent";
+import { createCodeBlockComponent } from "./extension-code-block/CodeBlockComponent";
+import { LowlightInstance } from "./extension-code-block/types";
 import CustomElement from "./extension-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
 import { LowlightPlugin } from "./tiptap-node/lowlight/lowlight-plugin";
@@ -31,6 +32,10 @@ import {
   ConfiguredFileHandler,
   ConfiguredMediaUploadNode,
 } from "./tiptap-node/media-upload-node/configured-upload-extensions";
+
+// We'll need to lazy-load the lowlight instance to avoid importing all the lowlight package dependencies, so
+// this is just an empty instance
+const lowlight: LowlightInstance = createLowlight();
 
 // These node types are the ones that will have data attributes set on them
 const dataAttributeNodeTypes = [
@@ -47,8 +52,6 @@ const dataAttributeNodeTypes = [
   "orderedList",
   "listItem",
 ];
-
-const lowlight = createLowlight(all);
 
 // Configure Tiptap extensions
 const extensions = [
@@ -70,7 +73,7 @@ const extensions = [
   }),
   CodeBlock.configure({ enableTabIndentation: true }).extend({
     addNodeView() {
-      return ReactNodeViewRenderer(CodeBlockComponent);
+      return ReactNodeViewRenderer(createCodeBlockComponent(lowlight));
     },
     addProseMirrorPlugins() {
       return [

@@ -2,9 +2,8 @@ import { findChildren } from "@tiptap/core";
 import type { Node as ProsemirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
-import { all, createLowlight } from "lowlight";
 
-const lowlight = createLowlight(all);
+import { LowlightInstance } from "../../extension-code-block/types";
 
 function parseNodes(
   nodes: any[],
@@ -34,7 +33,7 @@ function getHighlightNodes(result: any) {
   return result.value || result.children || [];
 }
 
-function registered(aliasOrLanguage: string) {
+function registered(aliasOrLanguage: string, lowlight: LowlightInstance) {
   return Boolean(lowlight.registered(aliasOrLanguage));
 }
 
@@ -59,7 +58,7 @@ function getDecorations({
     const nodes =
       language &&
       (languages.includes(language) ||
-        registered(language) ||
+        registered(language, lowlight) ||
         lowlight.registered?.(language))
         ? getHighlightNodes(
             lowlight.highlight(language, block.node.textContent)
@@ -84,30 +83,15 @@ function getDecorations({
   return DecorationSet.create(doc, decorations);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-function isFunction(param: any): param is Function {
-  return typeof param === "function";
-}
-
 export function LowlightPlugin({
   name,
-  lowlight,
   defaultLanguage,
+  lowlight,
 }: {
   name: string;
-  lowlight: any;
   defaultLanguage: string | null | undefined;
+  lowlight: LowlightInstance;
 }) {
-  if (
-    !["highlight", "highlightAuto", "listLanguages"].every((api) =>
-      isFunction(lowlight[api])
-    )
-  ) {
-    throw Error(
-      "You should provide an instance of lowlight to use the code-block-lowlight extension"
-    );
-  }
-
   // @ts-expect-error use of any
   const lowlightPlugin = new Plugin<any>({
     key: new PluginKey("lowlight"),

@@ -1161,6 +1161,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.0.9
         version: 4.0.9
+      '@types/hast':
+        specifier: ^3.0.0
+        version: 3.0.4
       '@types/jsonwebtoken':
         specifier: ^9.0.9
         version: 9.0.9

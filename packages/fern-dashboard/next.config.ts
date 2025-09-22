@@ -31,7 +31,10 @@ const nextConfig: NextConfig = {
     "@fern-api/ui-core-utils",
   ],
   experimental: {
-    optimizePackageImports: [],
+    optimizePackageImports: [
+      // this will separate the `createLowlight` from the `all` import
+      "lowlight",
+    ],
     useCache: true,
     ppr: "incremental",
   },
