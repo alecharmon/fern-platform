@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import CodeBlock from "@tiptap/extension-code-block";
 import Placeholder from "@tiptap/extension-placeholder";
 import {
-  EditorContent,
   EditorProvider,
   EditorProviderProps,
   Extension,
@@ -146,13 +145,12 @@ export default function TiptapEditor({
         {/* DEV NOTE: The floating menu and bubble menu MUST be rendered before the editor content to reconcile
         a dom bug with tiptap's floating menus.
         Context here: https://github.com/ueberdosis/tiptap/issues/4619#issuecomment-1869042861 */}
+        {!isEditingDisabled && <NodeHoverHandle />}
         {!isEditingDisabled && <FloatingMenu />}
         {!isEditingDisabled && <BubbleMenu />}
-        <EditorContent editor={null} />
       </div>
       <EditorContextUpdater />
       <TipTapEditingDisabledListener />
-      <NodeHoverHandle />
     </EditorProvider>
   );
 }

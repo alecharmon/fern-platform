@@ -4,6 +4,7 @@ import {
   ChevronsDown,
   Clapperboard,
   Code2,
+  Folder,
   Grid2X2,
   Image,
   List,
@@ -23,6 +24,7 @@ import {
 } from "@/docs/mdx/components/card/CardGroup";
 import { EMPTY_PARAM_FIELD_CONTENT } from "@/docs/mdx/components/parameters/ParamField";
 import { EMPTY_STEPS_CONTENT } from "@/docs/mdx/components/steps";
+import { EMPTY_TABS_CONTENT } from "@/docs/mdx/components/tabs/Tabs";
 
 import { SuggestionItem } from "../tiptap-ui-utils/suggestion-menu";
 import { createCustomElementNode } from "./extension-custom-element/create-custom-element-node";
@@ -162,6 +164,17 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     keywords: ["steps", "step", "step group"],
     onSelect: ({ editor }) => {
       handleCustomNodeInsert(editor, "Steps", EMPTY_STEPS_CONTENT);
+    },
+  },
+  {
+    title: "Tabs",
+    subtext: "Add a tab group",
+    aliases: ["tabs", "tab", "option"],
+    badge: Folder,
+    group: "Components",
+    keywords: ["tabs", "tab", "option"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "Tabs", EMPTY_TABS_CONTENT);
     },
   },
 ];

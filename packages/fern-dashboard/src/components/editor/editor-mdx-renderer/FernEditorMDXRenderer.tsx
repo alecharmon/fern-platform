@@ -315,10 +315,15 @@ MDXRenderer.displayName = "MDXRenderer";
 
 interface JSXElementRendererProps {
   element: JSXElement;
+  index: number;
   onUpdate: (mdx: string) => unknown;
 }
 
-const JSXElementRenderer = ({ element, onUpdate }: JSXElementRendererProps) => {
+const JSXElementRenderer = ({
+  element,
+  index,
+  onUpdate,
+}: JSXElementRendererProps) => {
   // Debounce the onUpdate callback for TiptapEditor updates (500ms delay)
   const debouncedOnUpdate = useDebounce(onUpdate, 500);
 
@@ -379,6 +384,7 @@ const JSXElementRenderer = ({ element, onUpdate }: JSXElementRendererProps) => {
   return (
     <EditorComponentProvider
       isWithinEditor
+      index={index}
       providedChildren={children}
       keyedAttributes={keyedAttributes}
       updateKeyedAttributes={(cb) => {
@@ -415,18 +421,22 @@ const JSXElementRenderer = ({ element, onUpdate }: JSXElementRendererProps) => {
 // Renderer for parsed markdown elements
 interface ParsedElementRendererProps {
   element: ParsedMarkdownElement;
+  index: number;
   onUpdate: (mdx: string) => unknown;
 }
 
 const ParsedElementRenderer = ({
   element,
+  index,
   onUpdate,
 }: ParsedElementRendererProps) => {
   if (element.type === "terminalElement") {
     return <MDXRenderer mdx={element.originalMdx} />;
   }
 
-  return <JSXElementRenderer element={element} onUpdate={onUpdate} />;
+  return (
+    <JSXElementRenderer index={index} element={element} onUpdate={onUpdate} />
+  );
 };
 
 const FernEditorMDXRendererInternal = ({
@@ -477,6 +487,7 @@ const FernEditorMDXRendererInternal = ({
   return parsed.map((element, index) => (
     <ParsedElementRenderer
       key={`${index}_${deleteCounter.current}`}
+      index={index}
       element={element}
       onUpdate={(updatedMdx) => handleChildUpdate(index, updatedMdx)}
     />
