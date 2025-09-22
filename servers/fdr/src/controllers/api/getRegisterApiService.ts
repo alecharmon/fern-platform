@@ -106,32 +106,26 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
         sdkIds.push(snippetsConfigurationWithSdkIds.csharpSdk.sdkId);
       }
 
-      const snippetsBySdkId = await app.dao
-        .snippets()
-        .loadAllSnippetsForSdkIds(sdkIds);
-      logOperationTime("loadAllSnippetsForSdkIds");
-
-      const snippetsBySdkIdAndEndpointId = await app.dao
-        .snippets()
-        .loadAllSnippetsForSdkIdsByEndpointId(sdkIds);
-      logOperationTime("loadAllSnippetsForSdkIdsByEndpointId");
-
+      let snippetsBySdkId = {};
+      let snippetsBySdkIdAndEndpointId = {};
       let snippetTemplatesByEndpoint: SnippetTemplatesByEndpoint = {};
       let snippetTemplatesByEndpointId: SnippetTemplatesByEndpointIdentifier =
         {};
 
-      snippetTemplatesByEndpoint = await getSnippetTemplatesIfEnabled({
-        app,
-        authorization: req.headers.authorization,
-        orgId: req.body.orgId,
-        apiId: req.body.apiId,
-        definition: req.body.definition ?? req.body.definitionV2,
-        snippetsConfigurationWithSdkIds,
-      });
-      logOperationTime("getSnippetTemplatesIfEnabled");
+      if (!req.body.dynamicIRs) {
+        app.logger.debug("No dynamicIRs detected, creating snippet holder");
 
-      snippetTemplatesByEndpointId =
-        await getSnippetTemplatesByEndpointIdIfEnabled({
+        snippetsBySdkId = await app.dao
+          .snippets()
+          .loadAllSnippetsForSdkIds(sdkIds);
+        logOperationTime("loadAllSnippetsForSdkIds");
+
+        snippetsBySdkIdAndEndpointId = await app.dao
+          .snippets()
+          .loadAllSnippetsForSdkIdsByEndpointId(sdkIds);
+        logOperationTime("loadAllSnippetsForSdkIdsByEndpointId");
+
+        snippetTemplatesByEndpoint = await getSnippetTemplatesIfEnabled({
           app,
           authorization: req.headers.authorization,
           orgId: req.body.orgId,
@@ -139,7 +133,21 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
           definition: req.body.definition ?? req.body.definitionV2,
           snippetsConfigurationWithSdkIds,
         });
-      logOperationTime("getSnippetTemplatesByEndpointIdIfEnabled");
+        logOperationTime("getSnippetTemplatesIfEnabled");
+
+        snippetTemplatesByEndpointId =
+          await getSnippetTemplatesByEndpointIdIfEnabled({
+            app,
+            authorization: req.headers.authorization,
+            orgId: req.body.orgId,
+            apiId: req.body.apiId,
+            definition: req.body.definition ?? req.body.definitionV2,
+            snippetsConfigurationWithSdkIds,
+          });
+        logOperationTime("getSnippetTemplatesByEndpointIdIfEnabled");
+      } else {
+        app.logger.debug("Receieved dynamicIR - using empty snippet holder");
+      }
 
       const snippetHolder = new SDKSnippetHolder({
         snippetsBySdkId,
@@ -160,24 +168,6 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
         );
       }
       logOperationTime("convertAPIDefinitionToDb");
-
-      let isLatest = false;
-      if (transformedApiDefinition == null) {
-        if (
-          req.body.definitionV2 == null ||
-          (req.body.definitionV2 != null &&
-            Object.keys(req.body.definitionV2).length === 0)
-        ) {
-          throw new Error("No latest definition provided");
-        }
-        transformedApiDefinition = enrichApiLatestDefinitionWithSnippets(
-          req.body.definitionV2,
-          snippetHolder
-        );
-        isLatest = true;
-        apiDefinitionId = transformedApiDefinition.id;
-      }
-      logOperationTime("enrichApiLatestDefinitionWithSnippets");
 
       let sources: Record<string, APIV1Write.SourceUpload> | undefined;
       if (req.body.sources != null) {
@@ -222,11 +212,7 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
         `Creating API Definition in database with id=${apiDefinitionId}, name=${req.body.apiId} for org ${req.body.orgId}`,
         REGISTER_API_DEFINITION_META
       );
-      await (
-        isLatest
-          ? app.services.db.prisma.apiDefinitionsLatest
-          : app.services.db.prisma.apiDefinitionsV2
-      ).create({
+      await app.services.db.prisma.apiDefinitionsV2.create({
         data: {
           apiDefinitionId,
           apiName: req.body.apiId,
@@ -253,156 +239,6 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
       });
     },
   });
-}
-
-function stringifyEndpointPathParts(
-  path: FdrAPI.api.latest.PathPart[]
-): string {
-  return urlJoin(
-    ...path.map((part) =>
-      part.type === "literal" ? part.value : `{${part.value}}`
-    )
-  );
-}
-
-function enrichApiLatestDefinitionWithSnippets(
-  definition: FdrAPI.api.latest.ApiDefinition,
-  snippetHolder: SDKSnippetHolder
-): FdrAPI.api.latest.ApiDefinition {
-  Object.entries(definition.endpoints).forEach(([_, endpoint]) => {
-    endpoint.snippetTemplates = snippetHolder.getSnippetTemplateForEndpoint({
-      endpointPath: FdrAPI.EndpointPathLiteral(
-        stringifyEndpointPathParts(endpoint.path)
-      ),
-      endpointMethod: endpoint.method,
-      endpointId: endpoint.id,
-    });
-
-    endpoint.examples?.forEach((example) => {
-      const goSnippet = snippetHolder.getGoCodeSnippetForEndpoint({
-        endpointPath: FdrAPI.EndpointPathLiteral(
-          stringifyEndpointPathParts(endpoint.path)
-        ),
-        endpointMethod: endpoint.method,
-        endpointId: endpoint.id,
-        exampleId: example.name,
-      });
-      const pythonSnippet = snippetHolder.getPythonCodeSnippetForEndpoint({
-        endpointPath: FdrAPI.EndpointPathLiteral(
-          stringifyEndpointPathParts(endpoint.path)
-        ),
-        endpointMethod: endpoint.method,
-        endpointId: endpoint.id,
-        exampleId: example.name,
-      });
-      const rubySnippet = snippetHolder.getRubyCodeSnippetForEndpoint({
-        endpointPath: FdrAPI.EndpointPathLiteral(
-          stringifyEndpointPathParts(endpoint.path)
-        ),
-        endpointMethod: endpoint.method,
-        endpointId: endpoint.id,
-        exampleId: example.name,
-      });
-      const typescriptSnippet =
-        snippetHolder.getTypeScriptCodeSnippetForEndpoint({
-          endpointPath: FdrAPI.EndpointPathLiteral(
-            stringifyEndpointPathParts(endpoint.path)
-          ),
-          endpointMethod: endpoint.method,
-          endpointId: endpoint.id,
-          exampleId: example.name,
-        });
-      const csharpSnippet = snippetHolder.getCsharpCodeSnippetForEndpoint({
-        endpointPath: FdrAPI.EndpointPathLiteral(
-          stringifyEndpointPathParts(endpoint.path)
-        ),
-        endpointMethod: endpoint.method,
-        endpointId: endpoint.id,
-        exampleId: example.name,
-      });
-
-      if (
-        goSnippet != null &&
-        (example.snippets?.go == null || example.snippets.go?.length === 0)
-      ) {
-        example.snippets ??= {};
-        example.snippets.go ??= [];
-        example.snippets.go.push({
-          language: "go",
-          code: goSnippet.client,
-          install: goSnippet.install,
-          generated: true,
-          description: example.description,
-          name: undefined,
-        });
-      }
-      if (
-        pythonSnippet != null &&
-        (example.snippets?.python == null ||
-          example.snippets.python?.length === 0)
-      ) {
-        example.snippets ??= {};
-        example.snippets.python ??= [];
-        example.snippets.python.push({
-          language: "python",
-          code: pythonSnippet.sync_client,
-          install: pythonSnippet.install,
-          generated: true,
-          description: example.description,
-          name: undefined,
-        });
-      }
-      if (
-        rubySnippet != null &&
-        (example.snippets?.ruby == null || example.snippets.ruby?.length === 0)
-      ) {
-        example.snippets ??= {};
-        example.snippets.ruby ??= [];
-        example.snippets.ruby.push({
-          language: "ruby",
-          code: rubySnippet.client,
-          install: rubySnippet.install,
-          generated: true,
-          description: example.description,
-          name: undefined,
-        });
-      }
-      if (
-        typescriptSnippet != null &&
-        (example.snippets?.typescript == null ||
-          example.snippets.typescript?.length === 0)
-      ) {
-        example.snippets ??= {};
-        example.snippets.typescript ??= [];
-        example.snippets.typescript.push({
-          language: "typescript",
-          code: typescriptSnippet.client,
-          install: typescriptSnippet.install,
-          generated: true,
-          description: example.description,
-          name: undefined,
-        });
-      }
-      if (
-        csharpSnippet != null &&
-        (example.snippets?.csharp == null ||
-          example.snippets.csharp?.length === 0)
-      ) {
-        example.snippets ??= {};
-        example.snippets.csharp ??= [];
-        example.snippets.csharp.push({
-          language: "csharp",
-          code: csharpSnippet.client,
-          install: csharpSnippet.install,
-          generated: true,
-          description: example.description,
-          name: undefined,
-        });
-      }
-    });
-  });
-
-  return definition;
 }
 
 function getSnippetSdkRequests({

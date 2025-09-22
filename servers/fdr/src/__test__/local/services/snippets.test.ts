@@ -1,4 +1,4 @@
-import { inject } from "vitest";
+import { expect, inject, it } from "vitest";
 
 import { DocsV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 
@@ -84,6 +84,9 @@ it("get snippets", async () => {
           goSdk: undefined,
           rubySdk: undefined,
           javaSdk: undefined,
+          csharpSdk: undefined,
+          phpSdk: undefined,
+          swiftSdk: undefined,
         },
       }),
     })
@@ -161,6 +164,8 @@ it("get snippets", async () => {
           logo: undefined,
           colors: undefined,
           colorsV2: undefined,
+          hideNavLinks: undefined,
+          aiChatConfig: undefined,
         },
         jsFiles: undefined,
       },
@@ -259,6 +264,9 @@ it("get Go snippets", async () => {
           pythonSdk: undefined,
           javaSdk: undefined,
           rubySdk: undefined,
+          csharpSdk: undefined,
+          phpSdk: undefined,
+          swiftSdk: undefined,
         },
       }),
     })
@@ -336,6 +344,8 @@ it("get Go snippets", async () => {
           logo: undefined,
           colors: undefined,
           colorsV2: undefined,
+          hideNavLinks: undefined,
+          aiChatConfig: undefined,
         },
         jsFiles: undefined,
       },
@@ -428,6 +438,9 @@ it("get Ruby snippets", async () => {
           pythonSdk: undefined,
           javaSdk: undefined,
           goSdk: undefined,
+          csharpSdk: undefined,
+          phpSdk: undefined,
+          swiftSdk: undefined,
         },
       }),
     })
@@ -505,6 +518,8 @@ it("get Ruby snippets", async () => {
           logo: undefined,
           colors: undefined,
           colorsV2: undefined,
+          hideNavLinks: undefined,
+          aiChatConfig: undefined,
         },
         jsFiles: undefined,
       },
@@ -814,4 +829,370 @@ it("get snippets (unauthenticated)", async () => {
     },
   });
   expect(response.ok).toBe(false);
+});
+
+it("no snippets generated when dynamicIR is present", async () => {
+  const fdr = getClient({ authed: true, url: inject("url") });
+
+  // Create snippets first
+  await fdr.snippetsFactory.createSnippetsForSdk({
+    orgId: FdrAPI.OrgId("acme"),
+    apiId: FdrAPI.ApiId("dynamic-api"),
+    snippets: {
+      type: "python",
+      sdk: {
+        package: "acme",
+        version: "0.0.2",
+      },
+      snippets: [
+        {
+          endpoint: {
+            path: FdrAPI.EndpointPathLiteral("/users/v1"),
+            method: FdrAPI.HttpMethod.Get,
+            identifierOverride: undefined,
+          },
+          snippet: {
+            async_client: "const client = new AsyncClient()",
+            sync_client: "const client = new Client()",
+          },
+          exampleIdentifier: undefined,
+        },
+      ],
+    },
+  });
+
+  // Register API definition with dynamicIR
+  const apiDefinitionResponse = getAPIResponse(
+    await fdr.api.v1.register.registerApiDefinition({
+      orgId: FdrAPI.OrgId("acme"),
+      apiId: FdrAPI.ApiId("dynamic-api"),
+      definition: createApiDefinition({
+        endpointId: FdrAPI.EndpointId("/users/v1"),
+        endpointMethod: "GET",
+        endpointPath: {
+          parts: [{ type: "literal", value: "/users/v1" }],
+          pathParameters: [],
+        },
+        snippetsConfig: {
+          pythonSdk: {
+            package: "acme",
+            version: "0.0.2",
+          },
+          typescriptSdk: undefined,
+          goSdk: undefined,
+          rubySdk: undefined,
+          javaSdk: undefined,
+          csharpSdk: undefined,
+          phpSdk: undefined,
+          swiftSdk: undefined,
+        },
+      }),
+      dynamicIRs: {
+        typescript: {
+          dynamicIR: {},
+        },
+        python: {
+          dynamicIR: {},
+        },
+      },
+    })
+  );
+
+  // Register docs
+  const startDocsRegisterResponse = getAPIResponse(
+    await fdr.docs.v2.write.startDocsRegister({
+      orgId: FdrAPI.OrgId("acme"),
+      apiId: FdrAPI.ApiId("dynamic-api"),
+      domain: "https://acme.docs.buildwithfern.com",
+      customDomains: [],
+      filepaths: [
+        DocsV1Write.FilePath("logo.png"),
+        DocsV1Write.FilePath("guides/guide.mdx"),
+      ],
+      images: [],
+    })
+  );
+
+  await fdr.docs.v2.write.finishDocsRegister(
+    startDocsRegisterResponse.docsRegistrationId,
+    {
+      docsDefinition: {
+        pages: {},
+        config: {
+          navigation: {
+            landingPage: undefined,
+            items: [
+              {
+                type: "api",
+                title: "Dynamic API",
+                api: apiDefinitionResponse.apiDefinitionId,
+                artifacts: undefined,
+                skipUrlSlug: undefined,
+                showErrors: undefined,
+                changelog: undefined,
+                changelogV2: undefined,
+                navigation: undefined,
+                longScrolling: undefined,
+                flattened: undefined,
+                icon: undefined,
+                hidden: undefined,
+                urlSlugOverride: undefined,
+                fullSlug: undefined,
+              },
+            ],
+          },
+          root: undefined,
+          typography: {
+            headingsFont: {
+              name: "Syne",
+              fontFile: FONT_FILE_ID,
+            },
+            bodyFont: undefined,
+            codeFont: undefined,
+          },
+          title: undefined,
+          defaultLanguage: undefined,
+          announcement: undefined,
+          navbarLinks: undefined,
+          footerLinks: undefined,
+          logoHeight: undefined,
+          logoHref: undefined,
+          favicon: undefined,
+          metadata: undefined,
+          redirects: undefined,
+          colorsV3: undefined,
+          layout: undefined,
+          typographyV2: undefined,
+          analyticsConfig: undefined,
+          integrations: undefined,
+          css: undefined,
+          js: undefined,
+          backgroundImage: undefined,
+          logoV2: undefined,
+          logo: undefined,
+          colors: undefined,
+          colorsV2: undefined,
+          hideNavLinks: undefined,
+          aiChatConfig: undefined,
+        },
+        jsFiles: undefined,
+      },
+    }
+  );
+
+  // Get docs for url
+  const docs = getAPIResponse(
+    await fdr.docs.v2.read.getDocsForUrl({
+      url: FdrAPI.Url("https://acme.docs.buildwithfern.com"),
+    })
+  );
+
+  const apiDefinition =
+    docs.definition.apis[apiDefinitionResponse.apiDefinitionId];
+  expect(apiDefinition).not.toEqual(undefined);
+
+  // Verify that no snippets are generated in the API definition
+  const endpoint = apiDefinition?.rootPackage.endpoints[0];
+  expect(endpoint).not.toEqual(undefined);
+
+  // Check that examples exist but have no generated snippets
+  const example = endpoint?.examples?.[0];
+  expect(example).not.toEqual(undefined);
+
+  // Verify no code examples are generated
+  expect(example?.codeExamples.pythonSdk).toBeUndefined();
+  expect(example?.codeExamples.typescriptSdk).toBeUndefined();
+  expect(example?.codeExamples.goSdk).toBeUndefined();
+  expect(example?.codeExamples.rubySdk).toBeUndefined();
+
+  // Verify that snippetsConfiguration is still populated
+  expect(apiDefinition?.snippetsConfiguration).toBeDefined();
+  expect(apiDefinition?.snippetsConfiguration?.pythonSdk).toBeDefined();
+  expect(apiDefinition?.snippetsConfiguration?.pythonSdk?.package).toEqual(
+    "acme"
+  );
+  expect(apiDefinition?.snippetsConfiguration?.pythonSdk?.version).toEqual(
+    "0.0.2"
+  );
+});
+
+it("no snippets generated when dynamicIR is present with regular definition", async () => {
+  const fdr = getClient({ authed: true, url: inject("url") });
+
+  // Create snippets first
+  await fdr.snippetsFactory.createSnippetsForSdk({
+    orgId: FdrAPI.OrgId("acme"),
+    apiId: FdrAPI.ApiId("dynamic-latest-api"),
+    snippets: {
+      type: "typescript",
+      sdk: {
+        package: "acme",
+        version: "0.0.3",
+      },
+      snippets: [
+        {
+          endpoint: {
+            path: FdrAPI.EndpointPathLiteral("/users/v1"),
+            method: FdrAPI.HttpMethod.Post,
+            identifierOverride: undefined,
+          },
+          snippet: {
+            client: "const client = new Client({ apiKey: 'YOUR_API_KEY' })",
+          },
+          exampleIdentifier: undefined,
+        },
+      ],
+    },
+  });
+
+  // Register API definition with dynamicIR using regular definition
+  const apiDefinitionResponse = getAPIResponse(
+    await fdr.api.v1.register.registerApiDefinition({
+      orgId: FdrAPI.OrgId("acme"),
+      apiId: FdrAPI.ApiId("dynamic-latest-api"),
+      definition: createApiDefinition({
+        endpointId: FdrAPI.EndpointId("/users/v1"),
+        endpointMethod: "POST",
+        endpointPath: {
+          parts: [{ type: "literal", value: "/users/v1" }],
+          pathParameters: [],
+        },
+        snippetsConfig: {
+          typescriptSdk: {
+            package: "acme",
+            version: "0.0.3",
+          },
+          pythonSdk: undefined,
+          goSdk: undefined,
+          javaSdk: undefined,
+          rubySdk: undefined,
+          csharpSdk: undefined,
+          phpSdk: undefined,
+          swiftSdk: undefined,
+        },
+      }),
+      dynamicIRs: {
+        typescript: {
+          dynamicIR: {},
+        },
+      },
+    })
+  );
+
+  // Register docs
+  const startDocsRegisterResponse = getAPIResponse(
+    await fdr.docs.v2.write.startDocsRegister({
+      orgId: FdrAPI.OrgId("acme"),
+      apiId: FdrAPI.ApiId("dynamic-latest-api"),
+      domain: "https://acme.docs.buildwithfern.com",
+      customDomains: [],
+      filepaths: [
+        DocsV1Write.FilePath("logo.png"),
+        DocsV1Write.FilePath("guides/guide.mdx"),
+      ],
+      images: [],
+    })
+  );
+
+  await fdr.docs.v2.write.finishDocsRegister(
+    startDocsRegisterResponse.docsRegistrationId,
+    {
+      docsDefinition: {
+        pages: {},
+        config: {
+          navigation: {
+            landingPage: undefined,
+            items: [
+              {
+                type: "api",
+                title: "Dynamic Latest API",
+                api: apiDefinitionResponse.apiDefinitionId,
+                artifacts: undefined,
+                skipUrlSlug: undefined,
+                showErrors: undefined,
+                changelog: undefined,
+                changelogV2: undefined,
+                navigation: undefined,
+                longScrolling: undefined,
+                flattened: undefined,
+                icon: undefined,
+                hidden: undefined,
+                urlSlugOverride: undefined,
+                fullSlug: undefined,
+              },
+            ],
+          },
+          root: undefined,
+          typography: {
+            headingsFont: {
+              name: "Syne",
+              fontFile: FONT_FILE_ID,
+            },
+            bodyFont: undefined,
+            codeFont: undefined,
+          },
+          title: undefined,
+          defaultLanguage: undefined,
+          announcement: undefined,
+          navbarLinks: undefined,
+          footerLinks: undefined,
+          logoHeight: undefined,
+          logoHref: undefined,
+          favicon: undefined,
+          metadata: undefined,
+          redirects: undefined,
+          colorsV3: undefined,
+          layout: undefined,
+          typographyV2: undefined,
+          analyticsConfig: undefined,
+          integrations: undefined,
+          css: undefined,
+          js: undefined,
+          backgroundImage: undefined,
+          logoV2: undefined,
+          logo: undefined,
+          colors: undefined,
+          colorsV2: undefined,
+          hideNavLinks: undefined,
+          aiChatConfig: undefined,
+        },
+        jsFiles: undefined,
+      },
+    }
+  );
+
+  // Get docs for url
+  const docs = getAPIResponse(
+    await fdr.docs.v2.read.getDocsForUrl({
+      url: FdrAPI.Url("https://acme.docs.buildwithfern.com"),
+    })
+  );
+
+  const apiDefinition =
+    docs.definition.apis[apiDefinitionResponse.apiDefinitionId];
+  expect(apiDefinition).not.toEqual(undefined);
+
+  // Verify that no snippets are generated in the API definition
+  const endpoint = apiDefinition?.rootPackage.endpoints[0];
+  expect(endpoint).not.toEqual(undefined);
+
+  // Check that examples exist but have no generated snippets
+  const example = endpoint?.examples?.[0];
+  expect(example).not.toEqual(undefined);
+
+  // Verify no code examples are generated (regular definition doesn't have pre-populated snippets)
+  expect(example?.codeExamples.typescriptSdk).toBeUndefined();
+  expect(example?.codeExamples.pythonSdk).toBeUndefined();
+  expect(example?.codeExamples.goSdk).toBeUndefined();
+  expect(example?.codeExamples.rubySdk).toBeUndefined();
+
+  // Verify that snippetsConfiguration is still populated
+  expect(apiDefinition?.snippetsConfiguration).toBeDefined();
+  expect(apiDefinition?.snippetsConfiguration?.typescriptSdk).toBeDefined();
+  expect(apiDefinition?.snippetsConfiguration?.typescriptSdk?.package).toEqual(
+    "acme"
+  );
+  expect(apiDefinition?.snippetsConfiguration?.typescriptSdk?.version).toEqual(
+    "0.0.3"
+  );
 });
