@@ -61,7 +61,7 @@ export function BranchListItem({
           </Button>
         </div>
       </div>
-      {showDivider && <hr className="bg-gray-400 dark:bg-gray-600" />}
+      {showDivider && <hr className="border-gray-400 dark:border-gray-600" />}
     </>
   );
 }
