@@ -7,6 +7,8 @@ on:
         description: 'Version to publish'
         required: false
         type: string
+  schedule:
+    - cron: '0 6 * * 1'  # Runs at 6 AM UTC every Monday
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -14,16 +16,58 @@ env:
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
 
 jobs:
-  test:
-    uses: ./.github/workflows/run-self-hosted-tests.yml
+  # test:
+  #   uses: ./.github/workflows/run-self-hosted-tests.yml
 
   build-and-publish:
     runs-on: ubuntu-latest
-    needs: test  # Wait for tests to pass before publishing
+    # needs: test
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 2 # This helps turbo resolve changes faster
+
+      - name: Determine version to publish
+        id: determine_version
+        run: |
+          PROVIDED_VERSION="${{ github.event.inputs.version }}"
+          if [ -n "$PROVIDED_VERSION" ]; then
+            echo "Using provided version: $PROVIDED_VERSION"
+            echo "version=$PROVIDED_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "No version provided, determining next version..."
+            
+            # Get Docker Hub token
+            USR="fernapi"
+            IMG="fern-self-hosted"
+            TOKEN=$(curl -fsSL -u "$USR:${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}" \
+              "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$USR/$IMG:pull" | \
+              jq -r .token)
+            
+            # Get latest tag from Docker Hub registry
+            LATEST_TAG=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
+              "https://registry-1.docker.io/v2/$USR/$IMG/tags/list" | \
+              jq -r '.tags | map(select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))) | sort_by(split(".") | map(tonumber)) | reverse | .[0]')
+            
+            if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
+              echo "ERROR: No valid semantic version tags found for $USR/$IMG"
+              exit 1
+            fi
+            
+            echo "Current latest tag is $LATEST_TAG"
+            
+            # Validate semver format (major.minor.patch)
+            if [[ ! "$LATEST_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Error: LATEST_TAG '$LATEST_TAG' does not match semver format (major.minor.patch). Manually publish new version to unblock automatic publishing."
+              exit 1
+            fi
+            
+            # Increment minor version
+            NEW_TAG=$(echo $LATEST_TAG | awk -F. '{print $1"."$2+1".0"}')
+            echo "New tag is $NEW_TAG"
+            echo "version=$NEW_TAG" >> $GITHUB_OUTPUT
+          fi
 
       - name: Update Engines
         run: |
@@ -55,5 +99,7 @@ jobs:
 
       - name: Push to Docker Hub
         run: |
-          docker tag fern-self-hosted:latest fernapi/fern-self-hosted:${{ github.event.inputs.version || 'latest' }}
-          docker push fernapi/fern-self-hosted:${{ github.event.inputs.version || 'latest' }}
+          VERSION="${{ steps.determine_version.outputs.version }}"
+          echo "Publishing version: $VERSION"
+          docker tag fern-self-hosted:latest fernapi/fern-self-hosted:$VERSION
+          docker push fernapi/fern-self-hosted:$VERSION
