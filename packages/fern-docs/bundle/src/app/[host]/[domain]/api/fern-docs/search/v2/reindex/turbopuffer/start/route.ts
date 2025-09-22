@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { kv } from "@vercel/kv";
+
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
@@ -40,6 +42,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       status: 400,
     });
   }
+
+  await kv.hset(domain, {
+    tpuf_job: {
+      status: "in_progress",
+    },
+  });
 
   return createJobResponse(messageId, "in_progress");
 }

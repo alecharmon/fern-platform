@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { createOpenAI } from "@ai-sdk/openai";
+import { kv } from "@vercel/kv";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server/analytics/posthog";
@@ -78,7 +79,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       }).settings.getSettings({ domain })
     ).ask_ai_enabled;
 
-    if (!isAskAiEnabled) {
+    const askAiProcessing = await kv.hget(domain, "tpuf_job").then((job) => {
+      return (
+        job &&
+        typeof job === "object" &&
+        "status" in job &&
+        job.status === "in_progress"
+      );
+    });
+
+    if (!isAskAiEnabled && !askAiProcessing) {
       return NextResponse.json("Ask Fern is not enabled for this domain", {
         status: 404,
       });
@@ -145,6 +155,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       job_id: syncResponse.job_id,
     });
 
+    await kv.hset(domain, {
+      tpuf_job: {
+        status: "completed",
+      },
+    });
+
     return NextResponse.json(
       {
         added: numInserted,
@@ -166,6 +182,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       `:rotating_light: [TURBOPUFFER] Failed to reindex ${domain} with the following error: ${String(error)}`,
       "turbopuffer-reindex"
     );
+
+    await kv.hset(domain, {
+      tpuf_job: {
+        status: "failed",
+      },
+    });
 
     return NextResponse.json(`Internal server error, error: ${String(error)}`, {
       status: 500,
