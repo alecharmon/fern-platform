@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  fern-self-hosted-1:
+    image: fern-self-hosted:latest
+    container_name: fern-self-hosted-multinode-fern-self-hosted-1
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+      - "9001:9001"
+      - "5434:5432"
+    volumes:
+      - ./fern:/fern
+    environment:
+      - RUN_MODE=server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fern-self-hosted-2:
+    image: fern-self-hosted:latest
+    container_name: fern-self-hosted-multinode-fern-self-hosted-2
+    ports:
+      - "8081:8080"
+      - "9002:9000"
+      - "9003:9001"
+      - "5435:5432"
+    volumes:
+      - ./fern:/fern
+    environment:
+      - RUN_MODE=server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fern-self-hosted-3:
+    image: fern-self-hosted:latest
+    container_name: fern-self-hosted-multinode-fern-self-hosted-3
+    ports:
+      - "8082:8080"
+      - "9004:9000"
+      - "9005:9001"
+      - "5436:5432"
+    volumes:
+      - ./fern:/fern
+    environment:
+      - RUN_MODE=server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

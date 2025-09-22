@@ -5,6 +5,7 @@ on:
     branches:
       - app
   pull_request:
+  workflow_call:
 
 jobs:
   run-self-hosted-tests:
@@ -31,10 +32,10 @@ jobs:
           WORKOS_CLIENT_ID: ${{ secrets.WORKOS_CLIENT_ID }}
 
       - name: Build FDR CJS
-        run: pnpm --filter @fern-platform/fdr build:tsup:cjs          
+        run: pnpm --filter @fern-platform/fdr build:tsup:cjs
         
       - name: Build docs bundle
         run: pnpm docs:self-hosted-bundle:build
 
-      - name: Run tests
+      - name: Run self-hosted tests
         run: pnpm turbo build test:self-hosted --filter=@fern-platform/self-hosted
