@@ -11,6 +11,7 @@ import React from "react";
 
 import { compact } from "es-toolkit/array";
 
+import { cacheSeed } from "@fern-api/docs-server";
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { withPrunedNavigationLoader } from "@fern-api/docs-server/withPrunedNavigation";
 import {
@@ -248,7 +249,7 @@ export default async function SharedPage({
       found.currentTab?.title ?? "",
       serializeNextMdx ? "nextMdx" : "mdx",
     ],
-    { tags: [loader.domain, "getNeighbors"] }
+    { tags: [loader.domain, cacheSeed(), "getNeighbors"] }
   );
 
   // if the current node requires authentication and the user is not authenticated, redirect to the auth page
@@ -384,7 +385,14 @@ async function getNeighbor(
     let page, mdx;
     {
       const start = Date.now();
-      page = await loader.getPage(pageId);
+      const cached_page = unstable_cache(
+        async () => {
+          return await loader.getPage(pageId);
+        },
+        ["neighbor-page", pageId],
+        { tags: [loader.domain, cacheSeed(), "neighbor-page", pageId] }
+      );
+      page = await cached_page();
       const end = Date.now();
       console.log(
         `[getNeighbor] loader.getPage(${pageId}) took ${end - start}ms`
