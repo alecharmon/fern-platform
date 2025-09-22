@@ -10,9 +10,6 @@ import { baseConfig } from "../sentry.base.config";
 if (isProduction()) {
   Sentry.init({
     ...baseConfig,
-    integrations: [Sentry.replayIntegration()],
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
   });
 }
 
