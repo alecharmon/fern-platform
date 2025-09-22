@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import * as Sentry from "@sentry/nextjs";
+import { isProduction } from "@/utils/environment";
 
 import ErrorPage from "./error";
 
@@ -10,7 +10,13 @@ export default function GlobalError({ error }: { error: Error }) {
   // Global error boundary requires manual capture as the last resort
   // for any unhandled client-side errors that bypass automatic Sentry integration
   useEffect(() => {
-    Sentry.captureException(error);
+    if (!isProduction()) {
+      return;
+    }
+
+    void import("@sentry/nextjs").then((module) =>
+      module.captureException(error)
+    );
   }, [error]);
 
   return (

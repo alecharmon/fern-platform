@@ -1,6 +1,10 @@
-import * as Sentry from "@sentry/nextjs";
+import { isProduction } from "./utils/environment";
 
 export async function register() {
+  if (!isProduction()) {
+    return;
+  }
+
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("../sentry.server.config");
   }
@@ -10,4 +14,14 @@ export async function register() {
   }
 }
 
-export const onRequestError = Sentry.captureRequestError;
+export const onRequestError = (...args: any[]) => {
+  if (!isProduction()) {
+    return;
+  }
+
+  void import("@sentry/nextjs").then((module) =>
+    module.captureRequestError(
+      ...(args as Parameters<typeof module.captureRequestError>)
+    )
+  );
+};

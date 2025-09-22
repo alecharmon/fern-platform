@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
+import type * as Sentry from "@sentry/nextjs";
 
 /**
  * https://docs.sentry.io/platforms/javascript/guides/nextjs/
