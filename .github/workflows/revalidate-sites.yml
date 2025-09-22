@@ -1,0 +1,66 @@
+name: Revalidate Sites
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"  # Every 4 hours
+  workflow_dispatch:
+
+jobs:
+  revalidate-sites:
+    name: Revalidate stale sites
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Revalidate sites
+        env:
+          REVALIDATE_AUTH_TOKEN: ${{ secrets.FERN_TOKEN }}
+        run: |
+          echo "Starting revalidation process..."
+          
+          if [ ! -f stale-sites.csv ]; then
+            echo "Error: stale-sites.csv not found"
+            exit 1
+          fi
+          
+          # Process each domain
+          while IFS= read -r domain; do
+            # Skip empty lines
+            if [ -z "$domain" ]; then
+              continue
+            fi
+            
+            # Remove trailing comma if present
+            domain=$(echo "$domain" | sed 's/,$//')
+            
+            echo "Revalidating: $domain"
+            
+            # Retry until successful
+            max_attempts=2
+            attempt=1
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt/$max_attempts for $domain"
+              
+              if curl -s -f -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
+                     "https://$domain/api/fern-docs/revalidate" \
+                     --max-time 3000; then
+                echo "SUCCESS: $domain revalidated successfully"
+                break
+              else
+                echo "Attempt $attempt failed for $domain"
+                if [ $attempt -eq $max_attempts ]; then
+                  echo "ERROR: Failed to revalidate $domain after $max_attempts attempts"
+                  exit 1
+                fi
+                sleep 10
+                ((attempt++))
+              fi
+            done
+            
+            sleep 2
+            
+          done < stale-sites.csv
+          
+          echo "All domains revalidated successfully!"
