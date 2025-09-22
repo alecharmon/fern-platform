@@ -1,4 +1,4 @@
-import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";
+import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 export interface ColorsConfig {

@@ -1,4 +1,4 @@
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import { FdrAPI } from "@fern-api/fdr-sdk";
 
 export class DefinitionObjectFactory {
   public static createDocsDefinition(): FdrAPI.docs.v1.read.DocsDefinition {

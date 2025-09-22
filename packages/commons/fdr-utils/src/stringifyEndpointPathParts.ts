@@ -1,4 +1,4 @@
-import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
+import { APIV1Read } from "@fern-api/fdr-sdk";
 
 export function stringifyEndpointPathParts(
   path: APIV1Read.EndpointPathPart[]

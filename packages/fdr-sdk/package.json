@@ -6,42 +6,57 @@
   "exports": {
     "./navigation": {
       "types": "./dist/navigation/index.d.ts",
-      "default": "./dist/navigation/index.js"
+      "import": "./dist/navigation/index.mjs",
+      "require": "./dist/navigation/index.js",
+      "default": "./dist/navigation/index.mjs"
     },
     "./api-definition": {
       "types": "./dist/api-definition/index.d.ts",
-      "default": "./dist/api-definition/index.js"
+      "import": "./dist/api-definition/index.mjs",
+      "require": "./dist/api-definition/index.js",
+      "default": "./dist/api-definition/index.mjs"
     },
     "./docs": {
       "types": "./dist/docs/index.d.ts",
-      "default": "./dist/docs/index.js"
+      "import": "./dist/docs/index.mjs",
+      "require": "./dist/docs/index.js",
+      "default": "./dist/docs/index.mjs"
     },
     "./client": {
       "types": "./dist/client/FdrClient.d.ts",
-      "default": "./dist/client/FdrClient.js"
+      "import": "./dist/client/FdrClient.mjs",
+      "require": "./dist/client/FdrClient.js",
+      "default": "./dist/client/FdrClient.mjs"
     },
     "./client/types": {
       "types": "./dist/client/types.d.ts",
-      "default": "./dist/client/types.js"
+      "import": "./dist/client/types.mjs",
+      "require": "./dist/client/types.js",
+      "default": "./dist/client/types.mjs"
     },
     "./traversers": {
       "types": "./dist/utils/traversers/index.d.ts",
-      "default": "./dist/utils/traversers/index.js"
+      "import": "./dist/utils/traversers/index.mjs",
+      "require": "./dist/utils/traversers/index.js",
+      "default": "./dist/utils/traversers/index.mjs"
     },
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.mjs"
     }
   },
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "source": "src/index.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "clean": "rm -rf ./dist && tsc --build --clean",
-    "compile": "tsc --build",
-    "dev": "tsc --watch tsconfig.build.json",
+    "clean": "rm -rf ./dist",
+    "compile": "tsc --build && tsup --clean false",
+    "dev": "tsup --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint": "eslint --max-warnings 0 src --ext .ts --resolve-plugins-relative-to ../../",
@@ -74,6 +89,7 @@
     "@types/qs": "6.9.14",
     "@types/tinycolor2": "^1.4.6",
     "@types/ungap__structured-clone": "^1.2.0",
+    "tsup": "^8.3.5",
     "typescript": "^5",
     "vitest": "^3.2.4"
   }
