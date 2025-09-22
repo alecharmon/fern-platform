@@ -309,7 +309,7 @@ async def handle_draft_reply_action(payload: dict[str, Any]) -> JSONResponse:
     try:
         trigger_id = payload.get("trigger_id")
         user = payload.get("user", {})
-        user_id = user.get("id")
+        user.get("id")
         team = payload.get("team", {})
         team_id = team.get("id")
         channel = payload.get("channel", {})
@@ -612,15 +612,14 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
                 integration_id = integration.integration_id
                 LOGGER.info(f"Using existing integration {integration_id} for domain {domain}")
             else:
-                from uuid import uuid4
-
-                integration_id = str(uuid4())
                 new_integration = SlackIntegrationDb(
-                    integration_id=integration_id,
                     domain=domain,
+                    created_at=datetime.now(UTC),
                 )
                 session.add(new_integration)
                 await session.commit()
+                await session.refresh(new_integration)
+                integration_id = new_integration.integration_id
                 LOGGER.info(f"Created new integration {integration_id} for domain {domain}")
 
         scopes = [
