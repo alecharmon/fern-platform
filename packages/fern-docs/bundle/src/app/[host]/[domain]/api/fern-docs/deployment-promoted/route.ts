@@ -18,8 +18,6 @@ import {
 
 import { batchQueue } from "@/server/queue";
 
-export const runtime = "nodejs";
-
 export async function POST(request: NextRequest) {
   if (isLocal() || isSelfHosted()) {
     throw new Error("production deployment is only available in production");

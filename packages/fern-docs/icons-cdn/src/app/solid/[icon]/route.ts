@@ -8,8 +8,6 @@ import { svgResponse } from "../../../svgResponse";
 const prefix = "fas";
 library.add(fas);
 
-export const runtime = "edge";
-
 export async function GET(
   _req: NextRequest,
   props: { params: Promise<{ icon: string }> }

@@ -15,8 +15,6 @@ import { COOKIE_FERN_TOKEN, withoutStaging } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 
-export const runtime = "edge";
-
 const FORWARDED_HOST_QUERY = "forwarded_host";
 const CODE_QUERY = "code";
 const ERROR_DESCRIPTION_QUERY = "error_description";

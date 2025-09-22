@@ -58,7 +58,7 @@
     "es-toolkit": "^1.33.0",
     "iron-session": "^8.0.4",
     "jose": "^5.9.6",
-    "next": "15.3.0-canary.1",
+    "next": "catalog:",
     "posthog-node": "^4.5.0",
     "react": "19.0.0",
     "server-only": "^0.0.1",

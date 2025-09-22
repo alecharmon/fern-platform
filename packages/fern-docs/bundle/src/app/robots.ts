@@ -12,8 +12,6 @@ import {
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getCanonicalUrl, getSeoDisabled } from "@fern-docs/edge-config";
 
-export const runtime = "edge";
-
 export default async function robots(): Promise<MetadataRoute.Robots> {
   if (isLocal()) {
     return {

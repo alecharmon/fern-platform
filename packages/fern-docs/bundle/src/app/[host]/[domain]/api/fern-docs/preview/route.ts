@@ -16,8 +16,6 @@ import {
 
 import { redirectResponse } from "@/server/serverResponse";
 
-export const runtime = "edge";
-
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const { VERCEL_ENV } = getEnv();
 

@@ -19,8 +19,6 @@ import {
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 
-export const runtime = "edge";
-
 export async function GET(req: NextRequest): Promise<NextResponse> {
   if (isLocal() || isSelfHosted()) {
     return new NextResponse(

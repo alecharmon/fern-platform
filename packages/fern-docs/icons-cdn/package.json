@@ -39,10 +39,10 @@
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
-    "@next/bundle-analyzer": "15.3.0-canary.1",
+    "@next/bundle-analyzer": "catalog:",
     "@types/node": "^22.0.0",
     "depcheck": "^1.4.7",
-    "next": "15.3.0-canary.1",
+    "next": "catalog:",
     "stylelint": "^16.1.0",
     "typescript": "^5",
     "vitest": "^3.2.4"

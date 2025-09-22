@@ -12,8 +12,6 @@ import { getAllEdge } from "./getEdge";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
-export const runtime = "edge";
-
 const EDGE_FLAGS = [
   "api-playground-enabled" as const,
   "api-scrolling-disabled" as const,

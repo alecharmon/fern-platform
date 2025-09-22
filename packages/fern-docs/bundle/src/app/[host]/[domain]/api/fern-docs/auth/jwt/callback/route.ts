@@ -17,8 +17,6 @@ import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
-export const runtime = "edge";
-
 export async function GET(req: NextRequest): Promise<NextResponse> {
   if (isLocal() || isSelfHosted()) {
     return new NextResponse("jwt is not accessible in local preview mode", {

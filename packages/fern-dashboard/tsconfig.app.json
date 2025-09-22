@@ -5,5 +5,8 @@
     "next.config.ts",
     "vitest.config.ts",
     ".next/types/**/*.ts"
-  ]
+  ],
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
 }
