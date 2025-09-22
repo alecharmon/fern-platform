@@ -20,7 +20,7 @@ export default defineConfig({
   bundle: true,
   minify: false,
   target: "es2022",
-  outDir: "dist",
+  outDir: "dist/js",
   tsconfig: "tsconfig.build.json",
   outExtension({ format }) {
     return {

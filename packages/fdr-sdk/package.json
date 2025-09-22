@@ -5,57 +5,56 @@
   "type": "module",
   "exports": {
     "./navigation": {
-      "types": "./dist/navigation/index.d.ts",
-      "import": "./dist/navigation/index.mjs",
-      "require": "./dist/navigation/index.js",
+      "types": "./dist/types/navigation/index.d.ts",
+      "import": "./dist/js/navigation/index.mjs",
+      "require": "./dist/js/navigation/index.js",
       "default": "./dist/navigation/index.mjs"
     },
     "./api-definition": {
-      "types": "./dist/api-definition/index.d.ts",
-      "import": "./dist/api-definition/index.mjs",
-      "require": "./dist/api-definition/index.js",
-      "default": "./dist/api-definition/index.mjs"
+      "types": "./dist/types/api-definition/index.d.ts",
+      "import": "./dist/js/api-definition/index.mjs",
+      "require": "./dist/js/api-definition/index.js",
+      "default": "./dist/js/api-definition/index.mjs"
     },
     "./docs": {
-      "types": "./dist/docs/index.d.ts",
-      "import": "./dist/docs/index.mjs",
-      "require": "./dist/docs/index.js",
-      "default": "./dist/docs/index.mjs"
+      "types": "./dist/types/docs/index.d.ts",
+      "import": "./dist/js/docs/index.mjs",
+      "require": "./dist/js/docs/index.js",
+      "default": "./dist/js/docs/index.mjs"
     },
     "./client": {
-      "types": "./dist/client/FdrClient.d.ts",
-      "import": "./dist/client/FdrClient.mjs",
-      "require": "./dist/client/FdrClient.js",
-      "default": "./dist/client/FdrClient.mjs"
+      "types": "./dist/types/client/FdrClient.d.ts",
+      "import": "./dist/js/client/FdrClient.mjs",
+      "require": "./dist/js/client/FdrClient.js",
+      "default": "./dist/js/client/FdrClient.mjs"
     },
     "./client/types": {
-      "types": "./dist/client/types.d.ts",
-      "import": "./dist/client/types.mjs",
-      "require": "./dist/client/types.js",
-      "default": "./dist/client/types.mjs"
+      "types": "./dist/types/client/types.d.ts",
+      "import": "./dist/js/client/types.mjs",
+      "require": "./dist/js/client/types.js",
+      "default": "./dist/js/client/types.mjs"
     },
     "./traversers": {
-      "types": "./dist/utils/traversers/index.d.ts",
-      "import": "./dist/utils/traversers/index.mjs",
-      "require": "./dist/utils/traversers/index.js",
-      "default": "./dist/utils/traversers/index.mjs"
+      "types": "./dist/types/utils/traversers/index.d.ts",
+      "import": "./dist/js/utils/traversers/index.mjs",
+      "require": "./dist/js/utils/traversers/index.js",
+      "default": "./dist/js/utils/traversers/index.mjs"
     },
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.mjs"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/js/index.mjs",
+      "require": "./dist/js/index.js",
+      "default": "./dist/js/index.mjs"
     }
   },
-  "main": "dist/index.mjs",
-  "source": "src/index.ts",
-  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "clean": "rm -rf ./dist",
-    "compile": "tsc --build && tsup --clean false",
+    "compile": "pnpm compile:js && pnpm compile:types",
+    "compile:js": "tsup",
+    "compile:types": "tsc --emitDeclarationOnly --outDir dist/types",
     "dev": "tsup --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
