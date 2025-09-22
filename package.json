@@ -12,6 +12,7 @@
     "codegen": "turbo codegen",
     "compile": "turbo compile",
     "dashboard:dev": "turbo dashboard:dev",
+    "dashboard:pull": "VERCEL_ORG_ID=team_6FKOM5nw037hv8g2mTk3gaH7 VERCEL_PROJECT_ID=prj_7PayvneDidzQ3RW6SUFMTN88chaa vercel pull --environment=development && cp .vercel/.env.development.local packages/fern-dashboard/.env.local",
     "depcheck": "turbo depcheck",
     "docs:build": "turbo docs:build",
     "docs:dev": "turbo docs:dev",
