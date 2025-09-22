@@ -2,13 +2,12 @@ import { redirect } from "next/navigation";
 
 import { FdrAPI } from "@fern-api/fdr-sdk";
 
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { DocsZeroState } from "@/components/docs-page/DocsZeroState";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
-
-import getMyDocsSites from "../../../api/get-my-docs-sites/handler";
-import { getCurrentSessionOrThrow } from "../../../services/auth0/getCurrentSession";
 
 export default async function Page({
   params,
@@ -16,12 +15,15 @@ export default async function Page({
   params: Promise<{ orgName: Auth0OrgName }>;
 }) {
   const { orgName } = await params;
-  const session = await getCurrentSessionOrThrow();
+  const session = await getCurrentSession();
+  if (session == null) {
+    redirect("/login");
+  }
 
   // Wrap this in a try/catch to not crash the page if docs sites are not found
   let docsSites: FdrAPI.dashboard.DocsSite[] = [];
   try {
-    const response = await getMyDocsSites({
+    const response = await getDocsSitesForOrg({
       orgName,
       token: session.accessToken,
     });
@@ -34,7 +36,6 @@ export default async function Page({
 
   const firstDocsSite = docsSites[0];
   if (firstDocsSite != null) {
-    const { orgName } = await params;
     redirect(
       `/${orgName}/docs/${constructDocsUrlParam(getDocsSiteUrl(firstDocsSite))}`
     );

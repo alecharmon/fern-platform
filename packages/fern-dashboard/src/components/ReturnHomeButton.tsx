@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
+
 import { Button } from "./ui/button";
 
 export default function ReturnHomeButton() {
   return (
     <Button asChild>
-      <a href="/">Return home</a>
+      <Link href="/">Return home</Link>
     </Button>
   );
 }

@@ -1,6 +1,5 @@
 import { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import { getGithubSourceMetadata } from "@/app/api/get-github-source-metadata/route";
-import { getMyDocsSites } from "@/app/api/get-my-docs-sites/route";
 import { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import { getOrgMembers } from "@/app/api/get-org-members/route";
 import { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
@@ -17,10 +16,6 @@ export const ReactQueryKey = {
     queryKey<OrgInvitation[]>("org-invitations", orgName),
   orgMembers: (orgName: Auth0OrgName) =>
     queryKey<getOrgMembers.Response>("org-members", orgName),
-  myDocsSites: (
-    orgName: Auth0OrgName
-  ): ReactQueryKey<getMyDocsSites.Response> =>
-    queryKey<getMyDocsSites.Response>("my-docs-sites", orgName),
   myOrganizations: () => queryKey<getMyOrganizations.Response>("my-orgs"),
   homepageImageUrl: ({
     orgName,

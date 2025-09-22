@@ -1,7 +1,9 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
+
+import { useRouter } from "@bprogress/next/app";
 
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import {

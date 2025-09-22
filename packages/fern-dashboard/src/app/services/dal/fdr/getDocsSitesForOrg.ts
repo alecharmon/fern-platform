@@ -1,9 +1,14 @@
 import "server-only";
 
+import { unstable_cacheTag } from "next/cache";
+
 import { FdrAPI } from "@fern-api/fdr-sdk";
 
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
+
+export const getDocsSitesForOrgCacheTag = (orgName: Auth0OrgName) =>
+  `docs-sites-${orgName}`;
 
 export default async function getDocsSitesForOrg({
   token,
@@ -13,6 +18,7 @@ export default async function getDocsSitesForOrg({
   orgName: Auth0OrgName;
 }) {
   "use cache";
+  unstable_cacheTag(getDocsSitesForOrgCacheTag(orgName));
   const fdr = getFdrClient({ token });
   const docsSites = await fdr.dashboard.getDocsSitesForOrg({
     // fdr uses org name (not id) as the org identifier

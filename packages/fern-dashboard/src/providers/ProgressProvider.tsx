@@ -15,9 +15,10 @@ export function ProgressProvider({ children }: ProgressProvider.Props) {
       color="var(--green-1100)"
       // don't show spinner in the top right
       options={{ showSpinner: false }}
-      shallowRouting
+      delay={200}
       startOnLoad
       disableSameURL
+      memo
     >
       {children}
     </BProgressProvider>

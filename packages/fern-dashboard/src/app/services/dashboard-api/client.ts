@@ -1,7 +1,6 @@
 import { generatePrDescription } from "@/app/api/generate-pr-description/route";
 import { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import { getGithubSourceMetadata } from "@/app/api/get-github-source-metadata/route";
-import { getMyDocsSites } from "@/app/api/get-my-docs-sites/route";
 import { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import { getOrgMembers } from "@/app/api/get-org-members/route";
@@ -18,10 +17,6 @@ import { updatePrStatus } from "@/app/api/update-pr-status/route";
 import { updatePrTitle } from "@/app/api/update-pr-title/route";
 
 export const DashboardApiClient = {
-  getMyDocsSites: (
-    request: getMyDocsSites.Request
-  ): Promise<getMyDocsSites.Response> =>
-    typedFetch<getMyDocsSites.Response>("/api/get-my-docs-sites", request),
   getMyOrganizations: () =>
     typedFetch<getMyOrganizations.Response>("/api/get-my-organizations"),
   getOrgInvitations: (request: getOrgInvitations.Request) =>

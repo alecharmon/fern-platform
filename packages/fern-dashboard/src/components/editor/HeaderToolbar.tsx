@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect } from "react";
 
 import {
@@ -70,9 +71,9 @@ export function HeaderToolbar({
     <div className="bg-background flex h-[var(--header-toolbar-height-mobile)] flex-wrap items-center justify-center gap-2 border-b border-gray-500 px-2 py-2 shadow-sm md:h-[var(--header-toolbar-height)] md:py-1">
       <div className="flex w-full flex-1 items-center gap-1 text-left md:w-auto">
         <Button className="px-2" variant="ghost" size="iconSm" asChild>
-          <a href={`/${orgName}/docs/${encodeURIComponent(docsUrl)}`}>
+          <Link href={`/${orgName}/docs/${encodeURIComponent(docsUrl)}`}>
             <ArrowLeftIcon />
-          </a>
+          </Link>
         </Button>
         <PRTitleEditor
           owner={owner}

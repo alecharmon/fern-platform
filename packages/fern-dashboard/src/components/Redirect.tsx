@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+
+import { useRouter } from "@bprogress/next/app";
 
 export default function Redirect({ href }: { href: string }) {
   const router = useRouter();

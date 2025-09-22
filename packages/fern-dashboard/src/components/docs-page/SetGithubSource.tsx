@@ -1,6 +1,6 @@
-import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
+import { useRouter } from "@bprogress/next/app";
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { useQueryClient } from "@tanstack/react-query";
 

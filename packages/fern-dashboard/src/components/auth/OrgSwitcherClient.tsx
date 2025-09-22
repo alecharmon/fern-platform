@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { useRouter } from "@bprogress/next/app";
 import { ChevronDown } from "lucide-react";
 
 import { Auth0OrgName, Auth0Organization } from "@/app/services/auth0/types";
@@ -47,7 +48,6 @@ export const OrgSwitcherClient = ({
   const onClickOrg = (newOrgName: Auth0OrgName) => {
     if (newOrgName !== orgName) {
       setLocalOrgName(newOrgName);
-      router.push(getPathnameForOrg(newOrgName));
     }
   };
 
@@ -67,19 +67,22 @@ export const OrgSwitcherClient = ({
       emptyMessage="No organizations found"
       getItemKey={(org) => org.id}
       shouldShowSearch={organizations.length > 10}
-      renderItem={(organization, onSelect) => (
-        <div
+      renderItem={(organization) => (
+        <Link
           className="flex w-full cursor-pointer justify-between px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-          onClick={onSelect}
+          href={getPathnameForOrg(organization.name)}
           onMouseOver={() => {
             onHoverOrg(organization.name);
+          }}
+          onClick={() => {
+            onClickOrg(organization.name);
           }}
         >
           <div className="flex items-center gap-2">
             <OrgLogo organization={organization} />
             {getOrgDisplayName(organization)}
           </div>
-        </div>
+        </Link>
       )}
     >
       <Button
@@ -98,6 +101,9 @@ export const OrgSwitcherClient = ({
 };
 
 function getRedirectPathname(pathname: string) {
+  if (!pathname || pathname === "/") {
+    return "/docs";
+  }
   // if the current pathame is /docs/<domain>, just redirect to /docs
   if (pathname.startsWith("/docs/")) {
     return "/docs";

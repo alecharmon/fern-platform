@@ -1,17 +1,19 @@
 import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
+import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsUrl } from "@/utils/types";
 
 import { ArchiveSiteButton } from "./ArchiveSiteButton";
 import { ToggleAskAiButton } from "./ToggleAskAiButton";
 
-export declare namespace Settings {
-  export interface Props {
-    docsUrl: DocsUrl;
-    hasFernEmail: boolean;
-  }
-}
-
-export async function Settings({ docsUrl, hasFernEmail }: Settings.Props) {
+export async function Settings({
+  docsUrl,
+  hasFernEmail,
+  orgName,
+}: {
+  docsUrl: DocsUrl;
+  orgName: Auth0OrgName;
+  hasFernEmail: boolean;
+}) {
   const askAiStatus = hasFernEmail
     ? await isAskAiEnabled({ domain: docsUrl })
     : null;
@@ -27,7 +29,7 @@ export async function Settings({ docsUrl, hasFernEmail }: Settings.Props) {
           </div>
         </div>
         <div className="mt-5 flex justify-center md:justify-end">
-          <ArchiveSiteButton docsUrl={docsUrl} />
+          <ArchiveSiteButton docsUrl={docsUrl} orgName={orgName} />
         </div>
       </div>
       {hasFernEmail && (

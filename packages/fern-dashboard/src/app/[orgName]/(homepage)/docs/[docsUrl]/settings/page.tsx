@@ -3,6 +3,7 @@ import {
   FERN_ORG_NAME,
   ensureUserBelongsToOrg,
 } from "@/app/services/auth0/management";
+import { Auth0OrgName } from "@/app/services/auth0/types";
 import { Settings } from "@/components/settings/Settings";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
@@ -10,9 +11,10 @@ import { EncodedDocsUrl } from "@/utils/types";
 export default async function Page({
   params,
 }: {
-  params: Promise<{ docsUrl: EncodedDocsUrl }>;
+  params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
 }) {
-  const docsUrl = parseDocsUrlParam(await params);
+  const { orgName, docsUrl: encodedDocsUrl } = await params;
+  const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
   const session = await getCurrentSession();
   let hasFernEmail = false;
@@ -25,5 +27,7 @@ export default async function Page({
     console.error("Failed to check if user has Fern email:", error);
     hasFernEmail = false;
   }
-  return <Settings docsUrl={docsUrl} hasFernEmail={hasFernEmail} />;
+  return (
+    <Settings docsUrl={docsUrl} hasFernEmail={hasFernEmail} orgName={orgName} />
+  );
 }

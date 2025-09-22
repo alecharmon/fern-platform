@@ -38,7 +38,7 @@ export default async function HeaderLayout({
     <div className="flex justify-between gap-4 p-4">
       <div className="flex min-w-0 items-center gap-4">
         <ThemedFernLogo className="w-16" />
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="h-[36px]" />}>
           <OrgSwitcher currentOrgName={orgName} />
         </Suspense>
         <Suspense fallback={null}>

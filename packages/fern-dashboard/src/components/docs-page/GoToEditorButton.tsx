@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Loader2, Plus } from "lucide-react";
@@ -61,7 +62,7 @@ export function GoToEditorButton({
               disabled={isLoading || disabled || isValidatingSource}
               asChild={!disabled}
             >
-              <a
+              <Link
                 className="flex flex-row items-center gap-1"
                 href={editorSlug}
                 onClick={() => {
@@ -76,7 +77,7 @@ export function GoToEditorButton({
                     New session
                   </>
                 )}
-              </a>
+              </Link>
             </Button>
           </span>
         </FernTooltip>

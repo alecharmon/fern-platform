@@ -1,13 +1,17 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import {
   addUserToOrg,
   doesUserBelongToOrg,
+  ensureUserBelongsToOrgCacheTag,
   getInviteToken,
   invalidateInviteToken,
 } from "../services/auth0/management";
 import { Auth0OrgName, Auth0UserID } from "../services/auth0/types";
+import { getAvailableOrgsForUserCacheTag } from "../services/dal/fdr/getAvailableOrgsForUser";
 
 export type RedeemInviteTokenErrors =
   | { type: "NOT_LOGGED_IN" }
@@ -62,6 +66,10 @@ export async function redeemInviteToken({
 
   // Clean up the token since it's been used (one-time use)
   await invalidateInviteToken(token);
+
+  // Invalidate the cache for the user's available organizations and org access
+  revalidateTag(getAvailableOrgsForUserCacheTag(userId));
+  revalidateTag(ensureUserBelongsToOrgCacheTag(userId, inviteToken.orgName));
 
   // Redirect to organization
   return { success: true, orgName: inviteToken.orgName };

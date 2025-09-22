@@ -26,7 +26,7 @@ export default async function Page() {
   }
 
   const firstOrg = await getOrCreateFirstOrgForUser(session);
-  redirect(`/${firstOrg.orgName}`);
+  redirect(`/${firstOrg.orgName}/docs`);
 }
 
 async function getOrCreateFirstOrgForUser(

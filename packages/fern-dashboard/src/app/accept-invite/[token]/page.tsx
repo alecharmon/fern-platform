@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 
 import { Loader2 } from "lucide-react";
@@ -70,7 +71,7 @@ async function AcceptInviteHandler({ token }: { token: string }) {
             {DisplayTokenError(result.error)}
           </div>
           <Button asChild>
-            <a href="/">Return to homepage</a>
+            <Link href="/">Return to homepage</Link>
           </Button>
         </div>
       );
@@ -84,7 +85,7 @@ async function AcceptInviteHandler({ token }: { token: string }) {
             : "Failed to accept invitation."}
         </div>
         <Button asChild>
-          <a href="/">Return to homepage</a>
+          <Link href="/">Return to homepage</Link>
         </Button>
       </div>
     );
