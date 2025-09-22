@@ -12,6 +12,7 @@ packages:
   - "!**/__test__/**"
 
 catalog:
+  "@next/eslint-plugin-next": "15.5.1-canary.39"
   "@next/bundle-analyzer": "15.5.1-canary.39"
   "eslint-config-next": "15.5.1-canary.39"
   "next": "15.5.1-canary.39"
