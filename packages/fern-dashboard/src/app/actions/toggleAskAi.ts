@@ -75,5 +75,5 @@ export async function getToggleStatus({
 }): Promise<string> {
   const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
   const response = await faiClient.settings.getToggleStatus({ domain });
-  return response.status || "unknown";
+  return response.status || "failed";
 }

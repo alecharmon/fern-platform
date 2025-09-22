@@ -26,6 +26,7 @@ export async function queue<TBody = unknown>({
   basepath: basepathProp,
   endpoint: endpointProp,
   disableVercelPreviewDeployment = false,
+  timeoutSeconds,
   ...request
 }: {
   /**
@@ -39,6 +40,7 @@ export async function queue<TBody = unknown>({
   basepath?: string;
   endpoint: `/api/fern-docs/${string}`;
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
+  timeoutSeconds?: number;
   body?: TBody;
   headers?: HeadersInit;
   retries?: number;
@@ -79,7 +81,82 @@ export async function queue<TBody = unknown>({
     retries: 1,
     ...request,
     headers,
+    timeout: timeoutSeconds ? `${BigInt(timeoutSeconds)}s` : undefined,
   });
+}
+
+export async function queueWithMessageId<TBody = unknown>({
+  host,
+  domain,
+  basepath: basepathProp,
+  endpoint: endpointProp,
+  disableVercelPreviewDeployment = false,
+  method,
+  timeoutSeconds,
+  ...request
+}: {
+  /**
+   * the host of the docs (might be different from the domain, in the case of reverse proxies)
+   */
+  host: string;
+  /**
+   * the domain of the docs (will be added to the x-fern-host header)
+   */
+  domain: string;
+  basepath?: string;
+  endpoint: `/api/fern-docs/${string}`;
+  /**
+   * queueName must be alphanumeric, hyphen, underscore, or period
+   */
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  timeoutSeconds?: number;
+  body?: TBody;
+  headers?: HeadersInit;
+  retries?: number;
+  deduplicationId?: string;
+  disableVercelPreviewDeployment?: boolean;
+}): Promise<string | undefined> {
+  if (isLocal() || isSelfHosted() || q === undefined) {
+    return undefined;
+  }
+
+  const { VERCEL, VERCEL_ENV, VERCEL_AUTOMATION_BYPASS_SECRET } = getEnv();
+
+  if (!VERCEL || VERCEL_ENV === "development") {
+    return undefined;
+  }
+
+  if (disableVercelPreviewDeployment && VERCEL_ENV !== "production") {
+    return undefined;
+  }
+
+  const headers = new Headers(request?.headers);
+
+  // add x-fern-host header to identify the docs domain (for compatibility with vercel preview urls)
+  headers.set(HEADER_X_FERN_HOST, domain);
+
+  if (VERCEL_AUTOMATION_BYPASS_SECRET) {
+    headers.set(
+      HEADER_X_VERCEL_PROTECTION_BYPASS,
+      VERCEL_AUTOMATION_BYPASS_SECRET
+    );
+  }
+
+  const basepath = cleanBasePath(basepathProp);
+  const endpoint = slugToHref(endpointProp);
+
+  const response = await q.publishJSON({
+    url: `https://${host}${basepath}${endpoint}`,
+    headers,
+    method,
+    timeout: timeoutSeconds ? `${BigInt(timeoutSeconds)}s` : undefined,
+  });
+
+  if ("messageId" in response) {
+    return response.messageId;
+  }
+
+  return undefined;
 }
 
 export async function batchQueue<TBody = unknown>({
@@ -167,4 +244,31 @@ export async function batchQueue<TBody = unknown>({
   );
 
   await q.batchJSON(batchRequests);
+}
+
+export async function getMessageStatus(
+  messageId: string
+): Promise<"completed" | "failed" | "in_progress"> {
+  const response = await q?.logs({
+    filter: {
+      messageId,
+    },
+  });
+  if (response) {
+    const state = response.logs[0]?.state;
+    if (state === "DELIVERED") {
+      return "completed";
+    } else if (
+      state === "CREATED" ||
+      state === "ACTIVE" ||
+      state === "RETRY" ||
+      state === "IN_PROGRESS" ||
+      state === "ERROR"
+    ) {
+      return "in_progress";
+    } else {
+      return "failed";
+    }
+  }
+  return "failed";
 }

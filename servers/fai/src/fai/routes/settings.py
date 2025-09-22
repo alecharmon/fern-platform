@@ -272,17 +272,21 @@ async def get_toggle_status(
             )
             if response.status_code == 200:
                 status_data = response.json()
+                job_status = status_data.get("status", None)
 
-                # If job is completed, clear the job_id and set completion time
-                if status_data.get("completed", False):
+                if (job_status == "completed"):
                     existing_record.job_id = None
                     existing_record.last_reindex_time = datetime.utcnow()
-                    await db.commit()
+                elif (job_status == "failed"):
+                    existing_record.job_id = None
+                    existing_record.last_reindex_time = None
+                
+                await db.commit()
 
                 return JSONResponse(
                     content=jsonable_encoder(
                         ToggleStatusResponse(
-                            status=status_data.get("status", "unknown"),
+                            status=job_status or "failed",
                             ask_ai_enabled=True,
                             last_reindex_time=(
                                 existing_record.last_reindex_time.isoformat()
@@ -297,7 +301,7 @@ async def get_toggle_status(
                 return JSONResponse(
                     content=jsonable_encoder(
                         ToggleStatusResponse(
-                            status="error",
+                            status="failed",
                             ask_ai_enabled=True,
                         )
                     )
@@ -305,7 +309,7 @@ async def get_toggle_status(
 
     except Exception:
         LOGGER.exception("Failed to get toggle status")
-        return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
+        return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="failed", ask_ai_enabled=False)))
 
 
 def get_token_from_auth_header(auth_header: str) -> str | None:

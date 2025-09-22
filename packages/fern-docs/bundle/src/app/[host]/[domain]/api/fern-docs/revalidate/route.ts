@@ -39,7 +39,7 @@ import {
   queueTurbopufferReindex,
 } from "@/server/queue-reindex";
 
-export const maxDuration = 600; // 10 minutes timeout
+export const maxDuration = 800; // 13 minutes timeout
 
 export async function GET(
   req: NextRequest,
@@ -94,7 +94,7 @@ export async function GET(
           // reindex unless explicitly disabled
           req.nextUrl.searchParams.get("reindex") !== "false"
         ) {
-          reindexPromise = reindex(docs, host, domain)
+          reindexPromise = reindex(docs, host, domain, maxDuration)
             .then((services) => {
               controller.enqueue(
                 `reindex-queued:services=${services.join(",")}\n`
@@ -358,7 +358,8 @@ export async function GET(
 async function reindex(
   docs: DocsV2Read.LoadDocsForUrlResponse,
   host: string,
-  domain: string
+  domain: string,
+  maxDuration: number
 ) {
   const { basePath } = docs.baseUrl;
 
@@ -371,7 +372,12 @@ async function reindex(
   ).ask_ai_enabled;
 
   if (isAskAiEnabled) {
-    await queueTurbopufferReindex(host, withoutStaging(domain), basePath);
+    await queueTurbopufferReindex(
+      host,
+      withoutStaging(domain),
+      basePath,
+      maxDuration
+    );
     return ["algolia", "turbopuffer"];
   }
   return ["algolia"];

@@ -99,8 +99,6 @@ export function ToggleAskAiButton({
     pollIntervalRef.current = setInterval(() => {
       void pollJobStatus();
     }, 7000);
-
-    void pollJobStatus();
   }, [pollJobStatus]);
 
   useEffect(() => {
