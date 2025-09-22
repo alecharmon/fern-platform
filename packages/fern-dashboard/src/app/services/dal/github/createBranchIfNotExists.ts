@@ -15,12 +15,17 @@ export default async function createBranchIfNotExists(request: {
   baseBranch: string;
   orgName: Auth0OrgName;
   site: DocsUrl;
-}): Promise<{
-  success: boolean;
-  error?: string;
-  baseSha?: string;
-  response?: any;
-}> {
+}): Promise<
+  | {
+      success: true;
+      baseSha: string;
+      response: any;
+    }
+  | {
+      success: false;
+      error: string;
+    }
+> {
   const session = await getCurrentSession();
   if (session == null) {
     return { success: false, error: "No session found" };

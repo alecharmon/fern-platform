@@ -15,8 +15,9 @@ export function ProgressProvider({ children }: ProgressProvider.Props) {
       color="var(--green-1100)"
       // don't show spinner in the top right
       options={{ showSpinner: false }}
-      // only show after loading for > 1s
-      delay={1_000}
+      shallowRouting
+      startOnLoad
+      disableSameURL
     >
       {children}
     </BProgressProvider>

@@ -1,9 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { useCallback } from "react";
-import { preload } from "react-dom";
+import { useMemo, useState } from "react";
 
 import { Loader2, Plus } from "lucide-react";
 
@@ -15,34 +12,25 @@ import { generateBranchName } from "@fern-docs/components/navigation/local-stora
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
-import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { GithubSourceRepo } from "@/app/services/github/types";
 import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
 import { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 
-import {
-  ErrorNoBaseBranchToast,
-  ErrorNoGithubSourceToast,
-} from "../editor/EditorToasts";
 import { Button } from "../ui/button";
 
 export function GoToEditorButton({
   docsUrl,
   session,
-  sourceRepo,
   disabled = false,
   isValidatingSource,
 }: {
   docsUrl: DocsUrl;
   session: Auth0SessionData;
-  sourceRepo?: GithubSourceRepo;
   disabled?: boolean;
   disabledReason?: string;
   isValidatingSource?: boolean;
 }) {
   const orgName = useOrgName();
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const newBranchName = useMemo(
     () => generateBranchName(session.user.sub, session.user.name),
@@ -58,30 +46,6 @@ export function GoToEditorButton({
     });
   }, [orgName, docsUrl, newBranchName]);
 
-  // Preload the editor data and URL in the background
-  useEffect(() => {
-    if (!disabled) {
-      DashboardApiClient.preloadEditorData({
-        docsUrl,
-      });
-      router.prefetch(editorSlug);
-      preload(editorSlug, { as: "fetch", crossOrigin: "anonymous" });
-    }
-  }, [docsUrl, disabled, router, editorSlug]);
-
-  const goToEditor = useCallback(() => {
-    if (sourceRepo?.owner == null || sourceRepo.repo == null) {
-      ErrorNoGithubSourceToast();
-      return;
-    }
-    if (sourceRepo.baseBranch == null) {
-      ErrorNoBaseBranchToast();
-      return;
-    }
-
-    router.push(editorSlug);
-  }, [sourceRepo, editorSlug, router]);
-
   return (
     <div className="flex w-fit flex-row items-center gap-2">
       <FernTooltipProvider>
@@ -94,14 +58,16 @@ export function GoToEditorButton({
         >
           <span className="pointer-events-auto">
             <Button
-              onClick={() => {
-                setIsLoading(true);
-                goToEditor();
-              }}
               disabled={isLoading || disabled || isValidatingSource}
               asChild={!disabled}
             >
-              <div className="flex flex-row items-center gap-1">
+              <a
+                className="flex flex-row items-center gap-1"
+                href={editorSlug}
+                onClick={() => {
+                  setIsLoading(true);
+                }}
+              >
                 {isLoading ? (
                   <Loader2 className="animate-spin" />
                 ) : (
@@ -110,7 +76,7 @@ export function GoToEditorButton({
                     New session
                   </>
                 )}
-              </div>
+              </a>
             </Button>
           </span>
         </FernTooltip>

@@ -11,8 +11,8 @@ import Card from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DocsUrl } from "@/utils/types";
 
+import { BranchList } from "../BranchList";
 import { GoToEditorButton } from "../GoToEditorButton";
-import { OpenPRsComponent } from "../OpenPRsComponent";
 import { VisualEditorEmptyCard } from "./VisualEditorEmptyCard";
 import { VisualEditorHeader } from "./VisualEditorHeader";
 
@@ -66,7 +66,7 @@ export function VisualEditorSectionClient({
 
   if (relevantBranches.length > 0) {
     return (
-      <OpenPRsComponent
+      <BranchList
         maybeCriticalUpdateWarning={maybeCriticalUpdateWarning}
         docsUrl={docsUrl}
         session={session}
@@ -81,11 +81,7 @@ export function VisualEditorSectionClient({
       <>
         {maybeCriticalUpdateWarning}
         <div className="flex flex-col gap-2 sm:flex-row">
-          <GoToEditorButton
-            docsUrl={docsUrl}
-            session={session}
-            sourceRepo={sourceRepo}
-          />
+          <GoToEditorButton docsUrl={docsUrl} session={session} />
         </div>
       </>
     </VisualEditorEmptyCard>

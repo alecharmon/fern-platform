@@ -1,9 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Fragment, useState } from "react";
-
-import { ArrowRight } from "lucide-react";
+import { useState } from "react";
 
 import { createNavigationLocalStorage } from "@fern-docs/components";
 
@@ -15,12 +13,11 @@ import Card from "@/components/ui/card";
 import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
 import { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 
-import { BranchPRInfo } from "./BranchPRInfo";
-import { DeleteBranchButton } from "./DeleteBranchButton";
+import { BranchListItem } from "./BranchListItem";
 import { GoToEditorButton } from "./GoToEditorButton";
 import { VisualEditorHeader } from "./visual-editor-section/VisualEditorHeader";
 
-export function OpenPRsComponent({
+export function BranchList({
   docsUrl,
   session,
   sourceRepo,
@@ -83,47 +80,22 @@ export function OpenPRsComponent({
         {maybeCriticalUpdateWarning}
         <div className="flex items-center justify-between">
           <VisualEditorHeader />
-          <GoToEditorButton
-            docsUrl={docsUrl}
-            session={session}
-            sourceRepo={sourceRepo}
-          />
+          <GoToEditorButton docsUrl={docsUrl} session={session} />
         </div>
 
         {availableBranches.length > 0 && (
           <div className="flex flex-col gap-y-3">
             {visibleBranches.map((branch, index) => (
-              <Fragment key={branch}>
-                <div className="flex items-center justify-between gap-x-4 gap-y-1">
-                  <div className="flex-1 overflow-x-scroll">
-                    <BranchPRInfo
-                      branch={branch}
-                      sourceRepo={sourceRepo}
-                      docsUrl={docsUrl}
-                    />
-                  </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <DeleteBranchButton
-                      branch={branch}
-                      onBranchDelete={handleBranchDelete}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleBranchClick(branch)}
-                      className="text-green-1100 hover:text-green-1100"
-                    >
-                      Open
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-                {index < visibleBranches.length - 1 && (
-                  <hr className="bg-gray-400 dark:bg-gray-600" />
-                )}
-              </Fragment>
+              <BranchListItem
+                key={branch}
+                branch={branch}
+                sourceRepo={sourceRepo}
+                docsUrl={docsUrl}
+                handleBranchDelete={handleBranchDelete}
+                handleBranchClick={handleBranchClick}
+                showDivider={index < visibleBranches.length - 1}
+              />
             ))}
-
             {hasMoreBranches && (
               <div className="-mb-2 -ml-1">
                 <Button variant="outline" size="xs" onClick={handleLoadMore}>
