@@ -266,7 +266,7 @@ export async function GET(
                   const res = await fetch(
                     `${req.nextUrl.origin}${slugToHref(slug)}`,
                     {
-                      method: "HEAD",
+                      method: "GET",
                       cache: "no-store",
                       headers: { [HEADER_X_FERN_HOST]: domain },
                       signal: AbortSignal.timeout(600_000),
