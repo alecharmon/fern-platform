@@ -1,6 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
+import { APIV1Write } from "@fern-api/fdr-sdk";
+
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 import {
@@ -14,9 +16,11 @@ export const loadDynamicIRWithUrl = cache(
   async ({
     orgId,
     apiName,
+    snippetsConfig,
   }: {
     orgId: string;
     apiName: string;
+    snippetsConfig: APIV1Write.SnippetsConfig | undefined;
   }): Promise<DynamicIRsByLanguage | undefined> => {
     return unstable_cache(
       async () => {
@@ -30,10 +34,15 @@ export const loadDynamicIRWithUrl = cache(
           return undefined;
         }
 
+        if (!snippetsConfig) {
+          return undefined;
+        }
+
         try {
           const response = await loadDynamicIRFromS3(
             orgId,
             apiName,
+            snippetsConfig,
             getDynamicIRBucketName()
           );
           if (response != null && Object.keys(response).length > 0) {

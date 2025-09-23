@@ -420,7 +420,10 @@ const createGetPrunedApiCached = (
           );
           if (cached != null) {
             const metadata = await getMetadata(cacheConfig)(domainKey);
-            const dynamicIr = await getDynamicIr(id)(metadata.org);
+            const dynamicIr = await getDynamicIr(id)(
+              metadata.org,
+              metadata.domain
+            );
             return await backfillSnippets(
               cached,
               dynamicIr,
@@ -462,7 +465,7 @@ const createGetPrunedApiCached = (
         );
       }
       const metadata = await getMetadata(cacheConfig)(domainKey);
-      const dynamicIr = await getDynamicIr(id)(metadata.org);
+      const dynamicIr = await getDynamicIr(id)(metadata.org, metadata.domain);
       return backfillSnippets(pruned, dynamicIr, await flagsPromise);
     },
     [domainKey, cacheSeed(), cacheConfig.cacheKeySuffix],
@@ -1036,13 +1039,16 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
   });
 
 const getDynamicIr = (apiName: string) =>
-  cache(async (orgId: string) => {
+  cache(async (orgId: string, domain: string) => {
     "use cache";
     unstable_cacheTag(orgId, "getDynamicIr");
+
+    const api = await getApi(domain, apiName);
 
     const response = await loadDynamicIRWithUrl({
       orgId,
       apiName,
+      snippetsConfig: api.snippetsConfiguration,
     });
 
     if (response) {
@@ -1244,7 +1250,7 @@ export const createCachedDocsLoader = async (
     },
     getDynamicIr: async (apiName: string) => {
       const m = await metadata;
-      return getDynamicIr(apiName)(m.org);
+      return getDynamicIr(apiName)(m.org, m.domain);
     },
     clearKvCache: () => clearKvCache(domainKey),
     isAskAiEnabled: () => getAskAiEnabled(config)(domainKey),

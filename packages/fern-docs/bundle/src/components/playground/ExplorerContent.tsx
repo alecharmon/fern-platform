@@ -30,23 +30,20 @@ export async function ExplorerContent({
 
   try {
     api = await loader.getPrunedApi(node.apiDefinitionId, createPruneKey(node));
-    const edgeFlags = await loader.getEdgeFlags();
-
-    if (edgeFlags.isDynamicSnippetsEnabled) {
-      try {
-        dynamicIRsByLanguage = await loader.getDynamicIr(node.apiDefinitionId);
-      } catch (error) {
-        console.error(`[dynamic-ir] ${JSON.stringify(error)}`);
-      }
-    }
   } catch (error) {
-    console.error(`[explorer-content] ${JSON.stringify(error)}`);
+    console.error(`[explorer-content:getPrunedApi] ${JSON.stringify(error)}`);
     // TODO: don't revalidate too often
     // revalidate(await loader.getBaseUrl());
   }
 
   if (api == null) {
     return <NoEndpointSelected />;
+  }
+
+  try {
+    dynamicIRsByLanguage = await loader.getDynamicIr(node.apiDefinitionId);
+  } catch (error) {
+    console.error(`[explorer-content:getDynamicIr] ${JSON.stringify(error)}`);
   }
 
   if (node.type === "endpoint") {
