@@ -1,3 +1,5 @@
+import "server-only";
+
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -7,7 +9,6 @@ import {
   RedeemInviteTokenErrors,
   redeemInviteToken,
 } from "@/app/actions/redeemInviteToken";
-import Redirect from "@/components/Redirect";
 import {
   GithubLoginButton,
   GoogleLoginButton,
@@ -15,6 +16,7 @@ import {
 import { LoginImage } from "@/components/login-page/LoginImage";
 import { Button } from "@/components/ui/button";
 
+import AcceptInviteSuccess from "./AcceptInviteSuccess";
 import "./invite-page.scss";
 
 export const revalidate = 0;
@@ -47,10 +49,7 @@ async function AcceptInviteHandler({ token }: { token: string }) {
     const result = await redeemInviteToken({ token });
     if (result.success) {
       return (
-        <>
-          <Loader text="Redirecting..." />
-          <Redirect href={`/${result.orgName}/docs`} />
-        </>
+        <AcceptInviteSuccess orgName={result.orgName} userId={result.userId} />
       );
     } else {
       if (result.error.type === "NOT_LOGGED_IN") {
