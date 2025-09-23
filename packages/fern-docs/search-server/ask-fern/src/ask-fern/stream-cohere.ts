@@ -175,14 +175,17 @@ export async function runRouteForCohere({
           });
           try {
             await faiClient.query.createQuery({
-              query_id: assistantQueryId,
-              conversation_id: conversationId,
               domain,
-              text: responseText,
-              role: "ASSISTANT",
-              source: chatSource.toUpperCase(),
-              created_at: new Date(end).toISOString(),
-              time_to_first_token: timeToFirstToken,
+              body: {
+                query_id: assistantQueryId,
+                conversation_id: conversationId,
+                domain,
+                text: responseText,
+                role: "ASSISTANT",
+                source: chatSource.toUpperCase(),
+                created_at: new Date(end).toISOString(),
+                time_to_first_token: timeToFirstToken,
+              },
             });
           } catch (error) {
             console.log("Error creating assistant query", error);

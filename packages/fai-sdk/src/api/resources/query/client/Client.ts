@@ -39,33 +39,39 @@ export class Query {
     }
 
     /**
-     * @param {FernAI.Query} request
+     * @param {FernAI.CreateQueryRequest} request
      * @param {Query.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
      *     await client.query.createQuery({
-     *         query_id: "query_id",
-     *         conversation_id: "conversation_id",
      *         domain: "domain",
-     *         text: "text",
-     *         role: "role",
-     *         source: "source",
-     *         created_at: "2024-01-15T09:30:00Z"
+     *         body: {
+     *             query_id: "query_id",
+     *             conversation_id: "conversation_id",
+     *             domain: "domain",
+     *             text: "text",
+     *             role: "role",
+     *             source: "source",
+     *             created_at: "2024-01-15T09:30:00Z"
+     *         }
      *     })
      */
     public createQuery(
-        request: FernAI.Query,
+        request: FernAI.CreateQueryRequest,
         requestOptions?: Query.RequestOptions,
     ): core.HttpResponsePromise<FernAI.CreateQueryResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createQuery(request, requestOptions));
     }
 
     private async __createQuery(
-        request: FernAI.Query,
+        request: FernAI.CreateQueryRequest,
         requestOptions?: Query.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.CreateQueryResponse>> {
+        const { domain, body: _body } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["domain"] = domain;
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(this._options?.headers, requestOptions?.headers);
         const _response = await core.fetcher({
             url: core.url.join(
@@ -77,9 +83,9 @@ export class Query {
             method: "POST",
             headers: _headers,
             contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,

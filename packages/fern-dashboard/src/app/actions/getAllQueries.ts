@@ -8,6 +8,8 @@ import {
   getRequestParams,
 } from "@/components/analytics/utils/get-request-params";
 
+import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
+
 export async function getAllQueries({
   domain,
   cutoffTime,
@@ -17,7 +19,8 @@ export async function getAllQueries({
   cutoffTime: string;
   timeRange: TimeRange;
 }): Promise<{ queries: FernAI.Query[]; total: number }> {
-  const client = getFaiClient({ token: "" });
+  const session = await getCurrentSessionOrThrow();
+  const client = getFaiClient({ token: session.accessToken });
   const params = getRequestParams(timeRange);
 
   let allQueries: FernAI.Query[] = [];

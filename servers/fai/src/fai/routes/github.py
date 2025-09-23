@@ -15,7 +15,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from turbopuffer import AsyncTurbopuffer
 
 from src.fai.app import fai_app
-from src.fai.dependencies import get_db
+from src.fai.dependencies import (
+    get_db,
+    verify_token,
+)
 from src.fai.models.api.connectors.github_api import (
     CodeIndexStatusResponse,
     GitHubFileInfoRequest,
@@ -45,6 +48,7 @@ async def index_reference_md(
     domain: str,
     body: GitHubFileInfoRequest = Body(...),
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     """
     Index an SDK repository's reference.md file.
@@ -100,6 +104,7 @@ async def index_reference_md(
 async def check_code_index_status(
     domain: str,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> CodeIndexStatusResponse:
     """
     Check if the domain has a non-empty code index in both database and turbopuffer.

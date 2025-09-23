@@ -8,7 +8,6 @@ import { track } from "@fern-api/docs-server/analytics/posthog";
 import {
   fdrEnvironment,
   fernToken_admin,
-  getFaiOrigin,
   openaiApiKey,
   turbopufferApiKey,
 } from "@fern-api/docs-server/env-variables";
@@ -18,7 +17,6 @@ import { postToSlack } from "@fern-api/docs-server/slack";
 import { Gate, withBasicTokenAnonymous } from "@fern-api/docs-server/withRbac";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { slugToHref, withoutStaging } from "@fern-api/docs-utils";
-import { FernAIClient } from "@fern-api/fai-sdk";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import {
   getFernDocsIndexName,
@@ -73,11 +71,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       getEdgeFlags(domain),
     ]);
 
-    const isAskAiEnabled = (
-      await getFaiClient({
-        token: process.env.FERN_TOKEN ?? "",
-      }).settings.getSettings({ domain })
-    ).ask_ai_enabled;
+    const faiClient = getFaiClient({
+      token: fernToken_admin(),
+    });
+
+    const isAskAiEnabled = (await faiClient.settings.getSettings({ domain }))
+      .ask_ai_enabled;
 
     const askAiProcessing = await kv.hget(domain, "tpuf_job").then((job) => {
       return (
@@ -115,9 +114,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         );
       },
       deleteExisting,
-    });
-    const faiClient = new FernAIClient({
-      baseUrl: getFaiOrigin(),
     });
 
     const syncResponse = await faiClient.index.syncIndexToQueryIndex(domain, {

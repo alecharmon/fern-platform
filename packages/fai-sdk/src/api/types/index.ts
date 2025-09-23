@@ -38,6 +38,7 @@ export * from "./PaginationResponse.js";
 export * from "./PostChatCompletionResponse.js";
 export * from "./Query.js";
 export * from "./ReconstructIndexResponse.js";
+export * from "./SlackIntegrationResponse.js";
 export * from "./SyncIndexResponse.js";
 export * from "./ToggleAskAiResponse.js";
 export * from "./ToggleStatusResponse.js";

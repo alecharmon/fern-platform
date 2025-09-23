@@ -2,24 +2,23 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import (
-    Depends,
-    Request,
-)
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
-from src.fai.dependencies import get_db
+from src.fai.dependencies import (
+    get_db,
+    verify_token,
+)
 from src.fai.models.api.settings_api import (
     GetSettingsResponse,
     ToggleAskAiResponse,
     ToggleStatusResponse,
 )
 from src.fai.models.db.settings_db import SettingsDb
-from src.fai.utils.get_venus_client import get_venus_client
 from src.settings import LOGGER
 
 
@@ -30,20 +29,11 @@ from src.settings import LOGGER
 )
 async def get_settings(
     domain: str,
-    request: Request,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     """Get settings for a domain and organization."""
     try:
-        token = get_token_from_auth_header(request.headers.get("Authorization"))
-        if token is None:
-            return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
-
-        venus_client = get_venus_client(token=token)
-        is_fern_member = "fern" in venus_client.organization.get_org_ids_from_token()
-        if not is_fern_member:
-            return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
-
         stripped_domain = strip_domain(domain)
 
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
@@ -66,21 +56,12 @@ async def get_settings(
 async def toggle_ask_ai(
     domain: str,
     org_name: str,
-    request: Request,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     """Toggle Ask AI setting and return job_id for tracking."""
     LOGGER.info(f"Toggling Ask AI for domain {domain} and org_name {org_name}")
     try:
-        token = get_token_from_auth_header(request.headers.get("Authorization"))
-        if token is None:
-            return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
-
-        venus_client = get_venus_client(token=token)
-        is_fern_member = "fern" in venus_client.organization.get_org_ids_from_token()
-        if not is_fern_member:
-            return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
-
         stripped_domain = strip_domain(domain)
 
         # Check existing record
@@ -153,21 +134,12 @@ async def toggle_ask_ai(
 async def reindex_ask_ai(
     domain: str,
     org_name: str,
-    request: Request,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     """Manually trigger reindex for an already enabled Ask AI setup."""
     LOGGER.info(f"Manual reindex triggered for domain {domain} and org_name {org_name}")
     try:
-        token = get_token_from_auth_header(request.headers.get("Authorization"))
-        if token is None:
-            return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
-
-        venus_client = get_venus_client(token=token)
-        is_fern_member = "fern" in venus_client.organization.get_org_ids_from_token()
-        if not is_fern_member:
-            return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
-
         stripped_domain = strip_domain(domain)
 
         # Check existing record - Ask AI must already be enabled
@@ -226,20 +198,11 @@ async def reindex_ask_ai(
 )
 async def get_toggle_status(
     domain: str,
-    request: Request,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     """Get the status of Ask AI toggle operation."""
     try:
-        token = get_token_from_auth_header(request.headers.get("Authorization"))
-        if token is None:
-            return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
-
-        venus_client = get_venus_client(token=token)
-        is_fern_member = "fern" in venus_client.organization.get_org_ids_from_token()
-        if not is_fern_member:
-            return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
-
         stripped_domain = strip_domain(domain)
 
         # Get the settings record
@@ -274,13 +237,13 @@ async def get_toggle_status(
                 status_data = response.json()
                 job_status = status_data.get("status", None)
 
-                if (job_status == "completed"):
+                if job_status == "completed":
                     existing_record.job_id = None
                     existing_record.last_reindex_time = datetime.utcnow()
-                elif (job_status == "failed"):
+                elif job_status == "failed":
                     existing_record.job_id = None
                     existing_record.last_reindex_time = None
-                
+
                 await db.commit()
 
                 return JSONResponse(

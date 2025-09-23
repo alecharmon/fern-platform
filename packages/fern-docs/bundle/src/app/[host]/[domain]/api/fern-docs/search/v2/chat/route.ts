@@ -7,13 +7,11 @@ import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
 import {
   fernToken_admin,
-  getFaiOrigin,
   openaiApiKey,
 } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
-import { FernAIClient } from "@fern-api/fai-sdk";
 import {
   getLanguageModel,
   getQueryIndexName,
@@ -61,11 +59,12 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const isAskAiEnabled = (
-    await getFaiClient({
-      token: process.env.FERN_TOKEN ?? "",
-    }).settings.getSettings({ domain })
-  ).ask_ai_enabled;
+  const faiClient = getFaiClient({
+    token: fernToken_admin(),
+  });
+
+  const isAskAiEnabled = (await faiClient.settings.getSettings({ domain }))
+    .ask_ai_enabled;
 
   if (!isAskAiEnabled) {
     return NextResponse.json("Ask AI is not enabled for this domain", {
@@ -108,22 +107,19 @@ export async function POST(req: NextRequest) {
   const openai = createOpenAI({ apiKey: openaiApiKey() });
   const embeddingModel = openai.embedding("text-embedding-3-large");
 
-  const faiClient = new FernAIClient({
-    baseUrl: getFaiOrigin(),
-    headers: {
-      Authorization: `Bearer ${fernToken_admin()}`,
-    },
-  });
   try {
     await faiClient.query.createQuery({
-      query_id: queryId,
-      conversation_id: conversationId,
       domain,
-      text: lastUserMessage,
-      role: "USER",
-      source: chatSource.toUpperCase(),
-      created_at: createdAt.toISOString(),
-      time_to_first_token: undefined,
+      body: {
+        domain,
+        text: lastUserMessage,
+        role: "USER",
+        source: chatSource.toUpperCase(),
+        created_at: createdAt.toISOString(),
+        time_to_first_token: undefined,
+        query_id: queryId,
+        conversation_id: conversationId,
+      },
     });
   } catch (error) {
     console.log("Error creating query", error);

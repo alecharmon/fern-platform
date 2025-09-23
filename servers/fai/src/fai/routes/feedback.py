@@ -14,7 +14,10 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
-from src.fai.dependencies import get_db
+from src.fai.dependencies import (
+    get_db,
+    verify_token,
+)
 from src.fai.models.api.feedback_api import (
     CreateFeedbackRequest,
     CreateFeedbackResponse,
@@ -31,6 +34,7 @@ async def create_feedback(
     domain: str,
     request: CreateFeedbackRequest,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     LOGGER.info(f"Creating feedback for domain {domain}")
     try:
@@ -61,6 +65,7 @@ async def get_feedback_by_id(
     domain: str,
     conversation_id: str,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     LOGGER.info(f"Retrieving feedback {conversation_id} for domain {domain}")
     try:

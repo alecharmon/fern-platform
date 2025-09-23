@@ -17,6 +17,7 @@ import { Index } from "./api/resources/index/client/Client.js";
 import { Mcp } from "./api/resources/mcp/client/Client.js";
 import { Query } from "./api/resources/query/client/Client.js";
 import { Settings } from "./api/resources/settings/client/Client.js";
+import { Slack } from "./api/resources/slack/client/Client.js";
 
 export declare namespace FernAIClient {
     export interface Options {
@@ -55,6 +56,7 @@ export class FernAIClient {
     protected _mcp: Mcp | undefined;
     protected _query: Query | undefined;
     protected _settings: Settings | undefined;
+    protected _slack: Slack | undefined;
 
     constructor(_options: FernAIClient.Options = {}) {
         this._options = {
@@ -116,5 +118,9 @@ export class FernAIClient {
 
     public get settings(): Settings {
         return (this._settings ??= new Settings(this._options));
+    }
+
+    public get slack(): Slack {
+        return (this._slack ??= new Slack(this._options));
     }
 }

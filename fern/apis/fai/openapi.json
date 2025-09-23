@@ -1686,15 +1686,26 @@
         ],
         "summary": "Create Query",
         "operationId": "create_query",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Query"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -2080,6 +2091,218 @@
           "internal"
         ]
       }
+    },
+    "/slack/integrations": {
+      "post": {
+        "tags": [
+          "Slack"
+        ],
+        "summary": "Create Slack Integration",
+        "operationId": "create_slack_integration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSlackIntegration"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlackIntegrationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/slack/events": {
+      "post": {
+        "tags": [
+          "Slack"
+        ],
+        "summary": "Handle Slack Events",
+        "operationId": "handle_slack_events",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/slack/slash-commands": {
+      "post": {
+        "tags": [
+          "Slack"
+        ],
+        "summary": "Handle Slack Slash Commands",
+        "operationId": "handle_slack_slash_commands",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/slack/interactions": {
+      "post": {
+        "tags": [
+          "Slack"
+        ],
+        "summary": "Handle Slack Interactions",
+        "operationId": "handle_slack_interactions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/slack/oauth/callback": {
+      "get": {
+        "tags": [
+          "Slack"
+        ],
+        "summary": "Handle Slack Oauth Callback",
+        "operationId": "handle_slack_oauth_callback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
+    },
+    "/slack/get-install": {
+      "get": {
+        "tags": [
+          "Slack"
+        ],
+        "summary": "Get Slack Install Link",
+        "operationId": "get_slack_install_link",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ]
+      }
     }
   },
   "components": {
@@ -2442,6 +2665,19 @@
           "query_id"
         ],
         "title": "CreateQueryResponse"
+      },
+      "CreateSlackIntegration": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          }
+        },
+        "type": "object",
+        "required": [
+          "domain"
+        ],
+        "title": "CreateSlackIntegration"
       },
       "DeleteDocumentRequest": {
         "properties": {
@@ -3305,6 +3541,64 @@
           "success"
         ],
         "title": "ReconstructIndexResponse"
+      },
+      "SlackIntegrationResponse": {
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "title": "Integration Id"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "slack_team_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slack Team Id"
+          },
+          "slack_team_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slack Team Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "installed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "integration_id",
+          "domain",
+          "created_at"
+        ],
+        "title": "SlackIntegrationResponse"
       },
       "SyncIndexRequest": {
         "properties": {

@@ -6,7 +6,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
-from src.fai.dependencies import get_db
+from src.fai.dependencies import (
+    get_db,
+    verify_token,
+)
 from src.fai.models.api.index_api import (
     JobStatusResponse,
     ReconstructIndexResponse,
@@ -30,6 +33,7 @@ from src.settings import LOGGER
 )
 async def reconstruct_query_index(
     domain: str,
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         await reconstruct_query_index_for_domain(domain)
@@ -47,6 +51,7 @@ async def sync_index_to_query_index(
     domain: str,
     body: SyncIndexRequest,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         job_id = await job_manager.create_job(db)

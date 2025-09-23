@@ -1,7 +1,9 @@
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from src.fai.app import fai_app
+from src.fai.dependencies import verify_token
 from src.fai.models.api.mcp_api import (
     GetMcpBmfQueryRequest,
     GetMcpBmfQueryResponse,
@@ -21,6 +23,7 @@ from src.settings import LOGGER
 async def get_mcp_semantic_query(
     domain: str,
     body: GetMcpSemanticQueryRequest,
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         documents = await semantic_search(body.semantic_query, domain)
@@ -37,6 +40,7 @@ async def get_mcp_semantic_query(
 async def get_mcp_bmf_query(
     domain: str,
     body: GetMcpBmfQueryRequest,
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         documents = await bm25_search(body.keywords, domain)

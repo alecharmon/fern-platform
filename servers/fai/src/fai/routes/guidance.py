@@ -16,7 +16,10 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
-from src.fai.dependencies import get_db
+from src.fai.dependencies import (
+    get_db,
+    verify_token,
+)
 from src.fai.models.api.commons.pagination import PaginationResponse
 from src.fai.models.api.guidance_api import (
     CreateGuidanceRequest,
@@ -48,6 +51,7 @@ async def create_guidance(
     domain: str,
     body: CreateGuidanceRequest = Body(...),
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         new_db_guidance = GuidanceDb(
@@ -82,6 +86,7 @@ async def update(
     guidance_id: str,
     body: UpdateGuidanceRequest = Body(...),
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         db_guidance = await db.execute(
@@ -117,6 +122,7 @@ async def delete_guidance_by_id(
     domain: str,
     guidance_id: str,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         db_guidance = await db.execute(
@@ -146,6 +152,7 @@ async def get_guidance_by_id(
     domain: str,
     guidance_id: str,
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         db_guidance = await db.execute(
@@ -169,6 +176,7 @@ async def get_guidances(
     page: int | None = QueryParam(default=None, description="The page number for pagination"),
     limit: int | None = QueryParam(default=None, description="The number of documents per page"),
     db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     try:
         if page is None or page < 1:

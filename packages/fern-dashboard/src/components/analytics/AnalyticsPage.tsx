@@ -14,7 +14,7 @@ export default async function AnalyticsPage({
   docsUrl: string;
   analyticsBillingEnabled: boolean;
 }) {
-  const client = getFaiClient({ token: "" });
+  const client = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
   const baseDocsUrl = getBaseDocsUrl(docsUrl);
   const cutoffTime = new Date(Date.now()).toISOString();
 

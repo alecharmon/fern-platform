@@ -25,6 +25,9 @@ class Variables:
     SLACK_CLIENT_SECRET: str | None = os.environ.get("SLACK_CLIENT_SECRET")
     SLACK_SIGNING_SECRET: str | None = os.environ.get("SLACK_SIGNING_SECRET")
 
+    KV_REST_API_READ_ONLY_TOKEN: str | None = os.environ.get("KV_REST_API_READ_ONLY_TOKEN")
+    KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
+
     @classmethod
     def validate_env_variables(cls) -> None:
         for attr_name, attr_value in vars(cls).items():

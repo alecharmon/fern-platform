@@ -1,11 +1,13 @@
 from typing import Any
 
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from turbopuffer.types.row import Row
 
 from fai.models.utils.chat import format_record
 from src.fai.app import fai_app
+from src.fai.dependencies import verify_token
 from src.fai.models.api.chat_api import (
     PostChatCompletionRequest,
     PostChatCompletionResponse,
@@ -25,6 +27,7 @@ SUPPORTED_MODELS = ["claude-4-sonnet-20250514", "command-a-03-2025"]
 async def post_chat_completion(
     domain: str,
     request: PostChatCompletionRequest,
+    _: None = Depends(verify_token),
 ) -> JSONResponse:
     LOGGER.info(f"Chatting for domain {domain}")
     try:

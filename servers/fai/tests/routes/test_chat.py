@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
+from tests.conftest import TEST_FERN_TOKEN
 from tests.factories import (
     PostChatCompletionRequestFactory,
     create_test_domain,
@@ -25,7 +26,11 @@ class TestChat:
             ]
             mock_anthropic.return_value = (mock_turns, mock_citations)
 
-            response = test_client.post(f"/chat/{domain}", json=request_body.model_dump())
+            response = test_client.post(
+                f"/chat/{domain}",
+                json=request_body.model_dump(),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -49,7 +54,11 @@ class TestChat:
             mock_retrieve.return_value = [type("Row", (), {"document": "test doc"})()]
             mock_cohere.return_value = (mock_turns, mock_citations)
 
-            response = test_client.post(f"/chat/{domain}", json=request_body.model_dump())
+            response = test_client.post(
+                f"/chat/{domain}",
+                json=request_body.model_dump(),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -68,7 +77,9 @@ class TestChat:
             "messages": [{"role": "user", "content": "Test message"}],
         }
 
-        response = test_client.post(f"/chat/{domain}", json=invalid_request_data)
+        response = test_client.post(
+            f"/chat/{domain}", json=invalid_request_data, headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
 
         assert response.status_code == 422  # Pydantic validation error
         data = response.json()
@@ -87,7 +98,11 @@ class TestChat:
             mock_retrieve.return_value = []  # No retrieval results for empty messages
             mock_anthropic.return_value = (mock_turns, mock_citations)
 
-            response = test_client.post(f"/chat/{domain}", json=request_body.model_dump())
+            response = test_client.post(
+                f"/chat/{domain}",
+                json=request_body.model_dump(),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -101,7 +116,11 @@ class TestChat:
         with patch("src.fai.routes.chat.v1_retrieve") as mock_retrieve:
             mock_retrieve.side_effect = Exception("Retrieve error")
 
-            response = test_client.post(f"/chat/{domain}", json=request_body.model_dump())
+            response = test_client.post(
+                f"/chat/{domain}",
+                json=request_body.model_dump(),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+            )
 
             assert response.status_code == 500
             data = response.json()

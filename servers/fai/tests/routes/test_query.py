@@ -5,6 +5,7 @@ from datetime import (
 
 from fastapi.testclient import TestClient
 
+from tests.conftest import TEST_FERN_TOKEN
 from tests.factories import (
     QueryFactory,
     create_test_domain,
@@ -19,7 +20,12 @@ class TestCreateQuery:
         query_data = query.model_dump()
         query_data["created_at"] = query.created_at.isoformat()
 
-        response = test_client.post("/queries", json=query_data)
+        # Send domain as query parameter and query_data as request body
+        response = test_client.post(
+            f"/queries?domain={query.domain}",
+            json=query_data,
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -37,7 +43,9 @@ class TestCreateQuery:
             "created_at": "invalid-date-format",  # Invalid datetime format
         }
 
-        response = test_client.post("/queries", json=invalid_query_data)
+        response = test_client.post(
+            "/queries", json=invalid_query_data, headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
 
         # Expect validation error or server error depending on where it fails
         assert response.status_code in [422, 500]
@@ -49,7 +57,7 @@ class TestGetQueries:
     def test_get_queries_success(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        response = test_client.get(f"/queries/{domain}")
+        response = test_client.get(f"/queries/{domain}", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"})
 
         assert response.status_code == 200
         data = response.json()
@@ -63,7 +71,11 @@ class TestGetQueries:
     def test_get_queries_with_pagination(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        response = test_client.get(f"/queries/{domain}", params={"page": 2, "limit": 10})
+        response = test_client.get(
+            f"/queries/{domain}",
+            params={"page": 2, "limit": 10},
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -77,7 +89,9 @@ class TestGetQueries:
         end_date = now.isoformat()
 
         response = test_client.get(
-            f"/queries/{domain}", params={"start_date": start_date, "end_date": end_date, "include_assistant": True}
+            f"/queries/{domain}",
+            params={"start_date": start_date, "end_date": end_date, "include_assistant": True},
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
         )
 
         assert response.status_code == 200
@@ -88,7 +102,11 @@ class TestGetQueries:
     def test_get_queries_user_only(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        response = test_client.get(f"/queries/{domain}", params={"include_assistant": False})
+        response = test_client.get(
+            f"/queries/{domain}",
+            params={"include_assistant": False},
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -98,7 +116,11 @@ class TestGetQueries:
         domain = create_test_domain()
         cutoff_time = datetime.now(UTC).isoformat()
 
-        response = test_client.get(f"/queries/{domain}", params={"cutoff_time": cutoff_time})
+        response = test_client.get(
+            f"/queries/{domain}",
+            params={"cutoff_time": cutoff_time},
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+        )
 
         assert response.status_code == 200
         data = response.json()

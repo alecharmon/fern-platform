@@ -23,7 +23,7 @@ from sqlalchemy.ext.asyncio import (
 
 from src.fai.db import Base
 
-TEST_FERN_TOKEN = "test-fern-token"
+TEST_FERN_TOKEN = os.environ.get("FERN_TOKEN") or "test-fern-token"
 TEST_ANTHROPIC_API_KEY = "test-anthropic-api-key"
 TEST_COHERE_API_KEY = "test-cohere-api-key"
 TEST_OPENAI_API_KEY = "test-openai-api-key"
@@ -75,6 +75,7 @@ async def test_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession,
 def setup_test_env(test_database_url: str) -> Any:
     original_url = os.environ.get("POSTGRES_DATABASE_URL")
     os.environ["IS_LOCAL"] = "true"
+    os.environ["FERN_TOKEN"] = TEST_FERN_TOKEN
     os.environ["POSTGRES_DATABASE_URL"] = test_database_url
     os.environ["COHERE_API_KEY"] = TEST_COHERE_API_KEY
     os.environ["ANTHROPIC_API_KEY"] = TEST_ANTHROPIC_API_KEY

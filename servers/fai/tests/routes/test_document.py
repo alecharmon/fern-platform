@@ -17,6 +17,7 @@ from src.fai.models.api.document_api import (
     UpdateDocumentResponse,
 )
 from src.fai.models.db.document_db import DocumentDb
+from tests.conftest import TEST_FERN_TOKEN
 from tests.factories import (
     CreateDocumentRequestFactory,
     DeleteDocumentRequestFactory,
@@ -35,7 +36,11 @@ class TestDocumentRoutes:
         with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
-            response = test_client.post(f"/document/{domain}/create", json=mock_request.model_dump(mode="json"))
+            response = test_client.post(
+                f"/document/{domain}/create",
+                json=mock_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+            )
 
         assert response.status_code == 200, f"Unexpected response: {response.text}"
 
@@ -70,7 +75,11 @@ class TestDocumentRoutes:
         with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
-            response = test_client.post(f"/document/{domain}/create", json=mock_request.model_dump(mode="json"))
+            response = test_client.post(
+                f"/document/{domain}/create",
+                json=mock_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+            )
 
         assert response.status_code == 200
         data = response.json()
@@ -97,7 +106,11 @@ class TestDocumentRoutes:
         with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
-            response = test_client.post(f"/document/{domain}/create", json=mock_request.model_dump(mode="json"))
+            response = test_client.post(
+                f"/document/{domain}/create",
+                json=mock_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+            )
 
         assert response.status_code == 200
         data = response.json()
@@ -124,7 +137,9 @@ class TestDocumentRoutes:
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
-                f"/document/{domain}/create", json=create_request.model_dump(mode="json")
+                f"/document/{domain}/create",
+                json=create_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         assert create_response.status_code == 200
@@ -138,7 +153,9 @@ class TestDocumentRoutes:
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.patch(
-                f"/document/{domain}/{document_id}", json=update_request.model_dump(mode="json")
+                f"/document/{domain}/{document_id}",
+                json=update_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         assert response.status_code == 200, f"Unexpected response: {response.text}"
@@ -165,7 +182,9 @@ class TestDocumentRoutes:
         update_request = UpdateDocumentRequestFactory.build()
 
         response = test_client.patch(
-            f"/document/{domain}/{non_existent_id}", json=update_request.model_dump(mode="json")
+            f"/document/{domain}/{non_existent_id}",
+            json=update_request.model_dump(mode="json"),
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
         )
 
         assert response.status_code == 404, "Should return 404 for non-existent document"
@@ -180,7 +199,9 @@ class TestDocumentRoutes:
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
-                f"/document/{domain}/create", json=create_request.model_dump(mode="json")
+                f"/document/{domain}/create",
+                json=create_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         create_data = create_response.json()
@@ -192,7 +213,10 @@ class TestDocumentRoutes:
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.request(
-                "DELETE", f"/document/{domain}/delete", json=delete_request.model_dump(mode="json")
+                "DELETE",
+                f"/document/{domain}/delete",
+                json=delete_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         assert response.status_code == 200, f"Unexpected response: {response.text}"
@@ -218,7 +242,10 @@ class TestDocumentRoutes:
         non_existent_id = create_test_id()
         delete_request = DeleteDocumentRequestFactory.build(document_id=non_existent_id)
         response = test_client.request(
-            "DELETE", f"/document/{domain}/delete", json=delete_request.model_dump(mode="json")
+            "DELETE",
+            f"/document/{domain}/delete",
+            json=delete_request.model_dump(mode="json"),
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
         )
 
         assert response.status_code == 200, "Should return 200 even for non-existent document"
@@ -237,14 +264,18 @@ class TestDocumentRoutes:
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
-                f"/document/{domain}/create", json=create_request.model_dump(mode="json")
+                f"/document/{domain}/create",
+                json=create_request.model_dump(mode="json"),
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         create_data = create_response.json()
         document_id = create_data[0]["document_id"]
 
         # Get document
-        response = test_client.get(f"/document/{domain}/{document_id}")
+        response = test_client.get(
+            f"/document/{domain}/{document_id}", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
 
         assert response.status_code == 200, f"Unexpected response: {response.text}"
 
@@ -262,7 +293,9 @@ class TestDocumentRoutes:
         domain = create_test_domain()
         non_existent_id = create_test_id()
 
-        response = test_client.get(f"/document/{domain}/{non_existent_id}")
+        response = test_client.get(
+            f"/document/{domain}/{non_existent_id}", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
 
         assert response.status_code == 500, "Should return 500 for non-existent document"
 
@@ -276,10 +309,16 @@ class TestDocumentRoutes:
             with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
                 "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
             ):
-                test_client.post(f"/document/{domain}/create", json=create_request.model_dump(mode="json"))
+                test_client.post(
+                    f"/document/{domain}/create",
+                    json=create_request.model_dump(mode="json"),
+                    headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+                )
 
         # Get documents with pagination
-        response = test_client.get(f"/document/{domain}?page=1&limit=3")
+        response = test_client.get(
+            f"/document/{domain}?page=1&limit=3", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
 
         assert response.status_code == 200, f"Unexpected response: {response.text}"
 
@@ -299,15 +338,21 @@ class TestDocumentRoutes:
         domain = create_test_domain()
 
         # Test invalid page
-        response = test_client.get(f"/document/{domain}?page=0&limit=10")
+        response = test_client.get(
+            f"/document/{domain}?page=0&limit=10", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
         assert response.status_code == 400, "Should return 400 for invalid page"
 
         # Test invalid limit
-        response = test_client.get(f"/document/{domain}?page=1&limit=0")
+        response = test_client.get(
+            f"/document/{domain}?page=1&limit=0", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
         assert response.status_code == 400, "Should return 400 for invalid limit"
 
         # Test limit too large
-        response = test_client.get(f"/document/{domain}?page=1&limit=2000")
+        response = test_client.get(
+            f"/document/{domain}?page=1&limit=2000", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+        )
         assert response.status_code == 400, "Should return 400 for limit too large"
 
     @pytest.mark.asyncio
@@ -320,7 +365,9 @@ class TestDocumentRoutes:
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.post(
-                f"/document/{domain}/batch-create", json=[req.model_dump(mode="json") for req in batch_requests]
+                f"/document/{domain}/batch-create",
+                json=[req.model_dump(mode="json") for req in batch_requests],
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         assert response.status_code == 200, f"Unexpected response: {response.text}"
@@ -356,7 +403,11 @@ class TestDocumentRoutes:
             with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
                 "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
             ):
-                create_response = test_client.post(f"/document/{domain}/create", json=req.model_dump(mode="json"))
+                create_response = test_client.post(
+                    f"/document/{domain}/create",
+                    json=req.model_dump(mode="json"),
+                    headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
+                )
             create_data = create_response.json()
             document_ids.extend([doc["document_id"] for doc in create_data])
 
@@ -368,6 +419,7 @@ class TestDocumentRoutes:
                 "DELETE",
                 f"/document/{domain}/batch-delete",
                 json=[req.model_dump(mode="json") for req in delete_requests],
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         assert response.status_code == 200, f"Unexpected response: {response.text}"
@@ -397,7 +449,9 @@ class TestDocumentRoutes:
             "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
-                f"/document/{domain}/batch-create", json=[req.model_dump(mode="json") for req in batch_requests]
+                f"/document/{domain}/batch-create",
+                json=[req.model_dump(mode="json") for req in batch_requests],
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         assert create_response.status_code == 200
@@ -419,6 +473,7 @@ class TestDocumentRoutes:
                 "DELETE",
                 f"/document/{domain}/batch-delete",
                 json=[req.model_dump(mode="json") for req in delete_requests],
+                headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
             )
 
         assert delete_response.status_code == 200
