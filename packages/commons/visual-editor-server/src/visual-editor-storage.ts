@@ -44,4 +44,5 @@ export class VisualEditorStorage {
   }
 }
 
-export const visualEditorStorage = new VisualEditorStorage();
+export const visualEditorStorage: VisualEditorStorage =
+  new VisualEditorStorage();
