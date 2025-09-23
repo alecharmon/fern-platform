@@ -25,6 +25,8 @@ jobs:
       SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
       SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
       SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+      KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
+      KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,6 +43,8 @@ jobs:
           echo "SLACK_CLIENT_ID=${{ env.SLACK_CLIENT_ID }}" >> .env
           echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
           echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env
+          echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
+          echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
       - name: Deploy to Dev
         run: |
           git_version="$(scripts/fai-version.sh)"
