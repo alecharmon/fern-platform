@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { track } from "@fern-api/docs-server/analytics/posthog";
 import {
   COOKIE_FERN_TOKEN,
   addLeadingSlash,
   slugToHref,
 } from "@fern-api/docs-utils";
+import { isLikelyBrowser } from "@fern-api/docs-utils";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
@@ -59,7 +61,27 @@ export async function GET(
   const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
   const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
-  const content = await getLlmsTxt(host, domain, path, fernToken);
+  const { content, timingStats } = await getLlmsTxt(
+    host,
+    domain,
+    path,
+    fernToken
+  );
+
+  const userAgent = req.headers.get("user-agent");
+  const possibleBot = !isLikelyBrowser(userAgent);
+
+  track("static_content_served", {
+    domain,
+    host,
+    path,
+    contentLength: content.length,
+    loadTimeMs: Math.round(timingStats.loadTimeMs),
+    rootRetrievalMs: Math.round(timingStats.rootRetrievalMs),
+    markdownProcessingMs: Math.round(timingStats.markdownProcessingMs),
+    possibleBot,
+    staticContentType: "llms.txt",
+  });
 
   return new NextResponse(content, {
     status: 200,
@@ -75,14 +97,18 @@ async function getLlmsTxt(
   domain: string,
   path: string,
   fernToken: string | undefined
-): Promise<string> {
+): Promise<{ content: string; timingStats: any }> {
   "use cache";
 
+  const startTime = performance.now();
   unstable_cacheTag(domain, "getLlmsTxt");
 
   const loader = await createCachedDocsLoader(host, domain, fernToken);
 
+  // Time the root retrieval and section root
+  const rootStartTime = performance.now();
   const root = getSectionRoot(await loader.getRoot(), path);
+  const rootEndTime = performance.now();
 
   if (root == null) {
     console.error(`[llmsTxt:${domain}] Could not find root`);
@@ -162,6 +188,7 @@ async function getLlmsTxt(
     return CONTINUE;
   });
 
+  const markdownStartTime = performance.now();
   const docs = await Promise.allSettled(
     pageInfos.map(
       async (
@@ -204,6 +231,7 @@ async function getLlmsTxt(
       }
     )
   );
+  const markdownEndTime = performance.now();
 
   const endpoints = endpointPageInfos
     .map((endpointPageInfo) => {
@@ -225,7 +253,7 @@ async function getLlmsTxt(
         `- ${endpoint.breadcrumb.join(" > ")} [${endpoint.title}](${endpoint.href})`
     );
 
-  return [
+  const content = [
     // if there's a landing page, use the llm-friendly markdown version instead of the ${root.title}
     markdown?.content ?? `# ${root.title}`,
     docs.length > 0
@@ -242,6 +270,17 @@ async function getLlmsTxt(
   ]
     .filter(isNonNullish)
     .join("\n\n");
+
+  const totalTime = performance.now() - startTime;
+
+  return {
+    content,
+    timingStats: {
+      loadTimeMs: totalTime,
+      rootRetrievalMs: rootEndTime - rootStartTime,
+      markdownProcessingMs: markdownEndTime - markdownStartTime,
+    },
+  };
 }
 
 function getLandingPage(

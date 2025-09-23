@@ -3,9 +3,14 @@ import { notFound } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { track } from "@fern-api/docs-server/analytics/posthog";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { MARKDOWN_PATTERN } from "@fern-api/docs-server/patterns";
-import { COOKIE_FERN_TOKEN, removeLeadingSlash } from "@fern-api/docs-utils";
+import {
+  COOKIE_FERN_TOKEN,
+  isLikelyBrowser,
+  removeLeadingSlash,
+} from "@fern-api/docs-utils";
 
 import {
   getMarkdownForPath,
@@ -20,6 +25,8 @@ export async function GET(
   req: NextRequest,
   props: { params: Promise<{ host: string; domain: string }> }
 ): Promise<NextResponse> {
+  const startTime = performance.now();
+
   if (isLocal()) {
     return new NextResponse(".md preview is not available in local preview", {
       status: 400,
@@ -52,6 +59,22 @@ export async function GET(
     console.error(`[${domain}] Markdown not found: ${path}`);
     notFound();
   }
+
+  const loadTime = performance.now() - startTime;
+
+  const userAgent = req.headers.get("user-agent");
+  const possibleBot = !isLikelyBrowser(userAgent);
+
+  track("static_content_served", {
+    domain,
+    path,
+    slug: cleanSlug,
+    host,
+    staticContentType: "markdown",
+    contentLength: markdown.content.length,
+    loadTimeMs: Math.round(loadTime),
+    possibleBot,
+  });
 
   return new NextResponse(markdown.content, {
     status: 200,
