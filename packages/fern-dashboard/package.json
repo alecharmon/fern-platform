@@ -7,7 +7,7 @@
     "url": "https://github.com/fern-api/fern-platform.git",
     "directory": "packages/fern-dashboard"
   },
-  "sideEffects": false,
+  "type": "module",
   "scripts": {
     "clean": "rm -rf ./lib ./dist ./.next && tsc --build --clean",
     "compile": "tsc --build",
