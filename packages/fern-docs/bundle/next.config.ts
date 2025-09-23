@@ -1,5 +1,5 @@
-import { NextConfig } from "next";
-import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
+import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 import process from "node:process";
