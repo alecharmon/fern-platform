@@ -16,7 +16,10 @@ from fastapi import (
     HTTPException,
     Request,
 )
-from fastapi.responses import JSONResponse
+from fastapi.responses import (
+    JSONResponse,
+    Response,
+)
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import (
     delete,
@@ -26,6 +29,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from src.fai.app import fai_app
 from src.fai.db import async_session_maker
+from src.fai.models.db.feedback_db import FeedbackDb
 from src.fai.models.db.slack_integration_db import SlackIntegrationDb
 from src.fai.models.db.slack_message_cache_db import SlackMessageCacheDb
 from src.fai.models.types.slack_integration_types import (
@@ -36,8 +40,8 @@ from src.fai.utils.slack.client import (
     add_reaction,
     open_modal,
     remove_reaction,
+    send_ephemeral_message,
     send_error_message,
-    send_slack_message,
     update_modal,
 )
 from src.fai.utils.slack.message_handler import (
@@ -255,9 +259,16 @@ async def handle_slack_interactions(request: Request) -> JSONResponse:
                 action_id = action.get("action_id")
                 LOGGER.info(f"Processing action: {action_id}")
 
+                if action_id in ["feedback_helpful", "feedback_not_helpful"]:
+                    return await handle_feedback_button(payload, action)
+
         elif interaction_type == "view_submission":
             view = payload.get("view", {})
-            LOGGER.info(f"Processing view submission: {view.get('callback_id')}")
+            callback_id = view.get("callback_id")
+            LOGGER.info(f"Processing view submission: {callback_id}")
+
+            if callback_id == "feedback_modal":
+                return await handle_feedback_submission(payload)
 
         elif interaction_type == "message_action":
             callback_id = payload.get("callback_id")
@@ -274,6 +285,322 @@ async def handle_slack_interactions(request: Request) -> JSONResponse:
             content={"text": "Sorry, an error occurred processing your interaction."},
             status_code=200,
         )
+
+
+async def delete_ephemeral_message(response_url: str) -> None:
+    try:
+        import aiohttp
+
+        payload: dict[str, Any] = {
+            "delete_original": True,
+        }
+
+        LOGGER.info(f"Deleting ephemeral message with response_url: {response_url[:50]}...")
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(response_url, json=payload) as response:
+                if response.status == 200:
+                    response_text = await response.text()
+                    LOGGER.info(f"Successfully deleted ephemeral message. Response: {response_text[:100]}")
+                else:
+                    error_text = await response.text()
+                    LOGGER.error(f"Failed to delete ephemeral message: {response.status}, Error: {error_text}")
+    except Exception as e:
+        LOGGER.error(f"Error deleting ephemeral message: {e}")
+
+
+async def check_feedback_exists(query_id: str, user_id: str) -> bool:
+    try:
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(FeedbackDb).where(
+                    FeedbackDb.query_id == query_id,
+                    FeedbackDb.user_email == user_id,
+                )
+            )
+            return result.scalar_one_or_none() is not None
+    except Exception as e:
+        LOGGER.error(f"Error checking feedback existence: {e}")
+        return False
+
+
+async def handle_feedback_button(payload: dict[str, Any], action: dict[str, Any]) -> JSONResponse:
+    try:
+        trigger_id = payload.get("trigger_id")
+        user = payload.get("user", {})
+        user_id = user.get("id")
+        team = payload.get("team", {})
+        team_id = team.get("id")
+        response_url = payload.get("response_url")
+        channel = payload.get("channel", {})
+        channel_id = channel.get("id")
+
+        value_data = json.loads(action.get("value", "{}"))
+        query_id = value_data.get("query_id")
+        is_helpful = value_data.get("is_helpful")
+        thread_ts = value_data.get("thread_ts")
+
+        if not trigger_id or not query_id:
+            LOGGER.error("Missing trigger_id or query_id")
+            return JSONResponse(content={"text": "Unable to process feedback"}, status_code=200)
+
+        if await check_feedback_exists(query_id, user_id):
+            if response_url:
+                await delete_ephemeral_message(response_url)
+                integration = await get_slack_integration(team_id)
+                if integration and integration.slack_bot_token and channel_id:
+                    await send_ephemeral_message(
+                        channel=channel_id,
+                        user=user_id,
+                        text="Thank you for submitting feedback.",
+                        bot_token=integration.slack_bot_token,
+                        thread_ts=thread_ts,
+                    )
+            LOGGER.info(f"User {user_id} already provided feedback for query {query_id}")
+            return Response(content="", status_code=200)
+
+        integration = await get_slack_integration(team_id)
+        if not integration or not integration.slack_bot_token:
+            LOGGER.error(f"No integration or bot token found for team {team_id}")
+            return JSONResponse(content={"text": "Unable to process feedback"}, status_code=200)
+
+        modal = {
+            "type": "modal",
+            "callback_id": "feedback_modal",
+            "title": {"type": "plain_text", "text": "Provide Feedback"},
+            "submit": {"type": "plain_text", "text": "Submit"},
+            "close": {"type": "plain_text", "text": "Cancel"},
+            "private_metadata": json.dumps(
+                {
+                    "query_id": query_id,
+                    "is_helpful": is_helpful,
+                    "team_id": team_id,
+                    "user_id": user_id,
+                    "response_url": response_url,
+                    "channel_id": channel_id,
+                    "thread_ts": thread_ts,
+                }
+            ),
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"You selected: *{'👍 Helpful' if is_helpful else '👎 Not Helpful'}*",
+                    },
+                },
+                {
+                    "type": "input",
+                    "block_id": "feedback_text",
+                    "label": {"type": "plain_text", "text": "Additional feedback (optional)"},
+                    "optional": True,
+                    "element": {
+                        "type": "plain_text_input",
+                        "action_id": "feedback_text_input",
+                        "multiline": True,
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Tell us more about your experience...",
+                        },
+                    },
+                },
+            ],
+        }
+
+        view_id = await open_modal(trigger_id, modal, integration.slack_bot_token)
+        if not view_id:
+            LOGGER.error("Failed to open feedback modal")
+            return JSONResponse(content={"text": "Unable to open feedback form"}, status_code=200)
+
+        return Response(content="", status_code=200)
+
+    except Exception as e:
+        LOGGER.error(f"Error handling feedback button: {e}")
+        return JSONResponse(
+            content={"text": "Sorry, an error occurred processing your feedback."},
+            status_code=200,
+        )
+
+
+async def handle_feedback_submission(payload: dict[str, Any]) -> JSONResponse:
+    try:
+        view = payload.get("view", {})
+        user = payload.get("user", {})
+        user_id = user.get("id")
+
+        private_metadata = json.loads(view.get("private_metadata", "{}"))
+        query_id = private_metadata.get("query_id")
+        is_helpful = private_metadata.get("is_helpful")
+        team_id = private_metadata.get("team_id")
+        response_url = private_metadata.get("response_url")
+        channel_id = private_metadata.get("channel_id")
+        thread_ts = private_metadata.get("thread_ts")
+
+        state = view.get("state", {})
+        values = state.get("values", {})
+        feedback_text = None
+        if "feedback_text" in values:
+            feedback_text_input = values["feedback_text"].get("feedback_text_input", {})
+            feedback_text = feedback_text_input.get("value")
+
+        domain = await get_domain_from_slack_team(team_id)
+        if not domain:
+            LOGGER.error(f"No domain found for team {team_id}")
+            return JSONResponse(content={"text": "Unable to save feedback"}, status_code=200)
+
+        integration = await get_slack_integration(team_id)
+        user_email = user_id
+
+        if integration and integration.slack_bot_token:
+            try:
+                client = AsyncWebClient(token=integration.slack_bot_token)
+                LOGGER.info(f"Fetching user info for user_id: {user_id}")
+                user_info = await client.users_info(user=user_id)
+
+                if user_info.get("ok"):
+                    user_data = user_info.get("user", {})
+                    user_profile = user_data.get("profile", {})
+
+                    email = user_profile.get("email")
+                    if email:
+                        user_email = email
+                        LOGGER.info(f"Successfully retrieved email for user {user_id}: {email}")
+                    else:
+                        LOGGER.warning(
+                            f"No email in profile for user {user_id}. Profile keys: {list(user_profile.keys())}"
+                        )
+
+                        if user_data.get("is_bot") is False:
+                            email = user_data.get("email")
+                            if email:
+                                user_email = email
+                                LOGGER.info(f"Found email at user level for {user_id}: {email}")
+                else:
+                    error_msg = user_info.get("error", "Unknown error")
+                    LOGGER.error(f"Slack API returned not ok for user {user_id}: {error_msg}")
+                    if error_msg == "missing_scope":
+                        LOGGER.error("Missing scope to read user email. Ensure 'users:read.email' scope is added.")
+
+            except Exception as e:
+                LOGGER.error(f"Exception fetching user email for {user_id}: {str(e)}")
+
+        async with async_session_maker() as session:
+            feedback = FeedbackDb(
+                id=str(uuid4()),
+                query_id=query_id,
+                conversation_id=f"slack_{team_id}_{user_id}",
+                domain=domain,
+                is_helpful=is_helpful,
+                feedback_message=feedback_text,
+                user_email=user_email,
+                created_at=datetime.now(UTC),
+            )
+            session.add(feedback)
+            await session.commit()
+
+        LOGGER.info(
+            f"Saved feedback for query {query_id}: helpful={is_helpful}, "
+            f"user_email={user_email}, domain={domain}, "
+            f"feedback_text={'Yes' if feedback_text else 'No'}"
+        )
+
+        if response_url:
+            LOGGER.info(f"Replacing ephemeral feedback buttons for user {user_id}")
+            await delete_ephemeral_message(response_url)
+            if integration and integration.slack_bot_token and channel_id:
+                await send_ephemeral_message(
+                    channel=channel_id,
+                    user=user_id,
+                    text="Thank you for submitting feedback.",
+                    bot_token=integration.slack_bot_token,
+                    thread_ts=thread_ts,
+                )
+        else:
+            LOGGER.warning(f"No response_url available to update ephemeral message for user {user_id}")
+
+        return Response(content="", status_code=200)
+
+    except Exception as e:
+        LOGGER.error(f"Error handling feedback submission: {e}")
+        return JSONResponse(
+            content={
+                "response_action": "errors",
+                "errors": {"feedback_text": "Sorry, an error occurred saving your feedback. Please try again."},
+            },
+            status_code=200,
+        )
+
+
+async def send_feedback_ephemeral(
+    channel: str,
+    user: str,
+    bot_token: str,
+    query_id: str,
+    message_ts: str,
+    team_id: str,
+    thread_ts: str | None = None,
+) -> None:
+    try:
+        blocks: list[dict[str, Any]] = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Was this response helpful?",
+                },
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "👍 Helpful",
+                        },
+                        "style": "primary",
+                        "action_id": "feedback_helpful",
+                        "value": json.dumps(
+                            {
+                                "query_id": query_id,
+                                "is_helpful": True,
+                                "message_ts": message_ts,
+                                "team_id": team_id,
+                                "thread_ts": thread_ts,
+                            }
+                        ),
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "👎 Not Helpful",
+                        },
+                        "action_id": "feedback_not_helpful",
+                        "value": json.dumps(
+                            {
+                                "query_id": query_id,
+                                "is_helpful": False,
+                                "message_ts": message_ts,
+                                "team_id": team_id,
+                                "thread_ts": thread_ts,
+                            }
+                        ),
+                    },
+                ],
+            },
+        ]
+
+        await send_ephemeral_message(
+            channel=channel,
+            user=user,
+            text="Was this response helpful?",
+            bot_token=bot_token,
+            blocks=blocks,
+            thread_ts=thread_ts,
+        )
+    except Exception as e:
+        LOGGER.error(f"Error sending feedback ephemeral message: {e}")
 
 
 async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
@@ -294,18 +621,59 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
         LOGGER.error("Could not generate response or missing bot token")
         return
 
-    success = await send_slack_message(response.channel, response.response_text, response.bot_token, response.thread_ts)
+    client = AsyncWebClient(token=response.bot_token)
+    success = False
+    bot_message_ts = None
 
-    if integration and integration.slack_bot_token and message_ts and channel:
-        await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
-        await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
+    try:
+        msg_response = await client.chat_postMessage(
+            channel=response.channel,
+            text=response.response_text,
+            thread_ts=response.thread_ts,
+            unfurl_links=False,
+            unfurl_media=False,
+        )
+        success = msg_response["ok"]
+        bot_message_ts = msg_response.get("ts") if success else None
+
+        if success and response.user_id and bot_message_ts:
+            feedback_thread_ts = response.thread_ts
+
+            if not response.query_id:
+                LOGGER.warning(f"No query_id for feedback, but still sending feedback request for message {message_ts}")
+
+            LOGGER.info(
+                f"Sending feedback ephemeral - thread_ts: {feedback_thread_ts}, "
+                f"bot_message_ts: {bot_message_ts}, channel: {response.channel}, "
+                f"original_event_thread_ts: {event.get('thread_ts')}"
+            )
+
+            if integration and integration.slack_bot_token and message_ts and channel:
+                await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
+                await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
+
+            await asyncio.sleep(2.5)
+
+            await send_feedback_ephemeral(
+                channel=response.channel,
+                user=response.user_id,
+                bot_token=response.bot_token,
+                query_id=response.query_id or "unknown",
+                message_ts=bot_message_ts,
+                team_id=team_id,
+                thread_ts=feedback_thread_ts,
+            )
+
+    except Exception as e:
+        LOGGER.error(f"Error sending message: {e}")
+        success = False
+        bot_message_ts = None
 
     if not success:
         await send_error_message(response.channel, response.bot_token, response.thread_ts)
 
 
 async def handle_draft_reply_action(payload: dict[str, Any]) -> JSONResponse:
-    """Handle the 'Draft Ask Fern reply' message action."""
     try:
         trigger_id = payload.get("trigger_id")
         user = payload.get("user", {})
@@ -400,7 +768,6 @@ async def generate_and_update_modal(
     team_id: str,
     integration: Any,
 ) -> None:
-    """Generate the AI response and update the modal with the result."""
     try:
         actual_thread_ts = thread_ts or message_ts
         message_history = None
@@ -410,7 +777,7 @@ async def generate_and_update_modal(
             )
 
         conversation_id = f"slack_draft_{team_id}_{channel_id}_{actual_thread_ts}"
-        response_text = await process_message(
+        response_text, _ = await process_message(
             message_text,
             integration.domain,
             None,
@@ -512,11 +879,53 @@ async def handle_message(event: dict[str, Any], team_id: str) -> None:
         LOGGER.error("Could not generate response or missing bot token")
         return
 
-    success = await send_slack_message(response.channel, response.response_text, response.bot_token, response.thread_ts)
+    client = AsyncWebClient(token=response.bot_token)
+    success = False
+    bot_message_ts = None
 
-    if integration and integration.slack_bot_token and message_ts and channel:
-        await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
-        await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
+    try:
+        msg_response = await client.chat_postMessage(
+            channel=response.channel,
+            text=response.response_text,
+            thread_ts=response.thread_ts,
+            unfurl_links=False,
+            unfurl_media=False,
+        )
+        success = msg_response["ok"]
+        bot_message_ts = msg_response.get("ts") if success else None
+
+        if success and response.user_id and bot_message_ts:
+            feedback_thread_ts = response.thread_ts
+
+            if not response.query_id:
+                LOGGER.warning(f"No query_id for feedback, but still sending feedback request for message {message_ts}")
+
+            LOGGER.info(
+                f"Sending feedback ephemeral - thread_ts: {feedback_thread_ts}, "
+                f"bot_message_ts: {bot_message_ts}, channel: {response.channel}, "
+                f"original_event_thread_ts: {event.get('thread_ts')}"
+            )
+
+            if integration and integration.slack_bot_token and message_ts and channel:
+                await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
+                await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
+
+            await asyncio.sleep(2.5)
+
+            await send_feedback_ephemeral(
+                channel=response.channel,
+                user=response.user_id,
+                bot_token=response.bot_token,
+                query_id=response.query_id or "unknown",
+                message_ts=bot_message_ts,
+                team_id=team_id,
+                thread_ts=feedback_thread_ts,
+            )
+
+    except Exception as e:
+        LOGGER.error(f"Error sending message: {e}")
+        success = False
+        bot_message_ts = None
 
     if not success:
         await send_error_message(response.channel, response.bot_token, response.thread_ts)
@@ -635,6 +1044,7 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
             "reactions:read",
             "reactions:write",
             "users:read",
+            "users:read.email",
         ]
 
         scope_string = ",".join(scopes)

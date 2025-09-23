@@ -64,26 +64,23 @@ async def toggle_ask_ai(
     try:
         stripped_domain = strip_domain(domain)
 
-        # Check existing record
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
         job_id = None
 
         if existing_record and existing_record.last_reindex_time is not None and existing_record.job_id is None:
-            # Disable Ask AI - clear the last_reindex_time but keep the record
             existing_record.last_reindex_time = None
             existing_record.job_id = None
             LOGGER.info(f"Disabled Ask AI for domain {stripped_domain}")
             await db.commit()
         else:
-            # Enable Ask AI - either create new record or update existing one
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
                 async with httpx.AsyncClient(follow_redirects=True) as client:
                     response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
                     if response.status_code == 200:
-                        job_id = response.json().get("job_id", None)  # Job ID for upsert task
+                        job_id = response.json().get("job_id", None)
                         LOGGER.info(
                             f"Successfully started turbopuffer reindex for domain {stripped_domain}, job_id: {job_id}"
                         )
@@ -105,7 +102,7 @@ async def toggle_ask_ai(
                     domain=stripped_domain,
                     org_name=org_name,
                     job_id=job_id,
-                    last_reindex_time=None,  # Don't set until job completes
+                    last_reindex_time=None,
                 )
                 db.add(new_record)
                 await db.commit()
@@ -142,23 +139,19 @@ async def reindex_ask_ai(
     try:
         stripped_domain = strip_domain(domain)
 
-        # Check existing record - Ask AI must already be enabled
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record or existing_record.last_reindex_time is None:
-            # Ask AI is not enabled, cannot reindex
             return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
 
         if existing_record.job_id is not None:
-            # Already reindexing, return existing job_id
             return JSONResponse(
                 content=jsonable_encoder(
                     ToggleAskAiResponse(success=True, job_id=existing_record.job_id, ask_ai_enabled=True)
                 )
             )
 
-        # Start reindex and get job_id
         job_id = None
         try:
             async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -177,7 +170,6 @@ async def reindex_ask_ai(
             LOGGER.error(f"Failed to start manual reindex for domain {stripped_domain}: {e}")
             return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=True)))
 
-        # Update record with job_id but keep last_reindex_time (Ask AI stays enabled)
         existing_record.job_id = job_id
         await db.commit()
         LOGGER.info(f"Started manual reindex for domain {stripped_domain} with job_id: {job_id}")
@@ -205,7 +197,6 @@ async def get_toggle_status(
     try:
         stripped_domain = strip_domain(domain)
 
-        # Get the settings record
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
@@ -213,7 +204,6 @@ async def get_toggle_status(
             return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
 
         if not existing_record.job_id:
-            # Ask AI is enabled if record exists AND has a non-null last_reindex_time
             ask_ai_enabled = existing_record.last_reindex_time is not None
 
             return JSONResponse(
@@ -228,7 +218,6 @@ async def get_toggle_status(
                 )
             )
 
-        # Check job status using the turbopuffer status endpoint
         async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.get(
                 f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/status?job_id={existing_record.job_id}"

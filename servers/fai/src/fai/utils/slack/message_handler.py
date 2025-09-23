@@ -17,6 +17,11 @@ from src.fai.utils.chat.response.anthropic import get_anthropic_response
 from src.fai.utils.chat.retrieve.v2_retrieve import v2_retrieve
 from src.settings import LOGGER
 
+SLACK_FOLLOW_UP_MESSAGE = """\
+---
+_If you have follow-up questions, please @Ask Fern again in this thread._\
+"""
+
 
 @dataclass
 class SlackMessageContext:
@@ -34,6 +39,8 @@ class SlackMessageResponse:
     channel: str
     thread_ts: str | None
     bot_token: str | None
+    query_id: str | None = None
+    user_id: str | None = None
 
 
 async def get_slack_integration(team_id: str) -> SlackIntegrationDb | None:
@@ -47,7 +54,6 @@ async def get_slack_integration(team_id: str) -> SlackIntegrationDb | None:
 async def get_thread_history(
     channel: str, thread_ts: str, bot_token: str, bot_user_id: str | None = None
 ) -> list[dict[str, str]]:
-    """Retrieve conversation history from a Slack thread."""
     try:
         client = AsyncWebClient(token=bot_token)
         result = await client.conversations_replies(channel=channel, ts=thread_ts, inclusive=True, limit=100)
@@ -77,7 +83,7 @@ async def log_query_to_db(
     conversation_id: str,
     role: str = "USER",
     source: str = "SLACK",
-) -> None:
+) -> str | None:
     try:
         async with async_session_maker() as session:
             db_query = QueryDb(
@@ -93,8 +99,10 @@ async def log_query_to_db(
             session.add(db_query)
             await session.commit()
             LOGGER.info(f"Logged Slack query to database: {db_query.query_id}")
+            return db_query.query_id
     except Exception as e:
         LOGGER.error(f"Failed to log query to database: {e}")
+        return None
 
 
 async def process_message(
@@ -105,15 +113,16 @@ async def process_message(
     model: str = "claude-4-sonnet-20250514",
     top_k: int = 5,
     conversation_id: str | None = None,
-) -> str:
+) -> tuple[str, str | None]:
     if bot_user_id and text:
         text = text.replace(f"<@{bot_user_id}>", "").strip()
 
     if not text:
-        return "I need a message to respond to. Please ask me a question!"
+        return "I need a message to respond to. Please ask me a question!", None
 
+    query_id = None
     if conversation_id:
-        await log_query_to_db(text, domain, conversation_id, role="USER", source="SLACK")
+        query_id = await log_query_to_db(text, domain, conversation_id, role="USER", source="SLACK")
 
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
@@ -144,15 +153,16 @@ async def process_message(
 
         if output_turns and len(output_turns) > 0:
             response = "\n\n".join([turn["text"] for turn in output_turns])
+            response = f"{response}\n\n{SLACK_FOLLOW_UP_MESSAGE}"
             if conversation_id:
                 await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="SLACK")
-            return response
+            return response, query_id
 
-        return "I couldn't find any relevant information to answer your question."
+        return "I couldn't find any relevant information to answer your question.", query_id
 
     except Exception as e:
         LOGGER.error(f"Error processing message: {e}")
-        return "Sorry, I encountered an error while processing your request. Please try again later."
+        return "Sorry, I encountered an error while processing your request. Please try again later.", query_id
 
 
 async def handle_slack_message(
@@ -188,7 +198,7 @@ async def handle_slack_message(
 
     conversation_id = f"slack_{context.team_id}_{context.channel}_{context.thread_ts or context.user or 'direct'}"
 
-    response_text = await process_message(
+    response_text, query_id = await process_message(
         context.text,
         integration.domain,
         integration.slack_bot_user_id if context.is_app_mention else None,
@@ -201,4 +211,6 @@ async def handle_slack_message(
         channel=context.channel,
         thread_ts=context.thread_ts,
         bot_token=integration.slack_bot_token,
+        query_id=query_id,
+        user_id=context.user,
     )

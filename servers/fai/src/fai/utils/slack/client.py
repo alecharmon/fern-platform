@@ -43,7 +43,6 @@ async def send_error_message(
 
 
 async def add_reaction(channel: str, timestamp: str, reaction: str, bot_token: str) -> bool:
-    """Add a reaction to a Slack message."""
     try:
         client = AsyncWebClient(token=bot_token)
         response = await client.reactions_add(channel=channel, timestamp=timestamp, name=reaction)
@@ -65,7 +64,6 @@ async def add_reaction(channel: str, timestamp: str, reaction: str, bot_token: s
 
 
 async def remove_reaction(channel: str, timestamp: str, reaction: str, bot_token: str) -> bool:
-    """Remove a reaction from a Slack message."""
     try:
         client = AsyncWebClient(token=bot_token)
         response = await client.reactions_remove(channel=channel, timestamp=timestamp, name=reaction)
@@ -86,17 +84,28 @@ async def remove_reaction(channel: str, timestamp: str, reaction: str, bot_token
         return False
 
 
-async def send_ephemeral_message(channel: str, user: str, text: str, bot_token: str) -> bool:
-    """Send an ephemeral message visible only to a specific user."""
+async def send_ephemeral_message(
+    channel: str,
+    user: str,
+    text: str,
+    bot_token: str,
+    blocks: list[dict[str, Any]] | None = None,
+    thread_ts: str | None = None,
+) -> bool:
     try:
         client = AsyncWebClient(token=bot_token)
-        response = await client.chat_postEphemeral(
-            channel=channel,
-            user=user,
-            text=text,
-            unfurl_links=False,
-            unfurl_media=False,
-        )
+        args = {
+            "channel": channel,
+            "user": user,
+            "text": text,
+            "unfurl_links": False,
+            "unfurl_media": False,
+        }
+        if blocks:
+            args["blocks"] = blocks
+        if thread_ts:
+            args["thread_ts"] = thread_ts
+        response = await client.chat_postEphemeral(**args)
         if response["ok"]:
             LOGGER.info("Successfully sent ephemeral message")
             return True
@@ -112,7 +121,6 @@ async def send_ephemeral_message(channel: str, user: str, text: str, bot_token: 
 
 
 async def open_modal(trigger_id: str, view: dict[str, Any], bot_token: str) -> str | None:
-    """Open a modal dialog in Slack. Returns view_id if successful."""
     try:
         client = AsyncWebClient(token=bot_token)
         response = await client.views_open(trigger_id=trigger_id, view=view)
@@ -132,7 +140,6 @@ async def open_modal(trigger_id: str, view: dict[str, Any], bot_token: str) -> s
 
 
 async def update_modal(view_id: str, view: dict[str, Any], bot_token: str) -> bool:
-    """Update an existing modal dialog in Slack."""
     try:
         client = AsyncWebClient(token=bot_token)
         response = await client.views_update(view_id=view_id, view=view)
