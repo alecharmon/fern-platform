@@ -8,6 +8,7 @@ import { NoiseOverlay } from "@/components/NoiseOverlay";
 import { PylonScript } from "@/components/pylon/PylonScript";
 import { HIDE_PYLON_CLASS_NAME } from "@/components/pylon/constants";
 import { Toaster } from "@/components/ui/sonner";
+import { applyOrgMappings } from "@/orgMappings";
 import { AnimatedNoiseProvider } from "@/providers/AnimatedNoiseProvider";
 import { PostHogProvider } from "@/providers/PosthogProvider";
 import { ProgressProvider } from "@/providers/ProgressProvider";
@@ -28,6 +29,8 @@ export default async function RootLayout({
   children: React.JSX.Element;
 }>) {
   const session = await getCurrentSession();
+
+  await applyOrgMappings();
 
   return (
     <html lang="en" suppressHydrationWarning className={gtPlanar.className}>

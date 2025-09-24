@@ -7,7 +7,7 @@ import {
   GetMembers200ResponseOneOfInner,
   ManagementClient,
 } from "auth0";
-import { randomUUID } from "node:crypto";
+import { v4 as uuidv4 } from "uuid";
 
 import { AsyncRedisCache } from "../redis/AsyncRedisCache";
 import {
@@ -130,7 +130,7 @@ export async function createInviteToken(
   orgName: Auth0OrgName,
   inviterId: string
 ) {
-  const token = randomUUID();
+  const token = uuidv4();
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
   const inviteToken: InviteToken = {
@@ -346,4 +346,28 @@ export async function getUserGithubToken(
   const user = (await auth0.users.get({ id: userId })).data;
   return user.identities.find((identity) => identity.provider === "github")
     ?.access_token;
+}
+export async function getUserGoogleOauth2EmailInfo(
+  userId: Auth0UserID
+): Promise<{ email: string | undefined; isEmailVerified: boolean }> {
+  const auth0 = getAuth0ManagementClient();
+  const user = (await auth0.users.get({ id: userId })).data;
+
+  // Find the google-oauth2 connection
+  const googleIdentity = user.identities?.find(
+    (identity) => identity.connection === "google-oauth2"
+  );
+
+  // Only return email info if the user has a google-oauth2 connection
+  if (googleIdentity == null) {
+    return {
+      email: undefined,
+      isEmailVerified: false,
+    };
+  }
+
+  return {
+    email: user.email,
+    isEmailVerified: user.email_verified ?? false,
+  };
 }

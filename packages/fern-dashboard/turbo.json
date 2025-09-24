@@ -21,7 +21,7 @@
       "dependsOn": ["compile"],
       "outputs": [".next/**", "!.next/cache/**"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["SENTRY_AUTH_TOKEN"]
+      "env": ["SENTRY_AUTH_TOKEN", "EMAIL_ORG_MAPPINGS"]
     },
     "dashboard:dev": {
       "dependsOn": ["^build", "^compile"]

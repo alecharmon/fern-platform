@@ -1052,6 +1052,9 @@ importers:
       '@types/three':
         specifier: ^0.173.0
         version: 0.173.0
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       '@upstash/redis':
         specifier: ^1.34.6
         version: 1.34.6
@@ -1166,6 +1169,9 @@ importers:
       url-join:
         specifier: ^5.0.0
         version: 5.0.0
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       zod:
         specifier: ^3.24.1
         version: 3.25.49
