@@ -80,6 +80,7 @@ export async function queue<TBody = unknown>({
     url: `https://${host}${basepath}${endpoint}`,
     retries: 1,
     ...request,
+    method: request.method === "HEAD" ? "GET" : request.method,
     headers,
     timeout: timeoutSeconds ? `${BigInt(timeoutSeconds)}s` : undefined,
   });
@@ -163,7 +164,6 @@ export async function batchQueue<TBody = unknown>({
   queueName,
   parallelism = 10,
   requests,
-  disableVercelPreviewDeployment = false,
   ...baseRequest
 }: {
   /**
@@ -195,21 +195,12 @@ export async function batchQueue<TBody = unknown>({
   body?: TBody;
   headers?: HeadersInit;
   retries?: number;
-  disableVercelPreviewDeployment?: boolean;
 }): Promise<void> {
   if (isLocal() || q === undefined || isSelfHosted()) {
     return;
   }
 
-  const { VERCEL, VERCEL_ENV, VERCEL_AUTOMATION_BYPASS_SECRET } = getEnv();
-
-  if (!VERCEL || VERCEL_ENV === "development") {
-    return;
-  }
-
-  if (disableVercelPreviewDeployment && VERCEL_ENV !== "production") {
-    return;
-  }
+  const { VERCEL_AUTOMATION_BYPASS_SECRET } = getEnv();
 
   if (queueName) {
     await q.queue({ queueName }).upsert({ parallelism });
@@ -243,7 +234,44 @@ export async function batchQueue<TBody = unknown>({
     }
   );
 
-  await q.batchJSON(batchRequests);
+  // Process requests individually to handle failures gracefully, ensuring messages are put in the specified queueName
+  const results = await Promise.allSettled(
+    batchRequests.map(async (request) => {
+      try {
+        // Use the .queue(queueName).publishJSON(...) API to ensure the message is put in the queue
+        await q.queue({ queueName: request.queueName }).enqueueJSON({
+          queueName: request.queueName,
+          url: request.url,
+          method: request.method as any,
+          headers: request.headers,
+          body: request.body,
+          retries: request.retries,
+          deduplicationId: request.deduplicationId,
+        });
+      } catch (error) {
+        console.error(
+          `[batchQueue] Failed to queue request for ${request.url}:`,
+          error
+        );
+        throw error;
+      }
+    })
+  );
+
+  // Log any failures
+  const failures = results.filter((result) => result.status === "rejected");
+  if (failures.length > 0) {
+    console.error(
+      `[batchQueue] ${failures.length} out of ${batchRequests.length} requests failed to queue`
+    );
+    failures.forEach((failure) => {
+      console.error("[batchQueue] Request failure:", failure.reason);
+    });
+  }
+
+  console.log(
+    `[batchQueue] Successfully queued ${batchRequests.length - failures.length} requests`
+  );
 }
 
 export async function getMessageStatus(

@@ -30,13 +30,7 @@ export async function POST(request: NextRequest) {
     notFound();
   }
 
-  const { VERCEL_ENV, VERCEL_DEPLOYMENT_ID } = getEnv();
-
-  if (VERCEL_ENV !== "production") {
-    throw new Error(
-      "Deployment promoted webhook is only available in production"
-    );
-  }
+  const { VERCEL_DEPLOYMENT_ID } = getEnv();
 
   // if (
   //   request.headers.get("x-vercel-signature") !==
@@ -49,7 +43,6 @@ export async function POST(request: NextRequest) {
     "x-vercel-signature",
     request.headers.get("x-vercel-signature")
   );
-  console.debug(await request.json());
 
   const domains = uniq(
     (await kv.smembers(`${cdnUri}:domains`))
@@ -100,7 +93,6 @@ export async function POST(request: NextRequest) {
     })),
     method: "GET",
     retries: 1,
-    disableVercelPreviewDeployment: true,
   });
 
   return new Response("OK", { status: 200 });
