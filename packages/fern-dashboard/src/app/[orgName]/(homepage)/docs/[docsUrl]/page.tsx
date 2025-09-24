@@ -1,16 +1,13 @@
 import "server-only";
 
-import { redirect } from "next/navigation";
-
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { notFound } from "next/navigation";
 
 import getGithubSourceMetadataHandler from "@/app/api/get-github-source-metadata/handler";
-import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import getDocsGithubUrl from "@/app/services/dal/github/getDocsGithubUrl";
 import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
-import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
+import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import { FernCliVersionDisplay } from "@/components/docs-page/FernCliVersionDisplay";
 import {
@@ -28,39 +25,24 @@ export const experimental_ppr = true;
 export default async function Page(props: {
   params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
 }) {
-  // Validate session
-  const session = await getCurrentSession();
-  if (session == null) {
-    redirect("/");
-  }
-
   const { orgName, docsUrl: encodedDocsUrl } = await props.params;
+
+  const session = await getAuthenticatedSessionOrRedirect(orgName);
   const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
-  await assertUserHasOrganizationAccess({
-    userId: session.user.sub,
-    orgName,
-  });
-
-  let currentDocsSite: FdrAPI.dashboard.DocsSite | undefined;
-
   // Validate that the docsUrl belongs to this organization so that we avoid errors in the page
-  try {
-    const docsSites = await getDocsSitesForOrg({
-      orgName,
-      token: session.accessToken,
-    });
-
-    currentDocsSite = docsSites.docsSites.find(
-      (site) => getDocsSiteUrl(site) === docsUrl
-    );
-    if (currentDocsSite == null) {
-      redirect(`/${orgName}/docs`);
-    }
-  } catch (error) {
-    console.error("Failed to validate docs url", error);
-    // If we can't validate (e.g., permission issues), redirect to docs overview
-    redirect(`/${orgName}/docs`);
+  const docsSites = await getDocsSitesForOrg({
+    orgName,
+    token: session.accessToken,
+  });
+  if (!docsSites.ok) {
+    notFound();
+  }
+  const currentDocsSite = docsSites.docsSites.find(
+    (site) => getDocsSiteUrl(site) === docsUrl
+  );
+  if (currentDocsSite == null) {
+    notFound();
   }
 
   let githubUrl = undefined;

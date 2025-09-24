@@ -9,9 +9,8 @@ export default async function Page({
   params: Promise<{ orgName: Auth0OrgName }>;
 }) {
   const session = await getCurrentSession();
-
   if (session == null) {
-    redirect("/login");
+    redirect("/");
   }
 
   const { orgName } = await params;

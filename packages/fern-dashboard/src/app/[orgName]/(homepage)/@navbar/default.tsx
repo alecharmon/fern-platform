@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { DocsNavbarItem } from "@/components/navbar/DocsNavbarItem";
 import { DocsNavbarItems } from "@/components/navbar/DocsNavbarItems";
 import { NavbarItem } from "@/components/navbar/NavbarItem";
@@ -15,6 +16,15 @@ export default async function Navbar({
   const { orgName } = await params;
   const session = await getCurrentSession();
   if (session == null) {
+    return null;
+  }
+  // Validate organization access, but return null rather than redirect, so that sidebar just doesn't show
+  try {
+    await assertUserHasOrganizationAccess({
+      userId: session.user.sub,
+      orgName,
+    });
+  } catch (_) {
     return null;
   }
 

@@ -92,7 +92,7 @@ export const OrgSwitcherClient = ({
       >
         <div className="flex items-center gap-2">
           {currentOrg && <OrgLogo organization={currentOrg} />}
-          {currentOrg ? getOrgDisplayName(currentOrg) : "Organization"}
+          {currentOrg ? getOrgDisplayName(currentOrg) : "Select Organization"}
         </div>
         <ChevronDown className="h-4 w-4 opacity-50" />
       </Button>

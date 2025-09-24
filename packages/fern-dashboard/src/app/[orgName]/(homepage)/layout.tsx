@@ -1,6 +1,5 @@
 import { ThemeProvider } from "next-themes";
 
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SidepanelProvider } from "@/components/layout/SidepanelContext";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
@@ -24,24 +23,22 @@ export default async function AuthedLayout({
   const { orgName } = await params;
 
   return (
-    <ProtectedRoute orgName={orgName}>
-      <>
-        <ServerSidePylonSetup />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <OrgNameProvider orgName={orgName}>
-            <SidepanelProvider>
-              <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
-                {children}
-              </AppLayout>
-            </SidepanelProvider>
-          </OrgNameProvider>
-        </ThemeProvider>
-      </>
-    </ProtectedRoute>
+    <>
+      <ServerSidePylonSetup />
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <OrgNameProvider orgName={orgName}>
+          <SidepanelProvider>
+            <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
+              {children}
+            </AppLayout>
+          </SidepanelProvider>
+        </OrgNameProvider>
+      </ThemeProvider>
+    </>
   );
 }
