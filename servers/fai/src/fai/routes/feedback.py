@@ -31,10 +31,7 @@ from src.settings import LOGGER
     "/feedback/{domain}", response_model=CreateFeedbackResponse, openapi_extra={"x-fern-audiences": ["internal"]}
 )
 async def create_feedback(
-    domain: str,
-    request: CreateFeedbackRequest,
-    db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    domain: str, request: CreateFeedbackRequest, db: AsyncSession = Depends(get_db)
 ) -> JSONResponse:
     LOGGER.info(f"Creating feedback for domain {domain}")
     try:

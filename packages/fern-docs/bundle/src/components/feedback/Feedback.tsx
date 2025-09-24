@@ -41,9 +41,6 @@ export const Feedback: FC<FeedbackProps> = ({
 
   const faiClient = new FernAIClient({
     baseUrl: getFaiOrigin(),
-    headers: {
-      Authorization: `Bearer ${process.env.FERN_TOKEN ?? ""}`,
-    },
   });
 
   const ref = useRef<HTMLDivElement>(null);
