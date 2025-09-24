@@ -11,6 +11,7 @@ import getGithubSourceMetadata from "@/app/api/get-github-source-metadata/handle
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import createBranchIfNotExists from "@/app/services/dal/github/createBranchIfNotExists";
+import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { PreviewOnlyNotification } from "@/components/editor/PreviewOnlyNotification";
 import { BranchProvider } from "@/providers/BranchContext";
@@ -20,6 +21,7 @@ import { EditorProvider } from "@/providers/EditorContext";
 import { GitHubRepoProvider } from "@/providers/GitHubRepoContext";
 import { GitPRProvider } from "@/providers/GitPRContext";
 import { PagesStoreProvider } from "@/providers/PagesStoreContext";
+import { throwDigestibleError } from "@/utils/errors";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 
@@ -43,6 +45,8 @@ export default async function EditorLayout({
   const { orgName, docsUrl: encodedDocsUrl, branch } = await params;
   const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
+  await getAuthenticatedSessionOrRedirect(orgName);
+
   const { githubUrl, session } = await assertAuthAndFetchGithubUrl({
     orgName,
     docsUrl,
@@ -58,8 +62,10 @@ export default async function EditorLayout({
     sourceRepo.repo == null ||
     sourceRepo.baseBranch == null
   ) {
-    console.error("Source repo is not set");
-    throw new Error("Source repo is not set");
+    throw throwDigestibleError(
+      new Error("Source repo is not set"),
+      "REPO_NOT_CONNECTED"
+    );
   }
 
   let branchFailed = false;
