@@ -86,9 +86,9 @@ origins = [
 ]
 
 fai_app.add_middleware(
-    CORSMiddleware,  # type: ignore
-    allow_origins=origins,
-    allow_credentials=True,
+    CORSMiddleware,
+    allow_origins="*",
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
