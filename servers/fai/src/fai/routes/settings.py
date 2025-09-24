@@ -30,7 +30,6 @@ from src.settings import LOGGER
 async def get_settings(
     domain: str,
     db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
 ) -> JSONResponse:
     """Get settings for a domain and organization."""
     try:
