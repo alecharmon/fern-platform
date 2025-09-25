@@ -6,8 +6,6 @@ export function getFaiClient({ token }: { token: string }): FernAIClient {
   }
   return new FernAIClient({
     baseUrl: process.env.FAI_SERVER_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    token: token,
   });
 }

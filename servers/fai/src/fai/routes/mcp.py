@@ -18,7 +18,7 @@ from src.settings import LOGGER
 @fai_app.post(
     "/mcp/semantic/{domain}",
     response_model=GetMcpSemanticQueryResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def get_mcp_semantic_query(
     domain: str,
@@ -35,7 +35,9 @@ async def get_mcp_semantic_query(
 
 
 @fai_app.post(
-    "/mcp/bmf/{domain}", response_model=GetMcpBmfQueryResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+    "/mcp/bmf/{domain}",
+    response_model=GetMcpBmfQueryResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def get_mcp_bmf_query(
     domain: str,

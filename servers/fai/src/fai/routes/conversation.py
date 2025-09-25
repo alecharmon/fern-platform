@@ -23,7 +23,11 @@ from src.fai.models.types.conversation_types import (
 from src.settings import LOGGER
 
 
-@fai_app.get("/conversation/{domain}/{conversation_id}", response_model=GetConversationResponse)
+@fai_app.get(
+    "/conversation/{domain}/{conversation_id}",
+    response_model=GetConversationResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+)
 async def get_conversation_by_id(
     domain: str,
     conversation_id: str,

@@ -62,6 +62,11 @@ class FAIApp(FastAPI):
             {"url": "http://localhost:8080", "x-fern-server-name": "Local"},
         ]
 
+        openapi_schema["components"] = openapi_schema.get("components", {})
+        openapi_schema["components"]["securitySchemes"] = {
+            "bearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
+        }
+
         self.openapi_schema = openapi_schema
         return self.openapi_schema
 

@@ -45,7 +45,7 @@ from src.settings import LOGGER
 @fai_app.post(
     "/guidance/{domain}/create",
     response_model=CreateGuidanceResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def create_guidance(
     domain: str,
@@ -79,7 +79,7 @@ async def create_guidance(
 @fai_app.patch(
     "/guidance/{domain}/{guidance_id}",
     response_model=UpdateGuidanceResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def update(
     domain: str,
@@ -116,7 +116,7 @@ async def update(
 @fai_app.delete(
     "/guidance/{domain}/{guidance_id}",
     response_model=DeleteGuidanceResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def delete_guidance_by_id(
     domain: str,
@@ -146,7 +146,7 @@ async def delete_guidance_by_id(
 @fai_app.get(
     "/guidance/{domain}/{guidance_id}",
     response_model=GetGuidanceResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def get_guidance_by_id(
     domain: str,
@@ -169,7 +169,9 @@ async def get_guidance_by_id(
 
 
 @fai_app.get(
-    "/guidance/{domain}", response_model=GetGuidancesResponse, openapi_extra={"x-fern-audiences": ["customers"]}
+    "/guidance/{domain}",
+    response_model=GetGuidancesResponse,
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def get_guidances(
     domain: str,

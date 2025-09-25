@@ -45,7 +45,7 @@ from src.settings import (
 @fai_app.get(
     "/analytics/histogram/{domain}",
     response_model=GetHistogramAnalyticsResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
     dependencies=[Depends(get_db), Depends(verify_token)],
 )
 async def get_analytics_histogram(
@@ -86,7 +86,9 @@ async def get_analytics_histogram(
 
 
 @fai_app.get(
-    "/analytics/insights/{domain}", response_model=GetInsightsResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+    "/analytics/insights/{domain}",
+    response_model=GetInsightsResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def get_analytics_insights(
     domain: str,

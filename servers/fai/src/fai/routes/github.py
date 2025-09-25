@@ -42,7 +42,7 @@ from src.settings import (
 @fai_app.post(
     "/github/{domain}/reference-md/index",
     response_model=IndexResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def index_reference_md(
     domain: str,
@@ -99,7 +99,7 @@ async def index_reference_md(
 @fai_app.get(
     "/github/{domain}/indexed",
     response_model=CodeIndexStatusResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def check_code_index_status(
     domain: str,

@@ -97,6 +97,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -180,6 +185,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -354,6 +364,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -405,7 +420,15 @@
               }
             }
           }
-        }
+        },
+        "x-fern-audiences": [
+          "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/document/{domain}/create": {
@@ -464,6 +487,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -527,6 +555,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -591,6 +624,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       },
       "get": {
@@ -643,6 +681,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -698,6 +741,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -757,6 +805,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -838,6 +891,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -883,6 +941,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -992,6 +1055,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1047,7 +1115,12 @@
           }
         },
         "x-fern-audiences": [
-          "customers"
+          "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1093,7 +1166,12 @@
           }
         },
         "x-fern-audiences": [
-          "customers"
+          "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1149,6 +1227,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1213,6 +1296,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       },
       "delete": {
@@ -1265,6 +1353,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       },
       "get": {
@@ -1317,6 +1410,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1398,6 +1496,11 @@
         },
         "x-fern-audiences": [
           "customers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1466,6 +1569,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1521,6 +1629,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1621,6 +1734,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1676,6 +1794,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1731,6 +1854,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1887,6 +2015,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -1988,6 +2121,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -2043,6 +2181,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -2089,6 +2232,11 @@
         },
         "x-fern-audiences": [
           "internal"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
       }
     },
@@ -3888,6 +4036,13 @@
           "type"
         ],
         "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   },

@@ -22,7 +22,9 @@ SUPPORTED_MODELS = ["claude-4-sonnet-20250514", "command-a-03-2025"]
 
 
 @fai_app.post(
-    "/chat/{domain}", response_model=PostChatCompletionResponse, openapi_extra={"x-fern-audiences": ["customers"]}
+    "/chat/{domain}",
+    response_model=PostChatCompletionResponse,
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def post_chat_completion(
     domain: str,

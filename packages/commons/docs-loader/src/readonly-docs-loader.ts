@@ -1128,9 +1128,7 @@ const getAskAiEnabled = (cacheConfig: Required<CacheConfig>) =>
         await new FernAIClient({
           baseUrl:
             process.env.FAI_SERVER_URL ?? "https://fai.buildwithfern.com",
-          headers: {
-            Authorization: `Bearer ${process.env.FERN_TOKEN ?? ""}`,
-          },
+          token: process.env.FERN_TOKEN ?? "",
         }).settings.getSettings({ domain })
       ).ask_ai_enabled;
 

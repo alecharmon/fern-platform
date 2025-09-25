@@ -56,7 +56,7 @@ async def create_feedback(
 @fai_app.get(
     "/feedback/{domain}/{conversation_id}",
     response_model=GetFeedbackResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def get_feedback_by_id(
     domain: str,

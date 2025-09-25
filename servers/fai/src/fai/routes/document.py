@@ -47,7 +47,7 @@ from src.settings import LOGGER
 @fai_app.post(
     "/document/{domain}/create",
     response_model=list[CreateDocumentResponse],
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def create_document(
     domain: str,
@@ -94,7 +94,7 @@ async def create_document(
 @fai_app.post(
     "/document/{domain}/batch-create",
     response_model=list[CreateDocumentResponse],
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def batch_create_document(
     domain: str,
@@ -144,7 +144,7 @@ async def batch_create_document(
 @fai_app.patch(
     "/document/{domain}/{document_id}",
     response_model=UpdateDocumentResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def update_document(
     domain: str,
@@ -191,7 +191,7 @@ async def update_document(
 @fai_app.delete(
     "/document/{domain}/delete",
     response_model=DeleteDocumentResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def delete_document_by_id(
     domain: str,
@@ -221,7 +221,7 @@ async def delete_document_by_id(
 @fai_app.delete(
     "/document/{domain}/batch-delete",
     response_model=DeleteDocumentResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def batch_delete_document(
     domain: str,
@@ -258,7 +258,7 @@ async def batch_delete_document(
 @fai_app.get(
     "/document/{domain}/{document_id}",
     response_model=GetDocumentResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def get_document_by_id(
     domain: str,
@@ -280,7 +280,9 @@ async def get_document_by_id(
 
 
 @fai_app.get(
-    "/document/{domain}", response_model=GetDocumentsResponse, openapi_extra={"x-fern-audiences": ["customers"]}
+    "/document/{domain}",
+    response_model=GetDocumentsResponse,
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def get_documents(
     domain: str,
@@ -327,7 +329,7 @@ async def get_documents(
 @fai_app.delete(
     "/document/{domain}/delete-all",
     response_model=DeleteDocumentResponse,
-    openapi_extra={"x-fern-audiences": ["customers"]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def delete_all_documents(
     domain: str,

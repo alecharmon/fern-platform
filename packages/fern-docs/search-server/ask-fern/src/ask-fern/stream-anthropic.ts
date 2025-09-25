@@ -64,9 +64,7 @@ export async function runRouteForAnthropic({
 }) {
   const faiClient = new FernAIClient({
     baseUrl: getFaiOrigin(),
-    headers: {
-      Authorization: `Bearer ${fernToken_admin()}`,
-    },
+    token: fernToken_admin(),
   });
 
   /*

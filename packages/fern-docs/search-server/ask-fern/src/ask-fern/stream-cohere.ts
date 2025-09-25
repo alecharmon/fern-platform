@@ -169,9 +169,7 @@ export async function runRouteForCohere({
           const end = Date.now();
           const faiClient = new FernAIClient({
             baseUrl: getFaiOrigin(),
-            headers: {
-              Authorization: `Bearer ${fernToken_admin()}`,
-            },
+            token: fernToken_admin(),
           });
           try {
             await faiClient.query.createQuery({

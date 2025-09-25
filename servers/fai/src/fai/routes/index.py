@@ -29,7 +29,7 @@ from src.settings import LOGGER
 @fai_app.post(
     "/index/{domain}/reconstruct",
     response_model=ReconstructIndexResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def reconstruct_query_index(
     domain: str,
@@ -45,7 +45,9 @@ async def reconstruct_query_index(
 
 
 @fai_app.post(
-    "/index/{domain}/sync", response_model=SyncIndexResponse, openapi_extra={"x-fern-audiences": ["internal"]}
+    "/index/{domain}/sync",
+    response_model=SyncIndexResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def sync_index_to_query_index(
     domain: str,

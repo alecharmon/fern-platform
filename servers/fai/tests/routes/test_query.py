@@ -22,9 +22,7 @@ class TestCreateQuery:
 
         # Send domain as query parameter and query_data as request body
         response = test_client.post(
-            f"/queries?domain={query.domain}",
-            json=query_data,
-            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+            f"/queries?domain={query.domain}", json=query_data, headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
         )
 
         assert response.status_code == 200

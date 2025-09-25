@@ -50,7 +50,7 @@ async def get_settings(
 @fai_app.post(
     "/settings/ask-ai/toggle",
     response_model=ToggleAskAiResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def toggle_ask_ai(
     domain: str,
@@ -125,7 +125,7 @@ async def toggle_ask_ai(
 @fai_app.post(
     "/settings/ask-ai/reindex",
     response_model=ToggleAskAiResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def reindex_ask_ai(
     domain: str,
@@ -185,7 +185,7 @@ async def reindex_ask_ai(
 @fai_app.get(
     "/settings/ask-ai/toggle/status",
     response_model=ToggleStatusResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
 )
 async def get_toggle_status(
     domain: str,
