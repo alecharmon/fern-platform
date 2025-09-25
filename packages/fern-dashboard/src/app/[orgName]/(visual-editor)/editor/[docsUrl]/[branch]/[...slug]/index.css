@@ -48,4 +48,38 @@
       color: var(--grayscale-11);
     }
   }
+
+  /* TipTap Editor - Inherit colors from parent elements */
+  .prose-inherit-colors {
+    color: inherit !important;
+  }
+
+  .prose-inherit-colors h1,
+  .prose-inherit-colors h2,
+  .prose-inherit-colors h3,
+  .prose-inherit-colors h4,
+  .prose-inherit-colors h5,
+  .prose-inherit-colors h6 {
+    color: inherit !important;
+  }
+
+  .prose-inherit-colors p,
+  .prose-inherit-colors li,
+  .prose-inherit-colors span,
+  .prose-inherit-colors div,
+  .prose-inherit-colors blockquote,
+  .prose-inherit-colors strong,
+  .prose-inherit-colors em,
+  .prose-inherit-colors code {
+    color: inherit !important;
+  }
+
+  .prose-inherit-colors a {
+    color: inherit !important;
+    opacity: 0.8;
+  }
+
+  .prose-inherit-colors a:hover {
+    opacity: 1;
+  }
 }

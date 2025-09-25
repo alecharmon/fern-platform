@@ -10,6 +10,7 @@ import {
   List,
   ListOrderedIcon,
   Megaphone,
+  MousePointerClick,
   Square,
 } from "lucide-react";
 
@@ -17,6 +18,7 @@ import {
   EMPTY_ACCORDION_CONTENT,
   EMPTY_ACCORDION_GROUP_CONTENT,
 } from "@/docs/mdx/components/accordion";
+import { EMPTY_BUTTON_CONTENT } from "@/docs/mdx/components/button";
 import { EMPTY_CALLOUT_CONTENT } from "@/docs/mdx/components/callout/Callout";
 import {
   EMPTY_CARD_CONTENT,
@@ -175,6 +177,17 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     keywords: ["tabs", "tab", "option"],
     onSelect: ({ editor }) => {
       handleCustomNodeInsert(editor, "Tabs", EMPTY_TABS_CONTENT);
+    },
+  },
+  {
+    title: "Button",
+    subtext: "Add a button",
+    aliases: ["button"],
+    badge: MousePointerClick,
+    group: "Components",
+    keywords: ["button"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, "Button", EMPTY_BUTTON_CONTENT);
     },
   },
 ];

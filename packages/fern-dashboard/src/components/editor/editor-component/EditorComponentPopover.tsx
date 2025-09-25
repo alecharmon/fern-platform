@@ -349,12 +349,15 @@ function CheckboxControlComponent({
   }
 
   // Parse the current value as a boolean
-  const currentValue = value.rawStringValue.toLowerCase() === "true";
+  // Empty string means undefined/unset, treat as false
+  const currentValue =
+    value.rawStringValue !== "" &&
+    value.rawStringValue.toLowerCase() === "true";
 
   const handleChange = (checked: boolean) => {
     onChange({
       type: "value",
-      rawStringValue: checked ? "true" : "false",
+      rawStringValue: checked ? "true" : "",
     });
   };
 

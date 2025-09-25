@@ -98,8 +98,8 @@ or it can return JSXElements that are terminal in that they have text children o
 const richTextComponents = [
   "Callout",
   "Card",
-  "Tab",
   "Button",
+  "Tab",
   "Accordion",
   "Step",
   "StepGroup",
@@ -113,6 +113,8 @@ const richTextComponents = [
   "LaunchNote",
   "ParamField",
 ];
+
+const contentDraggingDisabledComponents = ["Button"];
 
 function parseMDX(mdx: string): ParsedMarkdownElement[] {
   // Parse MDX to AST using mdxToAST
@@ -198,6 +200,9 @@ function parseMDX(mdx: string): ParsedMarkdownElement[] {
       type: "jsxElement",
       value: {
         richTextContent: richTextComponents.includes(node.name || ""),
+        contentDraggingDisabled: contentDraggingDisabledComponents.includes(
+          node.name || ""
+        ),
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         name: node.name!,
         keyedAttributes,
@@ -348,6 +353,7 @@ const JSXElementRenderer = ({
       <TiptapEditor
         autofocus={false}
         initialContent={html.html}
+        disableDragging={element.value.contentDraggingDisabled}
         className="px-4"
         onUpdate={({ editor }) => {
           const html = editor.getHTML();

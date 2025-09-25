@@ -92,7 +92,8 @@ export class CheckboxControl extends Control {
   getDefaultValue(): AttributeValue {
     return {
       type: "value",
-      rawStringValue: String(this.defaultValue || false),
+      rawStringValue:
+        this.defaultValue !== undefined ? String(this.defaultValue) : "",
     };
   }
 }
