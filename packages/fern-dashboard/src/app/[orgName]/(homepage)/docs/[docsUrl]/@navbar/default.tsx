@@ -1,3 +1,5 @@
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { isFernEmployee } from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
@@ -7,6 +9,13 @@ export default async function DocsSiteNavbar({
   params,
 }: Readonly<{ params: Promise<{ orgName: Auth0OrgName }> }>) {
   const { orgName } = await params;
+
+  const session = await getCurrentSession();
+  if (session == null) {
+    return null;
+  }
+
+  const isEmployee = await isFernEmployee(session.user.sub);
   return (
     <div className="flex">
       <DocsSiteNavBarItem title="Overview" href="" />
@@ -16,7 +25,7 @@ export default async function DocsSiteNavbar({
       >
         <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
       </FeatureFlaggedServerSide>
-      <DocsSiteNavBarItem title="Settings" href="settings" />
+      {isEmployee && <DocsSiteNavBarItem title="Settings" href="settings" />}
     </div>
   );
 }

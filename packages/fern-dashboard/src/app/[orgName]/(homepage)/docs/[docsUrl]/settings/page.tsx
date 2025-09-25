@@ -1,7 +1,6 @@
-import {
-  FERN_ORG_NAME,
-  ensureUserBelongsToOrg,
-} from "@/app/services/auth0/management";
+import { redirect } from "next/navigation";
+
+import { isFernEmployee } from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { Settings } from "@/components/settings/Settings";
@@ -18,15 +17,12 @@ export default async function Page({
 
   const session = await getAuthenticatedSessionOrRedirect(orgName);
 
-  let hasFernEmail = false;
-  try {
-    await ensureUserBelongsToOrg(session.user.sub, FERN_ORG_NAME);
-    hasFernEmail = true;
-  } catch (error) {
-    console.error("Failed to check if user has Fern email:", error);
-    hasFernEmail = false;
+  const isEmployee = await isFernEmployee(session.user.sub);
+  if (!isEmployee) {
+    redirect(`/${orgName}/docs/${docsUrl}`);
   }
+
   return (
-    <Settings docsUrl={docsUrl} hasFernEmail={hasFernEmail} orgName={orgName} />
+    <Settings docsUrl={docsUrl} hasFernEmail={isEmployee} orgName={orgName} />
   );
 }
