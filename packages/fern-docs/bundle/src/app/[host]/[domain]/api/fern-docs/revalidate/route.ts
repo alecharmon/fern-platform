@@ -1,7 +1,6 @@
-import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-import { waitUntil } from "@vercel/functions";
+import { invalidateByTag, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
 import { chunk } from "es-toolkit/array";
 import { mapValues } from "es-toolkit/object";
@@ -53,10 +52,7 @@ export async function GET(
   const start = performance.now();
 
   const { host, domain } = await props.params;
-  revalidateTag(domain);
-
-  // delay to ensure invalidation propagates before cache is accessed
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  await invalidateByTag(domain);
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -258,10 +254,10 @@ export async function GET(
               (batches[i] ?? []).map(async (slug: string) => {
                 const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
                 // force revalidate the static page
-                revalidatePath(
-                  `/${host}/${domain}/static/${encodeURIComponent(slugToHref(slug))}`,
-                  "page"
-                );
+                // revalidatePath(
+                //   `/${host}/${domain}/static/${encodeURIComponent(slugToHref(slug))}`,
+                //   "page"
+                // );
                 try {
                   const res = await fetch(
                     `${req.nextUrl.origin}${slugToHref(slug)}`,
@@ -272,6 +268,10 @@ export async function GET(
                       signal: AbortSignal.timeout(600_000),
                     }
                   );
+                  const xVercelCache = res.headers.get("x-vercel-cache");
+                  if (xVercelCache != null) {
+                    console.log(`slug=${slug} x-vercel-cache=${xVercelCache}`);
+                  }
                   if (!res?.ok) {
                     throw new Error(
                       `Failed to revalidate ${url}. Status code: ${res?.status}`
