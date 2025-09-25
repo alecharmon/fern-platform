@@ -26,9 +26,11 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import attributes
 
 from src.fai.app import fai_app
 from src.fai.db import async_session_maker
+from src.fai.models.api.update_channel_settings import ChannelSettings
 from src.fai.models.db.feedback_db import FeedbackDb
 from src.fai.models.db.slack_integration_db import SlackIntegrationDb
 from src.fai.models.db.slack_message_cache_db import SlackMessageCacheDb
@@ -114,21 +116,6 @@ async def get_domain_from_slack_team(team_id: str) -> str | None:
 async def create_slack_integration(integration_request: CreateSlackIntegration) -> SlackIntegrationResponse:
     try:
         async with async_session_maker() as session:
-            result = await session.execute(
-                select(SlackIntegrationDb).where(SlackIntegrationDb.domain == integration_request.domain)
-            )
-            existing = result.scalar_one_or_none()
-
-            if existing:
-                return SlackIntegrationResponse(
-                    integration_id=existing.integration_id,
-                    domain=existing.domain,
-                    slack_team_id=existing.slack_team_id,
-                    slack_team_name=existing.slack_team_name,
-                    created_at=existing.created_at,
-                    installed_at=existing.installed_at,
-                )
-
             new_integration = SlackIntegrationDb(domain=integration_request.domain, created_at=datetime.now(UTC))
             session.add(new_integration)
             await session.commit()
@@ -181,17 +168,21 @@ async def handle_slack_events(request: Request) -> JSONResponse:
                     return JSONResponse(content={"status": "ok"})
 
             if event_type == "app_mention":
+                if event.get("bot_id"):
+                    LOGGER.info(f"Skipping bot message: bot_id={event.get('bot_id')}")
+                    return JSONResponse(content={"status": "ok"})
+
                 if message_ts:
                     await mark_message_processed(team_id, message_ts)
                 await handle_app_mention(event, team_id)
             elif event_type == "message":
-                channel_type = event.get("channel_type")
-                if channel_type == "im":
-                    if message_ts:
-                        await mark_message_processed(team_id, message_ts)
-                    await handle_message(event, team_id)
-                else:
-                    LOGGER.info("Skipping channel message without app mention")
+                if event.get("bot_id"):
+                    LOGGER.info(f"Skipping bot message: bot_id={event.get('bot_id')}")
+                    return JSONResponse(content={"status": "ok"})
+
+                if message_ts:
+                    await mark_message_processed(team_id, message_ts)
+                await handle_message(event, team_id)
             else:
                 LOGGER.info(f"Unhandled event type: {event_type}")
 
@@ -214,9 +205,20 @@ async def handle_slack_slash_commands(request: Request) -> JSONResponse:
         command = command_data.get("command")
         text = command_data.get("text", "")
         user_id = command_data.get("user_id")
-        command_data.get("channel_id")
+        channel_id = command_data.get("channel_id")
+        team_id = command_data.get("team_id")
 
         LOGGER.info(f"Received Slack slash command: {command} from user {user_id}")
+
+        if command in ["/configure", "/configure-dev"]:
+            if not team_id or not channel_id or not user_id:
+                return JSONResponse(
+                    content={
+                        "response_type": "ephemeral",
+                        "text": "❌ Missing required information. Please try again.",
+                    }
+                )
+            return await handle_configure_command(text, team_id, channel_id, user_id, command)
 
         response_text = f"Received command: {command}"
         if text:
@@ -611,10 +613,6 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
 
     LOGGER.info(f"App mentioned by {user} in {channel}: {text}")
 
-    integration = await get_slack_integration(team_id)
-    if integration and integration.slack_bot_token and message_ts and channel:
-        await add_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
-
     response = await handle_slack_message(event, team_id, is_app_mention=True)
 
     if not response.response_text or not response.bot_token:
@@ -648,9 +646,9 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
                 f"original_event_thread_ts: {event.get('thread_ts')}"
             )
 
-            if integration and integration.slack_bot_token and message_ts and channel:
-                await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
-                await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
+            if response.bot_token and message_ts and channel:
+                await remove_reaction(channel, message_ts, "eyes", response.bot_token)
+                await add_reaction(channel, message_ts, "outbox_tray", response.bot_token)
 
             await asyncio.sleep(2.5)
 
@@ -861,6 +859,250 @@ async def generate_and_update_modal(
             LOGGER.error(f"Failed to update modal with error: {update_error}")
 
 
+async def handle_configure_command(
+    text: str, team_id: str, channel_id: str, user_id: str, command: str
+) -> JSONResponse:
+    """
+    Handle the /configure or /configure-dev command for updating channel settings.
+
+    Usage examples:
+    - /configure roles role1,role2,role3
+    - /configure respond_to all
+    - /configure respond_to mentions_only
+    - /configure show
+    - /configure help
+    """
+    try:
+        parts = text.split()
+
+        cmd_name = command
+
+        if len(parts) < 1:
+            return JSONResponse(
+                content={
+                    "response_type": "ephemeral",
+                    "text": (
+                        "*Usage:*\n"
+                        f"• `{cmd_name} show` - Show current settings\n"
+                        f"• `{cmd_name} roles role1,role2,role3` - Set allowed RBAC roles\n"
+                        f"• `{cmd_name} respond_to all` - Bot responds to all messages\n"
+                        f"• `{cmd_name} respond_to mentions_only` - Bot only responds to mentions\n"
+                        f"• `{cmd_name} help` - Show this help message"
+                    ),
+                }
+            )
+
+        action = parts[0]
+
+        if action == "help":
+            return JSONResponse(
+                content={
+                    "response_type": "ephemeral",
+                    "text": (
+                        "*AskFern Channel Configuration*\n\n"
+                        "*Commands:*\n"
+                        f"• `{cmd_name} show` - Display current channel settings\n"
+                        f"• `{cmd_name} roles role1,role2,role3` - Set allowed RBAC roles (comma-separated)\n"
+                        f"• `{cmd_name} respond_to all` - Bot responds to all messages in channel\n"
+                        f"• `{cmd_name} respond_to mentions_only` - Bot only responds when mentioned\n\n"
+                        "*Examples:*\n"
+                        f"• `{cmd_name} roles admin,developer,support`\n"
+                        f"• `{cmd_name} respond_to all`"
+                    ),
+                }
+            )
+
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(SlackIntegrationDb).where(SlackIntegrationDb.slack_team_id == team_id)
+            )
+            integration = result.scalar_one_or_none()
+
+            if not integration:
+                return JSONResponse(
+                    content={
+                        "response_type": "ephemeral",
+                        "text": "❌ Slack integration not found. Please install the AskFern bot first.",
+                    }
+                )
+
+            current_settings = integration.settings or {}
+            if not isinstance(current_settings, dict):
+                current_settings = {}
+
+            channel_settings = current_settings.get(channel_id, {})
+            if not isinstance(channel_settings, dict):
+                channel_settings = {}
+
+            if "allowed_roles" not in channel_settings:
+                channel_settings["allowed_roles"] = []
+            if "respond_to" not in channel_settings:
+                channel_settings["respond_to"] = "mentions_only"
+            if "domain_override" not in channel_settings:
+                channel_settings["domain_override"] = None
+
+            if action == "show":
+                settings_obj = ChannelSettings(**channel_settings)
+                roles_text = (
+                    ", ".join(settings_obj.allowed_roles) if settings_obj.allowed_roles else "None (all users allowed)"
+                )
+                respond_to_text = "All messages" if settings_obj.respond_to == "all" else "Mentions only"
+
+                return JSONResponse(
+                    content={
+                        "response_type": "ephemeral",
+                        "text": (
+                            f"*Current settings for <#{channel_id}>:*\n"
+                            f"• *Allowed roles:* {roles_text}\n"
+                            f"• *Respond to:* {respond_to_text}"
+                        ),
+                    }
+                )
+
+            elif action == "roles":
+                if len(parts) < 2:
+                    return JSONResponse(
+                        content={
+                            "response_type": "ephemeral",
+                            "text": (
+                                "❌ Please provide roles. " f"Example: `{cmd_name} roles admin,developer,support`"
+                            ),
+                        }
+                    )
+
+                roles_str = " ".join(parts[1:])
+                roles = [role.strip() for role in roles_str.split(",") if role.strip()]
+
+                channel_settings["allowed_roles"] = roles
+
+                if current_settings is None:
+                    current_settings = {}
+                current_settings[channel_id] = channel_settings
+
+                integration.settings = current_settings
+                attributes.flag_modified(integration, "settings")
+
+                await session.commit()
+                await session.refresh(integration)
+
+                roles_text = ", ".join(roles) if roles else "None (all users allowed)"
+                return JSONResponse(
+                    content={
+                        "response_type": "ephemeral",
+                        "text": f"✅ Updated allowed roles for <#{channel_id}>: {roles_text}",
+                    }
+                )
+
+            elif action == "respond_to":
+                if len(parts) < 2:
+                    return JSONResponse(
+                        content={
+                            "response_type": "ephemeral",
+                            "text": (
+                                "❌ Please specify 'all' or 'mentions_only'. " f"Example: `{cmd_name} respond_to all`"
+                            ),
+                        }
+                    )
+
+                mode = parts[1].lower()
+                if mode not in ["all", "mentions_only"]:
+                    return JSONResponse(
+                        content={
+                            "response_type": "ephemeral",
+                            "text": "❌ Invalid mode. Use 'all' or 'mentions_only'.",
+                        }
+                    )
+
+                channel_settings["respond_to"] = mode
+
+                if current_settings is None:
+                    current_settings = {}
+                current_settings[channel_id] = channel_settings
+
+                integration.settings = current_settings
+                attributes.flag_modified(integration, "settings")
+
+                LOGGER.info(f"Updating channel settings for {channel_id}: {channel_settings}")
+                LOGGER.info(f"Full settings to save: {current_settings}")
+
+                await session.commit()
+                await session.refresh(integration)
+
+                LOGGER.info(f"Settings after commit: {integration.settings}")
+
+                respond_to_text = "all messages" if mode == "all" else "mentions only"
+                return JSONResponse(
+                    content={
+                        "response_type": "ephemeral",
+                        "text": f"✅ Updated response mode for <#{channel_id}>: Bot will respond to {respond_to_text}",
+                    }
+                )
+
+            elif action == "domain_override":
+                if len(parts) < 2:
+                    current_domain = channel_settings.get("domain_override")
+                    if current_domain:
+                        return JSONResponse(
+                            content={
+                                "response_type": "ephemeral",
+                                "text": f"Current domain override for <#{channel_id}>: `{current_domain}`",
+                            }
+                        )
+                    else:
+                        default_domain = integration.domain
+                        return JSONResponse(
+                            content={
+                                "response_type": "ephemeral",
+                                "text": f"No domain override set for <#{channel_id}>. "
+                                f"Using default: `{default_domain}`",
+                            }
+                        )
+
+                domain = " ".join(parts[1:])
+                if domain.lower() == "clear" or domain.lower() == "none":
+                    channel_settings["domain_override"] = None
+                    domain_text = "cleared (using default)"
+                else:
+                    channel_settings["domain_override"] = domain
+                    domain_text = f"`{domain}`"
+
+                if current_settings is None:
+                    current_settings = {}
+                current_settings[channel_id] = channel_settings
+
+                integration.settings = current_settings
+                attributes.flag_modified(integration, "settings")
+
+                LOGGER.info(f"Updating domain override for {channel_id}: {domain}")
+
+                await session.commit()
+                await session.refresh(integration)
+
+                return JSONResponse(
+                    content={
+                        "response_type": "ephemeral",
+                        "text": f"✅ Updated domain override for <#{channel_id}>: {domain_text}",
+                    }
+                )
+
+            else:
+                return JSONResponse(
+                    content={
+                        "response_type": "ephemeral",
+                        "text": f"❌ Unknown action '{action}'. Use `{cmd_name} help` for available commands.",
+                    }
+                )
+
+    except Exception as e:
+        LOGGER.error(f"Error handling configure command: {e}")
+        return JSONResponse(
+            content={
+                "response_type": "ephemeral",
+                "text": "❌ An error occurred while updating settings. Please try again.",
+            }
+        )
+
+
 async def handle_message(event: dict[str, Any], team_id: str) -> None:
     user = event.get("user")
     text = event.get("text", "")
@@ -869,14 +1111,9 @@ async def handle_message(event: dict[str, Any], team_id: str) -> None:
 
     LOGGER.info(f"Message from {user} in {channel}: {text}")
 
-    integration = await get_slack_integration(team_id)
-    if integration and integration.slack_bot_token and message_ts and channel:
-        await add_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
-
     response = await handle_slack_message(event, team_id, is_app_mention=False)
 
     if not response.response_text or not response.bot_token:
-        LOGGER.error("Could not generate response or missing bot token")
         return
 
     client = AsyncWebClient(token=response.bot_token)
@@ -906,9 +1143,9 @@ async def handle_message(event: dict[str, Any], team_id: str) -> None:
                 f"original_event_thread_ts: {event.get('thread_ts')}"
             )
 
-            if integration and integration.slack_bot_token and message_ts and channel:
-                await remove_reaction(channel, message_ts, "eyes", integration.slack_bot_token)
-                await add_reaction(channel, message_ts, "outbox_tray", integration.slack_bot_token)
+            if response.bot_token and message_ts and channel:
+                await remove_reaction(channel, message_ts, "eyes", response.bot_token)
+                await add_reaction(channel, message_ts, "outbox_tray", response.bot_token)
 
             await asyncio.sleep(2.5)
 
@@ -1012,24 +1249,15 @@ async def handle_slack_oauth_callback(code: str, state: str | None = None) -> JS
 async def get_slack_install_link(domain: str) -> JSONResponse:
     try:
         async with async_session_maker() as session:
-            result = await session.execute(
-                select(SlackIntegrationDb).where(SlackIntegrationDb.domain == domain).limit(1)
+            new_integration = SlackIntegrationDb(
+                domain=domain,
+                created_at=datetime.now(UTC),
             )
-            integration = result.scalar_one_or_none()
-
-            if integration:
-                integration_id = integration.integration_id
-                LOGGER.info(f"Using existing integration {integration_id} for domain {domain}")
-            else:
-                new_integration = SlackIntegrationDb(
-                    domain=domain,
-                    created_at=datetime.now(UTC),
-                )
-                session.add(new_integration)
-                await session.commit()
-                await session.refresh(new_integration)
-                integration_id = new_integration.integration_id
-                LOGGER.info(f"Created new integration {integration_id} for domain {domain}")
+            session.add(new_integration)
+            await session.commit()
+            await session.refresh(new_integration)
+            integration_id = new_integration.integration_id
+            LOGGER.info(f"Created new integration {integration_id} for domain {domain}")
 
         scopes = [
             "app_mentions:read",
@@ -1067,4 +1295,101 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
 
     except Exception as e:
         LOGGER.error(f"Error generating Slack install link: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate install link")
+
+
+@fai_app.get("/slack/integrations/{domain}", openapi_extra={"x-fern-audiences": ["internal"]})
+async def list_slack_integrations(domain: str) -> JSONResponse:
+    try:
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(SlackIntegrationDb)
+                .where(SlackIntegrationDb.domain == domain)
+                .order_by(SlackIntegrationDb.created_at.desc())
+            )
+            integrations = result.scalars().all()
+
+            integration_list = []
+            for integration in integrations:
+                integration_list.append(
+                    {
+                        "integration_id": integration.integration_id,
+                        "domain": integration.domain,
+                        "slack_team_id": integration.slack_team_id,
+                        "slack_team_name": integration.slack_team_name,
+                        "created_at": integration.created_at.isoformat() if integration.created_at else None,
+                        "installed_at": integration.installed_at.isoformat() if integration.installed_at else None,
+                        "is_installed": integration.slack_team_id is not None,
+                    }
+                )
+
+            return JSONResponse(
+                content={
+                    "domain": domain,
+                    "integrations": integration_list,
+                    "total_count": len(integration_list),
+                }
+            )
+
+    except Exception as e:
+        LOGGER.error(f"Error listing Slack integrations for domain {domain}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to list integrations")
+
+
+@fai_app.get("/slack/get-install/{integration_id}", openapi_extra={"x-fern-audiences": ["internal"]})
+async def get_slack_install_link_by_id(integration_id: str) -> JSONResponse:
+    try:
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(SlackIntegrationDb).where(SlackIntegrationDb.integration_id == integration_id)
+            )
+            integration = result.scalar_one_or_none()
+
+            if not integration:
+                raise HTTPException(status_code=404, detail=f"Integration {integration_id} not found")
+
+            LOGGER.info(
+                f"Generating install link for existing integration {integration_id}, domain: {integration.domain}"
+            )
+
+        scopes = [
+            "app_mentions:read",
+            "channels:history",
+            "channels:join",
+            "channels:read",
+            "chat:write",
+            "commands",
+            "groups:history",
+            "im:history",
+            "mpim:history",
+            "reactions:read",
+            "reactions:write",
+            "users:read",
+            "users:read.email",
+        ]
+
+        scope_string = ",".join(scopes)
+
+        install_url = (
+            f"https://slack.com/oauth/v2/authorize?"
+            f"client_id={VARIABLES.SLACK_CLIENT_ID}&"
+            f"scope={quote(scope_string)}&"
+            f"state={integration_id}"
+        )
+
+        return JSONResponse(
+            content={
+                "integration_id": integration_id,
+                "domain": integration.domain,
+                "install_url": install_url,
+                "scopes": scopes,
+                "slack_team_id": integration.slack_team_id,
+                "installed_at": integration.installed_at.isoformat() if integration.installed_at else None,
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        LOGGER.error(f"Error generating Slack install link for integration {integration_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate install link")
