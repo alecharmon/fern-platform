@@ -19,8 +19,7 @@ import { cn } from "@/utils/utils";
 export default function DevPanel() {
   const { panelOpen } = useDevMode();
   const { currentFilename } = useCurrentPage();
-  const { allMdxFiles, updatePage, frontmatterData, emitSaveEvent } =
-    usePages();
+  const { allMdxFiles, updatePage, emitSaveEvent } = usePages();
   const isEditingDisabled = useEditingDisabled();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
@@ -62,24 +61,10 @@ export default function DevPanel() {
         treatAsUnsupported: ["math"],
       });
 
-      const mergedFrontmatter = {
-        ...frontmatterData[activeFilename],
-        ...frontmatter,
-      };
-
-      // If the new frontmatter is missing a key that exists in the existing frontmatter,
-      // we want to remove it from the merged frontmatter
-      Object.keys(mergedFrontmatter).forEach((key) => {
-        if (!(key in frontmatter)) {
-          mergedFrontmatter[key] = key === "title" ? "" : undefined; // Always keep title field
-        } else {
-          mergedFrontmatter[key] = frontmatter[key];
-        }
-      });
-
       updatePage(activeFilename, {
         html,
-        frontmatter: mergedFrontmatter,
+        frontmatter:
+          Object.keys(frontmatter).length > 0 ? frontmatter : undefined,
         changedNodes: {},
       });
 

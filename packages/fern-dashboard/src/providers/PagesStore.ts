@@ -8,7 +8,12 @@ import {
   PageData,
   SectionWithHierarchy,
 } from "@fern-docs/components";
-import { ChangedNodes, MdxToHtmlResponse, htmlToMdx } from "@fern-docs/mdx";
+import {
+  ChangedNodes,
+  Frontmatter,
+  MdxToHtmlResponse,
+  htmlToMdx,
+} from "@fern-docs/mdx";
 
 import {
   compareFrontmatter,
@@ -31,11 +36,11 @@ export interface PageMetadata {
 export interface PageContents {
   html: string;
   mdx?: string;
-  originalFrontmatter?: MdxToHtmlResponse["frontmatter"];
+  originalFrontmatter?: MdxToHtmlResponse["originalFrontmatter"];
 }
 
 export interface PageDependencies {
-  frontmatter: PageMetadata;
+  frontmatter?: PageMetadata; // Optional because frontmatter is not required in source MDX
   changedNodes?: ChangedNodes;
   changedFrontmatter?: boolean;
   changed?: boolean;
@@ -43,7 +48,7 @@ export interface PageDependencies {
 }
 
 export interface PagesStoreEntry {
-  metadata: PageMetadata;
+  metadata?: PageMetadata; // Optional because frontmatter is not required in source MDX
   contents: PageContents;
   dependencies: PageDependencies;
 }
@@ -166,7 +171,9 @@ export class PagesStore {
   private _computeFrontmatterData(): Record<Filename, PageMetadata> {
     const result: Record<Filename, PageMetadata> = {};
     Object.entries(this._pages).forEach(([filename, page]) => {
-      result[filename] = page.dependencies.frontmatter;
+      if (page.dependencies.frontmatter) {
+        result[filename] = page.dependencies.frontmatter;
+      }
     });
     return result;
   }
@@ -222,11 +229,11 @@ export class PagesStore {
 
     const filename = `${fullSlug || node.slug}.mdx`;
     const html = pageData?.html || initialContent || "";
-    const frontmatter = pageData?.frontmatter || { title: node.title };
+    const frontmatter = pageData?.frontmatter;
     const { mdx: mdxContent } = htmlToMdx(html, frontmatter);
 
     const pageEntry = createPageEntry(
-      createPageMetadata(frontmatter),
+      frontmatter ? createPageMetadata(frontmatter) : null,
       createPageContents(html, undefined, mdxContent),
       { changed: true, syncedStatus: "STAGED" }
     );
@@ -268,7 +275,8 @@ export class PagesStore {
   /** Update page dependencies */
   updateDependencies(
     filename: Filename,
-    updates: Partial<PageDependencies>
+    updates: Partial<PageDependencies>,
+    isCompleteFrontmatterReplacement = false
   ): void {
     const existing = this._pages[filename];
     if (!existing) {
@@ -280,16 +288,31 @@ export class PagesStore {
       this._initialFrontmatter[filename] = { ...updates.frontmatter };
     }
 
-    const mergedFrontmatter = updates.frontmatter
-      ? { ...existing.dependencies.frontmatter, ...updates.frontmatter }
-      : existing.dependencies.frontmatter;
+    const mergedFrontmatter = (() => {
+      if (!("frontmatter" in updates)) {
+        return existing.dependencies.frontmatter;
+      }
 
-    const changedFrontmatter = updates.frontmatter
-      ? !compareFrontmatter(
-          updates.frontmatter,
-          this._initialFrontmatter[filename] || {}
-        )
-      : existing.dependencies.changedFrontmatter;
+      if (updates.frontmatter === undefined) {
+        return undefined;
+      }
+
+      if (isCompleteFrontmatterReplacement) {
+        return updates.frontmatter; // Complete replacement - use new frontmatter as-is
+      }
+
+      return { ...existing.dependencies.frontmatter, ...updates.frontmatter }; // Partial update - merge
+    })();
+
+    const changedFrontmatter =
+      "frontmatter" in updates
+        ? updates.frontmatter === undefined
+          ? Object.keys(this._initialFrontmatter[filename] || {}).length > 0
+          : !compareFrontmatter(
+              updates.frontmatter,
+              this._initialFrontmatter[filename] || {}
+            )
+        : existing.dependencies.changedFrontmatter;
 
     this._pages[filename] = {
       ...existing,
@@ -314,20 +337,30 @@ export class PagesStore {
     filename: Filename,
     updates: Partial<PageDependencies> & {
       html?: string;
-      originalFrontmatter?: MdxToHtmlResponse["frontmatter"];
+      originalFrontmatter?: MdxToHtmlResponse["originalFrontmatter"];
     }
   ): void {
-    this.updateDependencies(filename, {
-      ...updates,
-      changed: true,
-      syncedStatus: "STAGED",
-    });
+    // Determine if this is a complete frontmatter replacement vs partial update
+    // Complete replacement: when html is provided with frontmatter (from dev panel)
+    // Partial update: when only frontmatter is provided (from UI components)
+    const isCompleteFrontmatterReplacement =
+      "html" in updates && "frontmatter" in updates;
+
+    this.updateDependencies(
+      filename,
+      {
+        ...updates,
+        changed: true,
+        syncedStatus: "STAGED",
+      },
+      isCompleteFrontmatterReplacement
+    );
 
     const existingPage = this._pages[filename];
 
     if (
       existingPage &&
-      (updates.html || updates.originalFrontmatter || updates.frontmatter)
+      (updates.html || updates.originalFrontmatter || "frontmatter" in updates)
     ) {
       const updatedContents = {
         ...existingPage.contents,
@@ -337,12 +370,16 @@ export class PagesStore {
         }),
       };
 
+      // Get the updated frontmatter from dependencies (updated by updateDependencies)
+      const currentFrontmatter =
+        this._pages[filename]?.dependencies.frontmatter;
+
       // Regenerate MDX when HTML changes or frontmatter changes
-      if (updates.html || updates.frontmatter) {
+      if (updates.html || "frontmatter" in updates) {
         try {
           const { mdx: newMdx } = htmlToMdx(
             updatedContents.html,
-            existingPage.dependencies.frontmatter,
+            currentFrontmatter,
             undefined,
             existingPage.dependencies.changedNodes
           );
@@ -443,7 +480,7 @@ export class PagesStore {
 
     // Check for saved data in NavigationStore first
     let htmlToUse = initialHtml;
-    let frontmatterToUse = initialFrontmatter;
+    let frontmatterToUse: Frontmatter | undefined = initialFrontmatter;
     const originalFrontmatterToUse = initialOriginalFrontmatter;
     let hasChanges = false;
     let mdxContent: string | undefined;
@@ -469,7 +506,7 @@ export class PagesStore {
 
     const existingPage = this._pages[filename];
     const pageEntry = createPageEntry(
-      createPageMetadata(frontmatterToUse),
+      frontmatterToUse ? createPageMetadata(frontmatterToUse) : null,
       createPageContents(htmlToUse, originalFrontmatterToUse, mdxContent),
       {
         changed: hasChanges,
@@ -494,9 +531,8 @@ export class PagesStore {
         dependencies: { ...existingPage.dependencies, changed: true },
       };
     } else {
-      const fallbackTitle = filename.replace(".mdx", "");
       this._pages[filename] = createPageEntry(
-        createPageMetadata({}, fallbackTitle),
+        null,
         createPageContents("", undefined, changedMdxContent),
         { changed: true, syncedStatus: "SYNCED" }
       );

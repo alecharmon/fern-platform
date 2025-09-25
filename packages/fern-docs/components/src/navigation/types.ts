@@ -64,7 +64,7 @@ export interface DocsConfig {
 /** Core page data with content and metadata */
 export interface PageData {
   html: string;
-  frontmatter: Frontmatter;
+  frontmatter?: Frontmatter;
 }
 
 /** Page data with optional change tracking */
@@ -105,7 +105,7 @@ export interface StoredNavigationData {
     string,
     {
       html: string;
-      frontmatter: Frontmatter;
+      frontmatter?: Frontmatter;
       lastModified: number;
       pageType: "client" | "server";
     }

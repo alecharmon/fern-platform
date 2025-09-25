@@ -606,7 +606,11 @@ export function htmlToMdx(
   let finalMdx = mdx;
   if (changedFrontmatter === false && originalFrontmatter) {
     finalMdx = `---\n${originalFrontmatter}---\n\n${mdx}`;
-  } else if (frontmatter && Object.keys(frontmatter).length > 0) {
+  } else if (
+    frontmatter &&
+    // Only include frontmatter if it has at least one defined value
+    Object.values(frontmatter).filter((value) => value !== undefined).length > 0
+  ) {
     const frontmatterYaml = yaml.dump(frontmatter, FRONTMATTER_YAML_OPTIONS);
     finalMdx = `---\n${frontmatterYaml}---\n\n${mdx}`;
   }

@@ -1,8 +1,6 @@
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
-import { mdxToHtml } from "@fern-docs/mdx";
 
-import { createMdxFrontmatter } from "../navigation";
 import {
   BuildPageDataProps,
   BuildPageDataResult,
@@ -274,13 +272,6 @@ function createFoundNode(
   } as unknown as FernNavigation.utils.Node.Found;
 }
 
-function generateDefaultPageData(title: string, slug: string) {
-  const initialMdx = createMdxFrontmatter({ title, slug });
-  return mdxToHtml(initialMdx, {
-    treatAsUnsupported: ["math"],
-  });
-}
-
 export function buildPageDataFromSources(
   navigationData: StoredNavigationData,
   props: BuildPageDataProps
@@ -321,16 +312,6 @@ export function buildPageDataFromSources(
     if (storedPage?.pageType === "server") {
       ({ html: initialHtml, frontmatter: initialFrontmatter } = storedPage);
     }
-  }
-
-  // Generate default data if missing
-  if (!initialHtml || !initialFrontmatter) {
-    const title = workingFoundNode.node.title || "Untitled";
-    const slug = workingFoundNode.node.slug || initialFilename || "untitled";
-    const defaultData = generateDefaultPageData(title, String(slug));
-
-    initialHtml = defaultData.html;
-    initialFrontmatter = defaultData.frontmatter;
   }
 
   return {

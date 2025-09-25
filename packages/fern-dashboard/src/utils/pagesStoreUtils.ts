@@ -9,15 +9,15 @@ import {
 } from "../providers/PagesStore";
 
 export function createPageEntry(
-  metadata: PageMetadata,
+  metadata: PageMetadata | null, // Optional because frontmatter is not required in source MDX
   contents: PageContents,
   dependencies: Partial<PageDependencies> = {}
 ): PagesStoreEntry {
   return {
-    metadata,
+    metadata: metadata ?? undefined,
     contents,
     dependencies: {
-      frontmatter: metadata,
+      frontmatter: metadata ?? undefined,
       changed: false,
       syncedStatus: "SYNCED",
       ...dependencies,
@@ -41,7 +41,7 @@ export function createPageMetadata(
   fallbackTitle?: string
 ): PageMetadata {
   return {
-    title: initialFrontmatter?.title?.toString() || fallbackTitle || "Untitled",
+    title: initialFrontmatter?.title?.toString() || fallbackTitle,
     subtitle: initialFrontmatter?.subtitle?.toString(),
     slug: initialFrontmatter?.slug?.toString(),
     ...initialFrontmatter,
@@ -56,7 +56,7 @@ export function createPageContents(
   return {
     html: initialHtml || "",
     mdx: mdxContent,
-    originalFrontmatter: initialOriginalFrontmatter as PageMetadata | undefined,
+    originalFrontmatter: initialOriginalFrontmatter,
   };
 }
 
