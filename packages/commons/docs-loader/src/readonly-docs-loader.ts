@@ -24,8 +24,9 @@ import {
   pruneWithAuthState,
 } from "@fern-api/docs-server";
 import {
+  loadWithUrl as cachedLoadWithUrl,
   loadDynamicIRWithUrl as uncachedLoadDynamicIRWithUrl,
-  loadWithUrl as uncachedLoadWithUrl,
+  uncachedLoadWithUrl,
 } from "@fern-api/docs-server";
 import {
   type DocsLoader,
@@ -97,11 +98,14 @@ const loadWithUrl = async (
       );
     }
   }
-  const response = await uncachedLoadWithUrl(domain);
   if (branchName) {
+    const response = await uncachedLoadWithUrl(domain);
     await visualEditorStorage.storeFdrSnapshot(domain, branchName, response);
+    return response;
+  } else {
+    const response = await cachedLoadWithUrl(domain);
+    return response;
   }
-  return response;
 };
 const loadDynamicIRWithUrl = uncachedLoadDynamicIRWithUrl;
 

@@ -1,5 +1,3 @@
-import { cache } from "react";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { HttpMethod } from "@fern-api/docs-utils";
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
@@ -188,39 +186,37 @@ export interface GitLoader {
   ): Promise<GetFernConfigJsonResult>;
 }
 
-export const createEditableDocsLoader = cache(
-  async ({
+export const createEditableDocsLoader = async ({
+  host,
+  encodedDocsUrl,
+  fernToken,
+  gitLoader,
+  forceRevalidate,
+  branchName,
+}: {
+  host: string;
+  encodedDocsUrl: string;
+  fernToken?: string;
+  gitLoader?: GitLoader;
+  forceRevalidate?: boolean;
+  branchName?: string;
+}) => {
+  const domain = decodeURIComponent(encodedDocsUrl);
+  const docsLoader = await createCachedDocsLoader(
     host,
-    encodedDocsUrl,
+    encodeDocsLoaderDomain(domain, branchName),
     fernToken,
-    gitLoader,
-    forceRevalidate,
-    branchName,
-  }: {
-    host: string;
-    encodedDocsUrl: string;
-    fernToken?: string;
-    gitLoader?: GitLoader;
-    forceRevalidate?: boolean;
-    branchName?: string;
-  }) => {
-    const domain = decodeURIComponent(encodedDocsUrl);
-    const docsLoader = await createCachedDocsLoader(
-      host,
-      encodeDocsLoaderDomain(domain, branchName),
-      fernToken,
-      {
-        returnRawMarkdown: true,
-        cacheConfig: {
-          // For editable docs, we want shorter TTL so that cache stays fresh
-          kvTtl: 5 * 60, // 5 minutes
-          cacheKeySuffix: "editable",
-          forceRevalidate,
-        },
-        skipAuth: true,
-      }
-    );
+    {
+      returnRawMarkdown: true,
+      cacheConfig: {
+        // For editable docs, we want shorter TTL so that cache stays fresh
+        kvTtl: 5 * 60, // 5 minutes
+        cacheKeySuffix: "editable",
+        forceRevalidate,
+      },
+      skipAuth: true,
+    }
+  );
 
-    return new EditableDocsLoader(docsLoader, gitLoader);
-  }
-);
+  return new EditableDocsLoader(docsLoader, gitLoader);
+};
