@@ -18,7 +18,7 @@ export function WarningNote({
       className={cn(
         "flex items-start gap-2 rounded-md border p-2 px-3",
         variant === "error"
-          ? "border-red-200 bg-red-100/50 text-red-600 dark:bg-red-700/20"
+          ? "border-red-200 bg-red-100/50 text-red-600 dark:border-red-700 dark:bg-red-700/20"
           : "border-yellow-800 bg-yellow-300 text-yellow-800",
         className
       )}

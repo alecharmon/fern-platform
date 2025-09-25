@@ -78,6 +78,8 @@ describe("PagesStore", () => {
     vi.clearAllMocks();
     navigationStore = new NavigationStore(
       "test-branch",
+      "test-org",
+      "https://test.com",
       createNavigationMemoryStorage()
     );
     store = new PagesStore(navigationStore);
@@ -206,6 +208,8 @@ describe("PagesStore", () => {
     beforeEach(() => {
       navigationStore = new NavigationStore(
         "test-branch",
+        "test-org",
+        "https://test.com",
         createNavigationMemoryStorage()
       );
       pagesStore = new PagesStore(navigationStore);

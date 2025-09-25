@@ -34,7 +34,12 @@ describe("NavigationStore", () => {
   let store: NavigationStore;
 
   beforeEach(() => {
-    store = new NavigationStore("test-branch", createNavigationMemoryStorage());
+    store = new NavigationStore(
+      "test-branch",
+      "test-org",
+      "https://test.com",
+      createNavigationMemoryStorage()
+    );
   });
 
   describe("page data persistence", () => {

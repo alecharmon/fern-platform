@@ -7,6 +7,9 @@ import {
   createNavigationMemoryStorage,
 } from "../NavigationStorage";
 
+const MOCK_ORG_NAME = "test-org";
+const MOCK_DOCS_URL = "https://test.com";
+
 const createTestNode = (): FernNavigation.PageNode => ({
   id: "test-page" as FernNavigation.NodeId,
   type: "page" as const,
@@ -34,6 +37,10 @@ const createTestData = () => ({
   committedFiles: new Set<string>(["test.mdx"]),
   pageContents: {},
   lastCommittedHash: undefined,
+  metadata: {
+    orgName: MOCK_ORG_NAME,
+    docsUrl: MOCK_DOCS_URL,
+  },
 });
 
 describe("NavigationStorage", () => {
@@ -46,7 +53,7 @@ describe("NavigationStorage", () => {
   it("should store, retrieve, and handle Set serialization", () => {
     const testData = createTestData();
 
-    storage.setStore("test-branch", testData);
+    storage.setStore("test-branch", MOCK_ORG_NAME, MOCK_DOCS_URL, testData);
     const retrieved = storage.getStore("test-branch");
 
     expect(retrieved.docsYmlState.baseContent).toBe("");
@@ -63,9 +70,14 @@ describe("NavigationStorage", () => {
   });
 
   it("should update existing store data", () => {
-    storage.setStore("test-branch", createTestData());
+    storage.setStore(
+      "test-branch",
+      MOCK_ORG_NAME,
+      MOCK_DOCS_URL,
+      createTestData()
+    );
 
-    storage.updateStore("test-branch", {
+    storage.updateStore("test-branch", MOCK_ORG_NAME, MOCK_DOCS_URL, {
       docsYmlState: {
         baseContent: "updated",
         pendingUpdates: {},
@@ -91,7 +103,7 @@ describe("NavigationStorage", () => {
       },
     };
 
-    storage.setStore("test-branch", testData);
+    storage.setStore("test-branch", MOCK_ORG_NAME, MOCK_DOCS_URL, testData);
     const result = storage.getStore("test-branch");
 
     expect(Object.keys(result.clientPages)).toContain("test-page");

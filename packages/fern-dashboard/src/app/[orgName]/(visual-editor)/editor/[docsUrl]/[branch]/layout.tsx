@@ -108,7 +108,11 @@ export default async function EditorLayout({
         <OrgNameProvider orgName={orgName}>
           <BranchProvider branch={branch} branchFailed={branchFailed}>
             <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo}>
-              <NavigationStoreProvider branchName={branch}>
+              <NavigationStoreProvider
+                branchName={branch}
+                orgName={orgName}
+                docsUrl={docsUrl}
+              >
                 <PagesStoreProvider branchName={branch}>
                   <CurrentPageProvider>
                     <ClientMDXProvider>

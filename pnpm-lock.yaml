@@ -917,6 +917,9 @@ importers:
       '@fern-api/venus-api-sdk':
         specifier: ^0.13.4-7-g5ff8ee8
         version: 0.13.4-7-g5ff8ee8
+      '@fern-api/visual-editor-server':
+        specifier: workspace:*
+        version: link:../commons/visual-editor-server
       '@fern-docs/components':
         specifier: workspace:*
         version: link:../fern-docs/components

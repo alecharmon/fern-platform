@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 
 import { createNavigationLocalStorage } from "@fern-docs/components";
-import { getRelevantBranchesForUser } from "@fern-docs/components/navigation/local-storage";
 
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import { Auth0OrgName } from "@/app/services/auth0/types";
+import { getRelevantUserBranchesForSite } from "@/app/services/dal/mongodb/getRelevantUserBranchesForSite";
 import { GithubSourceRepo } from "@/app/services/github/types";
 import Card from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,26 +22,31 @@ export function VisualEditorSectionClient({
   session,
   docsUrl,
   sourceRepo,
+  orgName,
 }: {
   maybeCriticalUpdateWarning: React.ReactNode;
   session: Auth0SessionData;
   docsUrl: DocsUrl;
   sourceRepo?: GithubSourceRepo;
+  orgName: Auth0OrgName;
 }) {
   const [relevantBranches, setRelevantBranches] = useState<string[]>([]);
   const [loadingBranches, setLoadingBranches] = useState(true);
 
-  // We load the relevant using a useEffect so that we can show a loading state. Without a loading state,
-  // the server parent will not render a loading state, but an empty state.
+  // Load relevant branches for user on this site and org
   useEffect(() => {
     setLoadingBranches(true);
-    const relevantBranches = getRelevantBranchesForUser(
-      session.user.sub,
-      createNavigationLocalStorage().getAllStoredBranches()
-    );
-    setRelevantBranches(relevantBranches);
-    setLoadingBranches(false);
-  }, [session.user.sub]);
+    const getBranches = async () => {
+      const relevantBranches = await getRelevantUserBranchesForSite(
+        orgName,
+        docsUrl,
+        createNavigationLocalStorage().getAllStoredBranches()
+      );
+      setRelevantBranches(relevantBranches);
+      setLoadingBranches(false);
+    };
+    void getBranches();
+  }, [session.user.sub, docsUrl, orgName]);
 
   // Loading state
   if (loadingBranches) {
@@ -55,9 +61,9 @@ export function VisualEditorSectionClient({
         <VisualEditorHeader />
         <div className="flex flex-col gap-3">
           {loadingRow}
-          <hr />
+          <hr className="border-border" />
           {loadingRow}
-          <hr />
+          <hr className="border-border" />
           {loadingRow}
         </div>
       </Card>

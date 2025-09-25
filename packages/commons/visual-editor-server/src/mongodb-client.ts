@@ -122,6 +122,24 @@ class VisualEditorMongoClient {
 
     return document.data;
   }
+
+  async findDocumentsForBranches(
+    branchNames: string[]
+  ): Promise<VisualEditorDocument[]> {
+    const collection = await this.ensureConnection();
+
+    const documents = await collection
+      .find({
+        branchName: { $in: branchNames },
+      })
+      .toArray();
+
+    if (!documents) {
+      return [];
+    }
+
+    return documents;
+  }
 }
 
 export const mongoClient: VisualEditorMongoClient =

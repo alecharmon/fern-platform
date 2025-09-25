@@ -64,6 +64,7 @@ export async function VisualEditorSection({
           baseBranch={baseBranch}
         />
       }
+      orgName={orgName}
       session={session}
       docsUrl={docsUrl}
       sourceRepo={githubAuthState.sourceRepo}

@@ -46,6 +46,8 @@ export interface NavigationSnapshot {
 
 export class NavigationStore {
   private _branchName: string;
+  private _orgName: string;
+  private _docsUrl: string;
   private _pageChanges = new Map<string, PageChange>();
   private _configChanges = new Map<string, ConfigChange>();
   private _listeners = new Set<() => void>();
@@ -62,8 +64,15 @@ export class NavigationStore {
   > | null = null;
   private _storage: NavigationStorage;
 
-  constructor(branchName: string, storage?: NavigationStorage) {
+  constructor(
+    branchName: string,
+    orgName: string,
+    docsUrl: string,
+    storage?: NavigationStorage
+  ) {
     this._branchName = branchName;
+    this._orgName = orgName;
+    this._docsUrl = docsUrl;
     this._storage = storage || createNavigationLocalStorage();
     this._data = this._storage.getStore(branchName);
   }
@@ -71,6 +80,16 @@ export class NavigationStore {
   /** Get the branch name */
   get branchName(): string {
     return this._branchName;
+  }
+
+  /** Get the org name */
+  get orgName(): string {
+    return this._orgName;
+  }
+
+  /** Get the docs url */
+  get docsUrl(): string {
+    return this._docsUrl;
   }
 
   /** Get a copy of all page changes */
@@ -84,7 +103,12 @@ export class NavigationStore {
   }
 
   private _updateStorage(updates: Partial<StoredNavigationData>): void {
-    this._storage.updateStore(this._branchName, updates);
+    this._storage.updateStore(
+      this._branchName,
+      this._orgName,
+      this._docsUrl,
+      updates
+    );
     this._data = { ...this._data, ...updates };
   }
 
@@ -153,7 +177,12 @@ export class NavigationStore {
   }
 
   private _persist(): void {
-    this._storage.setStore(this._branchName, this._data);
+    this._storage.setStore(
+      this._branchName,
+      this._orgName,
+      this._docsUrl,
+      this._data
+    );
   }
 
   private _updatePageState(

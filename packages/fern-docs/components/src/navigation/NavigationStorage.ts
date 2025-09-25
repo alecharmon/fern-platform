@@ -19,24 +19,42 @@ export class NavigationStorage {
     const data: StoredNavigationData = {
       ...this._getEmptyStore(),
       ...parsed,
+      metadata: {
+        orgName: parsed.metadata?.orgName,
+        docsUrl: parsed.metadata?.docsUrl,
+      },
       committedFiles: new Set(parsed.committedFiles || []),
     };
 
     return data;
   }
 
-  setStore(branchName: string, data: StoredNavigationData): void {
+  setStore(
+    branchName: string,
+    orgName: string,
+    docsUrl: string,
+    data: StoredNavigationData
+  ): void {
     // Convert Set to Array for JSON serialization
     const serializable = {
       ...data,
+      metadata: {
+        orgName,
+        docsUrl,
+      },
       committedFiles: Array.from(data.committedFiles),
     };
     this._storage.set(branchName, JSON.stringify(serializable));
   }
 
-  updateStore(branchName: string, update: Partial<StoredNavigationData>): void {
+  updateStore(
+    branchName: string,
+    orgName: string,
+    docsUrl: string,
+    update: Partial<StoredNavigationData>
+  ): void {
     const prevData = this.getStore(branchName);
-    this.setStore(branchName, {
+    this.setStore(branchName, orgName, docsUrl, {
       ...prevData,
       ...update,
       committedFiles: update.committedFiles ?? prevData.committedFiles,
@@ -62,6 +80,10 @@ export class NavigationStorage {
       committedFiles: new Set(),
       pageContents: {},
       lastCommittedHash: undefined,
+      metadata: {
+        docsUrl: undefined,
+        orgName: undefined,
+      },
     };
   }
 

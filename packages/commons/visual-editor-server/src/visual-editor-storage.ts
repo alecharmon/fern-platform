@@ -1,6 +1,6 @@
 import type { DocsV2Read } from "@fern-api/fdr-sdk";
 
-import { mongoClient } from "./mongodb-client";
+import { type VisualEditorDocument, mongoClient } from "./mongodb-client";
 
 export class VisualEditorStorage {
   async storeFdrSnapshot(
@@ -40,6 +40,21 @@ export class VisualEditorStorage {
         error
       );
       return null;
+    }
+  }
+
+  async getDocumentsForBranches(
+    branchNames: string[]
+  ): Promise<VisualEditorDocument[]> {
+    try {
+      const documents = await mongoClient.findDocumentsForBranches(branchNames);
+      return documents;
+    } catch (error) {
+      console.error(
+        `[VisualEditorStorage] Failed to retrieve documents for ${branchNames.length} branches`,
+        error
+      );
+      return [];
     }
   }
 }

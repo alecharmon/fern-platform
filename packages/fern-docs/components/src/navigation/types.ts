@@ -111,6 +111,10 @@ export interface StoredNavigationData {
     }
   >;
   lastCommittedHash?: string;
+  metadata?: {
+    docsUrl?: string;
+    orgName?: string;
+  };
 }
 
 /** Tracked page modification change */

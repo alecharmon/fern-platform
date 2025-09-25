@@ -22,16 +22,27 @@ const NavigationStoreContext =
 export interface NavigationStoreProviderProps {
   children: ReactNode;
   branchName: string;
+  orgName: string;
+  docsUrl: string;
 }
 
 export function NavigationStoreProvider({
   children,
   branchName,
+  orgName,
+  docsUrl,
 }: NavigationStoreProviderProps) {
-  const storeRef = useRef<NavigationStore>(new NavigationStore(branchName));
+  const storeRef = useRef<NavigationStore>(
+    new NavigationStore(branchName, orgName, docsUrl)
+  );
 
-  if (!storeRef.current || storeRef.current.branchName !== branchName) {
-    storeRef.current = new NavigationStore(branchName);
+  if (
+    !storeRef.current ||
+    storeRef.current.branchName !== branchName ||
+    storeRef.current.orgName !== orgName ||
+    storeRef.current.docsUrl !== docsUrl
+  ) {
+    storeRef.current = new NavigationStore(branchName, orgName, docsUrl);
   }
 
   return (
