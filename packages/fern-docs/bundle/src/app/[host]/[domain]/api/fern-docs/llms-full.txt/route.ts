@@ -16,7 +16,7 @@ import { isNonNullish } from "@fern-api/ui-core-utils";
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 
-export const maxDuration = 300; // 5 minutes timeout
+export const maxDuration = 800; // 13 minutes
 
 export async function GET(
   req: NextRequest,
