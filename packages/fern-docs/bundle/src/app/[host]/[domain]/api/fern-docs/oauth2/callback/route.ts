@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { SignJWT } from "jose";
+import { SignJWT, decodeJwt } from "jose";
 
 import { type FernUser, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
 import {
@@ -151,9 +151,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         if (parsedToken.data.scope) {
           console.log("Found scope:", parsedToken.data.scope);
-          const roles = parsedToken.data.scope
-            .split(" ")
-            .filter((scope) => scope.startsWith("fern:"));
+
+          let roles: string[] | undefined;
+
+          try {
+            const decodedToken = decodeJwt(parsedToken.data.access_token);
+            console.log("Decoded JWT keys:", Object.keys(decodedToken));
+
+            if (decodedToken.roles && Array.isArray(decodedToken.roles)) {
+              roles = decodedToken.roles as string[];
+              console.log("Found roles in JWT:", roles);
+            } else {
+              console.log("No roles found in JWT payload");
+            }
+          } catch (jwtError) {
+            console.error("Failed to decode JWT:", jwtError);
+          }
 
           payload = {
             playground: {
@@ -163,7 +176,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 },
               },
             },
-            roles,
+            ...(roles && { roles }),
           };
         }
       }
