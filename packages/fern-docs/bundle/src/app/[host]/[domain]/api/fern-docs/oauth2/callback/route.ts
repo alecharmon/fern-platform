@@ -126,69 +126,44 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const data = await response.json();
+    let fern_token = "";
 
-    // we currently assume the token is for bearer auth
-    const bearer_token = data.access_token;
-    const refresh_token = data.refresh_token;
-    const expires_in = data.expires_in;
-
-    let payload: FernUser = {
-      playground: {
-        initial_state: {
-          auth: {
-            bearer_token: bearer_token,
-          },
-        },
-      },
-    };
-
-    try {
-      console.log("Attempting to safely parse data...");
-      const parsedToken = OAuthTokenResponseSchema.safeParse(data);
-
-      if (parsedToken.data) {
-        console.log("Successfully parsed data.");
-
-        if (parsedToken.data.scope) {
-          console.log("Found scope:", parsedToken.data.scope);
-
-          let roles: string[] | undefined;
-
-          try {
-            const decodedToken = decodeJwt(parsedToken.data.access_token);
-            console.log("Decoded JWT keys:", Object.keys(decodedToken));
-
-            if (decodedToken.roles && Array.isArray(decodedToken.roles)) {
-              roles = decodedToken.roles as string[];
-              console.log("Found roles in JWT:", roles);
-            } else {
-              console.log("No roles found in JWT payload");
-            }
-          } catch (jwtError) {
-            console.error("Failed to decode JWT:", jwtError);
-          }
-
-          payload = {
-            playground: {
-              initial_state: {
-                auth: {
-                  bearer_token: parsedToken.data.access_token,
-                },
-              },
-            },
-            ...(roles && { roles }),
-          };
-        }
-      }
-    } catch (error) {
-      console.error(error);
+    const parsedToken = OAuthTokenResponseSchema.safeParse(data);
+    if (!parsedToken.success) {
+      console.error("Failed to parse OAuth token response:", parsedToken.error);
+      return redirectWithLoginError(
+        req,
+        redirectLocation,
+        "invalid_token_response",
+        "Couldn't login, please try again"
+      );
     }
 
-    const fern_token = await mintJwtToken({
+    const payload: FernUser = {};
+
+    if (config["api-key-injection-enabled"] && parsedToken.data.access_token) {
+      payload.playground = {
+        initial_state: {
+          auth: {
+            bearer_token: parsedToken.data.access_token,
+          },
+        },
+      };
+    }
+
+    // fern:role scope indicates we should parse for user roles
+    if (parsedToken.data.scope.includes("fern:role")) {
+      const roles = extractRolesFromJwt(parsedToken.data.access_token);
+      if (roles) {
+        payload.roles = roles;
+      }
+    }
+
+    fern_token = await mintJwtToken({
       payload,
-      refresh_token,
       issuer,
-      expires_in,
+      expires_in: parsedToken.data.expires_in,
+      refresh_token: parsedToken.data.refresh_token,
     });
 
     const res = redirectLocation
@@ -225,22 +200,43 @@ function getJwtTokenSecret(secret?: string): Uint8Array {
 
 async function mintJwtToken({
   payload,
-  refresh_token,
   issuer,
   expires_in,
+  refresh_token,
 }: {
-  payload: Record<string, any>;
-  refresh_token: string;
+  payload: FernUser;
   issuer: string;
   expires_in: number;
-}) {
-  return await new SignJWT({
+  refresh_token: string | undefined;
+}): Promise<string> {
+  const jwtPayload = {
     fern: payload,
-    refresh_token,
-  })
+    ...(refresh_token && { refresh_token }),
+  };
+
+  return await new SignJWT(jwtPayload)
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt()
-    .setExpirationTime(`${expires_in} secs`) // set to any value
+    .setExpirationTime(`${expires_in} secs`)
     .setIssuer(issuer)
     .sign(getJwtTokenSecret(process.env.OAUTH_JWT_SECRET));
+}
+
+/**
+ * extracts roles from JWT access token
+ */
+function extractRolesFromJwt(accessToken: string): string[] | null {
+  try {
+    const decodedToken = decodeJwt(accessToken);
+
+    if (decodedToken.roles && Array.isArray(decodedToken.roles)) {
+      return decodedToken.roles as string[];
+    }
+
+    console.log("No roles found in JWT payload");
+    return null;
+  } catch (jwtError) {
+    console.error("Failed to decode JWT:", jwtError);
+    return null;
+  }
 }
