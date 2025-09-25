@@ -185,6 +185,14 @@ export const OAuth2Schema = z.union([
   OAuth2WebflowSchema,
 ]);
 
+export const OAuth2TokenSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string(),
+  issuer: z.string(),
+  expires_in: z.number(),
+  roles: z.optional(z.union([z.string(), z.array(z.string())])),
+});
+
 export const BasicTokenVerificationSchema = z
   .object({
     type: z.literal("basic_token_verification"),
@@ -277,6 +285,7 @@ export type OAuth2Webflow = z.infer<typeof OAuth2WebflowSchema>;
 export type OAuth2ClientCredentials = z.infer<
   typeof OAuth2ClientCredentialsSchema
 >;
+export type OAuth2TokenWithRolesResponse = z.infer<typeof OAuth2TokenSchema>;
 export type BasicTokenVerification = z.infer<
   typeof BasicTokenVerificationSchema
 >;

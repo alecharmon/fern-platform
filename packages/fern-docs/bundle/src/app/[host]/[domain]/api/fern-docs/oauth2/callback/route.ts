@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { SignJWT } from "jose";
 
+import { type FernUser, OAuth2TokenSchema } from "@fern-api/docs-auth";
 import {
   getAllowedRedirectUrls,
   getDocsDomainEdge,
@@ -126,13 +127,54 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const data = await response.json();
 
+    console.log(`Detected data payload with fields: ${Object.keys(data)}`);
+
     // we currently assume the token is for bearer auth
     const bearer_token = data.access_token;
     const refresh_token = data.refresh_token;
     const expires_in = data.expires_in;
 
+    let payload: FernUser = {
+      playground: {
+        initial_state: {
+          auth: {
+            bearer_token: bearer_token,
+          },
+        },
+      },
+    };
+
+    try {
+      console.log("Attempting to parse data...");
+      const parsedToken = OAuth2TokenSchema.safeParse(data);
+
+      if (parsedToken.data) {
+        console.log("Successfully parsed data.");
+
+        if (parsedToken.data.roles) {
+          console.log("Setting roles:", parsedToken.data.roles);
+          const roles = Array.isArray(parsedToken.data.roles)
+            ? parsedToken.data.roles
+            : parsedToken.data.roles.split(" ");
+
+          payload = {
+            playground: {
+              initial_state: {
+                auth: {
+                  bearer_token: parsedToken.data.access_token,
+                },
+              },
+            },
+            roles,
+          };
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
     const fern_token = await mintJwtToken({
-      bearer_token,
+      payload,
       refresh_token,
       issuer,
       expires_in,
@@ -171,27 +213,19 @@ function getJwtTokenSecret(secret?: string): Uint8Array {
 }
 
 async function mintJwtToken({
-  bearer_token,
+  payload,
   refresh_token,
   issuer,
   expires_in,
 }: {
-  bearer_token: string;
+  payload: Record<string, any>;
   refresh_token: string;
   issuer: string;
   expires_in: number;
 }) {
   return await new SignJWT({
-    fern: {
-      playground: {
-        initial_state: {
-          auth: {
-            bearer_token: bearer_token,
-          },
-        },
-      },
-    },
-    refresh_token: refresh_token,
+    fern: payload,
+    refresh_token,
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt()
