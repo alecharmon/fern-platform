@@ -222,6 +222,14 @@ async def handle_slack_message(
                 roles_to_use = channel_settings.allowed_roles
                 LOGGER.info(f"Using roles override for channel {context.channel}: {roles_to_use}")
 
+    if not is_app_mention and integration.slack_bot_user_id and context.text:
+        if f"<@{integration.slack_bot_user_id}>" in context.text:
+            LOGGER.info(
+                f"Bot mentioned in message text (user_id: {integration.slack_bot_user_id}), treating as app mention"
+            )
+            is_app_mention = True
+            context.is_app_mention = True
+
     is_thread_message = event.get("thread_ts") is not None
     is_from_thread_starter = False
 
