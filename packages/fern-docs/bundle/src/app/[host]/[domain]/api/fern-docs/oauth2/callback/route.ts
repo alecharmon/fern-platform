@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { SignJWT } from "jose";
 
-import { type FernUser, OAuth2TokenSchema } from "@fern-api/docs-auth";
+import { type FernUser, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
 import {
   getAllowedRedirectUrls,
   getDocsDomainEdge,
@@ -127,8 +127,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const data = await response.json();
 
-    console.log(`Detected data payload with fields: ${Object.keys(data)}`);
-
     // we currently assume the token is for bearer auth
     const bearer_token = data.access_token;
     const refresh_token = data.refresh_token;
@@ -145,17 +143,17 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     };
 
     try {
-      console.log("Attempting to parse data...");
-      const parsedToken = OAuth2TokenSchema.safeParse(data);
+      console.log("Attempting to safely parse data...");
+      const parsedToken = OAuthTokenResponseSchema.safeParse(data);
 
       if (parsedToken.data) {
         console.log("Successfully parsed data.");
 
-        if (parsedToken.data.roles) {
-          console.log("Setting roles:", parsedToken.data.roles);
-          const roles = Array.isArray(parsedToken.data.roles)
-            ? parsedToken.data.roles
-            : parsedToken.data.roles.split(" ");
+        if (parsedToken.data.scope) {
+          console.log("Found scope:", parsedToken.data.scope);
+          const roles = parsedToken.data.scope
+            .split(" ")
+            .filter((scope) => scope.startsWith("fern:"));
 
           payload = {
             playground: {
