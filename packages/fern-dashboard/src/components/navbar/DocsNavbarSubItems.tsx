@@ -1,5 +1,3 @@
-"use client";
-
 import { FdrAPI } from "@fern-api/fdr-sdk";
 
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
@@ -16,11 +14,13 @@ export function DocsNavbarSubItems({
     <>
       {docsSites.map((docsSite) => {
         const url = getDocsSiteUrl(docsSite);
+        const docsUrlParam = constructDocsUrlParam(url);
         return (
           <NavbarSubItem
             key={url}
             title={url}
-            href={`/docs/${constructDocsUrlParam(url)}`}
+            href={`/docs/${docsUrlParam}`}
+            docsUrlParam={docsUrlParam}
           />
         );
       })}

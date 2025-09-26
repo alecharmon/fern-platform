@@ -12,14 +12,20 @@ export declare namespace NavbarSubItem {
     title: string;
     icon?: React.JSX.Element;
     href: `/${string}`;
+    docsUrlParam: string;
   }
 }
 
-export const NavbarSubItem = ({ title, icon, href }: NavbarSubItem.Props) => {
+export const NavbarSubItem = ({
+  title,
+  icon,
+  href,
+  docsUrlParam,
+}: NavbarSubItem.Props) => {
   const orgName = useOrgNameFromPathname();
   const params = useParams();
   const isSelected = params.docsUrl
-    ? href.endsWith(String(params.docsUrl))
+    ? docsUrlParam === String(params.docsUrl)
     : false;
 
   const className = cn(
