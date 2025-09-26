@@ -38,16 +38,6 @@
       @apply bg-(color:--grayscale-4) hover:bg-(color:--grayscale-5);
     }
   }
-  .ProseMirror {
-    ul {
-      list-style-type: none;
-      @apply pl-1;
-    }
-    li ::before {
-      content: "-   ";
-      color: var(--grayscale-11);
-    }
-  }
 
   /* TipTap Editor - Inherit colors from parent elements */
   .prose-inherit-colors {
