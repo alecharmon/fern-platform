@@ -5,6 +5,7 @@ from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
 
 from src.fai.utils.as_dict import as_dict
+from src.fai.utils.chat.filters import build_filters
 from src.fai.utils.turbopuffer.namespace import (
     get_query_index_name,
     get_tpuf_namespace,
@@ -14,7 +15,7 @@ from src.settings import (
     VARIABLES,
 )
 
-DOCUMENT_ATTRIBUTES = ["document", "chunk", "url", "version", "title", "keywords"]
+DOCUMENT_ATTRIBUTES = ["document", "url", "version", "title", "keywords"]
 
 
 class TPUFRow:
@@ -26,10 +27,6 @@ class TPUFRow:
     @property
     def document(self) -> str | None:
         return self.attributes.get("document")
-
-    @property
-    def chunk(self) -> str | None:
-        return self.attributes.get("chunk")
 
     @property
     def url(self) -> str | None:
@@ -103,32 +100,6 @@ def _rrf(bm25: list[TPUFRow], vector: list[TPUFRow], k: int = 60) -> list[TPUFRo
     return results
 
 
-def _build_filters(
-    filters: list[dict[str, str]] | None,
-    document_ids_to_ignore: list[str] | None,
-    urls_to_ignore: list[str] | None,
-) -> Any | None:
-    """Build TPUF-compatible filter expression mirroring the TS logic."""
-    document_ids_to_ignore = document_ids_to_ignore or []
-    urls_to_ignore = urls_to_ignore or []
-    filters = filters or []
-
-    doc_id_filters: list[Any] = [["id", "NotEq", _id] for _id in document_ids_to_ignore]
-    url_filters: list[Any] = [["url", "NotEq", u] for u in urls_to_ignore]
-
-    version_filters = [f for f in filters if f.get("facet") == "version.title"]
-    version_conds: list[Any] = [["version", "Eq", f["value"]] for f in version_filters if "value" in f]
-
-    if version_conds:
-        return ["And", [*version_conds, *doc_id_filters, *url_filters]]
-    elif doc_id_filters or url_filters:
-        all_filters = [*doc_id_filters, *url_filters]
-        return all_filters[0] if len(all_filters) == 1 else ["And", all_filters]
-
-    else:
-        return None
-
-
 async def v2_retrieve(
     query: str,
     domain: str,
@@ -136,8 +107,7 @@ async def v2_retrieve(
     top_k: int = 5,
     mode: str = "hybrid",  # "semantic" | "bm25" | "hybrid"
     filters: list[dict[str, str]] | None = None,
-    document_ids_to_ignore: list[str] | None = None,
-    urls_to_ignore: list[str] | None = None,
+    exploded_roles: list[str] | None = None,
 ) -> list[TPUFRow]:
     async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
         async with AsyncTurbopuffer(
@@ -148,7 +118,10 @@ async def v2_retrieve(
             namespace = get_tpuf_namespace(domain, query_index_name)
             tpuf_ns = tpuf_client.namespace(namespace)
 
-            query_filters = _build_filters(filters, document_ids_to_ignore, urls_to_ignore)
+            query_filters = build_filters(
+                filters=filters,
+                exploded_roles=exploded_roles,
+            )
 
             semantic_rows: list[TPUFRow] = []
             bm25_rows: list[TPUFRow] = []

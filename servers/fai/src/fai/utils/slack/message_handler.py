@@ -16,13 +16,11 @@ from src.fai.models.db.slack_integration_db import SlackIntegrationDb
 from src.fai.models.utils.chat import ChatMode
 from src.fai.utils.chat.response.anthropic import get_anthropic_response
 from src.fai.utils.chat.retrieve.v2_retrieve import v2_retrieve
+from src.fai.utils.chat.roles import create_delimited_role_combinations
 from src.fai.utils.slack.client import add_reaction
 from src.settings import LOGGER
 
-SLACK_FOLLOW_UP_MESSAGE = """\
----
-_If you have follow-up questions, please @Ask Fern again in this thread._\
-"""
+SLACK_FOLLOW_UP_MESSAGE = "---\n_If you have follow-up questions, please @Ask Fern again in this thread._"
 
 
 @dataclass
@@ -135,6 +133,7 @@ async def process_message(
     model: str = "claude-4-sonnet-20250514",
     top_k: int = 5,
     conversation_id: str | None = None,
+    allowed_roles: list[str] | None = None,
 ) -> tuple[str, str | None]:
     if bot_user_id and text:
         text = text.replace(f"<@{bot_user_id}>", "").strip()
@@ -148,10 +147,17 @@ async def process_message(
 
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
-        query_results = await v2_retrieve(text, domain, top_k=top_k)
-        rag_records = [
-            result.chunk or result.document or "" for result in query_results if result.chunk or result.document
-        ]
+
+        exploded_roles = None
+        if allowed_roles:
+            roles_with_everyone = allowed_roles.copy()
+            if "everyone" not in roles_with_everyone:
+                roles_with_everyone.append("everyone")
+            exploded_roles = create_delimited_role_combinations(roles_with_everyone)
+            LOGGER.info(f"Using exploded roles for filtering: {exploded_roles}")
+
+        query_results = await v2_retrieve(text, domain, top_k=top_k, exploded_roles=exploded_roles)
+        rag_records = [result.document for result in query_results if result.document]
 
         LOGGER.info(f"Retrieved {len(rag_records)} documents")
 
@@ -175,7 +181,8 @@ async def process_message(
 
         if output_turns and len(output_turns) > 0:
             response = "\n\n".join([turn["text"] for turn in output_turns])
-            response = f"{response}\n\n{SLACK_FOLLOW_UP_MESSAGE}"
+            if "@Ask Fern again in this thread" not in response:
+                response = f"{response}\n\n{SLACK_FOLLOW_UP_MESSAGE}"
             if conversation_id:
                 await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="SLACK")
             return response, query_id
@@ -284,6 +291,7 @@ async def handle_slack_message(
         integration.slack_bot_user_id if context.is_app_mention else None,
         message_history,
         conversation_id=conversation_id,
+        allowed_roles=roles_to_use if roles_to_use else None,
     )
 
     return SlackMessageResponse(

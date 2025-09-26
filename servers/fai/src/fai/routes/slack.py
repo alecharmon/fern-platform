@@ -180,6 +180,16 @@ async def handle_slack_events(request: Request) -> JSONResponse:
                     LOGGER.info(f"Skipping bot message: bot_id={event.get('bot_id')}")
                     return JSONResponse(content={"status": "ok"})
 
+                text = event.get("text", "")
+                if text:
+                    integration = await get_slack_integration(team_id)
+                    if integration and integration.slack_bot_user_id:
+                        if f"<@{integration.slack_bot_user_id}>" in text:
+                            LOGGER.info(
+                                "Skipping message event with bot mention (will be handled by app_mention event)"
+                            )
+                            return JSONResponse(content={"status": "ok"})
+
                 if message_ts:
                     await mark_message_processed(team_id, message_ts)
                 await handle_message(event, team_id)
@@ -862,16 +872,6 @@ async def generate_and_update_modal(
 async def handle_configure_command(
     text: str, team_id: str, channel_id: str, user_id: str, command: str
 ) -> JSONResponse:
-    """
-    Handle the /configure or /configure-dev command for updating channel settings.
-
-    Usage examples:
-    - /configure roles role1,role2,role3
-    - /configure respond_to all
-    - /configure respond_to mentions_only
-    - /configure show
-    - /configure help
-    """
     try:
         parts = text.split()
 

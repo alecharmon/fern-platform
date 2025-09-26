@@ -2,6 +2,7 @@ from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
 from turbopuffer.types.row import Row
 
+from src.fai.utils.chat.filters import build_filters
 from src.fai.utils.turbopuffer.namespace import (
     get_query_index_name,
     get_tpuf_namespace,
@@ -12,7 +13,14 @@ from src.settings import (
 )
 
 
-async def v1_retrieve(query: str, domain: str) -> list[Row]:
+async def v1_retrieve(
+    query: str,
+    domain: str,
+    *,
+    top_k: int = 5,
+    filters: list[dict[str, str]] | None = None,
+    exploded_roles: list[str] | None = None,
+) -> list[Row]:
     async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
         async with AsyncTurbopuffer(
             region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
@@ -25,9 +33,16 @@ async def v1_retrieve(query: str, domain: str) -> list[Row]:
             query_index_name = get_query_index_name()
             namespace = get_tpuf_namespace(domain, query_index_name)
             tpuf_ns = tpuf_client.namespace(namespace)
+
+            query_filters = build_filters(
+                filters=filters,
+                exploded_roles=exploded_roles,
+            )
+
             query_results = await tpuf_ns.query(
                 rank_by=("vector", "ANN", vector.data[0].embedding),
-                top_k=5,
-                include_attributes=["document", "url"],
+                top_k=top_k,
+                filters=query_filters,
+                include_attributes=["document", "url", "version", "product", "roles"],
             )
             return query_results.rows
