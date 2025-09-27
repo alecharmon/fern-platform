@@ -31,10 +31,10 @@ export const AskAiContextPill = ({
       onClick={handleClick}
       title={`Click to open: ${pageContext.title}`}
     >
-      <div className="flex flex-row items-center gap-[4px]">
+      <div className="flex w-full flex-row items-center justify-between">
         <BookOpen size={16} color="var(--accent-contrast)" />
         <div
-          className="flex items-center hover:underline"
+          className="mx-2 flex min-w-0 flex-1 items-center overflow-hidden hover:underline"
           style={{
             fontSize: "12px",
             fontStyle: "normal",
@@ -43,22 +43,22 @@ export const AskAiContextPill = ({
             color: "var(--accent-contrast)",
           }}
         >
-          {pageContext.title}
+          <span className="truncate">{pageContext.title}</span>
         </div>
+        {onRemove && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="hover:bg-(color:--accent-a20) rounded p-1 transition-colors hover:cursor-pointer"
+            title="Remove context"
+          >
+            <X size={16} color="var(--accent-contrast)" />
+          </button>
+        )}
       </div>
-      {onRemove && (
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onRemove();
-          }}
-          className="hover:bg-(color:--accent-a20) rounded p-1 transition-colors hover:cursor-pointer"
-          title="Remove context"
-        >
-          <X size={16} color="var(--accent-contrast)" />
-        </button>
-      )}
     </div>
   );
 };
