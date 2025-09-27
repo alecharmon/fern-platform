@@ -50,7 +50,9 @@ export const WebsocketMessageAccordionItem: FC<
           </span>
         ) : null}
         <span className="fern-web-socket-trigger-data">
-          {JSON.stringify(message.data)}
+          {message.data?.type === "sse"
+            ? `event: ${message.data.event}\ndata: ${JSON.stringify(message.data.data, null, 2)}`
+            : JSON.stringify(message.data?.data, null, 2)}
         </span>
         {message.displayName != null ||
         (message.type != null && message.type !== "") ? (
@@ -68,7 +70,11 @@ export const WebsocketMessageAccordionItem: FC<
 
         <CopyToClipboardButton
           className="fern-web-socket-copy"
-          content={() => JSON.stringify(message.data, null, 2)}
+          content={() =>
+            message.data?.type === "sse"
+              ? `event: ${message.data.event}\ndata: ${JSON.stringify(message.data.data, null, 2)}`
+              : JSON.stringify(message.data?.data, null, 2)
+          }
           onClick={(e) => e.stopPropagation()}
         />
       </Accordion.Trigger>
@@ -79,7 +85,11 @@ export const WebsocketMessageAccordionItem: FC<
         <div className="group/cb-container relative">
           <FernSyntaxHighlighter
             className="w-0 min-w-full overflow-y-auto"
-            code={JSON.stringify(message.data, null, 2)}
+            code={
+              message.data?.type === "sse"
+                ? `event: ${message.data.event}\ndata: ${JSON.stringify(message.data.data, null, 2)}`
+                : JSON.stringify(message.data?.data, null, 2)
+            }
             language="json"
             fontSize="sm"
           />

@@ -74,7 +74,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({
       setConnectedState("closed");
       pushMessage({
         type: "end",
-        data: "END OF SAMPLE SESSION",
+        data: {
+          type: "json",
+          data: "END OF SAMPLE SESSION",
+        },
         origin: "endSample",
         displayName: undefined,
       });
@@ -187,7 +190,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({
         socket.current.send(JSON.stringify(data));
         pushMessage({
           type: message.type,
-          data,
+          data: {
+            type: "json",
+            data,
+          },
           origin: "client",
           displayName: message.displayName,
         });

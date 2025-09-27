@@ -13,8 +13,19 @@ export interface WebSocketMessage {
   type: string | undefined;
   origin: APIV1Read.WebSocketMessageOrigin | "endSample" | undefined;
   displayName: string | undefined;
-  data: unknown | undefined;
+  data: JsonData | SSEData | undefined;
   // shape: APIV1Read.WebSocketMessageBodyShape;
+}
+
+export interface JsonData {
+  type: "json";
+  data: unknown;
+}
+
+export interface SSEData {
+  type: "sse";
+  event: string;
+  data: unknown;
 }
 
 export interface WebSocketMessagesProps {

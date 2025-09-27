@@ -77,7 +77,10 @@ export async function WebSocketContent({
       );
       return {
         type: message.type,
-        data: message.body,
+        data: {
+          type: "json",
+          data: message.body,
+        },
         origin: messageDefinition?.origin,
         displayName: messageDefinition?.displayName,
       };

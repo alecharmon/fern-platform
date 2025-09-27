@@ -272,7 +272,10 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<
                     type: undefined,
                     origin: undefined,
                     displayName: undefined,
-                    data: event,
+                    data: {
+                      type: "json",
+                      data: event,
+                    },
                   }))}
                 />
               </FernScrollArea>
@@ -286,7 +289,11 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<
                     type: event,
                     origin: undefined,
                     displayName: undefined,
-                    data,
+                    data: {
+                      type: "sse",
+                      event,
+                      data,
+                    },
                   }))}
                 />
               </FernScrollArea>
