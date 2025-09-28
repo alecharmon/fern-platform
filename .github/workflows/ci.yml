@@ -80,20 +80,6 @@ jobs:
           cd servers/fai
           poetry run mypy .
 
-  visual-testing:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: Build components
-        run: pnpm turbo --filter=@fern-docs/components compile
-
   fern-generate:
     runs-on: ubuntu-latest
     steps:

@@ -398,3 +398,12 @@ types:
     properties:
       name: string
       fontFile: rootCommons.FileId
+
+  PageActionsConfig:
+    properties:
+      copyPage: optional<boolean>
+      viewAsMarkdown: optional<boolean>
+      openAi: optional<boolean>
+      claude: optional<boolean>
+      cursor: optional<boolean>
+      vscode: optional<boolean>

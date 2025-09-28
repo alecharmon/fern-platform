@@ -55,3 +55,4 @@ export * from "./ColorUnthemedConfig";
 export * from "./ColorThemedConfig";
 export * from "./DocsTypographyConfig";
 export * from "./FontConfig";
+export * from "./PageActionsConfig";

@@ -87,6 +87,9 @@ types:
       # ai chat
       aiChatConfig: optional<commons.AIChatConfig>
 
+      # page actions
+      pageActions: optional<commons.PageActionsConfig>
+
       # deprecated
       logo:
         type: optional<rootCommons.FileId>

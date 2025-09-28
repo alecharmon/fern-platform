@@ -125,6 +125,9 @@ types:
       # ai chat
       aiChatConfig: optional<commons.AIChatConfig>
 
+      # page actions
+      pageActions: optional<commons.PageActionsConfig>
+
       # deprecated
       # backgroundImage:
       #   type: optional<rootCommons.FileId>

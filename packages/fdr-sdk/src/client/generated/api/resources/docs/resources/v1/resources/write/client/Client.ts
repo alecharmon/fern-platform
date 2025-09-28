@@ -145,6 +145,7 @@ export class Write {
      *                 css: undefined,
      *                 js: undefined,
      *                 aiChatConfig: undefined,
+     *                 pageActions: undefined,
      *                 backgroundImage: undefined,
      *                 logoV2: undefined,
      *                 logo: undefined,

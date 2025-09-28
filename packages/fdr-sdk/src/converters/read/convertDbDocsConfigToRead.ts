@@ -46,6 +46,7 @@ export function convertDbDocsConfigToRead({
     analyticsConfig: dbShape.analyticsConfig,
     announcement: dbShape.announcement,
     aiChatConfig: dbShape.aiChatConfig,
+    pageActions: dbShape.pageActions,
   };
 }
 

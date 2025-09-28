@@ -40,6 +40,7 @@ export class DefinitionObjectFactory {
         css: undefined,
         js: undefined,
         aiChatConfig: undefined,
+        pageActions: undefined,
       },
       jsFiles: undefined,
       id: undefined,

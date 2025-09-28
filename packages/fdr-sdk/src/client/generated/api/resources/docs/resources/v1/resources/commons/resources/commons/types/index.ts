@@ -55,3 +55,4 @@ export * from "./ColorUnthemedConfig.js";
 export * from "./ColorThemedConfig.js";
 export * from "./DocsTypographyConfig.js";
 export * from "./FontConfig.js";
+export * from "./PageActionsConfig.js";
