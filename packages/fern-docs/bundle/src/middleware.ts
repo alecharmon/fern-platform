@@ -189,6 +189,13 @@ export const middleware: NextMiddleware = async (request) => {
   }
 
   /**
+   * Rewrite mcp
+   */
+  if (pathname.endsWith("/mcp")) {
+    return rewrite(withDomain("/api/fern-docs/mcp"));
+  }
+
+  /**
    * Rewrite llms-full.txt
    */
   if (pathname.endsWith("/llms-full.txt")) {
