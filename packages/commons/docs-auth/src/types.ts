@@ -220,7 +220,7 @@ export const OAuthTokenResponseSchema = z.object({
   access_token: z.string(),
   expires_in: z.number(),
   refresh_token: z.string().optional(),
-  scope: z.string(),
+  scope: z.string().optional(),
   token_type: z.string(),
 });
 

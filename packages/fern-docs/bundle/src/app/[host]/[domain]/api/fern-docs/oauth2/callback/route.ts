@@ -151,8 +151,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       };
     }
 
-    // fern:role scope indicates we should parse for user roles
-    if (parsedToken.data.scope.includes("fern:role")) {
+    // if all pages are allowlisted, we do not need to parse for roles
+    if (!config.allowlist?.includes("/(.*)")) {
       const roles = extractRolesFromJwt(parsedToken.data.access_token);
       if (roles) {
         payload.roles = roles;
