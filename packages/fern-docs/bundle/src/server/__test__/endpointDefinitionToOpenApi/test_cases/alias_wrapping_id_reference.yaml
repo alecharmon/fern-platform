@@ -54,15 +54,18 @@ output:
                 type: object
                 properties:
                   user:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      email:
-                        type: string
-                    required:
-                      - name
-                      - email
-                    description: User object
+                    $ref: "#/components/schemas/User"
                 required:
                   - user
+  components:
+    schemas:
+      User:
+        type: object
+        properties:
+          name:
+            type: string
+          email:
+            type: string
+        required:
+          - name
+          - email

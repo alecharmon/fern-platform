@@ -1,48 +1,49 @@
 endpoint_input:
-  id: alias-endpoint
+  id: circular-reference-endpoint
   method: POST
   path:
     - type: literal
-      value: /api/alias
+      value: /api/tree
   requests:
     - contentType: application/json
       body:
         type: object
         extends: []
         properties:
-          - key: user
+          - key: tree
             valueShape:
-              type: alias
-              value:
-                type: id
-                id: User
+              type: id
+              id: TreeNode
 endpoint_definitions:
   types:
-    User:
-      description: User object
+    TreeNode:
+      description: A tree node that can have child nodes
       shape:
         type: object
         properties:
-          - key: name
+          - key: value
             valueShape:
               type: primitive
               value:
                 type: string
-          - key: email
+          - key: children
             valueShape:
-              type: primitive
-              value:
-                type: string
+              type: optional
+              shape:
+                type: list
+                itemShape:
+                  type: id
+                  id: TreeNode
 output:
   openapi: 3.1.1
   info:
     title: API
-    version: alias-endpoint
+    version: circular-reference-endpoint
   paths:
-    /api/alias:
+    /api/tree:
       post:
-        operationId: alias-endpoint
-        summary: alias-endpoint
+        operationId: circular-reference-endpoint
+        summary: circular-reference-endpoint
         parameters: []
         responses:
           "200":
@@ -53,19 +54,20 @@ output:
               schema:
                 type: object
                 properties:
-                  user:
-                    $ref: "#/components/schemas/User"
+                  tree:
+                    $ref: "#/components/schemas/TreeNode"
                 required:
-                  - user
+                  - tree
   components:
     schemas:
-      User:
+      TreeNode:
         type: object
         properties:
-          name:
+          value:
             type: string
-          email:
-            type: string
+          children:
+            type: array
+            items:
+              $ref: "#/components/schemas/TreeNode"
         required:
-          - name
-          - email
+          - value

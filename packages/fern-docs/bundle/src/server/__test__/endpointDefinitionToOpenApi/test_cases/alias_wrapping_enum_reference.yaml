@@ -47,11 +47,14 @@ output:
                 type: object
                 properties:
                   status:
-                    type: string
-                    enum:
-                      - pending
-                      - approved
-                      - rejected
-                    description: Status enumeration
+                    $ref: "#/components/schemas/StatusEnum"
                 required:
                   - status
+  components:
+    schemas:
+      StatusEnum:
+        type: string
+        enum:
+          - pending
+          - approved
+          - rejected

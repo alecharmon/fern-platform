@@ -41,6 +41,8 @@ export class OpenApiYamlFormatter {
           : undefined,
       globalHeaders: apiDefinition?.globalHeaders,
       apiDefinition,
+      components: {},
+      visitedTypes: new Set<string>(),
     };
 
     const openApiSpec = generateOpenApiFromEndpointContext(
@@ -59,12 +61,17 @@ export interface EndpointContext {
   auth?: ApiDefinition.AuthScheme;
   globalHeaders?: ApiDefinition.ObjectProperty[];
   apiDefinition?: ApiDefinition.ApiDefinition;
+  components: Record<
+    string,
+    OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
+  >;
+  visitedTypes: Set<string>;
 }
 
 export function createOpenApiParameter(
   property: ApiDefinition.ObjectProperty,
   location: "query" | "header" | "path",
-  apiDefinition?: ApiDefinition.ApiDefinition
+  context: EndpointContext
 ): OpenAPIV3_1.ParameterObject {
   return {
     name: property.key,
@@ -73,14 +80,14 @@ export function createOpenApiParameter(
     required: !isOptional(property.valueShape),
     schema: convertToOpenApiSchema(
       property.valueShape,
-      apiDefinition
+      context
     ) as ParameterCompatibleSchema,
   };
 }
 
 export function createAuthHeaderParameter(
   auth: ApiDefinition.AuthScheme,
-  apiDefinition?: ApiDefinition.ApiDefinition
+  context: EndpointContext
 ): OpenAPIV3_1.ParameterObject | null {
   const stringShape: ApiDefinition.TypeShape = {
     type: "alias",
@@ -108,7 +115,7 @@ export function createAuthHeaderParameter(
         required: true,
         schema: convertToOpenApiSchema(
           stringShape,
-          apiDefinition
+          context
         ) as ParameterCompatibleSchema,
       };
     case "bearerAuth":
@@ -121,7 +128,7 @@ export function createAuthHeaderParameter(
         required: true,
         schema: convertToOpenApiSchema(
           stringShape,
-          apiDefinition
+          context
         ) as ParameterCompatibleSchema,
       };
     case "header":
@@ -135,7 +142,7 @@ export function createAuthHeaderParameter(
         required: true,
         schema: convertToOpenApiSchema(
           stringShape,
-          apiDefinition
+          context
         ) as ParameterCompatibleSchema,
       };
     case "oAuth":
@@ -152,7 +159,7 @@ export function createAuthHeaderParameter(
             required: true,
             schema: convertToOpenApiSchema(
               stringShape,
-              apiDefinition
+              context
             ) as ParameterCompatibleSchema,
           };
         }
@@ -164,7 +171,7 @@ export function createAuthHeaderParameter(
         required: true,
         schema: convertToOpenApiSchema(
           stringShape,
-          apiDefinition
+          context
         ) as ParameterCompatibleSchema,
       };
     default:
@@ -176,19 +183,19 @@ function convertBodyToOpenApiContent(
   body:
     | ApiDefinition.HttpRequestBodyShape
     | ApiDefinition.HttpResponseBodyShape,
-  apiDefinition?: ApiDefinition.ApiDefinition
+  context: EndpointContext
 ): Record<string, OpenAPIV3_1.MediaTypeObject> {
   const content: Record<string, OpenAPIV3_1.MediaTypeObject> = {};
 
   switch (body.type) {
     case "object":
       content["application/json"] = {
-        schema: convertToOpenApiSchema(body, apiDefinition),
+        schema: convertToOpenApiSchema(body, context),
       };
       break;
     case "alias":
       content["application/json"] = {
-        schema: convertToOpenApiSchema(body.value, apiDefinition),
+        schema: convertToOpenApiSchema(body.value, context),
       };
       break;
     case "bytes":
@@ -210,7 +217,7 @@ function convertBodyToOpenApiContent(
             if ("key" in field && "valueShape" in field) {
               acc[field.key] = convertToOpenApiSchema(
                 field.valueShape,
-                apiDefinition
+                context
               );
             }
             return acc;
@@ -231,14 +238,14 @@ function convertBodyToOpenApiContent(
     case "stream": {
       let streamSchema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject;
       if (body.shape) {
-        streamSchema = convertToOpenApiSchema(body.shape, apiDefinition);
+        streamSchema = convertToOpenApiSchema(body.shape, context);
       } else {
         // Check if this stream body has a payload property (from legacy format)
         const bodyWithPayload = body as { payload?: ApiShapeTypes };
         if (bodyWithPayload.payload) {
           streamSchema = convertToOpenApiSchema(
             bodyWithPayload.payload,
-            apiDefinition
+            context
           );
         } else {
           streamSchema = {
@@ -310,7 +317,7 @@ function buildPropertiesAndRequired(
   shape:
     | ApiDefinition.TypeShape.Object_
     | ApiDefinition.TypeShape.DiscriminatedUnion,
-  apiDefinition?: ApiDefinition.ApiDefinition,
+  context: EndpointContext,
   initialProperties: Record<
     string,
     OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
@@ -331,15 +338,16 @@ function buildPropertiesAndRequired(
     shape.type === "object" &&
     shape.extends &&
     shape.extends.length > 0 &&
-    apiDefinition?.types
+    context.apiDefinition?.types
   ) {
     shape.extends.forEach((extendedTypeName: string) => {
       const extendedType =
-        apiDefinition.types[extendedTypeName as ApiDefinition.TypeId];
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        context.apiDefinition!.types[extendedTypeName as ApiDefinition.TypeId];
       if (extendedType?.shape) {
         const extendedSchema = convertToOpenApiSchema(
           extendedType.shape,
-          apiDefinition
+          context
         );
         if ("properties" in extendedSchema && extendedSchema.properties) {
           // Merge extended properties (current object properties will override these)
@@ -355,7 +363,7 @@ function buildPropertiesAndRequired(
   // Then, add/override with current object's properties
   if (shape.type === "object" && shape.properties) {
     shape.properties.forEach((prop: ApiDefinition.ObjectProperty) => {
-      const propSchema = convertToOpenApiSchema(prop.valueShape, apiDefinition);
+      const propSchema = convertToOpenApiSchema(prop.valueShape, context);
       if (prop.description && "description" in propSchema) {
         propSchema.description = prop.description;
       }
@@ -376,12 +384,9 @@ function buildPropertiesAndRequired(
 
 function convertObjectToSchema(
   shape: ApiDefinition.TypeShape.Object_,
-  apiDefinition?: ApiDefinition.ApiDefinition
+  context: EndpointContext
 ): OpenAPIV3_1.SchemaObject {
-  const { properties, required } = buildPropertiesAndRequired(
-    shape,
-    apiDefinition
-  );
+  const { properties, required } = buildPropertiesAndRequired(shape, context);
 
   const result: OpenAPIV3_1.SchemaObject = { type: "object", properties };
   if (required.length > 0) {
@@ -392,7 +397,7 @@ function convertObjectToSchema(
 
 function convertDiscriminatedUnionToSchema(
   shape: ApiDefinition.TypeShape.DiscriminatedUnion,
-  apiDefinition?: ApiDefinition.ApiDefinition
+  context: EndpointContext
 ): OpenAPIV3_1.SchemaObject {
   const variants = shape.variants;
   if (!variants || variants.length === 0) {
@@ -420,17 +425,18 @@ function convertDiscriminatedUnionToSchema(
       if (
         variant.extends &&
         variant.extends.length > 0 &&
-        apiDefinition?.types
+        context.apiDefinition?.types
       ) {
         variant.extends.forEach((extendedTypeName: string) => {
           const extendedType =
-            apiDefinition.types[
-              extendedTypeName as keyof typeof apiDefinition.types
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            context.apiDefinition!.types[
+              extendedTypeName as keyof typeof context.apiDefinition.types
             ];
           if (extendedType?.shape) {
             const extendedSchema = convertToOpenApiSchema(
               extendedType.shape,
-              apiDefinition
+              context
             );
             if ("properties" in extendedSchema && extendedSchema.properties) {
               Object.assign(variantProperties, extendedSchema.properties);
@@ -451,10 +457,7 @@ function convertDiscriminatedUnionToSchema(
       // Then, add/override with variant's own properties
       if (variant.properties) {
         variant.properties.forEach((prop: ApiDefinition.ObjectProperty) => {
-          const propSchema = convertToOpenApiSchema(
-            prop.valueShape,
-            apiDefinition
-          );
+          const propSchema = convertToOpenApiSchema(prop.valueShape, context);
           if (prop.description && "description" in propSchema) {
             propSchema.description = prop.description;
           }
@@ -495,7 +498,7 @@ function convertDiscriminatedUnionToSchema(
  */
 function convertToOpenApiSchema(
   shape: ApiShapeTypes,
-  apiDefinition?: ApiDefinition.ApiDefinition
+  context: EndpointContext
 ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject {
   if (!shape) {
     return {} as OpenAPIV3_1.SchemaObject;
@@ -505,35 +508,32 @@ function convertToOpenApiSchema(
     case "primitive":
       return convertPrimitiveToSchema(shape.value);
     case "alias":
-      return convertToOpenApiSchema(shape.value, apiDefinition);
+      return convertToOpenApiSchema(shape.value, context);
     case "object":
-      return convertObjectToSchema(shape, apiDefinition);
+      return convertObjectToSchema(shape, context);
     case "list":
       return {
         type: "array",
-        items: convertToOpenApiSchema(shape.itemShape, apiDefinition),
+        items: convertToOpenApiSchema(shape.itemShape, context),
       };
     case "set":
       // Sets in OpenAPI are represented as arrays with uniqueItems: true
       return {
         type: "array",
         uniqueItems: true,
-        items: convertToOpenApiSchema(shape.itemShape, apiDefinition),
+        items: convertToOpenApiSchema(shape.itemShape, context),
       };
     case "map": {
-      const valueSchema = convertToOpenApiSchema(
-        shape.valueShape,
-        apiDefinition
-      );
+      const valueSchema = convertToOpenApiSchema(shape.valueShape, context);
       return {
         type: "object",
         additionalProperties: valueSchema,
       };
     }
     case "optional":
-      return convertToOpenApiSchema(shape.shape, apiDefinition);
+      return convertToOpenApiSchema(shape.shape, context);
     case "nullable": {
-      const baseSchema = convertToOpenApiSchema(shape.shape, apiDefinition);
+      const baseSchema = convertToOpenApiSchema(shape.shape, context);
       // In OpenAPI 3.1, we can use type arrays for nullable types
       const schemaObj = baseSchema as OpenAPIV3_1.SchemaObject;
       if (schemaObj.type && typeof schemaObj.type === "string") {
@@ -564,7 +564,7 @@ function convertToOpenApiSchema(
             ) =>
               convertToOpenApiSchema(
                 "shape" in variant ? variant.shape : variant,
-                apiDefinition
+                context
               )
           ),
         } as OpenAPIV3_1.SchemaObject;
@@ -572,31 +572,43 @@ function convertToOpenApiSchema(
       return {} as OpenAPIV3_1.SchemaObject;
     }
     case "discriminatedUnion":
-      return convertDiscriminatedUnionToSchema(shape, apiDefinition);
+      return convertDiscriminatedUnionToSchema(shape, context);
     case "id":
-      if (apiDefinition?.types?.[shape.id]) {
-        const typeDef = apiDefinition.types[shape.id];
-        if (typeDef) {
-          const resolvedSchema = convertToOpenApiSchema(
-            typeDef.shape,
-            apiDefinition
-          );
-          if (typeDef.description) {
-            // It's a schema object, we can safely add description
+      if (context.apiDefinition?.types?.[shape.id]) {
+        const typeDef = context.apiDefinition.types[shape.id];
+        if (!typeDef) {
+          return {
+            description: `Reference to ${shape.id}`,
+          } as OpenAPIV3_1.SchemaObject;
+        }
+
+        if (context.visitedTypes.has(shape.id)) {
+          return { $ref: `#/components/schemas/${shape.id}` };
+        }
+
+        context.visitedTypes.add(shape.id);
+
+        if (!context.components[shape.id]) {
+          const resolvedSchema = convertToOpenApiSchema(typeDef.shape, context);
+
+          if (typeDef.description && "description" in resolvedSchema) {
             const schemaObj = resolvedSchema as OpenAPIV3_1.SchemaObject;
             if (!schemaObj.description) {
               schemaObj.description = typeDef.description;
             }
           }
-          return resolvedSchema;
+
+          context.components[shape.id] = resolvedSchema;
         }
+
+        context.visitedTypes.delete(shape.id);
+
+        return { $ref: `#/components/schemas/${shape.id}` };
       }
-      // Frontend would show this as the shape.id or "any"
       return {
         description: `Reference to ${shape.id}`,
       } as OpenAPIV3_1.SchemaObject;
     case "unknown":
-      // Frontend shows this as "any"
       return {
         description: shape.displayName || "Any type",
       } as OpenAPIV3_1.SchemaObject;
@@ -622,13 +634,7 @@ export function generateOpenApiFromEndpointContext(
   path: string,
   method: string
 ): OpenAPIV3_1.Document {
-  const {
-    endpoint,
-    types: _types,
-    auth,
-    globalHeaders,
-    apiDefinition,
-  } = context;
+  const { endpoint, types: _types, auth, globalHeaders } = context;
 
   const openApiSpec: OpenAPIV3_1.Document = {
     openapi: "3.1.1",
@@ -662,7 +668,7 @@ export function generateOpenApiFromEndpointContext(
     endpoint.pathParameters.forEach((param: ApiDefinition.ObjectProperty) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       operation.parameters!.push(
-        createOpenApiParameter(param, "path", apiDefinition)
+        createOpenApiParameter(param, "path", context)
       );
     });
   }
@@ -671,14 +677,14 @@ export function generateOpenApiFromEndpointContext(
     endpoint.queryParameters.forEach((param: ApiDefinition.ObjectProperty) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       operation.parameters!.push(
-        createOpenApiParameter(param, "query", apiDefinition)
+        createOpenApiParameter(param, "query", context)
       );
     });
   }
 
   let authHeader: OpenAPIV3_1.ParameterObject | null = null;
   if (auth) {
-    authHeader = createAuthHeaderParameter(auth, apiDefinition);
+    authHeader = createAuthHeaderParameter(auth, context);
   }
 
   const headers = [
@@ -699,7 +705,7 @@ export function generateOpenApiFromEndpointContext(
         createOpenApiParameter(
           header as ApiDefinition.ObjectProperty,
           "header",
-          apiDefinition
+          context
         )
       );
     }
@@ -709,7 +715,7 @@ export function generateOpenApiFromEndpointContext(
     const request = endpoint.requests[0];
     operation.requestBody = {
       description: request.description,
-      content: convertBodyToOpenApiContent(request.body, apiDefinition),
+      content: convertBodyToOpenApiContent(request.body, context),
     };
   }
 
@@ -721,7 +727,7 @@ export function generateOpenApiFromEndpointContext(
     operation.responses![statusCode] = {
       description: response.description || `Response with status ${statusCode}`,
       content: response.body
-        ? convertBodyToOpenApiContent(response.body, apiDefinition)
+        ? convertBodyToOpenApiContent(response.body, context)
         : {},
     };
   } else {
@@ -744,6 +750,12 @@ export function generateOpenApiFromEndpointContext(
         };
       }
     );
+  }
+
+  if (Object.keys(context.components).length > 0) {
+    openApiSpec.components = {
+      schemas: context.components,
+    };
   }
 
   return openApiSpec;

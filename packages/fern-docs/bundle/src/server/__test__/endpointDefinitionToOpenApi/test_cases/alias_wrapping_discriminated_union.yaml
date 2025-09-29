@@ -55,22 +55,25 @@ output:
                 type: object
                 properties:
                   payment:
-                    oneOf:
-                      - type: object
-                        properties:
-                          type:
-                            type: string
-                            enum:
-                              - card
-                            description: "Discriminator value: card"
-                          card_number:
-                            type: string
-                        required:
-                          - type
-                          - card_number
-                        description: Credit Card variant
-                    discriminator:
-                      propertyName: type
-                    description: Payment method options
+                    $ref: "#/components/schemas/PaymentMethod"
                 required:
                   - payment
+  components:
+    schemas:
+      PaymentMethod:
+        oneOf:
+          - type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - card
+                description: "Discriminator value: card"
+              card_number:
+                type: string
+            required:
+              - type
+              - card_number
+            description: Credit Card variant
+        discriminator:
+          propertyName: type

@@ -1,0 +1,113 @@
+endpoint_input:
+  id: mutual-circular-reference-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/users
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: user
+            valueShape:
+              type: id
+              id: User
+endpoint_definitions:
+  types:
+    User:
+      description: A user with posts
+      shape:
+        type: object
+        properties:
+          - key: id
+            valueShape:
+              type: primitive
+              value:
+                type: string
+          - key: name
+            valueShape:
+              type: primitive
+              value:
+                type: string
+          - key: posts
+            valueShape:
+              type: optional
+              shape:
+                type: list
+                itemShape:
+                  type: id
+                  id: Post
+    Post:
+      description: A post with an author
+      shape:
+        type: object
+        properties:
+          - key: id
+            valueShape:
+              type: primitive
+              value:
+                type: string
+          - key: title
+            valueShape:
+              type: primitive
+              value:
+                type: string
+          - key: author
+            valueShape:
+              type: id
+              id: User
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: mutual-circular-reference-endpoint
+  paths:
+    /api/users:
+      post:
+        operationId: mutual-circular-reference-endpoint
+        summary: mutual-circular-reference-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+                required:
+                  - user
+  components:
+    schemas:
+      Post:
+        type: object
+        properties:
+          id:
+            type: string
+          title:
+            type: string
+          author:
+            $ref: "#/components/schemas/User"
+        required:
+          - id
+          - title
+          - author
+      User:
+        type: object
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+          posts:
+            type: array
+            items:
+              $ref: "#/components/schemas/Post"
+        required:
+          - id
+          - name

@@ -15,16 +15,19 @@ function generateEndpointSections(
 ): string[] {
   const sections: string[] = [];
 
-  // Use the new OpenApiYamlFormatter class
-  const formatter = new OpenApiYamlFormatter();
-  const openApiYaml = formatter.generateYamlFromEndpoint(
-    endpoint,
-    apiDefinition
-  );
+  try {
+    const formatter = new OpenApiYamlFormatter();
+    const openApiYaml = formatter.generateYamlFromEndpoint(
+      endpoint,
+      apiDefinition
+    );
 
-  sections.push(
-    `## OpenAPI Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``
-  );
+    sections.push(
+      `## OpenAPI Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``
+    );
+  } catch (error) {
+    console.error(JSON.stringify(error));
+  }
 
   return sections;
 }
