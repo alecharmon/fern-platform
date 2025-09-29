@@ -135,7 +135,7 @@ export const OpenWithCursor = async ({
 
   const mcpServerConfig = {
     name: decodedDomain,
-    url: `https://${decodedDomain}/mcp`,
+    url: `https://${decodedDomain}/_mcp/server`,
   };
   const mcpServerConfigBase64 = btoa(JSON.stringify(mcpServerConfig));
 
