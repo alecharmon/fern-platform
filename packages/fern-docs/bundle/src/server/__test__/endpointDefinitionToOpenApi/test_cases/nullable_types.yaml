@@ -1,0 +1,46 @@
+endpoint_input:
+  id: nullable-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/nullable
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: nullable_field
+            valueShape:
+              type: nullable
+              shape:
+                type: primitive
+                value:
+                  type: string
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: nullable-endpoint
+  paths:
+    /api/nullable:
+      post:
+        operationId: nullable-endpoint
+        summary: nullable-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nullable_field:
+                    type:
+                      - string
+                      - "null"
+                required:
+                  - nullable_field

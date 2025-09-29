@@ -1,0 +1,30 @@
+endpoint_input:
+  id: download-endpoint
+  method: GET
+  path:
+    - type: literal
+      value: /api/download
+  responses:
+    - statusCode: 200
+      body:
+        type: fileDownload
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: download-endpoint
+  paths:
+    /api/download:
+      get:
+        operationId: download-endpoint
+        summary: download-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Response with status 200
+            content:
+              application/octet-stream:
+                schema:
+                  type: string
+                  format: binary

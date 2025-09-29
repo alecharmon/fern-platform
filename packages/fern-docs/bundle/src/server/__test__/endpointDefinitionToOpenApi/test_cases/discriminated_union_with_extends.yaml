@@ -1,0 +1,130 @@
+endpoint_input:
+  id: test-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/events
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - valueShape:
+              type: discriminatedUnion
+              discriminant: event_type
+              variants:
+                - discriminantValue: message-start
+                  displayName: Message Start
+                  extends:
+                    - ChatMessageStartEvent
+                  properties: []
+                - discriminantValue: debug
+                  displayName: Debug Event
+                  extends:
+                    - ChatDebugEvent
+                  properties:
+                    - key: debug_info
+                      valueShape:
+                        type: primitive
+                        value:
+                          type: string
+endpoint_definitions:
+  types:
+    ChatMessageStartEvent:
+      name: ChatMessageStartEvent
+      shape:
+        type: object
+        extends:
+          - ChatStreamEvent
+        properties:
+          - key: message_id
+            valueShape:
+              type: primitive
+              value:
+                type: string
+    ChatStreamEvent:
+      name: ChatStreamEvent
+      shape:
+        type: object
+        extends: []
+        properties:
+          - key: event_timestamp
+            valueShape:
+              type: primitive
+              value:
+                type: string
+    ChatDebugEvent:
+      name: ChatDebugEvent
+      shape:
+        type: object
+        extends:
+          - ChatStreamEvent
+        properties:
+          - key: prompt
+            valueShape:
+              type: optional
+              shape:
+                type: primitive
+                value:
+                  type: string
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: test-endpoint
+  paths:
+    /api/events:
+      post:
+        operationId: test-endpoint
+        summary: test-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  undefined:
+                    oneOf:
+                      - type: object
+                        properties:
+                          event_type:
+                            type: string
+                            enum:
+                              - message-start
+                            description: "Discriminator value: message-start"
+                          event_timestamp:
+                            type: string
+                          message_id:
+                            type: string
+                        required:
+                          - event_type
+                          - event_timestamp
+                          - message_id
+                        description: Message Start variant
+                      - type: object
+                        properties:
+                          event_type:
+                            type: string
+                            enum:
+                              - debug
+                            description: "Discriminator value: debug"
+                          event_timestamp:
+                            type: string
+                          prompt:
+                            type: string
+                          debug_info:
+                            type: string
+                        required:
+                          - event_type
+                          - event_timestamp
+                          - debug_info
+                        description: Debug Event variant
+                    discriminator:
+                      propertyName: event_type
+                required:
+                  - null

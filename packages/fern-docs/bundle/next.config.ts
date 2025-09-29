@@ -110,6 +110,15 @@ const nextConfig: NextConfig = {
   },
   expireTime: 3600, // 1 hour
 
+  outputFileTracingExcludes: {
+    "**": [
+      ".next/cache/**/*",
+      ".next/trace.json",
+      "**/*.map",
+      "node_modules/**/*.d.ts",
+    ],
+  },
+
   // speed up build
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },

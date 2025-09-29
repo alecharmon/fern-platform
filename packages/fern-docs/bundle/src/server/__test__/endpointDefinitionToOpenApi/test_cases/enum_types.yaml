@@ -1,0 +1,48 @@
+endpoint_input:
+  id: enum-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/enum
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: status
+            valueShape:
+              type: enum
+              values:
+                - pending
+                - approved
+                - rejected
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: enum-endpoint
+  paths:
+    /api/enum:
+      post:
+        operationId: enum-endpoint
+        summary: enum-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - pending
+                      - approved
+                      - rejected
+                required:
+                  - status

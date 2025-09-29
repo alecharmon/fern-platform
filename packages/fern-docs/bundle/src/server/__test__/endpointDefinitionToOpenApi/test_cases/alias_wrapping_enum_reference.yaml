@@ -1,0 +1,57 @@
+endpoint_input:
+  id: alias-enum-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/alias-enum
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: status
+            valueShape:
+              type: alias
+              value:
+                type: id
+                id: StatusEnum
+endpoint_definitions:
+  types:
+    StatusEnum:
+      description: Status enumeration
+      shape:
+        type: enum
+        values:
+          - pending
+          - approved
+          - rejected
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: alias-enum-endpoint
+  paths:
+    /api/alias-enum:
+      post:
+        operationId: alias-enum-endpoint
+        summary: alias-enum-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - pending
+                      - approved
+                      - rejected
+                    description: Status enumeration
+                required:
+                  - status

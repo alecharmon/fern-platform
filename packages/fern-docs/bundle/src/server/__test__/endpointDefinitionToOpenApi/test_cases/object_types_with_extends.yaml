@@ -1,0 +1,92 @@
+endpoint_input:
+  id: test-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/users
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends:
+          - BaseUser
+          - TimestampFields
+        properties:
+          - key: email
+            valueShape:
+              type: primitive
+              value:
+                type: string
+endpoint_definitions:
+  types:
+    BaseUser:
+      name: BaseUser
+      shape:
+        type: object
+        extends: []
+        properties:
+          - key: id
+            valueShape:
+              type: primitive
+              value:
+                type: string
+          - key: name
+            valueShape:
+              type: primitive
+              value:
+                type: string
+    TimestampFields:
+      name: TimestampFields
+      shape:
+        type: object
+        extends: []
+        properties:
+          - key: created_at
+            valueShape:
+              type: primitive
+              value:
+                type: datetime
+          - key: updated_at
+            valueShape:
+              type: optional
+              shape:
+                type: primitive
+                value:
+                  type: datetime
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: test-endpoint
+  paths:
+    /api/users:
+      post:
+        operationId: test-endpoint
+        summary: test-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  email:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - created_at
+                  - email

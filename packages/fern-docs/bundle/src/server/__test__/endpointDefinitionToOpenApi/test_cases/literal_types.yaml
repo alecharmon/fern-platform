@@ -1,0 +1,43 @@
+endpoint_input:
+  id: literal-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/literal
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: version
+            valueShape:
+              type: literal
+              value: 1.0.0
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: literal-endpoint
+  paths:
+    /api/literal:
+      post:
+        operationId: literal-endpoint
+        summary: literal-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    enum:
+                      - 1.0.0
+                required:
+                  - version

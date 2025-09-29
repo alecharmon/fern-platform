@@ -1,0 +1,46 @@
+endpoint_input:
+  id: form-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/form
+  requests:
+    - contentType: multipart/form-data
+      body:
+        type: formData
+        fields:
+          - key: name
+            valueShape:
+              type: primitive
+              value:
+                type: string
+          - key: file
+            valueShape:
+              type: primitive
+              value:
+                type: string
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: form-endpoint
+  paths:
+    /api/form:
+      post:
+        operationId: form-endpoint
+        summary: form-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  file:
+                    type: string

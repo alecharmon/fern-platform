@@ -1,0 +1,68 @@
+endpoint_input:
+  id: alias-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/alias
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: user
+            valueShape:
+              type: alias
+              value:
+                type: id
+                id: User
+endpoint_definitions:
+  types:
+    User:
+      description: User object
+      shape:
+        type: object
+        properties:
+          - key: name
+            valueShape:
+              type: primitive
+              value:
+                type: string
+          - key: email
+            valueShape:
+              type: primitive
+              value:
+                type: string
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: alias-endpoint
+  paths:
+    /api/alias:
+      post:
+        operationId: alias-endpoint
+        summary: alias-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      email:
+                        type: string
+                    required:
+                      - name
+                      - email
+                    description: User object
+                required:
+                  - user

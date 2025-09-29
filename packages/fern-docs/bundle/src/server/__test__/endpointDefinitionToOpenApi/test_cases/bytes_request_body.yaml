@@ -1,0 +1,31 @@
+endpoint_input:
+  id: upload-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/upload
+  requests:
+    - contentType: application/octet-stream
+      body:
+        type: bytes
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: upload-endpoint
+  paths:
+    /api/upload:
+      post:
+        operationId: upload-endpoint
+        summary: upload-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary

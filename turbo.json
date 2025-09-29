@@ -28,7 +28,8 @@
     },
     "format": {},
     "test": {
-      "dependsOn": ["compile"]
+      "dependsOn": ["compile"],
+      "env": ["UPDATE_SNAPSHOTS"]
     },
     "test-db": {
       "dependsOn": ["compile"]

@@ -1,0 +1,76 @@
+endpoint_input:
+  id: alias-union-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/alias-union
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: payment
+            valueShape:
+              type: alias
+              value:
+                type: id
+                id: PaymentMethod
+endpoint_definitions:
+  types:
+    PaymentMethod:
+      description: Payment method options
+      shape:
+        type: discriminatedUnion
+        discriminant: type
+        variants:
+          - discriminantValue: card
+            displayName: Credit Card
+            properties:
+              - key: card_number
+                valueShape:
+                  type: primitive
+                  value:
+                    type: string
+            extends: []
+            extraProperties: false
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: alias-union-endpoint
+  paths:
+    /api/alias-union:
+      post:
+        operationId: alias-union-endpoint
+        summary: alias-union-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payment:
+                    oneOf:
+                      - type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - card
+                            description: "Discriminator value: card"
+                          card_number:
+                            type: string
+                        required:
+                          - type
+                          - card_number
+                        description: Credit Card variant
+                    discriminator:
+                      propertyName: type
+                    description: Payment method options
+                required:
+                  - payment

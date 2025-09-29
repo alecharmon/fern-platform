@@ -1,0 +1,50 @@
+endpoint_input:
+  id: stream-endpoint
+  method: GET
+  path:
+    - type: literal
+      value: /api/events
+  responses:
+    - statusCode: 200
+      body:
+        type: stream
+        payload:
+          type: object
+          properties:
+            - key: event
+              valueShape:
+                type: primitive
+                value:
+                  type: string
+            - key: data
+              valueShape:
+                type: primitive
+                value:
+                  type: string
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: stream-endpoint
+  paths:
+    /api/events:
+      get:
+        operationId: stream-endpoint
+        summary: stream-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Response with status 200
+            content:
+              text/event-stream:
+                schema:
+                  type: object
+                  properties:
+                    event:
+                      type: string
+                    data:
+                      type: string
+                  required:
+                    - event
+                    - data

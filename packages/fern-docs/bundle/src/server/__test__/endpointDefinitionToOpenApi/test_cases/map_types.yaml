@@ -1,0 +1,50 @@
+endpoint_input:
+  id: map-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/map
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: metadata
+            valueShape:
+              type: map
+              keyShape:
+                type: primitive
+                value:
+                  type: string
+              valueShape:
+                type: primitive
+                value:
+                  type: string
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: map-endpoint
+  paths:
+    /api/map:
+      post:
+        operationId: map-endpoint
+        summary: map-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metadata:
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                  - metadata

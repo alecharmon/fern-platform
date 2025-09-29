@@ -1,0 +1,74 @@
+endpoint_input:
+  id: test-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/optional
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: union
+            valueShape:
+              type: discriminatedUnion
+              discriminant: type
+              variants:
+                - discriminantValue: basic
+                  properties:
+                    - key: name
+                      valueShape:
+                        type: primitive
+                        value:
+                          type: string
+                    - key: optional_field
+                      valueShape:
+                        type: optional
+                        shape:
+                          type: primitive
+                          value:
+                            type: string
+                  extends: []
+                  extraProperties: false
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: test-endpoint
+  paths:
+    /api/optional:
+      post:
+        operationId: test-endpoint
+        summary: test-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  union:
+                    oneOf:
+                      - type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - basic
+                            description: "Discriminator value: basic"
+                          name:
+                            type: string
+                          optional_field:
+                            type: string
+                        required:
+                          - type
+                          - name
+                    discriminator:
+                      propertyName: type
+                required:
+                  - union

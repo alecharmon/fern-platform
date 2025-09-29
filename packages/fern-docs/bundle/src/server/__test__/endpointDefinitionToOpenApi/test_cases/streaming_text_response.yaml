@@ -1,0 +1,29 @@
+endpoint_input:
+  id: stream-endpoint
+  method: GET
+  path:
+    - type: literal
+      value: /api/stream
+  responses:
+    - statusCode: 200
+      body:
+        type: streamingText
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: stream-endpoint
+  paths:
+    /api/stream:
+      get:
+        operationId: stream-endpoint
+        summary: stream-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Response with status 200
+            content:
+              text/plain:
+                schema:
+                  type: string

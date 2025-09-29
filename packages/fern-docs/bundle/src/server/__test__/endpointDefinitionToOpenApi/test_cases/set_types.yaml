@@ -1,0 +1,47 @@
+endpoint_input:
+  id: set-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/set
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: tags
+            valueShape:
+              type: set
+              itemShape:
+                type: primitive
+                value:
+                  type: string
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: set-endpoint
+  paths:
+    /api/set:
+      post:
+        operationId: set-endpoint
+        summary: set-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    uniqueItems: true
+                    items:
+                      type: string
+                required:
+                  - tags

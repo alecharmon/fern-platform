@@ -1,0 +1,100 @@
+endpoint_input:
+  id: payment-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/payment
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: payment
+            valueShape:
+              type: discriminatedUnion
+              discriminant: payment_method
+              variants:
+                - discriminantValue: card
+                  displayName: Credit Card
+                  description: Credit card payment
+                  properties:
+                    - key: card_number
+                      valueShape:
+                        type: primitive
+                        value:
+                          type: string
+                    - key: expiry
+                      valueShape:
+                        type: primitive
+                        value:
+                          type: string
+                  extends: []
+                  extraProperties: false
+                - discriminantValue: paypal
+                  displayName: PayPal
+                  description: PayPal payment
+                  properties:
+                    - key: email
+                      valueShape:
+                        type: primitive
+                        value:
+                          type: string
+                  extends: []
+                  extraProperties: false
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: payment-endpoint
+  paths:
+    /api/payment:
+      post:
+        operationId: payment-endpoint
+        summary: payment-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payment:
+                    oneOf:
+                      - type: object
+                        properties:
+                          payment_method:
+                            type: string
+                            enum:
+                              - card
+                            description: "Discriminator value: card"
+                          card_number:
+                            type: string
+                          expiry:
+                            type: string
+                        required:
+                          - payment_method
+                          - card_number
+                          - expiry
+                        description: Credit card payment
+                      - type: object
+                        properties:
+                          payment_method:
+                            type: string
+                            enum:
+                              - paypal
+                            description: "Discriminator value: paypal"
+                          email:
+                            type: string
+                        required:
+                          - payment_method
+                          - email
+                        description: PayPal payment
+                    discriminator:
+                      propertyName: payment_method
+                required:
+                  - payment

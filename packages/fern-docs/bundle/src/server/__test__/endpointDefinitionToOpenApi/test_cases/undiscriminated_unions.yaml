@@ -1,0 +1,62 @@
+endpoint_input:
+  id: union-endpoint
+  method: POST
+  path:
+    - type: literal
+      value: /api/union
+  requests:
+    - contentType: application/json
+      body:
+        type: object
+        extends: []
+        properties:
+          - key: info
+            valueShape:
+              type: undiscriminatedUnion
+              union:
+                - type: primitive
+                  value:
+                    type: string
+                - type: primitive
+                  value:
+                    type: integer
+                - type: object
+                  properties:
+                    - key: name
+                      valueShape:
+                        type: primitive
+                        value:
+                          type: string
+endpoint_definitions: {}
+output:
+  openapi: 3.1.1
+  info:
+    title: API
+    version: union-endpoint
+  paths:
+    /api/union:
+      post:
+        operationId: union-endpoint
+        summary: union-endpoint
+        parameters: []
+        responses:
+          "200":
+            description: Successful response
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  info:
+                    oneOf:
+                      - type: string
+                      - type: integer
+                      - type: object
+                        properties:
+                          name:
+                            type: string
+                        required:
+                          - name
+                required:
+                  - info

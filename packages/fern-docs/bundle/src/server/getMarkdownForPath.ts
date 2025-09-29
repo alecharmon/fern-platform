@@ -1,11 +1,33 @@
-import { DocsLoader, createPruneKey } from "@fern-api/docs-loader";
+import { createPruneKey } from "@fern-api/docs-loader";
+import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 
+import { OpenApiYamlFormatter } from "./endpointDefinitionToOpenApi";
 import { convertToLlmTxtMarkdown } from "./llm-txt-md";
+
+function generateEndpointSections(
+  endpoint: EndpointDefinition,
+  apiDefinition?: ApiDefinition.ApiDefinition
+): string[] {
+  const sections: string[] = [];
+
+  // Use the new OpenApiYamlFormatter class
+  const formatter = new OpenApiYamlFormatter();
+  const openApiYaml = formatter.generateYamlFromEndpoint(
+    endpoint,
+    apiDefinition
+  );
+
+  sections.push(
+    `## OpenAPI Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``
+  );
+
+  return sections;
+}
 
 export async function getMarkdownForPath(
   node: FernNavigation.NavigationNodePage,
@@ -20,14 +42,18 @@ export async function getMarkdownForPath(
     if (apiDefinition == null) {
       return undefined;
     }
-
     if (node.type === "endpoint") {
       const endpoint = apiDefinition.endpoints[node.endpointId];
       if (endpoint == null) {
         return undefined;
       }
       return {
-        content: endpointDefinitionToMarkdown(endpoint, node, domain),
+        content: endpointDefinitionToMarkdown(
+          endpoint,
+          node,
+          domain,
+          apiDefinition
+        ),
         contentType: "mdx",
       };
     }
@@ -67,50 +93,54 @@ export function getPageNodeForPath(
   return found.node;
 }
 
-// function getPageInfo(
-//     root: FernNavigation.RootNode | undefined,
-//     slug: FernNavigation.Slug,
-// ):
-//     | {
-//           nodeTitle: string;
-//           pageId?: FernNavigation.PageId;
-//           apiLeaf?: FernNavigation.NavigationNodeApiLeaf;
-//       }
-//     | undefined {
-//     if (root == null) {
-//         return undefined;
-//     }
-
-//     const foundNode = FernNavigation.utils.findNode(root, slug);
-//     if (foundNode == null || foundNode.type !== "found" || !FernNavigation.isPage(foundNode.node)) {
-//         return undefined;
-//     }
-
-//     if (FernNavigation.isApiLeaf(foundNode.node)) {
-//         return {
-//             nodeTitle: foundNode.node.title,
-//             apiLeaf: foundNode.node,
-//         };
-//     }
-
-//     const pageId = FernNavigation.getPageId(foundNode.node);
-//     if (pageId == null) {
-//         return undefined;
-//     }
-
-//     return {
-//         nodeTitle: foundNode.node.title,
-//         pageId,
-//     };
-// }
-
 export function endpointDefinitionToMarkdown(
   endpoint: EndpointDefinition,
   node: FernNavigation.NavigationNodePage,
-  domain?: string
+  domain?: string,
+  apiDefinition?: ApiDefinition.ApiDefinition
 ): string {
   const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
   const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
+
+  const endpointSections = generateEndpointSections(endpoint, apiDefinition);
+
+  const examplesContent = endpoint.examples
+    ?.flatMap((example) => {
+      // We have examples for all status codes (although the code will be repeated)
+      // So only process examples with response status code 201
+      // Only skip if the status code is not a 2xx "OK" HTTP status code
+      if (
+        typeof example.responseStatusCode !== "number" ||
+        example.responseStatusCode < 200 ||
+        example.responseStatusCode >= 300
+      ) {
+        return [];
+      }
+
+      return Object.entries(example.snippets ?? {}).flatMap(
+        ([language, snippets]) => {
+          // Filter out curl snippets, since AI should know how to use curl. SDK examples are specific to that generated SDK, so that would be helpful to use.
+          if (language === "curl") {
+            return [];
+          }
+
+          return snippets.map((snippet) => {
+            return {
+              language,
+              snippet,
+              name: snippet.name ?? example.name,
+            } as const;
+          });
+        }
+      );
+    })
+    .map(
+      ({ language, snippet, name }) =>
+        `\`\`\`${language}${name != null ? ` ${name}` : ""}\n${snippet.code}\n\`\`\``
+    )
+    .join("\n\n");
+
+  const hasExamples = examplesContent && examplesContent.trim().length > 0;
 
   return [
     `# ${node.title}`,
@@ -124,29 +154,9 @@ export function endpointDefinitionToMarkdown(
       .join("\n"),
     typeof endpoint.description === "string" ? endpoint.description : undefined,
     fullUrl ? `Reference: ${fullUrl}` : undefined,
-    endpoint.examples?.some(
-      (example) => example.snippets && Object.keys(example.snippets).length > 0
-    )
-      ? "## Examples"
-      : undefined,
-    endpoint.examples
-      ?.flatMap((example) =>
-        Object.entries(example.snippets ?? {}).flatMap(([language, snippets]) =>
-          snippets.map(
-            (snippet) =>
-              ({
-                language,
-                snippet,
-                name: snippet.name ?? example.name,
-              }) as const
-          )
-        )
-      )
-      .map(
-        ({ language, snippet, name }) =>
-          `\`\`\`${language === "curl" ? "shell" : language}${name != null ? ` ${name}` : ""}\n${snippet.code}\n\`\`\``
-      )
-      .join("\n\n"),
+    ...endpointSections,
+    hasExamples ? "## SDK Code Examples" : undefined,
+    hasExamples ? examplesContent : undefined,
   ]
     .filter(isNonNullish)
     .join("\n\n");
