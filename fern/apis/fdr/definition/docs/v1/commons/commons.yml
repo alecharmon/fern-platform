@@ -407,3 +407,4 @@ types:
       claude: optional<boolean>
       cursor: optional<boolean>
       vscode: optional<boolean>
+      apiReference: optional<boolean>
