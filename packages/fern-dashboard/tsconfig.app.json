@@ -7,6 +7,6 @@
     ".next/types/**/*.ts"
   ],
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "jsx": "preserve"
   }
 }

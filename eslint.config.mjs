@@ -35,6 +35,7 @@ export default [
       "packages/template-resolver/preparePackageJson.cjs",
       "servers/fdr/ts-loader.js",
       "servers/fdr/**",
+      "**/next-env.d.ts",
     ],
   },
   ...turboConfig,
