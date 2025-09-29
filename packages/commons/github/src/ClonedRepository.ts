@@ -51,11 +51,40 @@ export class ClonedRepository {
     staged?: boolean;
   }): Promise<void> {
     await this.git.cwd(this.clonePath);
-    const args = ["restore"];
-    if (staged) {
-      args.push("--staged");
+    const fileArray = Array.isArray(files) ? files : [files];
+
+    // Filter to only include files that exist in git
+    const existingFiles: string[] = [];
+    for (const file of fileArray) {
+      try {
+        // Check if the file exists in git by trying to get its status
+        const status = await this.git.raw([
+          "ls-files",
+          "--error-unmatch",
+          file,
+        ]);
+        if (status.trim()) {
+          existingFiles.push(file);
+        }
+      } catch (error: any) {
+        // Only catch "file not found" errors (exit code 1), rethrow critical git errors
+        if (error?.exitCode === 1) {
+          // File doesn't exist in git, skip it
+          continue;
+        }
+        // Re-throw critical git errors (corruption, permissions, etc.)
+        throw error;
+      }
     }
-    await this.git.raw([...args, ...(Array.isArray(files) ? files : [files])]);
+
+    // Only restore files that exist
+    if (existingFiles.length > 0) {
+      const args = ["restore"];
+      if (staged) {
+        args.push("--staged");
+      }
+      await this.git.raw([...args, ...existingFiles]);
+    }
   }
 
   public async commit(message?: string): Promise<void> {
