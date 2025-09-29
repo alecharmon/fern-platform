@@ -10,6 +10,7 @@ import { isSelfHosted } from "@/server/isSelfHosted";
 
 import {
   ClaudeIcon,
+  CursorIcon,
   MarkdownIcon,
   OpenAIIcon,
   SparklesIconHollow,
@@ -114,7 +115,43 @@ export const OpenWithLLM = ({
   } as FernDropdown.ValueOption;
 };
 
-export function constructPageOptions({
+export const OpenWithCursor = async ({
+  domain,
+}: {
+  domain: ParamValue;
+}): Promise<FernDropdown.ValueOption> => {
+  const resolveParam = (param: ParamValue): string => {
+    if (typeof param === "string") {
+      return decodeURIComponent(param);
+    } else if (Array.isArray(param)) {
+      return decodeURIComponent(param.join("/"));
+    } else {
+      return "";
+    }
+  };
+
+  const decodedDomain = resolveParam(domain);
+
+  const mcpServerConfig = {
+    name: decodedDomain,
+    url: `https://${decodedDomain}/mcp`,
+  };
+  const mcpServerConfigBase64 = btoa(JSON.stringify(mcpServerConfig));
+
+  return {
+    type: "value",
+    value: "open-cursor",
+    label: "Connect to Cursor",
+    helperText: "Install MCP server on Cursor",
+    icon: <CursorIcon />,
+    // Example MCP server config for Cursor install link
+    // See: https://modelcontextprotocol.org/docs/context/mcp
+    href: `cursor://anysphere.cursor-deeplink/mcp/install?name=${mcpServerConfig.name}&config=${mcpServerConfigBase64}`,
+    rightElement: <ExternalLink className="size-icon" />,
+  } as FernDropdown.ValueOption;
+};
+
+export async function constructPageOptions({
   pageActionConfig,
   domain,
   slug,
@@ -122,7 +159,7 @@ export function constructPageOptions({
   pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
   domain: ParamValue;
   slug: ParamValue;
-}): FernDropdown.PageActionOption[] | undefined {
+}): Promise<FernDropdown.PageActionOption[] | undefined> {
   const options: FernDropdown.PageActionOption[] = [CopyPageOption()];
 
   if (slug?.toString()) {
@@ -139,6 +176,10 @@ export function constructPageOptions({
 
   if (pageActionConfig.pageActions?.openAi !== false) {
     options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT" }));
+  }
+
+  if (pageActionConfig.pageActions?.cursor !== false) {
+    options.push(Separator(), await OpenWithCursor({ domain }));
   }
 
   return options;

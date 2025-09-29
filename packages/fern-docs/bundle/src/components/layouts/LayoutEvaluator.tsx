@@ -69,7 +69,7 @@ export async function LayoutEvaluator({
       breadcrumb={breadcrumb}
       slug={slug}
       markdown={markdown}
-      pageActionOptions={constructPageOptions({
+      pageActionOptions={await constructPageOptions({
         pageActionConfig: config,
         domain: loader.domain,
         slug,

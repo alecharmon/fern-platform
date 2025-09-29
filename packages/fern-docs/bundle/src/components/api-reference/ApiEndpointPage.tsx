@@ -43,7 +43,7 @@ export default async function ApiEndpointPage({
 
   const config = await loader.getConfig();
   const layout = await loader.getLayout();
-  const pageActionOptions = constructPageOptions({
+  const pageActionOptions = await constructPageOptions({
     pageActionConfig: config,
     domain: loader.domain,
     slug: node.slug,
