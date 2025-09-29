@@ -36,7 +36,7 @@
     "@fern-docs/mdx": "workspace:*",
     "es-toolkit": "^1.32.0",
     "html-entities": "^2.5.2",
-    "zod": "^3.24.1"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",

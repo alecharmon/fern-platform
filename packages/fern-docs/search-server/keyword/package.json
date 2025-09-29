@@ -52,7 +52,7 @@
     "html-entities": "^2.5.2",
     "meilisearch": "^0.51.0",
     "ts-essentials": "^10.0.4",
-    "zod": "^3.24.1"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",

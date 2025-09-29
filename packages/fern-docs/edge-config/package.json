@@ -35,8 +35,8 @@
     "@fern-api/docs-auth": "workspace:*",
     "@fern-api/docs-utils": "workspace:*",
     "@vercel/edge-config": "^1.4.0",
-    "url-join": "5.0.0",
-    "zod": "^3.24.1"
+    "url-join": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",

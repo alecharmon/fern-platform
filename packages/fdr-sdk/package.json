@@ -73,10 +73,10 @@
     "httpsnippet-lite": "^3.0.5",
     "js-base64": "3.7.7",
     "node-fetch": "2.7.0",
-    "qs": "6.12.0",
+    "qs": "catalog:",
     "tinycolor2": "^1.6.0",
     "ts-essentials": "^10.0.4",
-    "url-join": "5.0.0"
+    "url-join": "catalog:"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
@@ -85,7 +85,7 @@
     "@fern-api/snippets": "workspace:*",
     "@fern-platform/configs": "workspace:*",
     "@types/node-fetch": "2.6.9",
-    "@types/qs": "6.9.14",
+    "@types/qs": "catalog:",
     "@types/tinycolor2": "^1.4.6",
     "@types/ungap__structured-clone": "^1.2.0",
     "tsup": "^8.3.5",

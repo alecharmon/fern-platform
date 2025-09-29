@@ -48,7 +48,7 @@
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
     "@fern-platform/fdr-utils": "workspace:*",
-    "@radix-ui/colors": "^3.0.0",
+    "@radix-ui/colors": "catalog:",
     "@slack/web-api": "^6.9.0",
     "@types/react": "19.0.10",
     "@vercel/functions": "^3.1.0",
@@ -57,7 +57,7 @@
     "colorjs.io": "^0.5.2",
     "es-toolkit": "^1.33.0",
     "iron-session": "^8.0.4",
-    "jose": "^5.9.6",
+    "jose": "catalog:",
     "next": "catalog:",
     "posthog-node": "^4.5.0",
     "react": "19.0.0",
@@ -65,16 +65,16 @@
     "ts-essentials": "^10.0.4",
     "undici": "^6.21.2",
     "unist-util-visit": "^5.0.0",
-    "url-join": "^5.0.0",
-    "zod": "^3.24.1"
+    "url-join": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-platform/configs": "workspace:*",
     "@types/node": "^22.0.0",
-    "@types/qs": "6.9.14",
+    "@types/qs": "catalog:",
     "depcheck": "^1.4.7",
-    "qs": "^6.14.0",
+    "qs": "catalog:",
     "stylelint": "^16.1.0",
     "typescript": "^5",
     "vitest": "^3.2.4"

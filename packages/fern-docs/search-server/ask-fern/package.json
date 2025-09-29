@@ -45,7 +45,7 @@
     "ai-fallback": "^1.0.2",
     "es-toolkit": "^1.32.0",
     "gpt-tokenizer": "2.9.0",
-    "zod": "^3.25.49"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",

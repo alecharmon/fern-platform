@@ -37,7 +37,7 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "date-fns": "^4.1.0",
     "path-to-regexp": "6.3.0",
-    "url-join": "5.0.0"
+    "url-join": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",

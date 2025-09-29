@@ -86,6 +86,19 @@ let nextConfig: NextConfig = {
       delete config.optimization.splitChunks.cacheGroups.lib;
     }
 
+    // split chunks for build (not dev)
+    if (config.optimization.splitChunks) {
+      config.optimization.splitChunks.cacheGroups ??= {};
+
+      // Bundle all @radix-ui/react-* packages into a single chunk
+      config.optimization.splitChunks.cacheGroups.radix = {
+        test: /[\\/]node_modules[\\/]@radix-ui[\\/].*/,
+        name: "radix-ui",
+        chunks: "all",
+        enforce: true,
+      };
+    }
+
     // glslify is used to import 3d shaders (WaveformComplexShader)
     // into the bundle
     config.module.rules.push({
