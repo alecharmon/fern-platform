@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 
 import { applyOrgMappings } from "@/orgMappings";
 
-import { createPersonalProject } from "./actions/createPersonalProject";
 import {
   Auth0SessionData,
   getCurrentSession,
@@ -27,24 +26,27 @@ export default async function Page() {
     redirect(`/${pendingOrgRedirect}`);
   } else {
     await applyOrgMappings();
-    const firstOrg = await getOrCreateFirstOrgForUser(session);
-    redirect(`/${firstOrg.orgName}/docs`);
+    const response = await getOrCreateFirstOrgForUser(session);
+    if (response.empty) {
+      redirect(`/get-started`);
+    } else {
+      redirect(`/${response.orgName}/docs`);
+    }
   }
 }
 
 async function getOrCreateFirstOrgForUser(
   session: Auth0SessionData
-): Promise<{ orgName: Auth0OrgName }> {
+): Promise<{ empty: true } | { empty: false; orgName: Auth0OrgName }> {
   const organizations = await getMyOrganizations(session.user.sub);
   const firstOrg = organizations[0];
   if (firstOrg != null) {
     return {
+      empty: false,
       orgName: Auth0OrgName(firstOrg.name),
     };
   }
-
-  const personalProject = await createPersonalProject();
   return {
-    orgName: personalProject.orgName,
+    empty: true,
   };
 }

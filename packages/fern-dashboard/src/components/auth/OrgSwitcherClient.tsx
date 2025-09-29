@@ -20,7 +20,7 @@ export const OrgSwitcherClient = ({
   currentOrgName,
 }: {
   organizations: Auth0Organization[];
-  currentOrgName: Auth0OrgName;
+  currentOrgName?: Auth0OrgName;
 }) => {
   const orgName = useOrgNameFromPathname();
   const [localOrgName, setLocalOrgName] = useState(currentOrgName);
@@ -101,11 +101,12 @@ export const OrgSwitcherClient = ({
 };
 
 function getRedirectPathname(pathname: string) {
-  if (!pathname || pathname === "/") {
-    return "/docs";
-  }
-  // if the current pathame is /docs/<domain>, just redirect to /docs
-  if (pathname.startsWith("/docs/")) {
+  if (
+    !pathname ||
+    pathname === "/" ||
+    pathname.includes("get-started") ||
+    pathname.includes("/docs")
+  ) {
     return "/docs";
   }
   return pathname;

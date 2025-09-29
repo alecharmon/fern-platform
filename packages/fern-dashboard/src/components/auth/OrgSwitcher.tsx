@@ -9,7 +9,7 @@ import { OrgSwitcherClient } from "./OrgSwitcherClient";
 export async function OrgSwitcher({
   currentOrgName,
 }: {
-  currentOrgName: Auth0OrgName;
+  currentOrgName?: Auth0OrgName;
 }) {
   const session = await getCurrentSession();
   if (session == null) {

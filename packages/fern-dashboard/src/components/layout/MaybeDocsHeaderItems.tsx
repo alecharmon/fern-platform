@@ -11,9 +11,9 @@ export async function MaybeDocsHeaderItems({
   orgName,
 }: Readonly<{
   docsUrl?: DocsUrl;
-  orgName: Auth0OrgName;
+  orgName?: Auth0OrgName;
 }>) {
-  if (docsUrl == null) {
+  if (orgName == null || docsUrl == null) {
     return null;
   }
   await getAuthenticatedSessionOrRedirect(orgName);

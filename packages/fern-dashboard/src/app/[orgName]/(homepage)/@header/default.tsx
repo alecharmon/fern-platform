@@ -23,7 +23,7 @@ import { DocsUrl } from "@/utils/types";
 export default async function HeaderLayout({
   params,
 }: Readonly<{
-  params: Promise<{ docsUrl?: DocsUrl; orgName: Auth0OrgName }>;
+  params: Promise<{ docsUrl?: DocsUrl; orgName?: Auth0OrgName }>;
 }>) {
   const { orgName, docsUrl } = await params;
   const session = await getCurrentSession();
