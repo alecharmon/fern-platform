@@ -2,6 +2,7 @@
 import type { NextConfig } from "next";
 import withRspack from "next-rspack";
 
+import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const CSP_HEADER = `
@@ -100,6 +101,19 @@ let nextConfig: NextConfig = {
         },
       ],
     });
+
+    // analyze the bundle using rsdoctor
+    // https://rsdoctor.rs/guide/start/quick-start#nextjs
+    if (process.env.RSD === "1") {
+      config.plugins.push(
+        new RsdoctorRspackPlugin({
+          disableClientServer: true,
+          output: {
+            reportDir: isServer ? "./.next/server" : "./.next",
+          },
+        })
+      );
+    }
 
     return config;
   },

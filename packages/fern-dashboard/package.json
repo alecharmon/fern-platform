@@ -15,6 +15,9 @@
     "dashboard:dev": "next dev",
     "dashboard:dev:inspect": "NODE_OPTIONS='--inspect' next dev",
     "dashboard:lint": "next lint",
+    "dashboard:rsd": "RSD=1 next build",
+    "dashboard:rsd:client": "rsdoctor analyze --profile .next/.rsdoctor/manifest.json",
+    "dashboard:rsd:server": "rsdoctor analyze --profile .next/server/.rsdoctor/manifest.json",
     "dashboard:start": "next start",
     "db:migrate:dev": "dotenv -e .env.dev -- prisma migrate deploy --schema server/prisma/schema.prisma",
     "db:migrate:local": "dotenv -e .env.local -- prisma migrate deploy --schema server/prisma/schema.prisma",
@@ -135,6 +138,8 @@
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
+    "@rsdoctor/cli": "^1.2.3",
+    "@rsdoctor/rspack-plugin": "^1.2.3",
     "@tailwindcss/postcss": "^4.0.9",
     "@tailwindcss/typography": "^0.5.16",
     "@types/hast": "^3.0.0",
