@@ -6,7 +6,7 @@ import {
   getIsSidebarFixed,
   getIsSingleOverviewPage,
 } from "@fern-api/docs-utils";
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { getClientPageRedirectTarget } from "@fern-docs/components";
 import { SidebarClientTabsRoot } from "@fern-docs/components/sidebar/SidebarClientTabsRoot";

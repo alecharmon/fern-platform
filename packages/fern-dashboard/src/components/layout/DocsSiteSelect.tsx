@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "@bprogress/next/app";
 
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import {
   Select,

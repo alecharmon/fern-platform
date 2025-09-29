@@ -3,7 +3,7 @@ import "server-only";
 import { notFound, redirect } from "next/navigation";
 
 import { createEditableDocsLoader } from "@fern-api/docs-loader";
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { NodeId, getPageId, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 import { mdxToHtml } from "@fern-docs/mdx";

@@ -1,4 +1,4 @@
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { DocsUrl } from "./types";
 

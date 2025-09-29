@@ -6,7 +6,7 @@ import { z } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { ApiDefinition } from "@fern-api/fdr-sdk";
+import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 
 const defaultLanguageAtom = atom("curl");
 

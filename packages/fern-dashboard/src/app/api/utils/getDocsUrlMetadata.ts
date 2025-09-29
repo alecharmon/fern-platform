@@ -1,4 +1,4 @@
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";

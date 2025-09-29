@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import {
   HOMEPAGE_SCREENSHOT_HEIGHT,

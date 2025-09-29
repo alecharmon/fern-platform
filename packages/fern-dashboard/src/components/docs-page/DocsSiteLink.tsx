@@ -1,6 +1,6 @@
 "use client";
 
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { ExternalHoverLink } from "../ui/ExternalHoverLink";
 

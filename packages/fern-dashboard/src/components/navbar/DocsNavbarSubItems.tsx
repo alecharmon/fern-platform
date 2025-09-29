@@ -1,4 +1,4 @@
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";

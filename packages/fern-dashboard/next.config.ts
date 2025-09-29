@@ -22,14 +22,9 @@ let nextConfig: NextConfig = {
     "./": ["**/*.map"],
   },
   transpilePackages: [
-    /**
-     * Monorepo packages that are not transpiled by default.
-     *
-     * pnpm list --filter=@fern-dashboard/ui --only-projects --prod --recursive --depth=Infinity --json | jq -r '[.. | objects | select(.version | .!=null) | select(.version | startswith("link:")) | .from] | unique'
-     */
-    "@fern-api/fdr-sdk",
+    "@fern-api/docs-utils",
+    "@fern-docs/components",
     "@fern-ui/loadable",
-    "@fern-api/ui-core-utils",
   ],
   experimental: {
     webpackBuildWorker: true,

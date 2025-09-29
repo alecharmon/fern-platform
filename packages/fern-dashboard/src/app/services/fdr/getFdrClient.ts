@@ -1,5 +1,5 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import { FdrClient } from "@fern-api/fdr-sdk";
+import { FdrClient } from "@fern-api/fdr-sdk/client";
 
 export function getFdrClient({ token }: { token: string }): FdrClient {
   if (process.env.FDR_SERVER_URL == null) {

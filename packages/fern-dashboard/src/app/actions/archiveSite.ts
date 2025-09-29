@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { Auth0OrgName } from "../services/auth0/types";

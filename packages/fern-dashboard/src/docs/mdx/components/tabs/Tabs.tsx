@@ -13,7 +13,7 @@ import React from "react";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import { CirclePlusIcon } from "lucide-react";
 
-import { ApiDefinition } from "@fern-api/fdr-sdk";
+import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { Button, cn } from "@fern-docs/components";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 

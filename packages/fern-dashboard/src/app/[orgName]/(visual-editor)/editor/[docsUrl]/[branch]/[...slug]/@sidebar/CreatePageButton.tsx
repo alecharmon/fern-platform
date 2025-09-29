@@ -1,6 +1,6 @@
 "use client";
 
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { NavigationContext, getAllSections } from "@fern-docs/components";
 
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";

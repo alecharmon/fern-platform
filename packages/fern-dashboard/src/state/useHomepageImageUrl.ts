@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { Theme } from "@/app/api/homepage-images/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
