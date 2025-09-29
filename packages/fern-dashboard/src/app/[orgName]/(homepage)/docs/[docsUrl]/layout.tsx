@@ -33,6 +33,10 @@ export default async function DocsLayout({
     token: session.accessToken,
   });
   if (!response.ok) {
+    console.warn(
+      "Failed to get docs sites for org: ",
+      JSON.stringify(response.error, null, 2)
+    );
     return notFound();
   }
   const docsSites = response.docsSites;

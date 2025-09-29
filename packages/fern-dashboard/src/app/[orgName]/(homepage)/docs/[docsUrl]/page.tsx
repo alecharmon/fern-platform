@@ -30,14 +30,19 @@ export default async function Page(props: {
   const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
   // Validate that the docsUrl belongs to this organization so that we avoid errors in the page
-  const docsSites = await getDocsSitesForOrg({
+  const response = await getDocsSitesForOrg({
     orgName,
     token: session.accessToken,
   });
-  if (!docsSites.ok) {
+  if (!response.ok) {
+    console.warn(
+      "Failed to get docs sites for org: ",
+      JSON.stringify(response.error, null, 2)
+    );
+
     notFound();
   }
-  const currentDocsSite = docsSites.docsSites.find(
+  const currentDocsSite = response.docsSites.find(
     (site) => getDocsSiteUrl(site) === docsUrl
   );
   if (currentDocsSite == null) {
