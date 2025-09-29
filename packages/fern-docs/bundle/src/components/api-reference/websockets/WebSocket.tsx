@@ -42,6 +42,7 @@ export async function WebSocketContent({
   action,
   hideFeedback,
   pageActionOptions,
+  markdown,
 }: {
   serialize: MdxSerializer;
   context: WebSocketContext;
@@ -50,6 +51,7 @@ export async function WebSocketContent({
   action?: React.ReactNode;
   hideFeedback: boolean;
   pageActionOptions?: FernDropdown.PageActionOption[];
+  markdown?: string;
 }) {
   const { channel, node, types, globalHeaders } = context;
 
@@ -96,6 +98,7 @@ export async function WebSocketContent({
       header={
         <PageHeader
           serialize={serialize}
+          markdown={markdown}
           breadcrumb={breadcrumb}
           title={node.title}
           tags={

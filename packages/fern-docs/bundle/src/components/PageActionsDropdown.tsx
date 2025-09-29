@@ -41,8 +41,11 @@ export function PageActionsDropdown({
 
   const handleValueChange = async (value: string) => {
     if (value === "copy-page") {
+      window.focus();
+
       if (markdown) {
-        await navigator.clipboard.writeText(markdown).then(() => {
+        try {
+          await navigator.clipboard.writeText(markdown);
           capturePosthogEventInternal("page_actions_dropdown", {
             type: "copy-option",
             page_location: window.location.pathname,
@@ -53,9 +56,9 @@ export function PageActionsDropdown({
           setTimeout(() => {
             setShowCopied(false);
           }, 2000);
-        });
-      } else {
-        // TODO: load markdown for the page
+        } catch (error) {
+          console.error("Failed to copy to clipboard:", error);
+        }
       }
     } else if (value === "open-ai-search") {
       const pageContext = {

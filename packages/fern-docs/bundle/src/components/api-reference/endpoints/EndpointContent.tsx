@@ -41,6 +41,7 @@ export async function EndpointContent({
   bottomNavigation,
   hideFeedback,
   pageActionOptions,
+  markdown,
 }: {
   serialize: MdxSerializer;
   showErrors: boolean;
@@ -51,6 +52,7 @@ export async function EndpointContent({
   bottomNavigation?: React.ReactNode;
   hideFeedback: boolean;
   pageActionOptions?: FernDropdown.PageActionOption[];
+  markdown?: string;
 }) {
   const { node, endpoint, types } = context;
 
@@ -66,6 +68,7 @@ export async function EndpointContent({
             tags={getAvailabilityBadge(endpoint, node)}
             slug={node.slug}
             pageActionOptions={pageActionOptions}
+            markdown={markdown}
           >
             <EndpointUrlWithPlaygroundBaseUrl
               endpoint={endpoint}

@@ -13,6 +13,7 @@ import {
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { FernDropdown } from "@fern-docs/components";
 
+import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { MdxSerializer } from "@/server/mdx-serializer";
 
 import { constructPageOptions } from "../PageActionsDropdownOptions";
@@ -49,6 +50,9 @@ export default async function ApiEndpointPage({
     slug: node.slug,
   });
 
+  const markdown = (await getMarkdownForPath(node, loader, loader.domain))
+    ?.content;
+
   return (
     <ApiEndpointContent
       serialize={serialize}
@@ -59,6 +63,7 @@ export default async function ApiEndpointPage({
       action={action}
       hideFeedback={layout.hideFeedback}
       pageActionOptions={pageActionOptions}
+      markdown={markdown}
     />
   );
 }
@@ -72,6 +77,7 @@ async function ApiEndpointContent({
   bottomNavigation,
   hideFeedback,
   pageActionOptions,
+  markdown,
 }: {
   serialize: MdxSerializer;
   node: FernNavigation.NavigationNodeApiLeaf;
@@ -81,6 +87,7 @@ async function ApiEndpointContent({
   bottomNavigation?: React.ReactNode;
   hideFeedback: boolean;
   pageActionOptions?: FernDropdown.PageActionOption[];
+  markdown?: string;
 }) {
   switch (node.type) {
     case "endpoint": {
@@ -99,6 +106,7 @@ async function ApiEndpointContent({
           showAuth
           hideFeedback={hideFeedback}
           pageActionOptions={pageActionOptions}
+          markdown={markdown}
         />
       );
     }
@@ -116,6 +124,7 @@ async function ApiEndpointContent({
           bottomNavigation={bottomNavigation}
           hideFeedback={hideFeedback}
           pageActionOptions={pageActionOptions}
+          markdown={markdown}
         />
       );
     }
@@ -133,6 +142,7 @@ async function ApiEndpointContent({
           bottomNavigation={bottomNavigation}
           hideFeedback={hideFeedback}
           pageActionOptions={pageActionOptions}
+          markdown={markdown}
         />
       );
     }
@@ -150,6 +160,7 @@ async function ApiEndpointContent({
           bottomNavigation={bottomNavigation}
           hideFeedback={hideFeedback}
           pageActionOptions={pageActionOptions}
+          markdown={markdown}
         />
       );
     }
