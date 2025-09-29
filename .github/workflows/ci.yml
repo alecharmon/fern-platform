@@ -35,6 +35,9 @@ jobs:
       - name: Check dependencies
         run: pnpm depcheck
 
+      - name: Check dependency deduplication
+        run: pnpm dedupe --check
+
       - name: Check format
         run: pnpm format:check
 

@@ -104,12 +104,16 @@ let nextConfig: NextConfig = {
 
     // analyze the bundle using rsdoctor
     // https://rsdoctor.rs/guide/start/quick-start#nextjs
-    if (process.env.RSD === "1") {
+    if (process.env.RSD === "1" && ["client", "server"].includes(config.name)) {
       config.plugins.push(
         new RsdoctorRspackPlugin({
           disableClientServer: true,
+          features: ["bundle"],
+          experiments: {
+            enableNativePlugin: true,
+          },
           output: {
-            reportDir: isServer ? "./.next/server" : "./.next",
+            reportDir: config.name === "server" ? "./.next/server" : "./.next",
           },
         })
       );
