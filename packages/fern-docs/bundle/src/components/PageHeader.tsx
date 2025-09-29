@@ -76,7 +76,7 @@ export function PageHeader({
             )}
             {tags}
           </div>
-          {markdown && pageActionOptions && (
+          {pageActionOptions && (
             <div className="hidden md:flex">
               <PageActionsDropdown
                 markdown={markdown}

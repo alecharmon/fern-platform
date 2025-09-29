@@ -1,14 +1,10 @@
 import "server-only";
 
-import { ParamValue } from "next/dist/server/request/params";
 import React from "react";
 
-import { isSelfHosted } from "@fern-api/docs-server";
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
-import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import type { FernDropdown } from "@fern-docs/components";
 import {
   Availability,
   AvailabilityBadge,
@@ -20,12 +16,7 @@ import { MdxContent } from "@/mdx/components/MdxContent";
 import { MdxSerializer } from "@/server/mdx-serializer";
 
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
-import {
-  CopyPageOption,
-  OpenWithLLM,
-  Separator,
-  ViewAsMarkdownOption,
-} from "../PageActionsDropdownOptions";
+import { constructPageOptions } from "../PageActionsDropdownOptions";
 import { PageHeader } from "../PageHeader";
 import { BuiltWithFern } from "../built-with-fern";
 import { FooterLayout } from "./FooterLayout";
@@ -68,12 +59,6 @@ export async function LayoutEvaluator({
   const title = frontmatter?.title ?? fallbackTitle;
   const subtitle = frontmatter?.subtitle ?? frontmatter?.excerpt;
 
-  let frontmatterLayout = frontmatter?.layout ?? "guide";
-  const hasAside = mdx && exports?.Aside;
-  if (hasAside) {
-    frontmatterLayout = "reference";
-  }
-
   const config = await loader.getConfig();
 
   const pageHeader = (
@@ -88,7 +73,6 @@ export async function LayoutEvaluator({
         pageActionConfig: config,
         domain: loader.domain,
         slug,
-        frontmatterLayout,
       })}
       tags={
         availability && (
@@ -118,7 +102,7 @@ export async function LayoutEvaluator({
       tableOfContents={toc}
       pageHeader={pageHeader}
       aside={
-        hasAside ? (
+        mdx && exports?.Aside ? (
           <MdxAside
             code={mdx.code}
             jsxElements={mdx.jsxElements}
@@ -136,50 +120,4 @@ export async function LayoutEvaluator({
       />
     </AbstractLayoutEvaluatorContent>
   );
-}
-
-function shouldHideDropdown(
-  frontmatterLayout: string,
-  config: Omit<DocsV1Read.DocsConfig, "navigation" | "root">
-) {
-  if (frontmatterLayout === "reference") {
-    return !config.pageActions?.apiReference;
-  }
-  return false;
-}
-
-function constructPageOptions({
-  pageActionConfig,
-  domain,
-  slug,
-  frontmatterLayout,
-}: {
-  pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
-  domain: ParamValue;
-  slug: ParamValue;
-  frontmatterLayout: string;
-}): FernDropdown.PageActionOption[] | undefined {
-  if (shouldHideDropdown(frontmatterLayout, pageActionConfig)) {
-    return undefined;
-  }
-
-  const options: FernDropdown.PageActionOption[] = [
-    CopyPageOption(),
-    Separator(),
-    ViewAsMarkdownOption(),
-  ];
-
-  if (isSelfHosted()) {
-    return options;
-  }
-
-  if (pageActionConfig.pageActions?.claude !== false) {
-    options.push(Separator(), OpenWithLLM({ domain, slug, llm: "Claude" }));
-  }
-
-  if (pageActionConfig.pageActions?.openAi !== false) {
-    options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT" }));
-  }
-
-  return options;
 }

@@ -4,6 +4,7 @@ import React from "react";
 
 import { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { FernDropdown } from "@fern-docs/components";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 
@@ -25,6 +26,7 @@ export async function GrpcContent({
   action,
   bottomNavigation,
   hideFeedback,
+  pageActionOptions,
 }: {
   serialize: MdxSerializer;
   context: GrpcContext;
@@ -32,6 +34,7 @@ export async function GrpcContent({
   action?: React.ReactNode;
   bottomNavigation?: React.ReactNode;
   hideFeedback: boolean;
+  pageActionOptions?: FernDropdown.PageActionOption[];
 }) {
   const { node, grpc, types } = context;
 
@@ -55,6 +58,7 @@ export async function GrpcContent({
               )
             }
             slug={node.slug}
+            pageActionOptions={pageActionOptions}
           />
         }
         aside={<GrpcContentCodeSnippets node={node} />}

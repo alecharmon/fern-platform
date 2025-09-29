@@ -4,6 +4,7 @@ import React from "react";
 
 import { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { FernDropdown } from "@fern-docs/components";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 
@@ -39,6 +40,7 @@ export async function EndpointContent({
   action,
   bottomNavigation,
   hideFeedback,
+  pageActionOptions,
 }: {
   serialize: MdxSerializer;
   showErrors: boolean;
@@ -48,6 +50,7 @@ export async function EndpointContent({
   action?: React.ReactNode;
   bottomNavigation?: React.ReactNode;
   hideFeedback: boolean;
+  pageActionOptions?: FernDropdown.PageActionOption[];
 }) {
   const { node, endpoint, types } = context;
 
@@ -62,6 +65,7 @@ export async function EndpointContent({
             action={action}
             tags={getAvailabilityBadge(endpoint, node)}
             slug={node.slug}
+            pageActionOptions={pageActionOptions}
           >
             <EndpointUrlWithPlaygroundBaseUrl
               endpoint={endpoint}

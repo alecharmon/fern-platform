@@ -2,6 +2,7 @@ import "server-only";
 
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { FernDropdown } from "@fern-docs/components";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { Prose } from "@fern-docs/components/mdx/prose";
 
@@ -30,6 +31,7 @@ export async function WebhookContent({
   bottomNavigation,
   action,
   hideFeedback,
+  pageActionOptions,
 }: {
   serialize: MdxSerializer;
   context: ApiDefinition.WebhookContext;
@@ -37,6 +39,7 @@ export async function WebhookContent({
   bottomNavigation: React.ReactNode;
   action?: React.ReactNode;
   hideFeedback: boolean;
+  pageActionOptions?: FernDropdown.PageActionOption[];
 }) {
   const { node, webhook, types } = context;
 
@@ -55,6 +58,7 @@ export async function WebhookContent({
           title={node.title}
           action={action}
           slug={node.slug}
+          pageActionOptions={pageActionOptions}
         />
       }
       aside={webhookExample}

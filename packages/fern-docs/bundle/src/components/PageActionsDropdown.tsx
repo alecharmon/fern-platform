@@ -19,7 +19,7 @@ export function PageActionsDropdown({
   markdown,
   pageActionOptions,
 }: {
-  markdown: string;
+  markdown?: string;
   pageActionOptions: FernDropdown.PageActionOption[];
 }) {
   const [showCopied, setShowCopied] = useState<boolean>(false);
@@ -30,10 +30,6 @@ export function PageActionsDropdown({
   const setSearchPanelState = useSetAtom(searchPanelOpenAtom);
   const setPageContext = useSetPageContext();
   const isAskAiEnabled = useIsAskAiEnabled();
-
-  if (isAskAiEnabled) {
-    pageActionOptions.unshift(OpenAISearchOption(), Separator());
-  }
 
   const options = isAskAiEnabled
     ? [OpenAISearchOption(), Separator(), ...pageActionOptions]
@@ -58,6 +54,8 @@ export function PageActionsDropdown({
             setShowCopied(false);
           }, 2000);
         });
+      } else {
+        // TODO: load markdown for the page
       }
     } else if (value === "open-ai-search") {
       const pageContext = {

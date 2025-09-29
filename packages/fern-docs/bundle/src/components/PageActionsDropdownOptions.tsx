@@ -1,12 +1,12 @@
-"use client";
-
 import { ParamValue } from "next/dist/server/request/params";
-import { usePathname } from "next/navigation";
 import { type ReactNode } from "react";
 
 import { Copy, ExternalLink } from "lucide-react";
 
+import { DocsV1Read } from "@fern-api/fdr-sdk";
 import { FernDropdown } from "@fern-docs/components";
+
+import { isSelfHosted } from "@/server/isSelfHosted";
 
 import {
   ClaudeIcon,
@@ -32,15 +32,16 @@ export const CopyPageOption = (): FernDropdown.ValueOption => {
   } as FernDropdown.ValueOption;
 };
 
-export const ViewAsMarkdownOption = (): FernDropdown.ValueOption => {
-  const pathname = usePathname();
+export const ViewAsMarkdownOption = (
+  slug: string
+): FernDropdown.ValueOption => {
   return {
     type: "value",
     value: "view-as-markdown",
     label: "View as Markdown",
     helperText: "View this page as plain text",
     icon: <MarkdownIcon />,
-    href: `${pathname}.md`,
+    href: `${slug}.md`,
     rightElement: <ExternalLink className="size-icon" />,
   } as FernDropdown.ValueOption;
 };
@@ -112,3 +113,33 @@ export const OpenWithLLM = ({
     rightElement: <ExternalLink className="size-icon" />,
   } as FernDropdown.ValueOption;
 };
+
+export function constructPageOptions({
+  pageActionConfig,
+  domain,
+  slug,
+}: {
+  pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
+  domain: ParamValue;
+  slug: ParamValue;
+}): FernDropdown.PageActionOption[] | undefined {
+  const options: FernDropdown.PageActionOption[] = [CopyPageOption()];
+
+  if (slug?.toString()) {
+    options.push(Separator(), ViewAsMarkdownOption(slug?.toString()));
+  }
+
+  if (isSelfHosted()) {
+    return options;
+  }
+
+  if (pageActionConfig.pageActions?.claude !== false) {
+    options.push(Separator(), OpenWithLLM({ domain, slug, llm: "Claude" }));
+  }
+
+  if (pageActionConfig.pageActions?.openAi !== false) {
+    options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT" }));
+  }
+
+  return options;
+}

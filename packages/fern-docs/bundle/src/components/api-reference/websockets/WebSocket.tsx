@@ -6,7 +6,7 @@ import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernScrollArea } from "@fern-docs/components";
+import { FernDropdown, FernScrollArea } from "@fern-docs/components";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 
@@ -41,6 +41,7 @@ export async function WebSocketContent({
   bottomNavigation,
   action,
   hideFeedback,
+  pageActionOptions,
 }: {
   serialize: MdxSerializer;
   context: WebSocketContext;
@@ -48,6 +49,7 @@ export async function WebSocketContent({
   bottomNavigation: React.ReactNode;
   action?: React.ReactNode;
   hideFeedback: boolean;
+  pageActionOptions?: FernDropdown.PageActionOption[];
 }) {
   const { channel, node, types, globalHeaders } = context;
 
@@ -103,6 +105,7 @@ export async function WebSocketContent({
           }
           action={action}
           slug={node.slug}
+          pageActionOptions={pageActionOptions}
         >
           <EndpointUrlWithPlaygroundBaseUrl
             endpoint={channel}

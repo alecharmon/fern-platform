@@ -1,6 +1,7 @@
 import "server-only";
 
-import { DocsLoader, createPruneKey } from "@fern-api/docs-loader";
+import { createPruneKey } from "@fern-api/docs-loader";
+import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import {
   ApiDefinition,
   createEndpointContext,
@@ -10,9 +11,11 @@ import {
   prune,
 } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { FernDropdown } from "@fern-docs/components";
 
 import { MdxSerializer } from "@/server/mdx-serializer";
 
+import { constructPageOptions } from "../PageActionsDropdownOptions";
 import { EndpointContent } from "./endpoints/EndpointContent";
 import { GrpcContent } from "./grpcs/GrpcContent";
 import { WebhookContent } from "./webhooks/WebhookContent";
@@ -38,7 +41,13 @@ export default async function ApiEndpointPage({
     createPruneKey(node)
   );
 
-  const configLayout = await loader.getLayout();
+  const config = await loader.getConfig();
+  const layout = await loader.getLayout();
+  const pageActionOptions = constructPageOptions({
+    pageActionConfig: config,
+    domain: loader.domain,
+    slug: node.slug,
+  });
 
   return (
     <ApiEndpointContent
@@ -46,11 +55,10 @@ export default async function ApiEndpointPage({
       node={node}
       apiDefinition={apiDefinition}
       breadcrumb={breadcrumb}
-      bottomNavigation={
-        configLayout.hideNavLinks ? undefined : bottomNavigation
-      }
+      bottomNavigation={layout.hideNavLinks ? undefined : bottomNavigation}
       action={action}
-      hideFeedback={configLayout.hideFeedback}
+      hideFeedback={layout.hideFeedback}
+      pageActionOptions={pageActionOptions}
     />
   );
 }
@@ -63,6 +71,7 @@ async function ApiEndpointContent({
   breadcrumb,
   bottomNavigation,
   hideFeedback,
+  pageActionOptions,
 }: {
   serialize: MdxSerializer;
   node: FernNavigation.NavigationNodeApiLeaf;
@@ -71,6 +80,7 @@ async function ApiEndpointContent({
   breadcrumb: readonly FernNavigation.BreadcrumbItem[];
   bottomNavigation?: React.ReactNode;
   hideFeedback: boolean;
+  pageActionOptions?: FernDropdown.PageActionOption[];
 }) {
   switch (node.type) {
     case "endpoint": {
@@ -88,6 +98,7 @@ async function ApiEndpointContent({
           bottomNavigation={bottomNavigation}
           showAuth
           hideFeedback={hideFeedback}
+          pageActionOptions={pageActionOptions}
         />
       );
     }
@@ -104,6 +115,7 @@ async function ApiEndpointContent({
           action={action}
           bottomNavigation={bottomNavigation}
           hideFeedback={hideFeedback}
+          pageActionOptions={pageActionOptions}
         />
       );
     }
@@ -120,6 +132,7 @@ async function ApiEndpointContent({
           action={action}
           bottomNavigation={bottomNavigation}
           hideFeedback={hideFeedback}
+          pageActionOptions={pageActionOptions}
         />
       );
     }
@@ -136,6 +149,7 @@ async function ApiEndpointContent({
           action={action}
           bottomNavigation={bottomNavigation}
           hideFeedback={hideFeedback}
+          pageActionOptions={pageActionOptions}
         />
       );
     }
