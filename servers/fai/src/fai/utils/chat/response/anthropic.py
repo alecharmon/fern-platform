@@ -8,7 +8,7 @@ from src.fai.models.utils.chat import (
     format_record,
 )
 from src.fai.utils.chat.prompts.anthropic import build_anthropic_system_prompt
-from src.fai.utils.chat.retrieve.v1_retrieve import v1_retrieve
+from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.fai.utils.chat.tools import SEARCH_TOOL_ANTHROPIC
 from src.settings import VARIABLES
 
@@ -23,7 +23,7 @@ async def get_anthropic_response(
 ) -> tuple[list[dict[str, str]], list[str]]:
     async def _handle_anthropic_tool_use(tool_use: Any, domain: str) -> tuple[str, list[str]]:
         query = tool_use.input["query"]
-        query_results: list[Row] = await v1_retrieve(query, domain)
+        query_results: list[Row] = await retrieve(query, domain)
         rag_records = [format_record(result) for result in query_results]
         return tool_use.id, rag_records
 

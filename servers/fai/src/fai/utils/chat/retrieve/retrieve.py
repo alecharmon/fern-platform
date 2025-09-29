@@ -1,10 +1,7 @@
-from collections.abc import Iterable
-from typing import Any
-
 from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
+from turbopuffer.types.row import Row
 
-from src.fai.utils.as_dict import as_dict
 from src.fai.utils.chat.filters import build_filters
 from src.fai.utils.turbopuffer.namespace import (
     get_query_index_name,
@@ -15,58 +12,10 @@ from src.settings import (
     VARIABLES,
 )
 
-DOCUMENT_ATTRIBUTES = ["document", "url", "version", "title", "keywords"]
+DOCUMENT_ATTRIBUTES = ["document", "url", "version", "product", "roles", "title", "keywords"]
 
 
-class TPUFRow:
-    def __init__(self, id: str, score: float | None, attributes: dict[str, Any]):
-        self.id = id
-        self.score = score
-        self.attributes = attributes
-
-    @property
-    def document(self) -> str | None:
-        return self.attributes.get("document")
-
-    @property
-    def url(self) -> str | None:
-        return self.attributes.get("url")
-
-
-def _normalize_rows(rows: Iterable[Any]) -> list[TPUFRow]:
-    norm: list[TPUFRow] = []
-    for r in rows:
-        _id = getattr(r, "id", None)
-        _score = getattr(r, "score", None)
-
-        attrs = {}
-        cand = getattr(r, "attributes", None)
-        if isinstance(cand, dict):
-            attrs.update(cand)
-        cand = getattr(r, "payload", None)
-        if isinstance(cand, dict):
-            attrs.update(cand)
-
-        if not attrs:
-            dumped = as_dict(r)
-            for k in ("attributes", "payload"):
-                v = dumped.get(k)
-                if isinstance(v, dict):
-                    attrs.update(v)
-            for k in DOCUMENT_ATTRIBUTES:
-                if k in dumped and k not in attrs:
-                    attrs[k] = dumped[k]
-
-        if _id is None:
-            _id = as_dict(r).get("id")
-        if _score is None:
-            _score = as_dict(r).get("score")
-
-        norm.append(TPUFRow(id=str(_id), score=_score, attributes=attrs or {}))
-    return norm
-
-
-def _results_to_ranks(items: list[TPUFRow]) -> dict[str, int]:
+def _results_to_ranks(items: list[Row]) -> dict[str, int]:
     ranks: dict[str, int] = {}
     for i, it in enumerate(items, start=1):
         if it and it.id is not None and it.id not in ranks:
@@ -74,8 +23,8 @@ def _results_to_ranks(items: list[TPUFRow]) -> dict[str, int]:
     return ranks
 
 
-def _rrf(bm25: list[TPUFRow], vector: list[TPUFRow], k: int = 60) -> list[TPUFRow]:
-    by_id: dict[str, TPUFRow] = {it.id: it for it in bm25}
+def _rrf(bm25: list[Row], vector: list[Row], k: int = 60) -> list[Row]:
+    by_id: dict[str, Row] = {it.id: it for it in bm25}
     by_id.update({it.id: it for it in vector})
 
     bm25_ranks = _results_to_ranks(bm25)
@@ -91,7 +40,7 @@ def _rrf(bm25: list[TPUFRow], vector: list[TPUFRow], k: int = 60) -> list[TPUFRo
 
     fused = sorted(all_ids, key=lambda _id: scores[_id], reverse=True)
 
-    results: list[TPUFRow] = []
+    results: list[Row] = []
     for _id in fused:
         row = by_id[_id]
         row.score = scores[_id]
@@ -100,7 +49,7 @@ def _rrf(bm25: list[TPUFRow], vector: list[TPUFRow], k: int = 60) -> list[TPUFRo
     return results
 
 
-async def v2_retrieve(
+async def retrieve(
     query: str,
     domain: str,
     *,
@@ -108,7 +57,7 @@ async def v2_retrieve(
     mode: str = "hybrid",  # "semantic" | "bm25" | "hybrid"
     filters: list[dict[str, str]] | None = None,
     exploded_roles: list[str] | None = None,
-) -> list[TPUFRow]:
+) -> list[Row]:
     async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
         async with AsyncTurbopuffer(
             region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
@@ -123,8 +72,8 @@ async def v2_retrieve(
                 exploded_roles=exploded_roles,
             )
 
-            semantic_rows: list[TPUFRow] = []
-            bm25_rows: list[TPUFRow] = []
+            semantic_rows: list[Row] = []
+            bm25_rows: list[Row] = []
 
             if mode != "bm25":
                 embedding = (
@@ -144,7 +93,7 @@ async def v2_retrieve(
                     include_attributes=DOCUMENT_ATTRIBUTES,
                     rank_by=("vector", "ANN", embedding),
                 )
-                semantic_rows = _normalize_rows(getattr(sem_res, "rows", []))
+                semantic_rows = getattr(sem_res, "rows", [])
 
             if mode != "semantic" and len(query) < 1024:
                 bm25_res = await tpuf_ns.query(
@@ -159,7 +108,7 @@ async def v2_retrieve(
                         ],
                     ),
                 )
-                bm25_rows = _normalize_rows(getattr(bm25_res, "rows", []))
+                bm25_rows = getattr(bm25_res, "rows", [])
 
             if mode == "semantic":
                 fused = semantic_rows
@@ -168,8 +117,4 @@ async def v2_retrieve(
             else:
                 fused = _rrf(bm25_rows, semantic_rows, k=60)
 
-            results: list[Any] = []
-            for row in fused:
-                results.append(row)
-
-            return results
+            return fused

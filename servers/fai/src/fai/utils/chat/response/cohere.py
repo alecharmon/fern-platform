@@ -4,7 +4,7 @@ from cohere import AsyncClientV2
 from turbopuffer.types.row import Row
 
 from src.fai.utils.chat.prompts.cohere import build_cohere_system_prompt
-from src.fai.utils.chat.retrieve.v1_retrieve import v1_retrieve
+from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.fai.utils.chat.tools import SEARCH_TOOL_COHERE
 from src.settings import VARIABLES
 
@@ -21,7 +21,7 @@ async def get_cohere_response(
         if isinstance(args, str):
             args = eval(args)
         query = args["query"]
-        query_results: list[Row] = await v1_retrieve(query, domain)
+        query_results: list[Row] = await retrieve(query, domain)
         return tool_use.id, [result.document for result in query_results]
 
     def _build_system_turn(system_prompt: str) -> dict[str, str]:

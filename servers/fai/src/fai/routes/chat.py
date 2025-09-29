@@ -15,7 +15,7 @@ from src.fai.models.api.chat_api import (
 from src.fai.models.types.chat_types import ChatMessage
 from src.fai.utils.chat.response.anthropic import get_anthropic_response
 from src.fai.utils.chat.response.cohere import get_cohere_response
-from src.fai.utils.chat.retrieve.v1_retrieve import v1_retrieve
+from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.settings import LOGGER
 
 SUPPORTED_MODELS = ["claude-4-sonnet-20250514", "command-a-03-2025"]
@@ -38,7 +38,7 @@ async def post_chat_completion(
 
         rag_records: list[str] = []
         if last_user_message:
-            query_results: list[Row] = await v1_retrieve(last_user_message["content"], domain)
+            query_results: list[Row] = await retrieve(last_user_message["content"], domain)
             rag_records.extend([format_record(result) for result in query_results])
 
         maybe_system_prompt = request.system_prompt

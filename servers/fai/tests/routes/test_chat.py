@@ -17,7 +17,7 @@ class TestChat:
         mock_turns = [{"text": "Hello, I can help you with that!"}]
         mock_citations = ["doc1", "doc2"]
 
-        with patch("src.fai.routes.chat.v1_retrieve") as mock_retrieve, patch(
+        with patch("src.fai.routes.chat.retrieve") as mock_retrieve, patch(
             "src.fai.routes.chat.get_anthropic_response"
         ) as mock_anthropic:
             mock_retrieve.return_value = [
@@ -48,7 +48,7 @@ class TestChat:
         mock_turns = [{"text": "Hello from Cohere!"}]
         mock_citations = ["doc3"]
 
-        with patch("src.fai.routes.chat.v1_retrieve") as mock_retrieve, patch(
+        with patch("src.fai.routes.chat.retrieve") as mock_retrieve, patch(
             "src.fai.routes.chat.get_cohere_response"
         ) as mock_cohere:
             mock_retrieve.return_value = [type("Row", (), {"document": "test doc"})()]
@@ -92,7 +92,7 @@ class TestChat:
         mock_turns = [{"text": "No context response"}]
         mock_citations: list[str] = []
 
-        with patch("src.fai.routes.chat.v1_retrieve") as mock_retrieve, patch(
+        with patch("src.fai.routes.chat.retrieve") as mock_retrieve, patch(
             "src.fai.routes.chat.get_anthropic_response"
         ) as mock_anthropic:
             mock_retrieve.return_value = []  # No retrieval results for empty messages
@@ -113,7 +113,7 @@ class TestChat:
         domain = create_test_domain()
         request_body = PostChatCompletionRequestFactory.build()
 
-        with patch("src.fai.routes.chat.v1_retrieve") as mock_retrieve:
+        with patch("src.fai.routes.chat.retrieve") as mock_retrieve:
             mock_retrieve.side_effect = Exception("Retrieve error")
 
             response = test_client.post(

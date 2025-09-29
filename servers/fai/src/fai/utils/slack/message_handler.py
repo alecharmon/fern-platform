@@ -15,7 +15,7 @@ from src.fai.models.db.query_db import QueryDb
 from src.fai.models.db.slack_integration_db import SlackIntegrationDb
 from src.fai.models.utils.chat import ChatMode
 from src.fai.utils.chat.response.anthropic import get_anthropic_response
-from src.fai.utils.chat.retrieve.v2_retrieve import v2_retrieve
+from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.fai.utils.chat.roles import create_delimited_role_combinations
 from src.fai.utils.slack.client import add_reaction
 from src.settings import LOGGER
@@ -156,7 +156,7 @@ async def process_message(
             exploded_roles = create_delimited_role_combinations(roles_with_everyone)
             LOGGER.info(f"Using exploded roles for filtering: {exploded_roles}")
 
-        query_results = await v2_retrieve(text, domain, top_k=top_k, exploded_roles=exploded_roles)
+        query_results = await retrieve(text, domain, top_k=top_k, exploded_roles=exploded_roles)
         rag_records = [result.document for result in query_results if result.document]
 
         LOGGER.info(f"Retrieved {len(rag_records)} documents")
