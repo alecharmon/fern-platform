@@ -51,7 +51,7 @@ export default function ChangelogEntryPage({
                     {node.title}
                   </FernLink>
                 </Badge>
-                <div className="flex flex-row gap-2 pt-2">
+                <div className="filter-row">
                   <PageFilters filters={node.tags ?? []} forcePillDisplay />
                 </div>
               </div>

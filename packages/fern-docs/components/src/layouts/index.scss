@@ -24,14 +24,6 @@
         }
       }
 
-      .fern-changelog-label {
-        @apply flex w-full flex-row gap-2 lg:flex-col;
-
-        .filter-row {
-          @apply flex flex-row flex-wrap gap-2;
-        }
-      }
-
       .fern-filter-badge {
         @apply inline max-w-full cursor-pointer truncate;
       }
@@ -50,6 +42,24 @@
 
       .fern-changelog-content > aside {
         @apply hidden;
+      }
+    }
+
+    .fern-changelog-label {
+      @apply flex w-full flex-row gap-2 lg:flex-col;
+
+      .fern-docs-badge {
+        @apply w-fit;
+      }
+
+      .filter-row {
+        @apply flex flex-row flex-wrap gap-2;
+      }
+    }
+
+    .eyebrow {
+      .fern-changelog-label {
+        @apply flex flex-col;
       }
     }
   }
