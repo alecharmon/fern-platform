@@ -145,7 +145,7 @@ jobs:
         run: pnpm --filter=@fern-docs/bundle run docs:build:local
       - name: Copy static and public files
         working-directory: packages/fern-docs/bundle
-        run: cp -r .next/static .next/standalone/packages/fern-docs/bundle/.next && cp -r public .next/standalone/packages/fern-docs/bundle
+        run: cp -r .next/static .next/standalone/packages/fern-docs/bundle/.next
       - name: Remove unnecessary files
         working-directory: packages/fern-docs/bundle
         run: find .next -depth -mindepth 1 -not -path ".next/standalone*" -exec rm -rf {} \;
