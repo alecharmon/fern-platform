@@ -199,6 +199,7 @@ export default function ChangelogPageClient({
                   >
                     {entries[entry.pageId]}
                   </ChangelogContentLayout>
+                  {i < visibleEntries.length - 1 && <hr className="my-4" />}
                 </Fragment>
               );
             })}
