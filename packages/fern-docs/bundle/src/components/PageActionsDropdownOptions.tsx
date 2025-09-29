@@ -34,6 +34,7 @@ export const CopyPageOption = (): FernDropdown.ValueOption => {
 };
 
 export const ViewAsMarkdownOption = (
+  domain: string,
   slug: string
 ): FernDropdown.ValueOption => {
   return {
@@ -42,7 +43,7 @@ export const ViewAsMarkdownOption = (
     label: "View as Markdown",
     helperText: "View this page as plain text",
     icon: <MarkdownIcon />,
-    href: `${slug}.md`,
+    href: `https://${domain}/${slug}.md`,
     rightElement: <ExternalLink className="size-icon" />,
   } as FernDropdown.ValueOption;
 };
@@ -162,8 +163,11 @@ export async function constructPageOptions({
 }): Promise<FernDropdown.PageActionOption[] | undefined> {
   const options: FernDropdown.PageActionOption[] = [CopyPageOption()];
 
-  if (slug?.toString()) {
-    options.push(Separator(), ViewAsMarkdownOption(slug?.toString()));
+  if (slug?.toString() && domain?.toString()) {
+    options.push(
+      Separator(),
+      ViewAsMarkdownOption(domain?.toString(), slug?.toString())
+    );
   }
 
   if (isSelfHosted()) {
