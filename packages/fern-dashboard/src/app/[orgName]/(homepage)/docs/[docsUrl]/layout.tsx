@@ -9,8 +9,6 @@ import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
 
-export const experimental_ppr = true;
-
 export default async function DocsLayout({
   navbar,
   children,

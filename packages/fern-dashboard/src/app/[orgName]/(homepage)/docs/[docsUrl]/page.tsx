@@ -20,7 +20,6 @@ import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
 
 export const dynamic = "force-dynamic";
-export const experimental_ppr = true;
 
 export default async function Page(props: {
   params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;

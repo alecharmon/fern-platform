@@ -18,8 +18,6 @@ import { EncodedDocsUrl } from "@/utils/types";
 
 import PageNode from "./PageNode";
 
-export const experimental_ppr = true;
-
 export default async function Page({
   params,
   searchParams,

@@ -38,8 +38,6 @@ let nextConfig: NextConfig = {
       "lowlight",
     ],
     useCache: true,
-    // ppr requires next@canary track
-    ppr: "incremental",
   },
   images: {
     remotePatterns: [

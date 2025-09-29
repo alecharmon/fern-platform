@@ -20,8 +20,6 @@ import {
 } from "@/components/ui/popover";
 import { DocsUrl } from "@/utils/types";
 
-export const experimental_ppr = true;
-
 export default async function HeaderLayout({
   params,
 }: Readonly<{
