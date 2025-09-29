@@ -9,5 +9,4 @@ export interface PageActionsConfig {
     claude: boolean | undefined;
     cursor: boolean | undefined;
     vscode: boolean | undefined;
-    apiReference: boolean | undefined;
 }
