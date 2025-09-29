@@ -2121,8 +2121,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       estree-util-value-to-estree:
-        specifier: ^3.2.1
-        version: 3.2.1
+        specifier: ^3.3.3
+        version: 3.4.0
       estree-walker:
         specifier: ^3.0.3
         version: 3.0.3
@@ -13077,6 +13077,9 @@ packages:
 
   estree-util-value-to-estree@3.2.1:
     resolution: {integrity: sha512-Vt2UOjyPbNQQgT5eJh+K5aATti0OjCIAGc9SgMdOFYbohuifsWclR74l0iZTJwePMgWYdX1hlVS+dedH9XV8kw==}
+
+  estree-util-value-to-estree@3.4.0:
+    resolution: {integrity: sha512-Zlp+gxis+gCfK12d3Srl2PdX2ybsEA8ZYy6vQGVQTNNYLEGRQQ56XB64bjemN8kxIKXP1nC9ip4Z+ILy9LGzvQ==}
 
   estree-util-visit@2.0.0:
     resolution: {integrity: sha512-m5KgiH85xAhhW8Wta0vShLcUvOsh3LLPI2YVwcbio1l7E09NTLL1EyMZFM1OyWowoH0skScNbhOPl4kcBgzTww==}
@@ -33853,6 +33856,10 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.6
 
+  estree-util-value-to-estree@3.4.0:
+    dependencies:
+      '@types/estree': 1.0.6
+
   estree-util-visit@2.0.0:
     dependencies:
       '@types/estree-jsx': 1.0.5
@@ -40185,7 +40192,7 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
       estree-util-is-identifier-name: 3.0.0
-      estree-util-value-to-estree: 3.2.1
+      estree-util-value-to-estree: 3.4.0
       toml: 3.0.0
       unified: 11.0.5
       yaml: 2.8.0
