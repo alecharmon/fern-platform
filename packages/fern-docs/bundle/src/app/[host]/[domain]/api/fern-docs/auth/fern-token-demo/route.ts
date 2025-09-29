@@ -81,7 +81,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   cookieJar.set(
     "fern_token",
     fern_token,
-    withSecureCookie(withDefaultProtocol(preferPreview(host, domain)))
+    withSecureCookie(
+      withDefaultProtocol(preferPreview(host, domain)),
+      undefined,
+      domain
+    )
   );
 
   // redirect the user

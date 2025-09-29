@@ -83,7 +83,8 @@ export function normalizeDomainForCookie(hostname: string): string {
  */
 export function withSecureCookie(
   targetUrl: string,
-  opts?: Partial<ResponseCookie>
+  opts?: Partial<ResponseCookie>,
+  domain?: string
 ): Partial<ResponseCookie> {
   const url = new URL(targetUrl);
 
@@ -94,7 +95,7 @@ export function withSecureCookie(
     ...opts,
     secure: url.protocol === "https:",
     httpOnly: true,
-    domain: url.hostname,
+    domain: domain ? domain : url.hostname,
   };
 }
 
