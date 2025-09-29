@@ -3,6 +3,7 @@ import "server-only";
 import React from "react";
 
 import type { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernDropdown } from "@fern-docs/components";
 import { FernLink } from "@fern-docs/components/FernLink";
 
 import { MdxServerComponent } from "@/mdx/components/server-component";
@@ -24,7 +25,7 @@ export function PageHeader({
   subtitle,
   children,
   markdown,
-  includeDropdown,
+  pageActionOptions,
   showRssFeedButton,
   filters,
 }: {
@@ -38,7 +39,7 @@ export function PageHeader({
   tags?: React.ReactNode;
   children?: React.ReactNode;
   markdown?: string;
-  includeDropdown?: boolean;
+  pageActionOptions?: FernDropdown.PageActionOption[];
   showRssFeedButton?: boolean;
   // tags for the changelog section
   filters?: string[];
@@ -75,9 +76,12 @@ export function PageHeader({
             )}
             {tags}
           </div>
-          {includeDropdown && markdown && (
+          {markdown && pageActionOptions && (
             <div className="hidden md:flex">
-              <PageActionsDropdown markdown={markdown} />
+              <PageActionsDropdown
+                markdown={markdown}
+                pageActionOptions={pageActionOptions}
+              />
             </div>
           )}
           {showRssFeedButton && (

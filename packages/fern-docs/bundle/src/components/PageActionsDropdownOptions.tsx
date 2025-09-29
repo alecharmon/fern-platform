@@ -16,6 +16,12 @@ import {
   TextIcon,
 } from "./PageActionsDropdownAssets";
 
+export const Separator = (): FernDropdown.SeparatorOption => {
+  return {
+    type: "separator",
+  } as FernDropdown.SeparatorOption;
+};
+
 export const CopyPageOption = (): FernDropdown.ValueOption => {
   return {
     type: "value",

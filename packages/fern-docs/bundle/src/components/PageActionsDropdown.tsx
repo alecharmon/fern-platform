@@ -7,21 +7,21 @@ import { useState } from "react";
 import { useSetAtom } from "jotai";
 import { Check, ChevronDown, Copy } from "lucide-react";
 
-import { isSelfHosted } from "@fern-api/docs-server";
 import { FernButton, FernDropdown } from "@fern-docs/components";
 
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { useIsAskAiEnabled } from "@/state/search";
 import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
 
-import {
-  CopyPageOption,
-  OpenAISearchOption,
-  OpenWithLLM,
-  ViewAsMarkdownOption,
-} from "./PageActionsDropdownOptions";
+import { OpenAISearchOption, Separator } from "./PageActionsDropdownOptions";
 
-export function PageActionsDropdown({ markdown }: { markdown: string }) {
+export function PageActionsDropdown({
+  markdown,
+  pageActionOptions,
+}: {
+  markdown: string;
+  pageActionOptions: FernDropdown.PageActionOption[];
+}) {
   const [showCopied, setShowCopied] = useState<boolean>(false);
   const { domain, slug } = useParams();
 
@@ -29,25 +29,19 @@ export function PageActionsDropdown({ markdown }: { markdown: string }) {
   // const setSearchDialogState = useSetAtom(searchDialogOpenAtom);
   const setSearchPanelState = useSetAtom(searchPanelOpenAtom);
   const setPageContext = useSetPageContext();
+  const isAskAiEnabled = useIsAskAiEnabled();
 
-  const copyOption = CopyPageOption();
-  const viewAsMarkdownOption = ViewAsMarkdownOption();
-  const openAISearchOption = OpenAISearchOption();
-
-  let options: FernDropdown.Option[] = [copyOption];
-  if (useIsAskAiEnabled()) {
-    options.push({ type: "separator" } as FernDropdown.SeparatorOption);
-    options.push(openAISearchOption);
-  } else if (!isSelfHosted()) {
-    options.push({ type: "separator" } as FernDropdown.SeparatorOption);
-    options.push(OpenWithLLM({ domain, slug, llm: "ChatGPT" }));
-    options.push({ type: "separator" } as FernDropdown.SeparatorOption);
-    options.push(OpenWithLLM({ domain, slug, llm: "Claude" }));
+  if (isAskAiEnabled) {
+    pageActionOptions.unshift(OpenAISearchOption(), Separator());
   }
-  options = options.concat([
-    { type: "separator" } as FernDropdown.SeparatorOption,
-    viewAsMarkdownOption,
-  ]);
+
+  const options = isAskAiEnabled
+    ? [OpenAISearchOption(), Separator(), ...pageActionOptions]
+    : pageActionOptions;
+
+  if (options.length === 0) {
+    return null;
+  }
 
   const handleValueChange = async (value: string) => {
     if (value === "copy-page") {

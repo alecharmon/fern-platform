@@ -64,6 +64,8 @@ export declare namespace FernDropdown {
     type: "separator";
   }
 
+  export type PageActionOption = ValueOption | SeparatorOption;
+
   export type Option =
     | ProductOption
     | ValueOption

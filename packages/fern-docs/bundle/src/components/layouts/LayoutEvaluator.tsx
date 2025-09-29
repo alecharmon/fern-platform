@@ -1,10 +1,14 @@
 import "server-only";
 
+import { ParamValue } from "next/dist/server/request/params";
 import React from "react";
 
+import { isSelfHosted } from "@fern-api/docs-server";
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { FernDropdown } from "@fern-docs/components";
 import {
   Availability,
   AvailabilityBadge,
@@ -16,6 +20,12 @@ import { MdxContent } from "@/mdx/components/MdxContent";
 import { MdxSerializer } from "@/server/mdx-serializer";
 
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
+import {
+  CopyPageOption,
+  OpenWithLLM,
+  Separator,
+  ViewAsMarkdownOption,
+} from "../PageActionsDropdownOptions";
 import { PageHeader } from "../PageHeader";
 import { BuiltWithFern } from "../built-with-fern";
 import { FooterLayout } from "./FooterLayout";
@@ -64,7 +74,7 @@ export async function LayoutEvaluator({
     frontmatterLayout = "reference";
   }
 
-  const configLayout = await loader.getLayout();
+  const config = await loader.getConfig();
 
   const pageHeader = (
     <PageHeader
@@ -74,7 +84,12 @@ export async function LayoutEvaluator({
       breadcrumb={breadcrumb}
       slug={slug}
       markdown={markdown}
-      includeDropdown={frontmatterLayout !== "reference"}
+      pageActionOptions={constructPageOptions({
+        pageActionConfig: config,
+        domain: loader.domain,
+        slug,
+        frontmatterLayout,
+      })}
       tags={
         availability && (
           <AvailabilityBadge availability={availability} rounded />
@@ -86,9 +101,11 @@ export async function LayoutEvaluator({
   // prefer frontmatter values over global config
   const footer = (
     <FooterLayout
-      hideFeedback={frontmatter?.["hide-feedback"] ?? configLayout.hideFeedback}
+      hideFeedback={
+        frontmatter?.["hide-feedback"] ?? config.layout?.hideFeedback
+      }
       hideNavLinks={
-        frontmatter?.["hide-nav-links"] ?? configLayout.hideNavLinks
+        frontmatter?.["hide-nav-links"] ?? config.layout?.hideNavLinks
       }
       editThisPageUrl={frontmatter?.["edit-this-page-url"]}
       bottomNavigation={bottomNavigation}
@@ -119,4 +136,50 @@ export async function LayoutEvaluator({
       />
     </AbstractLayoutEvaluatorContent>
   );
+}
+
+function shouldHideDropdown(
+  frontmatterLayout: string,
+  config: Omit<DocsV1Read.DocsConfig, "navigation" | "root">
+) {
+  if (frontmatterLayout === "reference") {
+    return !config.pageActions?.apiReference;
+  }
+  return false;
+}
+
+function constructPageOptions({
+  pageActionConfig,
+  domain,
+  slug,
+  frontmatterLayout,
+}: {
+  pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
+  domain: ParamValue;
+  slug: ParamValue;
+  frontmatterLayout: string;
+}): FernDropdown.PageActionOption[] | undefined {
+  if (shouldHideDropdown(frontmatterLayout, pageActionConfig)) {
+    return undefined;
+  }
+
+  const options: FernDropdown.PageActionOption[] = [
+    CopyPageOption(),
+    Separator(),
+    ViewAsMarkdownOption(),
+  ];
+
+  if (isSelfHosted()) {
+    return options;
+  }
+
+  if (pageActionConfig.pageActions?.claude !== false) {
+    options.push(Separator(), OpenWithLLM({ domain, slug, llm: "Claude" }));
+  }
+
+  if (pageActionConfig.pageActions?.openAi !== false) {
+    options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT" }));
+  }
+
+  return options;
 }
