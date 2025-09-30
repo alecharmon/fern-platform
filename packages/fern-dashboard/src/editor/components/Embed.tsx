@@ -8,6 +8,7 @@ import {
   EditorComponentPopoverProvider,
 } from "@/components/editor/editor-component/EditorComponentPopover";
 import { TextInputControl } from "@/components/editor/editor-component/controls";
+import { useFileResolver } from "@/providers/FileResolverContext";
 
 export const EMPTY_EMBED_CONTENT = `
 <embed src="" />
@@ -25,7 +26,10 @@ export declare namespace Embed {
 
 export function Embed({ src, type, ...props }: Embed.Props) {
   const { isWithinEditor } = useEditorComponent();
+  const { resolveFileSrc } = useFileResolver();
   const embedRef = useRef<HTMLDivElement>(null);
+
+  const resolvedSrc = resolveFileSrc(src);
 
   const embedContent = (
     <div ref={embedRef} className="relative w-full">
@@ -43,7 +47,7 @@ export function Embed({ src, type, ...props }: Embed.Props) {
         </div>
       ) : (
         // Render embed when src is provided
-        <embed src={src} type={type} {...props} />
+        <embed src={resolvedSrc?.src || src} type={type} {...props} />
       )}
     </div>
   );

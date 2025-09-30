@@ -4,7 +4,6 @@ import { NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 
 import FernEditorMDXRenderer from "@/components/editor/editor-mdx-renderer/FernEditorMDXRenderer";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
-import { useFileResolver } from "@/providers/FileResolverContext";
 
 import { UnsupportedContent } from "../UnsupportedContent";
 
@@ -16,8 +15,6 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
   const mdxb64 = attrs["fve-mdx-b64"];
   const newlyCreated = attrs["fve-newly-created"];
   const mdx = Buffer.from(mdxb64, "base64").toString("utf-8");
-
-  const { resolveFileSrc } = useFileResolver();
 
   // Delete the node when mdxb64 becomes empty
   const handleDelete = useCallback(() => {
@@ -41,27 +38,8 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
   }, [mdxb64, handleDelete]);
 
   const handleUpdate = (updatedMdx: string) => {
-    // Match img and embed tags and resolve their src attributes
-    const tagRegex =
-      /<(img|embed|video)\s+([^>]*?)src=["']([^"']+)["']([^>]*?)>/g;
-    const processedMdx = updatedMdx.replace(
-      tagRegex,
-      (
-        _match: string,
-        tag: string,
-        beforeSrc: string,
-        src: string,
-        afterSrc: string
-      ) => {
-        const resolvedFileData = resolveFileSrc(src);
-        const resolvedSrc = resolvedFileData?.src || src;
-
-        return `<${tag} ${beforeSrc}src="${resolvedSrc}"${afterSrc}>`;
-      }
-    );
-
     updateAttributes({
-      "fve-mdx-b64": Buffer.from(processedMdx).toString("base64"),
+      "fve-mdx-b64": Buffer.from(updatedMdx).toString("base64"),
       "fve-newly-created": false,
     });
   };
