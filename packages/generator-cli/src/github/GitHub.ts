@@ -133,7 +133,7 @@ export class GitHub {
       if (
         !trimmedLine.startsWith("#") &&
         trimmedLine.length > 0 &&
-        !(await repository.fileExists({ relativeFilePath: trimmedLine }))
+        (await repository.fileExists({ relativeFilePath: trimmedLine }))
       ) {
         fernignoreFiles.push(trimmedLine);
       }
