@@ -521,7 +521,7 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
       <Popover.Portal>
         <Popover.Content
           className={cn(
-            "bg-popover text-popover-foreground border-border-default z-50 w-80 rounded-lg border p-4 shadow-md",
+            "bg-popover text-popover-foreground border-border-default z-50 flex max-h-[400px] w-80 flex-col rounded-lg border p-0 shadow-md",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -532,43 +532,41 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
           )}
           sideOffset={5}
         >
-          <div className="space-y-4">
-            <div className="space-y-3">
-              {(Object.entries(attributes) as [keyof T, T[keyof T]][]).map(
-                ([name, control]) => (
-                  <ControlRenderer
-                    key={name as string}
-                    name={name as string}
-                    control={control}
-                    value={tempValues[name]}
-                    onChange={(value) =>
-                      setTempValues((prev) => ({ ...prev, [name]: value }))
-                    }
-                  />
-                )
-              )}
-            </div>
+          <div className="flex-1 space-y-3 overflow-y-auto p-4">
+            {(Object.entries(attributes) as [keyof T, T[keyof T]][]).map(
+              ([name, control]) => (
+                <ControlRenderer
+                  key={name as string}
+                  name={name as string}
+                  control={control}
+                  value={tempValues[name]}
+                  onChange={(value) =>
+                    setTempValues((prev) => ({ ...prev, [name]: value }))
+                  }
+                />
+              )
+            )}
+          </div>
 
-            <div className="flex justify-between pt-2">
-              {!disableDelete && (
-                <Button
-                  variant="ghost"
-                  size="iconSm"
-                  onClick={handleDeletePressed}
-                  className="hover:text-red-600"
-                >
-                  <Trash2 />
-                </Button>
-              )}
+          <div className="bg-popover border-border-default flex shrink-0 justify-between rounded-b-lg border-t p-2">
+            {!disableDelete && (
+              <Button
+                variant="ghost"
+                size="iconSm"
+                onClick={handleDeletePressed}
+                className="hover:text-red-600"
+              >
+                <Trash2 />
+              </Button>
+            )}
 
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCancelPressed}>
-                  Cancel
-                </Button>
-                <Button size="sm" onClick={handleSavePressed}>
-                  Save
-                </Button>
-              </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={handleCancelPressed}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSavePressed}>
+                Save
+              </Button>
             </div>
           </div>
         </Popover.Content>

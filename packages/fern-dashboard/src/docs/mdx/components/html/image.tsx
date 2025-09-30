@@ -109,7 +109,7 @@ export const Image = forwardRef<
             />
           );
 
-          if (isImageZoomDisabled) {
+          if (isImageZoomDisabled || isWithinEditor) {
             return fernImage;
           }
 
