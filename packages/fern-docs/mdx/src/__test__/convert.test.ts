@@ -30,7 +30,6 @@ describe("mdxToHtml and htmlToMdx", () => {
   it("mdxToHtml: with custom element", () => {
     const result = mdxToHtml(mdxWithCustom);
     expect(result.html).toContain("custom-element-v2");
-    expect(result.html).toContain('fve-unsupported="true"');
     expect(result.frontmatter).toMatchInlineSnapshot(`{}`);
   });
 
@@ -70,7 +69,6 @@ describe("mdxToHtml and htmlToMdx", () => {
   it("mdxToHtml: with image", () => {
     const result = mdxToHtml(mdxWithImage);
     expect(result.html).toContain("custom-element-v2");
-    expect(result.html).toContain('fve-unsupported="true"');
     const expectedB64 = Buffer.from(
       '![Alt text](image.png "Title")',
       "utf-8"

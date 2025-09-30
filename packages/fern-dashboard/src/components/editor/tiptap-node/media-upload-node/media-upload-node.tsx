@@ -382,12 +382,10 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
 
           if (file && isVideo(file)) {
             return createCustomElementNode(
-              "video",
               `<video src="${url}" title="${filename}" controls></video>`
             );
           } else {
             return createCustomElementNode(
-              "img",
               `<img src="${url}" alt="${filename}" title="${filename}" />`
             );
           }
@@ -440,11 +438,8 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
     }
 
     const newMediaNode = isVideoUrl(imageUrl)
-      ? createCustomElementNode(
-          "video",
-          `<video src="${imageUrl}" controls></video>`
-        )
-      : createCustomElementNode("img", `<img src="${imageUrl}" />`);
+      ? createCustomElementNode(`<video src="${imageUrl}" controls></video>`)
+      : createCustomElementNode(`<img src="${imageUrl}" />`);
 
     props.editor
       .chain()

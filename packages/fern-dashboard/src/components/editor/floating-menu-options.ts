@@ -31,16 +31,8 @@ import { EMPTY_TABS_CONTENT } from "@/docs/mdx/components/tabs/Tabs";
 import { SuggestionItem } from "../tiptap-ui-utils/suggestion-menu";
 import { createCustomElementNode } from "./extension-custom-element/create-custom-element-node";
 
-const handleCustomNodeInsert = (
-  editor: Editor,
-  tagName: string,
-  content: string
-) => {
-  editor
-    .chain()
-    .focus()
-    .insertContent(createCustomElementNode(tagName, content))
-    .run();
+const handleCustomNodeInsert = (editor: Editor, content: string) => {
+  editor.chain().focus().insertContent(createCustomElementNode(content)).run();
 };
 
 export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
@@ -93,9 +85,9 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     aliases: ["accordion"],
     badge: ChevronDown,
     group: "Components",
-    keywords: ["accordion", "accordion group"],
+    keywords: ["accordion"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "Accordion", EMPTY_ACCORDION_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_ACCORDION_CONTENT);
     },
   },
   {
@@ -104,13 +96,9 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     aliases: ["accordion", "accordion group"],
     badge: ChevronsDown,
     group: "Components",
-    keywords: ["accordion", "accordion group"],
+    keywords: ["accordion", "accordion group", "accordiongroup"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(
-        editor,
-        "AccordionGroup",
-        EMPTY_ACCORDION_GROUP_CONTENT
-      );
+      handleCustomNodeInsert(editor, EMPTY_ACCORDION_GROUP_CONTENT);
     },
   },
   {
@@ -121,7 +109,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     group: "Components",
     keywords: ["callout", "tip", "note", "warning", "error", "success"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "Callout", EMPTY_CALLOUT_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_CALLOUT_CONTENT);
     },
   },
   {
@@ -132,7 +120,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     group: "Components",
     keywords: ["card"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "Card", EMPTY_CARD_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_CARD_CONTENT);
     },
   },
   {
@@ -141,9 +129,9 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     aliases: ["card", "card group"],
     badge: Grid2X2,
     group: "Components",
-    keywords: ["card", "card group"],
+    keywords: ["card", "card group", "cardgroup"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "CardGroup", EMPTY_CARD_GROUP_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_CARD_GROUP_CONTENT);
     },
   },
   {
@@ -154,7 +142,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     group: "Components",
     keywords: ["parameter", "parameter field"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "ParamField", EMPTY_PARAM_FIELD_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_PARAM_FIELD_CONTENT);
     },
   },
   {
@@ -165,7 +153,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     group: "Components",
     keywords: ["steps", "step", "step group"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "Steps", EMPTY_STEPS_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_STEPS_CONTENT);
     },
   },
   {
@@ -176,7 +164,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     group: "Components",
     keywords: ["tabs", "tab", "option"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "Tabs", EMPTY_TABS_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_TABS_CONTENT);
     },
   },
   {
@@ -187,7 +175,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     group: "Components",
     keywords: ["button"],
     onSelect: ({ editor }) => {
-      handleCustomNodeInsert(editor, "Button", EMPTY_BUTTON_CONTENT);
+      handleCustomNodeInsert(editor, EMPTY_BUTTON_CONTENT);
     },
   },
 ];

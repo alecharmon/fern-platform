@@ -15,12 +15,7 @@ import {
   frontmatterToMarkdown,
 } from "mdast-util-frontmatter";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
-import {
-  MdxJsxAttribute,
-  MdxJsxFlowElement,
-  mdxFromMarkdown,
-  mdxToMarkdown,
-} from "mdast-util-mdx";
+import { mdxFromMarkdown, mdxToMarkdown } from "mdast-util-mdx";
 import {
   Handler as ToHastHandler,
   State as ToHastState,
@@ -290,8 +285,7 @@ export function mdxToHtml(
 
     return mdxUnsupportedCustomElementNodev2(
       generateContentHash(positionStart, positionEnd, content),
-      content,
-      name
+      content
     );
   }
 
@@ -395,55 +389,23 @@ export function htmlToMdx(
     return getToMdastDefaultHandler(element.tagName as any)(state, element);
   };
 
-  const customElementv2Handler: ToMdastHandle = (state, element) => {
+  const customElementv2Handler: ToMdastHandle = (_, element) => {
     // Parse fve-data-* properties into MDX attributes and extract name/type/hash
     const props = element.properties || {};
-    let name: string | null = null;
-    const attributes: MdxJsxAttribute[] = [];
-    // Handle unsupported elements first
-    if (
-      typeof props["fve-unsupported"] === "string" &&
-      props["fve-unsupported"] === "true"
-    ) {
-      const content = props["fve-mdx-b64"];
-      if (typeof content !== "string") {
-        throw new Error(
-          `expected string content in fve-mdx-b64, found: ${typeof content}`
-        );
-      }
 
-      const originalMdx = Buffer.from(content, "base64").toString("utf-8");
-      const id = Math.random().toString().slice(2, 14);
-      const placeholder = `PLACEHOLDERV2_${id}`;
-      placeholders[placeholder] = originalMdx;
-
-      return { type: "html", value: placeholder } as any;
+    const content = props["fve-mdx-b64"];
+    if (typeof content !== "string") {
+      throw new Error(
+        `expected string content in fve-mdx-b64, found: ${typeof content}`
+      );
     }
 
-    // Also handle fve-data-name for the element name
-    if (typeof props["fve-data-name"] === "string") {
-      name = props["fve-data-name"];
-    }
+    const originalMdx = Buffer.from(content, "base64").toString("utf-8");
+    const id = Math.random().toString().slice(2, 14);
+    const placeholder = `PLACEHOLDERV2_${id}`;
+    placeholders[placeholder] = originalMdx;
 
-    // Optionally, handle legacy fve-data-prop-* attributes (if any)
-    for (const [key, value] of Object.entries(props)) {
-      if (key.startsWith("fve-data-prop-") && typeof value === "string") {
-        // Custom prop, strip prefix
-        attributes.push({
-          type: "mdxJsxAttribute",
-          name: key.replace(/^fve-data-prop-/, ""),
-          value,
-        });
-      }
-    }
-
-    // TODO(cberry): don't coerce the type here, handle the error, with honor
-    return {
-      type: "mdxJsxFlowElement",
-      name,
-      attributes,
-      children: state.all(element),
-    } as MdxJsxFlowElement;
+    return { type: "html", value: placeholder } as any;
   };
 
   // Get mdast from hast (and handle custom elements)
@@ -881,8 +843,7 @@ function mdxBaseElementNode(
 // Create node for a custom element -- colton v2 test
 function mdxUnsupportedCustomElementNodev2(
   id: string,
-  originalMdxContent: string,
-  name: string | undefined
+  originalMdxContent: string
 ) {
   return {
     type: "element" as const,
@@ -890,11 +851,9 @@ function mdxUnsupportedCustomElementNodev2(
     // These data attributes help the client to handle the custom element
     properties: {
       "fve-data-id": id,
-      "fve-data-name": name,
       "fve-mdx-b64": Buffer.from(originalMdxContent, "utf-8").toString(
         "base64"
       ),
-      "fve-unsupported": "true",
     },
     children: [],
   };

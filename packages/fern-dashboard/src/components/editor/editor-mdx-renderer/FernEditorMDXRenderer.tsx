@@ -72,6 +72,7 @@ function buildMdxElement(
 interface FernEditorMDXRendererProps {
   mdx: string;
   onUpdate: (mdx: string) => unknown;
+  newlyCreated?: boolean;
 }
 
 // Bundling state types
@@ -322,12 +323,14 @@ interface JSXElementRendererProps {
   element: JSXElement;
   index: number;
   onUpdate: (mdx: string) => unknown;
+  newlyCreated?: boolean;
 }
 
 const JSXElementRenderer = ({
   element,
   index,
   onUpdate,
+  newlyCreated,
 }: JSXElementRendererProps) => {
   // Debounce the onUpdate callback for TiptapEditor updates (500ms delay)
   const debouncedOnUpdate = useDebounce(onUpdate, 500);
@@ -418,6 +421,7 @@ const JSXElementRenderer = ({
       deleteSelf={() => {
         onUpdate("");
       }}
+      newlyCreated={newlyCreated}
     >
       <MDXRenderer mdx={parentMdxWithInterceptedChildren} />
     </EditorComponentProvider>
@@ -429,25 +433,33 @@ interface ParsedElementRendererProps {
   element: ParsedMarkdownElement;
   index: number;
   onUpdate: (mdx: string) => unknown;
+  newlyCreated?: boolean;
 }
 
 const ParsedElementRenderer = ({
   element,
   index,
   onUpdate,
+  newlyCreated,
 }: ParsedElementRendererProps) => {
   if (element.type === "terminalElement") {
     return <MDXRenderer mdx={element.originalMdx} />;
   }
 
   return (
-    <JSXElementRenderer index={index} element={element} onUpdate={onUpdate} />
+    <JSXElementRenderer
+      index={index}
+      element={element}
+      onUpdate={onUpdate}
+      newlyCreated={newlyCreated}
+    />
   );
 };
 
 const FernEditorMDXRendererInternal = ({
   mdx,
   onUpdate,
+  newlyCreated,
 }: FernEditorMDXRendererProps) => {
   const deleteCounter = useRef(0);
   const parsed = useMemo(() => parseMDX(mdx), [mdx]);
@@ -496,6 +508,7 @@ const FernEditorMDXRendererInternal = ({
       index={index}
       element={element}
       onUpdate={(updatedMdx) => handleChildUpdate(index, updatedMdx)}
+      newlyCreated={newlyCreated}
     />
   ));
 };
@@ -529,8 +542,15 @@ function applyIndentation(mdx: string, indentLevel: number): string {
 const FernEditorMDXRenderer = ({
   mdx,
   onUpdate,
+  newlyCreated,
 }: FernEditorMDXRendererProps) => {
-  return <FernEditorMDXRendererInternal mdx={mdx} onUpdate={onUpdate} />;
+  return (
+    <FernEditorMDXRendererInternal
+      mdx={mdx}
+      onUpdate={onUpdate}
+      newlyCreated={newlyCreated}
+    />
+  );
 };
 
 export default FernEditorMDXRenderer;

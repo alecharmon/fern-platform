@@ -71,13 +71,18 @@ export function EditorComponentPopoverProvider<T extends AttributeConfig>({
   children,
   targetRef,
   hoverSlopThreshold = 0, // Threshold distance in pixels for showing the popover button (0 = all hovers must be within the element itself)
+  openPopoverIfNewlyCreated = true,
 }: {
   attributes: T;
   children: ReactNode;
   targetRef?: RefObject<HTMLElement | null>;
   hoverSlopThreshold?: number;
+  openPopoverIfNewlyCreated?: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { newlyCreated } = useEditorComponent();
+  const [isOpen, setIsOpen] = useState(
+    Boolean(newlyCreated && openPopoverIfNewlyCreated)
+  );
   const [isWithinThreshold, setIsWithinThreshold] = useState(false);
 
   // Initialize values with defaults from controls
@@ -455,6 +460,21 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
 
   const { updateKeyedAttributes, deleteSelf } = useEditorComponent();
 
+  const performSave = () => {
+    setValues(tempValues);
+    updateKeyedAttributes((current) => {
+      return filterEmptyValues({
+        ...current,
+        ...tempValues,
+      });
+    });
+  };
+
+  const handleSavePressed = () => {
+    performSave();
+    setIsOpen(false);
+  };
+
   const handleOpen = (open: boolean) => {
     setIsOpen(open);
     if (open) {
@@ -463,37 +483,39 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
     }
   };
 
-  const handleSave = () => {
-    setValues(tempValues);
-    updateKeyedAttributes((current) => {
-      return filterEmptyValues({
-        ...current,
-        ...tempValues,
-      });
-    });
+  const handleCancelPressed = () => {
+    // Reset temp values to original values and close
+    setTempValues(values);
     setIsOpen(false);
   };
 
-  const handleDelete = () => {
+  const handleDeletePressed = () => {
     deleteSelf();
     setIsOpen(false);
   };
 
   return (
-    <Popover.Root open={isOpen} onOpenChange={handleOpen}>
+    <Popover.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        handleOpen(open);
+        if (!open) {
+          performSave();
+        }
+      }}
+    >
       <Popover.Trigger asChild>
-        {isWithinThreshold && (
-          <Button
-            variant="ghost"
-            size="iconSm"
-            className={cn(
-              "z-10 h-auto w-auto p-2 hover:bg-gray-400/50",
-              className
-            )}
-          >
-            <EllipsisVertical />
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="iconSm"
+          className={cn(
+            "z-10 h-auto w-auto p-2 hover:bg-gray-400/50",
+            !isWithinThreshold && "opacity-0",
+            className
+          )}
+        >
+          <EllipsisVertical />
+        </Button>
       </Popover.Trigger>
 
       <Popover.Portal>
@@ -527,21 +549,26 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-between pt-2">
               {!disableDelete && (
                 <Button
                   variant="ghost"
                   size="iconSm"
-                  onClick={handleDelete}
+                  onClick={handleDeletePressed}
                   className="hover:text-red-600"
                 >
                   <Trash2 />
                 </Button>
               )}
 
-              <Button size="sm" onClick={handleSave}>
-                Save
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleCancelPressed}>
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleSavePressed}>
+                  Save
+                </Button>
+              </div>
             </div>
           </div>
         </Popover.Content>

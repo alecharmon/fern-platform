@@ -47,17 +47,11 @@ export const CustomElement = Node.create<CustomElementOptions>({
       "fve-data-id": {
         default: null,
       },
-      "fve-data-type": {
-        default: null,
-      },
-      "fve-data-name": {
-        default: null,
-      },
       "fve-mdx-b64": {
         default: null,
       },
-      "fve-unsupported": {
-        default: null,
+      "fve-newly-created": {
+        default: false,
       },
       /**
        * Set contenteditable to false to prevent the custom element from being edited.

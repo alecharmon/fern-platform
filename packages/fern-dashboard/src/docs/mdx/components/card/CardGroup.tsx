@@ -74,6 +74,7 @@ function CardGroupContent({
         }}
         targetRef={cardGroupRef}
         hoverSlopThreshold={50}
+        openPopoverIfNewlyCreated={false}
       >
         {content}
       </EditorComponentPopoverProvider>

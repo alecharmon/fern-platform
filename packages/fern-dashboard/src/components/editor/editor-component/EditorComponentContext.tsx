@@ -14,6 +14,7 @@ interface EditorComponentContextValue {
   providedChildren: React.ReactElement;
   isWithinEditor: boolean;
   index: number;
+  newlyCreated?: boolean;
 }
 
 const EditorComponentContext = createContext<EditorComponentContextValue>({
@@ -27,6 +28,7 @@ const EditorComponentContext = createContext<EditorComponentContextValue>({
   providedChildren: <></>,
   isWithinEditor: false,
   index: 0,
+  newlyCreated: false,
 });
 export const EditorComponentProvider: React.FC<
   EditorComponentContextValue & {
@@ -40,6 +42,7 @@ export const EditorComponentProvider: React.FC<
   deleteSelf,
   isWithinEditor,
   index,
+  newlyCreated,
   children,
 }) => {
   const value: EditorComponentContextValue = {
@@ -50,6 +53,7 @@ export const EditorComponentProvider: React.FC<
     isWithinEditor,
     providedChildren,
     index,
+    newlyCreated,
   };
 
   return (

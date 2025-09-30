@@ -105,12 +105,10 @@ const createMediaNode = (file: File, mediaUrl: string) => {
 
   if (isVideo(file)) {
     return createCustomElementNode(
-      "video",
       `<video src="${mediaUrl}" title="${filename}" controls></video>`
     );
   } else {
     return createCustomElementNode(
-      "img",
       `<img src="${mediaUrl}" alt="${filename}" title="${filename}" />`
     );
   }

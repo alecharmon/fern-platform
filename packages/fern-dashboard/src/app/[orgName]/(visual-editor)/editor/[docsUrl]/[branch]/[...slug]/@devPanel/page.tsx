@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import CodeEditor, { Monaco } from "@monaco-editor/react";
 import { Code2 } from "lucide-react";
@@ -23,6 +23,7 @@ export default function DevPanel() {
   const isEditingDisabled = useEditingDisabled();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const LoadingIndicator = "// Loading content...";
   // Get the current file's markdown content
@@ -34,6 +35,8 @@ export default function DevPanel() {
     if (editorRef.current && currentMarkdown) {
       editorRef.current.setValue(currentMarkdown);
     }
+    // Reset unsaved changes flag when currentMarkdown changes
+    setHasUnsavedChanges(false);
   }, [currentMarkdown]);
 
   function handleEditorDidMount(editorInstance: any, monacoInstance: Monaco) {
@@ -43,16 +46,23 @@ export default function DevPanel() {
     // Define and apply custom theme that uses your app's colors
     const themeName = defineAppTheme(monacoInstance);
     monacoInstance.editor.setTheme(themeName);
+
+    // Listen for content changes to track unsaved changes
+    editorInstance.onDidChangeModelContent(() => {
+      const currentContent = editorInstance.getValue();
+      setHasUnsavedChanges(currentContent !== currentMarkdown);
+    });
   }
 
-  function handleCancelEdit() {
-    // Restore original content and make read-only
+  function handleReset() {
+    // Restore original content
     if (editorRef.current) {
       editorRef.current.setValue(currentMarkdown);
+      setHasUnsavedChanges(false);
     }
   }
 
-  function handleSaveEdit() {
+  function handleUpdate() {
     const content = editorRef.current?.getValue() || "";
 
     try {
@@ -73,6 +83,9 @@ export default function DevPanel() {
         fileName: activeFilename,
         html,
       });
+
+      // Reset unsaved changes flag after successful save
+      setHasUnsavedChanges(false);
     } catch (conversionError: any) {
       WarningValidationToast(conversionError.message);
     }
@@ -108,14 +121,16 @@ export default function DevPanel() {
         />
       </div>
 
-      {/* Cancel/Save buttons - bottom */}
+      {/* Reset/Update buttons - bottom */}
       <div className="fixed bottom-4 left-4 right-4 z-50 flex items-center gap-2">
         <div className="ml-auto flex gap-2">
-          <Button onClick={handleCancelEdit} variant="outline">
-            Cancel
-          </Button>
-          <Button onClick={handleSaveEdit} variant="default">
-            Save
+          {hasUnsavedChanges && (
+            <Button onClick={handleReset} variant="outline">
+              Reset
+            </Button>
+          )}
+          <Button onClick={handleUpdate} variant="default">
+            Update
           </Button>
         </div>
       </div>
