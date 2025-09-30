@@ -17,7 +17,9 @@ import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { Button, cn } from "@fern-docs/components";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 
+import { useEditorComponentChildren } from "@/components/editor/editor-component";
 import {
+  EditorComponentContextValue,
   EditorComponentProvider,
   useEditorComponent,
 } from "@/components/editor/editor-component/EditorComponentContext";
@@ -58,17 +60,7 @@ interface TabData {
   language?: string;
   toc?: boolean;
   // EditorComponent values passed from Tab to TabGroup
-  editorComponentValues?: {
-    index: number;
-    keyedAttributes: Record<string, any>;
-    updateKeyedAttributes: (
-      callback: (current: Record<string, any>) => Record<string, any>
-    ) => unknown;
-    appendChildrenMdx: (newChild: string) => unknown;
-    deleteSelf: () => unknown;
-    providedChildren: React.ReactElement;
-    isWithinEditor: boolean;
-  };
+  editorComponentValues?: EditorComponentContextValue;
 }
 
 interface TabsContextType {
@@ -140,7 +132,8 @@ export function TabGroup({
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const anchor = useCurrentAnchor();
   const [selectedLanguage, setSelectedLanguage] = useProgrammingLanguage();
-  const { appendChildrenMdx, isWithinEditor } = useEditorComponent();
+  const { isWithinEditor } = useEditorComponent();
+  const { appendChildrenMdx } = useEditorComponentChildren();
 
   const registerTab = useCallback((tab: TabData) => {
     setTabs((prevTabs) => {

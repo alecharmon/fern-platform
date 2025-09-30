@@ -41,15 +41,22 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
   }, [mdxb64, handleDelete]);
 
   const handleUpdate = (updatedMdx: string) => {
-    // Match img tags and resolve their src attributes
-    const imgRegex = /<img\s+([^>]*?)src=["']([^"']+)["']([^>]*?)>/g;
+    // Match img and embed tags and resolve their src attributes
+    const tagRegex =
+      /<(img|embed|video)\s+([^>]*?)src=["']([^"']+)["']([^>]*?)>/g;
     const processedMdx = updatedMdx.replace(
-      imgRegex,
-      (_match: string, beforeSrc: string, src: string, afterSrc: string) => {
+      tagRegex,
+      (
+        _match: string,
+        tag: string,
+        beforeSrc: string,
+        src: string,
+        afterSrc: string
+      ) => {
         const resolvedFileData = resolveFileSrc(src);
         const resolvedSrc = resolvedFileData?.src || src;
 
-        return `<img ${beforeSrc}src="${resolvedSrc}"${afterSrc}>`;
+        return `<${tag} ${beforeSrc}src="${resolvedSrc}"${afterSrc}>`;
       }
     );
 

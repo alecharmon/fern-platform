@@ -33,6 +33,10 @@ export const rehypeEditorComponents: Unified.Plugin<[], Hast.Root> = () => {
         node.name = "TabGroup";
       }
 
+      if (node.name === "embed") {
+        node.name = "Embed";
+      }
+
       return CONTINUE;
     });
   };

@@ -4,6 +4,7 @@ import {
   ChevronsDown,
   Clapperboard,
   Code2,
+  CodeXml,
   Folder,
   Grid2X2,
   Image,
@@ -27,6 +28,7 @@ import {
 import { EMPTY_PARAM_FIELD_CONTENT } from "@/docs/mdx/components/parameters/ParamField";
 import { EMPTY_STEPS_CONTENT } from "@/docs/mdx/components/steps";
 import { EMPTY_TABS_CONTENT } from "@/docs/mdx/components/tabs/Tabs";
+import { EMPTY_EMBED_CONTENT } from "@/editor/components/Embed";
 
 import { SuggestionItem } from "../tiptap-ui-utils/suggestion-menu";
 import { createCustomElementNode } from "./extension-custom-element/create-custom-element-node";
@@ -176,6 +178,17 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     keywords: ["button"],
     onSelect: ({ editor }) => {
       handleCustomNodeInsert(editor, EMPTY_BUTTON_CONTENT);
+    },
+  },
+  {
+    title: "Embed",
+    subtext: "Embed external content",
+    aliases: ["embed", "iframe", "external", "media"],
+    badge: CodeXml,
+    group: "Components",
+    keywords: ["embed", "iframe", "external", "media"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, EMPTY_EMBED_CONTENT);
     },
   },
 ];

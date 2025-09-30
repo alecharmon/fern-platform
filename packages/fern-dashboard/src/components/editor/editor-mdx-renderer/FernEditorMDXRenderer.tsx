@@ -14,6 +14,7 @@ import {
 } from "@fern-docs/mdx";
 
 import TiptapEditor from "@/components/editor/TiptapEditor";
+import { EditorComponentChildrenProvider } from "@/components/editor/editor-component/EditorComponentChildrenContext";
 import { EditorComponentProvider } from "@/components/editor/editor-component/EditorComponentContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
@@ -21,14 +22,51 @@ import { useDebounce } from "@/hooks/useDebounce";
 
 import { UnsupportedContent } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
-import { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
+import {
+  AttributeValue,
+  JSXElement,
+  JSXElementChildren,
+  ParsedMarkdownElement,
+} from "./types";
 
 function buildMdxElement(
   name: string,
   keyedAttributes: Record<string, AttributeValue>,
   expressionAttributes: (MdxJsxAttribute | MdxJsxExpressionAttribute)[],
-  childrenMdx: string
+  childrenMdx?: string
 ): string {
+  // If there are no children, render as a self-closing element
+  if (childrenMdx == null) {
+    const element: MdastNodes = {
+      type: "mdxJsxTextElement",
+      name,
+      attributes: [
+        ...Object.entries(keyedAttributes).map(
+          ([key, value]): MdxJsxAttribute =>
+            value.type === "string"
+              ? {
+                  type: "mdxJsxAttribute" as const,
+                  name: key,
+                  value: value.value,
+                }
+              : {
+                  type: "mdxJsxAttribute" as const,
+                  name: key,
+                  value: {
+                    type: "mdxJsxAttributeValueExpression",
+                    value: value.rawStringValue,
+                  },
+                }
+        ),
+        ...expressionAttributes,
+      ],
+      children: [],
+    };
+    const mdxElem = astToMDX(element);
+    return mdxElem;
+  }
+
+  // Otherwise, render as a flow element with children
   const placeholder = `PLACEHOLDER_${Math.random().toString(36).substring(2, 30)}`;
 
   const element: MdastNodes = {
@@ -92,10 +130,6 @@ interface ErrorState {
 
 type MDXRendererState = BundlingState | BundledState | ErrorState;
 
-/*
-This can return JSXElements that have further JSX children,
-or it can return JSXElements that are terminal in that they have text children or something 
-*/
 const richTextComponents = [
   "Callout",
   "Card",
@@ -115,6 +149,13 @@ const richTextComponents = [
   "ParamField",
 ];
 
+const componentsWithoutChildren = ["embed"];
+
+const editableComponents = [
+  ...richTextComponents,
+  ...componentsWithoutChildren,
+];
+
 const contentDraggingDisabledComponents = ["Button"];
 
 function parseMDX(mdx: string): ParsedMarkdownElement[] {
@@ -125,12 +166,12 @@ function parseMDX(mdx: string): ParsedMarkdownElement[] {
 
   // Function to traverse the AST and extract parent-child relationships
   function traverse(node: MdastNodes): ParsedMarkdownElement {
-    const isRichTextElement =
+    const isEditableComponent =
       node.type === "mdxJsxFlowElement" &&
       node.name != null &&
-      richTextComponents.includes(node.name);
+      editableComponents.includes(node.name);
 
-    if (!isRichTextElement) {
+    if (!isEditableComponent) {
       // A node is terminal if:
       // - it is not a rich text node
       // - none of its children are rich text nodes
@@ -197,10 +238,18 @@ function parseMDX(mdx: string): ParsedMarkdownElement[] {
       }
     });
 
+    const nodeName = node.name || "";
+    const childrenMdx = astToMDX({ type: "root", children: node.children });
+    let children: JSXElementChildren = { type: "ALLOWED", childrenMdx };
+    if (richTextComponents.includes(nodeName)) {
+      children = { type: "RICH_TEXT", childrenMdx };
+    } else if (componentsWithoutChildren.includes(nodeName)) {
+      children = { type: "DISALLOWED" };
+    }
+
     const element: JSXElement = {
       type: "jsxElement",
       value: {
-        richTextContent: richTextComponents.includes(node.name || ""),
         contentDraggingDisabled: contentDraggingDisabledComponents.includes(
           node.name || ""
         ),
@@ -208,7 +257,7 @@ function parseMDX(mdx: string): ParsedMarkdownElement[] {
         name: node.name!,
         keyedAttributes,
         expressionAttributes,
-        childrenMdx: astToMDX({ type: "root", children: node.children }),
+        children,
       },
     };
 
@@ -336,22 +385,27 @@ const JSXElementRenderer = ({
   const debouncedOnUpdate = useDebounce(onUpdate, 500);
 
   const {
-    value: { name, keyedAttributes, expressionAttributes, childrenMdx },
+    value: {
+      name,
+      keyedAttributes,
+      expressionAttributes,
+      children: jsxChildren,
+    },
   } = element;
 
-  const parentMdxWithInterceptedChildren = useMemo(() => {
+  const parentMdx = useMemo(() => {
     return buildMdxElement(
       name,
       keyedAttributes,
       expressionAttributes,
-      "<InterceptedChildren />"
+      jsxChildren.type === "DISALLOWED" ? undefined : "<InterceptedChildren />"
     );
-  }, [name, keyedAttributes, expressionAttributes]);
+  }, [name, keyedAttributes, expressionAttributes, jsxChildren]);
 
-  let children: React.ReactElement;
+  let children: React.ReactElement | undefined;
 
-  if (element.value.richTextContent) {
-    const html = mdxToHtml(element.value.childrenMdx);
+  if (jsxChildren.type === "RICH_TEXT") {
+    const html = mdxToHtml(jsxChildren.childrenMdx);
     children = (
       <TiptapEditor
         autofocus={false}
@@ -372,10 +426,10 @@ const JSXElementRenderer = ({
         }}
       />
     );
-  } else {
+  } else if (jsxChildren.type === "ALLOWED") {
     children = (
       <FernEditorMDXRendererInternal
-        mdx={childrenMdx}
+        mdx={jsxChildren.childrenMdx}
         onUpdate={(mdx) => {
           const indentedMdx = applyIndentation(mdx, 1);
           const finalMdx = buildMdxElement(
@@ -390,11 +444,12 @@ const JSXElementRenderer = ({
     );
   }
 
+  // Outer provider: EditorComponentProvider (no providedChildren/appendChildrenMdx here)
+  // Inner provider: EditorComponentChildrenProvider (only if childrenType !== "DISALLOWED")
   return (
     <EditorComponentProvider
       isWithinEditor
       index={index}
-      providedChildren={children}
       keyedAttributes={keyedAttributes}
       updateKeyedAttributes={(cb) => {
         const newAttributes = cb(keyedAttributes);
@@ -403,17 +458,9 @@ const JSXElementRenderer = ({
           name,
           newAttributes,
           expressionAttributes,
-          childrenMdx
-        );
-
-        onUpdate(newElement);
-      }}
-      appendChildrenMdx={(newChild) => {
-        const newElement = buildMdxElement(
-          name,
-          keyedAttributes,
-          expressionAttributes,
-          childrenMdx + "\n" + newChild
+          jsxChildren.type === "DISALLOWED"
+            ? undefined
+            : jsxChildren.childrenMdx
         );
 
         onUpdate(newElement);
@@ -423,11 +470,28 @@ const JSXElementRenderer = ({
       }}
       newlyCreated={newlyCreated}
     >
-      <MDXRenderer mdx={parentMdxWithInterceptedChildren} />
+      {jsxChildren.type !== "DISALLOWED" ? (
+        <EditorComponentChildrenProvider
+          appendChildrenMdx={(newChild: string) => {
+            const newElement = buildMdxElement(
+              name,
+              keyedAttributes,
+              expressionAttributes,
+              (jsxChildren.childrenMdx ? jsxChildren.childrenMdx + "\n" : "") +
+                newChild
+            );
+            onUpdate(newElement);
+          }}
+          providedChildren={children ?? <></>}
+        >
+          <MDXRenderer mdx={parentMdx} />
+        </EditorComponentChildrenProvider>
+      ) : (
+        <MDXRenderer mdx={parentMdx} />
+      )}
     </EditorComponentProvider>
   );
 };
-
 // Renderer for parsed markdown elements
 interface ParsedElementRendererProps {
   element: ParsedMarkdownElement;
@@ -476,7 +540,9 @@ const FernEditorMDXRendererInternal = ({
           element.value.name,
           element.value.keyedAttributes,
           element.value.expressionAttributes,
-          element.value.childrenMdx
+          element.value.children.type === "DISALLOWED"
+            ? undefined
+            : element.value.children.childrenMdx
         );
         initialMap.set(index, initialMdx);
       }

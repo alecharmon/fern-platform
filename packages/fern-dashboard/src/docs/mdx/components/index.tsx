@@ -11,6 +11,7 @@ import {
   ErrorBoundary,
   ErrorBoundaryFallback,
 } from "@/docs/components/error-boundary";
+import { Embed } from "@/editor/components/Embed";
 
 import { Accordion, AccordionGroup } from "./accordion";
 import { Availability } from "./availability";
@@ -153,6 +154,7 @@ const ALIASED_HTML_COMPONENTS = {
   Strong,
   Table,
   Ul,
+  Embed,
 };
 
 export const MDX_COMPONENTS = {

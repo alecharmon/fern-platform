@@ -13,6 +13,7 @@ import { CirclePlusIcon } from "lucide-react";
 
 import { Button, cn } from "@fern-docs/components";
 
+import { useEditorComponentChildren } from "@/components/editor/editor-component";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
   EditorComponentPopoverButton,
@@ -72,7 +73,8 @@ export function StepGroup({
   ...props
 }: StepGroupProps): ReactElement<any> {
   const [steps, setSteps] = useState<StepData[]>([]);
-  const { appendChildrenMdx, isWithinEditor } = useEditorComponent();
+  const { isWithinEditor } = useEditorComponent();
+  const { appendChildrenMdx } = useEditorComponentChildren();
   const stepGroupRef = useRef<HTMLDivElement>(null);
 
   const registerStep = useCallback((step: StepData) => {

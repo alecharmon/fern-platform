@@ -16,15 +16,33 @@ export type AttributeValue = StringAttribute | ValueAttribute;
 
 export type KeyedAttributes = Record<string, AttributeValue>;
 
+interface JSXElementChildrenRichText {
+  type: "RICH_TEXT";
+  childrenMdx: string;
+}
+
+interface JSXElementChildrenAllowed {
+  type: "ALLOWED";
+  childrenMdx: string;
+}
+
+interface JSXElementChildrenDisallowed {
+  type: "DISALLOWED";
+}
+
+export type JSXElementChildren =
+  | JSXElementChildrenRichText
+  | JSXElementChildrenAllowed
+  | JSXElementChildrenDisallowed;
+
 export interface JSXElement {
   type: "jsxElement";
   value: {
-    richTextContent: boolean;
+    children: JSXElementChildren;
     contentDraggingDisabled: boolean;
     name: string;
     keyedAttributes: KeyedAttributes;
     expressionAttributes: MdxJsxExpressionAttribute[];
-    childrenMdx: string;
   };
 }
 

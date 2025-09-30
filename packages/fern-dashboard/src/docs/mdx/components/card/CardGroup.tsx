@@ -4,6 +4,7 @@ import { CirclePlusIcon } from "lucide-react";
 
 import { Button, cn } from "@fern-docs/components";
 
+import { useEditorComponentChildren } from "@/components/editor/editor-component";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
   EditorComponentPopoverButton,
@@ -31,7 +32,8 @@ function CardGroupContent({
 }: React.PropsWithChildren<{
   cols?: number;
 }>) {
-  const { isWithinEditor, appendChildrenMdx } = useEditorComponent();
+  const { isWithinEditor } = useEditorComponent();
+  const { appendChildrenMdx } = useEditorComponentChildren();
   const cardGroupRef = useRef<HTMLDivElement>(null);
   const cardGroup = useCardGroup();
 

@@ -14,6 +14,7 @@ import * as AccordionComponent from "@fern-docs/components";
 import { Button } from "@fern-docs/components";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 
+import { useEditorComponentChildren } from "@/components/editor/editor-component";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
   EditorComponentPopoverButton,
@@ -169,7 +170,8 @@ export function AccordionGroup({ children }: AccordionGroupProps) {
     [registerAccordion, unregisterAccordion, accordions]
   );
 
-  const { appendChildrenMdx, isWithinEditor } = useEditorComponent();
+  const { isWithinEditor } = useEditorComponent();
+  const { appendChildrenMdx } = useEditorComponentChildren();
 
   return (
     <>
