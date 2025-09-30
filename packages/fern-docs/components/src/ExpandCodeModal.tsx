@@ -62,7 +62,7 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 top-[var(--header-height)] z-50 flex items-center justify-center">
       <div
         className="fixed inset-0 bg-black/50"
         onClick={handleBackdropClick}
