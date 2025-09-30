@@ -166,7 +166,7 @@ async function backfillSnippetsForExample(
   }
 
   for (const [language, generator] of Object.entries(dynamicGenerators)) {
-    if (!generator) {
+    if (!generator || endpoint.method === "HEAD") {
       continue;
     }
 
