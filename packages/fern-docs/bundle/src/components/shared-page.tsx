@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
 import {
   notFound,
   permanentRedirect,
@@ -226,29 +225,17 @@ export default async function SharedPage({
 
   // even if nav-links are globally disabled, we should calculate the neighbors
   // in case the page overrides this global setting
-  const neighborsPromise = unstable_cache(
-    async () => {
-      const start = Date.now();
-      const result = await getNeighbors(
-        loader,
-        serializeNextMdx ?? serialize,
-        found
-      );
-      const end = Date.now();
-      console.log(`[SharedPage] getNeighbors() took ${end - start}ms`);
-      return result;
-    },
-    [
-      "getNeighbors",
-      loader.domain,
-      found.node.slug,
-      found.currentProduct?.productId ?? "",
-      found.currentVersion?.versionId ?? "",
-      found.currentTab?.title ?? "",
-      serializeNextMdx ? "nextMdx" : "mdx",
-    ],
-    { tags: [loader.domain, "getNeighbors"] }
-  );
+  const neighborsPromise = (async () => {
+    const start = Date.now();
+    const result = await getNeighbors(
+      loader,
+      serializeNextMdx ?? serialize,
+      found
+    );
+    const end = Date.now();
+    console.log(`[SharedPage] getNeighbors() took ${end - start}ms`);
+    return result;
+  })();
 
   // if the current node requires authentication and the user is not authenticated, redirect to the auth page
   if (found.node.authed && !authState.authed) {
@@ -311,7 +298,7 @@ export default async function SharedPage({
   let neighbors;
   {
     const start = Date.now();
-    neighbors = await neighborsPromise();
+    neighbors = await neighborsPromise;
     const end = Date.now();
     console.log(
       `[SharedPage] neighborsPromise (getNeighbors) took ${end - start}ms`
