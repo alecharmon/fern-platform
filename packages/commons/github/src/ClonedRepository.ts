@@ -59,7 +59,7 @@ export class ClonedRepository {
     staged?: boolean;
   }): Promise<void> {
     await this.git.cwd(this.clonePath);
-    const args = ["restore --source=HEAD"];
+    const args = ["restore", "--source=HEAD"];
     if (staged) {
       args.push("--staged");
     }
