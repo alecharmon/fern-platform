@@ -33,10 +33,10 @@ export class GitHub {
 
       await repository.checkout(branch);
       await repository.pull(branch);
-      const fernIgnore = await repository.getFernignore();
+      const fernIgnoreFiles = await this.getFernignoreFiles(repository);
       await repository.overwriteLocalContents(sourceDirectory);
       await repository.add(".");
-      await this.restoreFernignoreFiles(repository, fernIgnore);
+      await this.restoreFiles(repository, fernIgnoreFiles);
       await repository.commit("SDK Generation");
       await repository.push();
     } catch (error) {
@@ -70,10 +70,10 @@ export class GitHub {
       await repository.pull(baseBranch);
       await repository.checkout(prBranch);
 
-      const fernIgnore = await repository.getFernignore();
+      const fernIgnoreFiles = await this.getFernignoreFiles(repository);
       await repository.overwriteLocalContents(sourceDirectory);
       await repository.add(".");
-      await this.restoreFernignoreFiles(repository, fernIgnore);
+      await this.restoreFiles(repository, fernIgnoreFiles);
       await repository.commit("SDK Generation");
       await repository.push();
 
@@ -119,26 +119,35 @@ export class GitHub {
     console.log("TODO: Implement release");
   }
 
-  private getFernignoreFiles(fernignore: string): string[] {
+  private async getFernignoreFiles(
+    repository: ClonedRepository
+  ): Promise<string[]> {
+    const fernignore = await repository.getFernignore();
+    if (fernignore === undefined) {
+      return [];
+    }
     const fernignoreLines = fernignore.split("\n");
     const fernignoreFiles: string[] = [];
     for (const line of fernignoreLines) {
       const trimmedLine = line.trim();
-      if (!trimmedLine.startsWith("#") && trimmedLine.length > 0) {
+      if (
+        !trimmedLine.startsWith("#") &&
+        trimmedLine.length > 0 &&
+        !(await repository.fileExists({ relativeFilePath: trimmedLine }))
+      ) {
         fernignoreFiles.push(trimmedLine);
       }
     }
     return fernignoreFiles;
   }
 
-  private async restoreFernignoreFiles(
+  private async restoreFiles(
     repository: ClonedRepository,
-    fernignore: string | undefined
+    files: string[]
   ): Promise<void> {
-    if (fernignore === undefined) {
+    if (files.length === 0) {
       return;
     }
-    const files = this.getFernignoreFiles(fernignore);
     await repository.restoreFiles({ files, staged: true });
     await repository.restoreFiles({ files: files });
   }
