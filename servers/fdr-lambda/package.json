@@ -1,0 +1,23 @@
+{
+  "name": "@fern-platform/fdr-lambda",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts --out-dir dist",
+    "clean": "rm -rf dist lambda.zip",
+    "deploy": "pnpm package && aws lambda update-function-code --function-name fdr-lambda --zip-file fileb://lambda.js",
+    "dev": "tsup src/index.ts --format cjs --watch --out-dir dist",
+    "package": "pnpm build && cp dist/index.js lambda.js"
+  },
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.143"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

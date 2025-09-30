@@ -3148,6 +3148,56 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.15.29)(jiti@2.4.2)(jsdom@24.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.29.1)(msw@2.10.3(@types/node@22.15.29)(typescript@5.7.3))(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.19.3)(yaml@2.8.0)
 
+  servers/fdr-lambda:
+    dependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.143
+        version: 8.10.153
+    devDependencies:
+      '@fern-platform/configs':
+        specifier: workspace:*
+        version: link:../../packages/configs
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.15.29
+      tsup:
+        specifier: ^8.0.0
+        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.8.0)
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
+  servers/fdr-lambda-deploy:
+    dependencies:
+      '@fern-fern/fern-cloud-sdk':
+        specifier: ^0.0.305
+        version: 0.0.305
+      aws-cdk-lib:
+        specifier: ^2.215.0
+        version: 2.215.0(constructs@10.3.0)
+      constructs:
+        specifier: ^10.3.0
+        version: 10.3.0
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+    devDependencies:
+      '@fern-platform/configs':
+        specifier: workspace:*
+        version: link:../../packages/configs
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.15.29
+      aws-cdk:
+        specifier: ^2.1029.1
+        version: 2.1029.1
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.2(@swc/core@1.13.5)(@types/node@22.15.29)(typescript@5.7.3)
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
   servers/fern-bot:
     dependencies:
       '@aws-sdk/client-s3':
@@ -3231,7 +3281,7 @@ importers:
         version: 0.5.7
       '@types/aws-lambda':
         specifier: ^8.10.71
-        version: 8.10.137
+        version: 8.10.153
       '@types/js-yaml':
         specifier: 'catalog:'
         version: 4.0.9
@@ -5460,7 +5510,7 @@ packages:
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
   '@fortawesome/fontawesome-common-types@6.7.2':
-    resolution: {integrity: sha512-Zs+YeHUC5fkt7Mg1l6XTniei3k4bwG/yo3iFUtZWd/pMx9g3fdvkSK9E0FOC+++phXOka78uJcYb8JaFkW52Xg==, tarball: https://npm.fontawesome.com/@fortawesome/fontawesome-common-types/-/6.7.2/fontawesome-common-types-6.7.2.tgz}
+    resolution: {integrity: sha512-Zs+YeHUC5fkt7Mg1l6XTniei3k4bwG/yo3iFUtZWd/pMx9g3fdvkSK9E0FOC+++phXOka78uJcYb8JaFkW52Xg==}
     engines: {node: '>=6'}
 
   '@fortawesome/fontawesome-svg-core@6.7.2':
@@ -9695,8 +9745,8 @@ packages:
   '@types/aria-query@5.0.4':
     resolution: {integrity: sha512-rfT93uj5s0PRL7EzccGMs3brplhcrghnDoV26NqKhCAS1hVo+WdNsPvE/yb6ilfr5hi2MEk6d5EWJTKdxg8jVw==}
 
-  '@types/aws-lambda@8.10.137':
-    resolution: {integrity: sha512-YNFwzVarXAOXkjuFxONyDw1vgRNzyH8AuyN19s0bM+ChSu/bzxb5XPxYFLXoqoM+tvgzwR3k7fXcEOW125yJxg==}
+  '@types/aws-lambda@8.10.153':
+    resolution: {integrity: sha512-j5zuETAQtPKuU8ZeqtcLdqLxQeNffX1Dd1Sr3tP56rYZD21Ph49iIqWbiHHqwLXugsMPSsgX/bAZI29Patlbbw==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -16499,6 +16549,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-fetch-native@1.6.6:
     resolution: {integrity: sha512-8Mc2HhqPdlIfedsuZoc3yioPuzp6b+L5jRCRY1QzuWZh2EGJVQrGppC6V6cF0bLdbW0+O2YpqCA25aF/1lvipQ==}
@@ -25001,7 +25052,7 @@ snapshots:
       '@octokit/core': 6.1.6
       '@octokit/oauth-authorization-url': 7.1.1
       '@octokit/oauth-methods': 5.1.5
-      '@types/aws-lambda': 8.10.137
+      '@types/aws-lambda': 8.10.153
       universal-user-agent: 7.0.2
 
   '@octokit/oauth-authorization-url@7.1.1': {}
@@ -29422,7 +29473,7 @@ snapshots:
 
   '@types/aria-query@5.0.4': {}
 
-  '@types/aws-lambda@8.10.137': {}
+  '@types/aws-lambda@8.10.153': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
