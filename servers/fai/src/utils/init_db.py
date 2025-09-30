@@ -5,6 +5,8 @@ from src.fai.db import (
     engine,
 )
 from src.fai.models.db.code_db import CodeDb  # noqa: F401
+from src.fai.models.db.discord_integration_db import DiscordIntegrationDb  # noqa: F401
+from src.fai.models.db.discord_message_cache_db import DiscordMessageCacheDb  # noqa: F401
 from src.fai.models.db.document_db import DocumentDb  # noqa: F401
 from src.fai.models.db.feedback_db import FeedbackDb  # noqa: F401
 from src.fai.models.db.guidance_db import GuidanceDb  # noqa: F401

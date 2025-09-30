@@ -31,7 +31,8 @@ TEST_TURBOPUFFER_API_KEY = "test-turbopuffer-api-key"
 TEST_SLACK_CLIENT_ID = "test-slack-client-id"
 TEST_SLACK_CLIENT_SECRET = "test-slack-client-secret"
 TEST_SLACK_SIGNING_SECRET = "test-slack-signing-secret"
-
+TEST_DISCORD_BOT_TOKEN = "test-discord-bot-token"
+TEST_DISCORD_OAUTH_URL = "test-discord-oauth-url"
 ROUTES_PACKAGE_NAME = "src.fai.routes"
 
 
@@ -82,6 +83,8 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["TURBOPUFFER_API_KEY"] = TEST_TURBOPUFFER_API_KEY
     os.environ["OPENAI_API_KEY"] = TEST_OPENAI_API_KEY
     os.environ["FERN_API_KEY"] = TEST_FERN_TOKEN
+    os.environ["DISCORD_BOT_TOKEN"] = TEST_DISCORD_BOT_TOKEN
+    os.environ["DISCORD_OAUTH_URL"] = TEST_DISCORD_OAUTH_URL
     os.environ["SLACK_CLIENT_ID"] = TEST_SLACK_CLIENT_ID
     os.environ["SLACK_CLIENT_SECRET"] = TEST_SLACK_CLIENT_SECRET
     os.environ["SLACK_SIGNING_SECRET"] = TEST_SLACK_SIGNING_SECRET

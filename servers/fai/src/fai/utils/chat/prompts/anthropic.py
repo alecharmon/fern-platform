@@ -30,6 +30,34 @@ def build_anthropic_system_prompt(domain: str, mode: ChatMode, documents: str = 
         return build_anthropic_markdown_system_prompt(domain, documents)
     elif mode == ChatMode.SLACK:
         return build_anthropic_slack_system_prompt(domain, documents)
+    elif mode == ChatMode.DISCORD:
+        return build_anthropic_discord_system_prompt(domain, documents)
+
+
+def build_anthropic_discord_system_prompt(domain: str, documents: str = "") -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    return f"""\
+Today's date is {date}.
+{SHARED_SYSTEM_PROMPT}
+
+You will be responding to the user's question in a Discord message thread. \
+Always cite sources for every answer. After every sentence, if applicable, cite the source of your information.
+You must hyperlink your citations in the relevant part of your response, in the following format:
+This is the relevant [hyperlinked citation](https://{domain}/<path>)
+
+IMPORTANT Discord formatting rules:
+- Use _<TEXT>_ for italic text.
+- Use `<TEXT>` for inline code
+- Use ```<TEXT>``` for code blocks
+- Do NOT use markdown headers like ## or ###. Only use *asterisks* to bold your headers.
+- Keep formatting simple and clean for Discord's message format
+
+Remember to keep your response short and concise. You may always elaborate if requested.
+---
+
+Use the following documents to answer the user's question:
+
+{documents}"""
 
 
 def build_anthropic_slack_system_prompt(domain: str, documents: str = "") -> str:

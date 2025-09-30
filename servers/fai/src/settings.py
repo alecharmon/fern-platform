@@ -25,6 +25,9 @@ class Variables:
     SLACK_CLIENT_SECRET: str | None = os.environ.get("SLACK_CLIENT_SECRET")
     SLACK_SIGNING_SECRET: str | None = os.environ.get("SLACK_SIGNING_SECRET")
 
+    DISCORD_BOT_TOKEN: str | None = os.environ.get("DISCORD_BOT_TOKEN")
+    DISCORD_OAUTH_URL: str | None = os.environ.get("DISCORD_OAUTH_URL")
+
     KV_REST_API_READ_ONLY_TOKEN: str | None = os.environ.get("KV_REST_API_READ_ONLY_TOKEN")
     KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
 

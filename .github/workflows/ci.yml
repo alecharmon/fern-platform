@@ -139,6 +139,8 @@ jobs:
           echo "COHERE_API_KEY=${{ env.COHERE_API_KEY }}" >> .env
           echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
           echo "FERN_TOKEN=${{ env.FERN_TOKEN }}" >> .env
+          echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env
+          echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env
           echo "SLACK_CLIENT_ID=${{ env.SLACK_CLIENT_ID }}" >> .env
           echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
           echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env

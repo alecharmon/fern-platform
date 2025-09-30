@@ -1,9 +1,11 @@
+import asyncio
 import importlib
 import pkgutil
 
 import uvicorn
 from fastapi.routing import APIRoute
 
+from src.apps.discord.discord_bot import safe_run_discord
 from src.fai.app import fai_app
 from src.settings import (
     LOGGER,
@@ -43,13 +45,8 @@ for route in fai_app.routes:
         LOGGER.info(f"{type(route).__name__} route | tags={getattr(route, 'tags', [])}")
 
 
-def start() -> None:
-    """Launched with `poetry run start` at root level"""
-
-    LOGGER.info("Setup: Starting environment variable validation...")
-    VARIABLES.validate_env_variables()
-    LOGGER.info("Setup: Environment variables validated.")
-
+async def run_fastapi() -> None:
+    """Run FastAPI asynchronously"""
     LOGGER.info("Setup: Importing all FastAPI routes...")
     for _, module_name, _ in pkgutil.iter_modules([ROUTES_PACKAGE_NAME.replace(".", "/")]):
         full_module_name = f"{ROUTES_PACKAGE_NAME}.{module_name}"
@@ -59,7 +56,7 @@ def start() -> None:
         LOGGER.info(f"{route.path} -> {route.methods}")
 
     LOGGER.info("Starting FastAPI application...")
-    uvicorn.run(
+    config = uvicorn.Config(
         "src.fai.main:fai_app",
         host="0.0.0.0",
         port=8080,
@@ -67,6 +64,29 @@ def start() -> None:
         reload=VARIABLES.IS_LOCAL,
         reload_dirs=["src"],
     )
+    server = uvicorn.Server(config)
+    await server.serve()
+
+
+async def run_discord() -> None:
+    """Run Discord bot asynchronously"""
+    LOGGER.info("Starting Discord bot...")
+    await safe_run_discord()
+
+
+async def async_start() -> None:
+    """Async implementation of start"""
+    LOGGER.info("Setup: Starting environment variable validation...")
+    VARIABLES.validate_env_variables()
+    LOGGER.info("Setup: Environment variables validated.")
+
+    # Create and run both tasks concurrently
+    await asyncio.gather(run_fastapi(), run_discord())
+
+
+def start() -> None:
+    """Launched with `poetry run start` at root level"""
+    asyncio.run(async_start())
 
 
 if __name__ == "__main__":

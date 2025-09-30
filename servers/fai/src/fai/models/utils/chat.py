@@ -7,6 +7,7 @@ from turbopuffer.types.row import Row
 class ChatMode(str, Enum):
     MARKDOWN = "markdown"
     SLACK = "slack"
+    DISCORD = "discord"
 
 
 def format_record(record: Row | Any) -> str:
