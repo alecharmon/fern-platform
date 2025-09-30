@@ -18,6 +18,9 @@ while not done:
         sys.exit(f"Request failed with status code {response.status_code}")
 
     for domain in response.json()["domains"]:
+        if not domain["verified"]:
+            print(f"{domain['name']} is not verified and will be skipped")
+            continue
         project_domains.append(domain["name"])
 
     # Deal with pagination
@@ -46,7 +49,7 @@ for domain in project_domains:
 
 
 # Skip domains in the list below
-skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","fern-docs.skyflow.dev","docs.pinnacle.sh","docs.staging.paradex.trade","developers.ada.cx","developer.doc.spscommerce.com","next-remote.ferndocs.com","stable.ferndocs.com","experimental.ferndocs.com","docs.cloud.browser-use.com","docs.aspect.inc"]
+skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","docs.staging.paradex.trade","next-remote.ferndocs.com","stable.ferndocs.com","experimental.ferndocs.com"]
 
 # Write domains out to file
 print(f"Found {len(domains)} domains to check.")
