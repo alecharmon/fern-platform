@@ -117,6 +117,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
       POSTGRES_DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/mydatabase
+      KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
     steps:

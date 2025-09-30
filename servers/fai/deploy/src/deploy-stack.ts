@@ -34,6 +34,7 @@ export interface FernAiEnvVariables {
   SLACK_SIGNING_SECRET: string;
   DISCORD_BOT_TOKEN: string;
   DISCORD_OAUTH_URL: string;
+  KV_REST_API_TOKEN: string;
   KV_REST_API_READ_ONLY_TOKEN: string;
   KV_REST_API_URL: string;
   [key: string]: string;

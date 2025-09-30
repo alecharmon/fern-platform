@@ -27,6 +27,7 @@ jobs:
       SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       DISCORD_OAUTH_URL: ${{ secrets.DISCORD_OAUTH_URL }}
+      KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
     steps:
@@ -47,6 +48,7 @@ jobs:
           echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env
           echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env
           echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env
+          echo "KV_REST_API_TOKEN=${{ env.KV_REST_API_TOKEN }}" >> .env
           echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
           echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
       - name: Deploy to Dev

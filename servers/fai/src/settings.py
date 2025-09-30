@@ -28,6 +28,7 @@ class Variables:
     DISCORD_BOT_TOKEN: str | None = os.environ.get("DISCORD_BOT_TOKEN")
     DISCORD_OAUTH_URL: str | None = os.environ.get("DISCORD_OAUTH_URL")
 
+    KV_REST_API_TOKEN: str | None = os.environ.get("KV_REST_API_TOKEN")
     KV_REST_API_READ_ONLY_TOKEN: str | None = os.environ.get("KV_REST_API_READ_ONLY_TOKEN")
     KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
 
