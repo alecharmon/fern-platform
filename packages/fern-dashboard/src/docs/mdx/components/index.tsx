@@ -127,7 +127,7 @@ const HTML_COMPONENTS = {
   h4: (props: ComponentProps<"h4">) => HeadingRenderer(4, props),
   h5: (props: ComponentProps<"h5">) => HeadingRenderer(5, props),
   h6: (props: ComponentProps<"h6">) => HeadingRenderer(6, props),
-  img: Image,
+  img: "img",
   li: Li,
   ol: Ol,
   strong: Strong,

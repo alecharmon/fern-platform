@@ -37,6 +37,10 @@ export const rehypeEditorComponents: Unified.Plugin<[], Hast.Root> = () => {
         node.name = "Embed";
       }
 
+      if (node.name === "img") {
+        node.name = "Image";
+      }
+
       return CONTINUE;
     });
   };

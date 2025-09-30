@@ -1,7 +1,5 @@
 import { useRef } from "react";
 
-import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
-
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
   EditorComponentPopoverButton,
@@ -39,12 +37,7 @@ export function Embed({ src, type, ...props }: Embed.Props) {
 
       {!src || src.trim() === "" ? (
         // Placeholder when no src is provided
-        <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-3">
-          <div className="tiptap-image-upload-text flex items-center gap-2">
-            <CloudArrowUpIcon className="size-8" />
-            <p>Add media</p>
-          </div>
-        </div>
+        <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-14" />
       ) : (
         // Render embed when src is provided
         <embed src={resolvedSrc?.src || src} type={type} {...props} />

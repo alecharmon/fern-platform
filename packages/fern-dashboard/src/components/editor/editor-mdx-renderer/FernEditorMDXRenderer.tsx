@@ -149,7 +149,7 @@ const richTextComponents = [
   "ParamField",
 ];
 
-const componentsWithoutChildren = ["embed"];
+const componentsWithoutChildren = ["embed", "img"];
 
 const editableComponents = [
   ...richTextComponents,

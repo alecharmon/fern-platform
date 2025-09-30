@@ -1,14 +1,32 @@
 "use client";
 
-import { ComponentProps, ReactElement, forwardRef, useContext } from "react";
+import {
+  ComponentProps,
+  ReactElement,
+  forwardRef,
+  useContext,
+  useRef,
+} from "react";
 import Zoom from "react-medium-image-zoom";
+
+import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
 
 import { cn } from "@fern-docs/components";
 import { FernImage } from "@fern-docs/components/FernImage";
 import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
 
+import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
+import {
+  EditorComponentPopoverButton,
+  EditorComponentPopoverProvider,
+} from "@/components/editor/editor-component/EditorComponentPopover";
+import {
+  CheckboxControl,
+  TextInputControl,
+} from "@/components/editor/editor-component/controls";
 import { useFrontmatter } from "@/docs/components/contexts/frontmatter";
 import { toPixelValue } from "@/docs/components/util/to-pixel-value";
+import { useFileResolver } from "@/providers/FileResolverContext";
 
 export const Image = forwardRef<
   HTMLImageElement,
@@ -36,20 +54,109 @@ export const Image = forwardRef<
 >((props, ref) => {
   const {
     src,
+    alt,
     width,
     height,
+    title,
     noZoom: isImageZoomDisabledProp = false,
     enableZoom: isImageZoomEnabledOverride = false,
     style,
     __assigned_imageSize,
+    className,
     ...rest
   } = props;
+
+  const { isWithinEditor } = useEditorComponent();
+  const { resolveFileSrc } = useFileResolver();
+  const imageRef = useRef<HTMLDivElement>(null);
+
+  const resolvedSrc = resolveFileSrc(src);
+  const finalSrc = resolvedSrc?.src || src || "";
 
   const isImageZoomDisabled = useIsImageZoomDisabled({
     noZoom: isImageZoomDisabledProp,
     enableZoom: isImageZoomEnabledOverride,
   });
 
+  const imageContent = (
+    <div ref={imageRef} className="relative w-full">
+      {isWithinEditor && (
+        <EditorComponentPopoverButton className="absolute -right-[38px] z-10" />
+      )}
+
+      {!src || src.trim() === "" ? (
+        // Placeholder when no src is provided
+        <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-3">
+          <div className="tiptap-image-upload-text flex items-center gap-2">
+            <CloudArrowUpIcon className="size-8" />
+            <p>Add image</p>
+          </div>
+        </div>
+      ) : (
+        // Render image when src is provided
+        (() => {
+          const fernImage = (
+            <FernImage
+              ref={ref}
+              src={finalSrc}
+              width={toPixelValue(width)}
+              height={toPixelValue(height)}
+              {...rest}
+              style={{ ...style, ...__assigned_imageSize }}
+              alt={alt || ""}
+              title={title || undefined}
+              className={cn("mx-auto", className)}
+            />
+          );
+
+          if (isImageZoomDisabled) {
+            return fernImage;
+          }
+
+          return (
+            <Zoom
+              zoomImg={{ src: finalSrc }}
+              classDialog="custom-backdrop"
+              wrapElement="span"
+            >
+              {fernImage}
+            </Zoom>
+          );
+        })()
+      )}
+    </div>
+  );
+
+  if (isWithinEditor) {
+    return (
+      <EditorComponentPopoverProvider
+        attributes={{
+          src: new TextInputControl({
+            placeholder: "Enter image URL",
+            defaultValue: src,
+          }),
+          alt: new TextInputControl({
+            placeholder: "Enter alt text for accessibility",
+            defaultValue: alt,
+          }),
+          title: new TextInputControl({
+            placeholder: "Enter title (tooltip text)",
+            defaultValue: title,
+          }),
+          noZoom: new CheckboxControl({
+            label: "Disable zoom",
+            defaultValue: isImageZoomDisabledProp,
+          }),
+        }}
+        targetRef={imageRef}
+        hoverSlopThreshold={42}
+      >
+        {imageContent}
+      </EditorComponentPopoverProvider>
+    );
+  }
+
+  // For non-editor mode, return the original logic but with resolved src
   if (!src) {
     return null;
   }
@@ -57,13 +164,14 @@ export const Image = forwardRef<
   const fernImage = (
     <FernImage
       ref={ref}
-      src={src}
+      src={finalSrc}
       width={toPixelValue(width)}
       height={toPixelValue(height)}
       {...rest}
       style={{ ...style, ...__assigned_imageSize }}
-      alt={rest.alt ?? ""}
-      className={cn("mx-auto", props.className)}
+      alt={alt || ""}
+      title={title || undefined}
+      className={cn("mx-auto", className)}
     />
   );
 
@@ -72,7 +180,11 @@ export const Image = forwardRef<
   }
 
   return (
-    <Zoom zoomImg={{ src }} classDialog="custom-backdrop" wrapElement="span">
+    <Zoom
+      zoomImg={{ src: finalSrc }}
+      classDialog="custom-backdrop"
+      wrapElement="span"
+    >
       {fernImage}
     </Zoom>
   );
