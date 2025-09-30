@@ -12,7 +12,7 @@
     "clean": "rm -rf ./lib ./dist ./.next && tsc --build --clean",
     "compile": "tsc --build",
     "dashboard:build": "next build",
-    "dashboard:dev": "next dev",
+    "dashboard:dev": "next dev --turbopack",
     "dashboard:dev:inspect": "NODE_OPTIONS='--inspect' next dev",
     "dashboard:lint": "next lint",
     "dashboard:rsd": "RSD=1 next build",
