@@ -8,7 +8,10 @@ from src.apps.discord.message.message_handler import handle_discord_message
 from src.apps.discord.shard_manager import ShardManager
 from src.fai.db import async_session_maker
 from src.fai.models.db.discord_integration_db import DiscordIntegrationDb
-from src.settings import VARIABLES
+from src.settings import (
+    LOGGER,
+    VARIABLES,
+)
 
 load_dotenv()
 bot_token = VARIABLES.DISCORD_BOT_TOKEN
@@ -26,14 +29,14 @@ class AskFernDiscordClient(discord.AutoShardedClient):
 
     async def setup_hook(self) -> None:
         await self.tree.sync()
-        print("Slash commands synced")
+        LOGGER.info("Slash commands synced")
         self.refresh_claim_loop.start()
 
     async def on_ready(self) -> None:
-        print(f"Connected to {len(self.guilds)} guilds on this shard:")
+        LOGGER.info(f"Connected to {len(self.guilds)} guilds on this shard:")
         for guild in self.guilds:
             shard_id = (guild.id >> 22) % 2
-            print(f"  - {guild.name} (ID: {guild.id}) -> shard {shard_id}")
+            LOGGER.info(f"  - {guild.name} (ID: {guild.id}) -> shard {shard_id}")
 
     @tasks.loop(minutes=2)
     async def refresh_claim_loop(self) -> None:
@@ -43,10 +46,10 @@ class AskFernDiscordClient(discord.AutoShardedClient):
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         shard_id = (guild.id >> 22) % 2
-        print(f"Bot added to: {guild.name} (ID: {guild.id}) -> shard {shard_id}")
+        LOGGER.info(f"Bot added to: {guild.name} (ID: {guild.id}) -> shard {shard_id}")
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
-        print(f"Bot removed from: {guild.name} (ID: {guild.id})")
+        LOGGER.info(f"Bot removed from: {guild.name} (ID: {guild.id})")
         await self.handle_remove_discord_integration(str(guild.id))
 
     async def on_message(self, message: discord.Message) -> None:
@@ -106,9 +109,9 @@ async def safe_run_discord() -> None:
     try:
         await start_discord_bot()
     except KeyboardInterrupt:
-        print("Discord bot shutting down...")
+        LOGGER.info("Discord bot shutting down...")
     except Exception as e:
-        print(f"Discord bot failed but FastAPI will continue running: {e}")
+        LOGGER.error(f"Discord bot failed but FastAPI will continue running: {e}")
     finally:
         # Close the client and release shard on shutdown
         if client:

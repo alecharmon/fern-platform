@@ -3,7 +3,10 @@ import os
 
 from upstash_redis import Redis
 
-from src.settings import VARIABLES
+from src.settings import (
+    LOGGER,
+    VARIABLES,
+)
 
 SHARD_COUNT = 2
 SHARD_KEY_PREFIX = "discord_shard"
@@ -30,7 +33,7 @@ class ShardManager:
                 # Extract task ID from ARN (last part after /)
                 return task_arn.split("/")[-1]
             except Exception as e:
-                print(f"Failed to get ECS task ID: {e}")
+                LOGGER.error(f"Failed to get ECS task ID: {e}")
 
         return os.environ.get("HOSTNAME", "unknown")
 
@@ -46,7 +49,7 @@ class ShardManager:
 
             if result:
                 self.claimed_shard = shard_id
-                print(f"Successfully claimed shard {shard_id} for task {self.task_id}")
+                LOGGER.info(f"Successfully claimed shard {shard_id} for task {self.task_id}")
 
                 self._register_cleanup()
                 return shard_id
@@ -54,7 +57,7 @@ class ShardManager:
         for shard_id in range(SHARD_COUNT):
             shard_key = f"{SHARD_KEY_PREFIX}:{shard_id}"
             owner = self.redis.get(shard_key)
-            print(f"Shard {shard_id} is claimed by: {owner}")
+            LOGGER.info(f"Shard {shard_id} is claimed by: {owner}")
 
         raise RuntimeError("Failed to claim any shard - all shards are already claimed")
 
@@ -72,9 +75,9 @@ class ShardManager:
             current_owner = self.redis.get(shard_key)
             if current_owner == self.task_id:
                 self.redis.delete(shard_key)
-                print(f"Released shard {self.claimed_shard} for task {self.task_id}")
+                LOGGER.info(f"Released shard {self.claimed_shard} for task {self.task_id}")
             else:
-                print(f"Warning: Shard {self.claimed_shard} is now owned by {current_owner}, not releasing")
+                LOGGER.warning(f"Warning: Shard {self.claimed_shard} is now owned by {current_owner}, not releasing")
 
             self.claimed_shard = None
 

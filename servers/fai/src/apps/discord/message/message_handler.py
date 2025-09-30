@@ -113,7 +113,7 @@ async def handle_discord_message(message: discord.Message) -> DiscordMessageResp
 
     async with message.channel.typing():
         await message.add_reaction("👀")
-        print(f"Processing message from {message.author} in {message.channel.id}...")
+        LOGGER.info(f"Processing message from {message.author} in {message.channel.id}...")
 
         message_history = None
         if is_in_thread:
