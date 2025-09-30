@@ -8,6 +8,8 @@ import { mergeHeaders } from "./core/headers.js";
 import { Analytics } from "./api/resources/analytics/client/Client.js";
 import { Chat } from "./api/resources/chat/client/Client.js";
 import { Conversation } from "./api/resources/conversation/client/Client.js";
+import { Settings } from "./api/resources/settings/client/Client.js";
+import { Discord } from "./api/resources/discord/client/Client.js";
 import { Document } from "./api/resources/document/client/Client.js";
 import { Feedback } from "./api/resources/feedback/client/Client.js";
 import { Github } from "./api/resources/github/client/Client.js";
@@ -16,7 +18,6 @@ import { Health } from "./api/resources/health/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
 import { Mcp } from "./api/resources/mcp/client/Client.js";
 import { Query } from "./api/resources/query/client/Client.js";
-import { Settings } from "./api/resources/settings/client/Client.js";
 import { Slack } from "./api/resources/slack/client/Client.js";
 
 export declare namespace FernAIClient {
@@ -48,6 +49,8 @@ export class FernAIClient {
     protected _analytics: Analytics | undefined;
     protected _chat: Chat | undefined;
     protected _conversation: Conversation | undefined;
+    protected _settings: Settings | undefined;
+    protected _discord: Discord | undefined;
     protected _document: Document | undefined;
     protected _feedback: Feedback | undefined;
     protected _github: Github | undefined;
@@ -56,7 +59,6 @@ export class FernAIClient {
     protected _index: Index | undefined;
     protected _mcp: Mcp | undefined;
     protected _query: Query | undefined;
-    protected _settings: Settings | undefined;
     protected _slack: Slack | undefined;
 
     constructor(_options: FernAIClient.Options = {}) {
@@ -83,6 +85,14 @@ export class FernAIClient {
 
     public get conversation(): Conversation {
         return (this._conversation ??= new Conversation(this._options));
+    }
+
+    public get settings(): Settings {
+        return (this._settings ??= new Settings(this._options));
+    }
+
+    public get discord(): Discord {
+        return (this._discord ??= new Discord(this._options));
     }
 
     public get document(): Document {
@@ -115,10 +125,6 @@ export class FernAIClient {
 
     public get query(): Query {
         return (this._query ??= new Query(this._options));
-    }
-
-    public get settings(): Settings {
-        return (this._settings ??= new Settings(this._options));
     }
 
     public get slack(): Slack {

@@ -14,23 +14,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
 from src.fai.dependencies import (
+    ask_ai_enabled,
     get_db,
+    strip_domain,
     verify_token,
 )
 from src.fai.models.db.discord_integration_db import DiscordIntegrationDb
 from src.fai.models.types.discord_integration_types import DiscordIntegrationResponse
-from src.fai.routes.settings import strip_domain
 from src.settings import (
     LOGGER,
     VARIABLES,
 )
 
 
-@fai_app.post("/discord/install", openapi_extra={"x-fern-audiences": ["internal"]})
+@fai_app.post("/discord/install", openapi_extra={"x-fern-audiences": ["customer"], "security": [{"bearerAuth": []}]})
 async def create_discord_integration(
-    domain: str,
-    db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    domain: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_token), __: None = Depends(ask_ai_enabled)
 ) -> DiscordIntegrationResponse:
     try:
         stripped_domain = strip_domain(domain)

@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib.parse import urlparse
 
 import httpx
 from fastapi import Depends
@@ -11,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.fai.app import fai_app
 from src.fai.dependencies import (
     get_db,
+    strip_domain,
     verify_token,
 )
 from src.fai.models.api.settings_api import (
@@ -267,11 +267,3 @@ def get_token_from_auth_header(auth_header: str) -> str | None:
     if auth_header and auth_header.startswith("Bearer "):
         return auth_header[7:]
     return None
-
-
-def strip_domain(url: str) -> str:
-    """Extract domain from URL, removing protocol, path, and query parameters."""
-    if not url.startswith(("http://", "https://")):
-        url = "https://" + url
-    parsed = urlparse(url)
-    return parsed.netloc

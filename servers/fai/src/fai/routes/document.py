@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.fai.app import fai_app
 from src.fai.dependencies import (
+    ask_ai_enabled,
     get_db,
     verify_token,
 )
@@ -54,6 +55,7 @@ async def create_document(
     body: CreateDocumentRequest = Body(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    __: None = Depends(ask_ai_enabled),
 ) -> JSONResponse:
     try:
         created_document_ids = []
@@ -101,6 +103,7 @@ async def batch_create_document(
     body: list[CreateDocumentRequest] = Body(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    __: None = Depends(ask_ai_enabled),
 ) -> JSONResponse:
     try:
         created_document_ids = []
@@ -152,6 +155,7 @@ async def update_document(
     body: UpdateDocumentRequest = Body(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    __: None = Depends(ask_ai_enabled),
 ) -> JSONResponse:
     try:
         db_document = await db.execute(
@@ -198,6 +202,7 @@ async def delete_document_by_id(
     body: DeleteDocumentRequest = Body(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    __: None = Depends(ask_ai_enabled),
 ) -> JSONResponse:
     try:
         db_document = await db.execute(
@@ -228,6 +233,7 @@ async def batch_delete_document(
     body: list[DeleteDocumentRequest] = Body(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    __: None = Depends(ask_ai_enabled),
 ) -> JSONResponse:
     try:
         deleted_count = 0
@@ -265,6 +271,7 @@ async def get_document_by_id(
     document_id: str,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    __: None = Depends(ask_ai_enabled),
 ) -> JSONResponse:
     try:
         document = await db.execute(select(DocumentDb).where(DocumentDb.id == document_id, DocumentDb.domain == domain))
@@ -290,6 +297,7 @@ async def get_documents(
     limit: int | None = QueryParam(default=None, description="The number of documents per page"),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    __: None = Depends(ask_ai_enabled),
 ) -> JSONResponse:
     try:
         if page is None or page < 1:
@@ -332,9 +340,7 @@ async def get_documents(
     openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def delete_all_documents(
-    domain: str,
-    db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    domain: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_token), __: None = Depends(ask_ai_enabled)
 ) -> JSONResponse:
     try:
         documents = await db.execute(select(DocumentDb).where(DocumentDb.domain == domain))

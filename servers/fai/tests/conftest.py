@@ -100,12 +100,19 @@ def setup_test_env(test_database_url: str) -> Any:
 @pytest.fixture
 def test_client(setup_test_env: Any, test_session: AsyncSession) -> Generator[TestClient, None, None]:
     from src.fai.app import fai_app
-    from src.fai.dependencies import get_db
+    from src.fai.dependencies import (
+        ask_ai_enabled,
+        get_db,
+    )
 
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield test_session
 
+    async def override_ask_ai_enabled(domain: str) -> None:
+        return None
+
     fai_app.dependency_overrides[get_db] = override_get_db
+    fai_app.dependency_overrides[ask_ai_enabled] = override_ask_ai_enabled
     _load_routes()
 
     client = TestClient(fai_app)

@@ -11,6 +11,7 @@ export * from "./CreateQueryResponse.js";
 export * from "./DeleteDocumentRequest.js";
 export * from "./DeleteDocumentResponse.js";
 export * from "./DeleteGuidanceResponse.js";
+export * from "./DiscordIntegrationResponse.js";
 export * from "./Document.js";
 export * from "./Feedback.js";
 export * from "./GetConversationResponse.js";

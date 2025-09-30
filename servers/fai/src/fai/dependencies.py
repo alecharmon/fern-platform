@@ -1,15 +1,18 @@
 import json
 from collections.abc import AsyncGenerator
+from urllib.parse import urlparse
 
 from fastapi import (
     HTTPException,
     Request,
     status,
 )
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from upstash_redis import Redis
 
 from src.fai.db import async_session_maker
+from src.fai.models.db.settings_db import SettingsDb
 from src.fai.utils.get_venus_client import get_venus_client
 from src.settings import VARIABLES
 
@@ -52,3 +55,22 @@ async def verify_token(request: Request, domain: str) -> str:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this organization")
 
     return token
+
+
+async def ask_ai_enabled(domain: str) -> None:
+    domain = strip_domain(domain)
+    async with async_session_maker() as session:
+        existing = await session.execute(select(SettingsDb).where(SettingsDb.domain == domain))
+        existing_record = existing.scalar_one_or_none()
+        if not existing_record:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ask AI is not enabled for this domain")
+        if not existing_record.last_reindex_time:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ask AI is not enabled for this domain")
+
+
+def strip_domain(url: str) -> str:
+    """Extract domain from URL, removing protocol, path, and query parameters."""
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+    parsed = urlparse(url)
+    return parsed.netloc
