@@ -50,9 +50,17 @@ export const middleware: NextMiddleware = async (request) => {
 
   // note: decoding the uri component here will avoid double-encoding the pathname futher
   // down the middleware chain
-  const pathname = decodeURIComponent(
-    removeTrailingSlash(request.nextUrl.pathname)
-  );
+
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(
+      removeTrailingSlash(request.nextUrl.pathname)
+    );
+  } catch (_) {
+    return new NextResponse("Bad Request: Invalid URI encoding", {
+      status: 400,
+    });
+  }
 
   const headers = new Headers(request.headers);
   headers.set(HEADER_X_FERN_HOST, domain);
