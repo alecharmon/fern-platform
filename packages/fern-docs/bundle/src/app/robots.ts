@@ -4,11 +4,7 @@ import { headers } from "next/headers";
 import urlJoin from "url-join";
 
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import {
-  HEADER_HOST,
-  HEADER_X_FERN_HOST,
-  conformTrailingSlash,
-} from "@fern-api/docs-utils";
+import { HEADER_HOST, HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getCanonicalUrl, getSeoDisabled } from "@fern-docs/edge-config";
 
@@ -41,23 +37,20 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
 
   if (await getSeoDisabled(domain)) {
     return {
+      sitemap,
       rules: {
         userAgent: "*",
         disallow: "/",
       },
-      sitemap,
-      host: domain,
     };
   }
 
-  // disallow all query strings
   return {
+    sitemap,
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: conformTrailingSlash("/*?*"),
+      disallow: "/api/fern-docs/",
     },
-    sitemap,
-    host: canonicalUrl ? canonicalUrl : domain,
   };
 }
