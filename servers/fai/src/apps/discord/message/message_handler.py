@@ -248,9 +248,7 @@ async def process_message(
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
         query_results = await retrieve(text, domain, top_k=top_k)
-        rag_records = [
-            result.chunk or result.document or "" for result in query_results if result.chunk or result.document
-        ]
+        rag_records = [result.document for result in query_results if result.document]
 
         LOGGER.info(f"Retrieved {len(rag_records)} documents")
 
