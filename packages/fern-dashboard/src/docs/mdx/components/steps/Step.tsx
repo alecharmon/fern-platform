@@ -45,7 +45,10 @@ export function Step({
 }: StepProps): ReactElement<any> {
   const { registerStep, unregisterStep, getStepIndex, steps } =
     useStepsContext();
-  const { isWithinEditor } = useEditorComponent();
+
+  // Get the editor component values if we're within the editor
+  const editorComponentValues = useEditorComponent();
+  const { isWithinEditor } = editorComponentValues;
   const uniqueId = React.useId();
   const stepId = id || `step-${uniqueId}`;
   const index = getStepIndex(stepId);
@@ -61,12 +64,16 @@ export function Step({
     registerStep({
       id: stepId,
       title,
+      // Pass the editor component values to the StepGroup
+      editorComponentValues: editorComponentValues.isWithinEditor
+        ? editorComponentValues
+        : undefined,
     });
 
     return () => {
       unregisterStep(stepId);
     };
-  }, [stepId, title, registerStep, unregisterStep]);
+  }, [stepId, title, registerStep, unregisterStep, editorComponentValues]);
 
   const stepContent = (
     <div
@@ -75,12 +82,7 @@ export function Step({
       id={stepId}
       {...props}
     >
-      {isWithinEditor && (
-        <EditorComponentPopoverButton
-          className="absolute right-2 top-0"
-          disableDelete={steps.length === 1}
-        />
-      )}
+      {/* Popover button will be handled by EditorComponentPopoverProvider wrapper */}
       {!isFernAnchorDisabled && (
         <FernLink
           className="fern-anchor"
@@ -141,7 +143,13 @@ export function Step({
         }}
         targetRef={stepRef}
       >
-        {stepContent}
+        <div className="relative">
+          <EditorComponentPopoverButton
+            className="absolute right-2 top-0"
+            disableDelete={steps.length === 1}
+          />
+          {stepContent}
+        </div>
       </EditorComponentPopoverProvider>
     );
   }

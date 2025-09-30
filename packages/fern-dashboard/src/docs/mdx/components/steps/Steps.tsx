@@ -14,7 +14,10 @@ import { CirclePlusIcon } from "lucide-react";
 import { Button, cn } from "@fern-docs/components";
 
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
-import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
+import {
+  EditorComponentContextValue,
+  useEditorComponent,
+} from "@/components/editor/editor-component/EditorComponentContext";
 import {
   EditorComponentPopoverButton,
   EditorComponentPopoverProvider,
@@ -41,6 +44,8 @@ export const EMPTY_STEPS_CONTENT = `
 interface StepData {
   id: string;
   title?: string;
+  // EditorComponent values passed from Step to StepGroup
+  editorComponentValues?: EditorComponentContextValue;
 }
 
 interface StepsContextType {
@@ -98,7 +103,13 @@ export function StepGroup({
 
   const getStepIndex = useCallback(
     (id: string) => {
-      const index = steps.findIndex((step) => step.id === id);
+      const sortedSteps = [...steps].sort((a, b) => {
+        // Use the editor component index if available, otherwise fall back to registration order
+        const aIndex = a.editorComponentValues?.index || 0;
+        const bIndex = b.editorComponentValues?.index || 0;
+        return aIndex - bIndex;
+      });
+      const index = sortedSteps.findIndex((step) => step.id === id);
       return index >= 0 ? index + 1 : 0;
     },
     [steps]
@@ -121,9 +132,6 @@ export function StepGroup({
       data-toc={toc}
       {...props}
     >
-      {isWithinEditor && (
-        <EditorComponentPopoverButton className="absolute -right-8 -top-2" />
-      )}
       {children}
       {isWithinEditor && (
         <Button
@@ -153,7 +161,10 @@ export function StepGroup({
           targetRef={stepGroupRef}
           hoverSlopThreshold={50}
         >
-          {stepGroupContent}
+          <div className="relative">
+            <EditorComponentPopoverButton className="absolute -right-8 -top-2" />
+            {stepGroupContent}
+          </div>
         </EditorComponentPopoverProvider>
       </StepsContext.Provider>
     );
