@@ -1,6 +1,6 @@
 import type { DocsV2Read } from "@fern-api/fdr-sdk";
 
-import { type VisualEditorDocument, mongoClient } from "./mongodb-client";
+import { type UnzippedEditorDocument, mongoClient } from "./mongodb-client";
 
 export class VisualEditorStorage {
   async storeFdrSnapshot(
@@ -45,7 +45,7 @@ export class VisualEditorStorage {
 
   async getDocumentsForBranches(
     branchNames: string[]
-  ): Promise<VisualEditorDocument[]> {
+  ): Promise<UnzippedEditorDocument[]> {
     try {
       const documents = await mongoClient.findDocumentsForBranches(branchNames);
       return documents;

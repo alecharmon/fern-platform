@@ -1,22 +1,36 @@
 import { attachDatabasePool } from "@vercel/functions";
 import {
+  Binary,
   type Collection,
   type Db,
   MongoClient,
   type MongoClientOptions,
 } from "mongodb";
+import { gunzip, gzip } from "zlib";
 
 import { DocsV2Read } from "@fern-api/fdr-sdk";
 
-export interface VisualEditorDocument {
+type EditorDocument = {
   _id: string;
   domain: string;
   branchName: string;
-  data: DocsV2Read.LoadDocsForUrlResponse;
   createdAt: Date;
   updatedAt: Date;
   expiresAt?: Date;
-}
+} & (
+  | {
+      // Old type for backwards compatibility
+      data: DocsV2Read.LoadDocsForUrlResponse;
+    }
+  | {
+      data: Binary;
+      version: number;
+    }
+);
+
+export type UnzippedEditorDocument = EditorDocument & {
+  data: DocsV2Read.LoadDocsForUrlResponse;
+};
 
 const uri = process.env.MONGODB_URI;
 const options: MongoClientOptions = {
@@ -52,9 +66,9 @@ if (uri) {
 
 class VisualEditorMongoClient {
   private db: Db | null = null;
-  private collection: Collection<VisualEditorDocument> | null = null;
+  private collection: Collection<EditorDocument> | null = null;
 
-  private async ensureConnection(): Promise<Collection<VisualEditorDocument>> {
+  private async ensureConnection(): Promise<Collection<EditorDocument>> {
     if (this.collection) {
       return this.collection;
     }
@@ -65,7 +79,7 @@ class VisualEditorMongoClient {
 
     const client = await clientPromise;
     this.db = client.db("visual-editor");
-    this.collection = this.db.collection<VisualEditorDocument>("fdr-data");
+    this.collection = this.db.collection<EditorDocument>("fdr-data");
 
     await this.collection.createIndex(
       { domain: 1, branchName: 1 },
@@ -83,6 +97,55 @@ class VisualEditorMongoClient {
     return `${domain}::${branchName}`;
   }
 
+  private zipCallback = (
+    resolve: (value: Buffer) => void,
+    reject: (reason?: any) => void,
+    err: unknown,
+    result: Buffer
+  ) => {
+    if (err) reject(err);
+    else resolve(result);
+  };
+
+  private async compressData(
+    data: DocsV2Read.LoadDocsForUrlResponse
+  ): Promise<Binary> {
+    const serialized = JSON.stringify(data);
+    const compressed = await new Promise<Buffer>((resolve, reject) => {
+      gzip(Buffer.from(serialized, "utf8"), (err, result) =>
+        this.zipCallback(resolve, reject, err, result)
+      );
+    });
+    return new Binary(compressed);
+  }
+
+  private async decompressData(
+    data: Binary
+  ): Promise<DocsV2Read.LoadDocsForUrlResponse> {
+    try {
+      // Ensure we have a proper Buffer from the Binary data
+      const buffer = Buffer.isBuffer(data.buffer)
+        ? data.buffer
+        : Buffer.from(data.buffer);
+
+      // Decompress the gzipped data
+      const decompressed = await new Promise<Buffer>((resolve, reject) => {
+        gunzip(buffer, (err, result) =>
+          this.zipCallback(resolve, reject, err, result)
+        );
+      });
+
+      // Parse the JSON
+      const jsonString = decompressed.toString("utf8");
+      return JSON.parse(jsonString) as DocsV2Read.LoadDocsForUrlResponse;
+    } catch (error) {
+      console.error("[decompressData] Failed to decompress data:", error);
+      throw new Error(
+        `Failed to decompress data: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
   async set(
     domain: string,
     branchName: string,
@@ -92,11 +155,12 @@ class VisualEditorMongoClient {
 
     const now = new Date();
 
-    const document: VisualEditorDocument = {
+    const document: EditorDocument = {
       _id: this.getDocumentId(domain, branchName),
       domain,
       branchName,
-      data,
+      data: await this.compressData(data),
+      version: 2,
       createdAt: now,
       updatedAt: now,
     };
@@ -120,12 +184,16 @@ class VisualEditorMongoClient {
       return null;
     }
 
+    if ("version" in document) {
+      return this.decompressData(document.data);
+    }
+
     return document.data;
   }
 
   async findDocumentsForBranches(
     branchNames: string[]
-  ): Promise<VisualEditorDocument[]> {
+  ): Promise<UnzippedEditorDocument[]> {
     const collection = await this.ensureConnection();
 
     const documents = await collection
@@ -138,7 +206,29 @@ class VisualEditorMongoClient {
       return [];
     }
 
-    return documents;
+    const decompressedDocuments = (
+      await Promise.all(
+        documents.map(async (document) => {
+          try {
+            const decompressedData =
+              "version" in document
+                ? await this.decompressData(document.data)
+                : document.data;
+            return {
+              ...document,
+              data: decompressedData,
+            };
+          } catch (error) {
+            console.error(
+              "[findDocumentsForBranches] Failed to decompress data:",
+              error
+            );
+            return undefined;
+          }
+        })
+      )
+    ).filter((document) => document != null);
+    return decompressedDocuments;
   }
 }
 

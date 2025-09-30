@@ -2,7 +2,7 @@
 
 import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import {
-  VisualEditorDocument,
+  UnzippedEditorDocument,
   visualEditorStorage,
 } from "@fern-api/visual-editor-server";
 import { branchMatchesUser } from "@fern-docs/components/navigation/local-storage";
@@ -56,7 +56,7 @@ export async function getRelevantUserBranchesForSite(
 
     // Sort by date (newest first)
     const sortedBranches = filteredBranchesForSiteAndOrg.sort(
-      (a: VisualEditorDocument, b: VisualEditorDocument) => {
+      (a: UnzippedEditorDocument, b: UnzippedEditorDocument) => {
         const dateA = a.updatedAt;
         const dateB = b.updatedAt;
 
