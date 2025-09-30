@@ -19,6 +19,7 @@ export default async function DocsSiteNavbar({
   return (
     <div className="flex">
       <DocsSiteNavBarItem title="Overview" href="" />
+      <DocsSiteNavBarItem title="Web Analytics" href="web-analytics" />
       <FeatureFlaggedServerSide
         flag={PosthogFeatureFlag.ENABLE_DOCS_ASK_FERN_TAB}
         orgName={orgName}
