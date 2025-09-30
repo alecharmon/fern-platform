@@ -27,7 +27,7 @@ from src.settings import (
 )
 
 
-@fai_app.post("/discord/install", openapi_extra={"x-fern-audiences": ["customer"], "security": [{"bearerAuth": []}]})
+@fai_app.post("/discord/install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]})
 async def create_discord_integration(
     domain: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_token), __: None = Depends(ask_ai_enabled)
 ) -> DiscordIntegrationResponse:
