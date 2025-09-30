@@ -20,7 +20,7 @@ from src.fai.models.db.discord_message_cache_db import DiscordMessageCacheDb
 from src.fai.models.db.query_db import QueryDb
 from src.fai.models.utils.chat import ChatMode
 from src.fai.utils.chat.response.anthropic import get_anthropic_response
-from src.fai.utils.chat.retrieve.v2_retrieve import v2_retrieve
+from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.settings import LOGGER
 
 DISCORD_FOLLOW_UP_MESSAGE = """\
@@ -247,7 +247,7 @@ async def process_message(
 
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
-        query_results = await v2_retrieve(text, domain, top_k=top_k)
+        query_results = await retrieve(text, domain, top_k=top_k)
         rag_records = [
             result.chunk or result.document or "" for result in query_results if result.chunk or result.document
         ]
