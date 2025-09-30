@@ -5,7 +5,7 @@ import { SKIP } from "unist-util-visit";
 import { visitParents } from "unist-util-visit-parents";
 
 import { isNonNullish } from "@fern-api/ui-core-utils";
-import { Hast } from "@fern-docs/mdx";
+import { Hast, markdownToString } from "@fern-docs/mdx";
 
 import { hastToString } from "./hast-utils";
 import { hastGetBooleanValue } from "./hast-utils/hast-get-boolean-value";
@@ -86,18 +86,31 @@ export function makeToc(
             const title = child.attributes
               .filter(isMdxJsxAttribute)
               .find((attr) => attr.name === "title")?.value;
-            if (
-              id == null ||
-              typeof id !== "string" ||
-              title == null ||
-              typeof title !== "string"
-            ) {
+
+            if (id == null || typeof id !== "string") {
               return;
+            }
+
+            let titleText: string;
+            if (title == null) {
+              return;
+            } else if (typeof title === "string") {
+              titleText = title;
+            } else {
+              // attempt to extract the text from the title
+              const extractedTitle = markdownToString(title.value, "mdx");
+              if (
+                extractedTitle == null ||
+                typeof extractedTitle !== "string"
+              ) {
+                return;
+              }
+              titleText = extractedTitle;
             }
             headings.push({
               depth: 3,
               id,
-              title,
+              title: titleText,
               featureFlags: findFlag(parents),
               roleRequirements: findRoleRequirements(parents),
             });
