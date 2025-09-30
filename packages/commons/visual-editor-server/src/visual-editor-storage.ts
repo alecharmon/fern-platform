@@ -8,12 +8,28 @@ export class VisualEditorStorage {
     branchName: string,
     fdrResponse: DocsV2Read.LoadDocsForUrlResponse
   ): Promise<void> {
+    const uniqueRunId = crypto.randomUUID();
+    const startTimestamp = Date.now();
     console.log(
-      `[VisualEditorStorage] Storing FDR for ${domain}:${branchName}`
+      `[VisualEditorStorage] Storing FDR for ${domain}:${branchName}`,
+      {
+        uniqueRunId,
+        timestamp: startTimestamp,
+      }
     );
 
     try {
       await mongoClient.set(domain, branchName, fdrResponse);
+      const endTimestamp = Date.now();
+      const duration = endTimestamp - startTimestamp;
+      console.log(
+        `[VisualEditorStorage] FDR successfully stored for ${domain}:${branchName}`,
+        {
+          uniqueRunId,
+          timestamp: endTimestamp,
+          duration,
+        }
+      );
     } catch (error) {
       console.error(
         `[VisualEditorStorage] Failed to store FDR for ${domain}:${branchName}`,
@@ -27,17 +43,37 @@ export class VisualEditorStorage {
     domain: string,
     branchName: string
   ): Promise<DocsV2Read.LoadDocsForUrlResponse | null> {
+    const uniqueRunId = crypto.randomUUID();
+    const startTimestamp = Date.now();
     console.log(
-      `[VisualEditorStorage] Retrieving FDR for ${domain}:${branchName}`
+      `[VisualEditorStorage] Retrieving FDR for ${domain}:${branchName}`,
+      {
+        uniqueRunId,
+      }
     );
 
     try {
       const fdrResponse = await mongoClient.get(domain, branchName);
+      const endTimestamp = Date.now();
+      const duration = endTimestamp - startTimestamp;
+      console.log(
+        `[VisualEditorStorage] FDR successfully retrieved for ${domain}:${branchName}`,
+        {
+          uniqueRunId,
+          duration,
+        }
+      );
       return fdrResponse;
     } catch (error) {
+      const endTimestamp = Date.now();
+      const duration = endTimestamp - startTimestamp;
       console.error(
         `[VisualEditorStorage] Failed to retrieve FDR for ${domain}:${branchName}`,
-        error
+        error,
+        {
+          uniqueRunId,
+          duration,
+        }
       );
       return null;
     }
