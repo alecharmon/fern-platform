@@ -226,6 +226,27 @@ export function mdxToHtml(
     if (treatAsUnsupported.includes(nodeType)) {
       throw new Error(`Unsupported node type: ${nodeType}`);
     }
+
+    // Special case: if this is a paragraph that contains only images/imageReferences,
+    // treat it as a custom element to avoid nested rendering
+    if (
+      nodeType === "paragraph" &&
+      node.children &&
+      Array.isArray(node.children)
+    ) {
+      const hasOnlyImages = node.children.every(
+        (child: any) =>
+          child.type === "image" || child.type === "imageReference"
+      );
+      if (hasOnlyImages && node.children.length > 0) {
+        const { content } = getNodeContent(node, rootContent);
+        return mdxUnsupportedCustomElementNodev2(
+          generateContentHash(positionStart, positionEnd, content),
+          content
+        );
+      }
+    }
+
     if (!isHashableBaseElementsType(nodeType)) {
       // Early return if the node is not hashable
       return getToHastDefaultHandler(nodeType)(state, node, parents);
