@@ -36,6 +36,7 @@ export default [
       "servers/fdr/ts-loader.js",
       "servers/fdr/**",
       "**/next-env.d.ts",
+      "packages/fdr-lambda-sdk/**",
     ],
   },
   ...turboConfig,
@@ -52,6 +53,7 @@ export default [
         "**/node_modules",
         "fern/**",
         "**/__snapshots__",
+        "packages/fdr-lambda-sdk/**",
       ],
       plugins: {
         "unused-imports": unusedImports,

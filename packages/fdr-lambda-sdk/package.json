@@ -1,0 +1,43 @@
+{
+  "name": "@fern-platform/fdr-lambda-sdk",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/fdr-lambda-sdk"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/js/index.mjs",
+      "require": "./dist/js/index.js",
+      "default": "./dist/js/index.mjs"
+    }
+  },
+  "main": "dist/js/index.js",
+  "source": "src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "compile": "pnpm compile:js && pnpm compile:types",
+    "compile:js": "tsup",
+    "compile:types": "tsc --emitDeclarationOnly --outDir dist/types",
+    "dev": "tsup --watch",
+    "format": "prettier --write --ignore-unknown \"**\"",
+    "format:check": "prettier --check --ignore-unknown \"**\"",
+    "lint": "eslint --max-warnings 0 src --ext .ts --resolve-plugins-relative-to ../../",
+    "test": "vitest --run --passWithNoTests --globals",
+    "test:update": "vitest --run  --passWithNoTests --globals -u"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  }
+}

@@ -28,6 +28,18 @@ groups:
           timeoutInSeconds: infinity
           useLegacyExports: false
 
+  fdr-lambda:
+    audiences:
+      - fdr-lambda
+    generators:
+      - name: fernapi/fern-typescript-node-sdk
+        version: 3.3.5
+        output:
+          location: local-file-system
+          path: ../../../packages/fdr-lambda-sdk/src
+        config: 
+          namespaceExport: FdrLambda
+
   fdr-cjs-sdk:
     generators:
       - name: fernapi/fern-typescript-node-sdk
@@ -43,8 +55,8 @@ groups:
           noOptionalProperties: true
           neverThrowErrors: true
           timeoutInSeconds: infinity
-          packageJson: 
-            devDependencies: 
+          packageJson:
+            devDependencies:
               "typescript": "~5.7.2"
 
   generators-sdk:

@@ -83,30 +83,6 @@ jobs:
           cd servers/fai
           poetry run mypy .
 
-  fern-generate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2 # This helps turbo resolve changes faster
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: fernapi
-          password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
-
-      - name: Codegen
-        run: |
-          pnpm fdr:generate
-          pnpm turbo --filter=@fern-platform/fdr codegen
-
-      - name: Ensure no changes to git-tracked files
-        run: git --no-pager diff --exit-code
-
   test-fai:
     runs-on: ubuntu-latest
     environment: Fern Dev

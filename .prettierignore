@@ -19,6 +19,7 @@ pnpm-lock.yaml
 **/generated/
 **/generated/**
 **/.serverless/**
+packages/fdr-lambda-sdk/**
 **/__test__/**/*.mdx
 **/__test__/**/*.md
 **/__test__/**/*.snap

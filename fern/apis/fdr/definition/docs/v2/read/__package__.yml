@@ -26,6 +26,8 @@ service:
     getDocsUrlMetadata: 
       method: POST
       path: /metadata-for-url
+      audiences:
+        - fdr-lambda
       request:
         name: GetMetadataForUrlRequest
         body:
