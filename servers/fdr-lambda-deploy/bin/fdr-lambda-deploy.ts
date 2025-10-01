@@ -61,7 +61,7 @@ async function main() {
           version,
           environmentType,
           environmentInfo,
-          "sg-0158802587ada8261",
+          "sg-c3cb3dd2",
           {
             env: { account: "985111089818", region: "us-east-1" },
           }
