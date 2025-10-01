@@ -10,6 +10,60 @@ import { getEdge } from "./getEdge";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
+// since we store the workOS org name within the authentication entry
+// we iterate through the entries to find ones that match the org name
+export async function getWorkOSOrganizationDomains(
+  orgName: string
+): Promise<string | undefined> {
+  if (isLocal() || isSelfHosted()) {
+    return undefined;
+  }
+
+  // get authentication record from edge config
+  const domainToAuthConfigMap =
+    await getEdge<Record<string, unknown>>("authentication");
+
+  if (!domainToAuthConfigMap) {
+    return undefined;
+  }
+
+  const domains: string[] = [];
+
+  // iterate through all domains and their auth configs
+  for (const [domain, authConfig] of Object.entries(domainToAuthConfigMap)) {
+    const config = AuthEdgeConfigSchema.safeParse(authConfig);
+
+    if (
+      config.success &&
+      config.data.type === "sso" &&
+      config.data.partner === "workos"
+    ) {
+      // if the orgName matches the organization field, return the domain
+      if (config.data.organization === orgName) {
+        domains.push(domain);
+      }
+    } else {
+      console.error(
+        `Could not parse AuthEdgeConfig for ${domain}`,
+        config.error
+      );
+    }
+  }
+
+  // prefer a non-buildwithfern domain, if it exists
+  if (domains.length > 0) {
+    for (const domain of domains) {
+      if (!domain.endsWith("docs.buildwithfern.com")) {
+        return domain;
+      }
+    }
+
+    return domains[0];
+  }
+
+  return undefined;
+}
+
 export async function getAuthEdgeConfig(
   currentDomain: string
 ): Promise<AuthEdgeConfig | undefined> {

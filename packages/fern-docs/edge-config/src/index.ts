@@ -2,6 +2,7 @@ export {
   getAuthEdgeConfig,
   getApiKeyInjectionEdgeConfig,
   getApiKeyInjectionDemoConfig,
+  getWorkOSOrganizationDomains,
 } from "./getAuthEdgeConfig";
 export { getCustomerAnalytics } from "./getCustomerAnalytics";
 export { getEdgeFlags } from "./getEdgeFlags";
