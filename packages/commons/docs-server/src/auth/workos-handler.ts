@@ -1,7 +1,7 @@
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 
-import { AuthState, getWorkosRbacRoles } from "./getAuthState";
+import { AuthState } from "./getAuthState";
 import { preferPreview } from "./origin";
 import { getWorkosSSOAuthorizationUrl } from "./workos";
 import {
@@ -47,14 +47,10 @@ export async function handleWorkosAuth({
   const workosUserInfo = await toSessionUserInfo(session);
 
   if (workosUserInfo.user) {
-    const roles = await getWorkosRbacRoles(
-      organization,
-      workosUserInfo.user.email
-    );
     return {
       authed: true,
       ok: true,
-      user: toFernUser(workosUserInfo, roles),
+      user: toFernUser(workosUserInfo, []),
       partner: "workos",
     };
   }
@@ -65,14 +61,10 @@ export async function handleWorkosAuth({
       if (setFernToken) {
         setFernToken(await encryptSession(updatedSession));
       }
-      const roles = await getWorkosRbacRoles(
-        organization,
-        updatedSession.user.email
-      );
       return {
         authed: true,
         ok: true,
-        user: toFernUser(await toSessionUserInfo(updatedSession), roles),
+        user: toFernUser(await toSessionUserInfo(updatedSession), []),
         partner: "workos",
       };
     }

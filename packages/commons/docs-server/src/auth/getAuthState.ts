@@ -306,22 +306,3 @@ function getAuthorizationUrl(
 
   return undefined;
 }
-
-export async function getWorkosRbacRoles(
-  org: string,
-  email: string
-): Promise<string[]> {
-  try {
-    // TODO: use `rbac.ferndocs.dev` for staging, and `rbac.ferndocs.com` for production, once available
-    const roles = await fetch(
-      `https://rbac.ferndocs.dev/${encodeURIComponent(org)}/users/${encodeURIComponent(email)}/roles`
-    ).then((res) => res.json());
-    if (Array.isArray(roles)) {
-      return roles.filter((role) => typeof role === "string");
-    }
-    return [];
-  } catch (error) {
-    console.error(`Error fetching RBAC roles for ${org}/${email}: ${error}`);
-    return [];
-  }
-}
