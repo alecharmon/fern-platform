@@ -14,6 +14,11 @@ import {
   EnvironmentType,
 } from "@fern-fern/fern-cloud-sdk/api";
 
+interface FdrLambdaDeployOptions {
+  isPreview?: boolean;
+  prNumber?: string;
+}
+
 export class FdrLambdaDeployStack extends Stack {
   constructor(
     scope: Construct,
@@ -22,9 +27,13 @@ export class FdrLambdaDeployStack extends Stack {
     environmentType: EnvironmentType,
     environmentInfo: EnvironmentInfo,
     rdsProxySecurityGroupId: string,
-    props?: StackProps
+    props?: StackProps,
+    options?: FdrLambdaDeployOptions
   ) {
     super(scope, id, props);
+
+    const isPreview = options?.isPreview ?? false;
+    const prNumber = options?.prNumber;
 
     const logGroup = LogGroup.fromLogGroupName(
       this,
@@ -77,8 +86,12 @@ export class FdrLambdaDeployStack extends Stack {
     );
 
     // Create Lambda function
+    const functionName = isPreview
+      ? `fdr-lambda-preview-${prNumber}`
+      : `fdr-lambda-${environmentType.toLowerCase()}`;
+
     const lambdaFunction = new lambda.Function(this, "fdr-lambda-function", {
-      functionName: `fdr-lambda-${environmentType.toLowerCase()}`,
+      functionName,
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: "index.handler",
       code: lambda.Code.fromAsset(
@@ -97,32 +110,62 @@ export class FdrLambdaDeployStack extends Stack {
         NODE_ENV: "production",
         ENVIRONMENT_TYPE: environmentType,
         DATABASE_URL: getEnvironmentVariableOrThrow("DATABASE_URL"),
+        ...(isPreview && { IS_PREVIEW: "true", PR_NUMBER: prNumber! }),
       },
     });
 
     // Create API Gateway with custom domain
+    const apiName = isPreview
+      ? `fdr-lambda-preview-${prNumber}`
+      : `fdr-lambda-${environmentType.toLowerCase()}`;
+
     const api = new apigateway.RestApi(this, "fdr-lambda-api", {
-      restApiName: `fdr-lambda-${environmentType.toLowerCase()}`,
-      description: `FDR Lambda API for ${environmentType}`,
+      restApiName: apiName,
+      description: isPreview
+        ? `FDR Lambda API Preview for PR #${prNumber}`
+        : `FDR Lambda API for ${environmentType}`,
       deployOptions: {
-        stageName: environmentType.toLowerCase(),
+        stageName: isPreview
+          ? `preview-${prNumber}`
+          : environmentType.toLowerCase(),
         loggingLevel: apigateway.MethodLoggingLevel.INFO,
         dataTraceEnabled: true,
       },
     });
 
-    // Create custom domain name for API Gateway
-    const customDomain = new apigateway.DomainName(this, "fdr-lambda-domain", {
-      domainName: getLambdaDomainName(environmentType, environmentInfo),
-      certificate,
-    });
+    // Only create custom domain for non-preview deployments
+    if (!isPreview) {
+      // Create custom domain name for API Gateway
+      const customDomain = new apigateway.DomainName(
+        this,
+        "fdr-lambda-domain",
+        {
+          domainName: getLambdaDomainName(environmentType, environmentInfo),
+          certificate,
+        }
+      );
 
-    // Map the custom domain to the API Gateway
-    new apigateway.BasePathMapping(this, "fdr-lambda-base-path-mapping", {
-      domainName: customDomain,
-      restApi: api,
-      stage: api.deploymentStage,
-    });
+      // Map the custom domain to the API Gateway
+      new apigateway.BasePathMapping(this, "fdr-lambda-base-path-mapping", {
+        domainName: customDomain,
+        restApi: api,
+        stage: api.deploymentStage,
+      });
+
+      // Create Route53 record for custom domain
+      new ARecord(this, "fdr-lambda-domain-record", {
+        zone: hostedZone,
+        target: RecordTarget.fromAlias(
+          new targets.ApiGatewayDomain(customDomain)
+        ),
+        recordName: getLambdaDomainName(environmentType, environmentInfo),
+      });
+
+      new CfnOutput(this, "CustomDomainUrl", {
+        value: `https://${getLambdaDomainName(environmentType, environmentInfo)}`,
+        description: "Custom Domain URL",
+      });
+    }
 
     // Add Lambda integration
     const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction);
@@ -137,30 +180,25 @@ export class FdrLambdaDeployStack extends Stack {
     const health = api.root.addResource("health");
     health.addMethod("GET", lambdaIntegration);
 
-    // Create Route53 record for custom domain
-    new ARecord(this, "fdr-lambda-domain-record", {
-      zone: hostedZone,
-      target: RecordTarget.fromAlias(
-        new targets.ApiGatewayDomain(customDomain)
-      ),
-      recordName: getLambdaDomainName(environmentType, environmentInfo),
-    });
+    // Output the API URL (remove trailing slash to avoid double slashes)
+    const apiUrlWithoutTrailingSlash = api.url.replace(/\/$/, "");
 
-    // Output the API URL
     new CfnOutput(this, "ApiUrl", {
-      value: api.url,
+      value: apiUrlWithoutTrailingSlash,
       description: "API Gateway URL",
-    });
-
-    new CfnOutput(this, "CustomDomainUrl", {
-      value: `https://${getLambdaDomainName(environmentType, environmentInfo)}`,
-      description: "Custom Domain URL",
     });
 
     new CfnOutput(this, "LambdaFunctionName", {
       value: lambdaFunction.functionName,
       description: "Lambda Function Name",
     });
+
+    if (isPreview) {
+      new CfnOutput(this, "PreviewUrl", {
+        value: apiUrlWithoutTrailingSlash,
+        description: `Preview URL for PR #${prNumber}`,
+      });
+    }
   }
 }
 

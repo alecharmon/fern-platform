@@ -5,7 +5,9 @@
   "scripts": {
     "cdk": "cdk",
     "deploy:dev": "cdk deploy fdr-lambda-dev2 --require-approval never --progress events",
+    "deploy:preview": "cdk deploy fdr-lambda-preview-$PR_NUMBER --require-approval never --progress events --outputs-file preview-output.json",
     "deploy:prod": "cdk deploy fdr-lambda-prod --require-approval never --progress events",
+    "destroy:preview": "cdk destroy fdr-lambda-preview-$PR_NUMBER --force",
     "watch": "tsc -w"
   },
   "dependencies": {

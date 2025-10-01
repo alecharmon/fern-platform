@@ -13,6 +13,65 @@ const pool = new Pool({
   connectionTimeoutMillis: 60000, // 60 seconds - enough for RDS Proxy cold start
 });
 
+interface DocsUrlMetadata {
+  url: string;
+  org: string;
+  isPreviewUrl: boolean;
+  gitUrl?: string;
+}
+
+interface GetMetadataForUrlRequest {
+  url: string;
+}
+
+class DomainNotRegisteredError extends Error {
+  constructor() {
+    super("Domain not registered");
+    this.name = "DomainNotRegisteredError";
+  }
+}
+
+class InvalidUrlError extends Error {
+  constructor(url: string, originalError: Error) {
+    super(`Invalid URL: ${url}`);
+    this.name = "InvalidUrlError";
+    this.cause = originalError;
+  }
+}
+
+async function getMetadataForUrl(url: string): Promise<DocsUrlMetadata | null> {
+  // Parse the URL to get the hostname
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch (error) {
+    throw new InvalidUrlError(url, error as Error);
+  }
+  const hostname = parsedUrl.hostname;
+
+  // Query the database for the docs metadata
+  const result = await pool.query(
+    `SELECT "orgID", "isPreview", "domain", "path", "githubUrl"
+     FROM "DocsV2"
+     WHERE "domain" = $1
+     ORDER BY "updatedTime" DESC
+     LIMIT 1`,
+    [hostname]
+  );
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  const row = result.rows[0];
+  return {
+    url,
+    org: row.orgID,
+    isPreviewUrl: row.isPreview,
+    gitUrl: row.githubUrl ?? undefined,
+  };
+}
+
 export const handler = async (
   event: APIGatewayProxyEvent,
   context: Context
@@ -20,8 +79,45 @@ export const handler = async (
   console.log("Event:", JSON.stringify(event, null, 2));
   console.log("Context:", JSON.stringify(context, null, 2));
 
+  const path = event.path;
+  const method = event.httpMethod;
+
   try {
-    // Simple queries to count API definitions and docs
+    // Route: POST /metadata-for-url
+    if (path === "/metadata-for-url" && method === "POST") {
+      const body: GetMetadataForUrlRequest = JSON.parse(event.body || "{}");
+
+      if (!body.url) {
+        return {
+          statusCode: 400,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({
+            message: "Missing required field: url",
+            requestId: context.awsRequestId,
+          }),
+        };
+      }
+
+      const metadata = await getMetadataForUrl(body.url);
+
+      if (metadata === null) {
+        throw new DomainNotRegisteredError();
+      }
+
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify(metadata),
+      };
+    }
+
+    // Default route for testing
     const apiDefinitionsResult = await pool.query(
       'SELECT COUNT(*) FROM "ApiDefinitionsV2"'
     );
@@ -47,7 +143,40 @@ export const handler = async (
       }),
     };
   } catch (error) {
-    console.error("Database error:", error);
+    console.error("Error:", error);
+
+    // Handle InvalidUrlError
+    if (error instanceof InvalidUrlError) {
+      return {
+        statusCode: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          error: "InvalidUrlError",
+          message: error.message,
+          requestId: context.awsRequestId,
+        }),
+      };
+    }
+
+    // Handle DomainNotRegisteredError
+    if (error instanceof DomainNotRegisteredError) {
+      return {
+        statusCode: 404,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          error: "DomainNotRegisteredError",
+          message: "Domain not registered",
+          requestId: context.awsRequestId,
+        }),
+      };
+    }
+
     return {
       statusCode: 500,
       headers: {
@@ -55,7 +184,7 @@ export const handler = async (
         "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
-        message: "Error querying database",
+        message: "Error processing request",
         error: error instanceof Error ? error.message : String(error),
         requestId: context.awsRequestId,
       }),

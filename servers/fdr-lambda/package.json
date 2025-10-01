@@ -4,11 +4,13 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs --dts --out-dir dist",
+    "build": "tsup",
     "clean": "rm -rf dist lambda.zip",
     "deploy": "pnpm package && aws lambda update-function-code --function-name fdr-lambda --zip-file fileb://lambda.js",
-    "dev": "tsup src/index.ts --format cjs --watch --out-dir dist",
-    "package": "pnpm build && cp dist/index.js lambda.js"
+    "dev": "tsup --watch",
+    "package": "pnpm build && cp dist/index.js lambda.js",
+    "test": "vitest --run --globals",
+    "test:watch": "vitest --globals"
   },
   "dependencies": {
     "@types/aws-lambda": "^8.10.143"
@@ -19,7 +21,8 @@
     "@types/pg": "^8.11.0",
     "pg": "^8.11.3",
     "tsup": "^8.0.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.0.0"
   },
   "packageManager": "pnpm@9.0.0"
 }

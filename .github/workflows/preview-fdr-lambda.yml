@@ -1,0 +1,197 @@
+name: Preview FDR Lambda
+
+on:
+  pull_request:
+    paths:
+      - "servers/fdr-lambda/**"
+      - "servers/fdr-lambda-deploy/**"
+      - ".github/workflows/preview-fdr-lambda.yml"
+
+env:
+  PACKAGE_NAME: "@fern-platform/fdr-lambda"
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: "buildwithfern"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+  DATABASE_URL: ${{ secrets.DEV2_RDS_PROXY_URL }}
+
+jobs:
+  preview_lambda:
+    runs-on: Seed
+    environment: Fern Dev
+    strategy:
+      matrix:
+        concurrency: [1]
+    env:
+      APPLICATION_ENVIRONMENT: dev
+      PREVIEW: "true"
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 🧪 Run Tests
+        run: |
+          cd servers/fdr-lambda
+          pnpm test
+
+      - name: 🔨 Build Lambda
+        run: |
+          pnpm turbo build --filter=${{ env.PACKAGE_NAME }}
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 🚀 Deploy Preview Stack
+        id: deploy
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          npm install -g aws-cdk
+          cd servers/fdr-lambda-deploy
+          VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm --filter=@fern-platform/fdr-lambda-deploy deploy:preview
+
+          # Extract the preview URL from CDK output
+          if [ -f preview-output.json ]; then
+            PREVIEW_URL=$(jq -r '.["fdr-lambda-preview-${{ github.event.pull_request.number }}"].PreviewUrl // .["fdr-lambda-preview-${{ github.event.pull_request.number }}"].ApiUrl' preview-output.json)
+            echo "PREVIEW_URL=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🧪 Test Preview Lambda
+        run: |
+          PREVIEW_URL="${{ steps.deploy.outputs.PREVIEW_URL }}"
+          echo "Testing Lambda at: ${PREVIEW_URL}"
+
+          # Wait a bit for the Lambda to be ready
+          sleep 5
+
+          # Test default route
+          echo "Testing default route..."
+          curl -f "${PREVIEW_URL}" || echo "Default route test failed"
+
+          # Test health endpoint
+          echo "Testing health endpoint..."
+          curl -f "${PREVIEW_URL}/health" || echo "Health endpoint test failed"
+
+          # Test metadata-for-url endpoint
+          echo "Testing metadata endpoint..."
+          curl -f -X POST "${PREVIEW_URL}/metadata-for-url" \
+            -H "Content-Type: application/json" \
+            -d '{"url":"https://docs.buildwithfern.com"}' || echo "Metadata endpoint test failed"
+
+      - name: 💬 Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const previewUrl = '${{ steps.deploy.outputs.PREVIEW_URL }}';
+            const prNumber = context.issue.number;
+
+            const body = `## 🚀 FDR Lambda Preview Deployed
+
+            Your Lambda function has been deployed to a preview environment!
+
+            **🔗 Preview URL:** ${previewUrl}
+
+            **📝 Available Endpoints:**
+            - Base: \`GET ${previewUrl}\`
+            - Health: \`GET ${previewUrl}/health\`
+            - Metadata: \`POST ${previewUrl}/metadata-for-url\`
+
+            **📋 Example Usage:**
+            \`\`\`bash
+            # Test default endpoint
+            curl "${previewUrl}"
+
+            # Test metadata endpoint
+            curl -X POST "${previewUrl}/metadata-for-url" \\
+              -H "Content-Type: application/json" \\
+              -d '{"url":"https://docs.buildwithfern.com"}'
+            \`\`\`
+
+            **🏷️ Stack Name:** \`fdr-lambda-preview-${prNumber}\`
+
+            **ℹ️ Note:** This preview will be automatically destroyed when the PR is closed or merged.`;
+
+            // Find existing preview comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('🚀 FDR Lambda Preview Deployed')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+
+  cleanup_preview:
+    runs-on: Seed
+    if: github.event.action == 'closed'
+    environment: Fern Dev
+    env:
+      APPLICATION_ENVIRONMENT: dev
+      PREVIEW: "true"
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 🗑️ Destroy Preview Stack
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          npm install -g aws-cdk
+          cd servers/fdr-lambda-deploy
+          VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm --filter=@fern-platform/fdr-lambda-deploy destroy:preview || echo "Stack may already be destroyed"
+
+      - name: 💬 Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.issue.number;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🗑️ Preview Environment Cleaned Up\n\nThe preview Lambda stack \`fdr-lambda-preview-${prNumber}\` has been destroyed.`
+            });

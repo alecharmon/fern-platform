@@ -12,8 +12,40 @@ async function main() {
   if (version === undefined) {
     throw new Error("Version is not specified!");
   }
+
+  const isPreview = process.env["PREVIEW"] === "true";
+  const prNumber = process.env["PR_NUMBER"];
+
+  if (isPreview && !prNumber) {
+    throw new Error("PR_NUMBER is required when PREVIEW=true");
+  }
+
   const environments = await getEnvironments();
   const app = new cdk.App();
+
+  // If preview mode, only deploy a preview stack
+  if (isPreview) {
+    const environmentInfo = environments[EnvironmentType.Dev2];
+    if (environmentInfo == null) {
+      throw new Error(`No info for environment Dev2`);
+    }
+
+    new FdrLambdaDeployStack(
+      app,
+      `fdr-lambda-preview-${prNumber}`,
+      version,
+      EnvironmentType.Dev2,
+      environmentInfo,
+      "sg-0158802587ada8261",
+      {
+        env: { account: "985111089818", region: "us-east-1" },
+      },
+      { isPreview: true, prNumber: prNumber! }
+    );
+    return;
+  }
+
+  // Normal deployment flow
   for (const [environmentType, environmentInfo] of Object.entries(
     environments
   )) {
