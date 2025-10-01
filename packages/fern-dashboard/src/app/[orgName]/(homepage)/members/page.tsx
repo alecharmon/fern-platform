@@ -1,8 +1,12 @@
+import { redirect } from "next/navigation";
+
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { MembersPage } from "@/components/members/MembersPage";
 
-import { getCurrentSessionOrThrow } from "../../../services/auth0/getCurrentSession";
-
 export default async function Page() {
-  const session = await getCurrentSessionOrThrow();
+  const session = await getCurrentSession();
+  if (session == null) {
+    redirect("/");
+  }
   return <MembersPage session={session} />;
 }
