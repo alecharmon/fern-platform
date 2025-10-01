@@ -253,6 +253,10 @@ function createSnippetGenerators({
   endpoint: EndpointDefinition;
   dynamicIr: DynamicIRsByLanguage;
 }) {
+  if (endpoint.method === "HEAD") {
+    return {};
+  }
+
   const snippetInputs = [];
   const generators: Record<string, any> = {};
 
