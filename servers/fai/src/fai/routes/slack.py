@@ -28,17 +28,21 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import attributes
 
-from src.fai.app import fai_app
-from src.fai.db import async_session_maker
-from src.fai.models.api.update_channel_settings import ChannelSettings
-from src.fai.models.db.feedback_db import FeedbackDb
-from src.fai.models.db.slack_integration_db import SlackIntegrationDb
-from src.fai.models.db.slack_message_cache_db import SlackMessageCacheDb
-from src.fai.models.types.slack_integration_types import (
+from fai.app import fai_app
+from fai.db import async_session_maker
+from fai.models.api.update_channel_settings import ChannelSettings
+from fai.models.db.feedback_db import FeedbackDb
+from fai.models.db.slack_integration_db import SlackIntegrationDb
+from fai.models.db.slack_message_cache_db import SlackMessageCacheDb
+from fai.models.types.slack_integration_types import (
     CreateSlackIntegration,
     SlackIntegrationResponse,
 )
-from src.fai.utils.slack.client import (
+from fai.settings import (
+    LOGGER,
+    VARIABLES,
+)
+from fai.utils.slack.client import (
     add_reaction,
     open_modal,
     remove_reaction,
@@ -46,15 +50,11 @@ from src.fai.utils.slack.client import (
     send_error_message,
     update_modal,
 )
-from src.fai.utils.slack.message_handler import (
+from fai.utils.slack.message_handler import (
     get_slack_integration,
     get_thread_history,
     handle_slack_message,
     process_message,
-)
-from src.settings import (
-    LOGGER,
-    VARIABLES,
 )
 
 MESSAGE_CACHE_TTL = 30

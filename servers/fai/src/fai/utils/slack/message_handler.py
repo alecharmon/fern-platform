@@ -16,29 +16,29 @@ from pydantic import (
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
-from src.fai.db import async_session_maker
-from src.fai.models.api.update_channel_settings import ChannelSettings
-from src.fai.models.db.query_db import QueryDb
-from src.fai.models.db.slack_context_db import SlackContextDb
-from src.fai.models.db.slack_integration_db import SlackIntegrationDb
-from src.fai.models.utils.chat import ChatMode
-from src.fai.utils.chat.response.anthropic import (
+from fai.db import async_session_maker
+from fai.models.api.update_channel_settings import ChannelSettings
+from fai.models.db.query_db import QueryDb
+from fai.models.db.slack_context_db import SlackContextDb
+from fai.models.db.slack_integration_db import SlackIntegrationDb
+from fai.models.utils.chat import ChatMode
+from fai.settings import LOGGER
+from fai.utils.chat.response.anthropic import (
     get_anthropic_index_response,
     get_anthropic_response,
 )
-from src.fai.utils.chat.retrieve.retrieve import retrieve
-from src.fai.utils.chat.roles import create_delimited_role_combinations
-from src.fai.utils.generate_model import generate_anthropic_generic_async
-from src.fai.utils.slack.client import add_reaction
-from src.fai.utils.turbopuffer.namespace import (
+from fai.utils.chat.retrieve.retrieve import retrieve
+from fai.utils.chat.roles import create_delimited_role_combinations
+from fai.utils.generate_model import generate_anthropic_generic_async
+from fai.utils.slack.client import add_reaction
+from fai.utils.turbopuffer.namespace import (
     get_query_index_name,
     get_slack_context_index_name,
 )
-from src.fai.utils.turbopuffer.sync import (
+from fai.utils.turbopuffer.sync import (
     sync_index_to_target,
     sync_slack_context_db_to_tpuf,
 )
-from src.settings import LOGGER
 
 
 class MessageClassification(BaseModel):

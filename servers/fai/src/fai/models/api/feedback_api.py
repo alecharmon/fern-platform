@@ -3,7 +3,7 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.types.feedback_types import Feedback
+from fai.models.types.feedback_types import Feedback
 
 
 class CreateFeedbackRequest(BaseModel):

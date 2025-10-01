@@ -9,14 +9,14 @@ from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.models.api.guidance_api import (
+from fai.models.api.guidance_api import (
     CreateGuidanceResponse,
     DeleteGuidanceResponse,
     GetGuidanceResponse,
     GetGuidancesResponse,
     UpdateGuidanceResponse,
 )
-from src.fai.models.db.guidance_db import GuidanceDb
+from fai.models.db.guidance_db import GuidanceDb
 from tests.conftest import TEST_FERN_TOKEN
 from tests.factories import (
     CreateGuidanceRequestFactory,
@@ -32,8 +32,8 @@ class TestGuidanceRoutes:
         domain = create_test_domain()
         mock_request = CreateGuidanceRequestFactory.build()
 
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.post(
                 f"/guidance/{domain}/create",
@@ -65,8 +65,8 @@ class TestGuidanceRoutes:
 
         # Create guidance first
         create_request = CreateGuidanceRequestFactory.build()
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/guidance/{domain}/create",
@@ -83,8 +83,8 @@ class TestGuidanceRoutes:
             context=["Updated guidance context"], document="Updated guidance document"
         )
 
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.patch(
                 f"/guidance/{domain}/{guidance_id}",
@@ -115,8 +115,8 @@ class TestGuidanceRoutes:
 
         # Create guidance first
         create_request = CreateGuidanceRequestFactory.build(context=["Original context"], document="Original document")
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/guidance/{domain}/create",
@@ -130,8 +130,8 @@ class TestGuidanceRoutes:
         # Update only context
         update_request = UpdateGuidanceRequestFactory.build(context=["Updated context only"])
 
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.patch(
                 f"/guidance/{domain}/{guidance_id}",
@@ -170,8 +170,8 @@ class TestGuidanceRoutes:
 
         # Create guidance first
         create_request = CreateGuidanceRequestFactory.build()
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/guidance/{domain}/create",
@@ -183,8 +183,8 @@ class TestGuidanceRoutes:
         guidance_id = create_data["guidance_id"]
 
         # Delete guidance
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.delete(
                 f"/guidance/{domain}/{guidance_id}", headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
@@ -228,8 +228,8 @@ class TestGuidanceRoutes:
 
         # Create guidance first
         create_request = CreateGuidanceRequestFactory.build()
-        with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/guidance/{domain}/create",
@@ -280,8 +280,8 @@ class TestGuidanceRoutes:
         # Create multiple guidances
         for i in range(5):
             create_request = CreateGuidanceRequestFactory.build(context=[f"Context {i}"])
-            with patch("src.fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
-                "src.fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
+            with patch("fai.routes.guidance.sync_guidance_db_to_tpuf", new_callable=AsyncMock), patch(
+                "fai.routes.guidance.sync_index_to_target", new_callable=AsyncMock
             ):
                 test_client.post(
                     f"/guidance/{domain}/create",

@@ -3,7 +3,7 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.types.conversation_types import Conversation
+from fai.models.types.conversation_types import Conversation
 
 
 class GetConversationResponse(BaseModel):

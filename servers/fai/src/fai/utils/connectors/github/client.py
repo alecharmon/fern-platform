@@ -4,12 +4,13 @@ from urllib.parse import urlparse
 
 import requests
 
-from src.fai.models.api.connectors.github_api import (
+from fai.models.api.connectors.github_api import (
     GitHubFileInfo,
     GitHubFileInfoRequest,
     ReferenceSnippet,
 )
-from src.fai.utils.connectors.github.constants import (
+from fai.settings import LOGGER
+from fai.utils.connectors.github.constants import (
     DESCRIPTION_SECTION_PATTERN,
     METHOD_HEADER_GROUPS_PATTERN,
     METHOD_HEADER_PATTERN,
@@ -17,7 +18,6 @@ from src.fai.utils.connectors.github.constants import (
     SUPPORTED_LANGUAGES,
     USAGE_SECTION_PATTERN,
 )
-from src.settings import LOGGER
 
 
 class GitHubClient:

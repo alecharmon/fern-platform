@@ -12,14 +12,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.models.db.insight_db import InsightDb
-from src.fai.models.db.query_db import QueryDb
-from src.fai.models.types.query_types import Query
-from src.fai.utils.insights_utils import get_insights_from_queries
-from src.settings import (
+from fai.models.db.insight_db import InsightDb
+from fai.models.db.query_db import QueryDb
+from fai.models.types.query_types import Query
+from fai.settings import (
     CONFIG,
     LOGGER,
 )
+from fai.utils.insights_utils import get_insights_from_queries
 
 
 def generate_insight_id(domain: str, started_at: datetime) -> str:

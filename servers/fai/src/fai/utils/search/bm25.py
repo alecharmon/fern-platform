@@ -1,12 +1,12 @@
 from turbopuffer import AsyncTurbopuffer
 
-from src.fai.utils.turbopuffer.namespace import (
-    get_query_index_name,
-    get_tpuf_namespace,
-)
-from src.settings import (
+from fai.settings import (
     CONFIG,
     VARIABLES,
+)
+from fai.utils.turbopuffer.namespace import (
+    get_query_index_name,
+    get_tpuf_namespace,
 )
 
 

@@ -11,9 +11,9 @@ from unittest.mock import (
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.models.db.insight_db import InsightDb
-from src.fai.models.db.query_db import QueryDb
-from src.fai.utils.insights_job import (
+from fai.models.db.insight_db import InsightDb
+from fai.models.db.query_db import QueryDb
+from fai.utils.insights_job import (
     generate_insight_id,
     generate_insights_for_all_domains,
     generate_insights_for_domain,
@@ -95,7 +95,7 @@ async def test_generate_insights_for_domain_insufficient_queries() -> None:
     start = datetime.now() - timedelta(days=7)
     end = datetime.now()
 
-    with patch("src.fai.utils.insights_job.CONFIG.MIN_INSIGHTS_QUERIES", 10):
+    with patch("fai.utils.insights_job.CONFIG.MIN_INSIGHTS_QUERIES", 10):
         result = await generate_insights_for_domain(mock_db, domain, start, end)
 
     assert result[0] == domain
@@ -108,8 +108,8 @@ async def test_generate_insights_for_all_domains() -> None:
     """Test generating insights for all domains."""
     mock_db = AsyncMock(spec=AsyncSession)
 
-    with patch("src.fai.utils.insights_job.get_domains_with_recent_queries") as mock_get_domains:
-        with patch("src.fai.utils.insights_job.generate_insights_for_domain") as mock_generate:
+    with patch("fai.utils.insights_job.get_domains_with_recent_queries") as mock_get_domains:
+        with patch("fai.utils.insights_job.generate_insights_for_domain") as mock_generate:
             mock_get_domains.return_value = ["domain1.com", "domain2.com"]
             mock_generate.side_effect = [
                 ("domain1.com", True, "Generated successfully"),
@@ -131,7 +131,7 @@ async def test_generate_insights_for_all_domains_no_domains() -> None:
     """Test generating insights when no domains found."""
     mock_db = AsyncMock(spec=AsyncSession)
 
-    with patch("src.fai.utils.insights_job.get_domains_with_recent_queries") as mock_get_domains:
+    with patch("fai.utils.insights_job.get_domains_with_recent_queries") as mock_get_domains:
         mock_get_domains.return_value = []
 
         results = await generate_insights_for_all_domains(mock_db)

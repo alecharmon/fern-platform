@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from src.fai.db import Base
+from fai.db import Base
 
 TEST_FERN_TOKEN = os.environ.get("FERN_TOKEN") or "test-fern-token"
 TEST_ANTHROPIC_API_KEY = "test-anthropic-api-key"
@@ -33,11 +33,13 @@ TEST_SLACK_CLIENT_SECRET = "test-slack-client-secret"
 TEST_SLACK_SIGNING_SECRET = "test-slack-signing-secret"
 TEST_DISCORD_BOT_TOKEN = "test-discord-bot-token"
 TEST_DISCORD_OAUTH_URL = "test-discord-oauth-url"
-ROUTES_PACKAGE_NAME = "src.fai.routes"
+ROUTES_PACKAGE_NAME = "fai.routes"
 
 
 def _load_routes() -> None:
-    for _, module_name, is_pkg in pkgutil.iter_modules([ROUTES_PACKAGE_NAME.replace(".", "/")]):
+    import fai.routes
+
+    for _, module_name, is_pkg in pkgutil.iter_modules(fai.routes.__path__):
         full_module_name = f"{ROUTES_PACKAGE_NAME}.{module_name}"
         importlib.import_module(full_module_name)
 
@@ -55,13 +57,13 @@ def test_engine(test_database_url: str) -> AsyncEngine:
 
 @pytest_asyncio.fixture
 async def test_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
-    from src.fai.models.db.code_db import CodeDb  # noqa: F401
-    from src.fai.models.db.document_db import DocumentDb  # noqa: F401
-    from src.fai.models.db.feedback_db import FeedbackDb  # noqa: F401
-    from src.fai.models.db.guidance_db import GuidanceDb  # noqa: F401
-    from src.fai.models.db.insight_db import InsightDb  # noqa: F401
-    from src.fai.models.db.job_db import JobDb  # noqa: F401
-    from src.fai.models.db.query_db import QueryDb  # noqa: F401
+    from fai.models.db.code_db import CodeDb  # noqa: F401
+    from fai.models.db.document_db import DocumentDb  # noqa: F401
+    from fai.models.db.feedback_db import FeedbackDb  # noqa: F401
+    from fai.models.db.guidance_db import GuidanceDb  # noqa: F401
+    from fai.models.db.insight_db import InsightDb  # noqa: F401
+    from fai.models.db.job_db import JobDb  # noqa: F401
+    from fai.models.db.query_db import QueryDb  # noqa: F401
 
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -99,8 +101,8 @@ def setup_test_env(test_database_url: str) -> Any:
 
 @pytest.fixture
 def test_client(setup_test_env: Any, test_session: AsyncSession) -> Generator[TestClient, None, None]:
-    from src.fai.app import fai_app
-    from src.fai.dependencies import (
+    from fai.app import fai_app
+    from fai.dependencies import (
         ask_ai_enabled,
         get_db,
     )
@@ -123,7 +125,7 @@ def test_client(setup_test_env: Any, test_session: AsyncSession) -> Generator[Te
 
 @pytest_asyncio.fixture
 async def async_test_client(setup_test_env: Any) -> AsyncGenerator[AsyncClient, None]:
-    from src.fai.app import fai_app
+    from fai.app import fai_app
 
     _load_routes()
     async with AsyncClient(transport=ASGITransport(app=fai_app), base_url="http://test") as client:

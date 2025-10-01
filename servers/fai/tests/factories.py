@@ -5,18 +5,18 @@ from datetime import (
 )
 from typing import Any
 
-from src.fai.models.api.chat_api import PostChatCompletionRequest
-from src.fai.models.api.document_api import (
+from fai.models.api.chat_api import PostChatCompletionRequest
+from fai.models.api.document_api import (
     CreateDocumentRequest,
     DeleteDocumentRequest,
     UpdateDocumentRequest,
 )
-from src.fai.models.api.guidance_api import (
+from fai.models.api.guidance_api import (
     CreateGuidanceRequest,
     UpdateGuidanceRequest,
 )
-from src.fai.models.types.chat_types import ChatMessage
-from src.fai.models.types.query_types import Query
+from fai.models.types.chat_types import ChatMessage
+from fai.models.types.query_types import Query
 
 
 class ChatMessageFactory:

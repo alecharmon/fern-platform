@@ -3,10 +3,10 @@ from typing import Any
 from cohere import AsyncClientV2
 from turbopuffer.types.row import Row
 
-from src.fai.utils.chat.prompts.cohere import build_cohere_system_prompt
-from src.fai.utils.chat.retrieve.retrieve import retrieve
-from src.fai.utils.chat.tools import SEARCH_TOOL_COHERE
-from src.settings import VARIABLES
+from fai.settings import VARIABLES
+from fai.utils.chat.prompts.cohere import build_cohere_system_prompt
+from fai.utils.chat.retrieve.retrieve import retrieve
+from fai.utils.chat.tools import SEARCH_TOOL_COHERE
 
 
 async def get_cohere_response(

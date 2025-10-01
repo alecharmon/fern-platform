@@ -5,8 +5,8 @@ from sqlalchemy import (
     String,
 )
 
-from src.fai.db import Base
-from src.fai.models.types.query_types import Query
+from fai.db import Base
+from fai.models.types.query_types import Query
 
 
 class QueryDb(Base):

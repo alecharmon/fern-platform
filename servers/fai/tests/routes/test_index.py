@@ -14,7 +14,7 @@ class TestIndexReconstruct:
     def test_reconstruct_index_success(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        with patch("src.fai.routes.index.reconstruct_query_index_for_domain") as mock_reconstruct:
+        with patch("fai.routes.index.reconstruct_query_index_for_domain") as mock_reconstruct:
             mock_reconstruct.return_value = None
 
             response = test_client.post(
@@ -28,7 +28,7 @@ class TestIndexReconstruct:
     def test_reconstruct_index_failure(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        with patch("src.fai.routes.index.reconstruct_query_index_for_domain") as mock_reconstruct:
+        with patch("fai.routes.index.reconstruct_query_index_for_domain") as mock_reconstruct:
             mock_reconstruct.side_effect = Exception("Reconstruction failed")
 
             response = test_client.post(
@@ -46,12 +46,12 @@ class TestIndexSync:
         domain = create_test_domain()
         request_body = {"index_name": "test-index"}
 
-        with patch("src.fai.routes.index.sync_index_to_target") as mock_sync, patch(
-            "src.fai.routes.index.get_query_index_name"
+        with patch("fai.routes.index.sync_index_to_target") as mock_sync, patch(
+            "fai.routes.index.get_query_index_name"
         ) as mock_get_name, patch(
-            "src.fai.routes.index.job_manager.create_job", new_callable=AsyncMock
+            "fai.routes.index.job_manager.create_job", new_callable=AsyncMock
         ) as mock_create_job, patch(
-            "src.fai.routes.index.job_manager.get_job_status", new_callable=AsyncMock
+            "fai.routes.index.job_manager.get_job_status", new_callable=AsyncMock
         ) as mock_get_job_status:
             mock_sync.return_value = None
             mock_get_name.return_value = "query-index"
@@ -59,7 +59,7 @@ class TestIndexSync:
 
             from datetime import datetime
 
-            from src.fai.models.db.job_db import JobDb
+            from fai.models.db.job_db import JobDb
 
             mock_job = JobDb(id="test-job-id-123", status="pending", created_at=datetime.now(UTC))
             mock_get_job_status.return_value = mock_job
@@ -84,7 +84,7 @@ class TestJobStatus:
     def test_job_status_not_found(self, test_client: TestClient) -> None:
         fake_job_id = "00000000-0000-0000-0000-000000000000"
 
-        with patch("src.fai.routes.index.job_manager.get_job_status", new_callable=AsyncMock) as mock_get_job_status:
+        with patch("fai.routes.index.job_manager.get_job_status", new_callable=AsyncMock) as mock_get_job_status:
             mock_get_job_status.return_value = None
 
             response = test_client.get(f"/jobs/{fake_job_id}/status")

@@ -13,18 +13,18 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     get_db,
     verify_token,
 )
-from src.fai.models.api.feedback_api import (
+from fai.models.api.feedback_api import (
     CreateFeedbackRequest,
     CreateFeedbackResponse,
     GetFeedbackResponse,
 )
-from src.fai.models.db.feedback_db import FeedbackDb
-from src.settings import LOGGER
+from fai.models.db.feedback_db import FeedbackDb
+from fai.settings import LOGGER
 
 
 @fai_app.post(

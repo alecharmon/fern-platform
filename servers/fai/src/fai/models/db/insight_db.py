@@ -7,8 +7,8 @@ from sqlalchemy import (
     String,
 )
 
-from src.fai.db import Base
-from src.fai.models.api.analytics_api import GetInsightsResponse
+from fai.db import Base
+from fai.models.api.analytics_api import GetInsightsResponse
 
 
 class InsightDb(Base):

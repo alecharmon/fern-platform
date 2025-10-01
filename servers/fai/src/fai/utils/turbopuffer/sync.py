@@ -10,25 +10,25 @@ from turbopuffer import (
 )
 from turbopuffer.types.row import Row
 
-from src.fai.models.db.code_db import CodeDb
-from src.fai.models.db.document_db import DocumentDb
-from src.fai.models.db.guidance_db import GuidanceDb
-from src.fai.models.db.slack_context_db import SlackContextDb
-from src.fai.utils.turbopuffer.namespace import (
+from fai.models.db.code_db import CodeDb
+from fai.models.db.document_db import DocumentDb
+from fai.models.db.guidance_db import GuidanceDb
+from fai.models.db.slack_context_db import SlackContextDb
+from fai.settings import (
+    CONFIG,
+    LOGGER,
+    VARIABLES,
+)
+from fai.utils.turbopuffer.namespace import (
     get_code_index_name,
     get_document_index_name,
     get_guidance_index_name,
     get_slack_context_index_name,
     get_tpuf_namespace,
 )
-from src.fai.utils.turbopuffer.schemas import (
+from fai.utils.turbopuffer.schemas import (
     get_data_index_tpuf_schema,
     get_query_index_tpuf_schema,
-)
-from src.settings import (
-    CONFIG,
-    LOGGER,
-    VARIABLES,
 )
 
 

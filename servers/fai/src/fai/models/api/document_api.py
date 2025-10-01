@@ -3,8 +3,8 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.api.commons.pagination import PaginationResponse
-from src.fai.models.types.document_types import Document
+from fai.models.api.commons.pagination import PaginationResponse
+from fai.models.types.document_types import Document
 
 
 class CreateDocumentRequest(BaseModel):

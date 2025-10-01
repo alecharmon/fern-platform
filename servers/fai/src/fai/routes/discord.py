@@ -12,16 +12,16 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     ask_ai_enabled,
     get_db,
     strip_domain,
     verify_token,
 )
-from src.fai.models.db.discord_integration_db import DiscordIntegrationDb
-from src.fai.models.types.discord_integration_types import DiscordIntegrationResponse
-from src.settings import (
+from fai.models.db.discord_integration_db import DiscordIntegrationDb
+from fai.models.types.discord_integration_types import DiscordIntegrationResponse
+from fai.settings import (
     LOGGER,
     VARIABLES,
 )

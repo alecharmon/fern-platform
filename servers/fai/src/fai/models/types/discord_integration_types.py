@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from src.apps.discord.utils.channel import ChannelSettings
+from fai.models.types.channel_settings_type import ChannelSettings
 
 
 class DiscordIntegration(BaseModel):

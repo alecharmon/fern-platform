@@ -24,8 +24,8 @@ class TestAnalyticsHistogram:
             }
         ]
 
-        with patch("src.fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
-            "src.fai.routes.analytics.fill_date_gaps"
+        with patch("fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
+            "fai.routes.analytics.fill_date_gaps"
         ) as mock_fill:
             mock_fetch.return_value = []
             mock_fill.return_value = mock_histogram_data
@@ -54,8 +54,8 @@ class TestAnalyticsHistogram:
             }
         ]
 
-        with patch("src.fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
-            "src.fai.routes.analytics.fill_date_gaps"
+        with patch("fai.routes.analytics.fetch_grouped_data") as mock_fetch, patch(
+            "fai.routes.analytics.fill_date_gaps"
         ) as mock_fill:
             mock_fetch.return_value = []
             mock_fill.return_value = mock_histogram_data
@@ -86,7 +86,7 @@ class TestAnalyticsHistogram:
     def test_get_analytics_histogram_failure(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        with patch("src.fai.routes.analytics.fetch_grouped_data") as mock_fetch:
+        with patch("fai.routes.analytics.fetch_grouped_data") as mock_fetch:
             mock_fetch.side_effect = Exception("Database error")
 
             response = test_client.get(

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.fai.models.utils.chat import ChatMode
+from fai.models.utils.chat import ChatMode
 
 SHARED_SYSTEM_PROMPT = """\
 You are an AI assistant. The user asking questions may be a developer, technical writer, or product manager. \
@@ -24,7 +24,7 @@ def build_anthropic_system_prompt(domain: str, mode: ChatMode, documents: str = 
         return build_anthropic_slack_chat_system_prompt(domain, documents)
     elif mode == ChatMode.SLACK_INDEX:
         return build_anthropic_slack_index_system_prompt(domain)
-    elif mode == ChatMode.DISCORD:
+    else:
         return build_anthropic_discord_system_prompt(domain, documents)
 
 
@@ -45,6 +45,7 @@ IMPORTANT Discord formatting rules:
 - Use ```<TEXT>``` for code blocks
 - Do NOT use markdown headers like ## or ###. Only use *asterisks* to bold your headers.
 - Keep formatting simple and clean for Discord's message format
+- KEEP ALL RESPONSES UNDER 2000 CHARACTERS
 
 Remember to keep your response short and concise. You may always elaborate if requested.
 ---

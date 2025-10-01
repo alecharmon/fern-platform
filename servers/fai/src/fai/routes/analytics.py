@@ -10,36 +10,36 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     get_db,
     verify_token,
 )
-from src.fai.models.api.analytics_api import (
+from fai.models.api.analytics_api import (
     GetHistogramAnalyticsResponse,
     GetInsightsResponse,
 )
-from src.fai.models.db.insight_db import InsightDb
-from src.fai.models.db.query_db import QueryDb
-from src.fai.models.enums.analytics_enums import GroupBy
-from src.fai.models.types.query_types import Query
-from src.fai.scheduler import (
+from fai.models.db.insight_db import InsightDb
+from fai.models.db.query_db import QueryDb
+from fai.models.enums.analytics_enums import GroupBy
+from fai.models.types.query_types import Query
+from fai.scheduler import (
     generate_weekly_insights_job,
     get_scheduler,
 )
-from src.fai.utils.histogram_utils import (
-    fetch_grouped_data,
-    fill_date_gaps,
-)
-from src.fai.utils.insights_job import (
-    generate_insight_id,
-    generate_insights_for_all_domains,
-)
-from src.fai.utils.insights_utils import get_insights_from_queries
-from src.settings import (
+from fai.settings import (
     CONFIG,
     LOGGER,
 )
+from fai.utils.histogram_utils import (
+    fetch_grouped_data,
+    fill_date_gaps,
+)
+from fai.utils.insights_job import (
+    generate_insight_id,
+    generate_insights_for_all_domains,
+)
+from fai.utils.insights_utils import get_insights_from_queries
 
 
 @fai_app.get(
@@ -218,7 +218,7 @@ async def trigger_scheduled_insights_generation() -> JSONResponse:
 async def get_scheduler_status() -> JSONResponse:
     """Get the status of the scheduler and its jobs."""
     try:
-        from src.fai.scheduler import get_scheduler
+        from fai.scheduler import get_scheduler
 
         scheduler = get_scheduler()
 

@@ -7,20 +7,20 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     get_db,
     verify_token,
 )
-from src.fai.models.api.conversation_api import GetConversationResponse
-from src.fai.models.db.feedback_db import FeedbackDb
-from src.fai.models.db.query_db import QueryDb
-from src.fai.models.types.conversation_types import (
+from fai.models.api.conversation_api import GetConversationResponse
+from fai.models.db.feedback_db import FeedbackDb
+from fai.models.db.query_db import QueryDb
+from fai.models.types.conversation_types import (
     Conversation,
     ConversationTurn,
     ConversationTurnFeedback,
 )
-from src.settings import LOGGER
+from fai.settings import LOGGER
 
 
 @fai_app.get(

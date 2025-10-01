@@ -1,13 +1,13 @@
 import asyncio
 
-from src.fai.db import (
+from fai.db import (
     Base,
     engine,
 )
 
-# from src.fai.models.db.guidance_db import GuidanceDb
-# from src.fai.models.db.document_db import DocumentDb
-# from src.fai.models.db.query_db import QueryDb
+# from fai.models.db.guidance_db import GuidanceDb
+# from fai.models.db.document_db import DocumentDb
+# from fai.models.db.query_db import QueryDb
 
 
 async def reinit() -> None:

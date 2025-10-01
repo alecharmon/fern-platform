@@ -17,9 +17,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.db import async_session_maker
-from src.fai.models.db.job_db import JobDb
-from src.settings import LOGGER
+from fai.db import async_session_maker
+from fai.models.db.job_db import JobDb
+from fai.settings import LOGGER
 
 
 class JobStatus(str, Enum):

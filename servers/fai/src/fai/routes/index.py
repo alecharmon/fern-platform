@@ -5,25 +5,25 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     get_db,
     verify_token,
 )
-from src.fai.models.api.index_api import (
+from fai.models.api.index_api import (
     JobStatusResponse,
     ReconstructIndexResponse,
     SyncIndexRequest,
     SyncIndexResponse,
 )
-from src.fai.utils.jobs import (
+from fai.settings import LOGGER
+from fai.utils.jobs import (
     JobStatus,
     job_manager,
 )
-from src.fai.utils.turbopuffer.namespace import get_query_index_name
-from src.fai.utils.turbopuffer.reconstruct import reconstruct_query_index_for_domain
-from src.fai.utils.turbopuffer.sync import sync_index_to_target
-from src.settings import LOGGER
+from fai.utils.turbopuffer.namespace import get_query_index_name
+from fai.utils.turbopuffer.reconstruct import reconstruct_query_index_for_domain
+from fai.utils.turbopuffer.sync import sync_index_to_target
 
 
 @fai_app.post(

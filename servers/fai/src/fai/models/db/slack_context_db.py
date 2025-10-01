@@ -5,10 +5,10 @@ from sqlalchemy import (
     String,
 )
 
-from src.fai.db import Base
-from src.fai.models.types.slack_context_types import SlackContext
-from src.fai.models.utils.record import TurbopufferRecord
-from src.settings import CONFIG
+from fai.db import Base
+from fai.models.types.slack_context_types import SlackContext
+from fai.models.utils.record import TurbopufferRecord
+from fai.settings import CONFIG
 
 
 def format_slack_context_for_tpuf(question: str, ideal_response: str) -> str:

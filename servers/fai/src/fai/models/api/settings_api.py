@@ -3,7 +3,7 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.types.settings_types import Settings
+from fai.models.types.settings_types import Settings
 
 
 class UpdateSettingsResponse(BaseModel):

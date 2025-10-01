@@ -7,19 +7,19 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     get_db,
     strip_domain,
     verify_token,
 )
-from src.fai.models.api.settings_api import (
+from fai.models.api.settings_api import (
     GetSettingsResponse,
     ToggleAskAiResponse,
     ToggleStatusResponse,
 )
-from src.fai.models.db.settings_db import SettingsDb
-from src.settings import LOGGER
+from fai.models.db.settings_db import SettingsDb
+from fai.settings import LOGGER
 
 
 @fai_app.get(

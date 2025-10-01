@@ -13,15 +13,15 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import insert
 
-from src.apps.discord.utils.channel import ChannelSettings
-from src.apps.discord.utils.integration import get_discord_integration
-from src.fai.db import async_session_maker
-from src.fai.models.db.discord_message_cache_db import DiscordMessageCacheDb
-from src.fai.models.db.query_db import QueryDb
-from src.fai.models.utils.chat import ChatMode
-from src.fai.utils.chat.response.anthropic import get_anthropic_response
-from src.fai.utils.chat.retrieve.retrieve import retrieve
-from src.settings import LOGGER
+from fai.db import async_session_maker
+from fai.models.db.discord_message_cache_db import DiscordMessageCacheDb
+from fai.models.db.query_db import QueryDb
+from fai.models.types.channel_settings_type import ChannelSettings
+from fai.models.utils.chat import ChatMode
+from fai.settings import LOGGER
+from fai.utils.chat.response.anthropic import get_anthropic_response
+from fai.utils.chat.retrieve.retrieve import retrieve
+from fai.utils.integration import get_discord_integration
 
 MESSAGE_CACHE_TTL = 30
 
@@ -42,20 +42,20 @@ async def cleanup_message_cache() -> None:
         await session.commit()
 
 
-async def is_message_processed(team_id: str, message_ts: str) -> bool:
+async def is_message_processed(team_id: str, message_id: str) -> bool:
     async with async_session_maker() as session:
         result = await session.execute(
             select(DiscordMessageCacheDb).where(
-                DiscordMessageCacheDb.discord_guild_id == team_id, DiscordMessageCacheDb.message_id == message_ts
+                DiscordMessageCacheDb.discord_guild_id == team_id, DiscordMessageCacheDb.message_id == message_id
             )
         )
         return result.scalar_one_or_none() is not None
 
 
-async def mark_message_processed(team_id: str, message_ts: str) -> None:
+async def mark_message_processed(team_id: str, message_id: str) -> None:
     async with async_session_maker() as session:
         stmt = insert(DiscordMessageCacheDb).values(
-            id=str(uuid4()), message_id=message_ts, discord_guild_id=team_id, processed_at=datetime.now(UTC)
+            id=str(uuid4()), message_id=message_id, discord_guild_id=team_id, processed_at=datetime.now(UTC)
         )
         stmt = stmt.on_conflict_do_nothing(
             index_elements=["discord_guild_id", "message_id"]  # Use column names instead
@@ -119,7 +119,7 @@ async def handle_discord_message(message: discord.Message) -> DiscordMessageResp
         response_text, query_id = await process_message(
             message.content,
             domain_to_use,
-            message.guild.me.id if is_bot_mentioned(message) else None,
+            str(message.guild.me.id) if is_bot_mentioned(message) else None,
             message_history,
             conversation_id=conversation_id,
         )
@@ -147,7 +147,7 @@ async def handle_discord_message(message: discord.Message) -> DiscordMessageResp
         await message.remove_reaction("👀", message.guild.me)
         await message.add_reaction("✅")
 
-        return DiscordMessageResponse(response_text, message.channel.id, query_id, message.author.id)
+        return DiscordMessageResponse(response_text, str(message.channel.id), query_id, str(message.author.id))
 
 
 async def should_respond_to_message(

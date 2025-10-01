@@ -5,11 +5,11 @@ from sqlalchemy import (
     String,
 )
 
-from src.fai.db import Base
-from src.fai.models.db.utils.array_column import ArrayColumn
-from src.fai.models.types.document_types import Document
-from src.fai.models.utils.record import TurbopufferRecord
-from src.settings import CONFIG
+from fai.db import Base
+from fai.models.db.utils.array_column import ArrayColumn
+from fai.models.types.document_types import Document
+from fai.models.utils.record import TurbopufferRecord
+from fai.settings import CONFIG
 
 
 class CodeDb(Base):

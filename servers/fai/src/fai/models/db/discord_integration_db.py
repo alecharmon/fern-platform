@@ -7,8 +7,8 @@ from sqlalchemy import (
     String,
 )
 
-from src.fai.db import Base
-from src.fai.models.types.discord_integration_types import DiscordIntegration
+from fai.db import Base
+from fai.models.types.discord_integration_types import DiscordIntegration
 
 
 class DiscordIntegrationDb(Base):

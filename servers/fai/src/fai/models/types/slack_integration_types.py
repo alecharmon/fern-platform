@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from src.fai.models.api.update_channel_settings import ChannelSettings
+from fai.models.api.update_channel_settings import ChannelSettings
 
 
 class SlackIntegration(BaseModel):

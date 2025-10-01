@@ -5,8 +5,8 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.api.commons.pagination import PaginationResponse
-from src.fai.models.types.query_types import Query
+from fai.models.api.commons.pagination import PaginationResponse
+from fai.models.types.query_types import Query
 
 
 class CreateQueryRequest(BaseModel):

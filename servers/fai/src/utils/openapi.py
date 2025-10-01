@@ -4,7 +4,7 @@ import json
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
-MODULE_PATH = "src.fai.main"
+MODULE_PATH = "fai.main"
 APP_NAME = "fai_app"
 
 OPENAPI_OUTPUT_PATH = "../../fern/apis/fai/openapi.json"

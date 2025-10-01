@@ -5,7 +5,8 @@ description = ""
 authors = []
 
 packages = [
-    { include = "fai", from = "src" }
+    { include = "fai", from = "src" },
+    { include = "utils", from = "src" }
 ]
 
 [[tool.poetry.source]]
@@ -43,10 +44,9 @@ tiktoken = "^0.11.0"
 slack-sdk = "^3.36.0"
 python-multipart = "^0.0.20"
 upstash-redis = "^1.4.0"
-discord-py = "^2.6.3"
 
 [tool.poetry.scripts]
-start = "src.fai.main:start"
+start = "fai.main:start"
 openapi = "src.utils.openapi:openapi"
 
 [tool.poetry.group.dev.dependencies]
@@ -93,7 +93,7 @@ force_grid_wrap = 2
 line_length = 120
 profile = "black"
 use_parentheses = true
-known_first_party = ["src", "fai", "tests"]
+known_first_party = ["fai", "tests"]
 src_paths = ["src"]
 
 [tool.autoflake]

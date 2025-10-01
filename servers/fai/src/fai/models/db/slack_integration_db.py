@@ -8,8 +8,8 @@ from sqlalchemy import (
     Text,
 )
 
-from src.fai.db import Base
-from src.fai.models.types.slack_integration_types import SlackIntegration
+from fai.db import Base
+from fai.models.types.slack_integration_types import SlackIntegration
 
 
 class SlackIntegrationDb(Base):

@@ -5,9 +5,9 @@ from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from src.fai.db import async_session_maker
-from src.fai.utils.insights_job import generate_insights_for_all_domains
-from src.settings import LOGGER
+from fai.db import async_session_maker
+from fai.settings import LOGGER
+from fai.utils.insights_job import generate_insights_for_all_domains
 
 _scheduler: AsyncIOScheduler | None = None
 

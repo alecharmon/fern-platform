@@ -11,14 +11,14 @@ from openai import (
 )
 from sklearn.cluster import KMeans
 
-from src.fai.models.api.analytics_api import GetInsightsResponse
-from src.fai.models.types.analytics_types import (
+from fai.models.api.analytics_api import GetInsightsResponse
+from fai.models.types.analytics_types import (
     Insight,
     InsightExample,
     InsightWithMetadata,
 )
-from src.fai.models.types.query_types import Query
-from src.settings import (
+from fai.models.types.query_types import Query
+from fai.settings import (
     CONFIG,
     LOGGER,
     VARIABLES,

@@ -1,4 +1,4 @@
-from src.fai.models.enums.index_names import (
+from fai.models.enums.index_names import (
     QUERY_INDEX_NAME,
     DataIndexNames,
 )

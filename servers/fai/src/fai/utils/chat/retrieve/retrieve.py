@@ -2,14 +2,14 @@ from openai import AsyncOpenAI
 from turbopuffer import AsyncTurbopuffer
 from turbopuffer.types.row import Row
 
-from src.fai.utils.chat.filters import build_filters
-from src.fai.utils.turbopuffer.namespace import (
-    get_query_index_name,
-    get_tpuf_namespace,
-)
-from src.settings import (
+from fai.settings import (
     CONFIG,
     VARIABLES,
+)
+from fai.utils.chat.filters import build_filters
+from fai.utils.turbopuffer.namespace import (
+    get_query_index_name,
+    get_tpuf_namespace,
 )
 
 DOCUMENT_ATTRIBUTES = ["document", "url", "version", "product", "roles", "title", "keywords"]

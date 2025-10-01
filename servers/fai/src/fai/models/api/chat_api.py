@@ -3,8 +3,8 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.enums.language_models import LanguageModel
-from src.fai.models.types.chat_types import ChatMessage
+from fai.models.enums.language_models import LanguageModel
+from fai.models.types.chat_types import ChatMessage
 
 
 class PostChatCompletionRequest(BaseModel):

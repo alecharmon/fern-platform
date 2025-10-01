@@ -3,7 +3,7 @@ from typing import Any
 from slack_sdk.errors import SlackApiError
 from slack_sdk.web.async_client import AsyncWebClient
 
-from src.settings import LOGGER
+from fai.settings import LOGGER
 
 
 async def send_slack_message(channel: str, text: str, bot_token: str, thread_ts: str | None = None) -> bool:

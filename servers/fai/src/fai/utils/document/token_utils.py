@@ -1,6 +1,6 @@
 import tiktoken
 
-from src.settings import CONFIG
+from fai.settings import CONFIG
 
 
 def maybe_chunk_document(chunk: str) -> list[str]:

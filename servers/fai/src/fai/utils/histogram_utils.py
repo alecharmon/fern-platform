@@ -10,9 +10,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.models.db.feedback_db import FeedbackDb
-from src.fai.models.db.query_db import QueryDb
-from src.fai.models.types.analytics_types import HistogramAnalyticsBar
+from fai.models.db.feedback_db import FeedbackDb
+from fai.models.db.query_db import QueryDb
+from fai.models.types.analytics_types import HistogramAnalyticsBar
 
 
 async def fetch_grouped_data(

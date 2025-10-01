@@ -3,7 +3,7 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.types.analytics_types import (
+from fai.models.types.analytics_types import (
     HistogramAnalyticsBar,
     InsightWithMetadata,
 )

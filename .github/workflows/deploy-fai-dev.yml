@@ -2,14 +2,13 @@ name: Deploy FAI Dev
 
 on:
   push:
-    tags:
-      - "fai@*" 
     branches:
       - app
+    paths:
+      - 'servers/fai/**'
 
 jobs:
   deploy-dev:
-    if: github.ref == 'refs/heads/app'
     runs-on: ubuntu-latest
     environment: Fern Dev
     env:
@@ -35,16 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Check FAI diff
-        id: check_fai_diff
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^servers/fai/'; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
       - name: Create .env file
-        if: steps.check_fai_diff.outputs.changed == 'true'
         run: |
           cd servers/fai
           echo "TURBOPUFFER_API_KEY=${{ env.TURBOPUFFER_API_KEY }}" >> .env
@@ -61,7 +51,6 @@ jobs:
           echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
           echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
       - name: Deploy to Dev
-        if: steps.check_fai_diff.outputs.changed == 'true'
         run: |
           git_version="$(scripts/fai-version.sh)"
           cd servers/fai

@@ -3,8 +3,8 @@ from pydantic import (
     Field,
 )
 
-from src.fai.models.api.commons.pagination import PaginationResponse
-from src.fai.models.types.guidance_types import Guidance
+from fai.models.api.commons.pagination import PaginationResponse
+from fai.models.types.guidance_types import Guidance
 
 
 class CreateGuidanceRequest(BaseModel):

@@ -15,14 +15,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     ask_ai_enabled,
     get_db,
     verify_token,
 )
-from src.fai.models.api.commons.pagination import PaginationResponse
-from src.fai.models.api.guidance_api import (
+from fai.models.api.commons.pagination import PaginationResponse
+from fai.models.api.guidance_api import (
     CreateGuidanceRequest,
     CreateGuidanceResponse,
     DeleteGuidanceResponse,
@@ -31,16 +31,16 @@ from src.fai.models.api.guidance_api import (
     UpdateGuidanceRequest,
     UpdateGuidanceResponse,
 )
-from src.fai.models.db.guidance_db import GuidanceDb
-from src.fai.utils.turbopuffer.namespace import (
+from fai.models.db.guidance_db import GuidanceDb
+from fai.settings import LOGGER
+from fai.utils.turbopuffer.namespace import (
     get_guidance_index_name,
     get_query_index_name,
 )
-from src.fai.utils.turbopuffer.sync import (
+from fai.utils.turbopuffer.sync import (
     sync_guidance_db_to_tpuf,
     sync_index_to_target,
 )
-from src.settings import LOGGER
 
 
 @fai_app.post(

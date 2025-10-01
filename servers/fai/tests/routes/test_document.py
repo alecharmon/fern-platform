@@ -9,14 +9,14 @@ from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.models.api.document_api import (
+from fai.models.api.document_api import (
     CreateDocumentResponse,
     DeleteDocumentResponse,
     GetDocumentResponse,
     GetDocumentsResponse,
     UpdateDocumentResponse,
 )
-from src.fai.models.db.document_db import DocumentDb
+from fai.models.db.document_db import DocumentDb
 from tests.conftest import TEST_FERN_TOKEN
 from tests.factories import (
     CreateDocumentRequestFactory,
@@ -33,8 +33,8 @@ class TestDocumentRoutes:
         domain = create_test_domain()
         mock_request = CreateDocumentRequestFactory.build()
 
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.post(
                 f"/document/{domain}/create",
@@ -72,8 +72,8 @@ class TestDocumentRoutes:
         domain = create_test_domain()
         mock_request = CreateDocumentRequestFactory.build(chunk="Custom chunk content")
 
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.post(
                 f"/document/{domain}/create",
@@ -103,8 +103,8 @@ class TestDocumentRoutes:
         domain = create_test_domain()
         mock_request = CreateDocumentRequestFactory.build(chunk=None)
 
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.post(
                 f"/document/{domain}/create",
@@ -133,8 +133,8 @@ class TestDocumentRoutes:
 
         # Create document first
         create_request = CreateDocumentRequestFactory.build()
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/document/{domain}/create",
@@ -149,8 +149,8 @@ class TestDocumentRoutes:
         # Update document
         update_request = UpdateDocumentRequestFactory.build(document="Updated document content", title="Updated Title")
 
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.patch(
                 f"/document/{domain}/{document_id}",
@@ -195,8 +195,8 @@ class TestDocumentRoutes:
 
         # Create document first
         create_request = CreateDocumentRequestFactory.build()
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/document/{domain}/create",
@@ -209,8 +209,8 @@ class TestDocumentRoutes:
         delete_request = DeleteDocumentRequestFactory.build(document_id=document_id)
 
         # Delete document
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.request(
                 "DELETE",
@@ -260,8 +260,8 @@ class TestDocumentRoutes:
 
         # Create document first
         create_request = CreateDocumentRequestFactory.build()
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/document/{domain}/create",
@@ -306,8 +306,8 @@ class TestDocumentRoutes:
         # Create multiple documents
         for i in range(5):
             create_request = CreateDocumentRequestFactory.build(title=f"Document {i}")
-            with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-                "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+            with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+                "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
             ):
                 test_client.post(
                     f"/document/{domain}/create",
@@ -361,8 +361,8 @@ class TestDocumentRoutes:
 
         batch_requests = [CreateDocumentRequestFactory.build(title=f"Document {i}") for i in range(3)]
 
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.post(
                 f"/document/{domain}/batch-create",
@@ -400,8 +400,8 @@ class TestDocumentRoutes:
         document_ids = []
 
         for req in create_requests:
-            with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-                "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+            with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+                "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
             ):
                 create_response = test_client.post(
                     f"/document/{domain}/create",
@@ -412,8 +412,8 @@ class TestDocumentRoutes:
             document_ids.extend([doc["document_id"] for doc in create_data])
 
         delete_requests = [DeleteDocumentRequestFactory.build(document_id=doc_id) for doc_id in document_ids]
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             response = test_client.request(
                 "DELETE",
@@ -445,8 +445,8 @@ class TestDocumentRoutes:
 
         batch_requests = [CreateDocumentRequestFactory.build() for _ in range(5)]
 
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             create_response = test_client.post(
                 f"/document/{domain}/batch-create",
@@ -466,8 +466,8 @@ class TestDocumentRoutes:
             assert document is not None, f"Created document {document_id} should exist"
 
         delete_requests = [DeleteDocumentRequestFactory.build(document_id=doc_id) for doc_id in document_ids]
-        with patch("src.fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
-            "src.fai.routes.document.sync_index_to_target", new_callable=AsyncMock
+        with patch("fai.routes.document.sync_document_db_to_tpuf", new_callable=AsyncMock), patch(
+            "fai.routes.document.sync_index_to_target", new_callable=AsyncMock
         ):
             delete_response = test_client.request(
                 "DELETE",

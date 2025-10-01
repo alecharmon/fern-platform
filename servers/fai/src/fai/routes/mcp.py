@@ -2,17 +2,17 @@ from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from src.fai.app import fai_app
-from src.fai.dependencies import verify_token
-from src.fai.models.api.mcp_api import (
+from fai.app import fai_app
+from fai.dependencies import verify_token
+from fai.models.api.mcp_api import (
     GetMcpBmfQueryRequest,
     GetMcpBmfQueryResponse,
     GetMcpSemanticQueryRequest,
     GetMcpSemanticQueryResponse,
 )
-from src.fai.utils.search.bm25 import bm25_search
-from src.fai.utils.search.semantic import semantic_search
-from src.settings import LOGGER
+from fai.settings import LOGGER
+from fai.utils.search.bm25 import bm25_search
+from fai.utils.search.semantic import semantic_search
 
 
 @fai_app.post(

@@ -11,10 +11,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from upstash_redis import Redis
 
-from src.fai.db import async_session_maker
-from src.fai.models.db.settings_db import SettingsDb
-from src.fai.utils.get_venus_client import get_venus_client
-from src.settings import VARIABLES
+from fai.db import async_session_maker
+from fai.models.db.settings_db import SettingsDb
+from fai.settings import VARIABLES
+from fai.utils.get_venus_client import get_venus_client
 
 redis = Redis(url=VARIABLES.KV_REST_API_URL, token=VARIABLES.KV_REST_API_READ_ONLY_TOKEN)
 

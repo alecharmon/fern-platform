@@ -12,7 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 
-from src.fai.db import Base
+from fai.db import Base
 
 
 class DiscordMessageCacheDb(Base):

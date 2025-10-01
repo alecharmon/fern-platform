@@ -5,8 +5,8 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from src.fai.models.enums.embedding_models import EmbeddingModels
-from src.fai.models.utils.model import EmbeddingModel
+from fai.models.enums.embedding_models import EmbeddingModels
+from fai.models.utils.model import EmbeddingModel
 
 load_dotenv()
 logging.config.fileConfig("logging.conf")

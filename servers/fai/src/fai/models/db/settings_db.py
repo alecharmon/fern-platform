@@ -4,8 +4,8 @@ from sqlalchemy import (
     String,
 )
 
-from src.fai.db import Base
-from src.fai.models.types.settings_types import Settings
+from fai.db import Base
+from fai.models.types.settings_types import Settings
 
 
 class SettingsDb(Base):

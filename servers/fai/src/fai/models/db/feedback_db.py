@@ -5,8 +5,8 @@ from sqlalchemy import (
     String,
 )
 
-from src.fai.db import Base
-from src.fai.models.types.feedback_types import Feedback
+from fai.db import Base
+from fai.models.types.feedback_types import Feedback
 
 
 class FeedbackDb(Base):

@@ -14,19 +14,19 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     get_db,
     verify_token,
 )
-from src.fai.models.api.commons.pagination import PaginationResponse
-from src.fai.models.api.query_api import (
+from fai.models.api.commons.pagination import PaginationResponse
+from fai.models.api.query_api import (
     CreateQueryResponse,
     GetQueriesResponse,
 )
-from src.fai.models.db.query_db import QueryDb
-from src.fai.models.types.query_types import Query
-from src.settings import LOGGER
+from fai.models.db.query_db import QueryDb
+from fai.models.types.query_types import Query
+from fai.settings import LOGGER
 
 
 @fai_app.post(

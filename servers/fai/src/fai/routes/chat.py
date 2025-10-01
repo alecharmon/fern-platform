@@ -5,21 +5,21 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from turbopuffer.types.row import Row
 
-from fai.models.utils.chat import format_record
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     ask_ai_enabled,
     verify_token,
 )
-from src.fai.models.api.chat_api import (
+from fai.models.api.chat_api import (
     PostChatCompletionRequest,
     PostChatCompletionResponse,
 )
-from src.fai.models.types.chat_types import ChatMessage
-from src.fai.utils.chat.response.anthropic import get_anthropic_response
-from src.fai.utils.chat.response.cohere import get_cohere_response
-from src.fai.utils.chat.retrieve.retrieve import retrieve
-from src.settings import LOGGER
+from fai.models.types.chat_types import ChatMessage
+from fai.models.utils.chat import format_record
+from fai.settings import LOGGER
+from fai.utils.chat.response.anthropic import get_anthropic_response
+from fai.utils.chat.response.cohere import get_cohere_response
+from fai.utils.chat.retrieve.retrieve import retrieve
 
 SUPPORTED_MODELS = ["claude-4-sonnet-20250514", "command-a-03-2025"]
 

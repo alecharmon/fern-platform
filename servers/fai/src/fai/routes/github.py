@@ -14,29 +14,29 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from turbopuffer import AsyncTurbopuffer
 
-from src.fai.app import fai_app
-from src.fai.dependencies import (
+from fai.app import fai_app
+from fai.dependencies import (
     get_db,
     verify_token,
 )
-from src.fai.models.api.connectors.github_api import (
+from fai.models.api.connectors.github_api import (
     CodeIndexStatusResponse,
     GitHubFileInfoRequest,
     IndexResponse,
     ReferenceSnippet,
 )
-from src.fai.models.db.code_db import CodeDb
-from src.fai.utils.connectors.github.client import GitHubClient
-from src.fai.utils.turbopuffer.namespace import (
-    get_code_index_name,
-    get_tpuf_namespace,
-)
-from src.fai.utils.turbopuffer.sync import sync_code_db_to_tpuf
-from src.settings import (
+from fai.models.db.code_db import CodeDb
+from fai.settings import (
     CONFIG,
     LOGGER,
     VARIABLES,
 )
+from fai.utils.connectors.github.client import GitHubClient
+from fai.utils.turbopuffer.namespace import (
+    get_code_index_name,
+    get_tpuf_namespace,
+)
+from fai.utils.turbopuffer.sync import sync_code_db_to_tpuf
 
 
 @fai_app.post(

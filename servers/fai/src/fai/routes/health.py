@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 
-from src.fai.app import fai_app
+from fai.app import fai_app
 
 
 @fai_app.get("/health", openapi_extra={"x-fern-audiences": ["internal"]})
