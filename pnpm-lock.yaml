@@ -2147,38 +2147,38 @@ importers:
   packages/fern-docs/icons-cdn:
     dependencies:
       '@fortawesome/fontawesome-svg-core':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/free-brands-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/pro-duotone-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/pro-light-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/pro-regular-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/pro-solid-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/pro-thin-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/sharp-light-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/sharp-regular-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/sharp-solid-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       '@fortawesome/sharp-thin-svg-icons':
-        specifier: ^6.7.2
-        version: 6.7.2
+        specifier: ^7.0.1
+        version: 7.0.1
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -5515,52 +5515,52 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@fortawesome/fontawesome-common-types@6.7.2':
-    resolution: {integrity: sha512-Zs+YeHUC5fkt7Mg1l6XTniei3k4bwG/yo3iFUtZWd/pMx9g3fdvkSK9E0FOC+++phXOka78uJcYb8JaFkW52Xg==}
+  '@fortawesome/fontawesome-common-types@7.0.1':
+    resolution: {integrity: sha512-0VpNtO5cNe1/HQWMkl4OdncYK/mv9hnBte0Ew0n6DMzmo3Q3WzDFABHm6LeNTipt5zAyhQ6Ugjiu8aLaEjh1gg==}
     engines: {node: '>=6'}
 
-  '@fortawesome/fontawesome-svg-core@6.7.2':
-    resolution: {integrity: sha512-yxtOBWDrdi5DD5o1pmVdq3WMCvnobT0LU6R8RyyVXPvFRd2o79/0NCuQoCjNTeZz9EzA9xS3JxNWfv54RIHFEA==}
+  '@fortawesome/fontawesome-svg-core@7.0.1':
+    resolution: {integrity: sha512-x0cR55ILVqFpUioSMf6ebpRCMXMcheGN743P05W2RB5uCNpJUqWIqW66Lap8PfL/lngvjTbZj0BNSUweIr/fHQ==}
     engines: {node: '>=6'}
 
-  '@fortawesome/free-brands-svg-icons@6.7.2':
-    resolution: {integrity: sha512-zu0evbcRTgjKfrr77/2XX+bU+kuGfjm0LbajJHVIgBWNIDzrhpRxiCPNT8DW5AdmSsq7Mcf9D1bH0aSeSUSM+Q==}
+  '@fortawesome/free-brands-svg-icons@7.0.1':
+    resolution: {integrity: sha512-6xPmn5SrND/GM0+W33E77x05+aDn6RpR02eWd8eLdN0IxY0vXa5yU/ugaAKloOVxiG9w2330TSRsbJYL6c57Ow==}
     engines: {node: '>=6'}
 
-  '@fortawesome/pro-duotone-svg-icons@6.7.2':
-    resolution: {integrity: sha512-XEQ95M7PLz2QbOGgAxRnxPr5wrkDEJI6+KCF6l/dOtZte27m1biZJadDCP4k7mBXn8/YznZTY4ujMiqy865dng==}
+  '@fortawesome/pro-duotone-svg-icons@7.0.1':
+    resolution: {integrity: sha512-YVa+NS6Vs7+R8gCcAbzzPVJGR6T+zXT8DZiZyjLkvubj6UYcCGaLaaVaVvXch9k4mprFJitNpq77v9X4+Wfbww==}
     engines: {node: '>=6'}
 
-  '@fortawesome/pro-light-svg-icons@6.7.2':
-    resolution: {integrity: sha512-LeUnJCKlVG0oQwTW3oADJq3rkmnSDTg95RWdP46dCQ8pXOaw/8wzhN0XzZ2s/MqE48FNAX7E/XEqs0qMnrTZDA==}
+  '@fortawesome/pro-light-svg-icons@7.0.1':
+    resolution: {integrity: sha512-4RgSCjipxZiabMNGYHPJF6E2KPD1TW9LuRKiDzs8Vlac1W7P5sHq+KvfFvkLlubW2tb4FXrmsRFuLhD/T2uyBQ==}
     engines: {node: '>=6'}
 
-  '@fortawesome/pro-regular-svg-icons@6.7.2':
-    resolution: {integrity: sha512-cJolK4K/s56mHAqOyno24SmjviHqSqG9ZfckBKCpWjJlgDexi61EfET5wWbmmEot6/BqasFjw9S6tudFQUL/PQ==}
+  '@fortawesome/pro-regular-svg-icons@7.0.1':
+    resolution: {integrity: sha512-30f3T+vLxivh/Y4piBa07ckW29rZ6UZAAEJnsLp4Jwv5JQAl+JNLxw6hmXm4Wj95i16lGoGXHE18ggNTECCmhA==}
     engines: {node: '>=6'}
 
-  '@fortawesome/pro-solid-svg-icons@6.7.2':
-    resolution: {integrity: sha512-SY2aP8d7uBlg1rNYznA9w9SVnnQhu3x/C7CCKQYcOGOC1YtPPHgIJhxKGbSzm6RkeJs1HVEfAkORX3J0XB5K9Q==}
+  '@fortawesome/pro-solid-svg-icons@7.0.1':
+    resolution: {integrity: sha512-oM05Jb7INwTzZWYHkt/moDurGo2EjDQlQIfkXk9qMYfW55Dfpp68frRUkr/EYJyOIQKDg7u2Vz+iaTSqhnvFFA==}
     engines: {node: '>=6'}
 
-  '@fortawesome/pro-thin-svg-icons@6.7.2':
-    resolution: {integrity: sha512-2MmuchdNCBuNA0/h9Zo75RTw2+U7OimPNRuShW/J509ql0eRowuDHDjFrQhmTdaeTk+lI1FwF63zKYAofsoUMA==}
+  '@fortawesome/pro-thin-svg-icons@7.0.1':
+    resolution: {integrity: sha512-bYepY7t3octtMXLCRecAwA4T8HQ3/uTXdzFKNCyEUAXZfA4W6D4mDdbo/EzBMgHLDV33lkwlydHmqlP0TV5Ibw==}
     engines: {node: '>=6'}
 
-  '@fortawesome/sharp-light-svg-icons@6.7.2':
-    resolution: {integrity: sha512-E4Q+zZbMOPyiZs79kXILJcbaWMz4ydLHQSIIld9DGRSU9tqvmo2o0iFInpHbVxswbYRN4v4sPbqLavq0F8MEyA==}
+  '@fortawesome/sharp-light-svg-icons@7.0.1':
+    resolution: {integrity: sha512-zQc/izA35ZJROvTRmI+KbetSAL+BndDjQFQsWK7FeTBQIsFuuYwQ5uFUvotr+o67AsQSBziUzWI2yiCEejdDPw==}
     engines: {node: '>=6'}
 
-  '@fortawesome/sharp-regular-svg-icons@6.7.2':
-    resolution: {integrity: sha512-WczljTfGbnyH0pIXeavRUryBWrO6phm+5FnBIW2hZ9EU6BPzMPs2bxqmWRzwWROyh7cEfX0jDFjOrSTKdfs2xA==}
+  '@fortawesome/sharp-regular-svg-icons@7.0.1':
+    resolution: {integrity: sha512-eeAfZqsAf5jMEQIsLtXoweKvkrMF6YnDZ7CbR57SxwyaawU3RgTqbn4TgABI+meeop4xKyFKi7dTH75ISIsY1Q==}
     engines: {node: '>=6'}
 
-  '@fortawesome/sharp-solid-svg-icons@6.7.2':
-    resolution: {integrity: sha512-RQGnMRGpVUAT6HtELU57ZxIBsbYFC60+qfwlyOBjnK/wwQLy0KiYo+GdBYHmnpefMXjotTk5Lp9zPXb2Lnhd4Q==}
+  '@fortawesome/sharp-solid-svg-icons@7.0.1':
+    resolution: {integrity: sha512-ewgAcGA8wg5kWZDDld+/Bm5LxoorTBZKUQSGByKNhY2dnUxraKXRUGxy3QJxWm89/sZSmAuSO7Y+9isoFc8siA==}
     engines: {node: '>=6'}
 
-  '@fortawesome/sharp-thin-svg-icons@6.7.2':
-    resolution: {integrity: sha512-lsPOZHfYhlU/tVwNLtlcMVXJZRu5XA8jhhIAa4LCjv4UVq1Xqz9vpOvixne1R+rP/ZfBGUyZXSKHU9ysZhyfxw==}
+  '@fortawesome/sharp-thin-svg-icons@7.0.1':
+    resolution: {integrity: sha512-Kptn5TSnEGuyLV4T80ItNoN9sbUJZ185iC5Q6oCFKvfxvxIznidCYuXV1WX6M3iJt56Ococ3odHxwEk8aB87XQ==}
     engines: {node: '>=6'}
 
   '@hapi/hoek@9.3.0':
@@ -23857,51 +23857,51 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@fortawesome/fontawesome-common-types@6.7.2': {}
+  '@fortawesome/fontawesome-common-types@7.0.1': {}
 
-  '@fortawesome/fontawesome-svg-core@6.7.2':
+  '@fortawesome/fontawesome-svg-core@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/free-brands-svg-icons@6.7.2':
+  '@fortawesome/free-brands-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/pro-duotone-svg-icons@6.7.2':
+  '@fortawesome/pro-duotone-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/pro-light-svg-icons@6.7.2':
+  '@fortawesome/pro-light-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/pro-regular-svg-icons@6.7.2':
+  '@fortawesome/pro-regular-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/pro-solid-svg-icons@6.7.2':
+  '@fortawesome/pro-solid-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/pro-thin-svg-icons@6.7.2':
+  '@fortawesome/pro-thin-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/sharp-light-svg-icons@6.7.2':
+  '@fortawesome/sharp-light-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/sharp-regular-svg-icons@6.7.2':
+  '@fortawesome/sharp-regular-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/sharp-solid-svg-icons@6.7.2':
+  '@fortawesome/sharp-solid-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
-  '@fortawesome/sharp-thin-svg-icons@6.7.2':
+  '@fortawesome/sharp-thin-svg-icons@7.0.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 6.7.2
+      '@fortawesome/fontawesome-common-types': 7.0.1
 
   '@hapi/hoek@9.3.0': {}
 
