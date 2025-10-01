@@ -78,14 +78,24 @@ export function createCachedMdxSerializer(
 
     await monitor.acquire();
 
+    console.log(
+      `[serializeMdx] starting serialization for domain: ${domain}, filename: ${options.filename || "unknown"}`
+    );
+
     // this lets us key on just
     const cachedSerializer = unstable_cache(
       async ({ filename, toc, scope }: MdxSerializerOptions) => {
+        console.log(
+          `[serializeMdx] inside cache function for domain: ${domain}, filename: ${filename || "unknown"}`
+        );
         const authState = await loader.getAuthState();
 
         try {
           if (useNextMdx && !content.includes("twoslash")) {
             try {
+              console.log(
+                `[serializeMdx] using NextMdxRemote for domain: ${domain}, filename: ${filename || "unknown"}`
+              );
               const result = await internalSerializeNextMdxRemote(content, {
                 loader,
                 scope: {
@@ -102,9 +112,15 @@ export function createCachedMdxSerializer(
                 );
               }
 
+              console.log(
+                `[serializeMdx] NextMdxRemote succeeded for domain: ${domain}, filename: ${filename || "unknown"}`
+              );
               return result;
             } catch (_nextMdxError) {
               try {
+                console.log(
+                  `[serializeMdx] NextMdxRemote failed, falling back to regular serialization for domain: ${domain}, filename: ${filename || "unknown"}`
+                );
                 const result = await internalSerializeMdx(content, {
                   filename,
                   loader,
@@ -116,10 +132,13 @@ export function createCachedMdxSerializer(
                   },
                   replaceHref,
                 });
+                console.log(
+                  `[serializeMdx] fallback serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}`
+                );
                 return result;
               } catch (fallbackError) {
                 console.error(
-                  "Both engines failed serializing mdx",
+                  "[serializeMdx] Both engines failed serializing mdx",
                   fallbackError
                 );
 
@@ -127,6 +146,9 @@ export function createCachedMdxSerializer(
               }
             }
           } else {
+            console.log(
+              `[serializeMdx] using regular serialization for domain: ${domain}, filename: ${filename || "unknown"}`
+            );
             const result = await internalSerializeMdx(content, {
               filename,
               loader,
@@ -138,6 +160,9 @@ export function createCachedMdxSerializer(
               },
               replaceHref,
             });
+            console.log(
+              `[serializeMdx] regular serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}`
+            );
             return result;
           }
         } catch (error) {

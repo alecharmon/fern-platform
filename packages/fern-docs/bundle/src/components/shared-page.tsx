@@ -57,18 +57,28 @@ export default async function SharedPage({
   let config;
   {
     const start = Date.now();
+    console.log(
+      `[SharedPage] calling loader.getConfig() for domain: ${loader.domain}`
+    );
     config = await configPromise;
     const end = Date.now();
-    console.log(`[SharedPage] loader.getConfig() took ${end - start}ms`);
+    console.log(
+      `[SharedPage] loader.getConfig() took ${end - start}ms for domain: ${loader.domain}`
+    );
   }
 
   // Await baseUrlPromise with timing for getRedirectForPath
   let baseUrl;
   {
     const start = Date.now();
+    console.log(
+      `[SharedPage] calling loader.getMetadata() for domain: ${loader.domain}`
+    );
     baseUrl = await baseUrlPromise;
     const end = Date.now();
-    console.log(`[SharedPage] loader.getMetadata() took ${end - start}ms`);
+    console.log(
+      `[SharedPage] loader.getMetadata() took ${end - start}ms for domain: ${loader.domain}`
+    );
   }
 
   // check for redirects
@@ -89,9 +99,14 @@ export default async function SharedPage({
   let root: FernNavigation.RootNode | undefined;
   {
     const start = Date.now();
+    console.log(
+      `[SharedPage] calling loader.getRoot() for domain: ${loader.domain}`
+    );
     root = await rootPromise;
     const end = Date.now();
-    console.log(`[SharedPage] loader.getRoot() took ${end - start}ms`);
+    console.log(
+      `[SharedPage] loader.getRoot() took ${end - start}ms for domain: ${loader.domain}`
+    );
   }
 
   // always match the basepath of the root node
@@ -108,9 +123,14 @@ export default async function SharedPage({
   let authState;
   {
     const start = Date.now();
+    console.log(
+      `[SharedPage] calling loader.getAuthState() for domain: ${loader.domain}`
+    );
     authState = await authStatePromise;
     const end = Date.now();
-    console.log(`[SharedPage] loader.getAuthState() took ${end - start}ms`);
+    console.log(
+      `[SharedPage] loader.getAuthState() took ${end - start}ms for domain: ${loader.domain}`
+    );
   }
 
   // this is a special case for when the user is not authenticated, but the not-found status originates from an authed node
@@ -150,9 +170,14 @@ export default async function SharedPage({
   let edgeFlags;
   {
     const start = Date.now();
+    console.log(
+      `[SharedPage] calling loader.getEdgeFlags() for domain: ${loader.domain}`
+    );
     edgeFlags = await edgeFlagsPromise;
     const end = Date.now();
-    console.log(`[SharedPage] loader.getEdgeFlags() took ${end - start}ms`);
+    console.log(
+      `[SharedPage] loader.getEdgeFlags() took ${end - start}ms for domain: ${loader.domain}`
+    );
   }
 
   if (found.type === "notFound") {
@@ -369,10 +394,13 @@ async function getNeighbor(
     let page, mdx;
     {
       const start = Date.now();
+      console.log(
+        `[getNeighbor] calling loader.getPage(${pageId}) for domain: ${loader.domain}`
+      );
       page = await loader.getPage(pageId);
       const end = Date.now();
       console.log(
-        `[getNeighbor] loader.getPage(${pageId}) took ${end - start}ms`
+        `[getNeighbor] loader.getPage(${pageId}) took ${end - start}ms for domain: ${loader.domain}`
       );
     }
     {

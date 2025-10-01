@@ -8,6 +8,7 @@ import { Semaphore, mapValues } from "es-toolkit";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
 import type { AuthEdgeConfig } from "@fern-api/docs-auth";
+import { track } from "@fern-api/docs-server";
 import {
   type AuthState,
   type FernFonts,
@@ -165,8 +166,13 @@ function kvSet(
 
   const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
 
+  console.log(
+    `[Upstash] SET operation - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`
+  );
+
   after(async () => {
     await setMonitor.acquire();
+    const start = Date.now();
     try {
       if (ttl && ttl > 0) {
         await kv.hset(domainKey, { [finalKey]: value });
@@ -180,8 +186,28 @@ function kvSet(
       } else {
         await kv.hset(domainKey, { [finalKey]: value });
       }
+      const duration = Date.now() - start;
+      console.log(
+        `[Upstash] SET completed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
+      );
+
+      track("upstash_cache_set", {
+        domain: domainKey,
+        cacheKey: finalKey,
+        hasTtl: Boolean(ttl && ttl > 0),
+        ttl: ttl,
+        duration,
+      });
     } catch (error) {
-      console.warn(`Failed to set kv key ${finalKey}: ${value}`, error);
+      console.warn(
+        `[Upstash] SET failed - domain: ${domainKey}, key: ${finalKey}`,
+        error
+      );
+      track("upstash_cache_set_error", {
+        domain: domainKey,
+        cacheKey: finalKey,
+        error: String(error),
+      });
     } finally {
       setMonitor.release();
     }
@@ -201,7 +227,12 @@ async function kvGet<T>(
 
   const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
 
+  console.log(
+    `[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`
+  );
+
   await getMonitor.acquire();
+  const start = Date.now();
   try {
     // Check if the key has expired
     const ttlKey = `${domainKey}:ttl:${finalKey}`;
@@ -211,12 +242,51 @@ async function kvGet<T>(
       // Key has expired, delete it
       await kv.hdel(domainKey, finalKey);
       await kv.del(ttlKey);
+      const duration = Date.now() - start;
+      console.log(
+        `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
+      );
+
+      track("upstash_cache_get", {
+        domain: domainKey,
+        cacheKey: finalKey,
+        hit: false,
+        expired: true,
+        duration,
+      });
       return null;
     }
 
-    return await kv.hget<T>(domainKey, finalKey);
+    const result = await kv.hget<T>(domainKey, finalKey);
+    const duration = Date.now() - start;
+    const isHit = result != null;
+
+    console.log(
+      `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
+    );
+
+    track("upstash_cache_get", {
+      domain: domainKey,
+      cacheKey: finalKey,
+      hit: isHit,
+      expired: false,
+      duration,
+    });
+
+    return result;
   } catch (error) {
-    console.warn(`Failed to get kv key ${finalKey}`, error);
+    const duration = Date.now() - start;
+    console.warn(
+      `[Upstash] GET failed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`,
+      error
+    );
+
+    track("upstash_cache_get_error", {
+      domain: domainKey,
+      cacheKey: finalKey,
+      error: String(error),
+      duration,
+    });
     return null;
   } finally {
     getMonitor.release();
