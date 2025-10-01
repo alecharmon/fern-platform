@@ -19,16 +19,26 @@ from sqlalchemy import select
 from src.fai.db import async_session_maker
 from src.fai.models.api.update_channel_settings import ChannelSettings
 from src.fai.models.db.query_db import QueryDb
+from src.fai.models.db.slack_context_db import SlackContextDb
 from src.fai.models.db.slack_integration_db import SlackIntegrationDb
 from src.fai.models.utils.chat import ChatMode
-from src.fai.utils.chat.response.anthropic import get_anthropic_response
+from src.fai.utils.chat.response.anthropic import (
+    get_anthropic_index_response,
+    get_anthropic_response,
+)
 from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.fai.utils.chat.roles import create_delimited_role_combinations
 from src.fai.utils.generate_model import generate_anthropic_generic_async
 from src.fai.utils.slack.client import add_reaction
+from src.fai.utils.turbopuffer.namespace import (
+    get_query_index_name,
+    get_slack_context_index_name,
+)
+from src.fai.utils.turbopuffer.sync import (
+    sync_index_to_target,
+    sync_slack_context_db_to_tpuf,
+)
 from src.settings import LOGGER
-
-SLACK_FOLLOW_UP_MESSAGE = "---\n_If you have follow-up questions, please @Ask Fern again in this thread._"
 
 
 class MessageClassification(BaseModel):
@@ -219,6 +229,34 @@ async def log_query_to_db(
         return None
 
 
+async def save_slack_context_to_db(question: str, ideal_response: str, domain: str) -> str | None:
+    try:
+        slack_context_id = str(uuid4())
+        now = datetime.now(UTC)
+
+        async with async_session_maker() as session:
+            slack_context = SlackContextDb(
+                id=slack_context_id,
+                domain=domain,
+                question=question,
+                ideal_response=ideal_response,
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(slack_context)
+            await session.commit()
+            LOGGER.info(f"Saved SlackContext to database: {slack_context_id}")
+            await sync_slack_context_db_to_tpuf(domain, session)
+            LOGGER.info(f"Synced SlackContext to Turbopuffer for domain: {domain}")
+            await sync_index_to_target(domain, get_slack_context_index_name(), get_query_index_name())
+            LOGGER.info(f"Synced SlackContext to Query index for domain: {domain}")
+
+        return slack_context_id
+    except Exception as e:
+        LOGGER.error(f"Failed to save SlackContext: {e}")
+        return None
+
+
 async def process_message(
     text: str,
     domain: str,
@@ -233,7 +271,7 @@ async def process_message(
         text = text.replace(f"<@{bot_user_id}>", "").strip()
 
     if not text:
-        return "I need a message to respond to. Please ask me a question!", None
+        return "", None
 
     query_id = None
     if conversation_id:
@@ -270,13 +308,11 @@ async def process_message(
             messages,
             domain,
             rag_records,
-            ChatMode.SLACK,
+            ChatMode.SLACK_CHAT,
         )
 
         if output_turns and len(output_turns) > 0:
             response = "\n\n".join([turn["text"] for turn in output_turns])
-            if "@Ask Fern again in this thread" not in response:
-                response = f"{response}\n\n{SLACK_FOLLOW_UP_MESSAGE}"
             if conversation_id:
                 await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="SLACK")
             return response, query_id
@@ -398,8 +434,44 @@ async def handle_slack_message(
             except Exception as e:
                 LOGGER.warning(f"Failed to add brain reaction: {e}")
 
-        # TODO: Implement actual indexing logic
-        return SlackMessageResponse("", "", None, None)
+        if message_history:
+            messages = message_history.copy()
+            if not messages or messages[-1]["content"] != context.text:
+                messages.append({"role": "user", "content": context.text})
+        else:
+            messages = [{"role": "user", "content": context.text}]
+
+        output_turns, context_data = await get_anthropic_index_response(
+            model="claude-4-sonnet-20250514",
+            messages=messages,
+            domain=domain_to_use,
+        )
+
+        if output_turns and len(output_turns) > 0:
+            response_text = "\n\n".join([turn["text"] for turn in output_turns])
+        else:
+            response_text = "I encountered an error while trying to help you index this content. Please try again."
+
+        if context_data:
+            slack_context_id = await save_slack_context_to_db(
+                question=context_data["question"],
+                ideal_response=context_data["ideal_response"],
+                domain=domain_to_use,
+            )
+            if slack_context_id:
+                LOGGER.info(f"Successfully saved and synced SlackContext: {slack_context_id}")
+            else:
+                LOGGER.error("Failed to save SlackContext to database")
+                response_text += "\n\n⚠️ Note: There was an error saving the context. Please try again."
+
+        return SlackMessageResponse(
+            response_text=response_text,
+            channel=context.channel,
+            thread_ts=context.thread_ts,
+            bot_token=integration.slack_bot_token,
+            query_id=None,  # No query_id for indexing conversations
+            user_id=context.user,
+        )
 
     elif message_action == "question":
         LOGGER.info(f"Processing question from {context.user} in {context.channel}: {context.text[:100]}...")

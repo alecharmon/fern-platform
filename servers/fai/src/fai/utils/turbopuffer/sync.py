@@ -13,10 +13,12 @@ from turbopuffer.types.row import Row
 from src.fai.models.db.code_db import CodeDb
 from src.fai.models.db.document_db import DocumentDb
 from src.fai.models.db.guidance_db import GuidanceDb
+from src.fai.models.db.slack_context_db import SlackContextDb
 from src.fai.utils.turbopuffer.namespace import (
     get_code_index_name,
     get_document_index_name,
     get_guidance_index_name,
+    get_slack_context_index_name,
     get_tpuf_namespace,
 )
 from src.fai.utils.turbopuffer.schemas import (
@@ -116,6 +118,31 @@ async def sync_guidance_db_to_tpuf(domain: str, db: AsyncSession) -> None:
                 schema=get_data_index_tpuf_schema(),
             )
             LOGGER.info(f"Wrote {len(guidances)} guidances to {target_namespace_id}")
+
+
+async def sync_slack_context_db_to_tpuf(domain: str, db: AsyncSession) -> None:
+    slack_contexts = await db.execute(select(SlackContextDb).where(SlackContextDb.domain == domain))
+    slack_contexts = slack_contexts.scalars().all()
+    async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
+        async with AsyncTurbopuffer(
+            region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+            api_key=VARIABLES.TURBOPUFFER_API_KEY,
+        ) as tpuf_client:
+            target_namespace_id = get_tpuf_namespace(domain, get_slack_context_index_name())
+            target_ns = tpuf_client.namespace(target_namespace_id)
+            try:
+                await target_ns.delete_all()
+            except Exception:
+                LOGGER.info(f"No slack contexts to delete from {target_namespace_id}")
+            tbuf_records = []
+            for slack_context in slack_contexts:
+                tbuf_records.append(await slack_context.to_tpuf_record(openai_client))
+            await target_ns.write(
+                upsert_rows=[jsonable_encoder(record) for record in tbuf_records],
+                distance_metric="cosine_distance",
+                schema=get_data_index_tpuf_schema(),
+            )
+            LOGGER.info(f"Wrote {len(slack_contexts)} slack contexts to {target_namespace_id}")
 
 
 async def sync_index_to_target(domain: str, source_index_name: str, target_index_name: str) -> None:

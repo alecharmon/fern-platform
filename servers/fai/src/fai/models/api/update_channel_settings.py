@@ -11,7 +11,7 @@ class ChannelSettings(BaseModel):
         default_factory=list, description="List of RBAC roles that are allowed to interact with the bot in this channel"
     )
     respond_to: Literal["all", "mentions_only", "auto"] = Field(
-        "mentions_only", description="Whether to respond to all messages, only mentions, or automatically determine"
+        "auto", description="Whether to respond to all messages, only mentions, or automatically determine"
     )
     domain_override: str | None = Field(
         None, description="Override domain for queries in this channel (hidden setting)"

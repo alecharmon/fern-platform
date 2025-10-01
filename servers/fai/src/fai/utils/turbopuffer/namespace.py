@@ -20,6 +20,10 @@ def get_guidance_index_name() -> str:
     return DataIndexNames.GUIDANCE.value
 
 
+def get_slack_context_index_name() -> str:
+    return DataIndexNames.SLACK_CONTEXT.value
+
+
 def get_code_index_name() -> str:
     return DataIndexNames.CODE.value
 

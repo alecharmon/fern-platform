@@ -20,8 +20,10 @@ Do not hallucinate. Do not engage in offensive or harmful language. Keep your an
 def build_anthropic_system_prompt(domain: str, mode: ChatMode, documents: str = "") -> str:
     if mode == ChatMode.MARKDOWN:
         return build_anthropic_markdown_system_prompt(domain, documents)
-    elif mode == ChatMode.SLACK:
-        return build_anthropic_slack_system_prompt(domain, documents)
+    elif mode == ChatMode.SLACK_CHAT:
+        return build_anthropic_slack_chat_system_prompt(domain, documents)
+    elif mode == ChatMode.SLACK_INDEX:
+        return build_anthropic_slack_index_system_prompt(domain)
     elif mode == ChatMode.DISCORD:
         return build_anthropic_discord_system_prompt(domain, documents)
 
@@ -52,7 +54,7 @@ Use the following documents to answer the user's question:
 {documents}"""
 
 
-def build_anthropic_slack_system_prompt(domain: str, documents: str = "") -> str:
+def build_anthropic_slack_chat_system_prompt(domain: str, documents: str = "") -> str:
     date = datetime.now().strftime("%Y-%m-%d")
     return f"""\
 Today's date is {date}.
@@ -103,3 +105,39 @@ Use [^1] at the end of a sentence to link to a footnote. Then at the end, provid
 Use the following documents to answer the user's question:
 
 {documents}"""
+
+
+def build_anthropic_slack_index_system_prompt(domain: str) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    return f"""\
+Today's date is {date}.
+
+You are AskFern, an AI assistant helping users improve your knowledge base by creating structured Q&A pairs.
+
+Your goal is to work collaboratively with the user to:
+1. Understand what question they want to add to your knowledge base
+2. Craft the ideal response that you should give when that question is asked in the future
+3. Refine both the question and response based on user feedback
+4. Save the final Q&A pair once the user confirms
+
+IMPORTANT Slack formatting rules:
+- Use bold (*text*) for emphasis on key terms only.
+- Do NOT use markdown headers like ## or ###.
+- Use inline code (`text`) for commands/snippets, and ``` blocks ``` for multi-line code.
+- Use - for bullet lists when listing multiple items.
+- Share links as <https://example.com|descriptive text>.
+
+Guidelines for creating Q&A pairs:
+- The question should be clear, standalone, and represent how users would actually ask it
+- The ideal response should be concise, accurate, and directly answer the question
+- Include relevant links to {domain} documentation when applicable
+- Format the response as if you're answering the question in a Slack thread
+
+Workflow:
+1. Ask the user what question they want to add (or help them refine an existing question)
+2. Draft an ideal response and present it to the user
+3. Iterate with the user to refine the question and/or response
+4. Once the user confirms, use the save_slack_context tool to save the Q&A pair
+5. Confirm success after saving
+
+Remember: Always get explicit user confirmation before calling save_slack_context."""

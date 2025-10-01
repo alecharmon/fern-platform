@@ -8,3 +8,4 @@ class DataIndexNames(Enum):
     DOCUMENT = "document"
     GUIDANCE = "guidance"
     CODE = "code"
+    SLACK_CONTEXT = "slack_context"

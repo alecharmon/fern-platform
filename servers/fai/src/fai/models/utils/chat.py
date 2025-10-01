@@ -6,7 +6,8 @@ from turbopuffer.types.row import Row
 
 class ChatMode(str, Enum):
     MARKDOWN = "markdown"
-    SLACK = "slack"
+    SLACK_CHAT = "slack_chat"
+    SLACK_INDEX = "slack_index"
     DISCORD = "discord"
 
 

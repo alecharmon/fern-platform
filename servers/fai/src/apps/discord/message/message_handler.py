@@ -23,11 +23,6 @@ from src.fai.utils.chat.response.anthropic import get_anthropic_response
 from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.settings import LOGGER
 
-DISCORD_FOLLOW_UP_MESSAGE = """\
----
-_If you have follow-up questions, please @Ask Fern again in this thread._\
-"""
-
 MESSAGE_CACHE_TTL = 30
 
 
@@ -272,7 +267,6 @@ async def process_message(
 
         if output_turns and len(output_turns) > 0:
             response = "\n\n".join([turn["text"] for turn in output_turns])
-            response = f"{response}\n\n{DISCORD_FOLLOW_UP_MESSAGE}"
             if conversation_id:
                 await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="DISCORD")
             return response, query_id
