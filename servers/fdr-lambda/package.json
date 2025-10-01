@@ -16,6 +16,8 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.0",
+    "pg": "^8.11.3",
     "tsup": "^8.0.0",
     "typescript": "^5"
   },

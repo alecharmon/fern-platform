@@ -1,6 +1,7 @@
 import { CfnOutput, Duration, Stack, StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
@@ -20,6 +21,7 @@ export class FdrLambdaDeployStack extends Stack {
     version: string,
     environmentType: EnvironmentType,
     environmentInfo: EnvironmentInfo,
+    rdsProxySecurityGroupId: string,
     props?: StackProps
   ) {
     super(scope, id, props);
@@ -41,6 +43,39 @@ export class FdrLambdaDeployStack extends Stack {
       zoneName: environmentInfo.route53Info.hostedZoneName,
     });
 
+    // Import existing VPC using environmentInfo like fdr-deploy does
+    const vpc = ec2.Vpc.fromLookup(this, "vpc", {
+      vpcId: environmentInfo.vpcId,
+    });
+
+    // Create security group for Lambda
+    const lambdaSecurityGroup = new ec2.SecurityGroup(
+      this,
+      "lambda-security-group",
+      {
+        vpc,
+        description: "Security group for FDR Lambda function",
+        allowAllOutbound: true,
+      }
+    );
+
+    // Import the existing RDS Proxy security group
+    const rdsProxySecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
+      this,
+      "rds-proxy-security-group",
+      rdsProxySecurityGroupId,
+      {
+        mutable: true,
+      }
+    );
+
+    // Allow RDS Proxy security group to accept inbound connections from Lambda
+    rdsProxySecurityGroup.addIngressRule(
+      lambdaSecurityGroup,
+      ec2.Port.tcp(5432),
+      "Allow inbound PostgreSQL traffic from Lambda"
+    );
+
     // Create Lambda function
     const lambdaFunction = new lambda.Function(this, "fdr-lambda-function", {
       functionName: `fdr-lambda-${environmentType.toLowerCase()}`,
@@ -52,9 +87,16 @@ export class FdrLambdaDeployStack extends Stack {
       timeout: Duration.seconds(30),
       memorySize: 512,
       logGroup,
+      vpc,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PUBLIC,
+      },
+      allowPublicSubnet: true,
+      securityGroups: [lambdaSecurityGroup],
       environment: {
         NODE_ENV: "production",
         ENVIRONMENT_TYPE: environmentType,
+        DATABASE_URL: getEnvironmentVariableOrThrow("DATABASE_URL"),
       },
     });
 
@@ -136,4 +178,12 @@ function getLambdaDomainName(
     "." +
     environmentInfo.route53Info.hostedZoneName
   );
+}
+
+function getEnvironmentVariableOrThrow(environmentVariable: string): string {
+  const value = process.env[environmentVariable];
+  if (value == null) {
+    throw new Error(`Environment variable ${environmentVariable} not found`);
+  }
+  return value;
 }
