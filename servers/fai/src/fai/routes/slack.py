@@ -887,6 +887,7 @@ async def handle_configure_command(
                         f"• `{cmd_name} roles role1,role2,role3` - Set allowed RBAC roles\n"
                         f"• `{cmd_name} respond_to all` - Bot responds to all messages\n"
                         f"• `{cmd_name} respond_to mentions_only` - Bot only responds to mentions\n"
+                        f"• `{cmd_name} respond_to auto` - Bot automatically determines when to respond\n"
                         f"• `{cmd_name} help` - Show this help message"
                     ),
                 }
@@ -904,10 +905,12 @@ async def handle_configure_command(
                         f"• `{cmd_name} show` - Display current channel settings\n"
                         f"• `{cmd_name} roles role1,role2,role3` - Set allowed RBAC roles (comma-separated)\n"
                         f"• `{cmd_name} respond_to all` - Bot responds to all messages in channel\n"
-                        f"• `{cmd_name} respond_to mentions_only` - Bot only responds when mentioned\n\n"
+                        f"• `{cmd_name} respond_to mentions_only` - Bot only responds when mentioned\n"
+                        f"• `{cmd_name} respond_to auto` - Bot automatically determines when to respond\n\n"
                         "*Examples:*\n"
                         f"• `{cmd_name} roles admin,developer,support`\n"
-                        f"• `{cmd_name} respond_to all`"
+                        f"• `{cmd_name} respond_to all`\n"
+                        f"• `{cmd_name} respond_to auto`"
                     ),
                 }
             )
@@ -946,7 +949,12 @@ async def handle_configure_command(
                 roles_text = (
                     ", ".join(settings_obj.allowed_roles) if settings_obj.allowed_roles else "None (all users allowed)"
                 )
-                respond_to_text = "All messages" if settings_obj.respond_to == "all" else "Mentions only"
+                respond_to_map = {
+                    "all": "All messages",
+                    "mentions_only": "Mentions only",
+                    "auto": "Auto (intelligent routing)",
+                }
+                respond_to_text = respond_to_map.get(settings_obj.respond_to, settings_obj.respond_to)
 
                 return JSONResponse(
                     content={
@@ -999,17 +1007,18 @@ async def handle_configure_command(
                         content={
                             "response_type": "ephemeral",
                             "text": (
-                                "❌ Please specify 'all' or 'mentions_only'. " f"Example: `{cmd_name} respond_to all`"
+                                "❌ Please specify 'all', 'mentions_only', or 'auto'. "
+                                f"Example: `{cmd_name} respond_to all`"
                             ),
                         }
                     )
 
                 mode = parts[1].lower()
-                if mode not in ["all", "mentions_only"]:
+                if mode not in ["all", "mentions_only", "auto"]:
                     return JSONResponse(
                         content={
                             "response_type": "ephemeral",
-                            "text": "❌ Invalid mode. Use 'all' or 'mentions_only'.",
+                            "text": "❌ Invalid mode. Use 'all', 'mentions_only', or 'auto'.",
                         }
                     )
 
@@ -1030,7 +1039,12 @@ async def handle_configure_command(
 
                 LOGGER.info(f"Settings after commit: {integration.settings}")
 
-                respond_to_text = "all messages" if mode == "all" else "mentions only"
+                respond_to_map = {
+                    "all": "all messages",
+                    "mentions_only": "mentions only",
+                    "auto": "messages automatically (using intelligent routing)",
+                }
+                respond_to_text = respond_to_map.get(mode, mode)
                 return JSONResponse(
                     content={
                         "response_type": "ephemeral",

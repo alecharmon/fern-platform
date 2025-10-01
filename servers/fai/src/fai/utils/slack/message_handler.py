@@ -3,9 +3,16 @@ from datetime import (
     UTC,
     datetime,
 )
-from typing import Any
+from typing import (
+    Any,
+    Literal,
+)
 from uuid import uuid4
 
+from pydantic import (
+    BaseModel,
+    Field,
+)
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
@@ -17,10 +24,89 @@ from src.fai.models.utils.chat import ChatMode
 from src.fai.utils.chat.response.anthropic import get_anthropic_response
 from src.fai.utils.chat.retrieve.retrieve import retrieve
 from src.fai.utils.chat.roles import create_delimited_role_combinations
+from src.fai.utils.generate_model import generate_anthropic_generic_async
 from src.fai.utils.slack.client import add_reaction
 from src.settings import LOGGER
 
 SLACK_FOLLOW_UP_MESSAGE = "---\n_If you have follow-up questions, please @Ask Fern again in this thread._"
+
+
+class MessageClassification(BaseModel):
+    classification: Literal["question", "index", "ignore"] = Field(
+        description=(
+            "The classification of the message: 'question' for questions requiring a response, "
+            "'index' for messages that request the bot to index a thread to improve its responses, "
+            "'ignore' for casual chat/greetings"
+        )
+    )
+    reasoning: str = Field(description="Brief explanation of why this classification was chosen")
+
+
+CLASSIFICATION_PROMPT = """You are a message classifier for a documentation chatbot called AskFern. \
+Your job is to determine whether incoming Slack messages should be treated as:
+
+1. **question**: A genuine question or request for information that requires a detailed response \
+from the documentation bot. You should not classify questions that are not related to the API / service as questions.
+2. **index**: A message that requests the bot to index a thread to improve its responses. This should only be \
+returned if the conversation thread can improve the bot's responses.
+3. **ignore**: Casual chat, greetings, thanks, social messages, or off-topic conversations that \
+don't need bot engagement. This will be used to ignore messages that are not related to the API / service.
+
+{bot_info}
+
+Consider the following when classifying:
+
+- Questions often contain interrogative words (what, how, why, when, where) or request information/help
+- Questions may be phrased as statements that clearly need information (e.g., "I need help with...")
+- Feedback includes things like "this doesn't work", "great response", "the bot should...", "I found a bug"
+- Ignore casual messages like "hello", "thanks", "lol", "have a good day", or general conversation between humans
+- **IMPORTANT**: If a message is clearly addressed to a specific person (e.g., contains @username or "hey John"), \
+classify it as "ignore" since it's a conversation between humans, not intended for the bot
+- **IMPORTANT**: If a question is directed at a specific person (not the bot), classify it as "ignore"
+- **IMPORTANT**: Check Slack mentions carefully - if the message starts with mentions to other users (not the bot), \
+it's likely directed at them, not the bot
+- Context matters: in a thread, follow-up messages may be questions even without question marks
+
+Message to classify:
+{message_text}
+
+{history_context}
+
+Classify this message and provide your reasoning."""
+
+
+async def classify_message(
+    text: str,
+    message_history: list[dict[str, str]] | None = None,
+    bot_user_id: str | None = None,
+) -> Literal["question", "index", "ignore"]:
+    bot_info = ""
+    if bot_user_id:
+        bot_info = (
+            f"**Bot Information**: The bot's Slack user ID is <@{bot_user_id}>. "
+            "Any mentions to this ID are directed at the bot. Mentions to other user IDs are NOT for the bot."
+        )
+
+    history_context = ""
+    if message_history and len(message_history) > 0:
+        recent_messages = message_history[-3:]  # Last 3 messages for context
+        history_lines = [f"{msg['role'].upper()}: {msg['content']}" for msg in recent_messages]
+        history_context = "\nRecent conversation context:\n" + "\n".join(history_lines)
+
+    result = await generate_anthropic_generic_async(
+        response_type=MessageClassification,
+        prompt_template=CLASSIFICATION_PROMPT,
+        message_text=text,
+        history_context=history_context,
+        bot_info=bot_info,
+    )
+
+    if result is None:
+        LOGGER.warning(f"Failed to classify message after retries: {text[:100]}")
+        return "ignore"
+
+    LOGGER.info(f"Message classification: {result.classification} - Reasoning: {result.reasoning}")
+    return result.classification
 
 
 @dataclass
@@ -51,24 +137,32 @@ async def get_slack_integration(team_id: str) -> SlackIntegrationDb | None:
         return result.scalar_one_or_none()
 
 
-def should_respond_to_message(
+def get_message_action(
     channel_settings: ChannelSettings | None,
     is_app_mention: bool,
     is_thread_message: bool,
     is_from_thread_starter: bool = False,
-) -> bool:
-    if is_app_mention:
-        return True
-
+    message_classification: Literal["question", "index", "ignore"] | None = None,
+) -> Literal["question", "index", "ignore"]:
     if channel_settings is None:
         channel_settings = ChannelSettings()
 
-    if is_thread_message:
-        if channel_settings.respond_to == "all":
-            return is_from_thread_starter
-        return False
+    if channel_settings.respond_to == "auto":
+        if message_classification is None:
+            LOGGER.warning("Auto mode enabled but no message classification provided")
+            return "ignore"
 
-    return channel_settings.respond_to == "all"
+        return message_classification
+
+    if is_app_mention:
+        return "question"
+
+    if channel_settings.respond_to == "all":
+        if is_thread_message:
+            return "question" if is_from_thread_starter else "ignore"
+        return "question"
+
+    return "ignore"
 
 
 async def get_thread_history(
@@ -259,22 +353,6 @@ async def handle_slack_message(
             except Exception as e:
                 LOGGER.error(f"Error checking thread starter: {e}")
 
-    if not should_respond_to_message(channel_settings, is_app_mention, is_thread_message, is_from_thread_starter):
-        LOGGER.info(
-            f"Skipping message based on channel settings: channel={context.channel}, is_thread={is_thread_message}, "
-            f"is_mention={is_app_mention}, is_thread_starter={is_from_thread_starter}"
-        )
-        return SlackMessageResponse("", "", None, None)
-
-    LOGGER.info(f"Processing message from {context.user} in {context.channel}: {context.text[:100]}...")
-
-    message_ts = event.get("ts")
-    if integration.slack_bot_token and message_ts and context.channel:
-        try:
-            await add_reaction(context.channel, message_ts, "eyes", integration.slack_bot_token)
-        except Exception as e:
-            LOGGER.warning(f"Failed to add reaction: {e}")
-
     message_history = None
     if context.thread_ts and event.get("thread_ts"):
         LOGGER.info(f"Retrieving thread history for ts: {context.thread_ts}")
@@ -283,22 +361,75 @@ async def handle_slack_message(
         )
         LOGGER.info(f"Retrieved {len(message_history)} messages from thread history")
 
-    conversation_id = f"slack_{context.team_id}_{context.channel}_{context.thread_ts or context.user or 'direct'}"
+    message_classification = None
+    if channel_settings and channel_settings.respond_to == "auto":
+        LOGGER.info(f"Auto mode enabled, classifying message: {context.text[:100]}...")
+        try:
+            message_classification = await classify_message(
+                context.text, message_history, integration.slack_bot_user_id
+            )
+            LOGGER.info(f"Message classified as: {message_classification}")
+        except Exception as e:
+            LOGGER.error(f"Error classifying message: {e}, treating as 'ignore'")
+            message_classification = "ignore"
 
-    response_text, query_id = await process_message(
-        context.text,
-        domain_to_use,
-        integration.slack_bot_user_id if context.is_app_mention else None,
-        message_history,
-        conversation_id=conversation_id,
-        allowed_roles=roles_to_use if roles_to_use else None,
+    message_action = get_message_action(
+        channel_settings, is_app_mention, is_thread_message, is_from_thread_starter, message_classification
     )
 
-    return SlackMessageResponse(
-        response_text=response_text,
-        channel=context.channel,
-        thread_ts=context.thread_ts,
-        bot_token=integration.slack_bot_token,
-        query_id=query_id,
-        user_id=context.user,
+    LOGGER.info(
+        f"Message action determined: {message_action} (channel={context.channel}, is_thread={is_thread_message}, "
+        f"is_mention={is_app_mention}, is_thread_starter={is_from_thread_starter}, "
+        f"classification={message_classification})"
     )
+
+    if message_action == "ignore":
+        LOGGER.info(f"Ignoring message from {context.user} in {context.channel}")
+        return SlackMessageResponse("", "", None, None)
+
+    elif message_action == "index":
+        LOGGER.info(f"Message marked for indexing from {context.user} in {context.channel}: {context.text[:100]}...")
+
+        message_ts = event.get("ts")
+        if integration.slack_bot_token and message_ts and context.channel:
+            try:
+                await add_reaction(context.channel, message_ts, "brain", integration.slack_bot_token)
+                LOGGER.info(f"Added brain reaction to message {message_ts} for indexing")
+            except Exception as e:
+                LOGGER.warning(f"Failed to add brain reaction: {e}")
+
+        # TODO: Implement actual indexing logic
+        return SlackMessageResponse("", "", None, None)
+
+    elif message_action == "question":
+        LOGGER.info(f"Processing question from {context.user} in {context.channel}: {context.text[:100]}...")
+
+        message_ts = event.get("ts")
+        if integration.slack_bot_token and message_ts and context.channel:
+            try:
+                await add_reaction(context.channel, message_ts, "eyes", integration.slack_bot_token)
+            except Exception as e:
+                LOGGER.warning(f"Failed to add reaction: {e}")
+
+        conversation_id = f"slack_{context.team_id}_{context.channel}_{context.thread_ts or context.user or 'direct'}"
+
+        response_text, query_id = await process_message(
+            context.text,
+            domain_to_use,
+            integration.slack_bot_user_id if context.is_app_mention else None,
+            message_history,
+            conversation_id=conversation_id,
+            allowed_roles=roles_to_use if roles_to_use else None,
+        )
+
+        return SlackMessageResponse(
+            response_text=response_text,
+            channel=context.channel,
+            thread_ts=context.thread_ts,
+            bot_token=integration.slack_bot_token,
+            query_id=query_id,
+            user_id=context.user,
+        )
+
+    LOGGER.warning(f"Unexpected message action: {message_action}")
+    return SlackMessageResponse("", "", None, None)
