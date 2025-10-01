@@ -68,6 +68,13 @@ export function getFdrOrigin(): string {
   );
 }
 
+export function getFdrLambdaOrigin(): string {
+  return withDefaultProtocol(
+    process.env.NEXT_PUBLIC_FDR_LAMBDA_ORIGIN ??
+      "https://registry-v2.buildwithfern.com"
+  );
+}
+
 export function cohereApiKey(): string {
   return getEnvVariable("COHERE_API_KEY");
 }

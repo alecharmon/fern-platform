@@ -1,5 +1,5 @@
 {
-  "name": "@fern-platform/fdr-lambda-sdk",
+  "name": "@fern-api/fdr-lambda-sdk",
   "version": "0.0.0",
   "repository": {
     "type": "git",
