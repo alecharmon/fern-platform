@@ -99,7 +99,7 @@ function getLoginUrl({
 }) {
   const searchParams = new URLSearchParams(additionalParams);
   if (returnTo != null) {
-    searchParams.append("returnTo", returnTo);
+    searchParams.append("redirect_on_login", returnTo);
   }
   searchParams.append("connection", connection);
   return `/auth/login?${searchParams.toString()}`;

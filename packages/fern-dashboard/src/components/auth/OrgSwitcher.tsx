@@ -2,9 +2,11 @@ import "server-only";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName, Auth0Organization } from "@/app/services/auth0/types";
-import getAvailableOrgsForUser from "@/app/services/dal/fdr/getAvailableOrgsForUser";
+import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
 
 import { OrgSwitcherClient } from "./OrgSwitcherClient";
+
+export const revalidate = 0;
 
 export async function OrgSwitcher({
   currentOrgName,

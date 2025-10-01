@@ -7,7 +7,6 @@ import { ensureUserBelongsToOrgCacheTag } from "@/app/services/auth0/management"
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { Auth0OrgName, Auth0UserID } from "../services/auth0/types";
-import { getAvailableOrgsForUserCacheTag } from "../services/dal/fdr/getAvailableOrgsForUser";
 
 export async function removeUserFromOrg({
   userIdToRemove,
@@ -41,7 +40,6 @@ export async function removeUserFromOrg({
     orgName,
   });
 
-  // Revalidate the cache for the user's available organizations and org access
-  revalidateTag(getAvailableOrgsForUserCacheTag(userIdToRemove));
+  // Revalidate the cache for the user's org access
   revalidateTag(ensureUserBelongsToOrgCacheTag(userIdToRemove, orgName));
 }

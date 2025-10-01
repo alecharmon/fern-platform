@@ -58,8 +58,8 @@ async function AcceptInviteHandler({ token }: { token: string }) {
             <div className="text-muted-foreground mb-4 text-sm">
               Please sign in to accept the invitation.
             </div>
-            <GithubLoginButton />
-            <GoogleLoginButton />
+            <GithubLoginButton returnTo={`/accept-invite/${token}`} />
+            <GoogleLoginButton returnTo={`/accept-invite/${token}`} />
           </div>
         );
       }

@@ -19,14 +19,14 @@ export default async function Page() {
 
   // Check if there's a pending org redirect from invitation flow
   const cookieStore = await cookies();
-  const pendingOrgRedirect = cookieStore.get("pending_org_redirect")?.value;
+  const pendingRedirect = cookieStore.get("redirect_on_login")?.value;
 
-  if (pendingOrgRedirect) {
+  if (pendingRedirect) {
     // Redirect to the invited organization (cookie will be cleared by middleware on next request)
-    redirect(`/${pendingOrgRedirect}`);
+    redirect(pendingRedirect);
   } else {
     await applyOrgMappings();
-    const response = await getOrCreateFirstOrgForUser(session);
+    const response = await getFirstOrgForUser(session);
     if (response.empty) {
       redirect(`/get-started`);
     } else {
@@ -35,7 +35,7 @@ export default async function Page() {
   }
 }
 
-async function getOrCreateFirstOrgForUser(
+async function getFirstOrgForUser(
   session: Auth0SessionData
 ): Promise<{ empty: true } | { empty: false; orgName: Auth0OrgName }> {
   const organizations = await getMyOrganizations(session.user.sub);
