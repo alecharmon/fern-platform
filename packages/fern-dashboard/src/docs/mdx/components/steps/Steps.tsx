@@ -160,6 +160,7 @@ export function StepGroup({
           }}
           targetRef={stepGroupRef}
           hoverSlopThreshold={50}
+          openPopoverIfNewlyCreated={false}
         >
           <div className="relative">
             <EditorComponentPopoverButton className="absolute -right-8 -top-2" />
