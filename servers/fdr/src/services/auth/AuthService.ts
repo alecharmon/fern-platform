@@ -120,6 +120,7 @@ export class AuthServiceImpl implements AuthService {
     const belongsToOrg = response.body;
 
     if (!belongsToOrg) {
+      this.logger.warn(`User does not belong to organization: ${orgId}`);
       throw new UserNotInOrgError("User does not belong to organization");
     }
   }
