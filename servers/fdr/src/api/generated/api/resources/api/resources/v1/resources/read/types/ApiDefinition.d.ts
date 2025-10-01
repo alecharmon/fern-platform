@@ -9,6 +9,7 @@ export interface ApiDefinition {
     subpackages: Record<FernRegistry.api.v1.SubpackageId, FernRegistry.api.v1.read.ApiDefinitionSubpackage>;
     snippetsConfiguration: FernRegistry.api.v1.register.SnippetsConfig | undefined;
     auth: FernRegistry.api.v1.read.ApiAuth | undefined;
+    authSchemes: Record<FernRegistry.AuthSchemeId, FernRegistry.api.v1.read.ApiAuth> | undefined;
     /**
      * If empty, assume false.
      * Whether or not endpoints are being served at different

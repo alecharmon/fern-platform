@@ -11,6 +11,7 @@ export interface DbApiDefinition {
     subpackages: Record<FernRegistry.api.v1.SubpackageId, FernRegistry.api.v1.db.DbApiDefinitionSubpackage>;
     snippetsConfiguration: FernRegistry.api.v1.register.SnippetsConfig | undefined;
     auth: FernRegistry.api.v1.read.ApiAuth | undefined;
+    authSchemes: Record<FernRegistry.AuthSchemeId, FernRegistry.api.v1.read.ApiAuth> | undefined;
     /**
      * Whether or not endpoints are being served at different
      * base urls (i.e. https://a.com and https://b.com)

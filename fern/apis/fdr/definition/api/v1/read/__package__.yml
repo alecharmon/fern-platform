@@ -34,11 +34,12 @@ types:
       subpackages: map<commons.SubpackageId, ApiDefinitionSubpackage>
       snippetsConfiguration: optional<registerRoot.SnippetsConfig>
       auth: optional<ApiAuth>
+      authSchemes: optional<map<rootCommons.AuthSchemeId, ApiAuth>>
       hasMultipleBaseUrls:
         type: optional<boolean>
         docs: |
-          If empty, assume false. 
-          Whether or not endpoints are being served at different 
+          If empty, assume false.
+          Whether or not endpoints are being served at different
           base urls (i.e. https://a.com and https://b.com)
       navigation:
         type: optional<ApiNavigationConfigRoot>

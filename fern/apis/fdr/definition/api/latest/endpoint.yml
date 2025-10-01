@@ -26,7 +26,7 @@ types:
       displayName: optional<string>
       operationId: optional<string>
 
-      auth: optional<list<auth.AuthSchemeId>>
+      auth: optional<list<rootCommons.AuthSchemeId>>
       defaultEnvironment: optional<rootCommons.EnvironmentId>
       environments: optional<list<commons.Environment>>
       pathParameters: optional<list<type.ObjectProperty>>

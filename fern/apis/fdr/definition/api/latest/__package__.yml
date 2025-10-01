@@ -34,7 +34,7 @@ types:
       webhooks: map<rootCommons.WebhookId, webhook.WebhookDefinition>
       types: map<rootCommons.TypeId, type.TypeDefinition>
       subpackages: map<commons.SubpackageId, commons.SubpackageMetadata>
-      auths: map<auth.AuthSchemeId, auth.AuthScheme>
+      auths: map<rootCommons.AuthSchemeId, auth.AuthScheme>
       globalHeaders: optional<list<type.ObjectProperty>>
       snippetsConfiguration: optional<v1Register.SnippetsConfig>
 

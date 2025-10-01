@@ -60,6 +60,7 @@ types:
       types: map<rootCommons.TypeId, type.TypeDefinition>
       subpackages: map<commons.SubpackageId, ApiDefinitionSubpackage>
       auth: optional<ApiAuth>
+      authSchemes: optional<map<rootCommons.AuthSchemeId, ApiAuth>>
       globalHeaders: optional<list<endpoint.Header>>
       snippetsConfiguration: optional<SnippetsConfig>
       navigation:

@@ -47,6 +47,8 @@ types:
 
   RoleId: string
 
+  AuthSchemeId: string
+
   EndpointIdentifier:
     properties:
       path: EndpointPathLiteral

@@ -79,6 +79,7 @@ export function convertAPIDefinitionToDb(
     }, {}),
     snippetsConfiguration: writeShape.snippetsConfiguration,
     auth: writeShape.auth,
+    authSchemes: writeShape.authSchemes,
     globalHeaders: writeShape.globalHeaders,
     hasMultipleBaseUrls: context.hasMultipleBaseUrls(),
     navigation: writeShape.navigation,
@@ -273,6 +274,7 @@ function transformEndpoint({
     description: writeShape.description,
     // htmlDescription,
     authed: writeShape.auth,
+    authV2: writeShape.authV2,
     // descriptionContainsMarkdown: true,
     snippetTemplates: snippets.getSnippetTemplateForEndpoint({
       endpointPath: getEndpointPathAsString(writeShape),

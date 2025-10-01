@@ -16,6 +16,7 @@ export * from "./Url";
 export * from "./JqString";
 export * from "./PropertyKey";
 export * from "./RoleId";
+export * from "./AuthSchemeId";
 export * from "./EndpointIdentifier";
 export * from "./EndpointPathLiteral";
 export * from "./HttpMethod";

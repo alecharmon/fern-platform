@@ -16,6 +16,7 @@ export * from "./Url.js";
 export * from "./JqString.js";
 export * from "./PropertyKey.js";
 export * from "./RoleId.js";
+export * from "./AuthSchemeId.js";
 export * from "./EndpointIdentifier.js";
 export * from "./EndpointPathLiteral.js";
 export * from "./HttpMethod.js";

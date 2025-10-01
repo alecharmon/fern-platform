@@ -6,6 +6,7 @@ exports[`transformApiDefinitionToDb > {"name":"candid"} 1`] = `
     "tokenName": "token",
     "type": "bearerAuth",
   },
+  "authSchemes": undefined,
   "globalHeaders": undefined,
   "hasMultipleBaseUrls": false,
   "id": "id",
@@ -87,6 +88,7 @@ exports[`transformApiDefinitionToDb > {"name":"candid"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -264,6 +266,7 @@ the current organization_id of the authenticated user
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -371,6 +374,7 @@ authenticated user, then response code of 403 will be returned
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -477,6 +481,7 @@ the current organization_id of the auathenticated user. Otherwise, response code
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -597,6 +602,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -725,6 +731,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": false,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -923,6 +930,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -1036,6 +1044,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -1158,6 +1167,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -1287,6 +1297,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "execute",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -1479,6 +1490,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -1563,6 +1575,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "delete-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -1685,6 +1698,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -2316,6 +2330,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -2575,6 +2590,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get-service-line-adjudication-details",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -2985,6 +3001,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -3561,6 +3578,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -3664,6 +3682,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get-legal-comparisons",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -3857,6 +3876,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -4449,6 +4469,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -4611,6 +4632,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "delete",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -4999,6 +5021,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "resolve-config-for-scope",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -5358,6 +5381,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -5717,6 +5741,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -5816,6 +5841,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get-all-variable-summaries",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -6010,6 +6036,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -6520,6 +6547,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -6758,6 +6786,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "delete",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -6916,6 +6945,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -7102,6 +7132,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -7364,6 +7395,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -7591,6 +7623,7 @@ Max items is 100.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -7678,6 +7711,7 @@ Max items is 100.
           "urlSlug": "delete",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -7995,6 +8029,7 @@ value, overriding what was set before.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -8114,6 +8149,7 @@ value, overriding what was set before.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -8219,6 +8255,7 @@ value, overriding what was set before.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -8383,6 +8420,7 @@ Must obey the ICD-10 format if an ICD-10 code_type is provided, specifically:
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -8507,6 +8545,7 @@ Must obey the ICD-10 format if an ICD-10 code_type is provided, specifically:
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -8749,6 +8788,7 @@ Must obey the ICD-10 format if an ICD-10 code_type is provided, specifically:
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -9353,6 +9393,7 @@ or encounter external id.
           "urlSlug": "get-summaries",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -9614,6 +9655,7 @@ or encounter external id.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -9923,6 +9965,7 @@ or encounter external id.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -10189,6 +10232,7 @@ or encounter external id.
           "urlSlug": "reverse-manual-insurance-adjustment-remit",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -10404,6 +10448,7 @@ or encounter external id.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -11091,6 +11136,7 @@ or encounter external id.
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -11605,6 +11651,7 @@ or encounter external id.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -12916,6 +12963,7 @@ in bounds of the diagnoses list field
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -13946,6 +13994,7 @@ submitted to the payor.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -14058,6 +14107,7 @@ submitted to the payor.
           "urlSlug": "get-attachments",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -14160,6 +14210,7 @@ submitted to the payor.
           "urlSlug": "generate-clinical-notes-pdf",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -14355,6 +14406,7 @@ submitted to the payor.
           "urlSlug": "recompute-network-status-results",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -14519,6 +14571,7 @@ submitted to the payor.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -14654,6 +14707,7 @@ submitted to the payor.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -14895,6 +14949,7 @@ submitted to the payor.
           "urlSlug": "get-multi",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -14982,6 +15037,7 @@ submitted to the payor.
           "urlSlug": "delete",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -15171,6 +15227,7 @@ submitted to the payor.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -15414,6 +15471,7 @@ submitted to the payor.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -15496,6 +15554,7 @@ submitted to the payor.
           "urlSlug": "get-latest-change-enrollment-import-datetime",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -15612,6 +15671,7 @@ submitted to the payor.
           "urlSlug": "download-attachment",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -15720,6 +15780,7 @@ submitted to the payor.
           "urlSlug": "list-attachments",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -15818,6 +15879,7 @@ submitted to the payor.
           "urlSlug": "upload-attachment",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -16010,6 +16072,7 @@ submitted to the payor.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -16415,6 +16478,7 @@ submitted to the payor.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -16648,6 +16712,7 @@ submitted to the payor.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -17168,6 +17233,7 @@ Must be within 30 days of start_date.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -17488,6 +17554,7 @@ Must be within 30 days of start_date.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -17570,6 +17637,7 @@ Must be within 30 days of start_date.
           "urlSlug": "get-fee-schedule-configuration-mechanism",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -17840,6 +17908,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "urlSlug": "get-grouped-fee-schedules-for-payer",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -18038,6 +18107,7 @@ doesn't data wrangle the modeling into the presentation shape.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -18258,6 +18328,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -18379,6 +18450,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -18663,6 +18735,7 @@ doesn't data wrangle the modeling into the presentation shape.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -18954,6 +19027,7 @@ doesn't data wrangle the modeling into the presentation shape.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -19199,6 +19273,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "urlSlug": "validate-insurance-adjustment",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -19439,6 +19514,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "urlSlug": "create-insurance-adjustment",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -19677,6 +19753,7 @@ doesn't data wrangle the modeling into the presentation shape.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -19838,6 +19915,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -19976,6 +20054,7 @@ doesn't data wrangle the modeling into the presentation shape.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -20163,6 +20242,7 @@ doesn't data wrangle the modeling into the presentation shape.
           "urlSlug": "create-movie",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -20363,6 +20443,7 @@ doesn't data wrangle the modeling into the presentation shape.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -20633,6 +20714,7 @@ identified by the id, then 403 response will be returned
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -20852,6 +20934,7 @@ will be limited to only those invoices that belong to the patient_external_id
           "urlSlug": "search",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -21180,6 +21263,7 @@ upon creation of the invoice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -21367,6 +21451,7 @@ upon creation of the invoice.
           "urlSlug": "get-by-id",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -21583,6 +21668,7 @@ upon creation of the invoice.
           "urlSlug": "get-multi",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -21788,6 +21874,7 @@ upon creation of the invoice.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -21991,6 +22078,7 @@ upon creation of the invoice.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -22187,6 +22275,7 @@ upon creation of the invoice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -22289,6 +22378,7 @@ upon creation of the invoice.
           "urlSlug": "search",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -22425,6 +22515,7 @@ upon creation of the invoice.
           "urlSlug": "get-multi",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -22570,6 +22661,7 @@ upon creation of the invoice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -22698,6 +22790,7 @@ upon creation of the invoice.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -22910,6 +23003,7 @@ upon creation of the invoice.
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -23051,6 +23145,7 @@ upon creation of the invoice.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -23359,6 +23454,7 @@ upon creation of the invoice.
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -23472,6 +23568,7 @@ upon creation of the invoice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -23612,6 +23709,7 @@ upon creation of the invoice.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -23836,6 +23934,7 @@ upon creation of the invoice.
           "urlSlug": "get-multi",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -24080,6 +24179,7 @@ upon creation of the invoice.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -24332,6 +24432,7 @@ upon creation of the invoice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -24525,6 +24626,7 @@ upon creation of the invoice.
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -24785,6 +24887,7 @@ upon creation of the invoice.
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -25041,6 +25144,7 @@ upon creation of the invoice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -25150,6 +25254,7 @@ upon creation of the invoice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -25409,6 +25514,7 @@ identified by the id, then 403 response will be returned
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -25563,6 +25669,7 @@ identified by the id, then 403 response will be returned
           "urlSlug": "search",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -25753,6 +25860,7 @@ identified by the id, then 403 response will be returned
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -26030,6 +26138,7 @@ If the authenticated user does not have the permission to update the PatientPaym
           "urlSlug": "patch",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -26310,6 +26419,7 @@ by the id, then 403 will be returned
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -26575,6 +26685,7 @@ by the id, then 403 will be returned
           "urlSlug": "search",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -26835,6 +26946,7 @@ by the id, then 403 will be returned
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -27028,6 +27140,7 @@ by the id, then 403 will be returned
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -27440,6 +27553,7 @@ by the id, then 403 will be returned
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -27771,6 +27885,7 @@ by the id, then 403 will be returned
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -28061,6 +28176,7 @@ the current organization_id of the authenticated user.
           "urlSlug": "search",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -28323,6 +28439,7 @@ authenticated user, then response code of 403 will be returned.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -28677,6 +28794,7 @@ The order of specificity from the most specific to least specific is \`service_l
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -29125,6 +29243,7 @@ The order of specificity from the most specific to least specific is \`service_l
           "urlSlug": "update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -29458,6 +29577,7 @@ current organization_id, then a response code of \`403\` will be returned.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -29636,6 +29756,7 @@ current organization_id, then a response code of \`403\` will be returned.
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -30028,6 +30149,7 @@ slashes.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -30132,6 +30254,7 @@ slashes.
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -30294,6 +30417,7 @@ as the billing_provider_npis should suffice.
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -30556,6 +30680,7 @@ identified by the id, then 403 response will be returned
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -30652,6 +30777,7 @@ identified by the id, then 403 response will be returned
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -31015,6 +31141,7 @@ If there already exists a PaymentAccountConfig for the organization with the sam
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -31459,6 +31586,7 @@ If there already exists a PaymentAccountConfig for the organization with the sam
           "urlSlug": "patch",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -31699,6 +31827,7 @@ by the id, then 403 will be returned
           "urlSlug": "delete",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -31890,6 +32019,7 @@ and the third party payment processor's customer can be identified by the patien
           "urlSlug": "verify-can-invoice",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -31987,6 +32117,7 @@ Verification includes that the provided token has all of the appropriate permiss
           "urlSlug": "verify-api-token",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -32185,6 +32316,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -32335,6 +32467,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -32642,6 +32775,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get-multi",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -32866,6 +33000,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get-multi-paged",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -33290,6 +33425,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -33508,6 +33644,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "create",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -33685,6 +33822,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "validate",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -33893,6 +34031,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -34071,6 +34210,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -34383,6 +34523,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -34609,6 +34750,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -34699,6 +34841,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get-all",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -34855,6 +34998,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -35035,6 +35179,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -35128,6 +35273,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get-internal-enrollment-assignees",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -35332,6 +35478,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get-assignable-users",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -35536,6 +35683,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get-multi",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -35637,6 +35785,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get-assignable-users-unpaginated",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -35871,6 +36020,7 @@ customer page will be returned (this generally is a page listing the existing cu
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -36060,6 +36210,7 @@ customer page will be returned (this generally is a page listing the existing cu
           "urlSlug": "get",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "production",
@@ -79474,6 +79625,7 @@ exports[`transformApiDefinitionToDb > {"name":"cyclical-1"} 1`] = `
     "nameOverride": "secretKey",
     "type": "header",
   },
+  "authSchemes": undefined,
   "globalHeaders": undefined,
   "hasMultipleBaseUrls": false,
   "id": "id",
@@ -79495,6 +79647,7 @@ exports[`transformApiDefinitionToDb > {"name":"cyclical-1"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": false,
           "availability": undefined,
           "defaultEnvironment": "Production",
@@ -79693,6 +79846,7 @@ exports[`transformApiDefinitionToDb > {"name":"realtime"} 1`] = `
     "tokenName": "token",
     "type": "bearerAuth",
   },
+  "authSchemes": undefined,
   "globalHeaders": [],
   "hasMultipleBaseUrls": false,
   "id": "id",
@@ -79865,6 +80019,7 @@ exports[`transformApiDefinitionToDb > {"name":"string"} 1`] = `
     "nameOverride": "MyAuthScheme",
     "type": "header",
   },
+  "authSchemes": undefined,
   "globalHeaders": undefined,
   "hasMultipleBaseUrls": false,
   "id": "id",
@@ -79886,6 +80041,7 @@ exports[`transformApiDefinitionToDb > {"name":"string"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "Production",
@@ -80728,6 +80884,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
     "nameOverride": "apiKey",
     "type": "header",
   },
+  "authSchemes": undefined,
   "globalHeaders": undefined,
   "hasMultipleBaseUrls": true,
   "id": "id",
@@ -80735,6 +80892,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
   "rootPackage": {
     "endpoints": [
       {
+        "authV2": undefined,
         "authed": true,
         "availability": undefined,
         "defaultEnvironment": "Production",
@@ -81054,6 +81212,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
         "urlSlug": "execute-workflow-stream",
       },
       {
+        "authV2": undefined,
         "authed": true,
         "availability": "GenerallyAvailable",
         "defaultEnvironment": "Production",
@@ -81447,6 +81606,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
         "urlSlug": "generate",
       },
       {
+        "authV2": undefined,
         "authed": true,
         "availability": "GenerallyAvailable",
         "defaultEnvironment": "Production",
@@ -81796,6 +81956,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
         "urlSlug": "generate-stream",
       },
       {
+        "authV2": undefined,
         "authed": true,
         "availability": "GenerallyAvailable",
         "defaultEnvironment": "Production",
@@ -82093,6 +82254,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
         "urlSlug": "search",
       },
       {
+        "authV2": undefined,
         "authed": true,
         "availability": "GenerallyAvailable",
         "defaultEnvironment": "Production",
@@ -82359,6 +82521,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
         "urlSlug": "submit-completion-actuals",
       },
       {
+        "authV2": undefined,
         "authed": true,
         "availability": "GenerallyAvailable",
         "defaultEnvironment": "Production",
@@ -82638,6 +82801,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -82769,6 +82933,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -82966,6 +83131,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "GenerallyAvailable",
           "defaultEnvironment": "Production",
@@ -83128,6 +83294,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
           "urlSlug": "list",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -83301,6 +83468,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
           "urlSlug": "partial-update",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": undefined,
           "defaultEnvironment": "Production",
@@ -83387,6 +83555,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
           "urlSlug": "destroy",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "GenerallyAvailable",
           "defaultEnvironment": "Production",
@@ -83625,6 +83794,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -83786,6 +83956,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
           "urlSlug": "retrieve",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -83935,6 +84106,7 @@ exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -84252,6 +84424,7 @@ Under the hood, this endpoint creates a new sandbox, a new model version, and a 
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -84440,6 +84613,7 @@ or overwritten with default values.",
           "urlSlug": "upsert-sandbox-scenario",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -84560,6 +84734,7 @@ or overwritten with default values.",
       "displayName": undefined,
       "endpoints": [
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",
@@ -84739,6 +84914,7 @@ or overwritten with default values.",
           "urlSlug": "upsert-test-suite-test-case",
         },
         {
+          "authV2": undefined,
           "authed": true,
           "availability": "Beta",
           "defaultEnvironment": "Production",

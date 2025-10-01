@@ -20,10 +20,11 @@ types:
       subpackages: map<commons.SubpackageId, DbApiDefinitionSubpackage>
       snippetsConfiguration: optional<registerRoot.SnippetsConfig>
       auth: optional<readRoot.ApiAuth>
+      authSchemes: optional<map<rootCommons.AuthSchemeId, readRoot.ApiAuth>>
       hasMultipleBaseUrls:
         type: boolean
         docs: |
-          Whether or not endpoints are being served at different 
+          Whether or not endpoints are being served at different
           base urls (i.e. https://a.com and https://b.com)
       navigation:
         type: optional<readRoot.ApiNavigationConfigRoot>

@@ -9,6 +9,7 @@ export interface ApiDefinition {
     types: Record<FernRegistry.TypeId, FernRegistry.api.v1.register.TypeDefinition>;
     subpackages: Record<FernRegistry.api.v1.SubpackageId, FernRegistry.api.v1.register.ApiDefinitionSubpackage>;
     auth: FernRegistry.api.v1.register.ApiAuth | undefined;
+    authSchemes: Record<FernRegistry.AuthSchemeId, FernRegistry.api.v1.register.ApiAuth> | undefined;
     globalHeaders: FernRegistry.api.v1.register.Header[] | undefined;
     snippetsConfiguration: FernRegistry.api.v1.register.SnippetsConfig | undefined;
     /** Use the docs navigation instead. */

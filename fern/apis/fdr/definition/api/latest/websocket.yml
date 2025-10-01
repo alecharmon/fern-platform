@@ -28,7 +28,7 @@ types:
         type: list<WebSocketMessage>
         docs: The messages that can be sent and received on this channel
 
-      auth: optional<list<auth.AuthSchemeId>>
+      auth: optional<list<rootCommons.AuthSchemeId>>
       defaultEnvironment: optional<rootCommons.EnvironmentId>
       environments: optional<list<commons.Environment>>
       pathParameters: optional<list<type.ObjectProperty>>

@@ -24,6 +24,7 @@ export class ApiDefinitionPruner {
       snippetsConfiguration: this.api.snippetsConfiguration,
       types,
       auth: this.api.auth,
+      authSchemes: this.api.authSchemes,
       hasMultipleBaseUrls: this.api.hasMultipleBaseUrls,
       navigation: undefined,
       globalHeaders: this.api.globalHeaders,

@@ -9,7 +9,7 @@ export interface ApiDefinition {
     webhooks: Record<FernRegistry.WebhookId, FernRegistry.api.latest.WebhookDefinition>;
     types: Record<FernRegistry.TypeId, FernRegistry.api.latest.TypeDefinition>;
     subpackages: Record<FernRegistry.api.latest.SubpackageId, FernRegistry.api.latest.SubpackageMetadata>;
-    auths: Record<FernRegistry.api.latest.AuthSchemeId, FernRegistry.api.latest.AuthScheme>;
+    auths: Record<FernRegistry.AuthSchemeId, FernRegistry.api.latest.AuthScheme>;
     globalHeaders: FernRegistry.api.latest.ObjectProperty[] | undefined;
     snippetsConfiguration: FernRegistry.api.v1.register.SnippetsConfig | undefined;
 }
