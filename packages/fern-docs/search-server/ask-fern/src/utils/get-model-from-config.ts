@@ -9,47 +9,66 @@ import {
   cohereApiKey,
 } from "@fern-api/docs-server/env-variables";
 
-type ModelId = string;
-
-export type ModelProvider = "anthropic" | "cohere" | "bedrock";
+type ModelId = "claude-3.5" | "claude-3.7" | "claude-4" | "claude-4.5";
+export type ModelProvider = "cohere" | "bedrock";
 
 type ModelConfig = {
   modelId: string;
   region: string;
 };
 
-const CLAUDE_3_5_MODEL_CONFIG = {
-  modelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
-  region: "us-west-2",
+const MODEL_CONFIGS: Record<ModelId, ModelConfig> = {
+  "claude-3.5": {
+    modelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+    region: "us-west-2",
+  },
+  "claude-3.7": {
+    modelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+    region: "us-east-1",
+  },
+  "claude-4": {
+    modelId: "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    region: "us-east-1",
+  },
+  "claude-4.5": {
+    modelId: "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    region: "us-east-1",
+  },
 };
 
-const CLAUDE_3_7_MODEL_CONFIG = {
-  modelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-  region: "us-east-1",
-};
+const DEFAULT_MODEL: ModelId = "claude-3.7";
 
-const CLAUDE_4_MODEL_CONFIG = {
-  modelId: "us.anthropic.claude-sonnet-4-20250514-v1:0",
-  region: "us-east-1",
-};
+const FALLBACK_ORDER: ModelId[] = [
+  "claude-4.5",
+  "claude-4",
+  "claude-3.7",
+  "claude-3.5",
+];
 
-const DEFAULT_MODEL_CONFIG: ModelConfig = CLAUDE_3_7_MODEL_CONFIG;
-
-const FALLBACK_MODEL_CONFIG: ModelConfig = CLAUDE_3_7_MODEL_CONFIG;
-
-const FALLBACK_MODEL_CONFIG_2: ModelConfig = CLAUDE_3_5_MODEL_CONFIG;
-
-const modelMap: Record<ModelId, ModelConfig> = {
-  "claude-3.5": CLAUDE_3_5_MODEL_CONFIG,
-  "claude-3.7": CLAUDE_3_7_MODEL_CONFIG,
-};
-
-export function getModelConfig(model: ModelId): ModelConfig {
-  const modelConfig = modelMap[model];
-  if (modelConfig == null) {
-    return DEFAULT_MODEL_CONFIG;
+const bedrockByRegion: Record<
+  string,
+  ReturnType<typeof createAmazonBedrock>
+> = {};
+function getBedrock(region: string) {
+  if (!bedrockByRegion[region]) {
+    bedrockByRegion[region] = createAmazonBedrock({
+      region,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    });
   }
-  return modelConfig;
+  return bedrockByRegion[region];
+}
+
+function resolveModelId(model: string | undefined): ModelId {
+  const m = (model ?? DEFAULT_MODEL) as ModelId;
+  return (Object.keys(MODEL_CONFIGS) as ModelId[]).includes(m)
+    ? m
+    : DEFAULT_MODEL;
+}
+
+function buildOrderedModels(primary: ModelId): ModelId[] {
+  return [primary, ...FALLBACK_ORDER.filter((m) => m !== primary)];
 }
 
 export function getLanguageModel(model: string | undefined): {
@@ -59,51 +78,25 @@ export function getLanguageModel(model: string | undefined): {
   if (model === "command-a" || model === "command-r-plus") {
     // TODO: remove command-r-plus once fern generate change is resolved
     const cohere = createCohere({ apiKey: cohereApiKey() });
-    return {
-      model: cohere("command-a-03-2025"),
-      provider: "cohere",
-    };
+    return { model: cohere("command-a-03-2025"), provider: "cohere" };
   }
 
-  const modelConfig = getModelConfig(model ?? "claude-3.5");
-  if (model === "claude-4") {
-    const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
-    const bedrock_4 = createAmazonBedrock({
-      region: FALLBACK_MODEL_CONFIG.region,
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    });
-    const bedrock_3_5 = createAmazonBedrock({
-      region: FALLBACK_MODEL_CONFIG.region,
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    });
-    const bedrock_3_7 = createAmazonBedrock({
-      region: FALLBACK_MODEL_CONFIG_2.region,
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    });
-    return {
-      model: createFallback({
-        models: [
-          bedrock_4(CLAUDE_4_MODEL_CONFIG.modelId),
-          bedrock_3_7(FALLBACK_MODEL_CONFIG.modelId),
-          bedrock_3_5(FALLBACK_MODEL_CONFIG_2.modelId),
-          anthropic("claude-4-sonnet-20250514"),
-        ],
-      }),
-      provider: "anthropic",
-    };
-  }
+  const requested = resolveModelId(model);
+  const ordered = buildOrderedModels(requested);
 
-  const bedrock = createAmazonBedrock({
-    region: modelConfig.region,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  const bedrockModels = ordered.map((id) => {
+    const cfg = MODEL_CONFIGS[id];
+    const bedrock = getBedrock(cfg.region);
+    return bedrock(cfg.modelId);
   });
 
+  const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
+  const anthropicFinal = anthropic("claude-3-7-sonnet-20250219");
+
   return {
-    model: bedrock(modelConfig.modelId),
+    model: createFallback({
+      models: [...bedrockModels, anthropicFinal],
+    }),
     provider: "bedrock",
   };
 }
