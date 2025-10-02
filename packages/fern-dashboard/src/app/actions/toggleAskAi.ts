@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
-
 import { getFaiClient } from "../services/fai/getFaiClient";
 
 export async function toggleAskAi({
@@ -20,10 +18,6 @@ export async function toggleAskAi({
     domain,
     org_name: orgName,
   });
-
-  if (response.success) {
-    revalidateTag(`${domain}_askAiEnabled`);
-  }
 
   return {
     success: response.success || false,

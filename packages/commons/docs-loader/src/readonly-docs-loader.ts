@@ -1285,7 +1285,7 @@ const getAuthConfig = getAuthEdgeConfig;
 const getAskAiEnabled = (cacheConfig: Required<CacheConfig>) =>
   cache(async (domain: string) => {
     "use cache";
-    unstable_cacheTag(`${domain}_askAiEnabled`);
+    unstable_cacheTag(domain, "askAiEnabled");
 
     if (isLocal() || isSelfHosted()) {
       return false;

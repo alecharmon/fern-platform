@@ -147,7 +147,6 @@ export function ToggleAskAiButton({
       if (response.success) {
         setIsEnabled(response.ask_ai_enabled);
 
-        // If we have a job_id, start polling for reindex progress
         if (response.job_id) {
           setIsReindexing(true);
           if (operation === "toggle") {
@@ -164,11 +163,9 @@ export function ToggleAskAiButton({
           }
           startPolling();
         } else if (operation === "toggle" && !response.ask_ai_enabled) {
-          // Ask AI was disabled via toggle
           toast.success("Ask AI disabled");
           setIsReindexing(false);
 
-          // Stop any ongoing polling
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;

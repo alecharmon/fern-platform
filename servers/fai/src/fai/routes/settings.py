@@ -1,7 +1,10 @@
 from datetime import datetime
 
 import httpx
-from fastapi import Depends
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+)
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
@@ -55,6 +58,7 @@ async def get_settings(
 async def toggle_ask_ai(
     domain: str,
     org_name: str,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> JSONResponse:
@@ -73,6 +77,8 @@ async def toggle_ask_ai(
             existing_record.job_id = None
             LOGGER.info(f"Disabled Ask AI for domain {stripped_domain}")
             await db.commit()
+            background_tasks.add_task(revalidate_domain, domain)
+
         else:
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
@@ -189,6 +195,7 @@ async def reindex_ask_ai(
 )
 async def get_toggle_status(
     domain: str,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> JSONResponse:
@@ -228,6 +235,7 @@ async def get_toggle_status(
                 if job_status == "completed":
                     existing_record.job_id = None
                     existing_record.last_reindex_time = datetime.utcnow()
+                    background_tasks.add_task(revalidate_domain, domain)
                 elif job_status == "failed":
                     existing_record.job_id = None
                     existing_record.last_reindex_time = None
@@ -267,3 +275,13 @@ def get_token_from_auth_header(auth_header: str) -> str | None:
     if auth_header and auth_header.startswith("Bearer "):
         return auth_header[7:]
     return None
+
+
+async def revalidate_domain(domain: str) -> None:
+    LOGGER.info(f"Revalidating domain {domain}")
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        try:
+            await client.get(f"https://{domain}/api/fern-docs/revalidate")
+            LOGGER.info(f"Revalidate request completed for {domain}")
+        except Exception as e:
+            LOGGER.warning(f"Revalidate request failed for {domain}: {e}")
