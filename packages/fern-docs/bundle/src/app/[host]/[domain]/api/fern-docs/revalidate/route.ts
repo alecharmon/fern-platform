@@ -112,7 +112,7 @@ export async function GET(
         const llmsFullPromise = fetch(
           `${req.nextUrl.origin}/api/fern-docs/llms-full.txt`,
           {
-            method: "GET",
+            method: "HEAD",
             cache: "no-store",
             headers: { [HEADER_X_FERN_HOST]: domain },
             signal: AbortSignal.timeout(600_000),
@@ -266,7 +266,7 @@ export async function GET(
                   const res = await fetch(
                     `${req.nextUrl.origin}${slugToHref(slug)}`,
                     {
-                      method: "GET",
+                      method: "HEAD",
                       cache: "no-store",
                       headers: { [HEADER_X_FERN_HOST]: domain },
                       signal: AbortSignal.timeout(600_000),
