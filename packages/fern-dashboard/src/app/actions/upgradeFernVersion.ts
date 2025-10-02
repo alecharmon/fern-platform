@@ -32,6 +32,7 @@ export async function upgradeFernVersionAction(
 
   return withGithubAuth(
     session.user.sub,
+    session.accessToken,
     orgName,
     { site: docsUrl, githubUrl },
     async (authResult) => {

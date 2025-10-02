@@ -1,6 +1,4 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import { unstable_cacheTag } from "next/cache";
-
 import {
   ApiResponse,
   GetInvitations200ResponseOneOfInner,
@@ -296,22 +294,6 @@ async function getAllOrgInvitations(orgId: Auth0OrgID) {
   invitations.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
   return invitations;
-}
-
-export const ensureUserBelongsToOrgCacheTag = (
-  userId: Auth0UserID,
-  orgName: Auth0OrgName
-) => `user-is-in-org-${userId}-${orgName}`;
-
-export async function ensureUserBelongsToOrg(
-  userId: Auth0UserID,
-  orgName: Auth0OrgName
-) {
-  "use cache";
-  unstable_cacheTag(ensureUserBelongsToOrgCacheTag(userId, orgName));
-  if (!(await doesUserBelongToOrg(userId, orgName))) {
-    throw new Error(`User ${userId} is not in org ${orgName}`);
-  }
 }
 
 export async function doesOrgExist(orgName: Auth0OrgName) {

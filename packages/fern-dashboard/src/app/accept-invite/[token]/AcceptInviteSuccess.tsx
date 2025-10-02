@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useRouter } from "@bprogress/next/app";
 import { Loader2 } from "lucide-react";
 
-import { revalidateInviteAcceptance } from "@/app/actions/revalidateInviteAcceptance";
 import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import Redirect from "@/components/Redirect";
 
@@ -22,7 +21,6 @@ export default function AcceptInviteSuccess({
 
   useEffect(() => {
     const handleRevalidation = async () => {
-      await revalidateInviteAcceptance({ userId, orgName });
       router.refresh();
     };
     void handleRevalidation();

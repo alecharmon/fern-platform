@@ -4,11 +4,9 @@ import * as auth0Management from "@/app/services/auth0/management";
 
 import { getAuth0ClientId } from "../services/auth0/auth0";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
-import {
-  ensureUserBelongsToOrg,
-  getAuth0ManagementClient,
-} from "../services/auth0/management";
+import { getAuth0ManagementClient } from "../services/auth0/management";
 import { Auth0OrgName } from "../services/auth0/types";
+import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function inviteUserToOrg({
   inviteeEmail,
@@ -19,7 +17,10 @@ export async function inviteUserToOrg({
 }) {
   const auth0 = getAuth0ManagementClient();
   const session = await getCurrentSessionOrThrow();
-  await ensureUserBelongsToOrg(session.user.sub, orgName);
+  await assertUserHasOrganizationAccess({
+    token: session.accessToken,
+    orgName,
+  });
 
   const invitation = await auth0.organizations.createInvitation(
     { id: await auth0Management.getOrgIdFromName(orgName) },

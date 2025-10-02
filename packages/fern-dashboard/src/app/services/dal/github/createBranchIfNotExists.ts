@@ -33,7 +33,7 @@ export default async function createBranchIfNotExists(request: {
 
   try {
     await assertUserHasOrganizationAccess({
-      userId: session.user.sub,
+      token: session.accessToken,
       orgName: request.orgName,
     });
   } catch (_) {

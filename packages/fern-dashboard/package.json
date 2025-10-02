@@ -150,6 +150,7 @@
     "@types/node": "^18.19.76",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
+    "dotenv": "^17.2.3",
     "dotenv-cli": "^6.0.0",
     "glslify-import": "^3.1.0",
     "glslify-loader": "^2.0.0",

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
-import { ensureUserBelongsToOrg } from "@/app/services/auth0/management";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { ResolvedReturnType } from "@/utils/types";
 
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   if (maybeSessionData.errorResponse != null) {
     return maybeSessionData.errorResponse;
   }
-  const { userId } = maybeSessionData.data;
+  const { token } = maybeSessionData.data;
 
   const parsedBody = await parseNextRequestBody(req, GetOrgInvitationsRequest);
   if (parsedBody.errorResponse != null) {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   }
   const { orgName } = parsedBody.data;
 
-  await ensureUserBelongsToOrg(userId, orgName);
+  await assertUserHasOrganizationAccess({ token, orgName });
 
   return NextResponse.json(await handler(orgName));
 }

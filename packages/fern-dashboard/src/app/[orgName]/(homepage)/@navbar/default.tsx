@@ -21,7 +21,7 @@ export default async function Navbar({
   // Validate organization access, but return null rather than redirect, so that sidebar just doesn't show
   try {
     await assertUserHasOrganizationAccess({
-      userId: session.user.sub,
+      token: session.accessToken,
       orgName,
     });
   } catch (_) {

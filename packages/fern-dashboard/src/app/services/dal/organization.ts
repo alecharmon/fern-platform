@@ -1,37 +1,54 @@
 import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
+
+import { FernVenusApi } from "@fern-api/venus-api-sdk";
 
 import * as auth0Management from "@/app/services/auth0/management";
 import { throwDigestibleError } from "@/utils/errors";
 
 import { getCurrentSession } from "../auth0/getCurrentSession";
-import { Auth0OrgName, Auth0UserID } from "../auth0/types";
+import { Auth0OrgName } from "../auth0/types";
+import { getVenusClient } from "../venus/getVenusClient";
 
 /**
  * Asserts that the user has access to a given auth0 organization.
  *
  * @throws {DigestibleError} if the user does not have access to the organization
  */
-export async function assertUserHasOrganizationAccess({
-  userId,
-  orgName,
-}: {
-  userId: Auth0UserID;
-  orgName: Auth0OrgName;
-}) {
-  const orgExists = await auth0Management.doesOrgExist(orgName);
-  if (!orgExists) {
-    throw throwDigestibleError(
-      new Error("Organization not found"),
-      "ORG_NOT_FOUND"
+export const assertUserHasOrganizationAccess = cache(
+  async ({ token, orgName }: { token: string; orgName: Auth0OrgName }) => {
+    const orgExists = await auth0Management.doesOrgExist(orgName);
+    if (!orgExists) {
+      throw throwDigestibleError(
+        new Error("Organization not found"),
+        "ORG_NOT_FOUND"
+      );
+    }
+    const venusClient = getVenusClient({ token });
+    const result = await venusClient.organization.isMember(
+      FernVenusApi.OrganizationId(orgName)
     );
+
+    if (result.ok) {
+      if (!result.body) {
+        throw throwDigestibleError(
+          new Error("user not in org"),
+          "USER_NOT_IN_ORG"
+        );
+      }
+    } else {
+      // Log the error before throwing
+      console.error("Venus API error:", result.error);
+
+      throw throwDigestibleError(
+        new Error(
+          "Venus API error: " + (result.error?.toString() ?? "Unknown error")
+        ),
+        "VENUS_API_ERROR"
+      );
+    }
   }
-  try {
-    // Check if user belongs to organization
-    await auth0Management.ensureUserBelongsToOrg(userId, orgName);
-  } catch (error) {
-    throw throwDigestibleError(error as Error, "USER_NOT_IN_ORG");
-  }
-}
+);
 
 export async function getAuthenticatedSessionOrRedirect(orgName: Auth0OrgName) {
   const session = await getCurrentSession();
@@ -40,7 +57,7 @@ export async function getAuthenticatedSessionOrRedirect(orgName: Auth0OrgName) {
   }
   try {
     await assertUserHasOrganizationAccess({
-      userId: session.user.sub,
+      token: session.accessToken,
       orgName,
     });
     return session;

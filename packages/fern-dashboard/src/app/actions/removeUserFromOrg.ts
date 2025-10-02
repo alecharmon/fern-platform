@@ -1,12 +1,10 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
-
 import * as auth0Management from "@/app/services/auth0/management";
-import { ensureUserBelongsToOrgCacheTag } from "@/app/services/auth0/management";
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { Auth0OrgName, Auth0UserID } from "../services/auth0/types";
+import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function removeUserFromOrg({
   userIdToRemove,
@@ -19,7 +17,10 @@ export async function removeUserFromOrg({
   const session = await getCurrentSessionOrThrow();
   const userId = session.user.sub;
 
-  await auth0Management.ensureUserBelongsToOrg(userId, orgName);
+  await assertUserHasOrganizationAccess({
+    token: session.accessToken,
+    orgName,
+  });
 
   if (userId === userIdToRemove) {
     throw new Error("User cannot remove themself");
@@ -39,7 +40,4 @@ export async function removeUserFromOrg({
   await auth0Management.invalidateCachesAfterAddingOrRemovingOrgMember({
     orgName,
   });
-
-  // Revalidate the cache for the user's org access
-  revalidateTag(ensureUserBelongsToOrgCacheTag(userIdToRemove, orgName));
 }

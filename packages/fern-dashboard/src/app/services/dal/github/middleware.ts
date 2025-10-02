@@ -36,6 +36,7 @@ export type AuthResult =
 
 export async function withGithubAuth<T>(
   userId: Auth0UserID,
+  token: string,
   orgName: Auth0OrgName,
   repoData: GithubIdentificationSchemeType,
   callback: (authResult: AuthResult) => Promise<T>
@@ -45,7 +46,7 @@ export async function withGithubAuth<T>(
 
   // Validate user organization membership
   try {
-    await assertUserHasOrganizationAccess({ userId, orgName });
+    await assertUserHasOrganizationAccess({ token, orgName });
 
     // Parse the repo data to create a RepoIdentifier and extract information
     let identifier: RepoIdentifier;
@@ -189,6 +190,7 @@ export async function withGithubAuthNextRoute(
 
   return withGithubAuth(
     sessionResult.data.userId,
+    sessionResult.data.token,
     orgName,
     repoData,
     async (authResult) => {

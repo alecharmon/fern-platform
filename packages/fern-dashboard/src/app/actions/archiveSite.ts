@@ -16,7 +16,7 @@ export async function archiveSite({
 }) {
   const session = await getCurrentSessionOrThrow();
   await assertUserHasOrganizationAccess({
-    userId: session.user.sub,
+    token: session.accessToken,
     orgName,
   });
   const fdrClient = getFdrClient({ token: session.accessToken });

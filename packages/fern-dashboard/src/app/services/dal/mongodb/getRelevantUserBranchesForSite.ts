@@ -31,7 +31,7 @@ export async function getRelevantUserBranchesForSite(
       return [];
     }
     await assertUserHasOrganizationAccess({
-      userId: session.user.sub,
+      token: session.accessToken,
       orgName,
     });
 

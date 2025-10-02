@@ -3,11 +3,9 @@
 import * as auth0Management from "@/app/services/auth0/management";
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
-import {
-  ensureUserBelongsToOrg,
-  getAuth0ManagementClient,
-} from "../services/auth0/management";
+import { getAuth0ManagementClient } from "../services/auth0/management";
 import { Auth0OrgName } from "../services/auth0/types";
+import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function rescindInvitation({
   invitationId,
@@ -17,7 +15,10 @@ export async function rescindInvitation({
   orgName: Auth0OrgName;
 }) {
   const session = await getCurrentSessionOrThrow();
-  await ensureUserBelongsToOrg(session.user.sub, orgName);
+  await assertUserHasOrganizationAccess({
+    token: session.accessToken,
+    orgName,
+  });
 
   const auth0 = getAuth0ManagementClient();
   await auth0.organizations.deleteInvitation({
