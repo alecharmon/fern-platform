@@ -330,6 +330,44 @@ const cachedGetEdgeFlags = cache(async (domainKey: string) => {
   return await getEdgeFlags(domainKey);
 });
 
+// In-memory cache for config to reduce Upstash calls
+interface InMemoryCacheEntry<T> {
+  value: T;
+  timestamp: number;
+}
+
+const IN_MEMORY_CONFIG_CACHE = new Map<
+  string,
+  InMemoryCacheEntry<
+    Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">
+  >
+>();
+const IN_MEMORY_CACHE_TTL_MS = 60_000; // 60 seconds
+
+function getFromInMemoryCache<T>(
+  key: string
+): InMemoryCacheEntry<T>["value"] | null {
+  const entry = IN_MEMORY_CONFIG_CACHE.get(key) as
+    | InMemoryCacheEntry<T>
+    | undefined;
+  if (!entry) {
+    return null;
+  }
+  // Check if entry is expired
+  if (Date.now() - entry.timestamp > IN_MEMORY_CACHE_TTL_MS) {
+    IN_MEMORY_CONFIG_CACHE.delete(key);
+    return null;
+  }
+  return entry.value;
+}
+
+function setInMemoryCache<T>(key: string, value: T): void {
+  IN_MEMORY_CONFIG_CACHE.set(key, {
+    value,
+    timestamp: Date.now(),
+  } as InMemoryCacheEntry<any>);
+}
+
 export const getMetadataFromResponse = async (
   domainKey: string,
   responsePromise: AsyncOrSync<DocsV2Read.LoadDocsForUrlResponse>
@@ -823,11 +861,26 @@ const getNavigationNode = (cacheConfig: Required<CacheConfig>) =>
 
 const getConfig = (cacheConfig: Required<CacheConfig>) =>
   cache(async (domainKey: string) => {
+    // Check in-memory cache first
+    const cacheKey = cacheConfig.cacheKeySuffix
+      ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+      : `${domainKey}:config`;
+    const inMemoryCached =
+      getFromInMemoryCache<
+        Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">
+      >(cacheKey);
+    if (inMemoryCached != null) {
+      console.log(`[getConfig] in-memory cache hit for ${domainKey}`);
+      return inMemoryCached;
+    }
+
     try {
       const cached = await kvGet<
         Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">
       >(domainKey, "config", cacheConfig.cacheKeySuffix);
       if (cached != null) {
+        // Store in in-memory cache for future requests
+        setInMemoryCache(cacheKey, cached);
         return cached;
       }
     } catch (error) {
@@ -839,6 +892,8 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
 
     const response = await loadWithUrl(domainKey);
     const { navigation, root, ...config } = response.definition.config;
+
+    // Store in both Upstash and in-memory cache
     kvSet(
       domainKey,
       "config",
@@ -846,6 +901,8 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
       cacheConfig.kvTtl,
       cacheConfig.cacheKeySuffix
     );
+    setInMemoryCache(cacheKey, config);
+
     return config;
   });
 
