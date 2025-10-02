@@ -41,9 +41,14 @@ class InvalidUrlError extends Error {
 
 async function getMetadataForUrl(url: string): Promise<DocsUrlMetadata | null> {
   // Parse the URL to get the hostname
+  // Coerce URL by adding https:// prefix if missing (similar to ParsedBaseUrl in FDR)
   let parsedUrl: URL;
   try {
-    parsedUrl = new URL(url);
+    let urlWithProtocol = url;
+    if (!/^https?:\/\//i.test(url)) {
+      urlWithProtocol = "https://" + url;
+    }
+    parsedUrl = new URL(urlWithProtocol);
   } catch (error) {
     throw new InvalidUrlError(url, error as Error);
   }

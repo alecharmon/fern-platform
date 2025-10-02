@@ -61,6 +61,34 @@ describe("Lambda Handler", () => {
   };
 
   describe("POST /metadata-for-url", () => {
+    it("should handle /v2/registry/docs/metadata-for-url path", async () => {
+      const mockMetadata = {
+        orgID: "test-org",
+        isPreview: false,
+        domain: "docs.example.com",
+        path: "/",
+        githubUrl: null,
+      };
+
+      mockQuery.mockResolvedValueOnce({
+        rows: [mockMetadata],
+      });
+
+      const event = createMockEvent("/v2/registry/docs/metadata-for-url", "POST", {
+        url: "https://docs.example.com",
+      });
+      const context = createMockContext();
+
+      const result = await handler(event, context);
+
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        url: "https://docs.example.com",
+        org: "test-org",
+        isPreviewUrl: false,
+      });
+    });
+
     it("should return metadata for a valid URL", async () => {
       const mockMetadata = {
         orgID: "test-org",
@@ -127,9 +155,95 @@ describe("Lambda Handler", () => {
       });
     });
 
-    it("should return 400 when url is invalid", async () => {
+    it("should coerce URL without protocol by adding https://", async () => {
+      const mockMetadata = {
+        orgID: "test-org",
+        isPreview: false,
+        domain: "docs.letta.com",
+        path: "/",
+        githubUrl: null,
+      };
+
+      mockQuery.mockResolvedValueOnce({
+        rows: [mockMetadata],
+      });
+
       const event = createMockEvent("/metadata-for-url", "POST", {
-        url: "invalid-url",
+        url: "docs.letta.com",
+      });
+      const context = createMockContext();
+
+      const result = await handler(event, context);
+
+      expect(result.statusCode).toBe(200);
+      expect(JSON.parse(result.body)).toEqual({
+        url: "docs.letta.com",
+        org: "test-org",
+        isPreviewUrl: false,
+      });
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('FROM "DocsV2"'),
+        ["docs.letta.com"]
+      );
+    });
+
+    it("should coerce URL with http:// protocol", async () => {
+      const mockMetadata = {
+        orgID: "test-org",
+        isPreview: false,
+        domain: "docs.example.com",
+        path: "/",
+        githubUrl: null,
+      };
+
+      mockQuery.mockResolvedValueOnce({
+        rows: [mockMetadata],
+      });
+
+      const event = createMockEvent("/metadata-for-url", "POST", {
+        url: "http://docs.example.com",
+      });
+      const context = createMockContext();
+
+      const result = await handler(event, context);
+
+      expect(result.statusCode).toBe(200);
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('FROM "DocsV2"'),
+        ["docs.example.com"]
+      );
+    });
+
+    it("should handle URL without protocol with path", async () => {
+      const mockMetadata = {
+        orgID: "test-org",
+        isPreview: false,
+        domain: "buildwithfern.com",
+        path: "/docs",
+        githubUrl: null,
+      };
+
+      mockQuery.mockResolvedValueOnce({
+        rows: [mockMetadata],
+      });
+
+      const event = createMockEvent("/metadata-for-url", "POST", {
+        url: "buildwithfern.com/docs",
+      });
+      const context = createMockContext();
+
+      const result = await handler(event, context);
+
+      expect(result.statusCode).toBe(200);
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('FROM "DocsV2"'),
+        ["buildwithfern.com"]
+      );
+    });
+
+    it("should return 400 when url is invalid even after coercion", async () => {
+      const event = createMockEvent("/metadata-for-url", "POST", {
+        url: "not a valid url at all!!!",
       });
       const context = createMockContext();
 
