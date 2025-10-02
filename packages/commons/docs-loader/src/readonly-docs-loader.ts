@@ -294,42 +294,6 @@ async function kvGet<T>(
   }
 }
 
-async function clearKvCache(domainKey: string) {
-  if (isLocal() || isSelfHosted()) {
-    return;
-  }
-
-  try {
-    // Clear KV cache for domainKey
-    const keys = await kv.hkeys(domainKey);
-    if (keys.length > 0) {
-      await kv.hdel(domainKey, ...keys);
-    }
-
-    // Clear TTL tracking keys
-    const ttlKeys = await kv.keys(`${domainKey}:ttl:*`);
-    if (ttlKeys.length > 0) {
-      await kv.del(...ttlKeys);
-    }
-
-    console.log(`KV cache cleared for domainKey: ${domainKey}`);
-  } catch (error) {
-    console.error(
-      `Failed to clear KV cache for domainKey ${domainKey}:`,
-      error
-    );
-  }
-}
-
-const cachedGetEdgeFlags = cache(async (domainKey: string) => {
-  if (isLocal()) {
-    return DEFAULT_LOCAL_EDGE_FLAGS;
-  } else if (isSelfHosted()) {
-    return DEFAULT_SELF_HOSTED_EDGE_FLAGS;
-  }
-  return await getEdgeFlags(domainKey);
-});
-
 // In-memory cache for config to reduce Upstash calls
 interface InMemoryCacheEntry<T> {
   value: T;
@@ -367,6 +331,58 @@ function setInMemoryCache<T>(key: string, value: T): void {
     timestamp: Date.now(),
   } as InMemoryCacheEntry<any>);
 }
+
+async function clearKvCache(domainKey: string) {
+  // Clear in-memory cache entries for this domain
+  const keysToDelete: string[] = [];
+  for (const key of IN_MEMORY_CONFIG_CACHE.keys()) {
+    if (key.startsWith(`${domainKey}:`)) {
+      keysToDelete.push(key);
+    }
+  }
+  for (const key of keysToDelete) {
+    IN_MEMORY_CONFIG_CACHE.delete(key);
+  }
+  if (keysToDelete.length > 0) {
+    console.log(
+      `In-memory cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`
+    );
+  }
+
+  if (isLocal() || isSelfHosted()) {
+    return;
+  }
+
+  try {
+    // Clear KV cache for domainKey
+    const keys = await kv.hkeys(domainKey);
+    if (keys.length > 0) {
+      await kv.hdel(domainKey, ...keys);
+    }
+
+    // Clear TTL tracking keys
+    const ttlKeys = await kv.keys(`${domainKey}:ttl:*`);
+    if (ttlKeys.length > 0) {
+      await kv.del(...ttlKeys);
+    }
+
+    console.log(`KV cache cleared for domainKey: ${domainKey}`);
+  } catch (error) {
+    console.error(
+      `Failed to clear KV cache for domainKey ${domainKey}:`,
+      error
+    );
+  }
+}
+
+const cachedGetEdgeFlags = cache(async (domainKey: string) => {
+  if (isLocal()) {
+    return DEFAULT_LOCAL_EDGE_FLAGS;
+  } else if (isSelfHosted()) {
+    return DEFAULT_SELF_HOSTED_EDGE_FLAGS;
+  }
+  return await getEdgeFlags(domainKey);
+});
 
 export const getMetadataFromResponse = async (
   domainKey: string,
