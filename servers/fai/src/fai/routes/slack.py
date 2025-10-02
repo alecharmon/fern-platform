@@ -615,6 +615,31 @@ async def send_feedback_ephemeral(
         LOGGER.error(f"Error sending feedback ephemeral message: {e}")
 
 
+async def check_message_exists(channel: str, message_ts: str, bot_token: str) -> bool:
+    try:
+        client = AsyncWebClient(token=bot_token)
+        if "." in message_ts:
+            thread_ts = message_ts.split(".")[0] + "." + message_ts.split(".")[1][:6]
+            result = await client.conversations_replies(channel=channel, ts=thread_ts, inclusive=True, limit=100)
+            if result["ok"] and "messages" in result:
+                return any(msg.get("ts") == message_ts for msg in result["messages"])
+        else:
+            result = await client.conversations_history(
+                channel=channel, latest=message_ts, oldest=message_ts, inclusive=True, limit=1
+            )
+            if result["ok"] and "messages" in result:
+                return len(result["messages"]) > 0 and result["messages"][0].get("ts") == message_ts
+
+        return False
+    except Exception as e:
+        error_msg = str(e).lower()
+        if any(err in error_msg for err in ["thread_not_found", "message_not_found", "not_found"]):
+            LOGGER.info(f"Message {message_ts} not found (deleted): {e}")
+            return False
+        LOGGER.error(f"Error checking if message exists: {e}")
+        return True
+
+
 async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
     user = event.get("user")
     text = event.get("text", "")
@@ -628,6 +653,12 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
     if not response.response_text or not response.bot_token:
         LOGGER.error("Could not generate response or missing bot token")
         return
+
+    if message_ts and channel and response.bot_token:
+        message_exists = await check_message_exists(channel, message_ts, response.bot_token)
+        if not message_exists:
+            LOGGER.info(f"Original message {message_ts} was deleted, skipping response")
+            return
 
     client = AsyncWebClient(token=response.bot_token)
     success = False
@@ -885,7 +916,6 @@ async def handle_configure_command(
                         "*Usage:*\n"
                         f"• `{cmd_name} show` - Show current settings\n"
                         f"• `{cmd_name} roles role1,role2,role3` - Set allowed RBAC roles\n"
-                        f"• `{cmd_name} respond_to all` - Bot responds to all messages\n"
                         f"• `{cmd_name} respond_to mentions_only` - Bot only responds to mentions\n"
                         f"• `{cmd_name} respond_to auto` - Bot automatically determines when to respond\n"
                         f"• `{cmd_name} help` - Show this help message"
@@ -904,12 +934,11 @@ async def handle_configure_command(
                         "*Commands:*\n"
                         f"• `{cmd_name} show` - Display current channel settings\n"
                         f"• `{cmd_name} roles role1,role2,role3` - Set allowed RBAC roles (comma-separated)\n"
-                        f"• `{cmd_name} respond_to all` - Bot responds to all messages in channel\n"
                         f"• `{cmd_name} respond_to mentions_only` - Bot only responds when mentioned\n"
                         f"• `{cmd_name} respond_to auto` - Bot automatically determines when to respond\n\n"
                         "*Examples:*\n"
                         f"• `{cmd_name} roles admin,developer,support`\n"
-                        f"• `{cmd_name} respond_to all`\n"
+                        f"• `{cmd_name} respond_to mentions_only`\n"
                         f"• `{cmd_name} respond_to auto`"
                     ),
                 }
@@ -950,7 +979,6 @@ async def handle_configure_command(
                     ", ".join(settings_obj.allowed_roles) if settings_obj.allowed_roles else "None (all users allowed)"
                 )
                 respond_to_map = {
-                    "all": "All messages",
                     "mentions_only": "Mentions only",
                     "auto": "Auto (intelligent routing)",
                 }
@@ -1007,18 +1035,17 @@ async def handle_configure_command(
                         content={
                             "response_type": "ephemeral",
                             "text": (
-                                "❌ Please specify 'all', 'mentions_only', or 'auto'. "
-                                f"Example: `{cmd_name} respond_to all`"
+                                "❌ Please specify 'mentions_only' or 'auto'. " f"Example: `{cmd_name} respond_to auto`"
                             ),
                         }
                     )
 
                 mode = parts[1].lower()
-                if mode not in ["all", "mentions_only", "auto"]:
+                if mode not in ["mentions_only", "auto"]:
                     return JSONResponse(
                         content={
                             "response_type": "ephemeral",
-                            "text": "❌ Invalid mode. Use 'all', 'mentions_only', or 'auto'.",
+                            "text": "❌ Invalid mode. Use 'mentions_only' or 'auto'.",
                         }
                     )
 
@@ -1040,7 +1067,6 @@ async def handle_configure_command(
                 LOGGER.info(f"Settings after commit: {integration.settings}")
 
                 respond_to_map = {
-                    "all": "all messages",
                     "mentions_only": "mentions only",
                     "auto": "messages automatically (using intelligent routing)",
                 }
@@ -1129,6 +1155,12 @@ async def handle_message(event: dict[str, Any], team_id: str) -> None:
 
     if not response.response_text or not response.bot_token:
         return
+
+    if message_ts and channel and response.bot_token:
+        message_exists = await check_message_exists(channel, message_ts, response.bot_token)
+        if not message_exists:
+            LOGGER.info(f"Original message {message_ts} was deleted, skipping response")
+            return
 
     client = AsyncWebClient(token=response.bot_token)
     success = False
