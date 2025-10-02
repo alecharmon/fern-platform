@@ -64,8 +64,46 @@ async def mark_message_processed(team_id: str, message_id: str) -> None:
         await session.commit()
 
 
-async def get_thread_history(channel: discord.Thread) -> list[dict[str, str]]:
-    return []
+async def get_thread_history(channel: discord.Thread, bot_user_id: str | None = None) -> list[dict[str, str]]:
+    try:
+        messages = []
+        starter_msg = None
+
+        try:
+            if isinstance(channel.parent, discord.TextChannel):
+                starter_msg = await channel.parent.fetch_message(channel.id)
+                LOGGER.info(f"Fetched starter message: {starter_msg.content}")
+        except Exception as e:
+            LOGGER.warning(f"Could not fetch starter message: {e}")
+
+        if starter_msg:
+            LOGGER.info(f"Adding starter message from {starter_msg.author.name}: {starter_msg.content}")
+            if starter_msg.author.bot and str(starter_msg.author.id) == bot_user_id:
+                if starter_msg.content:
+                    messages.append({"role": "assistant", "content": starter_msg.content})
+            else:
+                text = starter_msg.content
+                if bot_user_id and text:
+                    text = text.replace(f"<@{bot_user_id}>", "").strip()
+                if text:
+                    messages.append({"role": "user", "content": text})
+
+        # Get all replies in the thread
+        async for msg in channel.history(limit=100, oldest_first=True):
+            if msg.author.bot and str(msg.author.id) == bot_user_id:
+                if msg.content:
+                    messages.append({"role": "assistant", "content": msg.content})
+            else:
+                text = msg.content
+                if bot_user_id and text:
+                    text = text.replace(f"<@{bot_user_id}>", "").strip()
+                if text:
+                    messages.append({"role": "user", "content": text})
+
+        return messages
+    except Exception as e:
+        LOGGER.error(f"Error retrieving thread history: {e}")
+        return []
 
 
 async def handle_discord_message(message: discord.Message) -> DiscordMessageResponse:
@@ -112,7 +150,8 @@ async def handle_discord_message(message: discord.Message) -> DiscordMessageResp
 
         message_history = None
         if is_in_thread:
-            message_history = await get_thread_history(message.channel)
+            message_history = await get_thread_history(message.channel, str(message.guild.me.id))
+            LOGGER.info(f"Retrieved {len(message_history)} messages from thread history")
 
         conversation_id = f"discord_{message.guild.id}_{message.channel.id}_{message.id}"
 
