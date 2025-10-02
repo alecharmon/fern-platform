@@ -83,8 +83,12 @@ export const handler = async (
   const method = event.httpMethod;
 
   try {
-    // Route: POST /metadata-for-url
-    if (path === "/metadata-for-url" && method === "POST") {
+    // Route: POST /v2/registry/docs/metadata-for-url or POST /metadata-for-url
+    if (
+      (path === "/v2/registry/docs/metadata-for-url" ||
+        path === "/metadata-for-url") &&
+      method === "POST"
+    ) {
       const body: GetMetadataForUrlRequest = JSON.parse(event.body || "{}");
 
       if (!body.url) {
