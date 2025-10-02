@@ -159,10 +159,14 @@ def get_message_action(
         if message_classification is None:
             LOGGER.warning("Auto mode enabled but no message classification provided")
             return "ignore"
-
         return message_classification
 
-    if is_app_mention:
+    if channel_settings.respond_to == "mentions_only":
+        if not is_app_mention:
+            return "ignore"
+        if message_classification is not None:
+            return message_classification
+        LOGGER.warning("Mention received but no classification provided, defaulting to 'question'")
         return "question"
 
     return "ignore"
@@ -391,8 +395,14 @@ async def handle_slack_message(
         LOGGER.info(f"Retrieved {len(message_history)} messages from thread history")
 
     message_classification = None
+    should_classify = False
     if channel_settings and channel_settings.respond_to == "auto":
-        LOGGER.info(f"Auto mode enabled, classifying message: {context.text[:100]}...")
+        should_classify = True
+    elif (channel_settings is None or channel_settings.respond_to == "mentions_only") and is_app_mention:
+        should_classify = True
+
+    if should_classify:
+        LOGGER.info(f"Classifying message: {context.text[:100]}...")
         try:
             message_classification = await classify_message(
                 context.text, message_history, integration.slack_bot_user_id

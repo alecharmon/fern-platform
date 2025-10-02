@@ -4,7 +4,6 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from utils.init_db import init
 
 from fai.scheduler import (
     start_scheduler,
@@ -14,6 +13,7 @@ from fai.settings import (
     LOGGER,
     VARIABLES,
 )
+from utils.init_db import init
 
 
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
