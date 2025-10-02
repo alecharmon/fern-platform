@@ -1,6 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
+import { createHash } from "crypto";
+
 import { APIV1Write } from "@fern-api/fdr-sdk";
 
 import { isLocal } from "./isLocal";
@@ -11,6 +13,18 @@ import {
 } from "./loadDynamicIRFromS3";
 
 export type DynamicIRsByAPI = Record<string, DynamicIRsByLanguage>;
+
+function hashSnippetsConfig(
+  snippetsConfig: APIV1Write.SnippetsConfig | undefined
+): string {
+  if (!snippetsConfig) {
+    return "no-config";
+  }
+  return createHash("sha256")
+    .update(JSON.stringify(snippetsConfig))
+    .digest("hex")
+    .slice(0, 16);
+}
 
 export const loadDynamicIRWithUrl = cache(
   async ({
@@ -54,8 +68,15 @@ export const loadDynamicIRWithUrl = cache(
 
         return undefined;
       },
-      [orgId, apiName],
-      { tags: ["loadDynamicIRWithUrl", orgId, apiName] }
+      [orgId, apiName, hashSnippetsConfig(snippetsConfig)],
+      {
+        tags: [
+          "loadDynamicIRWithUrl",
+          `org:${orgId}`,
+          `api:${apiName}`,
+          `config:${hashSnippetsConfig(snippetsConfig)}`,
+        ],
+      }
     )();
   }
 );

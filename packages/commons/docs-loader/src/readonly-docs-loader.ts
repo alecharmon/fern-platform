@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { cache } from "react";
 
 import { kv } from "@vercel/kv";
+import { createHash } from "crypto";
 import { Semaphore, mapValues } from "es-toolkit";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
@@ -1115,9 +1116,20 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
 const getDynamicIr = (apiName: string) =>
   cache(async (orgId: string, domain: string) => {
     "use cache";
-    unstable_cacheTag(orgId, "getDynamicIr");
-
     const api = await getApi(domain, apiName);
+
+    const configHash = api.snippetsConfiguration
+      ? createHash("sha256")
+          .update(JSON.stringify(api.snippetsConfiguration))
+          .digest("hex")
+          .slice(0, 16)
+      : "no-config";
+
+    unstable_cacheTag(
+      `getDynamicIr:org:${orgId}`,
+      `getDynamicIr:api:${apiName}`,
+      `getDynamicIr:config:${configHash}`
+    );
 
     const response = await loadDynamicIRWithUrl({
       orgId,
