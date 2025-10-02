@@ -45,7 +45,7 @@ jobs:
               
               if curl -s -f -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
                      "https://$domain/api/fern-docs/revalidate" \
-                     --max-time 3000; then
+                     --max-time 600; then
                 echo "SUCCESS: $domain revalidated successfully"
                 break
               else
