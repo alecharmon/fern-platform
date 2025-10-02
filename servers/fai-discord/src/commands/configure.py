@@ -28,7 +28,6 @@ class ConfigureView(discord.ui.View):
         placeholder="Select thread setting",
         options=[
             discord.SelectOption(label="mentions_only", value="mentions_only", description="Respond only to mentions"),
-            discord.SelectOption(label="all messages", value="all_messages", description="Respond to all messages"),
         ],
         row=1,  # Second row (must be on separate row)
     )
