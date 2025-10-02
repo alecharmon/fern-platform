@@ -217,6 +217,9 @@ function kvSet(
 
 const getMonitor = new Semaphore(10);
 
+// Deduplicate simultaneous requests for the same key
+const inFlightRequests = new Map<string, Promise<any>>();
+
 async function kvGet<T>(
   domainKey: string,
   key: string,
@@ -227,71 +230,95 @@ async function kvGet<T>(
   }
 
   const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
+  const requestKey = `${domainKey}:${finalKey}`;
+
+  // If there's already an in-flight request, wait for it
+  if (inFlightRequests.has(requestKey)) {
+    console.log(
+      `[Upstash] Waiting for in-flight request - domain: ${domainKey}, key: ${finalKey}`
+    );
+    return inFlightRequests.get(requestKey) as Promise<T | null>;
+  }
 
   console.log(
     `[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`
   );
 
-  await getMonitor.acquire();
-  const start = Date.now();
-  try {
-    // Check if the key has expired
-    const ttlKey = `${domainKey}:ttl:${finalKey}`;
-    const expiration = await kv.get<number>(ttlKey);
+  // Create the request promise
+  const requestPromise = (async () => {
+    await getMonitor.acquire();
+    const start = Date.now();
+    try {
+      // Check if the key has expired
+      const ttlKey = `${domainKey}:ttl:${finalKey}`;
+      const expiration = await kv.get<number>(ttlKey);
 
-    if (expiration && Date.now() > expiration) {
-      // Key has expired, delete it
-      await kv.hdel(domainKey, finalKey);
-      await kv.del(ttlKey);
+      if (expiration && Date.now() > expiration) {
+        // Key has expired, delete it
+        await kv.hdel(domainKey, finalKey);
+        await kv.del(ttlKey);
+        const duration = Date.now() - start;
+        console.log(
+          `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
+        );
+
+        track("upstash_cache_get", {
+          domain: domainKey,
+          cacheKey: finalKey,
+          hit: false,
+          expired: true,
+          duration,
+        });
+        return null;
+      }
+
+      const result = await kv.hget<T>(domainKey, finalKey);
       const duration = Date.now() - start;
+      const isHit = result != null;
+
       console.log(
-        `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
+        `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
       );
 
       track("upstash_cache_get", {
         domain: domainKey,
         cacheKey: finalKey,
-        hit: false,
-        expired: true,
+        hit: isHit,
+        expired: false,
+        duration,
+      });
+
+      return result;
+    } catch (error) {
+      const duration = Date.now() - start;
+      console.warn(
+        `[Upstash] GET failed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`,
+        error
+      );
+
+      track("upstash_cache_get_error", {
+        domain: domainKey,
+        cacheKey: finalKey,
+        error: String(error),
         duration,
       });
       return null;
+    } finally {
+      getMonitor.release();
     }
+  })();
 
-    const result = await kv.hget<T>(domainKey, finalKey);
-    const duration = Date.now() - start;
-    const isHit = result != null;
-
-    console.log(
-      `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
-    );
-
-    track("upstash_cache_get", {
-      domain: domainKey,
-      cacheKey: finalKey,
-      hit: isHit,
-      expired: false,
-      duration,
+  // Store the promise and remove it when done
+  inFlightRequests.set(requestKey, requestPromise);
+  requestPromise
+    .finally(() => {
+      inFlightRequests.delete(requestKey);
+    })
+    .catch(() => {
+      // Errors are already handled in the main promise, this is just for cleanup
     });
 
-    return result;
-  } catch (error) {
-    const duration = Date.now() - start;
-    console.warn(
-      `[Upstash] GET failed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`,
-      error
-    );
-
-    track("upstash_cache_get_error", {
-      domain: domainKey,
-      cacheKey: finalKey,
-      error: String(error),
-      duration,
-    });
-    return null;
-  } finally {
-    getMonitor.release();
-  }
+  return requestPromise;
 }
 
 // In-memory cache for config to reduce Upstash calls
