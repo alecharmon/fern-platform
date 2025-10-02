@@ -9,7 +9,7 @@ import { Semaphore, mapValues } from "es-toolkit";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
 import type { AuthEdgeConfig } from "@fern-api/docs-auth";
-import { track } from "@fern-api/docs-server";
+// import { track } from "@fern-api/docs-server";
 import {
   type AuthState,
   type FernFonts,
@@ -192,23 +192,25 @@ function kvSet(
         `[Upstash] SET completed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
       );
 
-      track("upstash_cache_set", {
-        domain: domainKey,
-        cacheKey: finalKey,
-        hasTtl: Boolean(ttl && ttl > 0),
-        ttl: ttl,
-        duration,
-      });
+      // Disabled PostHog tracking for performance reasons
+      // track("upstash_cache_set", {
+      //   domain: domainKey,
+      //   cacheKey: finalKey,
+      //   hasTtl: Boolean(ttl && ttl > 0),
+      //   ttl: ttl,
+      //   duration,
+      // });
     } catch (error) {
       console.warn(
         `[Upstash] SET failed - domain: ${domainKey}, key: ${finalKey}`,
         error
       );
-      track("upstash_cache_set_error", {
-        domain: domainKey,
-        cacheKey: finalKey,
-        error: String(error),
-      });
+      // Disabled PostHog tracking for performance reasons
+      // track("upstash_cache_set_error", {
+      //   domain: domainKey,
+      //   cacheKey: finalKey,
+      //   error: String(error),
+      // });
     } finally {
       setMonitor.release();
     }
@@ -262,13 +264,14 @@ async function kvGet<T>(
           `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
         );
 
-        track("upstash_cache_get", {
-          domain: domainKey,
-          cacheKey: finalKey,
-          hit: false,
-          expired: true,
-          duration,
-        });
+        // Disabled PostHog tracking for performance reasons
+        // track("upstash_cache_get", {
+        //   domain: domainKey,
+        //   cacheKey: finalKey,
+        //   hit: false,
+        //   expired: true,
+        //   duration,
+        // });
         return null;
       }
 
@@ -280,13 +283,14 @@ async function kvGet<T>(
         `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
       );
 
-      track("upstash_cache_get", {
-        domain: domainKey,
-        cacheKey: finalKey,
-        hit: isHit,
-        expired: false,
-        duration,
-      });
+      // Disabled PostHog tracking for performance reasons
+      // track("upstash_cache_get", {
+      //   domain: domainKey,
+      //   cacheKey: finalKey,
+      //   hit: isHit,
+      //   expired: false,
+      //   duration,
+      // });
 
       return result;
     } catch (error) {
@@ -296,12 +300,13 @@ async function kvGet<T>(
         error
       );
 
-      track("upstash_cache_get_error", {
-        domain: domainKey,
-        cacheKey: finalKey,
-        error: String(error),
-        duration,
-      });
+      // Disabled PostHog tracking for performance reasons
+      // track("upstash_cache_get_error", {
+      //   domain: domainKey,
+      //   cacheKey: finalKey,
+      //   error: String(error),
+      //   duration,
+      // });
       return null;
     } finally {
       getMonitor.release();

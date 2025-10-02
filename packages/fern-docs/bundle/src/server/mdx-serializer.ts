@@ -78,6 +78,7 @@ export function createCachedMdxSerializer(
 
     await monitor.acquire();
 
+    const startTime = Date.now();
     console.log(
       `[serializeMdx] starting serialization for domain: ${domain}, filename: ${options.filename || "unknown"}`
     );
@@ -85,16 +86,18 @@ export function createCachedMdxSerializer(
     // this lets us key on just
     const cachedSerializer = unstable_cache(
       async ({ filename, toc, scope }: MdxSerializerOptions) => {
+        const cacheStartTime = Date.now();
         console.log(
-          `[serializeMdx] inside cache function for domain: ${domain}, filename: ${filename || "unknown"}`
+          `[serializeMdx] inside cache function for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${cacheStartTime - startTime}ms`
         );
         const authState = await loader.getAuthState();
 
         try {
           if (useNextMdx && !content.includes("twoslash")) {
             try {
+              const nextMdxStartTime = Date.now();
               console.log(
-                `[serializeMdx] using NextMdxRemote for domain: ${domain}, filename: ${filename || "unknown"}`
+                `[serializeMdx] using NextMdxRemote for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${nextMdxStartTime - startTime}ms`
               );
               const result = await internalSerializeNextMdxRemote(content, {
                 loader,
@@ -112,14 +115,16 @@ export function createCachedMdxSerializer(
                 );
               }
 
+              const nextMdxEndTime = Date.now();
               console.log(
-                `[serializeMdx] NextMdxRemote succeeded for domain: ${domain}, filename: ${filename || "unknown"}`
+                `[serializeMdx] NextMdxRemote succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${nextMdxEndTime - nextMdxStartTime}ms, total: ${nextMdxEndTime - startTime}ms`
               );
               return result;
             } catch (_nextMdxError) {
               try {
+                const fallbackStartTime = Date.now();
                 console.log(
-                  `[serializeMdx] NextMdxRemote failed, falling back to regular serialization for domain: ${domain}, filename: ${filename || "unknown"}`
+                  `[serializeMdx] NextMdxRemote failed, falling back to regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${fallbackStartTime - startTime}ms`
                 );
                 const result = await internalSerializeMdx(content, {
                   filename,
@@ -132,8 +137,9 @@ export function createCachedMdxSerializer(
                   },
                   replaceHref,
                 });
+                const fallbackEndTime = Date.now();
                 console.log(
-                  `[serializeMdx] fallback serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}`
+                  `[serializeMdx] fallback serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${fallbackEndTime - fallbackStartTime}ms, total: ${fallbackEndTime - startTime}ms`
                 );
                 return result;
               } catch (fallbackError) {
@@ -146,8 +152,9 @@ export function createCachedMdxSerializer(
               }
             }
           } else {
+            const regularStartTime = Date.now();
             console.log(
-              `[serializeMdx] using regular serialization for domain: ${domain}, filename: ${filename || "unknown"}`
+              `[serializeMdx] using regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${regularStartTime - startTime}ms`
             );
             const result = await internalSerializeMdx(content, {
               filename,
@@ -160,8 +167,9 @@ export function createCachedMdxSerializer(
               },
               replaceHref,
             });
+            const regularEndTime = Date.now();
             console.log(
-              `[serializeMdx] regular serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}`
+              `[serializeMdx] regular serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${regularEndTime - regularStartTime}ms, total: ${regularEndTime - startTime}ms`
             );
             return result;
           }
@@ -188,6 +196,11 @@ export function createCachedMdxSerializer(
       // if (result == null) {
       //   revalidateTag(key);
       // }
+
+      const endTime = Date.now();
+      console.log(
+        `[serializeMdx] completed for domain: ${domain}, filename: ${options.filename || "unknown"}, total duration: ${endTime - startTime}ms`
+      );
 
       return result;
     } finally {
