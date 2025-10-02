@@ -22,13 +22,15 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
+import {
+  getFrontmatter,
+  sanitizeBreaks,
+  sanitizeMdxExpression,
+} from "@fern-docs/mdx";
 
 import FeedbackPopover from "@/components/feedback/FeedbackPopover";
 import { withLaunchDarkly } from "@/server/ld-adapter";
-import {
-  MdxSerializer,
-  createCachedMdxSerializer,
-} from "@/server/mdx-serializer";
+import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 
 import { DocsMainContent } from "../app/[host]/[domain]/main";
 
@@ -252,11 +254,7 @@ export default async function SharedPage({
   // in case the page overrides this global setting
   const neighborsPromise = (async () => {
     const start = Date.now();
-    const result = await getNeighbors(
-      loader,
-      serializeNextMdx ?? serialize,
-      found
-    );
+    const result = await getNeighbors(loader, found);
     const end = Date.now();
     console.log(`[SharedPage] getNeighbors() took ${end - start}ms`);
     return result;
@@ -370,7 +368,6 @@ function prepareRedirect(destination: string): string {
 
 async function getNeighbor(
   loader: DocsLoader,
-  serialize: MdxSerializer,
   node: FernNavigation.NavigationNodeNeighbor | undefined
 ): Promise<
   | {
@@ -391,34 +388,29 @@ async function getNeighbor(
     };
   }
   try {
-    let page, mdx;
-    {
-      const start = Date.now();
-      console.log(
-        `[getNeighbor] calling loader.getPage(${pageId}) for domain: ${loader.domain}`
-      );
-      page = await loader.getPage(pageId);
-      const end = Date.now();
-      console.log(
-        `[getNeighbor] loader.getPage(${pageId}) took ${end - start}ms for domain: ${loader.domain}`
-      );
-    }
-    {
-      const start = Date.now();
-      mdx = await serialize(page.markdown, {
-        filename: page.filename,
-        slug: node.slug,
-        toc: true, // this is probably already cached with toc: true
-      });
-      const end = Date.now();
-      console.log(
-        `[getNeighbor] serialize() for ${node.slug} took ${end - start}ms`
-      );
-    }
-    const excerpt = mdx?.frontmatter?.subtitle ?? mdx?.frontmatter?.excerpt;
+    const start = Date.now();
+    const page = await loader.getPage(pageId);
+    const fetchEnd = Date.now();
+    console.log(
+      `[getNeighbor] loader.getPage(${pageId}) took ${fetchEnd - start}ms for domain: ${loader.domain}`
+    );
+
+    // Extract frontmatter without full MDX serialization (much faster!)
+    let content = sanitizeBreaks(page.markdown);
+    content = sanitizeMdxExpression(content)[0];
+
+    const { data: frontmatter } = getFrontmatter(content);
+    const parseEnd = Date.now();
+    console.log(
+      `[getNeighbor] frontmatter parsing for ${pageId} took ${parseEnd - fetchEnd}ms`
+    );
+
+    const excerpt = frontmatter?.subtitle ?? frontmatter?.excerpt;
+    const title = frontmatter?.title ?? node.title;
+
     return {
       href: slugToHref(node.slug),
-      title: mdx?.frontmatter?.title ?? node.title,
+      title,
       excerpt,
     };
   } catch (error) {
@@ -432,7 +424,6 @@ async function getNeighbor(
 
 async function getNeighbors(
   loader: DocsLoader,
-  serialize: MdxSerializer,
   neighbors: {
     prev: FernNavigation.NavigationNodeNeighbor | undefined;
     next: FernNavigation.NavigationNodeNeighbor | undefined;
@@ -453,8 +444,8 @@ async function getNeighbors(
   {
     const start = Date.now();
     [prev, next] = await Promise.all([
-      getNeighbor(loader, serialize, neighbors.prev),
-      getNeighbor(loader, serialize, neighbors.next),
+      getNeighbor(loader, neighbors.prev),
+      getNeighbor(loader, neighbors.next),
     ]);
     const end = Date.now();
     console.log(`[getNeighbors] getNeighbor() calls took ${end - start}ms`);
