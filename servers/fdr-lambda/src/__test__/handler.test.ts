@@ -74,9 +74,13 @@ describe("Lambda Handler", () => {
         rows: [mockMetadata],
       });
 
-      const event = createMockEvent("/v2/registry/docs/metadata-for-url", "POST", {
-        url: "https://docs.example.com",
-      });
+      const event = createMockEvent(
+        "/v2/registry/docs/metadata-for-url",
+        "POST",
+        {
+          url: "https://docs.example.com",
+        }
+      );
       const context = createMockContext();
 
       const result = await handler(event, context);
