@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 
 import NextBundleAnalyzer from "@next/bundle-analyzer";
+import path from "node:path";
 import process from "node:process";
 import webpack from "webpack";
 
@@ -9,7 +10,10 @@ const cdnUri = process.env.NEXT_PUBLIC_CDN_URI != null ? new URL("/", process.en
 const isTrailingSlashEnabled = process.env.NEXT_PUBLIC_TRAILING_SLASH === "1";
 const isAssetPrefixDisabled = process.env.NEXT_PUBLIC_ASSET_PREFIX_DISABLED === "1";
 const isSelfHosted = process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
-const isStandalone = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
+const isStandalone =
+    process.env.NEXT_PUBLIC_IS_LOCAL === "1" ||
+    process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1" ||
+    process.env.NEXT_PUBLIC_IS_SELF_SERVED === "1";
 
 // TODO: move this to a shared location (this is copied in FernImage.tsx)
 const NEXT_IMAGE_HOSTS = [
@@ -107,6 +111,8 @@ const nextConfig: NextConfig = {
     outputFileTracingExcludes: {
         "**": [".next/cache/**/*", ".next/trace.json", "**/*.map", "node_modules/**/*.d.ts"]
     },
+
+    outputFileTracingRoot: isStandalone ? path.join(__dirname, "../../..") : undefined,
 
     // speed up build
     typescript: { ignoreBuildErrors: true },
