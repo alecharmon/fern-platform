@@ -1,4 +1,5 @@
 import { bundleEditorMDX } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/bundleEditorMdx";
+import { EncodedDocsUrl } from "@/utils/types";
 
 interface CacheEntry {
   code: string;
@@ -15,13 +16,19 @@ const CACHE_TTL = 10 * 60 * 1000;
 /**
  * Process a batch of pending requests
  */
-async function processBatch(requests: PendingRequest[]): Promise<void> {
+async function processBatch(
+  requests: PendingRequest[],
+  options?: {
+    docsUrl?: EncodedDocsUrl;
+    branch?: string;
+  }
+): Promise<void> {
   // Get unique MDX sources to bundle
   const uniqueSources = Array.from(new Set(requests.map((req) => req.mdx)));
 
   try {
     // Bundle all unique sources at once
-    const results = await bundleEditorMDX(uniqueSources);
+    const results = await bundleEditorMDX(uniqueSources, options);
 
     // Create a map of source to result
     const resultMap = new Map<string, (typeof results)[0]>();
@@ -88,10 +95,17 @@ function evictStaleEntries(): void {
 /**
  * Cached version of bundleMDX that evicts entries older than 10 minutes
  * @param mdx The MDX source string to bundle
+ * @param options Optional docsUrl and branch for loader context
  * @returns The bundled MDX code
  * @throws Error if bundling fails
  */
-export async function cachedBundleMDX(mdx: string): Promise<{ code: string }> {
+export async function cachedBundleMDX(
+  mdx: string,
+  options?: {
+    docsUrl?: EncodedDocsUrl;
+    branch?: string;
+  }
+): Promise<{ code: string }> {
   // Check cache first without blocking
   const cachedEntry = bundleCache.get(mdx);
 
@@ -106,7 +120,7 @@ export async function cachedBundleMDX(mdx: string): Promise<{ code: string }> {
   }
 
   // Use batched bundling for cache miss
-  return batchedBundleMDX(mdx);
+  return batchedBundleMDX(mdx, options);
 }
 
 /**
@@ -131,42 +145,70 @@ interface PendingRequest {
   reject: (error: Error) => void;
 }
 
-// Batch collector for requests
-let pendingRequests: PendingRequest[] = [];
-let batchTimer: NodeJS.Timeout | null = null;
+interface BatchContext {
+  requests: PendingRequest[];
+  timer: NodeJS.Timeout;
+  options?: {
+    docsUrl?: EncodedDocsUrl;
+    branch?: string;
+  };
+}
+
+// Batch collector for requests - now keyed by docsUrl+branch combination
+const batchContexts = new Map<string, BatchContext>();
 const BATCH_WINDOW_MS = 100;
 
 /**
  * Batched version of bundleMDX that collects requests and processes them together
  * @param mdx The MDX source string to bundle
+ * @param options Optional docsUrl and branch for loader context
  * @returns The bundled MDX code
  */
-async function batchedBundleMDX(mdx: string): Promise<{ code: string }> {
+async function batchedBundleMDX(
+  mdx: string,
+  options?: {
+    docsUrl?: EncodedDocsUrl;
+    branch?: string;
+  }
+): Promise<{ code: string }> {
   return new Promise((resolve, reject) => {
-    // Add request to pending batch
-    pendingRequests.push({ mdx, resolve, reject });
+    // Create a key for this batch context
+    const batchKey = `${options?.docsUrl ?? "default"}_${options?.branch ?? "default"}`;
 
-    // If this is the first request in a new batch, set up the timer
-    if (!batchTimer) {
-      batchTimer = setTimeout(() => {
-        // Take all pending requests
-        const requestsToProcess = pendingRequests;
-        pendingRequests = [];
-        batchTimer = null;
+    // Get or create batch context
+    let context = batchContexts.get(batchKey);
 
-        // Process the batch asynchronously
-        void Promise.resolve().then(() => {
-          processBatch(requestsToProcess).catch((error: unknown) => {
-            // If batch processing fails entirely, reject all requests
-            console.error("Batch processing failed:", error);
-            requestsToProcess.forEach((req) => {
-              req.reject(
-                error instanceof Error ? error : new Error(String(error))
-              );
+    if (!context) {
+      // Create new batch context with timer
+      const timer = setTimeout(() => {
+        const ctx = batchContexts.get(batchKey);
+        if (ctx) {
+          batchContexts.delete(batchKey);
+
+          // Process the batch asynchronously
+          void Promise.resolve().then(() => {
+            processBatch(ctx.requests, ctx.options).catch((error: unknown) => {
+              // If batch processing fails entirely, reject all requests
+              console.error("Batch processing failed:", error);
+              ctx.requests.forEach((req) => {
+                req.reject(
+                  error instanceof Error ? error : new Error(String(error))
+                );
+              });
             });
           });
-        });
+        }
       }, BATCH_WINDOW_MS);
+
+      context = {
+        requests: [],
+        timer,
+        options,
+      };
+      batchContexts.set(batchKey, context);
     }
+
+    // Add request to batch
+    context.requests.push({ mdx, resolve, reject });
   });
 }

@@ -1031,6 +1031,9 @@ importers:
       '@fern-api/docs-utils':
         specifier: workspace:*
         version: link:../commons/docs-utils
+      '@fern-api/endpoint-snippet-dependencies':
+        specifier: workspace:*
+        version: link:endpoint-snippet-dependencies
       '@fern-api/fai-sdk':
         specifier: workspace:*
         version: link:../fai-sdk
@@ -1368,6 +1371,73 @@ importers:
       tailwindcss:
         specifier: ^4.0.9
         version: 4.0.9
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.15.29)(jiti@2.4.2)(jsdom@24.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.29.1)(msw@2.10.3(@types/node@22.15.29)(typescript@5.7.3))(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.19.3)(yaml@2.8.0)
+
+  packages/fern-dashboard/endpoint-snippet-dependencies:
+    dependencies:
+      '@fern-api/docs-utils':
+        specifier: workspace:*
+        version: link:../../commons/docs-utils
+      '@fern-api/fdr-sdk':
+        specifier: workspace:*
+        version: link:../../fdr-sdk
+      '@fern-api/ui-core-utils':
+        specifier: workspace:*
+        version: link:../../commons/core-utils
+      '@fern-docs/components':
+        specifier: workspace:*
+        version: link:../../fern-docs/components
+      '@fern-ui/react-commons':
+        specifier: workspace:*
+        version: link:../../commons/react-commons
+      '@radix-ui/primitive':
+        specifier: 'catalog:'
+        version: 1.1.1
+      '@radix-ui/react-compose-refs':
+        specifier: 'catalog:'
+        version: 1.1.1(@types/react@19.0.10)(react@19.0.0)
+      '@radix-ui/react-select':
+        specifier: 'catalog:'
+        version: 2.1.6(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      es-toolkit:
+        specifier: ^1.32.0
+        version: 1.39.7
+      fastdom:
+        specifier: ^1.0.12
+        version: 1.0.12
+      jotai:
+        specifier: ^2.12.1
+        version: 2.12.1(@types/react@19.0.10)(react@19.0.0)
+      lucide-react:
+        specifier: ^0.460.0
+        version: 0.460.0(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      ts-essentials:
+        specifier: ^10.0.4
+        version: 10.0.4(typescript@5.7.3)
+    devDependencies:
+      '@fern-platform/configs':
+        specifier: workspace:*
+        version: link:../../configs
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.15.29
+      '@types/react':
+        specifier: 19.0.10
+        version: 19.0.10
+      depcheck:
+        specifier: ^1.4.7
+        version: 1.4.7
+      stylelint:
+        specifier: ^16.1.0
+        version: 16.14.1(typescript@5.7.3)
       typescript:
         specifier: 5.7.3
         version: 5.7.3

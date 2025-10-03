@@ -26,6 +26,9 @@ import {
   EMPTY_CARD_GROUP_CONTENT,
 } from "@/docs/mdx/components/card/CardGroup";
 import { EMPTY_PARAM_FIELD_CONTENT } from "@/docs/mdx/components/parameters/ParamField";
+import { EMPTY_ENDPOINT_REQUEST_SNIPPET } from "@/docs/mdx/components/snippets/EndpointRequestSnippet";
+import { EMPTY_ENDPOINT_RESPONSE_SNIPPET } from "@/docs/mdx/components/snippets/EndpointResponseSnippet";
+import { EMPTY_ENDPOINT_SCHEMA_SNIPPET } from "@/docs/mdx/components/snippets/EndpointSchemaSnippet";
 import { EMPTY_STEPS_CONTENT } from "@/docs/mdx/components/steps";
 import { EMPTY_TABS_CONTENT } from "@/docs/mdx/components/tabs/Tabs";
 import { EMPTY_EMBED_CONTENT } from "@/editor/components/Embed";
@@ -189,6 +192,39 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
     keywords: ["embed", "iframe", "external", "media"],
     onSelect: ({ editor }) => {
       handleCustomNodeInsert(editor, EMPTY_EMBED_CONTENT);
+    },
+  },
+  {
+    title: "Endpoint Request Snippet",
+    subtext: "Show a code sample for an API request",
+    aliases: ["endpoint", "request", "api", "code", "snippet"],
+    badge: CodeXml,
+    group: "Components",
+    keywords: ["endpoint", "request", "api", "code", "snippet"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, EMPTY_ENDPOINT_REQUEST_SNIPPET);
+    },
+  },
+  {
+    title: "Endpoint Response Snippet",
+    subtext: "Show a code sample for an API response",
+    aliases: ["endpoint", "response", "api", "code", "snippet"],
+    badge: CodeXml,
+    group: "Components",
+    keywords: ["endpoint", "response", "api", "code", "snippet"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, EMPTY_ENDPOINT_RESPONSE_SNIPPET);
+    },
+  },
+  {
+    title: "Endpoint Schema Snippet",
+    subtext: "Show the schema for an API endpoint",
+    aliases: ["endpoint", "schema", "api", "definition", "type"],
+    badge: CodeXml,
+    group: "Components",
+    keywords: ["endpoint", "schema", "api", "definition", "type"],
+    onSelect: ({ editor }) => {
+      handleCustomNodeInsert(editor, EMPTY_ENDPOINT_SCHEMA_SNIPPET);
     },
   },
 ];

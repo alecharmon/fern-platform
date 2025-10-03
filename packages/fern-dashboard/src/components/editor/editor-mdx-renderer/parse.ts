@@ -31,7 +31,13 @@ const richTextComponents = [
   "ParamField",
 ];
 
-const componentsWithoutChildren = ["embed", "img"];
+const componentsWithoutChildren = [
+  "embed",
+  "img",
+  "EndpointRequestSnippet",
+  "EndpointResponseSnippet",
+  "EndpointSchemaSnippet",
+];
 
 const editableComponents = [
   ...richTextComponents,

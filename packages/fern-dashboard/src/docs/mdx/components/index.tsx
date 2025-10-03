@@ -45,6 +45,9 @@ import { If } from "./if";
 import { Json } from "./json";
 import { Mermaid } from "./mermaid";
 import { ParamField } from "./parameters/ParamField";
+import { EndpointRequestSnippet } from "./snippets/EndpointRequestSnippet";
+import { EndpointResponseSnippet } from "./snippets/EndpointResponseSnippet";
+import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 // import { EndpointRequestSnippet, EndpointResponseSnippet } from "./snippets";
 // import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
@@ -72,9 +75,9 @@ const FERN_COMPONENTS = {
   Column,
   ColumnGroup,
   // Download,
-  // EndpointRequestSnippet,
-  // EndpointResponseSnippet,
-  // EndpointSchemaSnippet,
+  EndpointRequestSnippet,
+  EndpointResponseSnippet,
+  EndpointSchemaSnippet,
   Feature,
   Frame,
   Icon,

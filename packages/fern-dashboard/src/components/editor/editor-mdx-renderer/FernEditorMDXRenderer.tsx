@@ -18,6 +18,7 @@ import { EditorComponentProvider } from "@/components/editor/editor-component/Ed
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
+import { EncodedDocsUrl } from "@/utils/types";
 
 import { UnsupportedContent } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
@@ -106,6 +107,8 @@ interface FernEditorMDXRendererProps {
   mdx: string;
   onUpdate: (mdx: string) => unknown;
   newlyCreated?: boolean;
+  docsUrl?: EncodedDocsUrl;
+  branch?: string;
 }
 
 // Bundling state types
@@ -135,6 +138,8 @@ LoadingTerminalElement.displayName = "LoadingTerminalElement";
 interface TerminalMDXRendererProps {
   code: string;
   components: ReturnType<typeof useMDXComponents>;
+  docsUrl?: EncodedDocsUrl;
+  branch?: string;
 }
 
 const TerminalMDXRenderer = React.memo(
@@ -159,9 +164,11 @@ TerminalMDXRenderer.displayName = "TerminalMDXRenderer";
 // Terminal element renderer with bundling logic
 interface MDXRendererProps {
   mdx: string;
+  docsUrl?: EncodedDocsUrl;
+  branch?: string;
 }
 
-const MDXRenderer = React.memo(({ mdx }: MDXRendererProps) => {
+const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
   const [state, setState] = useState<MDXRendererState>({
     type: "BUNDLING",
   });
@@ -172,7 +179,7 @@ const MDXRenderer = React.memo(({ mdx }: MDXRendererProps) => {
 
     void (async () => {
       try {
-        const result = await cachedBundleMDX(mdx);
+        const result = await cachedBundleMDX(mdx, { docsUrl, branch });
         if (!cancelled) {
           setState({ type: "BUNDLED", code: result.code });
         }
@@ -187,7 +194,7 @@ const MDXRenderer = React.memo(({ mdx }: MDXRendererProps) => {
     return () => {
       cancelled = true;
     };
-  }, [mdx]);
+  }, [mdx, docsUrl, branch]);
 
   if (state.type === "BUNDLING") {
     return <LoadingTerminalElement />;
@@ -224,6 +231,8 @@ interface JSXElementRendererProps {
   index: number;
   onUpdate: (mdx: string) => unknown;
   newlyCreated?: boolean;
+  docsUrl?: EncodedDocsUrl;
+  branch?: string;
 }
 
 const JSXElementRenderer = ({
@@ -231,6 +240,8 @@ const JSXElementRenderer = ({
   index,
   onUpdate,
   newlyCreated,
+  docsUrl,
+  branch,
 }: JSXElementRendererProps) => {
   // Debounce the onUpdate callback for TiptapEditor updates (500ms delay)
   const debouncedOnUpdate = useDebounce(onUpdate, 500);
@@ -281,6 +292,8 @@ const JSXElementRenderer = ({
     children = (
       <FernEditorMDXRendererInternal
         mdx={jsxChildren.childrenMdx}
+        docsUrl={docsUrl}
+        branch={branch}
         onUpdate={(mdx) => {
           const indentedMdx = applyIndentation(mdx, 1);
           const finalMdx = buildMdxElement(
@@ -335,10 +348,10 @@ const JSXElementRenderer = ({
           }}
           providedChildren={children ?? <></>}
         >
-          <MDXRenderer mdx={parentMdx} />
+          <MDXRenderer mdx={parentMdx} docsUrl={docsUrl} branch={branch} />
         </EditorComponentChildrenProvider>
       ) : (
-        <MDXRenderer mdx={parentMdx} />
+        <MDXRenderer mdx={parentMdx} docsUrl={docsUrl} branch={branch} />
       )}
     </EditorComponentProvider>
   );
@@ -349,6 +362,8 @@ interface ParsedElementRendererProps {
   index: number;
   onUpdate: (mdx: string) => unknown;
   newlyCreated?: boolean;
+  docsUrl?: EncodedDocsUrl;
+  branch?: string;
 }
 
 const ParsedElementRenderer = ({
@@ -356,9 +371,17 @@ const ParsedElementRenderer = ({
   index,
   onUpdate,
   newlyCreated,
+  docsUrl,
+  branch,
 }: ParsedElementRendererProps) => {
   if (element.type === "terminalElement") {
-    return <MDXRenderer mdx={element.originalMdx} />;
+    return (
+      <MDXRenderer
+        mdx={element.originalMdx}
+        docsUrl={docsUrl}
+        branch={branch}
+      />
+    );
   }
 
   return (
@@ -367,6 +390,8 @@ const ParsedElementRenderer = ({
       element={element}
       onUpdate={onUpdate}
       newlyCreated={newlyCreated}
+      docsUrl={docsUrl}
+      branch={branch}
     />
   );
 };
@@ -375,6 +400,8 @@ const FernEditorMDXRendererInternal = ({
   mdx,
   onUpdate,
   newlyCreated,
+  docsUrl,
+  branch,
 }: FernEditorMDXRendererProps) => {
   const deleteCounter = useRef(0);
   const parsed = useMemo(() => parseMDX(mdx), [mdx]);
@@ -426,6 +453,8 @@ const FernEditorMDXRendererInternal = ({
       element={element}
       onUpdate={(updatedMdx) => handleChildUpdate(index, updatedMdx)}
       newlyCreated={newlyCreated}
+      docsUrl={docsUrl}
+      branch={branch}
     />
   ));
 };
@@ -460,12 +489,16 @@ const FernEditorMDXRenderer = ({
   mdx,
   onUpdate,
   newlyCreated,
+  docsUrl,
+  branch,
 }: FernEditorMDXRendererProps) => {
   return (
     <FernEditorMDXRendererInternal
       mdx={mdx}
       onUpdate={onUpdate}
       newlyCreated={newlyCreated}
+      docsUrl={docsUrl}
+      branch={branch}
     />
   );
 };

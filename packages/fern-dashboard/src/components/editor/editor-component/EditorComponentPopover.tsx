@@ -48,6 +48,7 @@ interface EditorComponentPopoverContextValue<
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isWithinThreshold: boolean;
   setIsWithinThreshold: React.Dispatch<React.SetStateAction<boolean>>;
+  buttonAlwaysVisible: boolean;
 }
 
 const EditorComponentPopoverContext =
@@ -72,12 +73,14 @@ export function EditorComponentPopoverProvider<T extends AttributeConfig>({
   targetRef,
   hoverSlopThreshold = 0, // Threshold distance in pixels for showing the popover button (0 = all hovers must be within the element itself)
   openPopoverIfNewlyCreated = true,
+  buttonAlwaysVisible = false,
 }: {
   attributes: T;
   children: ReactNode;
   targetRef?: RefObject<HTMLElement | null>;
   hoverSlopThreshold?: number;
   openPopoverIfNewlyCreated?: boolean;
+  buttonAlwaysVisible?: boolean;
 }) {
   const { newlyCreated } = useEditorComponent();
   const [isOpen, setIsOpen] = useState(
@@ -153,6 +156,7 @@ export function EditorComponentPopoverProvider<T extends AttributeConfig>({
         setIsOpen,
         isWithinThreshold,
         setIsWithinThreshold,
+        buttonAlwaysVisible,
       }}
     >
       {children}
@@ -455,6 +459,7 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
     isOpen,
     setIsOpen,
     isWithinThreshold,
+    buttonAlwaysVisible,
   } = useEditorComponentPopover<T>();
   const [tempValues, setTempValues] = useState<AttributeValues<T>>(values);
 
@@ -510,7 +515,7 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
           size="iconSm"
           className={cn(
             "z-10 h-auto w-auto p-2 hover:bg-gray-400/50",
-            !isWithinThreshold && "opacity-0",
+            !buttonAlwaysVisible && !isWithinThreshold && "opacity-0",
             className
           )}
         >

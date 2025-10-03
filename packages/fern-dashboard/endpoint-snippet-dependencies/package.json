@@ -1,0 +1,59 @@
+{
+  "name": "@fern-api/endpoint-snippet-dependencies",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/fern-dashboard/endpoint-snippet-dependencies"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./lib ./dist && tsc --build --clean",
+    "compile": "tsc --build",
+    "depcheck": "depcheck",
+    "format": "prettier --write --ignore-unknown \"**\"",
+    "format:check": "prettier --check --ignore-unknown \"**\"",
+    "lint:eslint": "eslint --max-warnings 0 .",
+    "lint:eslint:fix": "pnpm lint:eslint --fix",
+    "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
+    "lint:style:fix": "pnpm lint:style --fix",
+    "test": "vitest --run --passWithNoTests --globals"
+  },
+  "dependencies": {
+    "@fern-api/docs-utils": "workspace:*",
+    "@fern-api/fdr-sdk": "workspace:*",
+    "@fern-api/ui-core-utils": "workspace:*",
+    "@fern-docs/components": "workspace:*",
+    "@fern-ui/react-commons": "workspace:*",
+    "@radix-ui/primitive": "catalog:",
+    "@radix-ui/react-compose-refs": "catalog:",
+    "@radix-ui/react-select": "catalog:",
+    "es-toolkit": "^1.32.0",
+    "fastdom": "^1.0.12",
+    "jotai": "^2.12.1",
+    "lucide-react": "^0.460.0",
+    "react": "19.0.0",
+    "ts-essentials": "^10.0.4"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.0.10",
+    "depcheck": "^1.4.7",
+    "stylelint": "^16.1.0",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  }
+}
