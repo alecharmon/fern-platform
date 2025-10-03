@@ -219,6 +219,16 @@ export const middleware: NextMiddleware = async (request) => {
     }
 
     /**
+     * Content negotiation: If Accept header contains text/plain or text/markdown,
+     * serve the llms.txt version instead
+     */
+    const acceptHeader = request.headers.get("accept");
+    if (acceptHeader && (acceptHeader.includes("text/plain") || acceptHeader.includes("text/markdown"))) {
+        const slug = removeLeadingSlash(pathname);
+        return rewrite(withDomain("/api/fern-docs/llms.txt"), { slug });
+    }
+
+    /**
      * At this point, conform the trailing slash setting or else redirect
      */
     if (isTrailingSlashEnabled() !== request.nextUrl.pathname.endsWith("/")) {
