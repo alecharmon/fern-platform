@@ -56,6 +56,7 @@ export async function GET(
     const loadTime = performance.now() - startTime;
 
     const userAgent = req.headers.get("user-agent");
+    const acceptHeader = req.headers.get("accept");
     const possibleBot = !isLikelyBrowser(userAgent);
 
     track("static_content_served", {
@@ -66,7 +67,9 @@ export async function GET(
         staticContentType: "markdown",
         contentLength: markdown.content.length,
         loadTimeMs: Math.round(loadTime),
-        possibleBot
+        possibleBot,
+        userAgent,
+        acceptHeader
     });
 
     return new NextResponse(markdown.content, {

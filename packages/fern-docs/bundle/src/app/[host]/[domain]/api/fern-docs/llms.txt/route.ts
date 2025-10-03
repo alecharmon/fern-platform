@@ -57,6 +57,7 @@ export async function GET(
     const { content, timingStats } = await getLlmsTxt(host, domain, path, fernToken);
 
     const userAgent = req.headers.get("user-agent");
+    const acceptHeader = req.headers.get("accept");
     const possibleBot = !isLikelyBrowser(userAgent);
 
     track("static_content_served", {
@@ -68,6 +69,8 @@ export async function GET(
         rootRetrievalMs: Math.round(timingStats.rootRetrievalMs),
         markdownProcessingMs: Math.round(timingStats.markdownProcessingMs),
         possibleBot,
+        userAgent,
+        acceptHeader,
         staticContentType: "llms.txt"
     });
 
