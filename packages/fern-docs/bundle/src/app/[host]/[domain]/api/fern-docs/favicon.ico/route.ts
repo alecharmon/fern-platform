@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
+import { COOKIE_FERN_TOKEN, FERN_DOCS_ORIGINS } from "@fern-api/docs-utils";
 
 export async function GET(
   req: NextRequest,
@@ -31,12 +31,28 @@ export async function GET(
       if (faviconResponse.ok) {
         const faviconBuffer = await faviconResponse.arrayBuffer();
 
+        // Disable caching for FERN_DOCS_ORIGINS hosts and localhost:3000
+        const isFernDocsOrigin = FERN_DOCS_ORIGINS.includes(host);
+        const isLocalhost = host === "localhost:3000";
+        const cacheControl =
+          isFernDocsOrigin || isLocalhost
+            ? "no-cache, no-store, must-revalidate"
+            : "public, max-age=31536000";
+
+        console.log(
+          `[favicon:${domain}] Host: ${host}, Cache-Control: ${cacheControl}`,
+          {
+            isFernDocsOrigin,
+            isLocalhost,
+          }
+        );
+
         return new NextResponse(faviconBuffer, {
           status: 200,
           headers: {
             "Content-Type":
               faviconResponse.headers.get("Content-Type") || "image/x-icon",
-            "Cache-Control": "public, max-age=31536000",
+            "Cache-Control": cacheControl,
           },
         });
       }
