@@ -21,6 +21,7 @@ from fai.models.api.update_channel_settings import ChannelSettings
 from fai.models.db.query_db import QueryDb
 from fai.models.db.slack_context_db import SlackContextDb
 from fai.models.db.slack_integration_db import SlackIntegrationDb
+from fai.models.db.slack_message_classification_db import SlackMessageClassificationDb
 from fai.models.utils.chat import ChatMode
 from fai.settings import LOGGER
 from fai.utils.chat.response.anthropic import (
@@ -116,6 +117,7 @@ async def classify_message(
         return "ignore"
 
     LOGGER.info(f"Message classification: {result.classification} - Reasoning: {result.reasoning}")
+
     return result.classification
 
 
@@ -196,6 +198,31 @@ async def get_thread_history(
     except Exception as e:
         LOGGER.error(f"Error retrieving thread history: {e}")
         return []
+
+
+async def log_slack_classification_to_db(
+    message_ts: str,
+    team_id: str,
+    classification: Literal["question", "index", "ignore"],
+    message_text: str,
+) -> str | None:
+    try:
+        async with async_session_maker() as session:
+            classification_record = SlackMessageClassificationDb(
+                id=str(uuid4()),
+                message_ts=message_ts,
+                team_id=team_id,
+                classification=classification,
+                message_text=message_text,
+                classified_at=datetime.now(UTC),
+            )
+            session.add(classification_record)
+            await session.commit()
+            LOGGER.info(f"Logged message classification to database: {classification_record.id}")
+            return classification_record.id
+    except Exception as e:
+        LOGGER.error(f"Failed to log classification to database: {e}")
+        return None
 
 
 async def log_query_to_db(
@@ -324,6 +351,8 @@ async def process_message(
 async def handle_slack_message(
     event: dict[str, Any], team_id: str, is_app_mention: bool = False
 ) -> SlackMessageResponse:
+    message_ts = event.get("ts")
+
     context = SlackMessageContext(
         text=event.get("text", ""),
         channel=event.get("channel", ""),
@@ -412,6 +441,11 @@ async def handle_slack_message(
             LOGGER.error(f"Error classifying message: {e}, treating as 'ignore'")
             message_classification = "ignore"
 
+        if message_classification:
+            await log_slack_classification_to_db(
+                str(message_ts) or "", context.team_id, message_classification, context.text
+            )
+
     message_action = get_message_action(channel_settings, is_app_mention, message_classification)
 
     LOGGER.info(
@@ -426,7 +460,6 @@ async def handle_slack_message(
     elif message_action == "index":
         LOGGER.info(f"Message marked for indexing from {context.user} in {context.channel}: {context.text[:100]}...")
 
-        message_ts = event.get("ts")
         if integration.slack_bot_token and message_ts and context.channel:
             try:
                 await add_reaction(context.channel, message_ts, "brain", integration.slack_bot_token)
