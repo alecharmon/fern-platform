@@ -8,30 +8,30 @@ import type { AlgoliaRecord } from "@fern-docs/search-keyword/types";
 
 import type { AlgoliaRecordHit } from "../types";
 import {
-  useMeilisearchHits,
-  useMeilisearchInfiniteHits,
-  useMeilisearchSendEvent,
+    useMeilisearchHits,
+    useMeilisearchInfiniteHits,
+    useMeilisearchSendEvent
 } from "./meilisearch/use-infinite-hits";
 
 export function useSearchHits(): AlgoliaRecordHit[] {
-  if (isSelfHosted()) {
-    return useDeferredValue(useMeilisearchHits());
-  }
-  const { items } = useHits<AlgoliaRecord>();
-  return useDeferredValue(items);
+    if (isSelfHosted()) {
+        return useDeferredValue(useMeilisearchHits());
+    }
+    const { items } = useHits<AlgoliaRecord>();
+    return useDeferredValue(items);
 }
 
 export function useSendEvent(): SendEventForHits {
-  if (isSelfHosted()) {
-    return useMeilisearchSendEvent();
-  }
-  const { sendEvent } = useHits();
-  return sendEvent;
+    if (isSelfHosted()) {
+        return useMeilisearchSendEvent();
+    }
+    const { sendEvent } = useHits();
+    return sendEvent;
 }
 
 export function useInfiniteSearchHits() {
-  if (isSelfHosted()) {
-    return useMeilisearchInfiniteHits();
-  }
-  return useInfiniteHits<AlgoliaRecord>();
+    if (isSelfHosted()) {
+        return useMeilisearchInfiniteHits();
+    }
+    return useInfiniteHits<AlgoliaRecord>();
 }

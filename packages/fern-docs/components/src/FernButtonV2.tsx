@@ -8,64 +8,52 @@ import { type VariantProps, cva } from "class-variance-authority";
 import { cn } from "./cn";
 
 const buttonVariants = cva(
-  "focus-visible:ring-(color:--accent) rounded-2 inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors hover:transition-none focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-(color:--accent) hover:bg-(color:--accent-10) text-(color:--accent-contrast)",
-        destructive:
-          "bg-(color:--red-a9) text-(color:--red-a12) hover:bg-(color:--red-a10)",
-        outline:
-          "border-border-default text-(color:--grayscale-11) hover:bg-(color:--grayscale-a4) hover:text-(color:--grayscale-12) data-[state=active]:bg-(color:--grayscale-a4) data-[state=open]:bg-(color:--grayscale-a4) border",
-        outlineSuccess:
-          "border-(color:--green-a6) bg-(color:--green-a2) text-(color:--green-11) hover:bg-(color:--green-a4) data-[state=active]:bg-(color:--green-a4) data-[state=open]:bg-(color:--green-a4) border",
-        outlineDanger:
-          "border-(color:--red-a6) bg-(color:--red-a2) text-(color:--red-11) hover:bg-(color:--red-a4) data-[state=active]:bg-(color:--red-a4) data-[state=open]:bg-(color:--red-a4) border",
-        secondary:
-          "bg-(color:--grayscale-a3) text-(color:--accent-12) hover:bg-(color:--grayscale-a4)",
-        ghost:
-          "text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-11)",
-        success:
-          "bg-(color:--green-a9) hover:bg-(color:--green-a10) text-(color:--green-1)",
-        ghostMinimal:
-          "text-(color:--grayscale-a11) hover:text-(color:--accent) border-none",
-        link: "text-(color:--accent-6) underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-9 px-4 py-2",
-        xs: "h-6 px-2 text-xs",
-        sm: "pointer-coarse:h-9 h-8 px-3 text-sm",
-        lg: "h-10 px-8",
-        icon: "size-9",
-        iconSm: "pointer-coarse:size-9 size-7",
-        iconXs: "size-6",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
+    "focus-visible:ring-(color:--accent) rounded-2 inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors hover:transition-none focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+    {
+        variants: {
+            variant: {
+                default: "bg-(color:--accent) hover:bg-(color:--accent-10) text-(color:--accent-contrast)",
+                destructive: "bg-(color:--red-a9) text-(color:--red-a12) hover:bg-(color:--red-a10)",
+                outline:
+                    "border-border-default text-(color:--grayscale-11) hover:bg-(color:--grayscale-a4) hover:text-(color:--grayscale-12) data-[state=active]:bg-(color:--grayscale-a4) data-[state=open]:bg-(color:--grayscale-a4) border",
+                outlineSuccess:
+                    "border-(color:--green-a6) bg-(color:--green-a2) text-(color:--green-11) hover:bg-(color:--green-a4) data-[state=active]:bg-(color:--green-a4) data-[state=open]:bg-(color:--green-a4) border",
+                outlineDanger:
+                    "border-(color:--red-a6) bg-(color:--red-a2) text-(color:--red-11) hover:bg-(color:--red-a4) data-[state=active]:bg-(color:--red-a4) data-[state=open]:bg-(color:--red-a4) border",
+                secondary: "bg-(color:--grayscale-a3) text-(color:--accent-12) hover:bg-(color:--grayscale-a4)",
+                ghost: "text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-11)",
+                success: "bg-(color:--green-a9) hover:bg-(color:--green-a10) text-(color:--green-1)",
+                ghostMinimal: "text-(color:--grayscale-a11) hover:text-(color:--accent) border-none",
+                link: "text-(color:--accent-6) underline-offset-4 hover:underline"
+            },
+            size: {
+                default: "h-9 px-4 py-2",
+                xs: "h-6 px-2 text-xs",
+                sm: "pointer-coarse:h-9 h-8 px-3 text-sm",
+                lg: "h-10 px-8",
+                icon: "size-9",
+                iconSm: "pointer-coarse:size-9 size-7",
+                iconXs: "size-6"
+            }
+        },
+        defaultVariants: {
+            variant: "default",
+            size: "default"
+        }
+    }
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
+    extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+        VariantProps<typeof buttonVariants> {
+    asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
+    ({ className, variant, size, asChild = false, ...props }, ref) => {
+        const Comp = asChild ? Slot : "button";
+        return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+    }
 );
 Button.displayName = "Button";
 

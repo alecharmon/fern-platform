@@ -1,21 +1,18 @@
 "use client";
 
-import {
-  DangerousTransmittableDocsLoaderData,
-  PrefetchedDocsLoader,
-} from "@fern-api/docs-loader/client";
+import { DangerousTransmittableDocsLoaderData, PrefetchedDocsLoader } from "@fern-api/docs-loader/client";
 
 import { SidebarTabsRootImpl } from "./SidebarTabsRootImpl";
 
 export function SidebarClientTabsRoot({
-  children,
-  loaderData,
+    children,
+    loaderData
 }: {
-  children: React.ReactNode;
-  loaderData: DangerousTransmittableDocsLoaderData;
+    children: React.ReactNode;
+    loaderData: DangerousTransmittableDocsLoaderData;
 }) {
-  const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
-  const layout = loader.getLayout();
+    const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
+    const layout = loader.getLayout();
 
-  return <SidebarTabsRootImpl layout={layout}>{children}</SidebarTabsRootImpl>;
+    return <SidebarTabsRootImpl layout={layout}>{children}</SidebarTabsRootImpl>;
 }

@@ -11,89 +11,81 @@ const WORKOS_API_URL = "https://api.workos.com";
 const WEBFLOW_API_URL = "https://webflow.com";
 
 export function getAllowedRedirectUrls(
-  authConfig?: AuthEdgeConfig | undefined,
-  previewAuthConfig?: PreviewUrlAuth | undefined
+    authConfig?: AuthEdgeConfig | undefined,
+    previewAuthConfig?: PreviewUrlAuth | undefined
 ): string[] {
-  return [
-    ...getAllowedRedirectUrlsForAuthConfig(authConfig),
-    ...getAllowedRedirectUrlsForPreviewAuthConfig(previewAuthConfig),
-  ];
+    return [
+        ...getAllowedRedirectUrlsForAuthConfig(authConfig),
+        ...getAllowedRedirectUrlsForPreviewAuthConfig(previewAuthConfig)
+    ];
 }
 
 function getAllowedRedirectUrlsForAuthConfig(authConfig?: AuthEdgeConfig) {
-  if (authConfig == null) {
+    if (authConfig == null) {
+        return [];
+    }
+
+    switch (authConfig.type) {
+        case "basic_token_verification":
+            // since the `redirect` and `logout` are configured in the edge config, we can trust them
+            return compact([authConfig.redirect, authConfig.logout]);
+        case "sso":
+            return getAllowedRedirectUrlsForSSO(authConfig);
+        case "oauth2":
+            return getAllowedRedirectUrlsForOAuth2(authConfig);
+        default:
+            console.error(new UnreachableCaseError(authConfig));
+    }
+
     return [];
-  }
-
-  switch (authConfig.type) {
-    case "basic_token_verification":
-      // since the `redirect` and `logout` are configured in the edge config, we can trust them
-      return compact([authConfig.redirect, authConfig.logout]);
-    case "sso":
-      return getAllowedRedirectUrlsForSSO(authConfig);
-    case "oauth2":
-      return getAllowedRedirectUrlsForOAuth2(authConfig);
-    default:
-      console.error(new UnreachableCaseError(authConfig));
-  }
-
-  return [];
 }
 
-function getAllowedRedirectUrlsForPreviewAuthConfig(
-  previewAuthConfig?: PreviewUrlAuth
-) {
-  if (previewAuthConfig == null) {
+function getAllowedRedirectUrlsForPreviewAuthConfig(previewAuthConfig?: PreviewUrlAuth) {
+    if (previewAuthConfig == null) {
+        return [];
+    }
+
+    switch (previewAuthConfig.type) {
+        case "workos":
+            return [WORKOS_API_URL];
+        default:
+            console.error(new UnreachableCaseError(previewAuthConfig.type));
+    }
+
     return [];
-  }
-
-  switch (previewAuthConfig.type) {
-    case "workos":
-      return [WORKOS_API_URL];
-    default:
-      console.error(new UnreachableCaseError(previewAuthConfig.type));
-  }
-
-  return [];
 }
 
 function getAllowedRedirectUrlsForSSO(_authConfig: SSOWorkOS) {
-  return [WORKOS_API_URL];
+    return [WORKOS_API_URL];
 }
 
 function getAllowedRedirectUrlsForOAuth2(authConfig: OAuth2) {
-  if (!("partner" in authConfig)) {
-    console.error("Missing required partner field in auth configuration");
-    return [];
-  }
+    if (!("partner" in authConfig)) {
+        console.error("Missing required partner field in auth configuration");
+        return [];
+    }
 
-  switch (authConfig.partner) {
-    case "ory":
-      if ("environment" in authConfig) {
-        // since the environment is configured in the edge config, we can trust it
-        // custom for ory (to be removed in the future)
-        return [authConfig.environment];
-      }
+    switch (authConfig.partner) {
+        case "ory":
+            if ("environment" in authConfig) {
+                // since the environment is configured in the edge config, we can trust it
+                // custom for ory (to be removed in the future)
+                return [authConfig.environment];
+            }
 
-      return [];
-    case "webflow":
-      return [WEBFLOW_API_URL];
-    default:
-      // generalized oauth2 flow
-      if (
-        "redirect_urls" in authConfig &&
-        typeof authConfig.redirect_urls === "string"
-      ) {
-        return [authConfig.redirect_urls];
-      }
+            return [];
+        case "webflow":
+            return [WEBFLOW_API_URL];
+        default:
+            // generalized oauth2 flow
+            if ("redirect_urls" in authConfig && typeof authConfig.redirect_urls === "string") {
+                return [authConfig.redirect_urls];
+            }
 
-      if (
-        "redirect_urls" in authConfig &&
-        Array.isArray(authConfig.redirect_urls)
-      ) {
-        return authConfig.redirect_urls;
-      }
+            if ("redirect_urls" in authConfig && Array.isArray(authConfig.redirect_urls)) {
+                return authConfig.redirect_urls;
+            }
 
-      return [];
-  }
+            return [];
+    }
 }

@@ -1,42 +1,42 @@
 export function cleanHost(host: string | null | undefined): string | undefined {
-  if (typeof host !== "string") {
-    return undefined;
-  }
+    if (typeof host !== "string") {
+        return undefined;
+    }
 
-  // handle case where host might contain multiple domains separated by commas
-  if (host.includes(",")) {
-    host = host.split(",")[0];
-  }
+    // handle case where host might contain multiple domains separated by commas
+    if (host.includes(",")) {
+        host = host.split(",")[0];
+    }
 
-  if (typeof host !== "string") {
-    return undefined;
-  }
+    if (typeof host !== "string") {
+        return undefined;
+    }
 
-  host = host.trim();
+    host = host.trim();
 
-  // host should not be localhost
-  if (host.includes("localhost")) {
-    return undefined;
-  }
+    // host should not be localhost
+    if (host.includes("localhost")) {
+        return undefined;
+    }
 
-  // host should not be an ip address
-  if (host.match(/\d+\.\d+\.\d+\.\d+/)) {
-    return undefined;
-  }
+    // host should not be an ip address
+    if (host.match(/\d+\.\d+\.\d+\.\d+/)) {
+        return undefined;
+    }
 
-  // strip `http://` or `https://` from the host, if present
-  if (host.includes("://")) {
-    host = host.split("://")[1];
-  }
+    // strip `http://` or `https://` from the host, if present
+    if (host.includes("://")) {
+        host = host.split("://")[1];
+    }
 
-  // strip trailing slash from the host, if present
-  if (host?.endsWith("/")) {
-    host = host.slice(0, -1);
-  }
+    // strip trailing slash from the host, if present
+    if (host?.endsWith("/")) {
+        host = host.slice(0, -1);
+    }
 
-  if (host === "") {
-    return undefined;
-  }
+    if (host === "") {
+        return undefined;
+    }
 
-  return host;
+    return host;
 }

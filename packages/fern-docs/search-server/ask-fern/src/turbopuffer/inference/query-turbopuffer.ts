@@ -7,95 +7,92 @@ import { buildQueryFilters } from "./query-filters";
 import { reciprocalRankFusion } from "./reciprocal-rank-fusion";
 
 interface SemanticSearchOptions {
-  vectorizer: (text: string) => Promise<number[]>;
-  namespace: string;
-  apiKey: string;
-  topK: number;
-  filters?: FacetFilter[];
-  explodedRoles: string[];
+    vectorizer: (text: string) => Promise<number[]>;
+    namespace: string;
+    apiKey: string;
+    topK: number;
+    filters?: FacetFilter[];
+    explodedRoles: string[];
 
-  /**
-   * The search mode to use.
-   * @default "semantic"
-   */
-  mode?: "semantic" | "bm25" | "hybrid";
+    /**
+     * The search mode to use.
+     * @default "semantic"
+     */
+    mode?: "semantic" | "bm25" | "hybrid";
 
-  // ignore these document ids & urls; used to avoid tool-calls returning the same document over and over
-  documentIdsToIgnore?: string[];
-  urlsToIgnore?: string[];
+    // ignore these document ids & urls; used to avoid tool-calls returning the same document over and over
+    documentIdsToIgnore?: string[];
+    urlsToIgnore?: string[];
 
-  // include only these specific documents
-  documentUrls?: string[];
+    // include only these specific documents
+    documentUrls?: string[];
 }
 
 export async function queryTurbopuffer(
-  query: string,
-  {
-    vectorizer,
-    namespace,
-    apiKey,
-    topK,
-    filters,
-    explodedRoles,
-    mode = "hybrid",
-    documentIdsToIgnore = [],
-    urlsToIgnore = [],
-    documentUrls,
-  }: SemanticSearchOptions
+    query: string,
+    {
+        vectorizer,
+        namespace,
+        apiKey,
+        topK,
+        filters,
+        explodedRoles,
+        mode = "hybrid",
+        documentIdsToIgnore = [],
+        urlsToIgnore = [],
+        documentUrls
+    }: SemanticSearchOptions
 ): Promise<TurbopufferRecord[]> {
-  const tpuf = new Turbopuffer({
-    apiKey,
-    baseUrl: "https://gcp-us-east4.turbopuffer.com",
-  });
-  const ns = tpuf.namespace(namespace);
-
-  const vector = await vectorizer(query);
-
-  const queryFilters = buildQueryFilters({
-    filters: filters ?? [],
-    explodedRoles,
-    documentIdsToIgnore,
-    urlsToIgnore,
-    documentUrls,
-  });
-
-  if (documentUrls?.length) {
-    const results = await ns.query({
-      filters: queryFilters,
-      include_attributes: true,
+    const tpuf = new Turbopuffer({
+        apiKey,
+        baseUrl: "https://gcp-us-east4.turbopuffer.com"
     });
-    return results as unknown as TurbopufferRecord[];
-  }
+    const ns = tpuf.namespace(namespace);
 
-  const semanticResults =
-    mode !== "bm25"
-      ? await ns.query({
-          vector,
-          distance_metric: "cosine_distance",
-          top_k: 1,
-          include_attributes: true,
-          filters: queryFilters,
-        })
-      : [];
+    const vector = await vectorizer(query);
 
-  const bm25Results =
-    mode !== "semantic" && query.length < 1024
-      ? await ns.query({
-          top_k: topK,
-          include_attributes: true,
-          filters: queryFilters,
-          rank_by: [
-            "Sum",
-            [
-              ["title", "BM25", query],
-              ["keywords", "BM25", query],
-            ],
-          ],
-        })
-      : [];
+    const queryFilters = buildQueryFilters({
+        filters: filters ?? [],
+        explodedRoles,
+        documentIdsToIgnore,
+        urlsToIgnore,
+        documentUrls
+    });
 
-  return reciprocalRankFusion(
-    semanticResults,
-    bm25Results
-  ) as unknown as TurbopufferRecord[];
+    if (documentUrls?.length) {
+        const results = await ns.query({
+            filters: queryFilters,
+            include_attributes: true
+        });
+        return results as unknown as TurbopufferRecord[];
+    }
+
+    const semanticResults =
+        mode !== "bm25"
+            ? await ns.query({
+                  vector,
+                  distance_metric: "cosine_distance",
+                  top_k: 1,
+                  include_attributes: true,
+                  filters: queryFilters
+              })
+            : [];
+
+    const bm25Results =
+        mode !== "semantic" && query.length < 1024
+            ? await ns.query({
+                  top_k: topK,
+                  include_attributes: true,
+                  filters: queryFilters,
+                  rank_by: [
+                      "Sum",
+                      [
+                          ["title", "BM25", query],
+                          ["keywords", "BM25", query]
+                      ]
+                  ]
+              })
+            : [];
+
+    return reciprocalRankFusion(semanticResults, bm25Results) as unknown as TurbopufferRecord[];
 }

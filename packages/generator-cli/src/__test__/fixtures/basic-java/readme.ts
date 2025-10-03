@@ -5,10 +5,10 @@ const CONFIG: FernGeneratorCli.ReadmeConfig = {
         publishInfo: {
             group: "io.intercom",
             artifact: "intercom-java",
-            version: "3.0.0",
-        },
+            version: "3.0.0"
+        }
     }),
-    organization: "basic",
+    organization: "basic"
 };
 
 export default CONFIG;

@@ -7,22 +7,11 @@ import { AbstractLogo } from "@fern-docs/components/abstract/logo";
 
 import { LogoText } from "@/state/logo-text";
 
-export function Logo({
-  logo,
-  className,
-  alt,
-}: {
-  logo: LogoConfiguration;
-  className?: string;
-  alt?: string;
-}) {
-  return (
-    <MaybeFernLink
-      href={logo.href}
-      className={cn(className, "flex items-center")}
-    >
-      <AbstractLogo logo={logo} alt={alt} />
-      <LogoText className="ml-1" />
-    </MaybeFernLink>
-  );
+export function Logo({ logo, className, alt }: { logo: LogoConfiguration; className?: string; alt?: string }) {
+    return (
+        <MaybeFernLink href={logo.href} className={cn(className, "flex items-center")}>
+            <AbstractLogo logo={logo} alt={alt} />
+            <LogoText className="ml-1" />
+        </MaybeFernLink>
+    );
 }

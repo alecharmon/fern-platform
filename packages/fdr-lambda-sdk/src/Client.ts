@@ -42,10 +42,10 @@ export class FdrLambdaClient {
                 {
                     "X-Fern-Language": "JavaScript",
                     "X-Fern-Runtime": core.RUNTIME.type,
-                    "X-Fern-Runtime-Version": core.RUNTIME.version,
+                    "X-Fern-Runtime-Version": core.RUNTIME.version
                 },
-                _options?.headers,
-            ),
+                _options?.headers
+            )
         };
     }
 

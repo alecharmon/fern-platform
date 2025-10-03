@@ -16,56 +16,46 @@ import { FacetFiltersContext, useFacetFilters } from "./useFacetFilters";
  */
 
 export function FacetFiltersProvider({
-  children,
-  initialFilters,
-  fetchFacets,
+    children,
+    initialFilters,
+    fetchFacets
 }: {
-  children: React.ReactNode;
-  initialFilters?: Partial<Record<FacetName, string>>;
-  fetchFacets: (filters: readonly string[]) => Promise<FacetsResponse>;
+    children: React.ReactNode;
+    initialFilters?: Partial<Record<FacetName, string>>;
+    fetchFacets: (filters: readonly string[]) => Promise<FacetsResponse>;
 }): React.ReactNode {
-  const { setFilters } = useFacetFilters();
+    const { setFilters } = useFacetFilters();
 
-  const preloadFacets = useCallback(
-    (filters: readonly FacetFilter[]) =>
-      preload(
-        ["facets", ...toAlgoliaFacetFilters(filters)],
-        ([_, ...filters]) => fetchFacets(filters)
-      ),
-    [fetchFacets]
-  );
+    const preloadFacets = useCallback(
+        (filters: readonly FacetFilter[]) =>
+            preload(["facets", ...toAlgoliaFacetFilters(filters)], ([_, ...filters]) => fetchFacets(filters)),
+        [fetchFacets]
+    );
 
-  // preload facets on initial render so that they're cached before the user runs `cmdk`
-  useDeepCompareEffectNoCheck(() => {
-    const filters = toFacetFilters(initialFilters);
-    void preloadFacets(filters);
-    setFilters(filters);
-  }, [initialFilters, preloadFacets, setFilters]);
+    // preload facets on initial render so that they're cached before the user runs `cmdk`
+    useDeepCompareEffectNoCheck(() => {
+        const filters = toFacetFilters(initialFilters);
+        void preloadFacets(filters);
+        setFilters(filters);
+    }, [initialFilters, preloadFacets, setFilters]);
 
-  const value = useMemo(
-    () => ({ preloadFacets, fetchFacets }),
-    [preloadFacets, fetchFacets]
-  );
-  return (
-    <FacetFiltersContext.Provider value={value}>
-      {children}
-    </FacetFiltersContext.Provider>
-  );
+    const value = useMemo(() => ({ preloadFacets, fetchFacets }), [preloadFacets, fetchFacets]);
+    return <FacetFiltersContext.Provider value={value}>{children}</FacetFiltersContext.Provider>;
 }
 
 /**
  * Converts the given initial filters to facet filters.
  */
 export function toFacetFilters(
-  initialFilters: Partial<Record<FacetName, string>> = EMPTY_OBJECT
+    initialFilters: Partial<Record<FacetName, string>> = EMPTY_OBJECT
 ): readonly FacetFilter[] {
-  const toRet: FacetFilter[] = [];
+    const toRet: FacetFilter[] = [];
 
-  Object.entries(initialFilters).forEach(([facet, value]) => {
-    if (isFacetName(facet) && value) {
-      toRet.push({ facet, value });
-    }
-  });
+    Object.entries(initialFilters).forEach(([facet, value]) => {
+        if (isFacetName(facet) && value) {
+            toRet.push({ facet, value });
+        }
+    });
 
-  return toRet;
+    return toRet;
 }

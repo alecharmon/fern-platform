@@ -24,9 +24,7 @@
       "default": "./dist/algolia/records/archive/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",

@@ -6,7 +6,7 @@ import { unknownToMdxJsxAttribute } from "../mdx-utils/unknown-to-mdx-jsx-attr";
 import { Unified } from "../unified";
 
 interface AcornErrorBoundaryOptions {
-  errorBoundaryComponentName?: string;
+    errorBoundaryComponentName?: string;
 }
 
 /**
@@ -14,35 +14,34 @@ interface AcornErrorBoundaryOptions {
  *
  * Requirement: `ErrorBoundary` is globally available with `fallback` string property
  */
-export const rehypeAcornErrorBoundary: Unified.Plugin<
-  [AcornErrorBoundaryOptions?],
-  Root
-> = ({ errorBoundaryComponentName = "ErrorBoundary" } = {}) => {
-  return (root) => {
-    visit(root, (node, index, parent) => {
-      if (index == null || parent == null) {
-        return CONTINUE;
-      }
+export const rehypeAcornErrorBoundary: Unified.Plugin<[AcornErrorBoundaryOptions?], Root> = ({
+    errorBoundaryComponentName = "ErrorBoundary"
+} = {}) => {
+    return (root) => {
+        visit(root, (node, index, parent) => {
+            if (index == null || parent == null) {
+                return CONTINUE;
+            }
 
-      if (isMdxExpression(node)) {
-        parent.children[index] = {
-          type: "mdxJsxFlowElement",
-          name: errorBoundaryComponentName,
-          children: [node],
-          attributes: [unknownToMdxJsxAttribute("fallback", `{${node.value}}`)],
-        };
-      }
+            if (isMdxExpression(node)) {
+                parent.children[index] = {
+                    type: "mdxJsxFlowElement",
+                    name: errorBoundaryComponentName,
+                    children: [node],
+                    attributes: [unknownToMdxJsxAttribute("fallback", `{${node.value}}`)]
+                };
+            }
 
-      if (isMdxJsxElementHast(node)) {
-        parent.children[index] = {
-          type: "mdxJsxFlowElement",
-          name: errorBoundaryComponentName,
-          children: [node],
-          attributes: [],
-        };
-      }
+            if (isMdxJsxElementHast(node)) {
+                parent.children[index] = {
+                    type: "mdxJsxFlowElement",
+                    name: errorBoundaryComponentName,
+                    children: [node],
+                    attributes: []
+                };
+            }
 
-      return CONTINUE;
-    });
-  };
+            return CONTINUE;
+        });
+    };
 };

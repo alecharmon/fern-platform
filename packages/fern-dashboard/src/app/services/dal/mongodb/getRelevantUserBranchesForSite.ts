@@ -1,10 +1,7 @@
 "use server";
 
 import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-import {
-  UnzippedEditorDocument,
-  visualEditorStorage,
-} from "@fern-api/visual-editor-server";
+import { UnzippedEditorDocument, visualEditorStorage } from "@fern-api/visual-editor-server";
 import { branchMatchesUser } from "@fern-docs/components/navigation/local-storage";
 
 import { DocsUrl } from "@/utils/types";
@@ -21,52 +18,49 @@ import { assertUserHasOrganizationAccess } from "../organization";
  * @returns Array of branch names, sorted by relevance
  */
 export async function getRelevantUserBranchesForSite(
-  orgName: Auth0OrgName,
-  docsUrl: DocsUrl,
-  branchNamesInClientStorage: string[]
+    orgName: Auth0OrgName,
+    docsUrl: DocsUrl,
+    branchNamesInClientStorage: string[]
 ): Promise<string[]> {
-  try {
-    const session = await getCurrentSession();
-    if (session == null) {
-      return [];
+    try {
+        const session = await getCurrentSession();
+        if (session == null) {
+            return [];
+        }
+        await assertUserHasOrganizationAccess({
+            token: session.accessToken,
+            orgName
+        });
+
+        // Filter local branches to only include branches that match the user's branch naming format
+        const userBranches = branchNamesInClientStorage.filter((branchName) =>
+            branchMatchesUser(branchName, session.user.sub)
+        );
+
+        // Get the branch documents from the database
+        const branchDocuments = await visualEditorStorage.getDocumentsForBranches(userBranches);
+
+        // Filter the branch documents to only include branches that match the site and org
+        const filteredBranchesForSiteAndOrg = branchDocuments
+            .filter(
+                (document) =>
+                    document != null && document.domain === docsUrl && document.data.orgId === FdrAPI.OrgId(orgName)
+            )
+            .filter((document) => document != null);
+
+        // Sort by date (newest first)
+        const sortedBranches = filteredBranchesForSiteAndOrg.sort(
+            (a: UnzippedEditorDocument, b: UnzippedEditorDocument) => {
+                const dateA = a.updatedAt;
+                const dateB = b.updatedAt;
+
+                return dateB.getTime() - dateA.getTime();
+            }
+        );
+
+        return sortedBranches.map((document) => document.branchName);
+    } catch (error) {
+        console.warn("Failed to get relevant branches from stored data:", error);
+        return [];
     }
-    await assertUserHasOrganizationAccess({
-      token: session.accessToken,
-      orgName,
-    });
-
-    // Filter local branches to only include branches that match the user's branch naming format
-    const userBranches = branchNamesInClientStorage.filter((branchName) =>
-      branchMatchesUser(branchName, session.user.sub)
-    );
-
-    // Get the branch documents from the database
-    const branchDocuments =
-      await visualEditorStorage.getDocumentsForBranches(userBranches);
-
-    // Filter the branch documents to only include branches that match the site and org
-    const filteredBranchesForSiteAndOrg = branchDocuments
-      .filter(
-        (document) =>
-          document != null &&
-          document.domain === docsUrl &&
-          document.data.orgId === FdrAPI.OrgId(orgName)
-      )
-      .filter((document) => document != null);
-
-    // Sort by date (newest first)
-    const sortedBranches = filteredBranchesForSiteAndOrg.sort(
-      (a: UnzippedEditorDocument, b: UnzippedEditorDocument) => {
-        const dateA = a.updatedAt;
-        const dateB = b.updatedAt;
-
-        return dateB.getTime() - dateA.getTime();
-      }
-    );
-
-    return sortedBranches.map((document) => document.branchName);
-  } catch (error) {
-    console.warn("Failed to get relevant branches from stored data:", error);
-    return [];
-  }
 }

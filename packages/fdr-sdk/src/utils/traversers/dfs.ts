@@ -1,29 +1,29 @@
 import { SKIP, STOP, TraverserGetChildren, TraverserVisit } from "./types";
 
 export function dfs<N, P extends N = N>(
-  root: N,
-  visit: TraverserVisit<N, P>,
-  getChildren: TraverserGetChildren<N, P>,
-  isParent: (node: N) => node is P = (node): node is P => true
+    root: N,
+    visit: TraverserVisit<N, P>,
+    getChildren: TraverserGetChildren<N, P>,
+    isParent: (node: N) => node is P = (node): node is P => true
 ): void {
-  const stack: [N, P[]][] = [[root, []]];
-  while (stack.length > 0) {
-    const [node, parents] = stack.pop() ?? [];
-    if (!node) {
-      continue;
-    }
-    const next = visit(node, parents ?? []);
+    const stack: [N, P[]][] = [[root, []]];
+    while (stack.length > 0) {
+        const [node, parents] = stack.pop() ?? [];
+        if (!node) {
+            continue;
+        }
+        const next = visit(node, parents ?? []);
 
-    if (next === SKIP) {
-      continue;
-    } else if (next === STOP) {
-      return;
-    }
+        if (next === SKIP) {
+            continue;
+        } else if (next === STOP) {
+            return;
+        }
 
-    if (isParent(node)) {
-      for (const child of [...getChildren(node)].reverse()) {
-        stack.push([child, [...(parents ?? []), node]]);
-      }
+        if (isParent(node)) {
+            for (const child of [...getChildren(node)].reverse()) {
+                stack.push([child, [...(parents ?? []), node]]);
+            }
+        }
     }
-  }
 }

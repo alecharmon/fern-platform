@@ -6,82 +6,74 @@ import { createNavigationMemoryStorage } from "../NavigationStorage";
 import { NavigationStore } from "../NavigationStore";
 
 const createTestPageData = () => ({
-  html: "<p>Test</p>",
-  frontmatter: { title: "Test" },
+    html: "<p>Test</p>",
+    frontmatter: { title: "Test" }
 });
 
-const createTestNode = (
-  id = "test-id",
-  title = "Test Page"
-): FernNavigation.PageNode => ({
-  id: id as FernNavigation.NodeId,
-  type: "page" as const,
-  title,
-  slug: title.toLowerCase().replace(" ", "-") as FernNavigation.Slug,
-  pageId: id as FernNavigation.PageId,
-  availability: undefined,
-  canonicalSlug: undefined,
-  icon: undefined,
-  hidden: undefined,
-  authed: undefined,
-  viewers: undefined,
-  orphaned: undefined,
-  featureFlags: undefined,
-  noindex: undefined,
+const createTestNode = (id = "test-id", title = "Test Page"): FernNavigation.PageNode => ({
+    id: id as FernNavigation.NodeId,
+    type: "page" as const,
+    title,
+    slug: title.toLowerCase().replace(" ", "-") as FernNavigation.Slug,
+    pageId: id as FernNavigation.PageId,
+    availability: undefined,
+    canonicalSlug: undefined,
+    icon: undefined,
+    hidden: undefined,
+    authed: undefined,
+    viewers: undefined,
+    orphaned: undefined,
+    featureFlags: undefined,
+    noindex: undefined
 });
 
 describe("NavigationStore", () => {
-  let store: NavigationStore;
+    let store: NavigationStore;
 
-  beforeEach(() => {
-    store = new NavigationStore(
-      "test-branch",
-      "test-org",
-      "https://test.com",
-      createNavigationMemoryStorage()
-    );
-  });
-
-  describe("page data persistence", () => {
-    it("should save and retrieve page data", () => {
-      const pageData = { "test.mdx": createTestPageData() };
-
-      store.savePageData(pageData);
-
-      const retrieved = store.loadPageData("test.mdx");
-      expect(retrieved).toEqual({
-        ...pageData["test.mdx"],
-        lastModified: expect.any(Number),
-        pageType: "server",
-      });
+    beforeEach(() => {
+        store = new NavigationStore("test-branch", "test-org", "https://test.com", createNavigationMemoryStorage());
     });
-  });
 
-  describe("commit success handling", () => {
-    it("should track committed files after success", () => {
-      const allFilesToCommit = {
-        "test.mdx": "# Test Content",
-        "docs.yml": "navigation: []",
-      };
+    describe("page data persistence", () => {
+        it("should save and retrieve page data", () => {
+            const pageData = { "test.mdx": createTestPageData() };
 
-      store.handleCommitSuccess(allFilesToCommit);
+            store.savePageData(pageData);
 
-      const committedFiles = store.getCommittedFiles();
-      expect(committedFiles.has("test.mdx")).toBe(true);
+            const retrieved = store.loadPageData("test.mdx");
+            expect(retrieved).toEqual({
+                ...pageData["test.mdx"],
+                lastModified: expect.any(Number),
+                pageType: "server"
+            });
+        });
     });
-  });
 
-  describe("client pages", () => {
-    it("should create, update, and retrieve client pages", () => {
-      const testNode = createTestNode();
-      const pageData = createTestPageData();
-      const parentId = "parent-id" as FernNavigation.NodeId;
+    describe("commit success handling", () => {
+        it("should track committed files after success", () => {
+            const allFilesToCommit = {
+                "test.mdx": "# Test Content",
+                "docs.yml": "navigation: []"
+            };
 
-      store.createPage(parentId, testNode);
-      expect(store.loadClientNodes()[parentId]).toEqual([testNode]);
+            store.handleCommitSuccess(allFilesToCommit);
 
-      store.updatePage(testNode.id, pageData);
-      expect(store.loadClientFoundNodes()[testNode.id]).toBeDefined();
+            const committedFiles = store.getCommittedFiles();
+            expect(committedFiles.has("test.mdx")).toBe(true);
+        });
     });
-  });
+
+    describe("client pages", () => {
+        it("should create, update, and retrieve client pages", () => {
+            const testNode = createTestNode();
+            const pageData = createTestPageData();
+            const parentId = "parent-id" as FernNavigation.NodeId;
+
+            store.createPage(parentId, testNode);
+            expect(store.loadClientNodes()[parentId]).toEqual([testNode]);
+
+            store.updatePage(testNode.id, pageData);
+            expect(store.loadClientFoundNodes()[testNode.id]).toBeDefined();
+        });
+    });
 });

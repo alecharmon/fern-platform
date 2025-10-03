@@ -14,33 +14,29 @@ import { Editor } from "@tiptap/react";
  * and instead stores the editor instance in a state variable.
  */
 interface EditorContextType {
-  editor: Editor | null;
-  setEditor: (editor: Editor | null) => void;
+    editor: Editor | null;
+    setEditor: (editor: Editor | null) => void;
 }
 
 const EditorContext = createContext<EditorContextType>({
-  editor: null,
-  setEditor: () => undefined,
+    editor: null,
+    setEditor: () => undefined
 });
 
 export const useEditor = () => {
-  const context = useContext(EditorContext);
-  if (!context) {
-    throw new Error("useEditor must be used within an EditorProvider");
-  }
-  return context;
+    const context = useContext(EditorContext);
+    if (!context) {
+        throw new Error("useEditor must be used within an EditorProvider");
+    }
+    return context;
 };
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
-  const [editor, setEditorState] = useState<Editor | null>(null);
+    const [editor, setEditorState] = useState<Editor | null>(null);
 
-  const setEditor = useCallback((newEditor: Editor | null) => {
-    setEditorState(newEditor);
-  }, []);
+    const setEditor = useCallback((newEditor: Editor | null) => {
+        setEditorState(newEditor);
+    }, []);
 
-  return (
-    <EditorContext.Provider value={{ editor, setEditor }}>
-      {children}
-    </EditorContext.Provider>
-  );
+    return <EditorContext.Provider value={{ editor, setEditor }}>{children}</EditorContext.Provider>;
 }

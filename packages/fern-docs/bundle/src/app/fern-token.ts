@@ -5,6 +5,6 @@ import { cookies } from "next/headers";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 
 export async function getFernToken() {
-  const cookieJar = await cookies();
-  return cookieJar.get(COOKIE_FERN_TOKEN)?.value;
+    const cookieJar = await cookies();
+    return cookieJar.get(COOKIE_FERN_TOKEN)?.value;
 }

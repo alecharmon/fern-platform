@@ -5,10 +5,10 @@ const CONFIG: FernGeneratorCli.ReadmeConfig = {
         publishInfo: {
             owner: "basic",
             repo: "basic-go",
-            version: "0.0.1",
-        },
+            version: "0.0.1"
+        }
     }),
-    organization: "basic",
+    organization: "basic"
 };
 
 export default CONFIG;

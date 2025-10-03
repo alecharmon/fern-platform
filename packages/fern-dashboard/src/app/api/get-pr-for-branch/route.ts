@@ -11,39 +11,31 @@ import { ResolvedReturnType } from "@/utils/types";
 import handler from "./handler";
 
 export declare namespace getPrForBranch {
-  export type Request = z.infer<typeof GetPrForBranchRequest>;
-  export type Response = ResolvedReturnType<typeof handler>;
+    export type Request = z.infer<typeof GetPrForBranchRequest>;
+    export type Response = ResolvedReturnType<typeof handler>;
 }
 
 const GetPrForBranchRequest = GithubIdentificationScheme.and(
-  z.object({
-    orgName: orgNameValidator,
-    branch: z.string(),
-    baseBranch: z.string().optional(),
-  })
+    z.object({
+        orgName: orgNameValidator,
+        branch: z.string(),
+        baseBranch: z.string().optional()
+    })
 );
 
 export const POST = withZodValidation(
-  GetPrForBranchRequest,
-  async (
-    req: NextRequest,
-    validatedBody: z.infer<typeof GetPrForBranchRequest>
-  ) => {
-    const { orgName, branch, baseBranch, ...repoData } = validatedBody;
+    GetPrForBranchRequest,
+    async (req: NextRequest, validatedBody: z.infer<typeof GetPrForBranchRequest>) => {
+        const { orgName, branch, baseBranch, ...repoData } = validatedBody;
 
-    return withGithubAuthNextRoute(
-      req,
-      orgName,
-      repoData,
-      async ({ owner, repo }) => {
-        const result = await handler({
-          owner,
-          repo,
-          branch,
-          baseBranch,
+        return withGithubAuthNextRoute(req, orgName, repoData, async ({ owner, repo }) => {
+            const result = await handler({
+                owner,
+                repo,
+                branch,
+                baseBranch
+            });
+            return NextResponse.json(result);
         });
-        return NextResponse.json(result);
-      }
-    );
-  }
+    }
 );

@@ -16,98 +16,93 @@ import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { OrgLogo } from "./org-logo/OrgLogo";
 
 export const OrgSwitcherClient = ({
-  organizations,
-  currentOrgName,
+    organizations,
+    currentOrgName
 }: {
-  organizations: Auth0Organization[];
-  currentOrgName?: Auth0OrgName;
+    organizations: Auth0Organization[];
+    currentOrgName?: Auth0OrgName;
 }) => {
-  const orgName = useOrgNameFromPathname();
-  const [localOrgName, setLocalOrgName] = useState(currentOrgName);
-  const [searchTerm, setSearchTerm] = useState("");
+    const orgName = useOrgNameFromPathname();
+    const [localOrgName, setLocalOrgName] = useState(currentOrgName);
+    const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    setLocalOrgName(orgName);
-  }, [orgName]);
+    useEffect(() => {
+        setLocalOrgName(orgName);
+    }, [orgName]);
 
-  const pathname = usePathnameWithoutOrgName();
-  const router = useRouter();
+    const pathname = usePathnameWithoutOrgName();
+    const router = useRouter();
 
-  // Filter organizations by search term
-  const filteredOrganizations = useMemo(() => {
-    return organizations.filter((org) => {
-      const displayName = getOrgDisplayName(org) ?? "";
-      return displayName.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-  }, [organizations, searchTerm]);
+    // Filter organizations by search term
+    const filteredOrganizations = useMemo(() => {
+        return organizations.filter((org) => {
+            const displayName = getOrgDisplayName(org) ?? "";
+            return displayName.toLowerCase().includes(searchTerm.toLowerCase());
+        });
+    }, [organizations, searchTerm]);
 
-  const getPathnameForOrg = (newOrgName: Auth0OrgName) => {
-    return `/${newOrgName}${getRedirectPathname(pathname)}`;
-  };
+    const getPathnameForOrg = (newOrgName: Auth0OrgName) => {
+        return `/${newOrgName}${getRedirectPathname(pathname)}`;
+    };
 
-  const onClickOrg = (newOrgName: Auth0OrgName) => {
-    if (newOrgName !== orgName) {
-      setLocalOrgName(newOrgName);
-    }
-  };
+    const onClickOrg = (newOrgName: Auth0OrgName) => {
+        if (newOrgName !== orgName) {
+            setLocalOrgName(newOrgName);
+        }
+    };
 
-  const onHoverOrg = (hoveredOrgName: Auth0OrgName) => {
-    router.prefetch(getPathnameForOrg(hoveredOrgName));
-  };
+    const onHoverOrg = (hoveredOrgName: Auth0OrgName) => {
+        router.prefetch(getPathnameForOrg(hoveredOrgName));
+    };
 
-  const currentOrg = organizations.find((org) => org.name === localOrgName);
+    const currentOrg = organizations.find((org) => org.name === localOrgName);
 
-  return (
-    <SearchableDropdown
-      items={filteredOrganizations}
-      searchTerm={searchTerm}
-      onSearchChange={setSearchTerm}
-      onSelect={(org) => onClickOrg(org.name)}
-      searchPlaceholder="Search organizations..."
-      emptyMessage="No organizations found"
-      getItemKey={(org) => org.id}
-      shouldShowSearch={organizations.length > 10}
-      renderItem={(organization) => (
-        <Link
-          className="flex w-full cursor-pointer justify-between px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-          href={getPathnameForOrg(organization.name)}
-          onMouseOver={() => {
-            onHoverOrg(organization.name);
-          }}
-          onClick={() => {
-            onClickOrg(organization.name);
-          }}
+    return (
+        <SearchableDropdown
+            items={filteredOrganizations}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onSelect={(org) => onClickOrg(org.name)}
+            searchPlaceholder="Search organizations..."
+            emptyMessage="No organizations found"
+            getItemKey={(org) => org.id}
+            shouldShowSearch={organizations.length > 10}
+            renderItem={(organization) => (
+                <Link
+                    className="flex w-full cursor-pointer justify-between px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                    href={getPathnameForOrg(organization.name)}
+                    onMouseOver={() => {
+                        onHoverOrg(organization.name);
+                    }}
+                    onClick={() => {
+                        onClickOrg(organization.name);
+                    }}
+                >
+                    <div className="flex items-center gap-2">
+                        <OrgLogo organization={organization} />
+                        {getOrgDisplayName(organization)}
+                    </div>
+                </Link>
+            )}
         >
-          <div className="flex items-center gap-2">
-            <OrgLogo organization={organization} />
-            {getOrgDisplayName(organization)}
-          </div>
-        </Link>
-      )}
-    >
-      <Button
-        variant="outline"
-        className="shrink-0 justify-between !pl-2 md:min-w-[200px]"
-        disabled={organizations.length === 0}
-      >
-        <div className="flex items-center gap-2">
-          {currentOrg && <OrgLogo organization={currentOrg} />}
-          {currentOrg ? getOrgDisplayName(currentOrg) : "Select Organization"}
-        </div>
-        <ChevronDown className="h-4 w-4 opacity-50" />
-      </Button>
-    </SearchableDropdown>
-  );
+            <Button
+                variant="outline"
+                className="shrink-0 justify-between !pl-2 md:min-w-[200px]"
+                disabled={organizations.length === 0}
+            >
+                <div className="flex items-center gap-2">
+                    {currentOrg && <OrgLogo organization={currentOrg} />}
+                    {currentOrg ? getOrgDisplayName(currentOrg) : "Select Organization"}
+                </div>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+        </SearchableDropdown>
+    );
 };
 
 function getRedirectPathname(pathname: string) {
-  if (
-    !pathname ||
-    pathname === "/" ||
-    pathname.includes("get-started") ||
-    pathname.includes("/docs")
-  ) {
-    return "/docs";
-  }
-  return pathname;
+    if (!pathname || pathname === "/" || pathname.includes("get-started") || pathname.includes("/docs")) {
+        return "/docs";
+    }
+    return pathname;
 }

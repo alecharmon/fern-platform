@@ -3,20 +3,12 @@ import { ReactElement } from "react";
 
 import { DocsV1Read } from "@fern-api/fdr-sdk";
 
-function FullstoryScript(props: {
-  config: DocsV1Read.FullStoryAnalyticsConfig;
-}): ReactElement<any> {
-  return (
-    <Script
-      id="init-fullstory"
-      defer
-      dangerouslySetInnerHTML={{ __html: initFullstory(props.config) }}
-    />
-  );
+function FullstoryScript(props: { config: DocsV1Read.FullStoryAnalyticsConfig }): ReactElement<any> {
+    return <Script id="init-fullstory" defer dangerouslySetInnerHTML={{ __html: initFullstory(props.config) }} />;
 }
 
 function initFullstory(config: DocsV1Read.FullStoryAnalyticsConfig) {
-  return `window['_fs_host'] = 'fullstory.com';
+    return `window['_fs_host'] = 'fullstory.com';
 window['_fs_script'] = 'edge.fullstory.com/s/fs.js';
 window['_fs_org'] = '${config.orgId}';
 window['_fs_namespace'] = 'FS';

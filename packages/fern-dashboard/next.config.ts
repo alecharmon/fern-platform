@@ -19,196 +19,192 @@ const CSP_HEADER = `
 `.replace(/\n/g, "");
 
 let nextConfig: NextConfig = {
-  outputFileTracingExcludes: {
-    "./": ["**/*.map"],
-  },
-  transpilePackages: [
-    "@fern-api/docs-utils",
-    "@fern-docs/components",
-    "@fern-ui/loadable",
-  ],
-  experimental: {
-    webpackBuildWorker: true,
-    optimizePackageImports: [
-      // this will separate the `createLowlight` from the `all` import
-      "lowlight",
-    ],
-    useCache: true,
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-        port: "",
-        pathname: "/u/**",
-        search: "?v=4",
-      },
-      {
-        protocol: "https",
-        hostname: "files.buildwithfern.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-        port: "",
-        pathname: "/**",
-      },
-    ],
-  },
-  webpack: (config, { isServer }) => {
-    config.externals.push(
-      "sharp",
-      // mongodb subdependencies are optional, and need to be externalized for rspack.
-      // add them + install dependencies as needed.
-      "kerberos",
-      "@mongodb-js/zstd",
-      "@aws-sdk/credential-providers",
-      "gcp-metadata",
-      "snappy",
-      "mongodb-client-encryption"
-    );
-
-    // esbuild is only used on the server (mdx-bundler), so only externalize it there
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push("esbuild");
-    }
-
-    // rspack's internal configuration for "lib" will bundle all shared node_modules into a giant chunk,
-    // so we need to kill it
-    if (
-      config.optimization.splitChunks.cacheGroups != null &&
-      config.optimization.splitChunks.cacheGroups.lib != null
-    ) {
-      delete config.optimization.splitChunks.cacheGroups.lib;
-    }
-
-    // split chunks for build (not dev)
-    if (config.optimization.splitChunks) {
-      config.optimization.splitChunks.cacheGroups ??= {};
-
-      // Bundle all @radix-ui/react-* packages into a single chunk
-      config.optimization.splitChunks.cacheGroups.radix = {
-        test: /[\\/]node_modules[\\/]@radix-ui[\\/].*/,
-        name: "radix-ui",
-        chunks: "all",
-        enforce: true,
-      };
-    }
-
-    // glslify is used to import 3d shaders (WaveformComplexShader)
-    // into the bundle
-    config.module.rules.push({
-      test: /\.(glsl|vs|fs|vert|frag)$/,
-      exclude: /node_modules/,
-      use: [
-        "raw-loader",
-        {
-          loader: "glslify-loader",
-          options: {
-            transform: ["glslify-import"],
-          },
-        },
-      ],
-    });
-
-    // analyze the bundle using rsdoctor
-    // https://rsdoctor.rs/guide/start/quick-start#nextjs
-    if (process.env.RSD === "1" && ["client", "server"].includes(config.name)) {
-      config.plugins.push(
-        new RsdoctorRspackPlugin({
-          disableClientServer: true,
-          features: ["bundle"],
-          experiments: {
-            enableNativePlugin: true,
-          },
-          output: {
-            reportDir: config.name === "server" ? "./.next/server" : "./.next",
-          },
-        })
-      );
-    }
-
-    return config;
-  },
-
-  // vercel chokes on monorepo compilation and we run compile before building
-  typescript: {
-    ignoreBuildErrors: true,
-    tsconfigPath: "./tsconfig.app.json",
-  },
-
-  // Exclude esbuild from server bundle to avoid .d.ts parsing issues
-  serverExternalPackages: ["esbuild"],
-
-  // so it doesn't cover the theme toggle
-  devIndicators: { position: "bottom-right" },
-
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: CSP_HEADER,
-          },
+    outputFileTracingExcludes: {
+        "./": ["**/*.map"]
+    },
+    transpilePackages: ["@fern-api/docs-utils", "@fern-docs/components", "@fern-ui/loadable"],
+    experimental: {
+        webpackBuildWorker: true,
+        optimizePackageImports: [
+            // this will separate the `createLowlight` from the `all` import
+            "lowlight"
         ],
-      },
-    ];
-  },
+        useCache: true
+    },
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "avatars.githubusercontent.com",
+                port: "",
+                pathname: "/u/**",
+                search: "?v=4"
+            },
+            {
+                protocol: "https",
+                hostname: "files.buildwithfern.com",
+                port: "",
+                pathname: "/**"
+            },
+            {
+                protocol: "https",
+                hostname: "lh3.googleusercontent.com",
+                port: "",
+                pathname: "/**"
+            }
+        ]
+    },
+    webpack: (config, { isServer }) => {
+        config.externals.push(
+            "sharp",
+            // mongodb subdependencies are optional, and need to be externalized for rspack.
+            // add them + install dependencies as needed.
+            "kerberos",
+            "@mongodb-js/zstd",
+            "@aws-sdk/credential-providers",
+            "gcp-metadata",
+            "snappy",
+            "mongodb-client-encryption"
+        );
 
-  // This is required to support PostHog trailing slash API requests
-  skipTrailingSlashRedirect: true,
+        // esbuild is only used on the server (mdx-bundler), so only externalize it there
+        if (isServer) {
+            config.externals = config.externals || [];
+            config.externals.push("esbuild");
+        }
+
+        // rspack's internal configuration for "lib" will bundle all shared node_modules into a giant chunk,
+        // so we need to kill it
+        if (
+            config.optimization.splitChunks.cacheGroups != null &&
+            config.optimization.splitChunks.cacheGroups.lib != null
+        ) {
+            delete config.optimization.splitChunks.cacheGroups.lib;
+        }
+
+        // split chunks for build (not dev)
+        if (config.optimization.splitChunks) {
+            config.optimization.splitChunks.cacheGroups ??= {};
+
+            // Bundle all @radix-ui/react-* packages into a single chunk
+            config.optimization.splitChunks.cacheGroups.radix = {
+                test: /[\\/]node_modules[\\/]@radix-ui[\\/].*/,
+                name: "radix-ui",
+                chunks: "all",
+                enforce: true
+            };
+        }
+
+        // glslify is used to import 3d shaders (WaveformComplexShader)
+        // into the bundle
+        config.module.rules.push({
+            test: /\.(glsl|vs|fs|vert|frag)$/,
+            exclude: /node_modules/,
+            use: [
+                "raw-loader",
+                {
+                    loader: "glslify-loader",
+                    options: {
+                        transform: ["glslify-import"]
+                    }
+                }
+            ]
+        });
+
+        // analyze the bundle using rsdoctor
+        // https://rsdoctor.rs/guide/start/quick-start#nextjs
+        if (process.env.RSD === "1" && ["client", "server"].includes(config.name)) {
+            config.plugins.push(
+                new RsdoctorRspackPlugin({
+                    disableClientServer: true,
+                    features: ["bundle"],
+                    experiments: {
+                        enableNativePlugin: true
+                    },
+                    output: {
+                        reportDir: config.name === "server" ? "./.next/server" : "./.next"
+                    }
+                })
+            );
+        }
+
+        return config;
+    },
+
+    // vercel chokes on monorepo compilation and we run compile before building
+    typescript: {
+        ignoreBuildErrors: true,
+        tsconfigPath: "./tsconfig.app.json"
+    },
+
+    // Exclude esbuild from server bundle to avoid .d.ts parsing issues
+    serverExternalPackages: ["esbuild"],
+
+    // so it doesn't cover the theme toggle
+    devIndicators: { position: "bottom-right" },
+
+    async headers() {
+        return [
+            {
+                source: "/(.*)",
+                headers: [
+                    {
+                        key: "Content-Security-Policy",
+                        value: CSP_HEADER
+                    }
+                ]
+            }
+        ];
+    },
+
+    // This is required to support PostHog trailing slash API requests
+    skipTrailingSlashRedirect: true
 };
 
 // only use rspack in development
 if (process.env.NODE_ENV === "development") {
-  nextConfig = withRspack(nextConfig);
+    nextConfig = withRspack(nextConfig);
 }
 
 if (process.env.NODE_ENV === "production") {
-  nextConfig = withSentryConfig(nextConfig, {
-    // For all available options, see:
-    // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+    nextConfig = withSentryConfig(nextConfig, {
+        // For all available options, see:
+        // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-    org: "buildwithfern",
-    project: "fern-dashboard",
+        org: "buildwithfern",
+        project: "fern-dashboard",
 
-    // Only print logs for uploading source maps in CI
-    silent: !process.env.CI,
+        // Only print logs for uploading source maps in CI
+        silent: !process.env.CI,
 
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+        // For all available options, see:
+        // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: false,
+        // Upload a larger set of source maps for prettier stack traces (increases build time)
+        widenClientFileUpload: false,
 
-    // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-    // This can increase your server load as well as your hosting bill.
-    // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-    // side errors will fail.
-    tunnelRoute: "/monitoring",
+        // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+        // This can increase your server load as well as your hosting bill.
+        // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+        // side errors will fail.
+        tunnelRoute: "/monitoring",
 
-    sourcemaps: {
-      // Note: maybe we can use these to reduce the size of the source maps, has to be tested
-      // assets: "./.next/**/*.{js,js.map}",
-      // ignore: ["**/node_modules/**"],
-      deleteSourcemapsAfterUpload: true,
-    },
+        sourcemaps: {
+            // Note: maybe we can use these to reduce the size of the source maps, has to be tested
+            // assets: "./.next/**/*.{js,js.map}",
+            // ignore: ["**/node_modules/**"],
+            deleteSourcemapsAfterUpload: true
+        },
 
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
+        // Automatically tree-shake Sentry logger statements to reduce bundle size
+        disableLogger: true,
 
-    // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true,
-  });
+        // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
+        // See the following for more information:
+        // https://docs.sentry.io/product/crons/
+        // https://vercel.com/docs/cron-jobs
+        automaticVercelMonitors: true
+    });
 }
 
 export default nextConfig;

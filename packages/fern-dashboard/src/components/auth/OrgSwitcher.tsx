@@ -8,29 +8,20 @@ import { OrgSwitcherClient } from "./OrgSwitcherClient";
 
 export const revalidate = 0;
 
-export async function OrgSwitcher({
-  currentOrgName,
-}: {
-  currentOrgName?: Auth0OrgName;
-}) {
-  const session = await getCurrentSession();
-  if (session == null) {
-    return null;
-  }
-  let organizations: Auth0Organization[] = [];
-  try {
-    organizations = await getAvailableOrgsForUser({
-      userId: session.user.sub,
-    });
-  } catch (error) {
-    console.error("Failed to load organizations", error);
-    return null;
-  }
+export async function OrgSwitcher({ currentOrgName }: { currentOrgName?: Auth0OrgName }) {
+    const session = await getCurrentSession();
+    if (session == null) {
+        return null;
+    }
+    let organizations: Auth0Organization[] = [];
+    try {
+        organizations = await getAvailableOrgsForUser({
+            userId: session.user.sub
+        });
+    } catch (error) {
+        console.error("Failed to load organizations", error);
+        return null;
+    }
 
-  return (
-    <OrgSwitcherClient
-      organizations={organizations}
-      currentOrgName={currentOrgName}
-    />
-  );
+    return <OrgSwitcherClient organizations={organizations} currentOrgName={currentOrgName} />;
 }

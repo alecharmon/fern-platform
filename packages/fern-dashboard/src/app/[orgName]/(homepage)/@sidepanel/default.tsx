@@ -1,3 +1,3 @@
 export default function DefaultSidepanel() {
-  return null;
+    return null;
 }

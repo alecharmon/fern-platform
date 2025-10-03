@@ -10,23 +10,23 @@ import { ReactQueryKey, inferQueryData } from "./queryKeys";
 import { OrgInvitation } from "./types";
 
 export function useOrgInvitations() {
-  const orgName = useOrgNameFromPathname();
-  const queryKey = ReactQueryKey.orgInvitations(orgName);
+    const orgName = useOrgNameFromPathname();
+    const queryKey = ReactQueryKey.orgInvitations(orgName);
 
-  return convertQueryResultToLoadable(
-    useQuery<inferQueryData<typeof queryKey>>({
-      queryKey: queryKey,
-      queryFn: async () => {
-        const invitations = await DashboardApiClient.getOrgInvitations({
-          orgName,
-        });
-        return invitations.map(
-          (invitation): OrgInvitation => ({
-            id: invitation.id,
-            inviteeEmail: invitation.invitee.email,
-          })
-        );
-      },
-    })
-  );
+    return convertQueryResultToLoadable(
+        useQuery<inferQueryData<typeof queryKey>>({
+            queryKey: queryKey,
+            queryFn: async () => {
+                const invitations = await DashboardApiClient.getOrgInvitations({
+                    orgName
+                });
+                return invitations.map(
+                    (invitation): OrgInvitation => ({
+                        id: invitation.id,
+                        inviteeEmail: invitation.invitee.email
+                    })
+                );
+            }
+        })
+    );
 }

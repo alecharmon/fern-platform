@@ -10,49 +10,49 @@ const SELF_HOSTED_CONTAINER_PORT = 5433;
 const FERN_DIR = path.join(__dirname, "../../fern");
 
 async function stopContainer(containerName: string) {
-  try {
-    await execa("docker", ["stop", "-t", "10", containerName]);
-  } catch (_) {}
+    try {
+        await execa("docker", ["stop", "-t", "10", containerName]);
+    } catch (_) {}
 }
 
 async function removeContainer(containerName: string) {
-  try {
-    await execa("docker", ["rm", "-f", containerName]);
-  } catch (_) {}
+    try {
+        await execa("docker", ["rm", "-f", containerName]);
+    } catch (_) {}
 }
 
 export async function setup() {
-  // Remove any existing container
-  await removeContainer(SELF_HOSTED_CONTAINER_NAME);
+    // Remove any existing container
+    await removeContainer(SELF_HOSTED_CONTAINER_NAME);
 
-  // Start the container using the shared image
-  await execa("docker", [
-    "run",
-    "--name",
-    SELF_HOSTED_CONTAINER_NAME,
-    "-d",
-    "-p",
-    `${SELF_HOSTED_CONTAINER_PORT}:5432`,
-    "-v",
-    `${FERN_DIR}:/fern`,
-    SELF_HOSTED_IMAGE_TAG_NAME,
-  ]);
-  await sleep(10000);
+    // Start the container using the shared image
+    await execa("docker", [
+        "run",
+        "--name",
+        SELF_HOSTED_CONTAINER_NAME,
+        "-d",
+        "-p",
+        `${SELF_HOSTED_CONTAINER_PORT}:5432`,
+        "-v",
+        `${FERN_DIR}:/fern`,
+        SELF_HOSTED_IMAGE_TAG_NAME
+    ]);
+    await sleep(10000);
 }
 
 export async function teardown() {
-  // Clean up single-node container after tests
-  try {
-    console.log("Cleaning up single-node container...");
-    await stopContainer(SELF_HOSTED_CONTAINER_NAME);
-    await removeContainer(SELF_HOSTED_CONTAINER_NAME);
-    console.log("Single-node cleanup complete");
-  } catch (error) {
-    console.error("Failed to cleanup single-node container:", error);
-    throw error;
-  }
+    // Clean up single-node container after tests
+    try {
+        console.log("Cleaning up single-node container...");
+        await stopContainer(SELF_HOSTED_CONTAINER_NAME);
+        await removeContainer(SELF_HOSTED_CONTAINER_NAME);
+        console.log("Single-node cleanup complete");
+    } catch (error) {
+        console.error("Failed to cleanup single-node container:", error);
+        throw error;
+    }
 }
 
 function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -56,7 +56,7 @@ export class Github {
     public indexReferenceMd(
         domain: string,
         request: FernAI.GitHubFileInfoRequest,
-        requestOptions?: Github.RequestOptions,
+        requestOptions?: Github.RequestOptions
     ): core.HttpResponsePromise<FernAI.IndexResponse> {
         return core.HttpResponsePromise.fromPromise(this.__indexReferenceMd(domain, request, requestOptions));
     }
@@ -64,19 +64,19 @@ export class Github {
     private async __indexReferenceMd(
         domain: string,
         request: FernAI.GitHubFileInfoRequest,
-        requestOptions?: Github.RequestOptions,
+        requestOptions?: Github.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.IndexResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `github/${encodeURIComponent(domain)}/reference-md/index`,
+                `github/${encodeURIComponent(domain)}/reference-md/index`
             ),
             method: "POST",
             headers: _headers,
@@ -86,7 +86,7 @@ export class Github {
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.IndexResponse, rawResponse: _response.rawResponse };
@@ -97,13 +97,13 @@ export class Github {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -113,16 +113,16 @@ export class Github {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling POST /github/{domain}/reference-md/index.",
+                    "Timeout exceeded when calling POST /github/{domain}/reference-md/index."
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -140,33 +140,33 @@ export class Github {
      */
     public checkCodeIndexStatus(
         domain: string,
-        requestOptions?: Github.RequestOptions,
+        requestOptions?: Github.RequestOptions
     ): core.HttpResponsePromise<FernAI.CodeIndexStatusResponse> {
         return core.HttpResponsePromise.fromPromise(this.__checkCodeIndexStatus(domain, requestOptions));
     }
 
     private async __checkCodeIndexStatus(
         domain: string,
-        requestOptions?: Github.RequestOptions,
+        requestOptions?: Github.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.CodeIndexStatusResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `github/${encodeURIComponent(domain)}/indexed`,
+                `github/${encodeURIComponent(domain)}/indexed`
             ),
             method: "GET",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.CodeIndexStatusResponse, rawResponse: _response.rawResponse };
@@ -177,13 +177,13 @@ export class Github {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -193,14 +193,14 @@ export class Github {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /github/{domain}/indexed.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

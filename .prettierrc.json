@@ -1,20 +1,9 @@
 {
   "tabWidth": 2,
   "trailingComma": "es5",
-  "plugins": [
-    "prettier-plugin-packagejson",
-    "@trivago/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss"
-  ],
+  "plugins": ["prettier-plugin-packagejson", "@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
   "tailwindFunctions": ["clsx", "cn", "cva"],
-  "importOrder": [
-    "server-only",
-    "^(react*|next*)",
-    "<THIRD_PARTY_MODULES>",
-    "^@fern-*",
-    "^@/(.*)$",
-    "^[./]"
-  ],
+  "importOrder": ["server-only", "^(react*|next*)", "<THIRD_PARTY_MODULES>", "^@fern-*", "^@/(.*)$", "^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true
 }

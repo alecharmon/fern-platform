@@ -20,53 +20,46 @@ import { z } from "zod";
  *   }
  * );
  */
-export interface ValidatedRequest<TSchema extends z.ZodSchema>
-  extends NextRequest {
-  validatedBody: z.infer<TSchema>;
+export interface ValidatedRequest<TSchema extends z.ZodSchema> extends NextRequest {
+    validatedBody: z.infer<TSchema>;
 }
 
 export function withZodValidation<TSchema extends z.ZodSchema>(
-  schema: TSchema,
-  handler: (
-    req: ValidatedRequest<TSchema>,
-    parsedBody: z.infer<TSchema>
-  ) => Promise<NextResponse>
+    schema: TSchema,
+    handler: (req: ValidatedRequest<TSchema>, parsedBody: z.infer<TSchema>) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest): Promise<NextResponse> => {
-    try {
-      // Parse request body
-      const rawBody = await req.json();
+    return async (req: NextRequest): Promise<NextResponse> => {
+        try {
+            // Parse request body
+            const rawBody = await req.json();
 
-      // Validate against schema
-      const validationResult = schema.safeParse(rawBody);
+            // Validate against schema
+            const validationResult = schema.safeParse(rawBody);
 
-      if (!validationResult.success) {
-        return NextResponse.json(
-          {
-            error: "Invalid request body",
-            details: validationResult.error.issues,
-          },
-          { status: 400 }
-        );
-      }
+            if (!validationResult.success) {
+                return NextResponse.json(
+                    {
+                        error: "Invalid request body",
+                        details: validationResult.error.issues
+                    },
+                    { status: 400 }
+                );
+            }
 
-      // Create amended request with validated body
-      const validatedReq = req as ValidatedRequest<TSchema>;
-      validatedReq.validatedBody = validationResult.data;
+            // Create amended request with validated body
+            const validatedReq = req as ValidatedRequest<TSchema>;
+            validatedReq.validatedBody = validationResult.data;
 
-      // Call handler with amended request and parsed body
-      return await handler(validatedReq, validationResult.data);
-    } catch (error) {
-      // Handle JSON parsing errors
-      if (error instanceof SyntaxError) {
-        return NextResponse.json(
-          { error: "Invalid JSON in request body" },
-          { status: 400 }
-        );
-      }
+            // Call handler with amended request and parsed body
+            return await handler(validatedReq, validationResult.data);
+        } catch (error) {
+            // Handle JSON parsing errors
+            if (error instanceof SyntaxError) {
+                return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
+            }
 
-      // Re-throw unexpected errors
-      throw error;
-    }
-  };
+            // Re-throw unexpected errors
+            throw error;
+        }
+    };
 }

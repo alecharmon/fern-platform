@@ -5,21 +5,21 @@ import { rehypeTabs } from "./rehype-tabs";
 
 const handleTabs = (rehypeTabs as any)();
 const handleSlug = (rehypeSlug as any)({
-  additionalJsxElements: ["Tab"],
+    additionalJsxElements: ["Tab"]
 });
 
 it("should convert Tabs to TabGroup", () => {
-  const tree = toTree(`
+    const tree = toTree(`
     <Tabs>
       <Tab title="Tab 1">Content for Tab 1</Tab>
       <Tab title="Tab 2">Content for Tab 2</Tab>
     </Tabs>
   `).hast;
 
-  handleTabs(tree);
-  handleSlug(tree);
+    handleTabs(tree);
+    handleSlug(tree);
 
-  expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
+    expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
     "<TabGroup>
       <Tab title="Tab 1" id="tab-1">
         Content for Tab 1
@@ -34,7 +34,7 @@ it("should convert Tabs to TabGroup", () => {
 });
 
 it("should handle nested Tabs correctly", () => {
-  const tree = toTree(`
+    const tree = toTree(`
     <Tabs>
       <Tab title="Tab 1">
         <Tabs>
@@ -44,10 +44,10 @@ it("should handle nested Tabs correctly", () => {
     </Tabs>
   `).hast;
 
-  handleTabs(tree);
-  handleSlug(tree);
+    handleTabs(tree);
+    handleSlug(tree);
 
-  expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
+    expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
     "<TabGroup>
       <Tab title="Tab 1" id="tab-1">
         <TabGroup>
@@ -62,16 +62,16 @@ it("should handle nested Tabs correctly", () => {
 });
 
 it("should handle Tabs with no children gracefully", () => {
-  const tree = toTree(`
+    const tree = toTree(`
     <Tabs>
       <Tab title="Empty Tab"></Tab>
     </Tabs>
   `).hast;
 
-  handleTabs(tree);
-  handleSlug(tree);
+    handleTabs(tree);
+    handleSlug(tree);
 
-  expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
+    expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
     "<TabGroup>
       <Tab title="Empty Tab" id="empty-tab" />
     </TabGroup>

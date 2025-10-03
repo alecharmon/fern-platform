@@ -8,10 +8,8 @@ import { useGitPrInfo } from "@/providers/GitPRContext";
  * @returns true if editing should be disabled (PR is closed or merged)
  */
 export function useEditingDisabled(): boolean {
-  const { prStatus } = useGitPrInfo();
-  const { branchFailed } = useBranch();
+    const { prStatus } = useGitPrInfo();
+    const { branchFailed } = useBranch();
 
-  return (
-    branchFailed || !prStatus || prStatus === "closed" || prStatus === "merged"
-  );
+    return branchFailed || !prStatus || prStatus === "closed" || prStatus === "merged";
 }

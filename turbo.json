@@ -44,13 +44,7 @@
     "docs:dev": {
       "persistent": true,
       "dependsOn": ["^build", "^compile"],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env.production.local",
-        ".env.local",
-        ".env.production",
-        ".env"
-      ]
+      "inputs": ["$TURBO_DEFAULT$", ".env.production.local", ".env.local", ".env.production", ".env"]
     },
     "docs:build": {
       "dependsOn": ["^build", "^compile", "^docs:build"],

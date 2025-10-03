@@ -8,10 +8,10 @@ import { InterceptedChildren } from "@/components/editor/editor-component/Editor
 import { MDX_COMPONENTS } from "@/docs/mdx/components";
 
 export function ClientMDXProvider({ children }: React.PropsWithChildren) {
-  const editorComponents = {
-    ...MDX_COMPONENTS,
-    InterceptedChildren: InterceptedChildren,
-  };
+    const editorComponents = {
+        ...MDX_COMPONENTS,
+        InterceptedChildren: InterceptedChildren
+    };
 
-  return <MDXProvider components={editorComponents}>{children}</MDXProvider>;
+    return <MDXProvider components={editorComponents}>{children}</MDXProvider>;
 }

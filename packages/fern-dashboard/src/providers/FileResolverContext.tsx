@@ -6,30 +6,25 @@ import { DashboardFileResolver } from "@fern-api/docs-server/dashboard-file-reso
 import { FileData } from "@fern-api/docs-utils/types/file-data";
 
 export const FileResolverContext = createContext<{
-  resolveFileSrc: DashboardFileResolver["getResolvedFileData"];
+    resolveFileSrc: DashboardFileResolver["getResolvedFileData"];
 }>({
-  resolveFileSrc: () => undefined,
+    resolveFileSrc: () => undefined
 });
 
 export const FileResolverProvider = ({
-  children,
-  files,
+    children,
+    files
 }: {
-  children: React.ReactNode;
-  files: Record<string, FileData>;
+    children: React.ReactNode;
+    files: Record<string, FileData>;
 }) => {
-  const fileResolver = new DashboardFileResolver(files);
+    const fileResolver = new DashboardFileResolver(files);
 
-  const resolveFileSrc = (src: string | undefined) =>
-    fileResolver.getResolvedFileData(src);
+    const resolveFileSrc = (src: string | undefined) => fileResolver.getResolvedFileData(src);
 
-  return (
-    <FileResolverContext.Provider value={{ resolveFileSrc }}>
-      {children}
-    </FileResolverContext.Provider>
-  );
+    return <FileResolverContext.Provider value={{ resolveFileSrc }}>{children}</FileResolverContext.Provider>;
 };
 
 export const useFileResolver = () => {
-  return useContext(FileResolverContext);
+    return useContext(FileResolverContext);
 };

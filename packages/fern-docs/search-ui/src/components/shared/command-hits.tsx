@@ -3,242 +3,211 @@ import { Snippet } from "react-instantsearch";
 
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 
-import {
-  useInfiniteSearchHits,
-  useSendEvent,
-} from "../../hooks/use-search-hits";
+import { useInfiniteSearchHits, useSendEvent } from "../../hooks/use-search-hits";
 import { AlgoliaRecordHit } from "../../types";
 import * as Command from "../cmdk";
 import { PageIcon } from "../icons/page";
 import { useFacetFilters } from "../search/useFacetFilters";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { CommandLink } from "./command-link";
 import { HitContent } from "./hit-content";
 import { GroupedHit, generateHits } from "./hits";
 
 export const CommandSearchHits = ({
-  domain,
-  onSelect,
-  prefetch,
+    domain,
+    onSelect,
+    prefetch
 }: {
-  domain: string;
-  onSelect: (path: string) => void;
-  prefetch?: (path: string) => void | Promise<void>;
+    domain: string;
+    onSelect: (path: string) => void;
+    prefetch?: (path: string) => void | Promise<void>;
 }): ReactNode => {
-  const isQueryEmpty = Command.useCommandState(
-    (state) => state.search.trimStart().length === 0
-  );
-  const { items, isLastPage, showMore } = useInfiniteSearchHits();
-  const sentinelRef = useRef<HTMLLIElement>(null);
-  const triggerSelection = Command.useTriggerSelection();
-  useEffect(() => {
-    if (sentinelRef.current != null) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !isLastPage) {
-            showMore();
-          }
-        });
-      });
+    const isQueryEmpty = Command.useCommandState((state) => state.search.trimStart().length === 0);
+    const { items, isLastPage, showMore } = useInfiniteSearchHits();
+    const sentinelRef = useRef<HTMLLIElement>(null);
+    const triggerSelection = Command.useTriggerSelection();
+    useEffect(() => {
+        if (sentinelRef.current != null) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && !isLastPage) {
+                        showMore();
+                    }
+                });
+            });
 
-      observer.observe(sentinelRef.current);
+            observer.observe(sentinelRef.current);
 
-      return () => {
-        observer.disconnect();
-      };
+            return () => {
+                observer.disconnect();
+            };
+        }
+
+        triggerSelection();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [items, isLastPage, showMore]);
+
+    const { filters } = useFacetFilters();
+
+    if ((filters.length === 0 && isQueryEmpty) || items.length === 0) {
+        return false;
     }
 
-    triggerSelection();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, isLastPage, showMore]);
-
-  const { filters } = useFacetFilters();
-
-  if ((filters.length === 0 && isQueryEmpty) || items.length === 0) {
-    return false;
-  }
-
-  return (
-    <MemoizedCommandSearchHits
-      items={items}
-      onSelect={onSelect}
-      prefetch={prefetch}
-      domain={domain}
-      sentinelRef={sentinelRef}
-    />
-  );
+    return (
+        <MemoizedCommandSearchHits
+            items={items}
+            onSelect={onSelect}
+            prefetch={prefetch}
+            domain={domain}
+            sentinelRef={sentinelRef}
+        />
+    );
 };
 
 const MemoizedCommandSearchHits = memo(
-  ({
-    domain,
-    items,
-    onSelect,
-    prefetch,
-    sentinelRef,
-  }: {
-    domain: string;
-    items: AlgoliaRecordHit[];
-    onSelect: (path: string) => void;
-    prefetch?: (path: string) => void | Promise<void>;
-    sentinelRef: React.RefObject<HTMLLIElement | null>;
-  }) => {
-    const groups = generateHits(items);
+    ({
+        domain,
+        items,
+        onSelect,
+        prefetch,
+        sentinelRef
+    }: {
+        domain: string;
+        items: AlgoliaRecordHit[];
+        onSelect: (path: string) => void;
+        prefetch?: (path: string) => void | Promise<void>;
+        sentinelRef: React.RefObject<HTMLLIElement | null>;
+    }) => {
+        const groups = generateHits(items);
 
-    return (
-      <TooltipProvider>
-        {groups.map((group, index) => (
-          <Command.Group
-            key={group.title ?? index}
-            heading={group.title ?? "Results"}
-            forceMount
-          >
-            {group.hits.map((hit) => (
-              <CommandHit
-                key={hit.path}
-                hit={hit}
-                onSelect={onSelect}
-                prefetch={prefetch}
-                domain={domain}
-              />
-            ))}
-          </Command.Group>
-        ))}
-        <li ref={sentinelRef} aria-hidden="true" className="list-none" />
-      </TooltipProvider>
-    );
-  }
+        return (
+            <TooltipProvider>
+                {groups.map((group, index) => (
+                    <Command.Group key={group.title ?? index} heading={group.title ?? "Results"} forceMount>
+                        {group.hits.map((hit) => (
+                            <CommandHit
+                                key={hit.path}
+                                hit={hit}
+                                onSelect={onSelect}
+                                prefetch={prefetch}
+                                domain={domain}
+                            />
+                        ))}
+                    </Command.Group>
+                ))}
+                <li ref={sentinelRef} aria-hidden="true" className="list-none" />
+            </TooltipProvider>
+        );
+    }
 );
 
 function CommandHit({
-  hit,
-  domain,
-  onSelect,
-  prefetch,
+    hit,
+    domain,
+    onSelect,
+    prefetch
 }: {
-  hit: GroupedHit;
-  domain: string;
-  /**
-   * @param path - the path to navigate to via nextjs router
-   */
-  onSelect: (path: string) => void;
-  prefetch?: (path: string) => void | Promise<void>;
+    hit: GroupedHit;
+    domain: string;
+    /**
+     * @param path - the path to navigate to via nextjs router
+     */
+    onSelect: (path: string) => void;
+    prefetch?: (path: string) => void | Promise<void>;
 }) {
-  const sendEvent = useSendEvent();
-  if (!hit.record) {
-    return false;
-  }
+    const sendEvent = useSendEvent();
+    if (!hit.record) {
+        return false;
+    }
 
-  return (
-    <CommandGroupSearchHitTooltip
-      key={hit.path}
-      hit={hit.record}
-      path={hit.path}
-    >
-      <CommandLink
-        href={hit.path}
-        keywords={[hit.record.title]}
-        prefetch={prefetch}
-        onSelect={(value) => {
-          // record click-through event for record
-          if (hit.record) {
-            sendEvent("click", hit.record, "search-result-clicked");
-          }
-          onSelect(value);
-        }}
-        domain={domain}
-      >
-        <PageIcon
-          icon={hit.icon}
-          type={
-            hit.record.type === "api-reference"
-              ? hit.record.api_type
-              : hit.record.type
-          }
-          isSubPage={hit.record.hash != null}
-          className="self-start"
-        />
-        <HitContent hit={hit.record} />
-      </CommandLink>
-    </CommandGroupSearchHitTooltip>
-  );
+    return (
+        <CommandGroupSearchHitTooltip key={hit.path} hit={hit.record} path={hit.path}>
+            <CommandLink
+                href={hit.path}
+                keywords={[hit.record.title]}
+                prefetch={prefetch}
+                onSelect={(value) => {
+                    // record click-through event for record
+                    if (hit.record) {
+                        sendEvent("click", hit.record, "search-result-clicked");
+                    }
+                    onSelect(value);
+                }}
+                domain={domain}
+            >
+                <PageIcon
+                    icon={hit.icon}
+                    type={hit.record.type === "api-reference" ? hit.record.api_type : hit.record.type}
+                    isSubPage={hit.record.hash != null}
+                    className="self-start"
+                />
+                <HitContent hit={hit.record} />
+            </CommandLink>
+        </CommandGroupSearchHitTooltip>
+    );
 }
 
 MemoizedCommandSearchHits.displayName = "MemoizedCommandSearchHits";
 
 function CommandGroupSearchHitTooltip({
-  hit,
-  path,
-  children,
+    hit,
+    path,
+    children
 }: PropsWithChildren<{ hit: AlgoliaRecordHit; path: string }>) {
-  const open = Command.useCommandState((state) => state.value === path);
+    const open = Command.useCommandState((state) => state.value === path);
 
-  if (
-    hit._snippetResult?.content == null &&
-    hit._snippetResult?.description == null
-  ) {
-    return children;
-  }
+    if (hit._snippetResult?.content == null && hit._snippetResult?.description == null) {
+        return children;
+    }
 
-  return (
-    <MemoizedTooltip hit={hit} open={open}>
-      {children}
-    </MemoizedTooltip>
-  );
+    return (
+        <MemoizedTooltip hit={hit} open={open}>
+            {children}
+        </MemoizedTooltip>
+    );
 }
 
-const MemoizedTooltip = memo(
-  ({
-    children,
-    hit,
-    open,
-  }: PropsWithChildren<{ hit: AlgoliaRecordHit; open: boolean }>) => (
+const MemoizedTooltip = memo(({ children, hit, open }: PropsWithChildren<{ hit: AlgoliaRecordHit; open: boolean }>) => (
     <Tooltip open={open}>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipPortal>
-        <TooltipContent
-          side="right"
-          sideOffset={16}
-          align="start"
-          className="max-h-(--radix-tooltip-content-available-height) [&_mark]:bg-(color:--accent-a3) [&_mark]:text-(color:--accent-a11) w-[384px] space-y-2"
-          avoidCollisions
-          animate={false}
-          collisionBoundary={document.getElementById("fern-search-dialog")}
-          hideWhenDetached={true}
-        >
-          {hit._snippetResult?.description && (
-            <p className="text-sm">
-              <Snippet
-                attribute="description"
-                hit={hit}
-                classNames={{
-                  highlighted: "fern-search-hit-highlighted",
-                  nonHighlighted: "fern-search-hit-non-highlighted",
-                }}
-              />
-            </p>
-          )}
-          {hit._snippetResult?.content && (
-            <p className="text-sm">
-              <Snippet
-                attribute="content"
-                hit={hit}
-                classNames={{
-                  highlighted: "fern-search-hit-highlighted",
-                  nonHighlighted: "fern-search-hit-non-highlighted",
-                }}
-              />
-            </p>
-          )}
-        </TooltipContent>
-      </TooltipPortal>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipPortal>
+            <TooltipContent
+                side="right"
+                sideOffset={16}
+                align="start"
+                className="max-h-(--radix-tooltip-content-available-height) [&_mark]:bg-(color:--accent-a3) [&_mark]:text-(color:--accent-a11) w-[384px] space-y-2"
+                avoidCollisions
+                animate={false}
+                collisionBoundary={document.getElementById("fern-search-dialog")}
+                hideWhenDetached={true}
+            >
+                {hit._snippetResult?.description && (
+                    <p className="text-sm">
+                        <Snippet
+                            attribute="description"
+                            hit={hit}
+                            classNames={{
+                                highlighted: "fern-search-hit-highlighted",
+                                nonHighlighted: "fern-search-hit-non-highlighted"
+                            }}
+                        />
+                    </p>
+                )}
+                {hit._snippetResult?.content && (
+                    <p className="text-sm">
+                        <Snippet
+                            attribute="content"
+                            hit={hit}
+                            classNames={{
+                                highlighted: "fern-search-hit-highlighted",
+                                nonHighlighted: "fern-search-hit-non-highlighted"
+                            }}
+                        />
+                    </p>
+                )}
+            </TooltipContent>
+        </TooltipPortal>
     </Tooltip>
-  )
-);
+));
 
 MemoizedTooltip.displayName = "MemoizedTooltip";

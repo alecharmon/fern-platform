@@ -12,17 +12,17 @@ import { sanitizeBreaks } from "./sanitize/sanitize-breaks";
 import { sanitizeMdxExpression } from "./sanitize/sanitize-mdx-expression";
 
 const MDX_NODE_TYPES = [
-  "mdxFlowExpression",
-  "mdxJsxFlowElement",
-  "mdxJsxTextElement",
-  "mdxTextExpression",
-  "mdxjsEsm",
+    "mdxFlowExpression",
+    "mdxJsxFlowElement",
+    "mdxJsxTextElement",
+    "mdxTextExpression",
+    "mdxjsEsm"
 ] as const;
 
 interface ToTreeOptions {
-  format?: "mdx" | "md";
-  allowedIdentifiers?: string[];
-  sanitize?: boolean;
+    format?: "mdx" | "md";
+    allowedIdentifiers?: string[];
+    sanitize?: boolean;
 }
 
 /**
@@ -30,48 +30,41 @@ interface ToTreeOptions {
  * minus converting to JS string. This is a bit of a hack to extract the ToC, Aside elements, and a list of JSX elements being used in the markdown.
  */
 export function toTree(
-  content: string,
-  {
-    format = "mdx",
-    allowedIdentifiers = [],
-    sanitize = true,
-  }: ToTreeOptions = {}
+    content: string,
+    { format = "mdx", allowedIdentifiers = [], sanitize = true }: ToTreeOptions = {}
 ): {
-  mdast: MdastRoot;
-  hast: HastRoot;
-  jsxElements: string[];
-  esmElements: string[];
+    mdast: MdastRoot;
+    hast: HastRoot;
+    jsxElements: string[];
+    esmElements: string[];
 } {
-  content =
-    sanitize && format === "mdx"
-      ? sanitizeMdxExpression(sanitizeBreaks(content))[0]
-      : content;
+    content = sanitize && format === "mdx" ? sanitizeMdxExpression(sanitizeBreaks(content))[0] : content;
 
-  const mdast = mdastFromMarkdown(content, format);
+    const mdast = mdastFromMarkdown(content, format);
 
-  // this is forked from mdxjs, but we need to run it before we convert to hast
-  // so that we can correctly identify explicit JSX nodes
-  (remarkMarkAndUnravel as any)()(mdast);
+    // this is forked from mdxjs, but we need to run it before we convert to hast
+    // so that we can correctly identify explicit JSX nodes
+    (remarkMarkAndUnravel as any)()(mdast);
 
-  if (sanitize) {
-    // sanitize the acorn expressions
-    (remarkSanitizeAcorn as any)({ allowedIdentifiers })(mdast);
-  }
+    if (sanitize) {
+        // sanitize the acorn expressions
+        (remarkSanitizeAcorn as any)({ allowedIdentifiers })(mdast);
+    }
 
-  const hast = toHast(mdast, {
-    handlers: {
-      heading: customHeadingHandler,
-    },
-    allowDangerousHtml: true,
-    passThrough: [...MDX_NODE_TYPES],
-  }) as HastRoot;
+    const hast = toHast(mdast, {
+        handlers: {
+            heading: customHeadingHandler
+        },
+        allowDangerousHtml: true,
+        passThrough: [...MDX_NODE_TYPES]
+    }) as HastRoot;
 
-  // add ids to headings
-  (rehypeSlug as any)()(hast);
+    // add ids to headings
+    (rehypeSlug as any)()(hast);
 
-  return {
-    mdast,
-    hast,
-    ...extractJsx(hast),
-  };
+    return {
+        mdast,
+        hast,
+        ...extractJsx(hast)
+    };
 }

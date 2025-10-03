@@ -5,14 +5,12 @@ import type { AuthEdgeConfig } from "@fern-api/docs-auth";
 // if the customer's auth provider requires the state query parameter to be named differently, they can override the default value in edge config.
 // TODO: we should think through how to make this better in the future, and reduce the security risks of leaving the state query parameter unvalidated.
 export const DEFAULT_RETURN_TO_QUERY_PARAM = "state";
-export function getReturnToQueryParam(
-  authConfig?: AuthEdgeConfig | undefined
-): string {
-  if (authConfig?.type === "oauth2") {
-    return DEFAULT_RETURN_TO_QUERY_PARAM;
-  }
+export function getReturnToQueryParam(authConfig?: AuthEdgeConfig | undefined): string {
+    if (authConfig?.type === "oauth2") {
+        return DEFAULT_RETURN_TO_QUERY_PARAM;
+    }
 
-  return authConfig?.type === "basic_token_verification"
-    ? (authConfig.returnToQueryParam ?? DEFAULT_RETURN_TO_QUERY_PARAM)
-    : DEFAULT_RETURN_TO_QUERY_PARAM;
+    return authConfig?.type === "basic_token_verification"
+        ? (authConfig.returnToQueryParam ?? DEFAULT_RETURN_TO_QUERY_PARAM)
+        : DEFAULT_RETURN_TO_QUERY_PARAM;
 }

@@ -12,12 +12,12 @@ import { AnalyticsService } from "./analytics";
  * This is now just a simple wrapper around createAnalyticsService
  */
 export function getAnalyticsService(config: {
-  userId: string;
-  baseSiteUrl: string;
-  projectId?: string;
-  apiUrl?: string;
+    userId: string;
+    baseSiteUrl: string;
+    projectId?: string;
+    apiUrl?: string;
 }) {
-  return new AnalyticsService(config);
+    return new AnalyticsService(config);
 }
 
 // Alias for backward compatibility

@@ -8,13 +8,11 @@ import { useDomain } from "../state/domain";
 import { useCurrentPathname } from "./use-current-pathname";
 
 function useServerSideLocationHref() {
-  const domain = useDomain();
-  const pathname = useCurrentPathname();
-  const searchParams = String(useSearchParams());
-  // TODO: this matches the current pages router pattern (/static/[domain]/[[...slug]]) but will need to be update for app router
-  return withDefaultProtocol(
-    `${domain}/${pathname.split("/").slice(2).join("/")}?${searchParams}`
-  );
+    const domain = useDomain();
+    const pathname = useCurrentPathname();
+    const searchParams = String(useSearchParams());
+    // TODO: this matches the current pages router pattern (/static/[domain]/[[...slug]]) but will need to be update for app router
+    return withDefaultProtocol(`${domain}/${pathname.split("/").slice(2).join("/")}?${searchParams}`);
 }
 
 /**
@@ -23,20 +21,20 @@ function useServerSideLocationHref() {
  * @returns the current href location
  */
 export function useLocationHref(hydrationSafe = false) {
-  // isomorphically get the current href location
-  if (typeof window === "undefined") {
-    return useServerSideLocationHref();
-  }
+    // isomorphically get the current href location
+    if (typeof window === "undefined") {
+        return useServerSideLocationHref();
+    }
 
-  const [locationHref, setLocationHref] = useState(
-    hydrationSafe ? window.location.href.split("#")[0] : window.location.href
-  );
+    const [locationHref, setLocationHref] = useState(
+        hydrationSafe ? window.location.href.split("#")[0] : window.location.href
+    );
 
-  const pathname = useCurrentPathname();
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    setLocationHref(window.location.href);
-  }, [pathname, searchParams]);
+    const pathname = useCurrentPathname();
+    const searchParams = useSearchParams();
+    useEffect(() => {
+        setLocationHref(window.location.href);
+    }, [pathname, searchParams]);
 
-  return locationHref;
+    return locationHref;
 }

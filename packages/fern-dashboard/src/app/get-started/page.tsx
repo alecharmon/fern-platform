@@ -8,20 +8,16 @@ import HeaderLayout from "../[orgName]/(homepage)/@header/default";
 import { getCurrentSession } from "../services/auth0/getCurrentSession";
 
 export default async function Page({ params }: { params: Promise<{}> }) {
-  const session = await getCurrentSession();
-  if (session == null) {
-    redirect("/");
-  }
+    const session = await getCurrentSession();
+    if (session == null) {
+        redirect("/");
+    }
 
-  return (
-    <SidepanelProvider>
-      <AppLayout
-        sidepanel={null}
-        navbar={null}
-        header={<HeaderLayout params={params} />}
-      >
-        <DocsZeroState user={session.user} />
-      </AppLayout>
-    </SidepanelProvider>
-  );
+    return (
+        <SidepanelProvider>
+            <AppLayout sidepanel={null} navbar={null} header={<HeaderLayout params={params} />}>
+                <DocsZeroState user={session.user} />
+            </AppLayout>
+        </SidepanelProvider>
+    );
 }

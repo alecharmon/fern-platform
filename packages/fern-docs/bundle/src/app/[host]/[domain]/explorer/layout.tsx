@@ -9,46 +9,38 @@ import { HorizontalSplitPane } from "@/components/playground/VerticalSplitPane";
 import { ApiExplorerFlags } from "@/state/api-explorer-flags";
 
 export default async function Layout({
-  params,
-  children,
-  sidebar,
+    params,
+    children,
+    sidebar
 }: {
-  children: React.ReactNode;
-  sidebar: React.ReactNode;
-  params: Promise<{ host: string; domain: string }>;
+    children: React.ReactNode;
+    sidebar: React.ReactNode;
+    params: Promise<{ host: string; domain: string }>;
 }) {
-  const { host, domain } = await params;
+    const { host, domain } = await params;
 
-  console.debug(`[${domain}] Loading API Explorer layout`);
-  const loader = await createCachedDocsLoader(
-    host,
-    domain,
-    await getFernToken()
-  );
-  const edgeFlags = await loader.getEdgeFlags();
+    console.debug(`[${domain}] Loading API Explorer layout`);
+    const loader = await createCachedDocsLoader(host, domain, await getFernToken());
+    const edgeFlags = await loader.getEdgeFlags();
 
-  return (
-    <main className="fixed inset-0">
-      <PlaygroundKeyboardTrigger />
-      <PlaygroundCloseButton />
-      <ApiExplorerFlags
-        isFileForgeHackEnabled={edgeFlags.isFileForgeHackEnabled}
-        isProxyDisabled={edgeFlags.isProxyDisabled}
-        usesApplicationJsonInFormDataValue={
-          edgeFlags.usesApplicationJsonInFormDataValue
-        }
-        isBinaryOctetStreamAudioPlayer={
-          edgeFlags.isBinaryOctetStreamAudioPlayer
-        }
-      />
-      <HorizontalSplitPane
-        mode="pixel"
-        className="size-full"
-        leftClassName="border-border-default border-r hidden lg:block"
-      >
-        {sidebar}
-        {children}
-      </HorizontalSplitPane>
-    </main>
-  );
+    return (
+        <main className="fixed inset-0">
+            <PlaygroundKeyboardTrigger />
+            <PlaygroundCloseButton />
+            <ApiExplorerFlags
+                isFileForgeHackEnabled={edgeFlags.isFileForgeHackEnabled}
+                isProxyDisabled={edgeFlags.isProxyDisabled}
+                usesApplicationJsonInFormDataValue={edgeFlags.usesApplicationJsonInFormDataValue}
+                isBinaryOctetStreamAudioPlayer={edgeFlags.isBinaryOctetStreamAudioPlayer}
+            />
+            <HorizontalSplitPane
+                mode="pixel"
+                className="size-full"
+                leftClassName="border-border-default border-r hidden lg:block"
+            >
+                {sidebar}
+                {children}
+            </HorizontalSplitPane>
+        </main>
+    );
 }

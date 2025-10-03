@@ -5,7 +5,7 @@
 export const FernAIEnvironment = {
     Production: "https://fai.buildwithfern.com",
     Development: "https://fai-dev.buildwithfern.com",
-    Local: "http://localhost:8080",
+    Local: "http://localhost:8080"
 } as const;
 
 export type FernAIEnvironment =

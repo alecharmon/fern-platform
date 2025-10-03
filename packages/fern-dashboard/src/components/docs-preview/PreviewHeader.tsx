@@ -7,46 +7,42 @@ import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";
 import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/desktop-search-button";
 
 export function PreviewHeader({
-  versionSelect,
-  productSelect,
-  navbarLinks,
-  logo,
-  showSearchBar,
+    versionSelect,
+    productSelect,
+    navbarLinks,
+    logo,
+    showSearchBar
 }: {
-  headertabs?: React.ReactNode;
-  versionSelect?: React.ReactNode;
-  productSelect?: React.ReactNode;
-  navbarLinks?: React.ReactNode;
-  logo?: React.ReactNode;
-  showSearchBar?: boolean;
+    headertabs?: React.ReactNode;
+    versionSelect?: React.ReactNode;
+    productSelect?: React.ReactNode;
+    navbarLinks?: React.ReactNode;
+    logo?: React.ReactNode;
+    showSearchBar?: boolean;
 }) {
-  return (
-    <AbstractHeaderContent
-      className="max-w-page-width mx-auto"
-      logo={logo}
-      versionSelect={versionSelect}
-      productSelect={productSelect}
-      navbarLinks={navbarLinks}
-      showSearchBar={showSearchBar}
-      themeSwitch={
-        <FernTooltipProvider>
-          <FernTooltip
-            content="Theme switch is disabled in editor"
-            side="bottom"
-            variant="dashboard"
-          >
-            <span className="pointer-events-auto ml-2 w-fit">
-              <ThemeSwitch iconOnly variant="ghost" disabled />
-            </span>
-          </FernTooltip>
-        </FernTooltipProvider>
-      }
-      searchBar={
-        <DesktopSearchButton
-          id={FERN_SEARCH_BUTTON_ID}
-          className="fern-header-search-bar cursor-not-allowed overflow-hidden"
+    return (
+        <AbstractHeaderContent
+            className="max-w-page-width mx-auto"
+            logo={logo}
+            versionSelect={versionSelect}
+            productSelect={productSelect}
+            navbarLinks={navbarLinks}
+            showSearchBar={showSearchBar}
+            themeSwitch={
+                <FernTooltipProvider>
+                    <FernTooltip content="Theme switch is disabled in editor" side="bottom" variant="dashboard">
+                        <span className="pointer-events-auto ml-2 w-fit">
+                            <ThemeSwitch iconOnly variant="ghost" disabled />
+                        </span>
+                    </FernTooltip>
+                </FernTooltipProvider>
+            }
+            searchBar={
+                <DesktopSearchButton
+                    id={FERN_SEARCH_BUTTON_ID}
+                    className="fern-header-search-bar cursor-not-allowed overflow-hidden"
+                />
+            }
         />
-      }
-    />
-  );
+    );
 }

@@ -52,26 +52,26 @@ export class Read {
      */
     public getDocsUrlMetadata(
         request: FdrLambda.docs.v2.read.GetMetadataForUrlRequest,
-        requestOptions?: Read.RequestOptions,
+        requestOptions?: Read.RequestOptions
     ): core.HttpResponsePromise<FdrLambda.docs.v2.read.DocsUrlMetadata> {
         return core.HttpResponsePromise.fromPromise(this.__getDocsUrlMetadata(request, requestOptions));
     }
 
     private async __getDocsUrlMetadata(
         request: FdrLambda.docs.v2.read.GetMetadataForUrlRequest,
-        requestOptions?: Read.RequestOptions,
+        requestOptions?: Read.RequestOptions
     ): Promise<core.WithRawResponse<FdrLambda.docs.v2.read.DocsUrlMetadata>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FdrLambdaEnvironment.Prod,
-                "/v2/registry/docs/metadata-for-url",
+                "/v2/registry/docs/metadata-for-url"
             ),
             method: "POST",
             headers: _headers,
@@ -81,12 +81,12 @@ export class Read {
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return {
                 data: _response.body as FdrLambda.docs.v2.read.DocsUrlMetadata,
-                rawResponse: _response.rawResponse,
+                rawResponse: _response.rawResponse
             };
         }
 
@@ -98,7 +98,7 @@ export class Read {
                     throw new errors.FdrLambdaError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -108,16 +108,16 @@ export class Read {
                 throw new errors.FdrLambdaError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FdrLambdaTimeoutError(
-                    "Timeout exceeded when calling POST /v2/registry/docs/metadata-for-url.",
+                    "Timeout exceeded when calling POST /v2/registry/docs/metadata-for-url."
                 );
             case "unknown":
                 throw new errors.FdrLambdaError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

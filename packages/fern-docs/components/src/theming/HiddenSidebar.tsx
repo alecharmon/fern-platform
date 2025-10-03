@@ -1,8 +1,8 @@
 "use client";
 
 export function HiddenSidebar() {
-  return (
-    <style jsx global>{`
+    return (
+        <style jsx global>{`
       #fern-toc,
       #fern-sidebar[data-state="sticky"],
       #fern-sidebar[data-state="fixed"],
@@ -13,5 +13,5 @@ export function HiddenSidebar() {
         display: none;
       }
     `}</style>
-  );
+    );
 }

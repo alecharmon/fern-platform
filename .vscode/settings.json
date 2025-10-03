@@ -22,11 +22,17 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": ["source.fixAll", "source.sortMembers"],
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "biomejs.biome",
   "scss.validate": false,
   "css.validate": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "vitest.disableWorkspaceWarning": true,

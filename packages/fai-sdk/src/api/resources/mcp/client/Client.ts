@@ -54,7 +54,7 @@ export class Mcp {
     public getMcpSemanticQuery(
         domain: string,
         request: FernAI.GetMcpSemanticQueryRequest,
-        requestOptions?: Mcp.RequestOptions,
+        requestOptions?: Mcp.RequestOptions
     ): core.HttpResponsePromise<FernAI.GetMcpSemanticQueryResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getMcpSemanticQuery(domain, request, requestOptions));
     }
@@ -62,19 +62,19 @@ export class Mcp {
     private async __getMcpSemanticQuery(
         domain: string,
         request: FernAI.GetMcpSemanticQueryRequest,
-        requestOptions?: Mcp.RequestOptions,
+        requestOptions?: Mcp.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.GetMcpSemanticQueryResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `mcp/semantic/${encodeURIComponent(domain)}`,
+                `mcp/semantic/${encodeURIComponent(domain)}`
             ),
             method: "POST",
             headers: _headers,
@@ -84,7 +84,7 @@ export class Mcp {
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetMcpSemanticQueryResponse, rawResponse: _response.rawResponse };
@@ -95,13 +95,13 @@ export class Mcp {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -111,14 +111,14 @@ export class Mcp {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /mcp/semantic/{domain}.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -138,7 +138,7 @@ export class Mcp {
     public getMcpBmfQuery(
         domain: string,
         request: FernAI.GetMcpBmfQueryRequest,
-        requestOptions?: Mcp.RequestOptions,
+        requestOptions?: Mcp.RequestOptions
     ): core.HttpResponsePromise<FernAI.GetMcpBmfQueryResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getMcpBmfQuery(domain, request, requestOptions));
     }
@@ -146,19 +146,19 @@ export class Mcp {
     private async __getMcpBmfQuery(
         domain: string,
         request: FernAI.GetMcpBmfQueryRequest,
-        requestOptions?: Mcp.RequestOptions,
+        requestOptions?: Mcp.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.GetMcpBmfQueryResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `mcp/bmf/${encodeURIComponent(domain)}`,
+                `mcp/bmf/${encodeURIComponent(domain)}`
             ),
             method: "POST",
             headers: _headers,
@@ -168,7 +168,7 @@ export class Mcp {
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetMcpBmfQueryResponse, rawResponse: _response.rawResponse };
@@ -179,13 +179,13 @@ export class Mcp {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -195,14 +195,14 @@ export class Mcp {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /mcp/bmf/{domain}.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

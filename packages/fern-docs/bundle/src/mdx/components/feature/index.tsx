@@ -3,7 +3,7 @@ import { FeatureFlagDebug } from "@fern-docs/components/feature-flags/FeatureFla
 import { FeatureProps } from "@fern-docs/components/feature-flags/types";
 
 export const Feature = (props: FeatureProps) => (
-  <FeatureFlagDebug {...props}>
-    <FeatureComponent {...props} />
-  </FeatureFlagDebug>
+    <FeatureFlagDebug {...props}>
+        <FeatureComponent {...props} />
+    </FeatureFlagDebug>
 );

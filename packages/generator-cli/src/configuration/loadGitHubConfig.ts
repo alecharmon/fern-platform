@@ -5,10 +5,10 @@ import { AbsoluteFilePath } from "@fern-api/fs-utils";
 import { FernGeneratorCli } from "./generated";
 
 export async function loadGitHubConfig({
-  absolutePathToConfig,
+    absolutePathToConfig
 }: {
-  absolutePathToConfig: AbsoluteFilePath;
+    absolutePathToConfig: AbsoluteFilePath;
 }): Promise<FernGeneratorCli.GitHubConfig> {
-  const rawContents = await readFile(absolutePathToConfig, "utf8");
-  return JSON.parse(rawContents);
+    const rawContents = await readFile(absolutePathToConfig, "utf8");
+    return JSON.parse(rawContents);
 }

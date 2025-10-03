@@ -8,37 +8,32 @@ import { Auth0OrgName } from "../../services/auth0/types";
 import { OrgNameProvider } from "../context/OrgNameContext";
 
 export default async function AuthedLayout({
-  params,
-  children,
-  sidepanel,
-  navbar,
-  header,
+    params,
+    children,
+    sidepanel,
+    navbar,
+    header
 }: Readonly<{
-  params: Promise<{ orgName: Auth0OrgName }>;
-  children: React.JSX.Element;
-  sidepanel: React.ReactNode;
-  navbar: React.ReactNode;
-  header: React.ReactNode;
+    params: Promise<{ orgName: Auth0OrgName }>;
+    children: React.JSX.Element;
+    sidepanel: React.ReactNode;
+    navbar: React.ReactNode;
+    header: React.ReactNode;
 }>) {
-  const { orgName } = await params;
+    const { orgName } = await params;
 
-  return (
-    <>
-      <ServerSidePylonSetup />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <OrgNameProvider orgName={orgName}>
-          <SidepanelProvider>
-            <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
-              {children}
-            </AppLayout>
-          </SidepanelProvider>
-        </OrgNameProvider>
-      </ThemeProvider>
-    </>
-  );
+    return (
+        <>
+            <ServerSidePylonSetup />
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                <OrgNameProvider orgName={orgName}>
+                    <SidepanelProvider>
+                        <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
+                            {children}
+                        </AppLayout>
+                    </SidepanelProvider>
+                </OrgNameProvider>
+            </ThemeProvider>
+        </>
+    );
 }

@@ -1,16 +1,15 @@
 import { Dispatch, SetStateAction, createContext, useContext } from "react";
 
 interface PlaygroundTypeReferenceFormContextValue {
-  isNullSelected: boolean;
-  setIsNullSelected: Dispatch<SetStateAction<boolean>>;
+    isNullSelected: boolean;
+    setIsNullSelected: Dispatch<SetStateAction<boolean>>;
 }
 
-export const PlaygroundTypeReferenceFormContext =
-  createContext<PlaygroundTypeReferenceFormContextValue>({
+export const PlaygroundTypeReferenceFormContext = createContext<PlaygroundTypeReferenceFormContextValue>({
     isNullSelected: false,
-    setIsNullSelected: () => undefined,
-  });
+    setIsNullSelected: () => undefined
+});
 
 export const usePlaygroundTypeReferenceFormContext = () => {
-  return useContext(PlaygroundTypeReferenceFormContext);
+    return useContext(PlaygroundTypeReferenceFormContext);
 };

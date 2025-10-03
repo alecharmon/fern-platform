@@ -9,86 +9,64 @@ import * as AccordionPrimitive from "./accordion-primitive";
 import { cn } from "./cn";
 
 const Accordion = React.forwardRef<
-  React.ComponentRef<typeof AccordionPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Root>
+    React.ComponentRef<typeof AccordionPrimitive.Root>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  return (
-    <AccordionPrimitive.Root
-      ref={ref}
-      className={cn("fern-accordion fern-card", className)}
-      {...props}
-    >
-      {props.children}
-    </AccordionPrimitive.Root>
-  );
+    return (
+        <AccordionPrimitive.Root ref={ref} className={cn("fern-accordion fern-card", className)} {...props}>
+            {props.children}
+        </AccordionPrimitive.Root>
+    );
 });
 Accordion.displayName = "Accordion";
 
 const AccordionItem = React.forwardRef<
-  React.ComponentRef<typeof AccordionPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> & {
-    nestedHeaders?: string[];
-  }
+    React.ComponentRef<typeof AccordionPrimitive.Item>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> & {
+        nestedHeaders?: string[];
+    }
 >(({ className, children, nestedHeaders, ...props }, forwardedRef) => (
-  <AccordionPrimitive.Item
-    ref={forwardedRef}
-    className={cn("fern-accordion-item", className)}
-    {...props}
-  >
-    {children}
-  </AccordionPrimitive.Item>
+    <AccordionPrimitive.Item ref={forwardedRef} className={cn("fern-accordion-item", className)} {...props}>
+        {children}
+    </AccordionPrimitive.Item>
 ));
 AccordionItem.displayName = "AccordionItem";
 
 const AccordionTrigger = React.forwardRef<
-  React.ComponentRef<typeof AccordionPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
+    React.ComponentRef<typeof AccordionPrimitive.Trigger>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header asChild>
-    <AccordionPrimitive.Trigger
-      ref={ref}
-      className={cn("fern-accordion-trigger", className)}
-      {...props}
-    >
-      <ChevronRight className="fern-accordion-trigger-arrow" />
-      {children && typeof children === "string" ? (
-        <h6 className="fern-accordion-trigger-title">{children}</h6>
-      ) : (
-        <div
-          className="fern-accordion-trigger-title"
-          role="heading"
-          aria-level={6}
-        >
-          {children}
-        </div>
-      )}
-    </AccordionPrimitive.Trigger>
-  </AccordionPrimitive.Header>
+    <AccordionPrimitive.Header asChild>
+        <AccordionPrimitive.Trigger ref={ref} className={cn("fern-accordion-trigger", className)} {...props}>
+            <ChevronRight className="fern-accordion-trigger-arrow" />
+            {children && typeof children === "string" ? (
+                <h6 className="fern-accordion-trigger-title">{children}</h6>
+            ) : (
+                <div className="fern-accordion-trigger-title" role="heading" aria-level={6}>
+                    {children}
+                </div>
+            )}
+        </AccordionPrimitive.Trigger>
+    </AccordionPrimitive.Header>
 ));
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 
 const AccordionContent = React.forwardRef<
-  React.ComponentRef<typeof AccordionPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
+    React.ComponentRef<typeof AccordionPrimitive.Content>,
+    React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
 >(({ children, asChild, ...props }, ref) => {
-  const collapseProps = useFernCollapseOverflow();
-  return (
-    <AccordionPrimitive.Content
-      ref={composeRefs(ref, collapseProps.ref)}
-      className={"flex flex-col"}
-      {...props}
-      onAnimationStart={composeEventHandlers(
-        props.onAnimationStart,
-        collapseProps.onAnimationStart
-      )}
-      onAnimationEnd={composeEventHandlers(
-        props.onAnimationEnd,
-        collapseProps.onAnimationEnd
-      )}
-    >
-      {children}
-    </AccordionPrimitive.Content>
-  );
+    const collapseProps = useFernCollapseOverflow();
+    return (
+        <AccordionPrimitive.Content
+            ref={composeRefs(ref, collapseProps.ref)}
+            className={"flex flex-col"}
+            {...props}
+            onAnimationStart={composeEventHandlers(props.onAnimationStart, collapseProps.onAnimationStart)}
+            onAnimationEnd={composeEventHandlers(props.onAnimationEnd, collapseProps.onAnimationEnd)}
+        >
+            {children}
+        </AccordionPrimitive.Content>
+    );
 });
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 

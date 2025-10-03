@@ -2,9 +2,9 @@ import { FernGeneratorCli } from "../../../configuration/generated";
 
 const CONFIG: FernGeneratorCli.ReadmeConfig = {
     language: FernGeneratorCli.LanguageInfo.go({
-        publishInfo: undefined,
+        publishInfo: undefined
     }),
-    organization: "empty",
+    organization: "empty"
 };
 
 export default CONFIG;

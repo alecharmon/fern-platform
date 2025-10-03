@@ -7,9 +7,7 @@
   "bin": {
     "generator-cli": "dist/cli.cjs"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsup ./src/cli.ts --format cjs && echo '#!/usr/bin/env node' | cat - dist/cli.cjs > dist/tmp && mv dist/tmp dist/cli.cjs",

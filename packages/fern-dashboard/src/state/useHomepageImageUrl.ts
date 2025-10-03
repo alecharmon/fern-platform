@@ -10,31 +10,25 @@ import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { convertQueryResultToLoadable } from "./convertQueryResultToLoadable";
 import { ReactQueryKey, inferQueryData } from "./queryKeys";
 
-export function useHomepageImageUrl({
-  docsSite,
-  theme,
-}: {
-  docsSite: FdrAPI.dashboard.DocsSite;
-  theme: Theme;
-}) {
-  const orgName = useOrgNameFromPathname();
-  const docsUrls = docsSite.urls.map(convertFdrDocsSiteUrlToDocsUrl);
-  const QUERY_KEY = ReactQueryKey.homepageImageUrl({
-    orgName,
-    docsUrls,
-    theme,
-  });
+export function useHomepageImageUrl({ docsSite, theme }: { docsSite: FdrAPI.dashboard.DocsSite; theme: Theme }) {
+    const orgName = useOrgNameFromPathname();
+    const docsUrls = docsSite.urls.map(convertFdrDocsSiteUrlToDocsUrl);
+    const QUERY_KEY = ReactQueryKey.homepageImageUrl({
+        orgName,
+        docsUrls,
+        theme
+    });
 
-  return convertQueryResultToLoadable(
-    useQuery<inferQueryData<typeof QUERY_KEY>>({
-      queryKey: QUERY_KEY,
-      queryFn: () =>
-        DashboardApiClient.getHomepageImages({
-          orgName,
-          urls: docsUrls,
-          theme,
-        }),
-      retry: false,
-    })
-  );
+    return convertQueryResultToLoadable(
+        useQuery<inferQueryData<typeof QUERY_KEY>>({
+            queryKey: QUERY_KEY,
+            queryFn: () =>
+                DashboardApiClient.getHomepageImages({
+                    orgName,
+                    urls: docsUrls,
+                    theme
+                }),
+            retry: false
+        })
+    );
 }

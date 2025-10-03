@@ -14,7 +14,7 @@ export class FernAIError extends Error {
         message,
         statusCode,
         body,
-        rawResponse,
+        rawResponse
     }: {
         message?: string;
         statusCode?: number;
@@ -32,7 +32,7 @@ export class FernAIError extends Error {
 function buildMessage({
     message,
     statusCode,
-    body,
+    body
 }: {
     message: string | undefined;
     statusCode: number | undefined;

@@ -1,3 +1,3 @@
 export type CustomAskFernConfig = {
-  isCohere: boolean;
+    isCohere: boolean;
 };

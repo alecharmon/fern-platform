@@ -15,30 +15,30 @@ const meilisearchQueryAtom = atom<string>("");
  * Persists the query across the app using a jotai atom.
  */
 function useMeilisearchBox(): ReturnType<typeof useAlgoliaSearchBox> {
-  const [query, setQuery] = useAtom(meilisearchQueryAtom);
+    const [query, setQuery] = useAtom(meilisearchQueryAtom);
 
-  const refine = useCallback(
-    (nextQuery: string) => {
-      setQuery(nextQuery);
-    },
-    [setQuery]
-  );
+    const refine = useCallback(
+        (nextQuery: string) => {
+            setQuery(nextQuery);
+        },
+        [setQuery]
+    );
 
-  const clear = useCallback(() => {
-    setQuery("");
-  }, [setQuery]);
+    const clear = useCallback(() => {
+        setQuery("");
+    }, [setQuery]);
 
-  return {
-    query,
-    refine,
-    clear,
-    isSearchStalled: false,
-  };
+    return {
+        query,
+        refine,
+        clear,
+        isSearchStalled: false
+    };
 }
 
 export function useSearchBox(): ReturnType<typeof useAlgoliaSearchBox> {
-  if (isSelfHosted()) {
-    return useMeilisearchBox();
-  }
-  return useAlgoliaSearchBox();
+    if (isSelfHosted()) {
+        return useMeilisearchBox();
+    }
+    return useAlgoliaSearchBox();
 }

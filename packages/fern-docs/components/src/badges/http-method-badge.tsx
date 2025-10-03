@@ -9,85 +9,81 @@ import { FaIcon } from "../fa-icon";
 import { Badge, BadgeProps } from "./badge";
 
 const METHOD_COLOR_SCHEMES: Record<HttpOrWssOrGrpc, UIColor> = {
-  GET: "green",
-  DELETE: "red",
-  POST: "blue",
-  PUT: "amber",
-  PATCH: "orange",
-  HEAD: "gray",
-  OPTIONS: "bronze",
-  CONNECT: "sky",
-  TRACE: "purple",
-  WSS: "green",
-  UNARY: "gray",
-  CLIENT_STREAM: "gray",
-  SERVER_STREAM: "gray",
-  BIDIRECTIONAL_STREAM: "gray",
+    GET: "green",
+    DELETE: "red",
+    POST: "blue",
+    PUT: "amber",
+    PATCH: "orange",
+    HEAD: "gray",
+    OPTIONS: "bronze",
+    CONNECT: "sky",
+    TRACE: "purple",
+    WSS: "green",
+    UNARY: "gray",
+    CLIENT_STREAM: "gray",
+    SERVER_STREAM: "gray",
+    BIDIRECTIONAL_STREAM: "gray"
 };
 
 /**
  * Abbreviated method names for smaller (fixed-width) badges.
  */
 const ABBREVIATED_METHODS: Record<HttpOrWssOrGrpc, string> = {
-  GET: "GET",
-  DELETE: "DEL",
-  POST: "POST",
-  PUT: "PUT",
-  PATCH: "PATCH",
-  HEAD: "HEAD",
-  OPTIONS: "OPT",
-  CONNECT: "CON",
-  TRACE: "TRACE",
-  WSS: "WSS",
-  UNARY: "UNARY",
-  CLIENT_STREAM: "STREAM",
-  SERVER_STREAM: "STREAM",
-  BIDIRECTIONAL_STREAM: "STREAM",
+    GET: "GET",
+    DELETE: "DEL",
+    POST: "POST",
+    PUT: "PUT",
+    PATCH: "PATCH",
+    HEAD: "HEAD",
+    OPTIONS: "OPT",
+    CONNECT: "CON",
+    TRACE: "TRACE",
+    WSS: "WSS",
+    UNARY: "UNARY",
+    CLIENT_STREAM: "STREAM",
+    SERVER_STREAM: "STREAM",
+    BIDIRECTIONAL_STREAM: "STREAM"
 };
 
 const GRPC_STREAM_ICONS: Partial<Record<HttpOrWssOrGrpc, string>> = {
-  CLIENT_STREAM: "fa-solid fa-arrow-up",
-  SERVER_STREAM: "fa-solid fa-arrow-down",
-  BIDIRECTIONAL_STREAM: "fa-solid fa-arrow-up-arrow-down",
+    CLIENT_STREAM: "fa-solid fa-arrow-up",
+    SERVER_STREAM: "fa-solid fa-arrow-down",
+    BIDIRECTIONAL_STREAM: "fa-solid fa-arrow-up-arrow-down"
 };
 
 export interface HttpOrWSSOrGrpcBadgeProps extends Omit<BadgeProps, "color"> {
-  method: HttpOrWssOrGrpc;
-  chevronProps?: {
-    show: boolean;
-    isOpen: boolean;
-  };
+    method: HttpOrWssOrGrpc;
+    chevronProps?: {
+        show: boolean;
+        isOpen: boolean;
+    };
 }
 
-export const HttpMethodBadge = forwardRef<
-  HTMLSpanElement & HTMLButtonElement,
-  HttpOrWSSOrGrpcBadgeProps
->((props, ref) => {
-  const { method, chevronProps, ...rest } = props;
-  const icon = GRPC_STREAM_ICONS[method];
+export const HttpMethodBadge = forwardRef<HTMLSpanElement & HTMLButtonElement, HttpOrWSSOrGrpcBadgeProps>(
+    (props, ref) => {
+        const { method, chevronProps, ...rest } = props;
+        const icon = GRPC_STREAM_ICONS[method];
 
-  return (
-    <Badge
-      ref={ref}
-      {...rest}
-      data-badge-type="http-method"
-      data-http-method={method}
-      color={METHOD_COLOR_SCHEMES[method]}
-      className={`${rest.className || ""} ${chevronProps?.show ? "inline-flex w-auto items-center gap-1" : ""}`}
-    >
-      {icon && <FaIcon icon={icon} className="grpc-streaming-arrow" />}
-      {props.children ??
-        (rest.size === "sm" || method in GrpcMethod
-          ? ABBREVIATED_METHODS[method]
-          : method)}
-      {chevronProps?.show &&
-        (chevronProps.isOpen ? (
-          <ChevronUp className="size-3 flex-shrink-0" />
-        ) : (
-          <ChevronDown className="size-3 flex-shrink-0" />
-        ))}
-    </Badge>
-  );
-});
+        return (
+            <Badge
+                ref={ref}
+                {...rest}
+                data-badge-type="http-method"
+                data-http-method={method}
+                color={METHOD_COLOR_SCHEMES[method]}
+                className={`${rest.className || ""} ${chevronProps?.show ? "inline-flex w-auto items-center gap-1" : ""}`}
+            >
+                {icon && <FaIcon icon={icon} className="grpc-streaming-arrow" />}
+                {props.children ?? (rest.size === "sm" || method in GrpcMethod ? ABBREVIATED_METHODS[method] : method)}
+                {chevronProps?.show &&
+                    (chevronProps.isOpen ? (
+                        <ChevronUp className="size-3 flex-shrink-0" />
+                    ) : (
+                        <ChevronDown className="size-3 flex-shrink-0" />
+                    ))}
+            </Badge>
+        );
+    }
+);
 
 HttpMethodBadge.displayName = "HttpMethodBadge";

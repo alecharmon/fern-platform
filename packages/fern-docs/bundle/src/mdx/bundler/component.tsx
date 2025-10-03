@@ -14,78 +14,69 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { createMdxComponents } from "../components";
 
 const globals = {
-  // allows us to use MDXProvider to pass components to children
-  MdxJsReact: { useMDXComponents },
-  React,
-  ReactDOM,
-  _jsx_runtime,
+    // allows us to use MDXProvider to pass components to children
+    MdxJsReact: { useMDXComponents },
+    React,
+    ReactDOM,
+    _jsx_runtime
 };
 
 export const MdxComponent = React.memo<{
-  code: string;
-  jsxElements: string[];
+    code: string;
+    jsxElements: string[];
 }>(
-  function MdxComponent({ code, jsxElements }) {
-    const { default: Component } = getMDXExport(code, globals);
-    return (
-      <ErrorBoundary>
-        <MDXProvider components={createMdxComponents(jsxElements)}>
-          <Component />
-        </MDXProvider>
-      </ErrorBoundary>
-    );
-  },
-  (prev, next) => prev.code === next.code
+    function MdxComponent({ code, jsxElements }) {
+        const { default: Component } = getMDXExport(code, globals);
+        return (
+            <ErrorBoundary>
+                <MDXProvider components={createMdxComponents(jsxElements)}>
+                    <Component />
+                </MDXProvider>
+            </ErrorBoundary>
+        );
+    },
+    (prev, next) => prev.code === next.code
 );
 
 export const NextMdxRemoteComponent = React.memo<{
-  scope: Record<string, unknown>;
-  code: string;
-  frontmatter?: Record<string, unknown>;
-  jsxElements: string[];
+    scope: Record<string, unknown>;
+    code: string;
+    frontmatter?: Record<string, unknown>;
+    jsxElements: string[];
 }>(
-  function NextMdxRemoteComponent({ scope, code, frontmatter, jsxElements }) {
-    return (
-      <ErrorBoundary>
-        <MDXProvider components={createMdxComponents(jsxElements)}>
-          <MDXRemote
-            scope={scope}
-            frontmatter={frontmatter}
-            compiledSource={code}
-            lazy={false}
-          />
-        </MDXProvider>
-      </ErrorBoundary>
-    );
-  },
-  (prev, next) => prev.code === next.code
+    function NextMdxRemoteComponent({ scope, code, frontmatter, jsxElements }) {
+        return (
+            <ErrorBoundary>
+                <MDXProvider components={createMdxComponents(jsxElements)}>
+                    <MDXRemote scope={scope} frontmatter={frontmatter} compiledSource={code} lazy={false} />
+                </MDXProvider>
+            </ErrorBoundary>
+        );
+    },
+    (prev, next) => prev.code === next.code
 );
 
 export const MdxAside = React.memo<{
-  code: string;
-  jsxElements: string[];
-  useNextMdx?: boolean;
+    code: string;
+    jsxElements: string[];
+    useNextMdx?: boolean;
 }>(
-  function MdxAside({ code, jsxElements, useNextMdx }) {
-    const { Aside } = getMDXExport(code, globals) ?? {};
-    if (Aside == null) {
-      return null;
-    }
-    return (
-      <ErrorBoundary>
-        {useNextMdx ? (
-          <NextMdxRemoteComponent
-            code={code}
-            scope={{}}
-            jsxElements={jsxElements}
-          />
-        ) : (
-          <MDXProvider components={createMdxComponents(jsxElements)}>
-            <Aside />
-          </MDXProvider>
-        )}
-      </ErrorBoundary>
-    );
-  },
-  (prev, next) => prev.code === next.code
+    function MdxAside({ code, jsxElements, useNextMdx }) {
+        const { Aside } = getMDXExport(code, globals) ?? {};
+        if (Aside == null) {
+            return null;
+        }
+        return (
+            <ErrorBoundary>
+                {useNextMdx ? (
+                    <NextMdxRemoteComponent code={code} scope={{}} jsxElements={jsxElements} />
+                ) : (
+                    <MDXProvider components={createMdxComponents(jsxElements)}>
+                        <Aside />
+                    </MDXProvider>
+                )}
+            </ErrorBoundary>
+        );
+    },
+    (prev, next) => prev.code === next.code
 );

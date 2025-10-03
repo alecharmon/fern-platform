@@ -18,60 +18,42 @@ import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  if (isLocal() || isSelfHosted()) {
-    return new NextResponse("jwt is not accessible in local preview mode", {
-      status: 400,
-    });
-  }
+    if (isLocal() || isSelfHosted()) {
+        return new NextResponse("jwt is not accessible in local preview mode", {
+            status: 400
+        });
+    }
 
-  const domain = getDocsDomainEdge(req);
-  const host = req.nextUrl.host;
-  const edgeConfig = await getAuthEdgeConfig(domain);
+    const domain = getDocsDomainEdge(req);
+    const host = req.nextUrl.host;
+    const edgeConfig = await getAuthEdgeConfig(domain);
 
-  // since we expect the callback to be redirected to, the token will be in the query params
-  const token = req.nextUrl.searchParams.get(COOKIE_FERN_TOKEN);
-  const returnTo = req.nextUrl.searchParams.get(
-    getReturnToQueryParam(edgeConfig)
-  );
-  const redirectLocation =
-    safeUrl(returnTo) ??
-    safeUrl(withDefaultProtocol(preferPreview(host, domain)));
-  console.log("Redirecting", host, domain, redirectLocation);
+    // since we expect the callback to be redirected to, the token will be in the query params
+    const token = req.nextUrl.searchParams.get(COOKIE_FERN_TOKEN);
+    const returnTo = req.nextUrl.searchParams.get(getReturnToQueryParam(edgeConfig));
+    const redirectLocation = safeUrl(returnTo) ?? safeUrl(withDefaultProtocol(preferPreview(host, domain)));
+    console.log("Redirecting", host, domain, redirectLocation);
 
-  if (edgeConfig?.type !== "basic_token_verification" || token == null) {
-    console.error(`Invalid config for domain ${domain}`);
-    return redirectWithLoginError(
-      req,
-      redirectLocation,
-      "unknown_error",
-      "Couldn't login, please try again"
-    );
-  }
+    if (edgeConfig?.type !== "basic_token_verification" || token == null) {
+        console.error(`Invalid config for domain ${domain}`);
+        return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
+    }
 
-  const fernUser = await safeVerifyFernJWTConfig(token, edgeConfig);
+    const fernUser = await safeVerifyFernJWTConfig(token, edgeConfig);
 
-  if (fernUser == null) {
-    return redirectWithLoginError(
-      req,
-      redirectLocation,
-      "unknown_error",
-      "Couldn't login, please try again"
-    );
-  }
+    if (fernUser == null) {
+        return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
+    }
 
-  const res = redirectLocation
-    ? FernNextResponse.redirect(req, {
-        destination: redirectLocation,
-        allowedDestinations: getAllowedRedirectUrls(edgeConfig),
-      })
-    : NextResponse.next();
+    const res = redirectLocation
+        ? FernNextResponse.redirect(req, {
+              destination: redirectLocation,
+              allowedDestinations: getAllowedRedirectUrls(edgeConfig)
+          })
+        : NextResponse.next();
 
-  const cookieJar = await cookies();
-  cookieJar.set(
-    COOKIE_FERN_TOKEN,
-    token,
-    withSecureCookie(withDefaultProtocol(host))
-  );
+    const cookieJar = await cookies();
+    cookieJar.set(COOKIE_FERN_TOKEN, token, withSecureCookie(withDefaultProtocol(host)));
 
-  return res;
+    return res;
 }

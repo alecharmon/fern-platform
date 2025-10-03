@@ -10,8 +10,8 @@ export { formatUtc } from "./formatUtc";
 export { identity } from "./identity";
 export { assertNonNullish, isNonNullish } from "./isNonNullish";
 export {
-  visitObject,
-  type ObjectPropertiesVisitor,
+    visitObject,
+    type ObjectPropertiesVisitor
 } from "./ObjectPropertiesVisitor";
 export { entries, type Entries } from "./objects/entries";
 export { isPlainObject } from "./objects/isPlainObject";

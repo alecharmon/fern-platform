@@ -3,67 +3,63 @@ import urljoin from "url-join";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 
 export function findEndpoint({
-  apiDefinition,
-  method,
-  path,
-  example: exampleName,
+    apiDefinition,
+    method,
+    path,
+    example: exampleName
 }: {
-  apiDefinition: ApiDefinition.ApiDefinition;
-  method: string;
-  path: string;
-  example: string | undefined;
+    apiDefinition: ApiDefinition.ApiDefinition;
+    method: string;
+    path: string;
+    example: string | undefined;
 }): ApiDefinition.EndpointDefinition | undefined {
-  path = path.startsWith("/") ? path : `/${path}`;
-  const matchingEndpoints = Object.values(apiDefinition.endpoints).filter(
-    (e) =>
-      e.method === method && getMatchablePermutationsForEndpoint(e).has(path)
-  );
-
-  if (exampleName != null && matchingEndpoints.length > 1) {
-    return (
-      matchingEndpoints.find((e) =>
-        e.examples?.some(createExampleNamePredicate(exampleName))
-      ) ?? matchingEndpoints[0]
+    path = path.startsWith("/") ? path : `/${path}`;
+    const matchingEndpoints = Object.values(apiDefinition.endpoints).filter(
+        (e) => e.method === method && getMatchablePermutationsForEndpoint(e).has(path)
     );
-  }
 
-  return matchingEndpoints[0];
+    if (exampleName != null && matchingEndpoints.length > 1) {
+        return (
+            matchingEndpoints.find((e) => e.examples?.some(createExampleNamePredicate(exampleName))) ??
+            matchingEndpoints[0]
+        );
+    }
+
+    return matchingEndpoints[0];
 }
 
-function createExampleNamePredicate(
-  exampleName: string
-): (example: ApiDefinition.ExampleEndpointCall) => boolean {
-  return (example) =>
-    example.name === exampleName ||
-    Object.values(example.snippets ?? {})
-      .flat()
-      .some((snippet) => snippet.name === exampleName);
+function createExampleNamePredicate(exampleName: string): (example: ApiDefinition.ExampleEndpointCall) => boolean {
+    return (example) =>
+        example.name === exampleName ||
+        Object.values(example.snippets ?? {})
+            .flat()
+            .some((snippet) => snippet.name === exampleName);
 }
 
 export function getMatchablePermutationsForEndpoint(
-  endpoint: Pick<ApiDefinition.EndpointDefinition, "path" | "environments">
+    endpoint: Pick<ApiDefinition.EndpointDefinition, "path" | "environments">
 ): Set<string> {
-  const path1 = ApiDefinition.toCurlyBraceEndpointPathLiteral(endpoint.path);
-  const path2 = ApiDefinition.toColonEndpointPathLiteral(endpoint.path);
-  const possiblePaths = new Set<string>([path1, path2]);
-  endpoint.environments?.forEach((env) => {
-    const fullUrl1 = urljoin(env.baseUrl, path1);
-    const fullUrl2 = urljoin(env.baseUrl, path2);
-    possiblePaths.add(fullUrl1);
-    possiblePaths.add(fullUrl2);
+    const path1 = ApiDefinition.toCurlyBraceEndpointPathLiteral(endpoint.path);
+    const path2 = ApiDefinition.toColonEndpointPathLiteral(endpoint.path);
+    const possiblePaths = new Set<string>([path1, path2]);
+    endpoint.environments?.forEach((env) => {
+        const fullUrl1 = urljoin(env.baseUrl, path1);
+        const fullUrl2 = urljoin(env.baseUrl, path2);
+        possiblePaths.add(fullUrl1);
+        possiblePaths.add(fullUrl2);
 
-    try {
-      const parsedUrl = new URL(env.baseUrl);
-      const basePath = parsedUrl.pathname + parsedUrl.search;
-      if (basePath !== "" && basePath !== undefined) {
-        const urlWithBasePath1 = urljoin(basePath, path1);
-        const urlWithBasePath2 = urljoin(basePath, path2);
-        possiblePaths.add(urlWithBasePath1);
-        possiblePaths.add(urlWithBasePath2);
-      }
-    } catch {
-      // If URL parsing fails, skip adding base path variations
-    }
-  });
-  return possiblePaths;
+        try {
+            const parsedUrl = new URL(env.baseUrl);
+            const basePath = parsedUrl.pathname + parsedUrl.search;
+            if (basePath !== "" && basePath !== undefined) {
+                const urlWithBasePath1 = urljoin(basePath, path1);
+                const urlWithBasePath2 = urljoin(basePath, path2);
+                possiblePaths.add(urlWithBasePath1);
+                possiblePaths.add(urlWithBasePath2);
+            }
+        } catch {
+            // If URL parsing fails, skip adding base path variations
+        }
+    });
+    return possiblePaths;
 }

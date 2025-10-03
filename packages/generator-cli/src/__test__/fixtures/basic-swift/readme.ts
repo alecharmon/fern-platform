@@ -4,10 +4,10 @@ const CONFIG: FernGeneratorCli.ReadmeConfig = {
     language: FernGeneratorCli.LanguageInfo.swift({
         publishInfo: {
             gitUrl: "https://github.com/fern-api/basic-swift-sdk",
-            minVersion: "0.1.0",
+            minVersion: "0.1.0"
         }
     }),
-    organization: "basic",
+    organization: "basic"
 };
 
 export default CONFIG;

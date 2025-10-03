@@ -8,59 +8,59 @@ import { MediaUploadNode as MediaUploadNodeComponent } from "@/components/editor
  * This file is boilerplate from Tiptap's image-upload-node.
  */
 export type UploadFunction = (
-  file: File,
-  onProgress?: (event: { progress: number }) => void,
-  abortSignal?: AbortSignal
+    file: File,
+    onProgress?: (event: { progress: number }) => void,
+    abortSignal?: AbortSignal
 ) => Promise<string>;
 
 export interface MediaUploadNodeOptions {
-  /**
-   * The type of the node.
-   * @default 'image'
-   */
-  type?: string | NodeType | undefined;
-  /**
-   * Acceptable file types for upload.
-   * @default 'image/*,video/*'
-   */
-  accept?: string;
-  /**
-   * Maximum number of files that can be uploaded.
-   * @default 1
-   */
-  limit?: number;
-  /**
-   * Maximum file size in bytes (0 for unlimited).
-   * @default 0
-   */
-  maxSize?: number;
-  /**
-   * Function to handle the upload process.
-   */
-  upload?: UploadFunction;
-  /**
-   * Callback for upload errors.
-   */
-  onError?: (error: Error) => void;
-  /**
-   * Callback for successful uploads.
-   */
-  onSuccess?: (url: string) => void;
-  /**
-   * HTML attributes to add to the image element.
-   * @default {}
-   * @example { class: 'foo' }
-   */
+    /**
+     * The type of the node.
+     * @default 'image'
+     */
+    type?: string | NodeType | undefined;
+    /**
+     * Acceptable file types for upload.
+     * @default 'image/*,video/*'
+     */
+    accept?: string;
+    /**
+     * Maximum number of files that can be uploaded.
+     * @default 1
+     */
+    limit?: number;
+    /**
+     * Maximum file size in bytes (0 for unlimited).
+     * @default 0
+     */
+    maxSize?: number;
+    /**
+     * Function to handle the upload process.
+     */
+    upload?: UploadFunction;
+    /**
+     * Callback for upload errors.
+     */
+    onError?: (error: Error) => void;
+    /**
+     * Callback for successful uploads.
+     */
+    onSuccess?: (url: string) => void;
+    /**
+     * HTML attributes to add to the image element.
+     * @default {}
+     * @example { class: 'foo' }
+     */
 
-  HTMLAttributes: Record<string, any>;
+    HTMLAttributes: Record<string, any>;
 }
 
 declare module "@tiptap/react" {
-  interface Commands<ReturnType> {
-    mediaUpload: {
-      setMediaUploadNode: (options?: MediaUploadNodeOptions) => ReturnType;
-    };
-  }
+    interface Commands<ReturnType> {
+        mediaUpload: {
+            setMediaUploadNode: (options?: MediaUploadNodeOptions) => ReturnType;
+        };
+    }
 }
 
 /**
@@ -68,97 +68,90 @@ declare module "@tiptap/react" {
  * @see registry/tiptap-node/image-upload-node/image-upload-node
  */
 export const MediaUploadNode = Node.create<MediaUploadNodeOptions>({
-  name: "mediaUpload",
+    name: "mediaUpload",
 
-  group: "block",
+    group: "block",
 
-  draggable: true,
+    draggable: true,
 
-  atom: true,
+    atom: true,
 
-  addOptions() {
-    return {
-      type: "media",
-      accept: "image/*,video/*",
-      limit: 1,
-      maxSize: 0,
-      upload: undefined,
-      onError: undefined,
-      onSuccess: undefined,
-      HTMLAttributes: {},
-    };
-  },
+    addOptions() {
+        return {
+            type: "media",
+            accept: "image/*,video/*",
+            limit: 1,
+            maxSize: 0,
+            upload: undefined,
+            onError: undefined,
+            onSuccess: undefined,
+            HTMLAttributes: {}
+        };
+    },
 
-  addAttributes() {
-    return {
-      accept: {
-        default: this.options.accept,
-      },
-      limit: {
-        default: this.options.limit,
-      },
-      maxSize: {
-        default: this.options.maxSize,
-      },
-    };
-  },
-
-  parseHTML() {
-    return [{ tag: "div", attrs: { "data-type": "image-upload" } }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return [
-      "div",
-      mergeAttributes({ "data-type": "image-upload" }, HTMLAttributes),
-    ];
-  },
-
-  addNodeView() {
-    return ReactNodeViewRenderer(MediaUploadNodeComponent);
-  },
-
-  addCommands() {
-    return {
-      setMediaUploadNode:
-        (options) =>
-        ({ commands }) => {
-          return commands.insertContent({
-            type: this.name,
-            attrs: options,
-          });
-        },
-    };
-  },
-
-  /**
-   * Adds Enter key handler to trigger the upload component when it's selected.
-   */
-  addKeyboardShortcuts() {
-    return {
-      Enter: ({ editor }) => {
-        const { selection } = editor.state;
-        const { nodeAfter } = selection.$from;
-
-        if (
-          nodeAfter &&
-          nodeAfter.type.name === "mediaUpload" &&
-          editor.isActive("mediaUpload")
-        ) {
-          const nodeEl = editor.view.nodeDOM(selection.$from.pos);
-          if (nodeEl && nodeEl instanceof HTMLElement) {
-            // Since NodeViewWrapper is wrapped with a div, we need to click the first child
-            const firstChild = nodeEl.firstChild;
-            if (firstChild && firstChild instanceof HTMLElement) {
-              firstChild.click();
-              return true;
+    addAttributes() {
+        return {
+            accept: {
+                default: this.options.accept
+            },
+            limit: {
+                default: this.options.limit
+            },
+            maxSize: {
+                default: this.options.maxSize
             }
-          }
-        }
-        return false;
-      },
-    };
-  },
+        };
+    },
+
+    parseHTML() {
+        return [{ tag: "div", attrs: { "data-type": "image-upload" } }];
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        return ["div", mergeAttributes({ "data-type": "image-upload" }, HTMLAttributes)];
+    },
+
+    addNodeView() {
+        return ReactNodeViewRenderer(MediaUploadNodeComponent);
+    },
+
+    addCommands() {
+        return {
+            setMediaUploadNode:
+                (options) =>
+                ({ commands }) => {
+                    return commands.insertContent({
+                        type: this.name,
+                        attrs: options
+                    });
+                }
+        };
+    },
+
+    /**
+     * Adds Enter key handler to trigger the upload component when it's selected.
+     */
+    addKeyboardShortcuts() {
+        return {
+            Enter: ({ editor }) => {
+                const { selection } = editor.state;
+                const { nodeAfter } = selection.$from;
+
+                if (nodeAfter && nodeAfter.type.name === "mediaUpload" && editor.isActive("mediaUpload")) {
+                    const nodeEl = editor.view.nodeDOM(selection.$from.pos);
+                    if (nodeEl && nodeEl instanceof HTMLElement) {
+                        // Since NodeViewWrapper is wrapped with a div, we need to click the first child
+                        const firstChild = nodeEl.firstChild;
+                        if (firstChild && firstChild instanceof HTMLElement) {
+                            firstChild.click();
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        };
+    }
 });
 
 export default MediaUploadNode;

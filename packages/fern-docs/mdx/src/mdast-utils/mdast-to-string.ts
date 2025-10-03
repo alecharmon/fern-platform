@@ -7,20 +7,20 @@ import type { Nodes } from "mdast";
  * Configuration options (optional).
  */
 interface Options {
-  /**
-   * Whether to use `alt` for `image`s (default: `true`).
-   */
-  includeImageAlt?: boolean;
+    /**
+     * Whether to use `alt` for `image`s (default: `true`).
+     */
+    includeImageAlt?: boolean;
 
-  /**
-   * Whether to use `value` of HTML (default: `true`).
-   */
-  includeHtml?: boolean;
+    /**
+     * Whether to use `value` of HTML (default: `true`).
+     */
+    includeHtml?: boolean;
 
-  /**
-   * Whether to preserve newlines in text nodes (default: `true`).
-   */
-  preserveNewlines?: boolean;
+    /**
+     * Whether to preserve newlines in text nodes (default: `true`).
+     */
+    preserveNewlines?: boolean;
 }
 
 /**
@@ -37,14 +37,10 @@ interface Options {
  *   Serialized `value`.
  */
 export function mdastToString(
-  value?: unknown,
-  {
-    includeImageAlt = true,
-    includeHtml = true,
-    preserveNewlines = true,
-  }: Options = {}
+    value?: unknown,
+    { includeImageAlt = true, includeHtml = true, preserveNewlines = true }: Options = {}
 ): string {
-  return one(value, includeImageAlt, includeHtml, preserveNewlines).trim();
+    return one(value, includeImageAlt, includeHtml, preserveNewlines).trim();
 }
 
 /**
@@ -59,63 +55,49 @@ export function mdastToString(
  * @returns
  *   Serialized node.
  */
-function one(
-  value: unknown,
-  includeImageAlt: boolean,
-  includeHtml: boolean,
-  preserveNewlines: boolean
-): string {
-  if (node(value)) {
-    if (value.type === "break" || value.type === "thematicBreak") {
-      return preserveNewlines ? "\n\n" : "";
+function one(value: unknown, includeImageAlt: boolean, includeHtml: boolean, preserveNewlines: boolean): string {
+    if (node(value)) {
+        if (value.type === "break" || value.type === "thematicBreak") {
+            return preserveNewlines ? "\n\n" : "";
+        }
+
+        if ("value" in value) {
+            return value.type === "html" && !includeHtml ? "" : value.value;
+        }
+
+        if (includeImageAlt && "alt" in value && value.alt) {
+            return value.alt;
+        }
+
+        if ("children" in value) {
+            return (
+                all(value.children as unknown[], includeImageAlt, includeHtml, preserveNewlines) +
+                (preserveNewlines && hasBreak(value) ? "\n" : hasSpace(value) ? " " : "")
+            );
+        }
     }
 
-    if ("value" in value) {
-      return value.type === "html" && !includeHtml ? "" : value.value;
+    if (Array.isArray(value)) {
+        return all(value, includeImageAlt, includeHtml, preserveNewlines);
     }
 
-    if (includeImageAlt && "alt" in value && value.alt) {
-      return value.alt;
-    }
-
-    if ("children" in value) {
-      return (
-        all(
-          value.children as unknown[],
-          includeImageAlt,
-          includeHtml,
-          preserveNewlines
-        ) +
-        (preserveNewlines && hasBreak(value)
-          ? "\n"
-          : hasSpace(value)
-            ? " "
-            : "")
-      );
-    }
-  }
-
-  if (Array.isArray(value)) {
-    return all(value, includeImageAlt, includeHtml, preserveNewlines);
-  }
-
-  return "";
+    return "";
 }
 
 function hasBreak(value: Extract<Nodes, { children: unknown[] }>): boolean {
-  return (
-    value.type === "blockquote" ||
-    value.type === "list" ||
-    value.type === "listItem" ||
-    value.type === "paragraph" ||
-    value.type === "table" ||
-    value.type === "tableRow" ||
-    value.type === "heading"
-  );
+    return (
+        value.type === "blockquote" ||
+        value.type === "list" ||
+        value.type === "listItem" ||
+        value.type === "paragraph" ||
+        value.type === "table" ||
+        value.type === "tableRow" ||
+        value.type === "heading"
+    );
 }
 
 function hasSpace(value: Extract<Nodes, { children: unknown[] }>): boolean {
-  return hasBreak(value) || value.type === "tableCell";
+    return hasBreak(value) || value.type === "tableCell";
 }
 
 /**
@@ -130,25 +112,15 @@ function hasSpace(value: Extract<Nodes, { children: unknown[] }>): boolean {
  * @returns
  *   Serialized nodes.
  */
-function all(
-  values: unknown[],
-  includeImageAlt: boolean,
-  includeHtml: boolean,
-  preserveNewlines: boolean
-): string {
-  const result: string[] = [];
-  let index = -1;
+function all(values: unknown[], includeImageAlt: boolean, includeHtml: boolean, preserveNewlines: boolean): string {
+    const result: string[] = [];
+    let index = -1;
 
-  while (++index < values.length) {
-    result[index] = one(
-      values[index],
-      includeImageAlt,
-      includeHtml,
-      preserveNewlines
-    );
-  }
+    while (++index < values.length) {
+        result[index] = one(values[index], includeImageAlt, includeHtml, preserveNewlines);
+    }
 
-  return result.join("");
+    return result.join("");
 }
 
 /**
@@ -160,5 +132,5 @@ function all(
  *   Whether `value` is a node.
  */
 function node(value: unknown): value is Nodes {
-  return Boolean(value && typeof value === "object");
+    return Boolean(value && typeof value === "object");
 }

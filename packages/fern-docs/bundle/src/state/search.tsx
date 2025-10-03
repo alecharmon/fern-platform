@@ -15,100 +15,92 @@ export const searchDialogOpenAtom = atom(false);
 export const searchInitializedAtom = atom(false);
 export const isAskAiEnabledAtom = atom(false);
 
-export const SetIsAskAiEnabled = ({
-  isAskAiEnabled,
-}: {
-  isAskAiEnabled: boolean;
-}) => {
-  useHydrateAtoms([[isAskAiEnabledAtom, isAskAiEnabled]], {
-    dangerouslyForceHydrate: true,
-  });
-  return null;
+export const SetIsAskAiEnabled = ({ isAskAiEnabled }: { isAskAiEnabled: boolean }) => {
+    useHydrateAtoms([[isAskAiEnabledAtom, isAskAiEnabled]], {
+        dangerouslyForceHydrate: true
+    });
+    return null;
 };
 
 export const useIsAskAiEnabled = () => {
-  return useAtomValue(isAskAiEnabledAtom);
+    return useAtomValue(isAskAiEnabledAtom);
 };
 
 export const isDefaultSearchFilterOnAtom = atom(false);
 
-export const SetIsDefaultSearchFilterOn = ({
-  isDefaultSearchFilterOn,
-}: {
-  isDefaultSearchFilterOn: boolean;
-}) => {
-  useHydrateAtoms([[isDefaultSearchFilterOnAtom, isDefaultSearchFilterOn]], {
-    dangerouslyForceHydrate: true,
-  });
-  return null;
+export const SetIsDefaultSearchFilterOn = ({ isDefaultSearchFilterOn }: { isDefaultSearchFilterOn: boolean }) => {
+    useHydrateAtoms([[isDefaultSearchFilterOnAtom, isDefaultSearchFilterOn]], {
+        dangerouslyForceHydrate: true
+    });
+    return null;
 };
 
 export const useIsDefaultSearchFilterOn = () => {
-  return useAtomValue(isDefaultSearchFilterOnAtom);
+    return useAtomValue(isDefaultSearchFilterOnAtom);
 };
 
 searchInitializedAtom.onMount = (setInitialized) => {
-  if (typeof window === "undefined") {
-    return;
-  }
+    if (typeof window === "undefined") {
+        return;
+    }
 
-  if (isLocal()) {
-    return;
-  }
+    if (isLocal()) {
+        return;
+    }
 
-  const initialize = () => {
-    setInitialized(true);
-  };
+    const initialize = () => {
+        setInitialized(true);
+    };
 
-  if (isSelfHosted()) {
-    initialize();
-  }
+    if (isSelfHosted()) {
+        initialize();
+    }
 
-  // enable other components to initialize the search state
-  window.addEventListener("search:initialized", initialize);
-  return () => {
-    window.removeEventListener("search:initialized", initialize);
-  };
+    // enable other components to initialize the search state
+    window.addEventListener("search:initialized", initialize);
+    return () => {
+        window.removeEventListener("search:initialized", initialize);
+    };
 };
 
 export const SearchV2Trigger = React.memo(function SearchV2Trigger(
-  props: React.ComponentProps<typeof DesktopSearchButton>
+    props: React.ComponentProps<typeof DesktopSearchButton>
 ) {
-  const isInitialized = useAtomValue(searchInitializedAtom);
-  const toggleSearchDialog = useToggleSearchDialog();
-  const isLocalEnvironment = isLocal();
-  const placeholder = "Search";
+    const isInitialized = useAtomValue(searchInitializedAtom);
+    const toggleSearchDialog = useToggleSearchDialog();
+    const isLocalEnvironment = isLocal();
+    const placeholder = "Search";
 
-  return (
-    <DesktopSearchButton
-      /**
-       * IMPORTANT: This component must be rendered only ONCE in the entire DOM tree,
-       * because the ID must be unique across the entire document.
-       */
-      id={FERN_SEARCH_BUTTON_ID}
-      {...props}
-      onClick={composeEventHandlers(props.onClick, toggleSearchDialog)}
-      variant={isInitialized && !isLocalEnvironment ? "default" : "loading"}
-      placeholder={placeholder}
-    />
-  );
+    return (
+        <DesktopSearchButton
+            /**
+             * IMPORTANT: This component must be rendered only ONCE in the entire DOM tree,
+             * because the ID must be unique across the entire document.
+             */
+            id={FERN_SEARCH_BUTTON_ID}
+            {...props}
+            onClick={composeEventHandlers(props.onClick, toggleSearchDialog)}
+            variant={isInitialized && !isLocalEnvironment ? "default" : "loading"}
+            placeholder={placeholder}
+        />
+    );
 });
 
 export function useIsSearchDialogOpen(): boolean {
-  return useAtomValue(searchDialogOpenAtom);
+    return useAtomValue(searchDialogOpenAtom);
 }
 
 export function useToggleSearchDialog(): () => void {
-  const setSearchDialogState = useSetAtom(searchDialogOpenAtom);
-  return () => setSearchDialogState((prev) => !prev);
+    const setSearchDialogState = useSetAtom(searchDialogOpenAtom);
+    return () => setSearchDialogState((prev) => !prev);
 }
 
 export const selectedFiltersAtom = atom<string[]>([]);
 
 export const useSelectedFilters = () => {
-  return useAtomValue(selectedFiltersAtom);
+    return useAtomValue(selectedFiltersAtom);
 };
 
 export const useSetSelectedFilters = () => {
-  return useSetAtom(selectedFiltersAtom);
+    return useSetAtom(selectedFiltersAtom);
 };

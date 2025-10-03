@@ -8,14 +8,14 @@ import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
 import { GitHubLoader } from "../../github/github-loader";
 
 export type CheckOrgWritePermissionToRepoError =
-  | { type: "MALFORMED_GITHUB_URL"; url: string }
-  | { type: "FERN_BOT_NOT_INSTALLED" }
-  | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
-  | FernConfigJsonErrors;
+    | { type: "MALFORMED_GITHUB_URL"; url: string }
+    | { type: "FERN_BOT_NOT_INSTALLED" }
+    | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
+    | FernConfigJsonErrors;
 
 export type CheckOrgWritePermissionToRepoResult =
-  | { ok: true }
-  | { ok: false; error: CheckOrgWritePermissionToRepoError };
+    | { ok: true }
+    | { ok: false; error: CheckOrgWritePermissionToRepoError };
 
 /**
  * Checks if the user has write permission to a given GitHub repository.
@@ -25,60 +25,56 @@ export type CheckOrgWritePermissionToRepoResult =
  * @returns true if the user has write permission, false otherwise
  */
 export async function checkOrgWritePermissionToRepo(
-  orgName: string,
-  site: string,
-  githubUrl: string
+    orgName: string,
+    site: string,
+    githubUrl: string
 ): Promise<CheckOrgWritePermissionToRepoResult> {
-  const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
-  if (owner == null || repo == null) {
-    return {
-      ok: false,
-      error: { type: "MALFORMED_GITHUB_URL", url: githubUrl },
-    };
-  }
-
-  // Use Fern bot to check permissions
-  const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
-  if (!fernBotResult.ok) {
-    if (fernBotResult.error.type === "NOT_INSTALLED") {
-      return {
-        ok: false,
-        error: { type: "FERN_BOT_NOT_INSTALLED" },
-      };
+    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+    if (owner == null || repo == null) {
+        return {
+            ok: false,
+            error: { type: "MALFORMED_GITHUB_URL", url: githubUrl }
+        };
     }
 
-    // For other errors, let's treat it as an internal server error for now
-    throw new Error(
-      `Internal server error while checking Fern bot installation or permissions: ${JSON.stringify(
-        fernBotResult.error
-      )}`
-    );
-  }
+    // Use Fern bot to check permissions
+    const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
+    if (!fernBotResult.ok) {
+        if (fernBotResult.error.type === "NOT_INSTALLED") {
+            return {
+                ok: false,
+                error: { type: "FERN_BOT_NOT_INSTALLED" }
+            };
+        }
 
-  const githubLoader = new GitHubLoader(githubUrl);
+        // For other errors, let's treat it as an internal server error for now
+        throw new Error(
+            `Internal server error while checking Fern bot installation or permissions: ${JSON.stringify(
+                fernBotResult.error
+            )}`
+        );
+    }
 
-  // Use the helper function to fetch fern.config.json from the repo
-  const fernConfigResult = await githubLoader.getFernConfigJson(
-    owner,
-    repo,
-    site
-  );
+    const githubLoader = new GitHubLoader(githubUrl);
 
-  if (fernConfigResult.type !== "ok") {
-    return {
-      ok: false,
-      error: fernConfigResult.error,
-    };
-  }
+    // Use the helper function to fetch fern.config.json from the repo
+    const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, site);
 
-  const fernConfigJson = fernConfigResult.result;
+    if (fernConfigResult.type !== "ok") {
+        return {
+            ok: false,
+            error: fernConfigResult.error
+        };
+    }
 
-  if (fernConfigJson.organization !== orgName) {
-    return {
-      ok: false,
-      error: { type: "FERN_CONFIG_JSON_ORG_MISMATCH" },
-    };
-  }
+    const fernConfigJson = fernConfigResult.result;
 
-  return { ok: true };
+    if (fernConfigJson.organization !== orgName) {
+        return {
+            ok: false,
+            error: { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
+        };
+    }
+
+    return { ok: true };
 }

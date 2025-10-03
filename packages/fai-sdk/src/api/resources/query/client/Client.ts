@@ -61,14 +61,14 @@ export class Query {
      */
     public createQuery(
         request: FernAI.CreateQueryRequest,
-        requestOptions?: Query.RequestOptions,
+        requestOptions?: Query.RequestOptions
     ): core.HttpResponsePromise<FernAI.CreateQueryResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createQuery(request, requestOptions));
     }
 
     private async __createQuery(
         request: FernAI.CreateQueryRequest,
-        requestOptions?: Query.RequestOptions,
+        requestOptions?: Query.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.CreateQueryResponse>> {
         const { domain, body: _body } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -76,14 +76,14 @@ export class Query {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "queries",
+                "queries"
             ),
             method: "POST",
             headers: _headers,
@@ -93,7 +93,7 @@ export class Query {
             body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.CreateQueryResponse, rawResponse: _response.rawResponse };
@@ -104,13 +104,13 @@ export class Query {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -120,14 +120,14 @@ export class Query {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /queries.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -145,7 +145,7 @@ export class Query {
     public getRecentQueries(
         domain: string,
         request: FernAI.GetRecentQueriesRequest = {},
-        requestOptions?: Query.RequestOptions,
+        requestOptions?: Query.RequestOptions
     ): core.HttpResponsePromise<FernAI.GetQueriesResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getRecentQueries(domain, request, requestOptions));
     }
@@ -153,7 +153,7 @@ export class Query {
     private async __getRecentQueries(
         domain: string,
         request: FernAI.GetRecentQueriesRequest = {},
-        requestOptions?: Query.RequestOptions,
+        requestOptions?: Query.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.GetQueriesResponse>> {
         const {
             page,
@@ -161,7 +161,7 @@ export class Query {
             cutoff_time: cutoffTime,
             include_assistant: includeAssistant,
             start_date: startDate,
-            end_date: endDate,
+            end_date: endDate
         } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (page != null) {
@@ -191,21 +191,21 @@ export class Query {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `queries/${encodeURIComponent(domain)}`,
+                `queries/${encodeURIComponent(domain)}`
             ),
             method: "GET",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetQueriesResponse, rawResponse: _response.rawResponse };
@@ -216,13 +216,13 @@ export class Query {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -232,14 +232,14 @@ export class Query {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /queries/{domain}.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

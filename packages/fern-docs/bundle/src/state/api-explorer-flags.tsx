@@ -9,27 +9,24 @@ export const usesApplicationJsonInFormDataValueAtom = atom(false);
 export const isBinaryOctetStreamAudioPlayerAtom = atom(false);
 
 export function ApiExplorerFlags({
-  isFileForgeHackEnabled,
-  isProxyDisabled,
-  usesApplicationJsonInFormDataValue,
-  isBinaryOctetStreamAudioPlayer,
+    isFileForgeHackEnabled,
+    isProxyDisabled,
+    usesApplicationJsonInFormDataValue,
+    isBinaryOctetStreamAudioPlayer
 }: {
-  isFileForgeHackEnabled: boolean;
-  isProxyDisabled: boolean;
-  usesApplicationJsonInFormDataValue: boolean;
-  isBinaryOctetStreamAudioPlayer: boolean;
+    isFileForgeHackEnabled: boolean;
+    isProxyDisabled: boolean;
+    usesApplicationJsonInFormDataValue: boolean;
+    isBinaryOctetStreamAudioPlayer: boolean;
 }) {
-  useHydrateAtoms(
-    [
-      [isFileForgeHackEnabledAtom, isFileForgeHackEnabled],
-      [isProxyDisabledAtom, isProxyDisabled],
-      [
-        usesApplicationJsonInFormDataValueAtom,
-        usesApplicationJsonInFormDataValue,
-      ],
-      [isBinaryOctetStreamAudioPlayerAtom, isBinaryOctetStreamAudioPlayer],
-    ],
-    { dangerouslyForceHydrate: true }
-  );
-  return null;
+    useHydrateAtoms(
+        [
+            [isFileForgeHackEnabledAtom, isFileForgeHackEnabled],
+            [isProxyDisabledAtom, isProxyDisabled],
+            [usesApplicationJsonInFormDataValueAtom, usesApplicationJsonInFormDataValue],
+            [isBinaryOctetStreamAudioPlayerAtom, isBinaryOctetStreamAudioPlayer]
+        ],
+        { dangerouslyForceHydrate: true }
+    );
+    return null;
 }

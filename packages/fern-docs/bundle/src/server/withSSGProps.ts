@@ -11,20 +11,18 @@ import { REVALIDATE_SECONDS } from "@fern-api/docs-utils";
  * @returns props for getServerSideProps
  */
 export async function withSSGProps<Props>(
-  ssrProps:
-    | GetServerSidePropsResult<Props>
-    | PromiseLike<GetServerSidePropsResult<Props>>
+    ssrProps: GetServerSidePropsResult<Props> | PromiseLike<GetServerSidePropsResult<Props>>
 ): Promise<GetStaticPropsResult<Props>> {
-  const ssrPropsResolved = await ssrProps;
-  if ("props" in ssrPropsResolved) {
-    return {
-      props: await ssrPropsResolved.props,
-      revalidate: REVALIDATE_SECONDS,
-    };
-  } else if ("redirect" in ssrPropsResolved) {
-    return { redirect: ssrPropsResolved.redirect, revalidate: true };
-  } else if ("notFound" in ssrPropsResolved) {
-    return { notFound: ssrPropsResolved.notFound, revalidate: true };
-  }
-  throw new UnreachableCaseError(ssrPropsResolved);
+    const ssrPropsResolved = await ssrProps;
+    if ("props" in ssrPropsResolved) {
+        return {
+            props: await ssrPropsResolved.props,
+            revalidate: REVALIDATE_SECONDS
+        };
+    } else if ("redirect" in ssrPropsResolved) {
+        return { redirect: ssrPropsResolved.redirect, revalidate: true };
+    } else if ("notFound" in ssrPropsResolved) {
+        return { notFound: ssrPropsResolved.notFound, revalidate: true };
+    }
+    throw new UnreachableCaseError(ssrPropsResolved);
 }

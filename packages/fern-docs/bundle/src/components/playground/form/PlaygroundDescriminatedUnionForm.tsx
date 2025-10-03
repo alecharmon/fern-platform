@@ -5,166 +5,125 @@ import { memo, useCallback, useMemo } from "react";
 
 import { ChevronDown } from "lucide-react";
 
-import {
-  DiscriminatedUnionType,
-  TypeDefinition,
-  unwrapObjectType,
-} from "@fern-api/fdr-sdk/api-definition";
+import { DiscriminatedUnionType, TypeDefinition, unwrapObjectType } from "@fern-api/fdr-sdk/api-definition";
 import { titleCase } from "@fern-api/ui-core-utils";
-import {
-  FernButton,
-  FernDropdown,
-  FernSegmentedControl,
-} from "@fern-docs/components";
+import { FernButton, FernDropdown, FernSegmentedControl } from "@fern-docs/components";
 
 import { castToRecord, getEmptyValueForObjectProperties } from "../utils";
 import { PlaygroundObjectPropertiesForm } from "./PlaygroundObjectPropertyForm";
 
-const Markdown = dynamic(() =>
-  import("@/mdx/components/Markdown").then(({ Markdown }) => Markdown)
-);
+const Markdown = dynamic(() => import("@/mdx/components/Markdown").then(({ Markdown }) => Markdown));
 
 interface PlaygroundDiscriminatedUnionFormProps {
-  discriminatedUnion: DiscriminatedUnionType;
-  types: Record<string, TypeDefinition>;
-  onChange: (value: unknown) => void;
-  value: unknown;
-  id: string;
-  disabled?: boolean;
+    discriminatedUnion: DiscriminatedUnionType;
+    types: Record<string, TypeDefinition>;
+    onChange: (value: unknown) => void;
+    value: unknown;
+    id: string;
+    disabled?: boolean;
 }
 
-export const PlaygroundDiscriminatedUnionForm =
-  memo<PlaygroundDiscriminatedUnionFormProps>((props) => {
+export const PlaygroundDiscriminatedUnionForm = memo<PlaygroundDiscriminatedUnionFormProps>((props) => {
     const { discriminatedUnion, types, onChange, value, id, disabled } = props;
     const selectedVariantKey =
-      value != null
-        ? (castToRecord(value)[discriminatedUnion.discriminant] as string)
-        : undefined;
+        value != null ? (castToRecord(value)[discriminatedUnion.discriminant] as string) : undefined;
 
     const setSelectedVariant = useCallback(
-      (variantKey: string) => {
-        onChange((oldValue: unknown) => {
-          const currentVariantKey = castToRecord(oldValue)[
-            discriminatedUnion.discriminant
-          ] as string | undefined;
-          if (currentVariantKey === variantKey) {
-            return oldValue;
-          }
+        (variantKey: string) => {
+            onChange((oldValue: unknown) => {
+                const currentVariantKey = castToRecord(oldValue)[discriminatedUnion.discriminant] as string | undefined;
+                if (currentVariantKey === variantKey) {
+                    return oldValue;
+                }
 
-          const selectedVariant = discriminatedUnion.variants.find(
-            (variant) => variant.discriminantValue === variantKey
-          );
-          if (selectedVariant == null) {
-            console.error(
-              `Could not find variant with discriminant value ${variantKey}`
-            );
-            return oldValue;
-          }
-          return {
-            [discriminatedUnion.discriminant]: variantKey,
-            ...getEmptyValueForObjectProperties(
-              unwrapObjectType(selectedVariant, types).properties,
-              types
-            ),
-          };
-        });
-      },
-      [
-        discriminatedUnion.discriminant,
-        discriminatedUnion.variants,
-        onChange,
-        types,
-      ]
+                const selectedVariant = discriminatedUnion.variants.find(
+                    (variant) => variant.discriminantValue === variantKey
+                );
+                if (selectedVariant == null) {
+                    console.error(`Could not find variant with discriminant value ${variantKey}`);
+                    return oldValue;
+                }
+                return {
+                    [discriminatedUnion.discriminant]: variantKey,
+                    ...getEmptyValueForObjectProperties(unwrapObjectType(selectedVariant, types).properties, types)
+                };
+            });
+        },
+        [discriminatedUnion.discriminant, discriminatedUnion.variants, onChange, types]
     );
 
     const activeVariant = discriminatedUnion.variants.find(
-      (variant) => variant.discriminantValue === selectedVariantKey
+        (variant) => variant.discriminantValue === selectedVariantKey
     );
 
     const options = useMemo(
-      () =>
-        discriminatedUnion.variants.map(
-          (variant): FernDropdown.Option => ({
-            type: "value",
-            label: variant.displayName ?? titleCase(variant.discriminantValue),
-            value: variant.discriminantValue,
-            // todo: handle availability
-            tooltip:
-              variant.description != null ? (
-                // todo: server-side render this
-                <Markdown
-                  size="xs"
-                  mdx={variant.description}
-                  useNextMdx={false}
-                />
-              ) : undefined,
-          })
-        ),
-      [discriminatedUnion.variants]
+        () =>
+            discriminatedUnion.variants.map(
+                (variant): FernDropdown.Option => ({
+                    type: "value",
+                    label: variant.displayName ?? titleCase(variant.discriminantValue),
+                    value: variant.discriminantValue,
+                    // todo: handle availability
+                    tooltip:
+                        variant.description != null ? (
+                            // todo: server-side render this
+                            <Markdown size="xs" mdx={variant.description} useNextMdx={false} />
+                        ) : undefined
+                })
+            ),
+        [discriminatedUnion.variants]
     );
 
     const selectedVariant = discriminatedUnion.variants.find(
-      (variant) => variant.discriminantValue === selectedVariantKey
+        (variant) => variant.discriminantValue === selectedVariantKey
     );
 
     const properties = useMemo(
-      () =>
-        selectedVariant != null
-          ? unwrapObjectType(selectedVariant, types).properties
-          : [],
-      [selectedVariant, types]
+        () => (selectedVariant != null ? unwrapObjectType(selectedVariant, types).properties : []),
+        [selectedVariant, types]
     );
 
     return (
-      <div className="w-full">
-        {discriminatedUnion.variants.length < 5 ? (
-          <FernSegmentedControl
-            options={options}
-            value={selectedVariantKey}
-            onValueChange={setSelectedVariant}
-            className="mb-4 w-full"
-            muted={disabled}
-          />
-        ) : (
-          <FernDropdown
-            options={options}
-            onValueChange={setSelectedVariant}
-            value={selectedVariantKey}
-          >
-            <FernButton
-              text={
-                activeVariant != null ? (
-                  <span className="font-mono">
-                    {activeVariant.discriminantValue}
-                  </span>
-                ) : (
-                  <span className="text-(color:--grayscale-a11)">
-                    Select a variant...
-                  </span>
-                )
-              }
-              rightIcon={<ChevronDown />}
-              className="w-full text-left"
-              variant="outlined"
-              mono={true}
-            />
-          </FernDropdown>
-        )}
-        {activeVariant != null && (
-          <div className="border-border-default-soft border-l pl-4">
-            <PlaygroundObjectPropertiesForm
-              properties={properties}
-              extraProperties={undefined}
-              value={value}
-              onChange={onChange}
-              id={id}
-              types={types}
-            />
-          </div>
-        )}
-      </div>
+        <div className="w-full">
+            {discriminatedUnion.variants.length < 5 ? (
+                <FernSegmentedControl
+                    options={options}
+                    value={selectedVariantKey}
+                    onValueChange={setSelectedVariant}
+                    className="mb-4 w-full"
+                    muted={disabled}
+                />
+            ) : (
+                <FernDropdown options={options} onValueChange={setSelectedVariant} value={selectedVariantKey}>
+                    <FernButton
+                        text={
+                            activeVariant != null ? (
+                                <span className="font-mono">{activeVariant.discriminantValue}</span>
+                            ) : (
+                                <span className="text-(color:--grayscale-a11)">Select a variant...</span>
+                            )
+                        }
+                        rightIcon={<ChevronDown />}
+                        className="w-full text-left"
+                        variant="outlined"
+                        mono={true}
+                    />
+                </FernDropdown>
+            )}
+            {activeVariant != null && (
+                <div className="border-border-default-soft border-l pl-4">
+                    <PlaygroundObjectPropertiesForm
+                        properties={properties}
+                        extraProperties={undefined}
+                        value={value}
+                        onChange={onChange}
+                        id={id}
+                        types={types}
+                    />
+                </div>
+            )}
+        </div>
     );
-  });
+});
 
-PlaygroundDiscriminatedUnionForm.displayName =
-  "PlaygroundDiscriminatedUnionForm";
+PlaygroundDiscriminatedUnionForm.displayName = "PlaygroundDiscriminatedUnionForm";

@@ -1,9 +1,9 @@
 export declare namespace NavbarSectionTitle {
-  export interface Props {
-    title: string;
-  }
+    export interface Props {
+        title: string;
+    }
 }
 
 export const NavbarSectionTitle = ({ title }: NavbarSectionTitle.Props) => {
-  return <div className="my-3 hidden text-xs font-bold md:flex">{title}</div>;
+    return <div className="my-3 hidden text-xs font-bold md:flex">{title}</div>;
 };

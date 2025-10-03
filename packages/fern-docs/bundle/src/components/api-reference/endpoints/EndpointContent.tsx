@@ -21,91 +21,69 @@ import { EndpointContentLeft } from "./EndpointContentLeft";
 import { EndpointContextProvider } from "./EndpointContext";
 import { EndpointUrlWithPlaygroundBaseUrl } from "./EndpointUrlWithPlaygroundBaseUrl";
 
-function getAvailabilityBadge(
-  endpoint: EndpointContext["endpoint"],
-  node: EndpointContext["node"]
-) {
-  const availability = endpoint.availability ?? node.availability;
-  return availability ? (
-    <AvailabilityBadge availability={availability} rounded />
-  ) : null;
+function getAvailabilityBadge(endpoint: EndpointContext["endpoint"], node: EndpointContext["node"]) {
+    const availability = endpoint.availability ?? node.availability;
+    return availability ? <AvailabilityBadge availability={availability} rounded /> : null;
 }
 
 export async function EndpointContent({
-  serialize,
-  showErrors,
-  showAuth,
-  context,
-  breadcrumb,
-  action,
-  bottomNavigation,
-  hideFeedback,
-  pageActionOptions,
-  markdown,
+    serialize,
+    showErrors,
+    showAuth,
+    context,
+    breadcrumb,
+    action,
+    bottomNavigation,
+    hideFeedback,
+    pageActionOptions,
+    markdown
 }: {
-  serialize: MdxSerializer;
-  showErrors: boolean;
-  showAuth: boolean;
-  context: EndpointContext;
-  breadcrumb: readonly FernNavigation.BreadcrumbItem[];
-  action?: React.ReactNode;
-  bottomNavigation?: React.ReactNode;
-  hideFeedback: boolean;
-  pageActionOptions?: FernDropdown.PageActionOption[];
-  markdown?: string;
+    serialize: MdxSerializer;
+    showErrors: boolean;
+    showAuth: boolean;
+    context: EndpointContext;
+    breadcrumb: readonly FernNavigation.BreadcrumbItem[];
+    action?: React.ReactNode;
+    bottomNavigation?: React.ReactNode;
+    hideFeedback: boolean;
+    pageActionOptions?: FernDropdown.PageActionOption[];
+    markdown?: string;
 }) {
-  const { node, endpoint, types } = context;
+    const { node, endpoint, types } = context;
 
-  return (
-    <EndpointContextProvider endpoint={endpoint}>
-      <ReferenceLayout
-        header={
-          <PageHeader
-            serialize={serialize}
-            breadcrumb={breadcrumb}
-            title={node.title}
-            action={action}
-            tags={getAvailabilityBadge(endpoint, node)}
-            slug={node.slug}
-            pageActionOptions={pageActionOptions}
-            markdown={markdown}
-          >
-            <EndpointUrlWithPlaygroundBaseUrl
-              endpoint={endpoint}
-              className={
-                endpoint.protocol?.type === "grpc" ? "hidden" : "hidden lg:flex"
-              }
-            />
-          </PageHeader>
-        }
-        aside={
-          <EndpointContentCodeSnippets
-            endpoint={endpoint}
-            showErrors={showErrors}
-            node={node}
-          />
-        }
-        reference={
-          <TypeDefinitionRoot types={types} slug={node.slug}>
-            <TypeDefinitionSlotsServer types={types}>
-              <EndpointContentLeft
-                context={context}
-                showAuth={showAuth}
-                showErrors={showErrors}
-              />
-            </TypeDefinitionSlotsServer>
-          </TypeDefinitionRoot>
-        }
-        footer={
-          <FooterLayout
-            bottomNavigation={bottomNavigation}
-            hideFeedback={hideFeedback}
-          />
-        }
-      >
-        <PlaygroundKeyboardTrigger />
-        <MdxServerComponentProseSuspense mdx={endpoint.description} />
-      </ReferenceLayout>
-    </EndpointContextProvider>
-  );
+    return (
+        <EndpointContextProvider endpoint={endpoint}>
+            <ReferenceLayout
+                header={
+                    <PageHeader
+                        serialize={serialize}
+                        breadcrumb={breadcrumb}
+                        title={node.title}
+                        action={action}
+                        tags={getAvailabilityBadge(endpoint, node)}
+                        slug={node.slug}
+                        pageActionOptions={pageActionOptions}
+                        markdown={markdown}
+                    >
+                        <EndpointUrlWithPlaygroundBaseUrl
+                            endpoint={endpoint}
+                            className={endpoint.protocol?.type === "grpc" ? "hidden" : "hidden lg:flex"}
+                        />
+                    </PageHeader>
+                }
+                aside={<EndpointContentCodeSnippets endpoint={endpoint} showErrors={showErrors} node={node} />}
+                reference={
+                    <TypeDefinitionRoot types={types} slug={node.slug}>
+                        <TypeDefinitionSlotsServer types={types}>
+                            <EndpointContentLeft context={context} showAuth={showAuth} showErrors={showErrors} />
+                        </TypeDefinitionSlotsServer>
+                    </TypeDefinitionRoot>
+                }
+                footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} />}
+            >
+                <PlaygroundKeyboardTrigger />
+                <MdxServerComponentProseSuspense mdx={endpoint.description} />
+            </ReferenceLayout>
+        </EndpointContextProvider>
+    );
 }

@@ -10,7 +10,7 @@ export class DomainNotRegisteredError extends errors.FdrLambdaError {
         super({
             message: "DomainNotRegisteredError",
             statusCode: 404,
-            rawResponse: rawResponse,
+            rawResponse: rawResponse
         });
         Object.setPrototypeOf(this, DomainNotRegisteredError.prototype);
     }

@@ -13,124 +13,96 @@ import { KeyIconAnimated } from "./KeyIconAnimated";
 import { UsersIconAnimated } from "./UsersIconAnimated";
 
 export declare namespace NavbarItem {
-  export interface Props {
-    title: string;
-    icon?: React.JSX.Element;
-    iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks";
+    export interface Props {
+        title: string;
+        icon?: React.JSX.Element;
+        iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks";
 
-    /**
-     * href is used to determine:
-     *   (1) if this item is selected: pathname.startsWith(href)
-     *   (2) the href for the <a />
-     *       (to override, use hrefForActualLinking)
-     */
-    href: `/${string}`;
-    hrefForActualLinking?: string;
-  }
+        /**
+         * href is used to determine:
+         *   (1) if this item is selected: pathname.startsWith(href)
+         *   (2) the href for the <a />
+         *       (to override, use hrefForActualLinking)
+         */
+        href: `/${string}`;
+        hrefForActualLinking?: string;
+    }
 }
 
 export const ICON_SIZE = "size-5";
 
-export const NavbarItem = ({
-  title,
-  icon,
-  iconType,
-  href,
-  hrefForActualLinking = href,
-}: NavbarItem.Props) => {
-  const ANIMATION_DURATION_MS = 1400;
-  const [hoverAnimating, setHoverAnimating] = React.useState(false);
-  const hoverTimeoutRef = React.useRef<number | null>(null);
-  const [isHovered, setIsHovered] = React.useState(false);
+export const NavbarItem = ({ title, icon, iconType, href, hrefForActualLinking = href }: NavbarItem.Props) => {
+    const ANIMATION_DURATION_MS = 1400;
+    const [hoverAnimating, setHoverAnimating] = React.useState(false);
+    const hoverTimeoutRef = React.useRef<number | null>(null);
+    const [isHovered, setIsHovered] = React.useState(false);
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    setHoverAnimating(true);
-    if (hoverTimeoutRef.current != null) {
-      window.clearTimeout(hoverTimeoutRef.current);
-    }
-    hoverTimeoutRef.current = window.setTimeout(() => {
-      setHoverAnimating(false);
-      hoverTimeoutRef.current = null;
-    }, ANIMATION_DURATION_MS);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-
-  React.useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current != null) {
-        window.clearTimeout(hoverTimeoutRef.current);
-      }
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+        setHoverAnimating(true);
+        if (hoverTimeoutRef.current != null) {
+            window.clearTimeout(hoverTimeoutRef.current);
+        }
+        hoverTimeoutRef.current = window.setTimeout(() => {
+            setHoverAnimating(false);
+            hoverTimeoutRef.current = null;
+        }, ANIMATION_DURATION_MS);
     };
-  }, []);
 
-  const orgName = useOrgNameFromPathname();
-  const pathname = usePathnameWithoutOrgName();
+    const handleMouseLeave = () => {
+        setIsHovered(false);
+    };
 
-  const isSelected = pathname.startsWith(href);
-  const isClickable = !isSelected;
-  const strokeColor = isSelected
-    ? "var(--green-1100)"
-    : isHovered
-      ? "var(--gray-1100)"
-      : "var(--gray-900)";
+    React.useEffect(() => {
+        return () => {
+            if (hoverTimeoutRef.current != null) {
+                window.clearTimeout(hoverTimeoutRef.current);
+            }
+        };
+    }, []);
 
-  const className = cn(
-    "group flex flex-1 flex-col items-center gap-2 py-2 text-sm transition md:flex-row",
-    isSelected ? "text-primary" : "text-gray-900",
-    isClickable && "hover:text-gray-1100",
-    hoverAnimating && "hover-animating"
-  );
+    const orgName = useOrgNameFromPathname();
+    const pathname = usePathnameWithoutOrgName();
 
-  const children = (
-    <>
-      {icon}
-      {iconType === "members" && (
-        <UsersIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />
-      )}
-      {iconType === "api-keys" && (
-        <KeyIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />
-      )}
-      {iconType === "billing" && (
-        <CreditCardIconAnimated
-          className={ICON_SIZE}
-          strokeColor={strokeColor}
-        />
-      )}
-      {iconType === "sdks" && (
-        <CodeBracketIconAnimated
-          className={ICON_SIZE}
-          strokeColor={strokeColor}
-        />
-      )}
+    const isSelected = pathname.startsWith(href);
+    const isClickable = !isSelected;
+    const strokeColor = isSelected ? "var(--green-1100)" : isHovered ? "var(--gray-1100)" : "var(--gray-900)";
 
-      <div>{title}</div>
-    </>
-  );
-
-  if (isClickable) {
-    return (
-      <Link
-        className={className}
-        href={`/${orgName}/${hrefForActualLinking}`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {children}
-      </Link>
+    const className = cn(
+        "group flex flex-1 flex-col items-center gap-2 py-2 text-sm transition md:flex-row",
+        isSelected ? "text-primary" : "text-gray-900",
+        isClickable && "hover:text-gray-1100",
+        hoverAnimating && "hover-animating"
     );
-  } else {
-    return (
-      <div
-        className={className}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {children}
-      </div>
+
+    const children = (
+        <>
+            {icon}
+            {iconType === "members" && <UsersIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
+            {iconType === "api-keys" && <KeyIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
+            {iconType === "billing" && <CreditCardIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
+            {iconType === "sdks" && <CodeBracketIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
+
+            <div>{title}</div>
+        </>
     );
-  }
+
+    if (isClickable) {
+        return (
+            <Link
+                className={className}
+                href={`/${orgName}/${hrefForActualLinking}`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                {children}
+            </Link>
+        );
+    } else {
+        return (
+            <div className={className} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                {children}
+            </div>
+        );
+    }
 };

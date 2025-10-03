@@ -9,12 +9,12 @@ import { convertQueryResultToLoadable } from "./convertQueryResultToLoadable";
 import { ReactQueryKey } from "./queryKeys";
 
 export function useOrgMembers() {
-  const orgName = useOrgNameFromPathname();
+    const orgName = useOrgNameFromPathname();
 
-  return convertQueryResultToLoadable(
-    useQuery({
-      queryKey: ReactQueryKey.orgMembers(orgName),
-      queryFn: () => DashboardApiClient.getOrgMembers({ orgName }),
-    })
-  );
+    return convertQueryResultToLoadable(
+        useQuery({
+            queryKey: ReactQueryKey.orgMembers(orgName),
+            queryFn: () => DashboardApiClient.getOrgMembers({ orgName })
+        })
+    );
 }

@@ -1,126 +1,120 @@
+import type { EndpointNode, GrpcNode, TypeId, WebSocketNode, WebhookNode } from "../navigation";
 import type {
-  EndpointNode,
-  GrpcNode,
-  TypeId,
-  WebSocketNode,
-  WebhookNode,
-} from "../navigation";
-import type {
-  ApiDefinition,
-  AuthScheme,
-  EndpointDefinition,
-  EndpointId,
-  ObjectProperty,
-  TypeDefinition,
-  WebSocketChannel,
-  WebhookDefinition,
+    ApiDefinition,
+    AuthScheme,
+    EndpointDefinition,
+    EndpointId,
+    ObjectProperty,
+    TypeDefinition,
+    WebSocketChannel,
+    WebhookDefinition
 } from "./latest";
 import { prune } from "./prune";
 
 export type EndpointContext = {
-  node: EndpointNode;
-  endpoint: EndpointDefinition;
-  globalHeaders: ObjectProperty[];
-  auth: AuthScheme | undefined;
-  types: Record<TypeId, TypeDefinition>;
+    node: EndpointNode;
+    endpoint: EndpointDefinition;
+    globalHeaders: ObjectProperty[];
+    auth: AuthScheme | undefined;
+    types: Record<TypeId, TypeDefinition>;
 };
 
 export function createEndpointContext(
-  node: EndpointNode | undefined,
-  apiDefinition: ApiDefinition | undefined
+    node: EndpointNode | undefined,
+    apiDefinition: ApiDefinition | undefined
 ): EndpointContext | undefined {
-  if (!node) {
-    return undefined;
-  }
-  const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-  const endpoint = api?.endpoints[node.endpointId];
-  if (!endpoint) {
-    return undefined;
-  }
-  return {
-    node,
-    endpoint,
-    auth: endpoint.auth?.map((id) => api.auths[id])[0],
-    globalHeaders: api.globalHeaders ?? [],
-    types: api.types,
-  };
+    if (!node) {
+        return undefined;
+    }
+    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
+    const endpoint = api?.endpoints[node.endpointId];
+    if (!endpoint) {
+        return undefined;
+    }
+    return {
+        node,
+        endpoint,
+        auth: endpoint.auth?.map((id) => api.auths[id])[0],
+        globalHeaders: api.globalHeaders ?? [],
+        types: api.types
+    };
 }
 
 export type WebSocketContext = {
-  node: WebSocketNode;
-  channel: WebSocketChannel;
-  globalHeaders: ObjectProperty[];
-  auth: AuthScheme | undefined;
-  types: Record<TypeId, TypeDefinition>;
+    node: WebSocketNode;
+    channel: WebSocketChannel;
+    globalHeaders: ObjectProperty[];
+    auth: AuthScheme | undefined;
+    types: Record<TypeId, TypeDefinition>;
 };
 
 export function createWebSocketContext(
-  node: WebSocketNode | undefined,
-  apiDefinition: ApiDefinition | undefined
+    node: WebSocketNode | undefined,
+    apiDefinition: ApiDefinition | undefined
 ): WebSocketContext | undefined {
-  if (!node) {
-    return undefined;
-  }
-  const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-  const channel = api?.websockets[node.webSocketId];
-  if (!channel) {
-    return undefined;
-  }
-  return {
-    node,
-    channel,
-    auth: channel.auth?.map((id) => api.auths[id])[0],
-    globalHeaders: api.globalHeaders ?? [],
-    types: api.types,
-  };
+    if (!node) {
+        return undefined;
+    }
+    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
+    const channel = api?.websockets[node.webSocketId];
+    if (!channel) {
+        return undefined;
+    }
+    return {
+        node,
+        channel,
+        auth: channel.auth?.map((id) => api.auths[id])[0],
+        globalHeaders: api.globalHeaders ?? [],
+        types: api.types
+    };
 }
 
 export type WebhookContext = {
-  node: WebhookNode;
-  webhook: WebhookDefinition;
-  types: Record<TypeId, TypeDefinition>;
+    node: WebhookNode;
+    webhook: WebhookDefinition;
+    types: Record<TypeId, TypeDefinition>;
 };
 
 export function createWebhookContext(
-  node: WebhookNode | undefined,
-  apiDefinition: ApiDefinition | undefined
+    node: WebhookNode | undefined,
+    apiDefinition: ApiDefinition | undefined
 ): WebhookContext | undefined {
-  if (!node) {
-    return undefined;
-  }
-  const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-  const webhook = api?.webhooks[node.webhookId];
-  if (!webhook) {
-    return undefined;
-  }
-  return {
-    node,
-    webhook,
-    types: api.types,
-  };
+    if (!node) {
+        return undefined;
+    }
+    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
+    const webhook = api?.webhooks[node.webhookId];
+    if (!webhook) {
+        return undefined;
+    }
+    return {
+        node,
+        webhook,
+        types: api.types
+    };
 }
 
 export type GrpcContext = {
-  node: GrpcNode;
-  grpc: EndpointDefinition;
-  types: Record<TypeId, TypeDefinition>;
+    node: GrpcNode;
+    grpc: EndpointDefinition;
+    types: Record<TypeId, TypeDefinition>;
 };
 
 export function createGrpcContext(
-  node: GrpcNode | undefined,
-  apiDefinition: ApiDefinition | undefined
+    node: GrpcNode | undefined,
+    apiDefinition: ApiDefinition | undefined
 ): GrpcContext | undefined {
-  if (!node) {
-    return undefined;
-  }
-  const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-  const grpc = api?.endpoints[node.grpcId as unknown as EndpointId];
-  if (!grpc) {
-    return undefined;
-  }
-  return {
-    node,
-    grpc,
-    types: api.types,
-  };
+    if (!node) {
+        return undefined;
+    }
+    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
+    const grpc = api?.endpoints[node.grpcId as unknown as EndpointId];
+    if (!grpc) {
+        return undefined;
+    }
+    return {
+        node,
+        grpc,
+        types: api.types
+    };
 }

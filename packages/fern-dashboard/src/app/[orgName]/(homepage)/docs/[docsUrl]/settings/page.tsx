@@ -8,21 +8,19 @@ import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { EncodedDocsUrl } from "@/utils/types";
 
 export default async function Page({
-  params,
+    params
 }: {
-  params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
+    params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
 }) {
-  const { orgName, docsUrl: encodedDocsUrl } = await params;
-  const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
+    const { orgName, docsUrl: encodedDocsUrl } = await params;
+    const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
-  const session = await getAuthenticatedSessionOrRedirect(orgName);
+    const session = await getAuthenticatedSessionOrRedirect(orgName);
 
-  const isEmployee = await isFernEmployee(session.user.sub);
-  if (!isEmployee) {
-    redirect(`/${orgName}/docs/${docsUrl}`);
-  }
+    const isEmployee = await isFernEmployee(session.user.sub);
+    if (!isEmployee) {
+        redirect(`/${orgName}/docs/${docsUrl}`);
+    }
 
-  return (
-    <Settings docsUrl={docsUrl} hasFernEmail={isEmployee} orgName={orgName} />
-  );
+    return <Settings docsUrl={docsUrl} hasFernEmail={isEmployee} orgName={orgName} />;
 }

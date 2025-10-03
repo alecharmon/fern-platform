@@ -9,117 +9,108 @@ import { DocsUrl } from "@/utils/types";
 import { assertUserHasOrganizationAccess } from "../organization";
 
 export default async function createBranchIfNotExists(request: {
-  owner: string;
-  repo: string;
-  branch: string;
-  baseBranch: string;
-  orgName: Auth0OrgName;
-  site: DocsUrl;
+    owner: string;
+    repo: string;
+    branch: string;
+    baseBranch: string;
+    orgName: Auth0OrgName;
+    site: DocsUrl;
 }): Promise<
-  | {
-      success: true;
-      baseSha: string;
-      response: any;
-    }
-  | {
-      success: false;
-      error: string;
-    }
+    | {
+          success: true;
+          baseSha: string;
+          response: any;
+      }
+    | {
+          success: false;
+          error: string;
+      }
 > {
-  const session = await getCurrentSession();
-  if (session == null) {
-    return { success: false, error: "No session found" };
-  }
-
-  try {
-    await assertUserHasOrganizationAccess({
-      token: session.accessToken,
-      orgName: request.orgName,
-    });
-  } catch (_) {
-    return {
-      success: false,
-      error: "User is not a member of the specified organization",
-    };
-  }
-
-  const result = await validateGithubRepoAccess(request.orgName, request.site, {
-    type: "owner-repo",
-    owner: request.owner,
-    repo: request.repo,
-  });
-
-  if (!result.ok) {
-    return { success: false, error: result.error.type };
-  }
-
-  const octokitResult = await getFernBotOctokitForRepo(
-    request.owner,
-    request.repo
-  );
-
-  if (!octokitResult.ok) {
-    throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
-  }
-
-  const octokit = octokitResult.octokit;
-
-  try {
-    // Check if the branch already exists
-    try {
-      const existingBranchResponse = await octokit.request(
-        "GET /repos/{owner}/{repo}/git/ref/{ref}",
-        {
-          owner: request.owner,
-          repo: request.repo,
-          ref: `heads/${request.branch}`,
-        }
-      );
-
-      // Branch exists, return success with existing branch data
-      return {
-        success: true,
-        baseSha: existingBranchResponse.data.object.sha,
-        response: existingBranchResponse,
-      };
-    } catch (branchCheckError: any) {
-      // Branch doesn't exist (404), continue to create it
-      if (branchCheckError.status !== 404) {
-        throw branchCheckError;
-      }
+    const session = await getCurrentSession();
+    if (session == null) {
+        return { success: false, error: "No session found" };
     }
 
-    // Get the latest commit SHA on base branch
-    const {
-      data: {
-        object: { sha: baseSha },
-      },
-    } = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
-      owner: request.owner,
-      repo: request.repo,
-      ref: `heads/${request.baseBranch}`,
+    try {
+        await assertUserHasOrganizationAccess({
+            token: session.accessToken,
+            orgName: request.orgName
+        });
+    } catch (_) {
+        return {
+            success: false,
+            error: "User is not a member of the specified organization"
+        };
+    }
+
+    const result = await validateGithubRepoAccess(request.orgName, request.site, {
+        type: "owner-repo",
+        owner: request.owner,
+        repo: request.repo
     });
 
-    // Create the new branch
-    const response = await octokit.request(
-      "POST /repos/{owner}/{repo}/git/refs",
-      {
-        owner: request.owner,
-        repo: request.repo,
-        ref: `refs/heads/${request.branch}`,
-        sha: baseSha,
-      }
-    );
+    if (!result.ok) {
+        return { success: false, error: result.error.type };
+    }
 
-    return {
-      success: true,
-      baseSha,
-      response,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: `Unknown error occurred: ${error}`, // TODO: Add error message
-    };
-  }
+    const octokitResult = await getFernBotOctokitForRepo(request.owner, request.repo);
+
+    if (!octokitResult.ok) {
+        throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
+    }
+
+    const octokit = octokitResult.octokit;
+
+    try {
+        // Check if the branch already exists
+        try {
+            const existingBranchResponse = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
+                owner: request.owner,
+                repo: request.repo,
+                ref: `heads/${request.branch}`
+            });
+
+            // Branch exists, return success with existing branch data
+            return {
+                success: true,
+                baseSha: existingBranchResponse.data.object.sha,
+                response: existingBranchResponse
+            };
+        } catch (branchCheckError: any) {
+            // Branch doesn't exist (404), continue to create it
+            if (branchCheckError.status !== 404) {
+                throw branchCheckError;
+            }
+        }
+
+        // Get the latest commit SHA on base branch
+        const {
+            data: {
+                object: { sha: baseSha }
+            }
+        } = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
+            owner: request.owner,
+            repo: request.repo,
+            ref: `heads/${request.baseBranch}`
+        });
+
+        // Create the new branch
+        const response = await octokit.request("POST /repos/{owner}/{repo}/git/refs", {
+            owner: request.owner,
+            repo: request.repo,
+            ref: `refs/heads/${request.branch}`,
+            sha: baseSha
+        });
+
+        return {
+            success: true,
+            baseSha,
+            response
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: `Unknown error occurred: ${error}` // TODO: Add error message
+        };
+    }
 }

@@ -6,5 +6,5 @@ export type GroupBy = "DAY" | "WEEK" | "MONTH";
 export const GroupBy = {
     Day: "DAY",
     Week: "WEEK",
-    Month: "MONTH",
+    Month: "MONTH"
 } as const;

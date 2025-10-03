@@ -8,51 +8,27 @@ import { SidebarCollapseGroup } from "./SidebarCollapseGroup";
 import { SidebarPageNode } from "./SidebarPageNode";
 
 interface SidebarSectionNodeProps {
-  node: FernNavigation.SectionNode;
-  icon: React.ReactNode;
-  depth: number;
-  className?: string;
-  children: ReactNode;
+    node: FernNavigation.SectionNode;
+    icon: React.ReactNode;
+    depth: number;
+    className?: string;
+    children: ReactNode;
 }
 
-export function SidebarSectionNode({
-  node,
-  icon,
-  className,
-  depth,
-  children,
-}: SidebarSectionNodeProps): ReactNode {
-  if (
-    React.Children.count(children) === 0 &&
-    FernNavigation.hasMarkdown(node)
-  ) {
+export function SidebarSectionNode({ node, icon, className, depth, children }: SidebarSectionNodeProps): ReactNode {
+    if (React.Children.count(children) === 0 && FernNavigation.hasMarkdown(node)) {
+        return <SidebarPageNode node={node} depth={depth} className={className} icon={icon} />;
+    }
+
+    if (React.Children.count(children) === 0) {
+        return null;
+    }
+
     return (
-      <SidebarPageNode
-        node={node}
-        depth={depth}
-        className={className}
-        icon={icon}
-      />
+        <SidebarCollapseGroup node={node} icon={icon} depth={depth} className={className}>
+            {/* Inject client nodes for this section */}
+            <SidebarClientNavigationChildInjector parentNodeId={node.id} childDepth={depth + 1} />
+            {children}
+        </SidebarCollapseGroup>
     );
-  }
-
-  if (React.Children.count(children) === 0) {
-    return null;
-  }
-
-  return (
-    <SidebarCollapseGroup
-      node={node}
-      icon={icon}
-      depth={depth}
-      className={className}
-    >
-      {/* Inject client nodes for this section */}
-      <SidebarClientNavigationChildInjector
-        parentNodeId={node.id}
-        childDepth={depth + 1}
-      />
-      {children}
-    </SidebarCollapseGroup>
-  );
 }

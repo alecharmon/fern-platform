@@ -10,61 +10,58 @@ import { FernLinkCard } from "@/components/FernLinkCard";
 import { Badge } from "../badge";
 
 export declare namespace Card {
-  export interface Props {
-    title: string;
-    icon?: unknown;
-    iconSize?: number; // size in 0.25rem increments. default is 4.
-    color?: string; // ignored if lightModeColor and darkModeColor are set
-    darkModeColor?: string;
-    lightModeColor?: string;
+    export interface Props {
+        title: string;
+        icon?: unknown;
+        iconSize?: number; // size in 0.25rem increments. default is 4.
+        color?: string; // ignored if lightModeColor and darkModeColor are set
+        darkModeColor?: string;
+        lightModeColor?: string;
 
-    children?: string;
-    href?: string;
-    iconPosition?: "top" | "left";
-    className?: string;
+        children?: string;
+        href?: string;
+        iconPosition?: "top" | "left";
+        className?: string;
 
-    // in-development:
-    badge?: string;
-  }
+        // in-development:
+        badge?: string;
+    }
 }
 
 export const Card: React.FC<Card.Props> = ({
-  title,
-  icon,
-  iconSize = 8,
-  color,
-  darkModeColor,
-  lightModeColor,
-  iconPosition = "top",
-  children,
-  href,
-  badge,
-  className,
-}) => {
-  if (isNaN(iconSize)) {
-    iconSize = 8;
-  }
-
-  const combinedClassName = cn(
-    "not-prose rounded-3 relative block border p-6 text-base",
+    title,
+    icon,
+    iconSize = 8,
+    color,
+    darkModeColor,
+    lightModeColor,
+    iconPosition = "top",
+    children,
+    href,
+    badge,
     className
-  );
+}) => {
+    if (isNaN(iconSize)) {
+        iconSize = 8;
+    }
 
-  const content = (
-    <>
-      {badge != null && (
-        <Badge intent="primary" className="absolute -right-2 -top-2">
-          {badge}
-        </Badge>
-      )}
-      <div
-        className={cn("flex items-start", {
-          "flex-col space-y-3": iconPosition === "top",
-          "flex-row space-x-3": iconPosition === "left",
-        })}
-      >
-        <style jsx>
-          {`
+    const combinedClassName = cn("not-prose rounded-3 relative block border p-6 text-base", className);
+
+    const content = (
+        <>
+            {badge != null && (
+                <Badge intent="primary" className="absolute -right-2 -top-2">
+                    {badge}
+                </Badge>
+            )}
+            <div
+                className={cn("flex items-start", {
+                    "flex-col space-y-3": iconPosition === "top",
+                    "flex-row space-x-3": iconPosition === "left"
+                })}
+            >
+                <style jsx>
+                    {`
             div > :global(.card-icon) {
               color: ${lightModeColor ?? color ?? "var(--accent-a10)"};
               width: ${iconSize * 4}px;
@@ -75,32 +72,30 @@ export const Card: React.FC<Card.Props> = ({
               color: ${darkModeColor ?? color ?? "var(--accent-a10)"};
             }
           `}
-        </style>
-        {typeof icon === "string" ? (
-          <FaIcon className="card-icon" icon={icon} />
-        ) : isValidElement(icon) ? (
-          <span className="card-icon">
-            <NoZoom>{icon}</NoZoom>
-          </span>
-        ) : null}
-        <div className="w-full space-y-1 overflow-hidden">
-          <div className="text-body text-base font-semibold">{title}</div>
-          {children != null && (
-            <div className="text-(color:--grayscale-a11)">{children}</div>
-          )}
-        </div>
-      </div>
-    </>
-  );
-
-  if (href != null) {
-    return (
-      <FernLinkCard className={combinedClassName} scroll={true} href={href}>
-        <NoZoom>
-          <DisableFernAnchor>{content}</DisableFernAnchor>
-        </NoZoom>
-      </FernLinkCard>
+                </style>
+                {typeof icon === "string" ? (
+                    <FaIcon className="card-icon" icon={icon} />
+                ) : isValidElement(icon) ? (
+                    <span className="card-icon">
+                        <NoZoom>{icon}</NoZoom>
+                    </span>
+                ) : null}
+                <div className="w-full space-y-1 overflow-hidden">
+                    <div className="text-body text-base font-semibold">{title}</div>
+                    {children != null && <div className="text-(color:--grayscale-a11)">{children}</div>}
+                </div>
+            </div>
+        </>
     );
-  }
-  return <FernCard className={combinedClassName}>{content}</FernCard>;
+
+    if (href != null) {
+        return (
+            <FernLinkCard className={combinedClassName} scroll={true} href={href}>
+                <NoZoom>
+                    <DisableFernAnchor>{content}</DisableFernAnchor>
+                </NoZoom>
+            </FernLinkCard>
+        );
+    }
+    return <FernCard className={combinedClassName}>{content}</FernCard>;
 };

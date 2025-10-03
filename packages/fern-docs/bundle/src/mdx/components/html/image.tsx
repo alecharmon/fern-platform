@@ -11,71 +11,71 @@ import { useFrontmatter } from "@/components/contexts/frontmatter";
 import { toPixelValue } from "@/components/util/to-pixel-value";
 
 export const Image = forwardRef<
-  HTMLImageElement,
-  React.ComponentPropsWithoutRef<"img"> & {
-    /**
-     * @default false
-     */
-    noZoom?: boolean;
-    /**
-     * overrides `noZoom` if true
-     * @default false
-     */
-    enableZoom?: boolean;
+    HTMLImageElement,
+    React.ComponentPropsWithoutRef<"img"> & {
+        /**
+         * @default false
+         */
+        noZoom?: boolean;
+        /**
+         * overrides `noZoom` if true
+         * @default false
+         */
+        enableZoom?: boolean;
 
-    // other props from next/image that are supported
-    fill?: boolean | undefined;
-    quality?: number | `${number}` | undefined;
-    priority?: boolean | undefined;
-    loading?: "eager" | "lazy" | undefined;
-    blurDataURL?: string | undefined;
-    unoptimized?: boolean | undefined;
-    // set by rehype-files.ts if image width or height property
-    __assigned_imageSize?: React.CSSProperties | undefined;
-  }
+        // other props from next/image that are supported
+        fill?: boolean | undefined;
+        quality?: number | `${number}` | undefined;
+        priority?: boolean | undefined;
+        loading?: "eager" | "lazy" | undefined;
+        blurDataURL?: string | undefined;
+        unoptimized?: boolean | undefined;
+        // set by rehype-files.ts if image width or height property
+        __assigned_imageSize?: React.CSSProperties | undefined;
+    }
 >((props, ref) => {
-  const {
-    src,
-    width,
-    height,
-    noZoom: isImageZoomDisabledProp = false,
-    enableZoom: isImageZoomEnabledOverride = false,
-    style,
-    __assigned_imageSize,
-    ...rest
-  } = props;
+    const {
+        src,
+        width,
+        height,
+        noZoom: isImageZoomDisabledProp = false,
+        enableZoom: isImageZoomEnabledOverride = false,
+        style,
+        __assigned_imageSize,
+        ...rest
+    } = props;
 
-  const isImageZoomDisabled = useIsImageZoomDisabled({
-    noZoom: isImageZoomDisabledProp,
-    enableZoom: isImageZoomEnabledOverride,
-  });
+    const isImageZoomDisabled = useIsImageZoomDisabled({
+        noZoom: isImageZoomDisabledProp,
+        enableZoom: isImageZoomEnabledOverride
+    });
 
-  if (!src) {
-    return null;
-  }
+    if (!src) {
+        return null;
+    }
 
-  const fernImage = (
-    <FernImage
-      ref={ref}
-      src={src}
-      width={toPixelValue(width)}
-      height={toPixelValue(height)}
-      {...rest}
-      style={{ ...style, ...__assigned_imageSize }}
-      alt={rest.alt ?? ""}
-      className={cn("mx-auto", props.className)}
-    />
-  );
+    const fernImage = (
+        <FernImage
+            ref={ref}
+            src={src}
+            width={toPixelValue(width)}
+            height={toPixelValue(height)}
+            {...rest}
+            style={{ ...style, ...__assigned_imageSize }}
+            alt={rest.alt ?? ""}
+            className={cn("mx-auto", props.className)}
+        />
+    );
 
-  if (isImageZoomDisabled) {
-    return fernImage;
-  }
+    if (isImageZoomDisabled) {
+        return fernImage;
+    }
 
-  return (
-    <Zoom zoomImg={{ src }} classDialog="custom-backdrop" wrapElement="span">
-      {fernImage}
-    </Zoom>
-  );
+    return (
+        <Zoom zoomImg={{ src }} classDialog="custom-backdrop" wrapElement="span">
+            {fernImage}
+        </Zoom>
+    );
 });
 
 Image.displayName = "Image";
@@ -84,10 +84,8 @@ Image.displayName = "Image";
  * @param element - React element
  * @returns true if the element is an `Image` component
  */
-export function isImageElement(
-  element: ReactElement<any>
-): element is ReactElement<ComponentProps<typeof Image>> {
-  return element.type === Image;
+export function isImageElement(element: ReactElement<any>): element is ReactElement<ComponentProps<typeof Image>> {
+    return element.type === Image;
 }
 
 /**
@@ -100,22 +98,12 @@ export function isImageElement(
  * @param opts - Options
  * @returns true if image zoom is disabled
  */
-function useIsImageZoomDisabled({
-  noZoom,
-  enableZoom,
-}: {
-  noZoom: boolean;
-  enableZoom: boolean;
-}) {
-  const isImageZoomDisabledContext = useContext(NoZoomContext);
+function useIsImageZoomDisabled({ noZoom, enableZoom }: { noZoom: boolean; enableZoom: boolean }) {
+    const isImageZoomDisabledContext = useContext(NoZoomContext);
 
-  const { "no-image-zoom": isImageZoomDisabledFrontmatter, layout } =
-    useFrontmatter();
+    const { "no-image-zoom": isImageZoomDisabledFrontmatter, layout } = useFrontmatter();
 
-  const isImageZoomDisabledLayout =
-    isImageZoomDisabledFrontmatter ?? layout === "custom";
+    const isImageZoomDisabledLayout = isImageZoomDisabledFrontmatter ?? layout === "custom";
 
-  return isImageZoomDisabledContext || isImageZoomDisabledLayout
-    ? !enableZoom
-    : noZoom;
+    return isImageZoomDisabledContext || isImageZoomDisabledLayout ? !enableZoom : noZoom;
 }

@@ -1,7 +1,7 @@
 export function maybeReplaceCarriageReturns(markdown: string): string {
-  return replaceCarriageReturns(markdown);
+    return replaceCarriageReturns(markdown);
 }
 
 function replaceCarriageReturns(markdown: string): string {
-  return markdown.replace(/\r/g, "\n");
+    return markdown.replace(/\r/g, "\n");
 }

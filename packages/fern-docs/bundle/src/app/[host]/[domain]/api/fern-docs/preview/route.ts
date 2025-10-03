@@ -4,61 +4,40 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getEnv } from "@vercel/functions";
 
-import {
-  withDeleteCookie,
-  withSecureCookie,
-} from "@fern-api/docs-server/auth/with-secure-cookie";
-import {
-  COOKIE_FERN_DOCS_PREVIEW,
-  FERN_DOCS_ORIGINS,
-  HEADER_X_FORWARDED_HOST,
-} from "@fern-api/docs-utils";
+import { withDeleteCookie, withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
+import { COOKIE_FERN_DOCS_PREVIEW, FERN_DOCS_ORIGINS, HEADER_X_FORWARDED_HOST } from "@fern-api/docs-utils";
 
 import { redirectResponse } from "@/server/serverResponse";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { VERCEL_ENV } = getEnv();
+    const { VERCEL_ENV } = getEnv();
 
-  // Only allow preview in dev and preview deployments
-  const origin = req.headers.get(HEADER_X_FORWARDED_HOST) ?? req.nextUrl.host;
-  if (
-    VERCEL_ENV === "production" &&
-    !FERN_DOCS_ORIGINS.includes(origin) &&
-    !origin.endsWith(".vercel.app")
-  ) {
-    console.debug(`Cannot preview docs hosted on ${origin}`);
-    return notFound();
-  }
+    // Only allow preview in dev and preview deployments
+    const origin = req.headers.get(HEADER_X_FORWARDED_HOST) ?? req.nextUrl.host;
+    if (VERCEL_ENV === "production" && !FERN_DOCS_ORIGINS.includes(origin) && !origin.endsWith(".vercel.app")) {
+        console.debug(`Cannot preview docs hosted on ${origin}`);
+        return notFound();
+    }
 
-  const host = req.nextUrl.searchParams.get("host");
-  const site = req.nextUrl.searchParams.get("site");
-  const clear = req.nextUrl.searchParams.get("clear");
-  const cookieStore = await cookies();
-  if (typeof host === "string") {
-    cookieStore.set(
-      COOKIE_FERN_DOCS_PREVIEW,
-      host,
-      withSecureCookie(req.nextUrl.origin)
-    );
-    return redirectResponse(req.nextUrl.origin);
-  } else if (typeof site === "string") {
-    cookieStore.set(
-      COOKIE_FERN_DOCS_PREVIEW,
-      `${site}.docs.buildwithfern.com`,
-      withSecureCookie(req.nextUrl.origin)
-    );
-    return redirectResponse(req.nextUrl.origin);
-  } else if (clear === "true") {
-    cookieStore.delete(
-      withDeleteCookie(
-        COOKIE_FERN_DOCS_PREVIEW,
-        req.nextUrl.origin,
-        req.nextUrl.hostname
-      )
-    );
-    return redirectResponse(req.nextUrl.origin);
-  }
+    const host = req.nextUrl.searchParams.get("host");
+    const site = req.nextUrl.searchParams.get("site");
+    const clear = req.nextUrl.searchParams.get("clear");
+    const cookieStore = await cookies();
+    if (typeof host === "string") {
+        cookieStore.set(COOKIE_FERN_DOCS_PREVIEW, host, withSecureCookie(req.nextUrl.origin));
+        return redirectResponse(req.nextUrl.origin);
+    } else if (typeof site === "string") {
+        cookieStore.set(
+            COOKIE_FERN_DOCS_PREVIEW,
+            `${site}.docs.buildwithfern.com`,
+            withSecureCookie(req.nextUrl.origin)
+        );
+        return redirectResponse(req.nextUrl.origin);
+    } else if (clear === "true") {
+        cookieStore.delete(withDeleteCookie(COOKIE_FERN_DOCS_PREVIEW, req.nextUrl.origin, req.nextUrl.hostname));
+        return redirectResponse(req.nextUrl.origin);
+    }
 
-  console.debug("No redirect returned");
-  notFound();
+    console.debug("No redirect returned");
+    notFound();
 }

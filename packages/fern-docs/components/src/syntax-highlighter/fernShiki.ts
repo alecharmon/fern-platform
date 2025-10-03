@@ -4,12 +4,12 @@ import { memoize } from "es-toolkit/function";
 import type { Root } from "hast";
 import { h } from "hastscript";
 import {
-  type BundledLanguage,
-  type BundledTheme,
-  type Highlighter,
-  type SpecialLanguage,
-  bundledLanguages,
-  getSingletonHighlighter,
+    type BundledLanguage,
+    type BundledTheme,
+    type Highlighter,
+    type SpecialLanguage,
+    bundledLanguages,
+    getSingletonHighlighter
 } from "shiki";
 
 import { isLocal } from "../util/isLocal";
@@ -21,126 +21,108 @@ let highlighter: Highlighter;
 
 const DEFAULT = Symbol("DEFAULT");
 
-const THEMES: Record<
-  "light" | "dark",
-  Record<string | typeof DEFAULT, BundledTheme>
-> = {
-  light: {
-    [DEFAULT]: "min-light",
-    diff: "github-light", // `min-light` does not work well for diff
-  },
-  dark: {
-    [DEFAULT]: "material-theme-darker",
-  },
+const THEMES: Record<"light" | "dark", Record<string | typeof DEFAULT, BundledTheme>> = {
+    light: {
+        [DEFAULT]: "min-light",
+        diff: "github-light" // `min-light` does not work well for diff
+    },
+    dark: {
+        [DEFAULT]: "material-theme-darker"
+    }
 };
 
-const getHighlighterInstanceImpl = async (
-  language: string
-): Promise<Highlighter> => {
-  const lang = parseLang(language);
+const getHighlighterInstanceImpl = async (language: string): Promise<Highlighter> => {
+    const lang = parseLang(language);
 
-  if (process.env.NODE_ENV === "development") {
-    console.debug("Loading language:", lang);
-  }
-
-  if (highlighter == null) {
-    highlighter = await getSingletonHighlighter();
-  }
-
-  // load the themes used by the current language
-  await highlighter.loadTheme(
-    THEMES.light[lang] ?? THEMES.light[DEFAULT],
-    THEMES.dark[lang] ?? THEMES.dark[DEFAULT]
-  );
-
-  if (!highlighter.getLoadedLanguages().includes(lang)) {
-    try {
-      await highlighter.loadLanguage(
-        additionalLanguages[lang] ?? (lang as BundledLanguage | SpecialLanguage)
-      );
-    } catch (e) {
-      console.error(`Failed to load language: ${lang}`, e);
+    if (process.env.NODE_ENV === "development") {
+        console.debug("Loading language:", lang);
     }
-  }
 
-  return highlighter;
+    if (highlighter == null) {
+        highlighter = await getSingletonHighlighter();
+    }
+
+    // load the themes used by the current language
+    await highlighter.loadTheme(THEMES.light[lang] ?? THEMES.light[DEFAULT], THEMES.dark[lang] ?? THEMES.dark[DEFAULT]);
+
+    if (!highlighter.getLoadedLanguages().includes(lang)) {
+        try {
+            await highlighter.loadLanguage(additionalLanguages[lang] ?? (lang as BundledLanguage | SpecialLanguage));
+        } catch (e) {
+            console.error(`Failed to load language: ${lang}`, e);
+        }
+    }
+
+    return highlighter;
 };
 
 const isLocalOrSelfHostedEnv = isLocal() || isSelfHosted();
-export const memoizedGetHighlighterInstance = memoize(
-  getHighlighterInstanceImpl
-);
+export const memoizedGetHighlighterInstance = memoize(getHighlighterInstanceImpl);
 
 // only call this once per language when isLocal is true
 export const getHighlighterInstance = () =>
-  isLocalOrSelfHostedEnv
-    ? getHighlighterInstanceImpl
-    : memoizedGetHighlighterInstance;
+    isLocalOrSelfHostedEnv ? getHighlighterInstanceImpl : memoizedGetHighlighterInstance;
 
 function hasLanguage(lang: string): boolean {
-  return highlighter?.getLoadedLanguages().includes(parseLang(lang)) ?? false;
+    return highlighter?.getLoadedLanguages().includes(parseLang(lang)) ?? false;
 }
 
 export interface HighlightedTokens {
-  code: string;
-  lang: string;
-  hast: Root;
+    code: string;
+    lang: string;
+    hast: Root;
 }
 
 export function highlightTokens(
-  highlighter: Highlighter,
-  code: string,
-  lang: string,
-  templateVariables?: Set<string>
+    highlighter: Highlighter,
+    code: string,
+    lang: string,
+    templateVariables?: Set<string>
 ): HighlightedTokens {
-  code = trimCode(code);
-  lang = parseLang(lang);
-  const hast = highlighter.codeToHast(code, {
-    lang,
-    themes: {
-      light: THEMES.light[lang] ?? THEMES.light[DEFAULT],
-      dark: THEMES.dark[lang] ?? THEMES.dark[DEFAULT],
-    },
-    transformers: [templateTransformer(templateVariables)],
-  });
-  return { code, lang, hast };
+    code = trimCode(code);
+    lang = parseLang(lang);
+    const hast = highlighter.codeToHast(code, {
+        lang,
+        themes: {
+            light: THEMES.light[lang] ?? THEMES.light[DEFAULT],
+            dark: THEMES.dark[lang] ?? THEMES.dark[DEFAULT]
+        },
+        transformers: [templateTransformer(templateVariables)]
+    });
+    return { code, lang, hast };
 }
 
 // remove leading and trailing newlines
 export function trimCode(code: string): string {
-  if (code == null) {
-    return "";
-  }
-  return code.replace(/^\n+|\n+$/g, "");
+    if (code == null) {
+        return "";
+    }
+    return code.replace(/^\n+|\n+$/g, "");
 }
 
 export function parseLang(lang: string): string {
-  lang = lang.trim();
+    lang = lang.trim();
 
-  if (lang == null) {
+    if (lang == null) {
+        return "txt";
+    }
+    lang = lang.toLowerCase();
+    if (Object.keys(bundledLanguages).includes(lang as BundledLanguage)) {
+        return lang as BundledLanguage;
+    }
+    if (lang === "golang") {
+        return "go";
+    }
+    if (lang === "curl") {
+        return "bash";
+    }
+    if (Object.keys(additionalLanguages).includes(lang)) {
+        return lang as SpecialLanguage;
+    }
     return "txt";
-  }
-  lang = lang.toLowerCase();
-  if (Object.keys(bundledLanguages).includes(lang as BundledLanguage)) {
-    return lang as BundledLanguage;
-  }
-  if (lang === "golang") {
-    return "go";
-  }
-  if (lang === "curl") {
-    return "bash";
-  }
-  if (Object.keys(additionalLanguages).includes(lang)) {
-    return lang as SpecialLanguage;
-  }
-  return "txt";
 }
 
-type HighlightCallback = (
-  code: string,
-  language: string,
-  cb: (tokens: HighlightedTokens) => void
-) => void;
+type HighlightCallback = (code: string, language: string, cb: (tokens: HighlightedTokens) => void) => void;
 
 /**
  * useHighlightTokens is a hook that wraps around highlightTokens to safely handle async highlighting.
@@ -161,52 +143,52 @@ type HighlightCallback = (
  * ```
  */
 export function useHighlightTokens(): HighlightCallback {
-  return useCallback<HighlightCallback>((code, language, cb) => {
-    if (!hasLanguage(language)) {
-      cb(createRawTokens(code, language));
-    }
-    void (async () => {
-      const highlighter = await getHighlighterInstance()(language);
-      cb(highlightTokens(highlighter, code, language));
-    })();
-  }, []);
+    return useCallback<HighlightCallback>((code, language, cb) => {
+        if (!hasLanguage(language)) {
+            cb(createRawTokens(code, language));
+        }
+        void (async () => {
+            const highlighter = await getHighlighterInstance()(language);
+            cb(highlightTokens(highlighter, code, language));
+        })();
+    }, []);
 }
 
 export function useHighlighter(lang: string): Highlighter | undefined {
-  const [, setNonce] = useState(0);
-  useEffect(() => {
-    if (!hasLanguage(lang)) {
-      void (async () => {
-        await getHighlighterInstance()(lang);
-        setNonce((n) => n + 1);
-      })();
-    }
-  }, [lang]);
-  return hasLanguage(lang) ? highlighter : undefined;
+    const [, setNonce] = useState(0);
+    useEffect(() => {
+        if (!hasLanguage(lang)) {
+            void (async () => {
+                await getHighlighterInstance()(lang);
+                setNonce((n) => n + 1);
+            })();
+        }
+    }, [lang]);
+    return hasLanguage(lang) ? highlighter : undefined;
 }
 
 export function createRawTokens(code: string, lang: string): HighlightedTokens {
-  code = trimCode(code);
+    code = trimCode(code);
 
-  return {
-    code,
-    lang,
-    hast: {
-      type: "root",
-      children: [
-        h("pre", [
-          h(
-            "code",
-            code
-              .split("\n")
-              .flatMap((line, idx) =>
-                idx === 0
-                  ? [h("span", { class: "line" }, line)]
-                  : ["\n", h("span", { class: "line" }, line)]
-              )
-          ),
-        ]),
-      ],
-    },
-  };
+    return {
+        code,
+        lang,
+        hast: {
+            type: "root",
+            children: [
+                h("pre", [
+                    h(
+                        "code",
+                        code
+                            .split("\n")
+                            .flatMap((line, idx) =>
+                                idx === 0
+                                    ? [h("span", { class: "line" }, line)]
+                                    : ["\n", h("span", { class: "line" }, line)]
+                            )
+                    )
+                ])
+            ]
+        }
+    };
 }

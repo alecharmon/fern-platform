@@ -1,15 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 
 export class DocsWorkspaceDao {
-  private prisma: PrismaClient;
+    private prisma: PrismaClient;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
-  }
+    constructor(prisma: PrismaClient) {
+        this.prisma = prisma;
+    }
 
-  // async createWorkspace(workspace: DocsWorkspace) {
-  // await this.prisma.docsWorkspace.create({
-  //   data: workspace,
-  // });
-  // }
+    // async createWorkspace(workspace: DocsWorkspace) {
+    // await this.prisma.docsWorkspace.create({
+    //   data: workspace,
+    // });
+    // }
 }

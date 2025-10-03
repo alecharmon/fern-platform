@@ -7,22 +7,22 @@ import { DocsUrl } from "@/utils/types";
 import { DocsSiteSwitcher } from "./DocsSiteSwitcher";
 
 export async function MaybeDocsHeaderItems({
-  docsUrl,
-  orgName,
+    docsUrl,
+    orgName
 }: Readonly<{
-  docsUrl?: DocsUrl;
-  orgName?: Auth0OrgName;
+    docsUrl?: DocsUrl;
+    orgName?: Auth0OrgName;
 }>) {
-  if (orgName == null || docsUrl == null) {
-    return null;
-  }
-  await getAuthenticatedSessionOrRedirect(orgName);
-  return (
-    <>
-      <div className="flex items-center md:hidden">/</div>
-      <div className="flex min-w-0 md:hidden">
-        <DocsSiteSwitcher orgName={orgName} docsUrl={docsUrl} />
-      </div>
-    </>
-  );
+    if (orgName == null || docsUrl == null) {
+        return null;
+    }
+    await getAuthenticatedSessionOrRedirect(orgName);
+    return (
+        <>
+            <div className="flex items-center md:hidden">/</div>
+            <div className="flex min-w-0 md:hidden">
+                <DocsSiteSwitcher orgName={orgName} docsUrl={docsUrl} />
+            </div>
+        </>
+    );
 }

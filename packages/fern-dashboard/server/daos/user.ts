@@ -1,15 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 
 export class UserDao {
-  private prisma: PrismaClient;
+    private prisma: PrismaClient;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
-  }
+    constructor(prisma: PrismaClient) {
+        this.prisma = prisma;
+    }
 
-  // async createUser(user: User) {
-  //   await this.prisma.user.create({
-  //     data: user,
-  //   });
-  // }
+    // async createUser(user: User) {
+    //   await this.prisma.user.create({
+    //     data: user,
+    //   });
+    // }
 }

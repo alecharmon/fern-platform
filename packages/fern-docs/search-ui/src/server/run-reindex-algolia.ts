@@ -1,40 +1,33 @@
 import "server-only";
 
 import {
-  AlgoliaIndexerTaskResponse,
-  SEARCH_INDEX,
-  algoliaIndexSettingsTask,
-  algoliaIndexerTask,
+    AlgoliaIndexerTaskResponse,
+    SEARCH_INDEX,
+    algoliaIndexSettingsTask,
+    algoliaIndexerTask
 } from "@fern-docs/search-keyword";
 
-import {
-  algoliaAppId,
-  algoliaWriteApiKey,
-  fdrEnvironment,
-  fernToken_admin,
-} from "./env-variables";
+import { algoliaAppId, algoliaWriteApiKey, fdrEnvironment, fernToken_admin } from "./env-variables";
 
-export const runReindexAlgolia = async (
-  domain: string
-): Promise<AlgoliaIndexerTaskResponse> => {
-  console.time("reindexing");
+export const runReindexAlgolia = async (domain: string): Promise<AlgoliaIndexerTaskResponse> => {
+    console.time("reindexing");
 
-  await algoliaIndexSettingsTask({
-    appId: algoliaAppId(),
-    writeApiKey: algoliaWriteApiKey(),
-    indexName: SEARCH_INDEX,
-  });
+    await algoliaIndexSettingsTask({
+        appId: algoliaAppId(),
+        writeApiKey: algoliaWriteApiKey(),
+        indexName: SEARCH_INDEX
+    });
 
-  const response = await algoliaIndexerTask({
-    appId: algoliaAppId(),
-    writeApiKey: algoliaWriteApiKey(),
-    indexName: SEARCH_INDEX,
-    environment: fdrEnvironment(),
-    fernToken: fernToken_admin(),
-    domain,
-  });
+    const response = await algoliaIndexerTask({
+        appId: algoliaAppId(),
+        writeApiKey: algoliaWriteApiKey(),
+        indexName: SEARCH_INDEX,
+        environment: fdrEnvironment(),
+        fernToken: fernToken_admin(),
+        domain
+    });
 
-  console.timeEnd("reindexing");
+    console.timeEnd("reindexing");
 
-  return response;
+    return response;
 };

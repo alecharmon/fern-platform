@@ -7,72 +7,68 @@ import { FERN_SIDEBAR_ID, FERN_SIDEBAR_SPACER_ID } from "../constants";
 import { MobileMenu } from "./mobile-menu";
 
 export function SidebarNav({
-  children,
-  className,
-  mobileClassName,
-  desktopClassName,
-  fixed,
-  isSidePanelOpen,
-  ...props
+    children,
+    className,
+    mobileClassName,
+    desktopClassName,
+    fixed,
+    isSidePanelOpen,
+    ...props
 }: {
-  children: React.ReactNode;
-  className?: string;
-  mobileClassName?: string;
-  desktopClassName?: string;
-  fixed?: boolean;
-  "data-theme"?: string;
-  isSidePanelOpen?: boolean;
+    children: React.ReactNode;
+    className?: string;
+    mobileClassName?: string;
+    desktopClassName?: string;
+    fixed?: boolean;
+    "data-theme"?: string;
+    isSidePanelOpen?: boolean;
 }) {
-  const isDesktop = useIsDesktop();
+    const isDesktop = useIsDesktop();
 
-  if (isDesktop) {
+    if (isDesktop) {
+        return (
+            <DesktopMenu className={cn(className, desktopClassName)} fixed={fixed} {...props}>
+                {children}
+            </DesktopMenu>
+        );
+    }
+
     return (
-      <DesktopMenu
-        className={cn(className, desktopClassName)}
-        fixed={fixed}
-        {...props}
-      >
-        {children}
-      </DesktopMenu>
+        <MobileMenu
+            className={cn(className, mobileClassName, { hidden: isDesktop })}
+            isSidePanelOpen={isSidePanelOpen}
+            {...props}
+        >
+            {children}
+        </MobileMenu>
     );
-  }
-
-  return (
-    <MobileMenu
-      className={cn(className, mobileClassName, { hidden: isDesktop })}
-      isSidePanelOpen={isSidePanelOpen}
-      {...props}
-    >
-      {children}
-    </MobileMenu>
-  );
 }
 
 function DesktopMenu({
-  children,
-  className,
-  hidden,
-  fixed,
+    children,
+    className,
+    hidden,
+    fixed
 }: {
-  children: React.ReactNode;
-  className?: string;
-  hidden?: boolean;
-  fixed?: boolean;
+    children: React.ReactNode;
+    className?: string;
+    hidden?: boolean;
+    fixed?: boolean;
 }) {
-  if (hidden) {
-    return null;
-  }
-  return (
-    <>
-      <aside
-        id={FERN_SIDEBAR_ID}
-        data-viewport="desktop"
-        data-state={fixed ? "fixed" : "sticky"}
-        className={className}
-      >
-        {children}
-      </aside>
-      {fixed && <aside id={FERN_SIDEBAR_SPACER_ID} />}
-    </>
-  );
+    if (hidden) {
+        return null;
+    }
+    return (
+        <>
+            <aside
+                id={FERN_SIDEBAR_ID}
+                data-viewport="desktop"
+                data-state={fixed ? "fixed" : "sticky"}
+                className={className}
+            >
+                {children}
+            </aside>
+            {fixed && <aside id={FERN_SIDEBAR_SPACER_ID} />}
+        </>
+    );
 }

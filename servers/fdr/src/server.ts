@@ -42,94 +42,90 @@ setGlobalDispatcher(new Agent({ connect: { timeout: 5_000 } }));
 const app = createFdrApplication(config);
 
 expressApp.get("/health", (_req, res) => {
-  (async () => {
-    const cacheInitialized = app.docsDefinitionCache.isInitialized();
-    if (!cacheInitialized) {
-      app.logger.error(
-        "The docs definition cache is not initilialized. Erroring the health check."
-      );
-      res.sendStatus(500);
-      return;
-    }
-    if (app.redisDatastore != null) {
-      const redisHealthCheckSuccessful = await checkRedis({
-        redis: app.redisDatastore,
-      });
-      if (!redisHealthCheckSuccessful) {
-        app.logger.error(
-          "Records cannot be successfully written and read from redis"
-        );
+    (async () => {
+        const cacheInitialized = app.docsDefinitionCache.isInitialized();
+        if (!cacheInitialized) {
+            app.logger.error("The docs definition cache is not initilialized. Erroring the health check.");
+            res.sendStatus(500);
+            return;
+        }
+        if (app.redisDatastore != null) {
+            const redisHealthCheckSuccessful = await checkRedis({
+                redis: app.redisDatastore
+            });
+            if (!redisHealthCheckSuccessful) {
+                app.logger.error("Records cannot be successfully written and read from redis");
+                res.sendStatus(500);
+                return;
+            }
+        }
+        res.sendStatus(200);
+    })().catch((e: unknown) => {
+        app.logger.error("Error in health check:", e);
         res.sendStatus(500);
-        return;
-      }
-    }
-    res.sendStatus(200);
-  })().catch((e: unknown) => {
-    app.logger.error("Error in health check:", e);
-    res.sendStatus(500);
-  });
+    });
 });
 
 void startServer();
 
 async function startServer(): Promise<void> {
-  try {
-    await app.initialize();
-    expressApp.use(express.json({ limit: "50mb" }));
-    register(expressApp, {
-      docs: {
-        v1: {
-          read: {
-            _root: getDocsReadService(app),
-          },
-          write: {
-            _root: getDocsWriteService(app),
-          },
-        },
-        v2: {
-          read: {
-            _root: getDocsReadV2Service(app),
-          },
-          write: {
-            _root: getDocsWriteV2Service(app),
-          },
-        },
-      },
-      api: {
-        v1: {
-          read: {
-            _root: getReadApiService(app),
-          },
-          register: {
-            _root: getRegisterApiService(app),
-          },
-        },
-        latest: {
-          _root: getApiLatestService(app),
-        },
-      },
-      snippets: getSnippetsService(app),
-      snippetsFactory: getSnippetsFactoryService(app),
-      templates: getTemplatesService(app),
-      diff: getApiDiffService(app),
-      docsCache: getDocsCacheService(app),
-      sdks: {
-        versions: getVersionsService(app),
-      },
-      generators: {
-        _root: getGeneratorsRootController(app),
-        cli: getGeneratorsCliController(app),
-        versions: getGeneratorsVersionsController(app),
-      },
-      tokens: getTokensService(app),
-      git: getGitController(app),
-      dashboard: {
-        _root: getDashboardController(app),
-      },
-    });
-    app.logger.info(`Listening for requests on port ${PORT}`);
-    expressApp.listen(PORT);
-  } catch (err) {
-    app.logger.error("Failed to start express server", err);
-  }
+    try {
+        await app.initialize();
+        expressApp.use(express.json({ limit: "50mb" }));
+        register(expressApp, {
+            docs: {
+                v1: {
+                    read: {
+                        _root: getDocsReadService(app)
+                    },
+                    write: {
+                        _root: getDocsWriteService(app)
+                    }
+                },
+                v2: {
+                    read: {
+                        _root: getDocsReadV2Service(app)
+                    },
+                    write: {
+                        _root: getDocsWriteV2Service(app)
+                    }
+                }
+            },
+            api: {
+                v1: {
+                    read: {
+                        _root: getReadApiService(app)
+                    },
+                    register: {
+                        _root: getRegisterApiService(app)
+                    }
+                },
+                latest: {
+                    _root: getApiLatestService(app)
+                }
+            },
+            snippets: getSnippetsService(app),
+            snippetsFactory: getSnippetsFactoryService(app),
+            templates: getTemplatesService(app),
+            diff: getApiDiffService(app),
+            docsCache: getDocsCacheService(app),
+            sdks: {
+                versions: getVersionsService(app)
+            },
+            generators: {
+                _root: getGeneratorsRootController(app),
+                cli: getGeneratorsCliController(app),
+                versions: getGeneratorsVersionsController(app)
+            },
+            tokens: getTokensService(app),
+            git: getGitController(app),
+            dashboard: {
+                _root: getDashboardController(app)
+            }
+        });
+        app.logger.info(`Listening for requests on port ${PORT}`);
+        expressApp.listen(PORT);
+    } catch (err) {
+        app.logger.error("Failed to start express server", err);
+    }
 }

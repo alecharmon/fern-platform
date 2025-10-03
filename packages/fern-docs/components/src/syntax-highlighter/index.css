@@ -54,9 +54,7 @@
     @apply opacity-40 blur-[1.5px] transition-[filter,opacity] dark:opacity-50;
   }
 
-  .code-block:hover
-    .code-block-line-group.highlight-focus
-    .code-block-line:not(.highlight) {
+  .code-block:hover .code-block-line-group.highlight-focus .code-block-line:not(.highlight) {
     @apply opacity-100 blur-none dark:opacity-100;
   }
 

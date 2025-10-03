@@ -13,39 +13,39 @@ import handler from "./handler";
 export const maxDuration = 60;
 
 export declare namespace getHomepageImageUrl {
-  export type Request = z.infer<typeof GetHomepageImagesRequest>;
-  export type Response = ResolvedReturnType<typeof handler>;
+    export type Request = z.infer<typeof GetHomepageImagesRequest>;
+    export type Response = ResolvedReturnType<typeof handler>;
 }
 
 const GetHomepageImagesRequest = z.object({
-  urls: z.array(z.string()),
-  theme: z.union([z.literal("dark"), z.literal("light")]),
-  orgName: orgNameValidator,
+    urls: z.array(z.string()),
+    theme: z.union([z.literal("dark"), z.literal("light")]),
+    orgName: orgNameValidator
 });
 
 export async function POST(req: NextRequest) {
-  const maybeSessionData = await maybeGetCurrentSession(req);
-  if (maybeSessionData.errorResponse != null) {
-    return maybeSessionData.errorResponse;
-  }
-  const { token } = maybeSessionData.data;
-
-  const parsedBody = await parseNextRequestBody(req, GetHomepageImagesRequest);
-  if (parsedBody.errorResponse != null) {
-    return parsedBody.errorResponse;
-  }
-  const { urls, theme, orgName } = parsedBody.data;
-
-  for (const url of urls) {
-    const ensureOrgOwnsUrlResponse = await ensureOrgOwnsUrl({
-      url,
-      orgName,
-      token,
-    });
-    if (ensureOrgOwnsUrlResponse.errorResponse != null) {
-      return ensureOrgOwnsUrlResponse.errorResponse;
+    const maybeSessionData = await maybeGetCurrentSession(req);
+    if (maybeSessionData.errorResponse != null) {
+        return maybeSessionData.errorResponse;
     }
-  }
+    const { token } = maybeSessionData.data;
 
-  return NextResponse.json(await handler({ urls, theme }));
+    const parsedBody = await parseNextRequestBody(req, GetHomepageImagesRequest);
+    if (parsedBody.errorResponse != null) {
+        return parsedBody.errorResponse;
+    }
+    const { urls, theme, orgName } = parsedBody.data;
+
+    for (const url of urls) {
+        const ensureOrgOwnsUrlResponse = await ensureOrgOwnsUrl({
+            url,
+            orgName,
+            token
+        });
+        if (ensureOrgOwnsUrlResponse.errorResponse != null) {
+            return ensureOrgOwnsUrlResponse.errorResponse;
+        }
+    }
+
+    return NextResponse.json(await handler({ urls, theme }));
 }

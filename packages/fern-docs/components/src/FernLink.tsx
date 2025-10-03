@@ -12,238 +12,212 @@ import { useCurrentPathname } from "./hooks/use-current-pathname";
 import { useDomain } from "./state/domain";
 
 export const FernLink = React.forwardRef<
-  HTMLAnchorElement,
-  Omit<React.ComponentProps<typeof Link>, "href"> & {
-    href: string;
-    showExternalLinkIcon?: boolean;
-  }
+    HTMLAnchorElement,
+    Omit<React.ComponentProps<typeof Link>, "href"> & {
+        href: string;
+        showExternalLinkIcon?: boolean;
+    }
 >(function FernLink({ showExternalLinkIcon = false, ...props }, ref) {
-  const url = toUrlObject(props.href);
-  const isExternalUrl = checkIsExternalUrl(url);
+    const url = toUrlObject(props.href);
+    const isExternalUrl = checkIsExternalUrl(url);
 
-  // if the url is relative, we will need to invoke useRouter to resolve the relative url
-  // since useRouter injects the router context, it will cause a re-render any time the route changes.
-  // to avoid unnecessary re-renders, we will isolate the useRouter call to a separate component.
-  if (!isExternalUrl && checkIsRelativeUrl(url)) {
-    return <FernRelativeLink ref={ref} {...props} />;
-  }
+    // if the url is relative, we will need to invoke useRouter to resolve the relative url
+    // since useRouter injects the router context, it will cause a re-render any time the route changes.
+    // to avoid unnecessary re-renders, we will isolate the useRouter call to a separate component.
+    if (!isExternalUrl && checkIsRelativeUrl(url)) {
+        return <FernRelativeLink ref={ref} {...props} />;
+    }
 
-  if (isExternalUrl) {
-    return (
-      <FernExternalLink
-        ref={ref}
-        {...stripNextLinkProps(props)}
-        showExternalLinkIcon={showExternalLinkIcon}
-        url={url}
-      />
-    );
-  }
+    if (isExternalUrl) {
+        return (
+            <FernExternalLink
+                ref={ref}
+                {...stripNextLinkProps(props)}
+                showExternalLinkIcon={showExternalLinkIcon}
+                url={url}
+            />
+        );
+    }
 
-  return <Link ref={ref} {...props} href={conformTrailingSlash(props.href)} />;
+    return <Link ref={ref} {...props} href={conformTrailingSlash(props.href)} />;
 });
 
 FernLink.displayName = "FernLink";
 
-const FernRelativeLink = React.forwardRef<
-  HTMLAnchorElement,
-  React.ComponentProps<typeof Link>
->((props, ref) => {
-  const pathname = useCurrentPathname();
-  const href = resolveRelativeUrl(pathname, formatUrlString(props.href));
-  return (
-    <Link
-      ref={ref}
-      prefetch={true}
-      {...props}
-      href={conformTrailingSlash(href)}
-    />
-  );
+const FernRelativeLink = React.forwardRef<HTMLAnchorElement, React.ComponentProps<typeof Link>>((props, ref) => {
+    const pathname = useCurrentPathname();
+    const href = resolveRelativeUrl(pathname, formatUrlString(props.href));
+    return <Link ref={ref} prefetch={true} {...props} href={conformTrailingSlash(href)} />;
 });
 
 FernRelativeLink.displayName = "FernRelativeLink";
 
-interface FernExternalLinkProps
-  extends Omit<React.ComponentProps<"a">, "href"> {
-  showExternalLinkIcon: boolean;
-  url: UrlObject;
+interface FernExternalLinkProps extends Omit<React.ComponentProps<"a">, "href"> {
+    showExternalLinkIcon: boolean;
+    url: UrlObject;
 }
 
-const FernExternalLink = React.forwardRef<
-  HTMLAnchorElement,
-  FernExternalLinkProps
->(({ showExternalLinkIcon, url, ...props }, ref) => {
-  const domain = useDomain();
-  const [host, setHost] = React.useState<string>(domain);
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      setHost(window.location.host);
-    }
-  }, []);
+const FernExternalLink = React.forwardRef<HTMLAnchorElement, FernExternalLinkProps>(
+    ({ showExternalLinkIcon, url, ...props }, ref) => {
+        const domain = useDomain();
+        const [host, setHost] = React.useState<string>(domain);
+        React.useEffect(() => {
+            if (typeof window !== "undefined") {
+                setHost(window.location.host);
+            }
+        }, []);
 
-  // if the link is to a different domain, always open in a new tab
-  // TODO: if the link is to the same domain, we should check if the page is a fern page, and if so, use the Link component to leverage client-side navigation
-  const isSameSite = host === url.host;
-  return (
-    <a
-      ref={ref}
-      {...props}
-      target={isSameSite || props.target != null ? props.target : "_blank"}
-      rel={
-        isSameSite && props.target !== "_blank"
-          ? props.rel
-          : props.rel == null
-            ? "noreferrer"
-            : props.rel.includes("noreferrer")
-              ? props.rel
-              : `${props.rel} noreferrer`
-      }
-      href={formatUrlString(url)}
-    >
-      {props.children}
-      {!isSameSite && showExternalLinkIcon && (
-        <ExternalLinkIcon className="external-link-icon" />
-      )}
-    </a>
-  );
-});
+        // if the link is to a different domain, always open in a new tab
+        // TODO: if the link is to the same domain, we should check if the page is a fern page, and if so, use the Link component to leverage client-side navigation
+        const isSameSite = host === url.host;
+        return (
+            <a
+                ref={ref}
+                {...props}
+                target={isSameSite || props.target != null ? props.target : "_blank"}
+                rel={
+                    isSameSite && props.target !== "_blank"
+                        ? props.rel
+                        : props.rel == null
+                          ? "noreferrer"
+                          : props.rel.includes("noreferrer")
+                            ? props.rel
+                            : `${props.rel} noreferrer`
+                }
+                href={formatUrlString(url)}
+            >
+                {props.children}
+                {!isSameSite && showExternalLinkIcon && <ExternalLinkIcon className="external-link-icon" />}
+            </a>
+        );
+    }
+);
 
 FernExternalLink.displayName = "FernExternalLink";
 
 export function toUrlObject(url: string | UrlObject): UrlObject {
-  if (url == null) {
-    return {};
-  }
-  if (typeof url === "string") {
-    const parsed = safeParseUrl(url);
-    if (parsed) {
-      return parsed;
+    if (url == null) {
+        return {};
     }
-  }
-  return url as UrlObject;
+    if (typeof url === "string") {
+        const parsed = safeParseUrl(url);
+        if (parsed) {
+            return parsed;
+        }
+    }
+    return url as UrlObject;
 }
 
 export function formatUrlString(url: string | UrlObject): string {
-  if (url == null) {
-    return "";
-  }
-  if (typeof url === "object") {
-    return format(url);
-  }
-  return typeof url === "string" ? url : "";
+    if (url == null) {
+        return "";
+    }
+    if (typeof url === "object") {
+        return format(url);
+    }
+    return typeof url === "string" ? url : "";
 }
 
 export function resolveRelativeUrl(pathName: string, href: string): string {
-  // if the href is "../" or "./" or missing an initial slash, we want to resolve it relative to the current page
-  if (
-    href.startsWith(".") ||
-    !href.startsWith("/") ||
-    href.startsWith("#") ||
-    href.startsWith("?")
-  ) {
-    const pathname = resolve(pathName, href);
-    return pathname;
-  }
-  return href;
+    // if the href is "../" or "./" or missing an initial slash, we want to resolve it relative to the current page
+    if (href.startsWith(".") || !href.startsWith("/") || href.startsWith("#") || href.startsWith("?")) {
+        const pathname = resolve(pathName, href);
+        return pathname;
+    }
+    return href;
 }
 
 export function checkIsExternalUrl(url: UrlObject): boolean {
-  return url.protocol != null && url.host != null;
+    return url.protocol != null && url.host != null;
 }
 
 export function checkIsRelativeUrl(url: UrlObject): boolean {
-  if (url.href == null) {
-    return true;
-  }
+    if (url.href == null) {
+        return true;
+    }
 
-  if (url.protocol) {
-    return false;
-  }
+    if (url.protocol) {
+        return false;
+    }
 
-  // If it starts with /, it's an absolute path (not relative)
-  if (url.href.startsWith("/")) {
-    return false;
-  }
+    // If it starts with /, it's an absolute path (not relative)
+    if (url.href.startsWith("/")) {
+        return false;
+    }
 
-  return (
-    url.href.startsWith(".") ||
-    url.href.startsWith("#") ||
-    url.href.startsWith("?") ||
-    !url.href.startsWith("/")
-  );
+    return (
+        url.href.startsWith(".") || url.href.startsWith("#") || url.href.startsWith("?") || !url.href.startsWith("/")
+    );
 }
 
-type MaybeFernLinkProps = Omit<
-  React.ComponentPropsWithoutRef<typeof FernLink>,
-  "href"
-> & {
-  href?: React.ComponentPropsWithoutRef<typeof FernLink>["href"];
+type MaybeFernLinkProps = Omit<React.ComponentPropsWithoutRef<typeof FernLink>, "href"> & {
+    href?: React.ComponentPropsWithoutRef<typeof FernLink>["href"];
 };
 
-export const MaybeFernLink = React.forwardRef<
-  HTMLAnchorElement,
-  MaybeFernLinkProps
->(function MaybeFernLink({ href, ...props }, ref) {
-  if (href == null) {
-    return <span ref={ref} {...stripNextLinkProps(props)} />;
-  }
-  return <FernLink ref={ref} {...props} href={href} />;
+export const MaybeFernLink = React.forwardRef<HTMLAnchorElement, MaybeFernLinkProps>(function MaybeFernLink(
+    { href, ...props },
+    ref
+) {
+    if (href == null) {
+        return <span ref={ref} {...stripNextLinkProps(props)} />;
+    }
+    return <FernLink ref={ref} {...props} href={href} />;
 });
 
 function stripNextLinkProps<T extends MaybeFernLinkProps>(
-  props: T
+    props: T
 ): Omit<T, "href" | "locale" | "prefetch" | "replace" | "scroll" | "shallow"> {
-  const { href, locale, prefetch, replace, scroll, shallow, ...rest } = props;
-  return rest;
+    const { href, locale, prefetch, replace, scroll, shallow, ...rest } = props;
+    return rest;
 }
 
 const safeParseUrl = (url: string | undefined): UrlObject | null => {
-  return url
-    ? (() => {
-        try {
-          // check if it's an absolute URL (has protocol)
-          // this includes both http://example.com and mailto:email@example.com
-          if (url.includes("://") || /^[a-zA-Z]+:/.test(url)) {
-            const urlObj = new URL(url);
-            // for non-http protocols like mailto:, tel:, etc., don't set slashes to true
-            // as they don't use the standard URL format with slashes
-            const isStandardProtocol =
-              urlObj.protocol === "http:" || urlObj.protocol === "https:";
-            return {
-              protocol: urlObj.protocol,
-              slashes: isStandardProtocol,
-              auth: "",
-              host: urlObj.host,
-              port: urlObj.port,
-              hostname: urlObj.hostname,
-              hash: urlObj.hash,
-              search: urlObj.search,
-              query: urlObj.search,
-              pathname: urlObj.pathname,
-              path: urlObj.pathname + urlObj.search,
-              href: urlObj.href,
-            };
-          } else {
-            // handle relative URLs by parsing with a base URL
-            // then extracting only the relative parts
-            const urlObj = new URL(url, "http://localhost");
-            return {
-              protocol: null,
-              slashes: null,
-              auth: null,
-              host: null,
-              port: null,
-              hostname: null,
-              hash: urlObj.hash,
-              search: urlObj.search,
-              query: urlObj.search,
-              pathname: urlObj.pathname,
-              path: urlObj.pathname + urlObj.search,
-              href: url,
-            };
-          }
-        } catch (_error) {
-          return null;
-        }
-      })()
-    : null;
+    return url
+        ? (() => {
+              try {
+                  // check if it's an absolute URL (has protocol)
+                  // this includes both http://example.com and mailto:email@example.com
+                  if (url.includes("://") || /^[a-zA-Z]+:/.test(url)) {
+                      const urlObj = new URL(url);
+                      // for non-http protocols like mailto:, tel:, etc., don't set slashes to true
+                      // as they don't use the standard URL format with slashes
+                      const isStandardProtocol = urlObj.protocol === "http:" || urlObj.protocol === "https:";
+                      return {
+                          protocol: urlObj.protocol,
+                          slashes: isStandardProtocol,
+                          auth: "",
+                          host: urlObj.host,
+                          port: urlObj.port,
+                          hostname: urlObj.hostname,
+                          hash: urlObj.hash,
+                          search: urlObj.search,
+                          query: urlObj.search,
+                          pathname: urlObj.pathname,
+                          path: urlObj.pathname + urlObj.search,
+                          href: urlObj.href
+                      };
+                  } else {
+                      // handle relative URLs by parsing with a base URL
+                      // then extracting only the relative parts
+                      const urlObj = new URL(url, "http://localhost");
+                      return {
+                          protocol: null,
+                          slashes: null,
+                          auth: null,
+                          host: null,
+                          port: null,
+                          hostname: null,
+                          hash: urlObj.hash,
+                          search: urlObj.search,
+                          query: urlObj.search,
+                          pathname: urlObj.pathname,
+                          path: urlObj.pathname + urlObj.search,
+                          href: url
+                      };
+                  }
+              } catch (_error) {
+                  return null;
+              }
+          })()
+        : null;
 };

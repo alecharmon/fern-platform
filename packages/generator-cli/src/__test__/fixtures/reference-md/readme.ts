@@ -2,10 +2,10 @@ import { FernGeneratorCli } from "../../../configuration/generated";
 
 const CONFIG: FernGeneratorCli.ReadmeConfig = {
     language: FernGeneratorCli.LanguageInfo.typescript({
-        publishInfo: undefined,
+        publishInfo: undefined
     }),
     organization: "imdb",
-    referenceMarkdownPath: "./reference.md",
+    referenceMarkdownPath: "./reference.md"
 };
 
 export default CONFIG;

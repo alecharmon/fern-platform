@@ -7,10 +7,7 @@ import { NodeViewWrapper } from "@tiptap/react";
 import type { MDXComponents } from "@fern-docs/mdx";
 
 import { UnsupportedContent } from "@/components/editor/UnsupportedContent";
-import {
-  ErrorBoundary,
-  ErrorBoundaryFallback,
-} from "@/docs/components/error-boundary";
+import { ErrorBoundary, ErrorBoundaryFallback } from "@/docs/components/error-boundary";
 import { Embed } from "@/editor/components/Embed";
 
 import { Accordion, AccordionGroup } from "./accordion";
@@ -19,15 +16,15 @@ import { Badge } from "./badge";
 import { Bleed } from "./bleed";
 import { Button, ButtonGroup } from "./button";
 import {
-  Callout,
-  CheckCallout,
-  ErrorCallout,
-  InfoCallout,
-  LaunchNoteCallout,
-  NoteCallout,
-  SuccessCallout,
-  TipCallout,
-  WarningCallout,
+    Callout,
+    CheckCallout,
+    ErrorCallout,
+    InfoCallout,
+    LaunchNoteCallout,
+    NoteCallout,
+    SuccessCallout,
+    TipCallout,
+    WarningCallout
 } from "./callout";
 import { Card, CardGroup } from "./card";
 import { ClientLibraries } from "./client-libraries";
@@ -59,127 +56,123 @@ import { Tab, TabGroup } from "./tabs";
 // );
 
 const FERN_COMPONENTS = {
-  Accordion,
-  AccordionGroup,
-  Availability,
-  Badge,
-  Bleed,
-  Button,
-  ButtonGroup,
-  Callout,
-  Card,
-  CardGroup,
-  ClientLibraries,
-  CodeBlock,
-  CodeGroup,
-  Column,
-  ColumnGroup,
-  // Download,
-  EndpointRequestSnippet,
-  EndpointResponseSnippet,
-  EndpointSchemaSnippet,
-  Feature,
-  Frame,
-  Icon,
-  If,
-  Json,
-  Mermaid,
-  ParamField,
-  Step,
-  Steps: StepGroup,
-  Tab,
-  TabGroup,
-  Template,
-  // Tooltip,
-  // TwoSlash,
-  // callout aliases
-  Info: InfoCallout,
-  Warning: WarningCallout,
-  Success: SuccessCallout,
-  Error: ErrorCallout,
-  Note: NoteCallout,
-  Tip: TipCallout,
-  Check: CheckCallout,
-  LaunchNote: LaunchNoteCallout,
+    Accordion,
+    AccordionGroup,
+    Availability,
+    Badge,
+    Bleed,
+    Button,
+    ButtonGroup,
+    Callout,
+    Card,
+    CardGroup,
+    ClientLibraries,
+    CodeBlock,
+    CodeGroup,
+    Column,
+    ColumnGroup,
+    // Download,
+    EndpointRequestSnippet,
+    EndpointResponseSnippet,
+    EndpointSchemaSnippet,
+    Feature,
+    Frame,
+    Icon,
+    If,
+    Json,
+    Mermaid,
+    ParamField,
+    Step,
+    Steps: StepGroup,
+    Tab,
+    TabGroup,
+    Template,
+    // Tooltip,
+    // TwoSlash,
+    // callout aliases
+    Info: InfoCallout,
+    Warning: WarningCallout,
+    Success: SuccessCallout,
+    Error: ErrorCallout,
+    Note: NoteCallout,
+    Tip: TipCallout,
+    Check: CheckCallout,
+    LaunchNote: LaunchNoteCallout
 };
 
 // internal-use only
 const INTERNAL_COMPONENTS = {
-  ErrorBoundary,
-  ElevenLabsWaveform: () => (
-    <NodeViewWrapper>
-      <UnsupportedContent>
-        ElevenLabsWaveform is not supported in the editor.
-      </UnsupportedContent>
-    </NodeViewWrapper>
-  ),
+    ErrorBoundary,
+    ElevenLabsWaveform: () => (
+        <NodeViewWrapper>
+            <UnsupportedContent>ElevenLabsWaveform is not supported in the editor.</UnsupportedContent>
+        </NodeViewWrapper>
+    ),
 
-  /**
-   * deprecated but kept for backwards compatibility
-   */
-  Cards: CardGroup,
-  CodeBlocks,
-  Tabs: TabGroup,
+    /**
+     * deprecated but kept for backwards compatibility
+     */
+    Cards: CardGroup,
+    CodeBlocks,
+    Tabs: TabGroup
 };
 
 const HTML_COMPONENTS = {
-  a: A,
-  h1: (props: ComponentProps<"h1">) => HeadingRenderer(1, props),
-  h2: (props: ComponentProps<"h2">) => HeadingRenderer(2, props),
-  h3: (props: ComponentProps<"h3">) => HeadingRenderer(3, props),
-  h4: (props: ComponentProps<"h4">) => HeadingRenderer(4, props),
-  h5: (props: ComponentProps<"h5">) => HeadingRenderer(5, props),
-  h6: (props: ComponentProps<"h6">) => HeadingRenderer(6, props),
-  img: "img",
-  li: Li,
-  ol: Ol,
-  strong: Strong,
-  table: Table,
-  ul: Ul,
-  video: "video",
-  iframe: "iframe",
-  canvas: "canvas",
-  embed: "embed",
-  br: "br",
+    a: A,
+    h1: (props: ComponentProps<"h1">) => HeadingRenderer(1, props),
+    h2: (props: ComponentProps<"h2">) => HeadingRenderer(2, props),
+    h3: (props: ComponentProps<"h3">) => HeadingRenderer(3, props),
+    h4: (props: ComponentProps<"h4">) => HeadingRenderer(4, props),
+    h5: (props: ComponentProps<"h5">) => HeadingRenderer(5, props),
+    h6: (props: ComponentProps<"h6">) => HeadingRenderer(6, props),
+    img: "img",
+    li: Li,
+    ol: Ol,
+    strong: Strong,
+    table: Table,
+    ul: Ul,
+    video: "video",
+    iframe: "iframe",
+    canvas: "canvas",
+    embed: "embed",
+    br: "br"
 };
 
 const ALIASED_HTML_COMPONENTS = {
-  A,
-  H1: (props: ComponentProps<"h1">) => HeadingRenderer(1, props),
-  H2: (props: ComponentProps<"h2">) => HeadingRenderer(2, props),
-  H3: (props: ComponentProps<"h3">) => HeadingRenderer(3, props),
-  H4: (props: ComponentProps<"h4">) => HeadingRenderer(4, props),
-  H5: (props: ComponentProps<"h5">) => HeadingRenderer(5, props),
-  H6: (props: ComponentProps<"h6">) => HeadingRenderer(6, props),
-  Image,
-  Li,
-  Ol,
-  Strong,
-  Table,
-  Ul,
-  Embed,
+    A,
+    H1: (props: ComponentProps<"h1">) => HeadingRenderer(1, props),
+    H2: (props: ComponentProps<"h2">) => HeadingRenderer(2, props),
+    H3: (props: ComponentProps<"h3">) => HeadingRenderer(3, props),
+    H4: (props: ComponentProps<"h4">) => HeadingRenderer(4, props),
+    H5: (props: ComponentProps<"h5">) => HeadingRenderer(5, props),
+    H6: (props: ComponentProps<"h6">) => HeadingRenderer(6, props),
+    Image,
+    Li,
+    Ol,
+    Strong,
+    Table,
+    Ul,
+    Embed
 };
 
 export const MDX_COMPONENTS = {
-  ...FERN_COMPONENTS,
-  ...INTERNAL_COMPONENTS,
-  ...HTML_COMPONENTS,
-  ...ALIASED_HTML_COMPONENTS,
+    ...FERN_COMPONENTS,
+    ...INTERNAL_COMPONENTS,
+    ...HTML_COMPONENTS,
+    ...ALIASED_HTML_COMPONENTS
 } as unknown as MDXComponents;
 
 export function createMdxComponents(jsxElements: string[]): MDXComponents {
-  return {
-    // spread in jsx elements that may be unsupported
-    // TODO: fix this type, any is used here just to get this working
-    ...jsxElements.reduce<Record<string, any>>((acc, jsxElement) => {
-      acc[jsxElement] = () => (
-        <ErrorBoundaryFallback
-          error={new Error(`Unsupported JSX tag: <${jsxElement} />`)}
-        />
-      );
-      return acc;
-    }, {}),
-    // then, spread in the supported components
-    ...MDX_COMPONENTS,
-  };
+    return {
+        // spread in jsx elements that may be unsupported
+        // TODO: fix this type, any is used here just to get this working
+        ...jsxElements.reduce<Record<string, any>>((acc, jsxElement) => {
+            acc[jsxElement] = () => (
+                <ErrorBoundaryFallback error={new Error(`Unsupported JSX tag: <${jsxElement} />`)} />
+            );
+            return acc;
+        }, {}),
+        // then, spread in the supported components
+        ...MDX_COMPONENTS
+    };
 }

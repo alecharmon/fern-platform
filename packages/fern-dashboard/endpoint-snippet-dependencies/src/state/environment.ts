@@ -5,30 +5,25 @@ import { atomWithStorage } from "jotai/utils";
 export const ALL_ENVIRONMENTS_ATOM = atom<string[]>([]);
 
 export const useSetAllEnvironments = (allEnvironmentIds: string[]): void => {
-  const setAllEnvironments = useSetAtom(ALL_ENVIRONMENTS_ATOM);
-  setAllEnvironments(allEnvironmentIds);
+    const setAllEnvironments = useSetAtom(ALL_ENVIRONMENTS_ATOM);
+    setAllEnvironments(allEnvironmentIds);
 };
 
 // Get or select an environment based on the ID
-export const SELECTED_ENVIRONMENT_ID_ATOM = atomWithStorage<string | undefined>(
-  "selected-environment-id",
-  undefined
-);
+export const SELECTED_ENVIRONMENT_ID_ATOM = atomWithStorage<string | undefined>("selected-environment-id", undefined);
 
 export const useSelectedEnvironmentId = (): string | undefined => {
-  return useAtomValue(SELECTED_ENVIRONMENT_ID_ATOM);
+    return useAtomValue(SELECTED_ENVIRONMENT_ID_ATOM);
 };
 
 export const useAllEnvironmentIds = (): string[] => {
-  return useAtomValue(ALL_ENVIRONMENTS_ATOM);
+    return useAtomValue(ALL_ENVIRONMENTS_ATOM);
 };
 
 // separately track the URL that matches the given environment + api
 // used to match the environment specified in the playground env_state key
-export const SELECTED_ENVIRONMENT_URL_ATOM = atomWithStorage<
-  string | undefined
->("selected-environment-url", undefined);
+export const SELECTED_ENVIRONMENT_URL_ATOM = atomWithStorage<string | undefined>("selected-environment-url", undefined);
 
 export const useSelectedEnvironmentUrl = (): string | undefined => {
-  return useAtomValue(SELECTED_ENVIRONMENT_URL_ATOM);
+    return useAtomValue(SELECTED_ENVIRONMENT_URL_ATOM);
 };

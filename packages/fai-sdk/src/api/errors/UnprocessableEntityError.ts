@@ -12,7 +12,7 @@ export class UnprocessableEntityError extends errors.FernAIError {
             message: "UnprocessableEntityError",
             statusCode: 422,
             body: body,
-            rawResponse: rawResponse,
+            rawResponse: rawResponse
         });
         Object.setPrototypeOf(this, UnprocessableEntityError.prototype);
     }

@@ -11,6 +11,6 @@ export namespace ChatMessage {
     export type Role = "user" | "assistant";
     export const Role = {
         User: "user",
-        Assistant: "assistant",
+        Assistant: "assistant"
     } as const;
 }

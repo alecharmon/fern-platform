@@ -9,38 +9,28 @@ import { ProductDropdown } from "@fern-docs/components/header/ProductDropdown";
 import { getFernToken } from "@/app/fern-token";
 
 export default async function ProductSelectPage({
-  params,
+    params
 }: {
-  params: Promise<{ host: string; domain: string; slug: string }>;
+    params: Promise<{ host: string; domain: string; slug: string }>;
 }) {
-  const { host, domain, slug } = await params;
-  const loader = await createCachedDocsLoader(
-    host,
-    domain,
-    await getFernToken()
-  );
+    const { host, domain, slug } = await params;
+    const loader = await createCachedDocsLoader(host, domain, await getFernToken());
 
-  // preload:
-  const [layout, _auth, _flags, root] = await Promise.all([
-    loader.getLayout(),
-    loader.getAuthState(),
-    loader.getEdgeFlags(),
-    loader.getRoot(),
-  ]);
-  const useDenseLayout = layout.isHeaderDisabled;
+    // preload:
+    const [layout, _auth, _flags, root] = await Promise.all([
+        loader.getLayout(),
+        loader.getAuthState(),
+        loader.getEdgeFlags(),
+        loader.getRoot()
+    ]);
+    const useDenseLayout = layout.isHeaderDisabled;
 
-  const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
+    const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
 
-  const fallbackProduct = getFallbackProduct(foundNode, root, slug);
-  if (fallbackProduct == null) {
-    return null;
-  }
+    const fallbackProduct = getFallbackProduct(foundNode, root, slug);
+    if (fallbackProduct == null) {
+        return null;
+    }
 
-  return (
-    <ProductDropdown
-      loader={loader}
-      fallbackProduct={fallbackProduct}
-      useDenseLayout={useDenseLayout}
-    />
-  );
+    return <ProductDropdown loader={loader} fallbackProduct={fallbackProduct} useDenseLayout={useDenseLayout} />;
 }

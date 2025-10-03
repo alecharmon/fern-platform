@@ -10,7 +10,7 @@ import type { Root } from "mdast";
 import type { Plugin } from "unified";
 
 export interface RemarkInjectEsmOptions {
-  scope?: Record<string, unknown>;
+    scope?: Record<string, unknown>;
 }
 
 /**
@@ -19,43 +19,39 @@ export interface RemarkInjectEsmOptions {
  * @param options Optional options to configure the output.
  * @returns A unified transformer.
  */
-export const remarkInjectEsm: Plugin<[RemarkInjectEsmOptions?], Root> = (
-  { scope = {} } = { scope: {} }
-) => {
-  const keys = Object.keys(scope);
-  if (keys.some((key) => !isIdentifierName(key))) {
-    throw new Error(
-      `Scope keys should be valid identifiers, got: ${JSON.stringify(keys)}`
-    );
-  }
-
-  return (ast) => {
-    if (Object.keys(scope).length === 0) {
-      return;
+export const remarkInjectEsm: Plugin<[RemarkInjectEsmOptions?], Root> = ({ scope = {} } = { scope: {} }) => {
+    const keys = Object.keys(scope);
+    if (keys.some((key) => !isIdentifierName(key))) {
+        throw new Error(`Scope keys should be valid identifiers, got: ${JSON.stringify(keys)}`);
     }
 
-    ast.children.unshift({
-      type: "mdxjsEsm",
-      value: "",
-      data: {
-        estree: {
-          type: "Program",
-          sourceType: "module",
-          body: Object.entries(scope).map(
-            ([key, value]): Statement => ({
-              type: "VariableDeclaration",
-              kind: "const",
-              declarations: [
-                {
-                  type: "VariableDeclarator",
-                  id: { type: "Identifier", name: key },
-                  init: valueToEstree(value, { preserveReferences: true }),
-                },
-              ],
-            })
-          ),
-        },
-      },
-    });
-  };
+    return (ast) => {
+        if (Object.keys(scope).length === 0) {
+            return;
+        }
+
+        ast.children.unshift({
+            type: "mdxjsEsm",
+            value: "",
+            data: {
+                estree: {
+                    type: "Program",
+                    sourceType: "module",
+                    body: Object.entries(scope).map(
+                        ([key, value]): Statement => ({
+                            type: "VariableDeclaration",
+                            kind: "const",
+                            declarations: [
+                                {
+                                    type: "VariableDeclarator",
+                                    id: { type: "Identifier", name: key },
+                                    init: valueToEstree(value, { preserveReferences: true })
+                                }
+                            ]
+                        })
+                    )
+                }
+            }
+        });
+    };
 };

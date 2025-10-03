@@ -11,46 +11,37 @@ import { ResolvedReturnType } from "@/utils/types";
 import handler from "./handler";
 
 export declare namespace postCreatePr {
-  export type Request = z.infer<typeof PostCreatePrRequest>;
-  export type Response = ResolvedReturnType<typeof handler>;
+    export type Request = z.infer<typeof PostCreatePrRequest>;
+    export type Response = ResolvedReturnType<typeof handler>;
 }
 
 export const PostCreatePrRequest = GithubIdentificationScheme.and(
-  z.object({
-    orgName: orgNameValidator,
-    head: z.string(),
-    base: z.string(),
-    title: z.string(),
-    body: z.string().optional(),
-    draft: z.boolean().optional(),
-  })
+    z.object({
+        orgName: orgNameValidator,
+        head: z.string(),
+        base: z.string(),
+        title: z.string(),
+        body: z.string().optional(),
+        draft: z.boolean().optional()
+    })
 );
 
 export const POST = withZodValidation(
-  PostCreatePrRequest,
-  async (
-    req: NextRequest,
-    validatedBody: z.infer<typeof PostCreatePrRequest>
-  ) => {
-    const { orgName, head, base, title, body, draft, ...repoData } =
-      validatedBody;
+    PostCreatePrRequest,
+    async (req: NextRequest, validatedBody: z.infer<typeof PostCreatePrRequest>) => {
+        const { orgName, head, base, title, body, draft, ...repoData } = validatedBody;
 
-    return withGithubAuthNextRoute(
-      req,
-      orgName,
-      repoData,
-      async ({ owner, repo }) => {
-        const result = await handler({
-          owner,
-          repo,
-          head,
-          base,
-          title,
-          body,
-          draft,
+        return withGithubAuthNextRoute(req, orgName, repoData, async ({ owner, repo }) => {
+            const result = await handler({
+                owner,
+                repo,
+                head,
+                base,
+                title,
+                body,
+                draft
+            });
+            return NextResponse.json(result);
         });
-        return NextResponse.json(result);
-      }
-    );
-  }
+    }
 );

@@ -8,40 +8,40 @@ import { JotaiProvider } from "../state/jotai-provider";
 import StyledJsxRegistry from "./registry";
 
 export function Providers({
-  children,
-  loaderColor,
-  skipProgressProvider = false,
+    children,
+    loaderColor,
+    skipProgressProvider = false
 }: {
-  children: React.ReactNode;
-  loaderColor?: string;
-  skipProgressProvider?: boolean;
+    children: React.ReactNode;
+    loaderColor?: string;
+    skipProgressProvider?: boolean;
 }) {
-  const content = (
-    <StyledJsxRegistry>
-      <JotaiProvider>
-        <TooltipProvider>
-          <Toaster />
-          {children}
-        </TooltipProvider>
-      </JotaiProvider>
-    </StyledJsxRegistry>
-  );
+    const content = (
+        <StyledJsxRegistry>
+            <JotaiProvider>
+                <TooltipProvider>
+                    <Toaster />
+                    {children}
+                </TooltipProvider>
+            </JotaiProvider>
+        </StyledJsxRegistry>
+    );
 
-  if (skipProgressProvider) {
-    return content;
-  }
+    if (skipProgressProvider) {
+        return content;
+    }
 
-  return (
-    <ProgressProvider
-      height="3px"
-      color={loaderColor ?? "var(--accent)"}
-      options={{ showSpinner: false }}
-      disableSameURL
-      delay={300}
-      memo
-      shouldCompareComplexProps
-    >
-      {content}
-    </ProgressProvider>
-  );
+    return (
+        <ProgressProvider
+            height="3px"
+            color={loaderColor ?? "var(--accent)"}
+            options={{ showSpinner: false }}
+            disableSameURL
+            delay={300}
+            memo
+            shouldCompareComplexProps
+        >
+            {content}
+        </ProgressProvider>
+    );
 }

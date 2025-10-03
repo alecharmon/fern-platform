@@ -1,9 +1,9 @@
 {
-    "extends": "./tsconfig.base.json",
-    "compilerOptions": {
-        "module": "esnext",
-        "outDir": "dist/esm"
-    },
-    "include": ["src"],
-    "exclude": []
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "outDir": "dist/esm"
+  },
+  "include": ["src"],
+  "exclude": []
 }

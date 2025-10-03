@@ -13,39 +13,39 @@ import { type Mdast, Unified, mdastToString } from "@fern-docs/mdx";
  * extracting the title from a <h1> that was intentionally inserted.
  */
 export const remarkExtractTitle: Unified.Plugin<[], Mdast.Root> = () => {
-  return (tree: Mdast.Root) => {
-    const yaml = tree.children.find((child) => child.type === "yaml");
+    return (tree: Mdast.Root) => {
+        const yaml = tree.children.find((child) => child.type === "yaml");
 
-    if (yaml && parseYaml(yaml.value).title) {
-      return;
-    }
+        if (yaml && parseYaml(yaml.value).title) {
+            return;
+        }
 
-    const firstHeadingIndex = tree.children.findIndex(
-      (child) => child.type !== "mdxjsEsm" && child.type !== "yaml"
-    );
-    if (firstHeadingIndex === -1) {
-      return;
-    }
+        const firstHeadingIndex = tree.children.findIndex(
+            (child) => child.type !== "mdxjsEsm" && child.type !== "yaml"
+        );
+        if (firstHeadingIndex === -1) {
+            return;
+        }
 
-    const firstHeading = tree.children[firstHeadingIndex];
-    if (firstHeading?.type === "heading" && firstHeading.depth === 1) {
-      const extractedTitle = mdastToString(firstHeading);
+        const firstHeading = tree.children[firstHeadingIndex];
+        if (firstHeading?.type === "heading" && firstHeading.depth === 1) {
+            const extractedTitle = mdastToString(firstHeading);
 
-      if (!extractedTitle) {
-        return;
-      }
-      tree.children.splice(firstHeadingIndex, 1);
+            if (!extractedTitle) {
+                return;
+            }
+            tree.children.splice(firstHeadingIndex, 1);
 
-      if (yaml == null) {
-        tree.children.unshift({
-          type: "yaml",
-          value: `title: "${extractedTitle.replaceAll('"', '\\"')}"`,
-        });
-      } else {
-        const parsedYaml = parseYaml(yaml.value);
-        parsedYaml.title = extractedTitle;
-        yaml.value = stringifyYaml(parsedYaml);
-      }
-    }
-  };
+            if (yaml == null) {
+                tree.children.unshift({
+                    type: "yaml",
+                    value: `title: "${extractedTitle.replaceAll('"', '\\"')}"`
+                });
+            } else {
+                const parsedYaml = parseYaml(yaml.value);
+                parsedYaml.title = extractedTitle;
+                yaml.value = stringifyYaml(parsedYaml);
+            }
+        }
+    };
 };

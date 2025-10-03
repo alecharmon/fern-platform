@@ -9,13 +9,7 @@
     "jsx": "preserve"
   },
   "exclude": ["node_modules", "**/__snapshots__"],
-  "include": [
-    "src/**/*",
-    ".next/types/**/*.ts",
-    ".storybook/**/*.{ts,tsx}",
-    "next.config.ts",
-    "vitest.config.ts"
-  ],
+  "include": ["src/**/*", ".next/types/**/*.ts", ".storybook/**/*.{ts,tsx}", "next.config.ts", "vitest.config.ts"],
   "references": [
     {
       "path": "../../commons/core-utils"

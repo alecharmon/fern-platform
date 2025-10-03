@@ -13,68 +13,61 @@ import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
 setGlobalDispatcher(
-  new Agent({
-    connect: { timeout: 2147483647 },
-    bodyTimeout: 0,
-    headersTimeout: 2147483647,
-  })
+    new Agent({
+        connect: { timeout: 2147483647 },
+        bodyTimeout: 0,
+        headersTimeout: 2147483647
+    })
 );
 
 export const uncachedGetDocsUrlMetadata = async (
-  domain: string
+    domain: string
 ): Promise<{
-  url: string;
-  org: string;
-  isPreview: boolean;
+    url: string;
+    org: string;
+    isPreview: boolean;
 }> => {
-  if (isLocal()) {
-    return {
-      url: domain,
-      org: domain.split(".")[0] ?? domain,
-      isPreview: true,
-    };
-  }
-
-  try {
-    // address FDR error: Failed to parse URL: %5Bdomain%5D
-    // todo: figure out where these calls originate
-    if (domain.includes("[") || domain.includes("%5B")) {
-      console.error(
-        `Cannot get docs url metadata for an invalid domain: ${domain}`
-      );
-      notFound();
+    if (isLocal()) {
+        return {
+            url: domain,
+            org: domain.split(".")[0] ?? domain,
+            isPreview: true
+        };
     }
 
-    const client = new FdrLambdaClient({
-      environment: getFdrLambdaOrigin(),
-      token: isSelfHosted() ? "" : fernToken_admin(),
-    });
+    try {
+        // address FDR error: Failed to parse URL: %5Bdomain%5D
+        // todo: figure out where these calls originate
+        if (domain.includes("[") || domain.includes("%5B")) {
+            console.error(`Cannot get docs url metadata for an invalid domain: ${domain}`);
+            notFound();
+        }
 
-    const response = await client.docs.v2.read.getDocsUrlMetadata({
-      url: withoutStaging(domain),
-    });
+        const client = new FdrLambdaClient({
+            environment: getFdrLambdaOrigin(),
+            token: isSelfHosted() ? "" : fernToken_admin()
+        });
 
-    return {
-      url: response.url,
-      org: response.org,
-      isPreview: response.isPreviewUrl,
-    };
-  } catch (error) {
-    console.error(
-      `Failed to get docs url metadata for ${withoutStaging(domain)}`,
-      {
-        cause: error,
-      }
-    );
-    notFound();
-  }
+        const response = await client.docs.v2.read.getDocsUrlMetadata({
+            url: withoutStaging(domain)
+        });
+
+        return {
+            url: response.url,
+            org: response.org,
+            isPreview: response.isPreviewUrl
+        };
+    } catch (error) {
+        console.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
+            cause: error
+        });
+        notFound();
+    }
 };
 
 export const getDocsUrlMetadata = cache((domain: string) => {
-  const get = unstable_cache(
-    () => uncachedGetDocsUrlMetadata(domain),
-    [domain, cacheSeed()],
-    { tags: [domain, "getDocsUrlMetadata"] }
-  );
-  return get();
+    const get = unstable_cache(() => uncachedGetDocsUrlMetadata(domain), [domain, cacheSeed()], {
+        tags: [domain, "getDocsUrlMetadata"]
+    });
+    return get();
 });

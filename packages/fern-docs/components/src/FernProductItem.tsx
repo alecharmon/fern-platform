@@ -12,24 +12,18 @@ import { cn } from "./cn";
  * @param highlighted: whether the item is highlighted
  * @returns the rendered product item
  */
-export function FernProductItem({
-  option,
-  dense = false,
-}: {
-  option: FernDropdown.ProductOption;
-  dense?: boolean;
-}) {
-  return (
-    <a href={option.href}>
-      <div className={cn("fern-product-item", option.className)}>
-        <FernSelectionItem
-          image={option.image}
-          icon={option.icon}
-          title={option.title}
-          subtitle={option.subtitle}
-          dense={dense}
-        />
-      </div>
-    </a>
-  );
+export function FernProductItem({ option, dense = false }: { option: FernDropdown.ProductOption; dense?: boolean }) {
+    return (
+        <a href={option.href}>
+            <div className={cn("fern-product-item", option.className)}>
+                <FernSelectionItem
+                    image={option.image}
+                    icon={option.icon}
+                    title={option.title}
+                    subtitle={option.subtitle}
+                    dense={dense}
+                />
+            </div>
+        </a>
+    );
 }

@@ -6,9 +6,7 @@
   "author": "Deep Singhvi <deep@buildwithfern.com>",
   "type": "module",
   "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build:tsup:cjs": "tsup src/server.ts --config tsup.config.ts --format cjs --out-dir cjs",
     "build:tsup:esm": "tsup src/server.ts --format esm --out-dir dist/esm",

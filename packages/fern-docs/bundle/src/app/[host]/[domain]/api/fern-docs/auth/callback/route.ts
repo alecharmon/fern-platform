@@ -12,64 +12,49 @@ import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const domain = getDocsDomainEdge(req);
-  const host = req.nextUrl.host;
+    const domain = getDocsDomainEdge(req);
+    const host = req.nextUrl.host;
 
-  const config = await getAuthEdgeConfig(domain);
+    const config = await getAuthEdgeConfig(domain);
 
-  // The authorization code returned by AuthKit
-  const code = req.nextUrl.searchParams.get("code");
-  const return_to = req.nextUrl.searchParams.get(getReturnToQueryParam(config));
-  const error = req.nextUrl.searchParams.get("error");
-  const error_description = req.nextUrl.searchParams.get("error_description");
-  const redirectLocation =
-    safeUrl(return_to) ??
-    safeUrl(withDefaultProtocol(preferPreview(host, domain)));
+    // The authorization code returned by AuthKit
+    const code = req.nextUrl.searchParams.get("code");
+    const return_to = req.nextUrl.searchParams.get(getReturnToQueryParam(config));
+    const error = req.nextUrl.searchParams.get("error");
+    const error_description = req.nextUrl.searchParams.get("error_description");
+    const redirectLocation = safeUrl(return_to) ?? safeUrl(withDefaultProtocol(preferPreview(host, domain)));
 
-  if (error != null) {
-    return redirectWithLoginError(
-      req,
-      redirectLocation,
-      error,
-      error_description
-    );
-  }
+    if (error != null) {
+        return redirectWithLoginError(req, redirectLocation, error, error_description);
+    }
 
-  if (typeof code !== "string") {
-    return redirectWithLoginError(
-      req,
-      redirectLocation,
-      "missing_authorization_code",
-      "Couldn't login, please try again"
-    );
-  }
-  const nextUrl = req.nextUrl.clone();
-  nextUrl.host = preferPreview(host, domain);
+    if (typeof code !== "string") {
+        return redirectWithLoginError(
+            req,
+            redirectLocation,
+            "missing_authorization_code",
+            "Couldn't login, please try again"
+        );
+    }
+    const nextUrl = req.nextUrl.clone();
+    nextUrl.host = preferPreview(host, domain);
 
-  if (config?.type === "oauth2" && config.partner === "ory") {
-    nextUrl.pathname = nextUrl.pathname.replace(
-      "/api/fern-docs/auth/callback",
-      "/api/fern-docs/oauth/ory/callback"
-    );
-    return FernNextResponse.redirect(req, {
-      destination: nextUrl,
-      allowedDestinations: getAllowedRedirectUrls(config),
-    });
-  } else if (config?.type === "sso") {
-    nextUrl.pathname = nextUrl.pathname.replace(
-      "/api/fern-docs/auth/callback",
-      "/api/fern-docs/auth/sso/callback"
-    );
-    return FernNextResponse.redirect(req, {
-      destination: nextUrl,
-      allowedDestinations: getAllowedRedirectUrls(config),
-    });
-  }
+    if (config?.type === "oauth2" && config.partner === "ory") {
+        nextUrl.pathname = nextUrl.pathname.replace(
+            "/api/fern-docs/auth/callback",
+            "/api/fern-docs/oauth/ory/callback"
+        );
+        return FernNextResponse.redirect(req, {
+            destination: nextUrl,
+            allowedDestinations: getAllowedRedirectUrls(config)
+        });
+    } else if (config?.type === "sso") {
+        nextUrl.pathname = nextUrl.pathname.replace("/api/fern-docs/auth/callback", "/api/fern-docs/auth/sso/callback");
+        return FernNextResponse.redirect(req, {
+            destination: nextUrl,
+            allowedDestinations: getAllowedRedirectUrls(config)
+        });
+    }
 
-  return redirectWithLoginError(
-    req,
-    redirectLocation,
-    "unknown_error",
-    "Couldn't login, please try again"
-  );
+    return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
 }

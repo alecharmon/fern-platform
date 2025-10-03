@@ -11,20 +11,20 @@ import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { useApiPageCenterElement } from "./useApiPageCenterElement";
 
 export const ApiPageCenter = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentPropsWithoutRef<"div"> & {
-    slug: Slug;
-    asChild?: boolean;
-  }
+    HTMLDivElement,
+    React.ComponentPropsWithoutRef<"div"> & {
+        slug: Slug;
+        asChild?: boolean;
+    }
 >(function ApiPageCenter({ children, asChild, slug, ...props }, forwardedRef) {
-  const Comp = asChild ? Slot : "div";
+    const Comp = asChild ? Slot : "div";
 
-  const ref = React.useRef<HTMLDivElement>(null);
-  useApiPageCenterElement(ref, slug);
+    const ref = React.useRef<HTMLDivElement>(null);
+    useApiPageCenterElement(ref, slug);
 
-  return (
-    <Comp ref={composeRefs(forwardedRef, ref)} id={slugToHref(slug)} {...props}>
-      {children}
-    </Comp>
-  );
+    return (
+        <Comp ref={composeRefs(forwardedRef, ref)} id={slugToHref(slug)} {...props}>
+            {children}
+        </Comp>
+    );
 });

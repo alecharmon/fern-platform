@@ -3,41 +3,39 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 
 export const BranchContext = createContext<{
-  branch: string;
-  setBranch: (branch: string) => void;
-  branchFailed: boolean;
+    branch: string;
+    setBranch: (branch: string) => void;
+    branchFailed: boolean;
 }>({
-  branch: "",
-  setBranch: (_branch: string) => {
-    return;
-  },
-  branchFailed: false,
+    branch: "",
+    setBranch: (_branch: string) => {
+        return;
+    },
+    branchFailed: false
 });
 
 export function BranchProvider({
-  branch,
-  branchFailed,
-  children,
+    branch,
+    branchFailed,
+    children
 }: {
-  branch: string;
-  branchFailed: boolean;
-  children: ReactNode;
+    branch: string;
+    branchFailed: boolean;
+    children: ReactNode;
 }) {
-  const [currBranch, setBranchStore] = useState<string>(branch);
+    const [currBranch, setBranchStore] = useState<string>(branch);
 
-  function setBranch(branch: string) {
-    setBranchStore(branch);
-  }
+    function setBranch(branch: string) {
+        setBranchStore(branch);
+    }
 
-  return (
-    <BranchContext.Provider
-      value={{ branch: currBranch, setBranch, branchFailed }}
-    >
-      {children}
-    </BranchContext.Provider>
-  );
+    return (
+        <BranchContext.Provider value={{ branch: currBranch, setBranch, branchFailed }}>
+            {children}
+        </BranchContext.Provider>
+    );
 }
 
 export function useBranch() {
-  return useContext(BranchContext);
+    return useContext(BranchContext);
 }

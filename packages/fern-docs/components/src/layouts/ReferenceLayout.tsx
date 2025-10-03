@@ -9,78 +9,57 @@ import { Prose } from "../mdx/prose";
 import { SetLayout } from "../state/layout";
 
 interface ReferenceLayoutProps {
-  header?: React.ReactNode;
-  aside?: React.ReactNode;
-  children?: React.ReactNode;
-  reference?: React.ReactNode;
-  footer?: React.ReactNode;
-  enableFullWidth?: boolean;
-  /**
-   * If true, scrolling will be disabled on the reference sidebar
-   * so that the code examples are constrained and must implement
-   * scrolling within themselves.
-   */
-  kind?: "api" | "guide";
+    header?: React.ReactNode;
+    aside?: React.ReactNode;
+    children?: React.ReactNode;
+    reference?: React.ReactNode;
+    footer?: React.ReactNode;
+    enableFullWidth?: boolean;
+    /**
+     * If true, scrolling will be disabled on the reference sidebar
+     * so that the code examples are constrained and must implement
+     * scrolling within themselves.
+     */
+    kind?: "api" | "guide";
 }
 
 export const ReferenceLayout = React.forwardRef<
-  HTMLDivElement,
-  ComponentPropsWithoutRef<"article"> & ReferenceLayoutProps
+    HTMLDivElement,
+    ComponentPropsWithoutRef<"article"> & ReferenceLayoutProps
 >(function ReferenceLayout(
-  {
-    header,
-    aside,
-    children,
-    footer,
-    reference,
-    enableFullWidth,
-    kind = "api",
-    ...props
-  },
-  ref
+    { header, aside, children, footer, reference, enableFullWidth, kind = "api", ...props },
+    ref
 ) {
-  const isMobile = useIsMobile();
-  return (
-    <div className="fern-layout-reference">
-      <SetLayout value="reference" />
-      <article
-        {...props}
-        className={cn(
-          "w-content-width md:w-endpoint-width max-w-full",
-          { "xl:w-page-width": enableFullWidth },
-          props.className
-        )}
-        ref={ref}
-      >
-        {header}
-        <div
-          className="fern-layout-reference-content"
-          data-kind={kind}
-          data-cols={aside ? "2" : "1"}
-        >
-          {!isMobile && (
-            <aside className="fern-layout-reference-aside">
-              {kind === "api" ? (
-                aside
-              ) : (
-                <Prose className="relative">{aside}</Prose>
-              )}
-            </aside>
-          )}
-          <Prose className="mb-12 space-y-12">
-            <div className="mb-12 space-y-12">
-              {children}
-              {isMobile && (
-                <section className="fern-layout-reference-aside">
-                  {aside}
-                </section>
-              )}
-              {reference}
-              {footer}
-            </div>
-          </Prose>
+    const isMobile = useIsMobile();
+    return (
+        <div className="fern-layout-reference">
+            <SetLayout value="reference" />
+            <article
+                {...props}
+                className={cn(
+                    "w-content-width md:w-endpoint-width max-w-full",
+                    { "xl:w-page-width": enableFullWidth },
+                    props.className
+                )}
+                ref={ref}
+            >
+                {header}
+                <div className="fern-layout-reference-content" data-kind={kind} data-cols={aside ? "2" : "1"}>
+                    {!isMobile && (
+                        <aside className="fern-layout-reference-aside">
+                            {kind === "api" ? aside : <Prose className="relative">{aside}</Prose>}
+                        </aside>
+                    )}
+                    <Prose className="mb-12 space-y-12">
+                        <div className="mb-12 space-y-12">
+                            {children}
+                            {isMobile && <section className="fern-layout-reference-aside">{aside}</section>}
+                            {reference}
+                            {footer}
+                        </div>
+                    </Prose>
+                </div>
+            </article>
         </div>
-      </article>
-    </div>
-  );
+    );
 });

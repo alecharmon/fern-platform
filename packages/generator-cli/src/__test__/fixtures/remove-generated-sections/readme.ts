@@ -3,11 +3,11 @@ import { FernGeneratorCli } from "../../../configuration/generated";
 const CONFIG: FernGeneratorCli.ReadmeConfig = {
     language: FernGeneratorCli.LanguageInfo.typescript({
         publishInfo: {
-            packageName: "imdb-typescript-sdk",
-        },
+            packageName: "imdb-typescript-sdk"
+        }
     }),
     organization: "imdb",
-    disabledFeatures: [ "CONTRIBUTING" ],
+    disabledFeatures: ["CONTRIBUTING"]
 };
 
 export default CONFIG;

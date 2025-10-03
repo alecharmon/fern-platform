@@ -415,13 +415,11 @@
 }
 
 .animate-float-container:hover .animate-float-sdks {
-  transform: translateX(-1rem) translateY(-3rem) rotateX(26deg) rotateY(14deg)
-    rotateZ(3deg);
+  transform: translateX(-1rem) translateY(-3rem) rotateX(26deg) rotateY(14deg) rotateZ(3deg);
 }
 
 .animate-float-container:hover .animate-float-docs {
-  transform: translateX(1rem) translateY(-2rem) rotateX(26deg) rotateY(14deg)
-    rotateZ(3deg);
+  transform: translateX(1rem) translateY(-2rem) rotateX(26deg) rotateY(14deg) rotateZ(3deg);
 }
 
 @keyframes float-sdks {

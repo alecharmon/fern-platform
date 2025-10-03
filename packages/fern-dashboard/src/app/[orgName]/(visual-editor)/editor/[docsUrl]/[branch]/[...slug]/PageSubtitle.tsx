@@ -9,67 +9,61 @@ import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { usePages } from "@/providers/PagesStoreContext";
 
 export declare namespace PageSubtitle {
-  export interface Props {
-    className?: string;
-    filename: string;
-    initialText?: string;
-  }
+    export interface Props {
+        className?: string;
+        filename: string;
+        initialText?: string;
+    }
 }
 
-export default function PageSubtitle({
-  className,
-  filename,
-  initialText,
-}: PageSubtitle.Props) {
-  const [text, setText] = useState(initialText);
-  const isEditingDisabled = useEditingDisabled();
+export default function PageSubtitle({ className, filename, initialText }: PageSubtitle.Props) {
+    const [text, setText] = useState(initialText);
+    const isEditingDisabled = useEditingDisabled();
 
-  const { updatePage, frontmatterData } = usePages();
+    const { updatePage, frontmatterData } = usePages();
 
-  // Watch for frontmatter changes from dev panel and update text accordingly
-  useEffect(() => {
-    const currentFrontmatter = frontmatterData[filename];
-    if (currentFrontmatter && "subtitle" in currentFrontmatter) {
-      // Subtitle field exists in frontmatter
-      const newSubtitle = currentFrontmatter.subtitle
-        ? String(currentFrontmatter.subtitle)
-        : "";
-      if (newSubtitle !== text) {
-        setText(newSubtitle);
-      }
-    } else if (text) {
-      // Subtitle field was deleted from frontmatter, clear the input
-      setText("");
+    // Watch for frontmatter changes from dev panel and update text accordingly
+    useEffect(() => {
+        const currentFrontmatter = frontmatterData[filename];
+        if (currentFrontmatter && "subtitle" in currentFrontmatter) {
+            // Subtitle field exists in frontmatter
+            const newSubtitle = currentFrontmatter.subtitle ? String(currentFrontmatter.subtitle) : "";
+            if (newSubtitle !== text) {
+                setText(newSubtitle);
+            }
+        } else if (text) {
+            // Subtitle field was deleted from frontmatter, clear the input
+            setText("");
+        }
+    }, [frontmatterData, filename, text]);
+
+    function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+        const nextText = e.target.value;
+        setText(nextText);
+
+        // If the text is empty, we want to remove the subtitle field entirely
+        // We can do this by passing undefined, which will be filtered out when converting back to MDX
+        if (nextText.trim() === "") {
+            updatePage(filename, {
+                frontmatter: { subtitle: undefined }
+            });
+        } else {
+            updatePage(filename, {
+                frontmatter: { subtitle: nextText }
+            });
+        }
     }
-  }, [frontmatterData, filename, text]);
 
-  function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    const nextText = e.target.value;
-    setText(nextText);
-
-    // If the text is empty, we want to remove the subtitle field entirely
-    // We can do this by passing undefined, which will be filtered out when converting back to MDX
-    if (nextText.trim() === "") {
-      updatePage(filename, {
-        frontmatter: { subtitle: undefined },
-      });
-    } else {
-      updatePage(filename, {
-        frontmatter: { subtitle: nextText },
-      });
-    }
-  }
-
-  return (
-    <div className={cn("flex", className)}>
-      <AutoResizingInput
-        className="mx-5 text-base"
-        name="subtitle"
-        onChange={onChange}
-        disabled={isEditingDisabled}
-        placeholder="Add a subtitle"
-        value={text}
-      />
-    </div>
-  );
+    return (
+        <div className={cn("flex", className)}>
+            <AutoResizingInput
+                className="mx-5 text-base"
+                name="subtitle"
+                onChange={onChange}
+                disabled={isEditingDisabled}
+                placeholder="Add a subtitle"
+                value={text}
+            />
+        </div>
+    );
 }

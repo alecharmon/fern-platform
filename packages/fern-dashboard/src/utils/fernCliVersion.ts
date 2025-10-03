@@ -1,13 +1,11 @@
 export async function getLatestFernCliVersion(): Promise<string> {
-  const response = await fetch("https://registry.npmjs.org/fern-api/latest");
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch latest fern-cli version: ${response.statusText}`
-    );
-  }
+    const response = await fetch("https://registry.npmjs.org/fern-api/latest");
+    if (!response.ok) {
+        throw new Error(`Failed to fetch latest fern-cli version: ${response.statusText}`);
+    }
 
-  const data = await response.json();
-  return data.version;
+    const data = await response.json();
+    return data.version;
 }
 
 /**
@@ -27,37 +25,34 @@ export const MIN_VE_CLI_VERSION = "0.69.0";
  * @param versionToCompareAgainst - The version to compare against
  * @returns boolean
  */
-export function compareVersions(
-  version: string,
-  versionToCompareAgainst: string
-): boolean {
-  if (version === "*") {
-    return false;
-  }
-  const v1 = parseVersion(version);
-  const v2 = parseVersion(versionToCompareAgainst);
+export function compareVersions(version: string, versionToCompareAgainst: string): boolean {
+    if (version === "*") {
+        return false;
+    }
+    const v1 = parseVersion(version);
+    const v2 = parseVersion(versionToCompareAgainst);
 
-  if (v1.major < v2.major) return true;
-  if (v1.major > v2.major) return false;
+    if (v1.major < v2.major) return true;
+    if (v1.major > v2.major) return false;
 
-  if (v1.minor < v2.minor) return true;
-  if (v1.minor > v2.minor) return false;
+    if (v1.minor < v2.minor) return true;
+    if (v1.minor > v2.minor) return false;
 
-  return v1.patch < v2.patch;
+    return v1.patch < v2.patch;
 }
 
 function parseVersion(version: string): {
-  major: number;
-  minor: number;
-  patch: number;
+    major: number;
+    minor: number;
+    patch: number;
 } {
-  // Extract core version (major.minor.patch)
-  // Split on hyphen or plus to separate pre-release/build metadata
-  const coreVersion = version.split(/[-+]/)[0] ?? "";
-  const parts = coreVersion.split(".").map(Number);
-  return {
-    major: parts[0] || 0,
-    minor: parts[1] || 0,
-    patch: parts[2] || 0,
-  };
+    // Extract core version (major.minor.patch)
+    // Split on hyphen or plus to separate pre-release/build metadata
+    const coreVersion = version.split(/[-+]/)[0] ?? "";
+    const parts = coreVersion.split(".").map(Number);
+    return {
+        major: parts[0] || 0,
+        minor: parts[1] || 0,
+        patch: parts[2] || 0
+    };
 }

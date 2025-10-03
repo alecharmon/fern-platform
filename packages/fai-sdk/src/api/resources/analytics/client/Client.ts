@@ -52,7 +52,7 @@ export class Analytics {
     public getAnalyticsHistogram(
         domain: string,
         request: FernAI.GetAnalyticsHistogramRequest = {},
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): core.HttpResponsePromise<FernAI.GetHistogramAnalyticsResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getAnalyticsHistogram(domain, request, requestOptions));
     }
@@ -60,7 +60,7 @@ export class Analytics {
     private async __getAnalyticsHistogram(
         domain: string,
         request: FernAI.GetAnalyticsHistogramRequest = {},
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.GetHistogramAnalyticsResponse>> {
         const { start_date: startDate, end_date: endDate, group_by: groupBy } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -79,21 +79,21 @@ export class Analytics {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `analytics/histogram/${encodeURIComponent(domain)}`,
+                `analytics/histogram/${encodeURIComponent(domain)}`
             ),
             method: "GET",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetHistogramAnalyticsResponse, rawResponse: _response.rawResponse };
@@ -104,13 +104,13 @@ export class Analytics {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -120,14 +120,14 @@ export class Analytics {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /analytics/histogram/{domain}.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -145,7 +145,7 @@ export class Analytics {
     public getAnalyticsInsights(
         domain: string,
         request: FernAI.GetAnalyticsInsightsRequest = {},
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): core.HttpResponsePromise<FernAI.GetInsightsResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getAnalyticsInsights(domain, request, requestOptions));
     }
@@ -153,7 +153,7 @@ export class Analytics {
     private async __getAnalyticsInsights(
         domain: string,
         request: FernAI.GetAnalyticsInsightsRequest = {},
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.GetInsightsResponse>> {
         const { start_date: startDate, end_date: endDate } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -168,21 +168,21 @@ export class Analytics {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `analytics/insights/${encodeURIComponent(domain)}`,
+                `analytics/insights/${encodeURIComponent(domain)}`
             ),
             method: "GET",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetInsightsResponse, rawResponse: _response.rawResponse };
@@ -193,13 +193,13 @@ export class Analytics {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -209,14 +209,14 @@ export class Analytics {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /analytics/insights/{domain}.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -234,14 +234,14 @@ export class Analytics {
      */
     public generateAllInsights(
         request: FernAI.GenerateAllInsightsRequest = {},
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__generateAllInsights(request, requestOptions));
     }
 
     private async __generateAllInsights(
         request: FernAI.GenerateAllInsightsRequest = {},
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): Promise<core.WithRawResponse<unknown>> {
         const { start_date: startDate, end_date: endDate } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -256,21 +256,21 @@ export class Analytics {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "analytics/insights/generate_all",
+                "analytics/insights/generate_all"
             ),
             method: "POST",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body, rawResponse: _response.rawResponse };
@@ -281,13 +281,13 @@ export class Analytics {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -297,16 +297,16 @@ export class Analytics {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling POST /analytics/insights/generate_all.",
+                    "Timeout exceeded when calling POST /analytics/insights/generate_all."
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -320,32 +320,32 @@ export class Analytics {
      *     await client.analytics.triggerScheduledInsightsGeneration()
      */
     public triggerScheduledInsightsGeneration(
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__triggerScheduledInsightsGeneration(requestOptions));
     }
 
     private async __triggerScheduledInsightsGeneration(
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): Promise<core.WithRawResponse<unknown>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "analytics/insights/trigger_scheduled",
+                "analytics/insights/trigger_scheduled"
             ),
             method: "POST",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body, rawResponse: _response.rawResponse };
@@ -355,7 +355,7 @@ export class Analytics {
             throw new errors.FernAIError({
                 statusCode: _response.error.statusCode,
                 body: _response.error.body,
-                rawResponse: _response.rawResponse,
+                rawResponse: _response.rawResponse
             });
         }
 
@@ -364,16 +364,16 @@ export class Analytics {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling POST /analytics/insights/trigger_scheduled.",
+                    "Timeout exceeded when calling POST /analytics/insights/trigger_scheduled."
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -391,26 +391,26 @@ export class Analytics {
     }
 
     private async __getSchedulerStatus(
-        requestOptions?: Analytics.RequestOptions,
+        requestOptions?: Analytics.RequestOptions
     ): Promise<core.WithRawResponse<unknown>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "analytics/scheduler/status",
+                "analytics/scheduler/status"
             ),
             method: "GET",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body, rawResponse: _response.rawResponse };
@@ -420,7 +420,7 @@ export class Analytics {
             throw new errors.FernAIError({
                 statusCode: _response.error.statusCode,
                 body: _response.error.body,
-                rawResponse: _response.rawResponse,
+                rawResponse: _response.rawResponse
             });
         }
 
@@ -429,14 +429,14 @@ export class Analytics {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /analytics/scheduler/status.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

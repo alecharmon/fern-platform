@@ -2,62 +2,53 @@ import { RedisCacheKey, RedisCacheKeyType, inferCachedData } from "./cacheKey";
 import { redisDel, redisGet, redisSet } from "./redis";
 
 export class AsyncRedisCache<T extends RedisCacheKeyType> {
-  private debug: boolean;
-  private ttlInSeconds: number;
+    private debug: boolean;
+    private ttlInSeconds: number;
 
-  constructor(
-    private readonly type: T,
-    { ttlInSeconds, debug = false }: { ttlInSeconds: number; debug?: boolean }
-  ) {
-    this.ttlInSeconds = ttlInSeconds;
-    this.debug = debug;
-  }
-
-  public async get(
-    key: RedisCacheKey<T>,
-    getter: () => Promise<inferCachedData<T>>
-  ): Promise<inferCachedData<T>> {
-    const log = this.debug
-      ? (logLine: string) =>
-          console.debug(`[${this.type} CACHE] key=${key} ${logLine}`)
-      : undefined;
-
-    log?.("checking cache");
-
-    const cachedValue = await redisGet(key);
-    if (cachedValue != null) {
-      log?.("cache hit, returning value");
-      return cachedValue;
+    constructor(
+        private readonly type: T,
+        { ttlInSeconds, debug = false }: { ttlInSeconds: number; debug?: boolean }
+    ) {
+        this.ttlInSeconds = ttlInSeconds;
+        this.debug = debug;
     }
 
-    log?.("cache miss, getting value");
-    const newValue = await getter();
+    public async get(key: RedisCacheKey<T>, getter: () => Promise<inferCachedData<T>>): Promise<inferCachedData<T>> {
+        const log = this.debug
+            ? (logLine: string) => console.debug(`[${this.type} CACHE] key=${key} ${logLine}`)
+            : undefined;
 
-    log?.("updating cache");
-    await redisSet(key, newValue, {
-      ttlInSeconds: this.ttlInSeconds,
-    });
+        log?.("checking cache");
 
-    log?.("returning value");
-    return newValue;
-  }
+        const cachedValue = await redisGet(key);
+        if (cachedValue != null) {
+            log?.("cache hit, returning value");
+            return cachedValue;
+        }
 
-  public async set(
-    key: RedisCacheKey<T>,
-    value: inferCachedData<T>
-  ): Promise<void> {
-    await redisSet(key, value, {
-      ttlInSeconds: this.ttlInSeconds,
-    });
-  }
+        log?.("cache miss, getting value");
+        const newValue = await getter();
 
-  public async getDirectly(
-    key: RedisCacheKey<T>
-  ): Promise<inferCachedData<T> | undefined> {
-    return await redisGet(key);
-  }
+        log?.("updating cache");
+        await redisSet(key, newValue, {
+            ttlInSeconds: this.ttlInSeconds
+        });
 
-  public async invalidate(key: RedisCacheKey<T>) {
-    await redisDel(key);
-  }
+        log?.("returning value");
+        return newValue;
+    }
+
+    public async set(key: RedisCacheKey<T>, value: inferCachedData<T>): Promise<void> {
+        await redisSet(key, value, {
+            ttlInSeconds: this.ttlInSeconds
+        });
+    }
+
+    public async getDirectly(key: RedisCacheKey<T>): Promise<inferCachedData<T> | undefined> {
+        return await redisGet(key);
+    }
+
+    public async invalidate(key: RedisCacheKey<T>) {
+        await redisDel(key);
+    }
 }

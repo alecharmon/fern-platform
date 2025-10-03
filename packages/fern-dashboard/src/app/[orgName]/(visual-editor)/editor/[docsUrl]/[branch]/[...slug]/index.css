@@ -10,9 +10,7 @@
 :root {
   --header-toolbar-height: 54px;
   --header-toolbar-height-mobile: 108px;
-  --preview-container-height: calc(
-    100vh - var(--header-height) - var(--header-toolbar-height)
-  );
+  --preview-container-height: calc(100vh - var(--header-height) - var(--header-toolbar-height));
 }
 #preview-container {
   @apply relative;

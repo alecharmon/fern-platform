@@ -5,15 +5,15 @@ const baseConfig: FernGeneratorCli.ReadmeConfig = {
         publishInfo: {
             artifact: "imdb-java-sdk",
             group: "imdb",
-            version: "2.0.0",
-        },
+            version: "2.0.0"
+        }
     }),
     apiName: "IMDB Inc",
-    organization: "imdb",
+    organization: "imdb"
 };
 
 export const noCustomSectionsConfig: FernGeneratorCli.ReadmeConfig = {
-    ...baseConfig,
+    ...baseConfig
 };
 
 export const basicConfig: FernGeneratorCli.ReadmeConfig = {
@@ -22,9 +22,9 @@ export const basicConfig: FernGeneratorCli.ReadmeConfig = {
         {
             name: "Custom Section",
             language: FernGeneratorCli.Language.Java,
-            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}",
-        },
-    ],
+            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}"
+        }
+    ]
 };
 
 export const overrideCustomSectionConfig: FernGeneratorCli.ReadmeConfig = {
@@ -33,9 +33,9 @@ export const overrideCustomSectionConfig: FernGeneratorCli.ReadmeConfig = {
         {
             name: "Preexisting Custom Section",
             language: FernGeneratorCli.Language.Java,
-            content: "This will overwrite the preexisting custom section",
-        },
-    ],
+            content: "This will overwrite the preexisting custom section"
+        }
+    ]
 };
 
 export const invalidKeyConfig: FernGeneratorCli.ReadmeConfig = {
@@ -44,9 +44,9 @@ export const invalidKeyConfig: FernGeneratorCli.ReadmeConfig = {
         {
             name: "Custom Section",
             language: FernGeneratorCli.Language.Java,
-            content: "This is a custom section for the package {{ packageName }}",
-        },
-    ],
+            content: "This is a custom section for the package {{ packageName }}"
+        }
+    ]
 };
 
 export const invalidLanguageConfig: FernGeneratorCli.ReadmeConfig = {
@@ -55,9 +55,9 @@ export const invalidLanguageConfig: FernGeneratorCli.ReadmeConfig = {
         {
             name: "Custom Section",
             language: FernGeneratorCli.Language.Typescript,
-            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}",
-        },
-    ],
+            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}"
+        }
+    ]
 };
 
 export const multipleCustomSectionsConfig: FernGeneratorCli.ReadmeConfig = {
@@ -66,12 +66,12 @@ export const multipleCustomSectionsConfig: FernGeneratorCli.ReadmeConfig = {
         {
             name: "Custom Section",
             language: FernGeneratorCli.Language.Java,
-            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}",
+            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}"
         },
         {
             name: "Second Custom Section",
             language: FernGeneratorCli.Language.Java,
-            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}",
-        },
-    ],
+            content: "This is a custom section for the package {{ group }}/{{ artifact }}:{{ version }}"
+        }
+    ]
 };

@@ -13,17 +13,16 @@ export type Auth0UserID = string & { __Auth0UserID: void };
 export const Auth0UserID = createBrandedStringCreator<Auth0UserID>;
 
 // the auth0 typings are incorrect (missing some question marks)
-export interface Auth0Organization
-  extends Pick<GetOrganizations200ResponseOneOfInner, "display_name"> {
-  id: Auth0OrgID;
-  name: Auth0OrgName;
-  branding?: Partial<GetOrganizations200ResponseOneOfInner["branding"]>;
-  metadata?: GetOrganizations200ResponseOneOfInner["metadata"];
+export interface Auth0Organization extends Pick<GetOrganizations200ResponseOneOfInner, "display_name"> {
+    id: Auth0OrgID;
+    name: Auth0OrgName;
+    branding?: Partial<GetOrganizations200ResponseOneOfInner["branding"]>;
+    metadata?: GetOrganizations200ResponseOneOfInner["metadata"];
 }
 
 export interface Auth0User {
-  sub: Auth0UserID;
-  name?: string;
-  email?: string;
-  picture?: string;
+    sub: Auth0UserID;
+    name?: string;
+    email?: string;
+    picture?: string;
 }

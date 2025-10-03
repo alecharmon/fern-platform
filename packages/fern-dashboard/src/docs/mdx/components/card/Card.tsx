@@ -6,8 +6,8 @@ import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
 
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
-  EditorComponentPopoverButton,
-  EditorComponentPopoverProvider,
+    EditorComponentPopoverButton,
+    EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
 import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { DisableFernAnchor } from "@/docs/components/FernAnchor";
@@ -17,72 +17,70 @@ import { Badge } from "../badge";
 import { useCardGroup } from "./CardGroupContext";
 
 export declare namespace Card {
-  export interface Props {
-    title: string;
-    icon?: unknown;
-    iconSize?: number; // size in 0.25rem increments. default is 4.
-    color?: string; // ignored if lightModeColor and darkModeColor are set
-    darkModeColor?: string;
-    lightModeColor?: string;
+    export interface Props {
+        title: string;
+        icon?: unknown;
+        iconSize?: number; // size in 0.25rem increments. default is 4.
+        color?: string; // ignored if lightModeColor and darkModeColor are set
+        darkModeColor?: string;
+        lightModeColor?: string;
 
-    children?: string;
-    href?: string;
-    iconPosition?: "top" | "left";
+        children?: string;
+        href?: string;
+        iconPosition?: "top" | "left";
 
-    // in-development:
-    badge?: string;
-  }
+        // in-development:
+        badge?: string;
+    }
 }
 
 export const Card: React.FC<Card.Props> = ({
-  title,
-  icon,
-  iconSize = 8,
-  color,
-  darkModeColor,
-  lightModeColor,
-  iconPosition = "top",
-  children,
-  href,
-  badge,
+    title,
+    icon,
+    iconSize = 8,
+    color,
+    darkModeColor,
+    lightModeColor,
+    iconPosition = "top",
+    children,
+    href,
+    badge
 }) => {
-  const { isWithinEditor } = useEditorComponent();
-  const popoverRef = useRef<HTMLDivElement>(null);
-  const cardGroup = useCardGroup();
+    const { isWithinEditor } = useEditorComponent();
+    const popoverRef = useRef<HTMLDivElement>(null);
+    const cardGroup = useCardGroup();
 
-  // Register/unregister with CardGroup if within one
-  useEffect(() => {
-    if (cardGroup) {
-      cardGroup.registerCard();
-      return () => {
-        cardGroup.unregisterCard();
-      };
+    // Register/unregister with CardGroup if within one
+    useEffect(() => {
+        if (cardGroup) {
+            cardGroup.registerCard();
+            return () => {
+                cardGroup.unregisterCard();
+            };
+        }
+        return undefined;
+    }, [cardGroup]);
+
+    if (isNaN(iconSize)) {
+        iconSize = 8;
     }
-    return undefined;
-  }, [cardGroup]);
 
-  if (isNaN(iconSize)) {
-    iconSize = 8;
-  }
+    const className = cn("not-prose rounded-3 relative block border p-6 text-base");
 
-  const className = cn(
-    "not-prose rounded-3 relative block border p-6 text-base"
-  );
-
-  const content = (
-    <div ref={popoverRef} className="relative">
-      <div className="absolute -right-4 -top-4 flex items-center gap-1">
-        {isWithinEditor && <EditorComponentPopoverButton className="h-full" />}
-        {badge != null && <Badge intent="primary">{badge}</Badge>}
-      </div>
-      <div
-        className={cn("flex items-start", {
-          "flex-col space-y-3": iconPosition === "top",
-          "flex-row space-x-3": iconPosition === "left",
-        })}
-      >
-        <style jsx>
-          {`
+    const content = (
+        <div ref={popoverRef} className="relative">
+            <div className="absolute -right-4 -top-4 flex items-center gap-1">
+                {isWithinEditor && <EditorComponentPopoverButton className="h-full" />}
+                {badge != null && <Badge intent="primary">{badge}</Badge>}
+            </div>
+            <div
+                className={cn("flex items-start", {
+                    "flex-col space-y-3": iconPosition === "top",
+                    "flex-row space-x-3": iconPosition === "left"
+                })}
+            >
+                <style jsx>
+                    {`
             div > :global(.card-icon) {
               color: ${lightModeColor ?? color ?? "var(--accent-a10)"};
               width: ${iconSize * 4}px;
@@ -93,60 +91,60 @@ export const Card: React.FC<Card.Props> = ({
               color: ${darkModeColor ?? color ?? "var(--accent-a10)"};
             }
           `}
-        </style>
-        {typeof icon === "string" ? (
-          <FaIcon className="card-icon" icon={icon} />
-        ) : isValidElement(icon) ? (
-          <span className="card-icon">
-            <NoZoom>{icon}</NoZoom>
-          </span>
-        ) : null}
-        <div className="w-full space-y-1">
-          <div className="text-body text-base font-semibold">{title}</div>
-          {children != null && (
-            <div
-              className={cn(
-                "text-(color:--grayscale-a11)",
-                isWithinEditor && "solid-hover-handle -ml-8 -mt-2"
-              )}
-            >
-              {children}
+                </style>
+                {typeof icon === "string" ? (
+                    <FaIcon className="card-icon" icon={icon} />
+                ) : isValidElement(icon) ? (
+                    <span className="card-icon">
+                        <NoZoom>{icon}</NoZoom>
+                    </span>
+                ) : null}
+                <div className="w-full space-y-1">
+                    <div className="text-body text-base font-semibold">{title}</div>
+                    {children != null && (
+                        <div
+                            className={cn(
+                                "text-(color:--grayscale-a11)",
+                                isWithinEditor && "solid-hover-handle -ml-8 -mt-2"
+                            )}
+                        >
+                            {children}
+                        </div>
+                    )}
+                </div>
             </div>
-          )}
         </div>
-      </div>
-    </div>
-  );
-
-  const cardElement =
-    href != null && !isWithinEditor ? (
-      <FernLinkCard className={className} scroll={true} href={href}>
-        <NoZoom>
-          <DisableFernAnchor>{content}</DisableFernAnchor>
-        </NoZoom>
-      </FernLinkCard>
-    ) : (
-      <FernCard className={className}>{content}</FernCard>
     );
 
-  if (!isWithinEditor) {
-    return cardElement;
-  }
+    const cardElement =
+        href != null && !isWithinEditor ? (
+            <FernLinkCard className={className} scroll={true} href={href}>
+                <NoZoom>
+                    <DisableFernAnchor>{content}</DisableFernAnchor>
+                </NoZoom>
+            </FernLinkCard>
+        ) : (
+            <FernCard className={className}>{content}</FernCard>
+        );
 
-  return (
-    <EditorComponentPopoverProvider
-      attributes={{
-        title: new TextInputControl({ defaultValue: title }),
-        icon: new TextInputControl({
-          defaultValue: typeof icon === "string" ? icon : "",
-        }),
-        href: new TextInputControl({ defaultValue: href || "" }),
-        badge: new TextInputControl({ defaultValue: badge || "" }),
-      }}
-      targetRef={popoverRef}
-      hoverSlopThreshold={20}
-    >
-      {cardElement}
-    </EditorComponentPopoverProvider>
-  );
+    if (!isWithinEditor) {
+        return cardElement;
+    }
+
+    return (
+        <EditorComponentPopoverProvider
+            attributes={{
+                title: new TextInputControl({ defaultValue: title }),
+                icon: new TextInputControl({
+                    defaultValue: typeof icon === "string" ? icon : ""
+                }),
+                href: new TextInputControl({ defaultValue: href || "" }),
+                badge: new TextInputControl({ defaultValue: badge || "" })
+            }}
+            targetRef={popoverRef}
+            hoverSlopThreshold={20}
+        >
+            {cardElement}
+        </EditorComponentPopoverProvider>
+    );
 };

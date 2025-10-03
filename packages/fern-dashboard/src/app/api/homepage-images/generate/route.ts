@@ -11,39 +11,36 @@ import handler from "./handler";
 export const maxDuration = 60;
 
 const GenerateHomepageImagesRequest = z.object({
-  url: z.string(),
-  orgName: orgNameValidator,
+    url: z.string(),
+    orgName: orgNameValidator
 });
 
 export async function POST(req: NextRequest) {
-  const maybeSessionData = await maybeGetCurrentSession(req);
-  if (maybeSessionData.errorResponse != null) {
-    return maybeSessionData.errorResponse;
-  }
-  const { token } = maybeSessionData.data;
+    const maybeSessionData = await maybeGetCurrentSession(req);
+    if (maybeSessionData.errorResponse != null) {
+        return maybeSessionData.errorResponse;
+    }
+    const { token } = maybeSessionData.data;
 
-  const parsedBody = await parseNextRequestBody(
-    req,
-    GenerateHomepageImagesRequest
-  );
-  if (parsedBody.errorResponse != null) {
-    return parsedBody.errorResponse;
-  }
-  const { url, orgName } = parsedBody.data;
+    const parsedBody = await parseNextRequestBody(req, GenerateHomepageImagesRequest);
+    if (parsedBody.errorResponse != null) {
+        return parsedBody.errorResponse;
+    }
+    const { url, orgName } = parsedBody.data;
 
-  const ensureOrgOwnsUrlResponse = await ensureOrgOwnsUrl({
-    url,
-    orgName,
-    token,
-  });
-  if (ensureOrgOwnsUrlResponse.errorResponse != null) {
-    return ensureOrgOwnsUrlResponse.errorResponse;
-  }
+    const ensureOrgOwnsUrlResponse = await ensureOrgOwnsUrl({
+        url,
+        orgName,
+        token
+    });
+    if (ensureOrgOwnsUrlResponse.errorResponse != null) {
+        return ensureOrgOwnsUrlResponse.errorResponse;
+    }
 
-  const handlerResponse = await handler({ url });
-  if (handlerResponse.errorResponse != null) {
-    return handlerResponse.errorResponse;
-  }
+    const handlerResponse = await handler({ url });
+    if (handlerResponse.errorResponse != null) {
+        return handlerResponse.errorResponse;
+    }
 
-  return NextResponse.json({});
+    return NextResponse.json({});
 }

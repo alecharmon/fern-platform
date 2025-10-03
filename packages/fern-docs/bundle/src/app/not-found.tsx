@@ -1,9 +1,9 @@
 import RootPage from "./page";
 
 export default function RootNotFound() {
-  return (
-    <main>
-      <RootPage />
-    </main>
-  );
+    return (
+        <main>
+            <RootPage />
+        </main>
+    );
 }

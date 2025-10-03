@@ -1,6 +1,6 @@
 export {
-  SuggestionsSchema,
-  type Suggestions,
+    SuggestionsSchema,
+    type Suggestions
 } from "./utils/suggestions-schema";
 export { buildCustomConfig } from "./custom/build-custom-config";
 export { createDefaultSystemPrompt } from "./utils/system-prompt";

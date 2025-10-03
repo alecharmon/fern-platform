@@ -14,75 +14,64 @@ import { DropdownMenuItem } from "../ui/dropdown-menu";
 import { MemberOrInviteeRow } from "./MemberOrInviteeRow";
 
 export declare namespace MemberRow {
-  export interface Props {
-    member: GetMembers200ResponseOneOfInner;
-    currentUserId: Auth0UserID;
-  }
+    export interface Props {
+        member: GetMembers200ResponseOneOfInner;
+        currentUserId: Auth0UserID;
+    }
 }
 
 export function MemberRow({ member, currentUserId }: MemberRow.Props) {
-  const orgName = useOrgNameFromPathname();
-  const queryKey = ReactQueryKey.orgMembers(orgName);
+    const orgName = useOrgNameFromPathname();
+    const queryKey = ReactQueryKey.orgMembers(orgName);
 
-  const queryClient = useQueryClient();
-  const removeMember = useMutation({
-    mutationFn: () =>
-      removeUserFromOrg({
-        orgName,
-        userIdToRemove: Auth0UserID(member.user_id),
-      }),
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey });
+    const queryClient = useQueryClient();
+    const removeMember = useMutation({
+        mutationFn: () =>
+            removeUserFromOrg({
+                orgName,
+                userIdToRemove: Auth0UserID(member.user_id)
+            }),
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey });
 
-      const previousMembers =
-        queryClient.getQueryData<inferQueryData<typeof queryKey>>(queryKey);
+            const previousMembers = queryClient.getQueryData<inferQueryData<typeof queryKey>>(queryKey);
 
-      queryClient.setQueryData<inferQueryData<typeof queryKey>>(
-        queryKey,
-        (previousMembers) =>
-          previousMembers != null
-            ? previousMembers.filter((m) => m.user_id !== member.user_id)
-            : previousMembers
-      );
+            queryClient.setQueryData<inferQueryData<typeof queryKey>>(queryKey, (previousMembers) =>
+                previousMembers != null ? previousMembers.filter((m) => m.user_id !== member.user_id) : previousMembers
+            );
 
-      return { previousMembers };
-    },
-    onError: async (error, _variables, context) => {
-      console.error(
-        `Failed to remove ${member.name} (${member.email}, ${member.email})`,
-        error
-      );
-      toast.error(`Failed to remove ${member.name}`);
-      if (context?.previousMembers != null) {
-        queryClient.setQueryData<inferQueryData<typeof queryKey>>(
-          queryKey,
-          context.previousMembers
-        );
-      }
+            return { previousMembers };
+        },
+        onError: async (error, _variables, context) => {
+            console.error(`Failed to remove ${member.name} (${member.email}, ${member.email})`, error);
+            toast.error(`Failed to remove ${member.name}`);
+            if (context?.previousMembers != null) {
+                queryClient.setQueryData<inferQueryData<typeof queryKey>>(queryKey, context.previousMembers);
+            }
 
-      // only invalidate on error. if we invalidate on success, we can wipe
-      // out other optimsitic writes (if the user is removing multiple members)
-      await queryClient.invalidateQueries({ queryKey });
-    },
-  });
+            // only invalidate on error. if we invalidate on success, we can wipe
+            // out other optimsitic writes (if the user is removing multiple members)
+            await queryClient.invalidateQueries({ queryKey });
+        }
+    });
 
-  return (
-    <MemberOrInviteeRow
-      title={member.name}
-      subtitle={member.email}
-      pictureUrl={member.picture}
-      dropdownMenuItems={
-        currentUserId !== member.user_id ? (
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => {
-              removeMember.mutate();
-            }}
-          >
-            <UserMinusIcon /> Remove member
-          </DropdownMenuItem>
-        ) : undefined
-      }
-    />
-  );
+    return (
+        <MemberOrInviteeRow
+            title={member.name}
+            subtitle={member.email}
+            pictureUrl={member.picture}
+            dropdownMenuItems={
+                currentUserId !== member.user_id ? (
+                    <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => {
+                            removeMember.mutate();
+                        }}
+                    >
+                        <UserMinusIcon /> Remove member
+                    </DropdownMenuItem>
+                ) : undefined
+            }
+        />
+    );
 }

@@ -11,42 +11,32 @@ import { ResolvedReturnType } from "@/utils/types";
 import handler from "./handler";
 
 export declare namespace getGithubSourceMetadata {
-  export type Request = z.infer<typeof GetGithubSourceMetadataRequest>;
-  export type Response = ResolvedReturnType<typeof handler>;
+    export type Request = z.infer<typeof GetGithubSourceMetadataRequest>;
+    export type Response = ResolvedReturnType<typeof handler>;
 }
 
 const GetGithubSourceMetadataRequest = GithubIdentificationScheme.and(
-  z.object({
-    orgName: orgNameValidator,
-    skipCache: z.boolean().optional(),
-  })
+    z.object({
+        orgName: orgNameValidator,
+        skipCache: z.boolean().optional()
+    })
 );
 
 export const POST = withZodValidation(
-  GetGithubSourceMetadataRequest,
-  async (
-    req: NextRequest,
-    validatedBody: z.infer<typeof GetGithubSourceMetadataRequest>
-  ) => {
-    const { orgName, skipCache, ...repoData } = validatedBody;
+    GetGithubSourceMetadataRequest,
+    async (req: NextRequest, validatedBody: z.infer<typeof GetGithubSourceMetadataRequest>) => {
+        const { orgName, skipCache, ...repoData } = validatedBody;
 
-    return withGithubAuthNextRoute(
-      req,
-      orgName,
-      repoData,
-      async ({ githubUrl }) => {
-        const { maybeGetCurrentSession } = await import(
-          "@/app/api/utils/maybeGetCurrentSession"
-        );
-        const sessionResult = await maybeGetCurrentSession(req);
-        if (sessionResult.errorResponse != null) {
-          return sessionResult.errorResponse;
-        }
-        const { userId } = sessionResult.data;
+        return withGithubAuthNextRoute(req, orgName, repoData, async ({ githubUrl }) => {
+            const { maybeGetCurrentSession } = await import("@/app/api/utils/maybeGetCurrentSession");
+            const sessionResult = await maybeGetCurrentSession(req);
+            if (sessionResult.errorResponse != null) {
+                return sessionResult.errorResponse;
+            }
+            const { userId } = sessionResult.data;
 
-        const response = await handler({ userId, githubUrl, skipCache });
-        return NextResponse.json(response);
-      }
-    );
-  }
+            const response = await handler({ userId, githubUrl, skipCache });
+            return NextResponse.json(response);
+        });
+    }
 );

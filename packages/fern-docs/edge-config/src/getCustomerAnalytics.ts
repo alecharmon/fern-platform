@@ -5,24 +5,21 @@ import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
 interface GTMParams {
-  tagId: string;
+    tagId: string;
 }
 interface CustomerAnalytics {
-  ga4?: {
-    measurementId: string;
-  };
-  gtm?: GTMParams;
+    ga4?: {
+        measurementId: string;
+    };
+    gtm?: GTMParams;
 }
 
 // deprecated
-export async function getCustomerAnalytics(
-  host: string,
-  basePath?: string
-): Promise<CustomerAnalytics | undefined> {
-  if (isLocal() || isSelfHosted()) {
-    return undefined;
-  }
+export async function getCustomerAnalytics(host: string, basePath?: string): Promise<CustomerAnalytics | undefined> {
+    if (isLocal() || isSelfHosted()) {
+        return undefined;
+    }
 
-  const config = await getEdge<Record<string, CustomerAnalytics>>("analytics");
-  return config?.[urlJoin(host, basePath ?? "")];
+    const config = await getEdge<Record<string, CustomerAnalytics>>("analytics");
+    return config?.[urlJoin(host, basePath ?? "")];
 }

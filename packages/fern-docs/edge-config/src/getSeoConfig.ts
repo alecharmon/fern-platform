@@ -4,18 +4,18 @@ import { getEdge } from "./getEdge";
 import { isLocal } from "./isLocal";
 
 export async function getSeoDisabled(domain: string): Promise<boolean> {
-  if (isLocal()) {
-    return true;
-  }
+    if (isLocal()) {
+        return true;
+    }
 
-  const isSeoEnabled = (await getEdge<string[]>("seo-enabled")) ?? [];
-  if (isSeoEnabled.includes(domain)) {
-    return false;
-  }
+    const isSeoEnabled = (await getEdge<string[]>("seo-enabled")) ?? [];
+    if (isSeoEnabled.includes(domain)) {
+        return false;
+    }
 
-  if (!isCustomDomain(domain)) {
-    return true;
-  }
-  const isDisabled = (await getEdge<string[]>("seo-disabled")) ?? [];
-  return isDisabled.includes(domain);
+    if (!isCustomDomain(domain)) {
+        return true;
+    }
+    const isDisabled = (await getEdge<string[]>("seo-disabled")) ?? [];
+    return isDisabled.includes(domain);
 }

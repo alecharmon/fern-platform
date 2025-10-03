@@ -11,26 +11,18 @@ import { EndpointError } from "./EndpointError";
 import { EndpointErrorGroupClient } from "./EndpointErrorGroupClient";
 
 export function EndpointErrorGroup({
-  errors,
-  types,
+    errors,
+    types
 }: {
-  errors: ErrorResponse[];
-  types: Record<string, ApiDefinition.TypeDefinition>;
+    errors: ErrorResponse[];
+    types: Record<string, ApiDefinition.TypeDefinition>;
 }) {
-  return (
-    <EndpointErrorGroupClient
-      errors={sortBy(errors, [(e) => e.statusCode, (e) => e.name]).map(
-        (error) => ({
-          children: (
-            <EndpointError
-              error={error}
-              availability={error.availability}
-              types={types}
-            />
-          ),
-          data: error,
-        })
-      )}
-    />
-  );
+    return (
+        <EndpointErrorGroupClient
+            errors={sortBy(errors, [(e) => e.statusCode, (e) => e.name]).map((error) => ({
+                children: <EndpointError error={error} availability={error.availability} types={types} />,
+                data: error
+            }))}
+        />
+    );
 }

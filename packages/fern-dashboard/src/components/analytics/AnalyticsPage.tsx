@@ -8,34 +8,34 @@ import { TimeRange } from "./utils/get-request-params";
 export const ITEMS_PER_PAGE = 25;
 
 export default async function AnalyticsPage({
-  docsUrl,
-  analyticsBillingEnabled,
+    docsUrl,
+    analyticsBillingEnabled
 }: {
-  docsUrl: string;
-  analyticsBillingEnabled: boolean;
+    docsUrl: string;
+    analyticsBillingEnabled: boolean;
 }) {
-  const client = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
-  const baseDocsUrl = getBaseDocsUrl(docsUrl);
-  const cutoffTime = new Date(Date.now()).toISOString();
+    const client = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
+    const baseDocsUrl = getBaseDocsUrl(docsUrl);
+    const cutoffTime = new Date(Date.now()).toISOString();
 
-  const analyticsData = await getDomainAnalytics({
-    docsUrl: baseDocsUrl,
-    timeRange: TimeRange.LAST_WEEK,
-  });
+    const analyticsData = await getDomainAnalytics({
+        docsUrl: baseDocsUrl,
+        timeRange: TimeRange.LAST_WEEK
+    });
 
-  const queriesData = await client.query.getRecentQueries(baseDocsUrl, {
-    cutoff_time: cutoffTime,
-    limit: ITEMS_PER_PAGE,
-  });
+    const queriesData = await client.query.getRecentQueries(baseDocsUrl, {
+        cutoff_time: cutoffTime,
+        limit: ITEMS_PER_PAGE
+    });
 
-  return (
-    <AnalyticsPageClient
-      baseDocsUrl={baseDocsUrl}
-      initialQueriesData={queriesData.queries}
-      initialHistogramData={analyticsData}
-      initialTotalQueries={queriesData.pagination.total}
-      cutoffTime={cutoffTime}
-      analyticsBillingEnabled={analyticsBillingEnabled}
-    />
-  );
+    return (
+        <AnalyticsPageClient
+            baseDocsUrl={baseDocsUrl}
+            initialQueriesData={queriesData.queries}
+            initialHistogramData={analyticsData}
+            initialTotalQueries={queriesData.pagination.total}
+            cutoffTime={cutoffTime}
+            analyticsBillingEnabled={analyticsBillingEnabled}
+        />
+    );
 }

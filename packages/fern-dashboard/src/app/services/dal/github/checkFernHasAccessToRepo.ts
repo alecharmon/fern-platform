@@ -10,11 +10,11 @@ import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
  * @returns true if the fern GitHub app has access to the repository, false otherwise
  */
 export async function checkFernHasAccessToRepo(githubUrl: string) {
-  const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
-  if (owner == null || repo == null) {
-    return false;
-  }
+    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+    if (owner == null || repo == null) {
+        return false;
+    }
 
-  const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
-  return fernBotResult.ok;
+    const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
+    return fernBotResult.ok;
 }

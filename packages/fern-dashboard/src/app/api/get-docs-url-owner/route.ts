@@ -10,37 +10,34 @@ import { parseNextRequestBody } from "../utils/parseNextRequestBody";
 import handler from "./handler";
 
 export declare namespace getDocsUrlOwner {
-  export type Request = z.infer<typeof GetDocsUrlOwnerRequest>;
-  export type Response = ResolvedReturnType<typeof handler>;
+    export type Request = z.infer<typeof GetDocsUrlOwnerRequest>;
+    export type Response = ResolvedReturnType<typeof handler>;
 }
 
 const GetDocsUrlOwnerRequest = z.object({
-  url: z.string(),
+    url: z.string()
 });
 
 export async function POST(req: NextRequest) {
-  const maybeSessionData = await maybeGetCurrentSession(req);
-  if (maybeSessionData.errorResponse != null) {
-    return maybeSessionData.errorResponse;
-  }
-  const { userId, token } = maybeSessionData.data;
-
-  const parsedBody = await parseNextRequestBody(req, GetDocsUrlOwnerRequest);
-  if (parsedBody.errorResponse != null) {
-    return parsedBody.errorResponse;
-  }
-  const { url } = parsedBody.data;
-
-  let response = await handler({ token, url });
-  if (response.orgName != null) {
-    const doesUserBelongToOrg = await auth0Management.doesUserBelongToOrg(
-      userId,
-      response.orgName
-    );
-    if (!doesUserBelongToOrg) {
-      response = { orgName: undefined };
+    const maybeSessionData = await maybeGetCurrentSession(req);
+    if (maybeSessionData.errorResponse != null) {
+        return maybeSessionData.errorResponse;
     }
-  }
+    const { userId, token } = maybeSessionData.data;
 
-  return NextResponse.json(response);
+    const parsedBody = await parseNextRequestBody(req, GetDocsUrlOwnerRequest);
+    if (parsedBody.errorResponse != null) {
+        return parsedBody.errorResponse;
+    }
+    const { url } = parsedBody.data;
+
+    let response = await handler({ token, url });
+    if (response.orgName != null) {
+        const doesUserBelongToOrg = await auth0Management.doesUserBelongToOrg(userId, response.orgName);
+        if (!doesUserBelongToOrg) {
+            response = { orgName: undefined };
+        }
+    }
+
+    return NextResponse.json(response);
 }

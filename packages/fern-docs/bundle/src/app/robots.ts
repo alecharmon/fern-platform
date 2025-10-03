@@ -9,48 +9,47 @@ import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getCanonicalUrl, getSeoDisabled } from "@fern-docs/edge-config";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  if (isLocal()) {
+    if (isLocal()) {
+        return {
+            rules: {
+                userAgent: "*",
+                disallow: "/"
+            }
+        };
+    }
+
+    const headersList = await headers();
+    const domain = headersList.get(HEADER_X_FERN_HOST) ?? headersList.get(HEADER_HOST);
+
+    if (!domain) {
+        return {
+            rules: {
+                userAgent: "*",
+                disallow: "/"
+            }
+        };
+    }
+    const canonicalUrl = await getCanonicalUrl(domain);
+    const basepath = headersList.get("x-fern-basepath")?.replace(/\/$/, "") ?? "";
+    const baseUrl = withDefaultProtocol(canonicalUrl ?? domain);
+    const sitemap = urlJoin(baseUrl, basepath, "sitemap.xml");
+
+    if (await getSeoDisabled(domain)) {
+        return {
+            sitemap,
+            rules: {
+                userAgent: "*",
+                disallow: "/"
+            }
+        };
+    }
+
     return {
-      rules: {
-        userAgent: "*",
-        disallow: "/",
-      },
+        sitemap,
+        rules: {
+            userAgent: "*",
+            allow: "/",
+            disallow: "/api/fern-docs/"
+        }
     };
-  }
-
-  const headersList = await headers();
-  const domain =
-    headersList.get(HEADER_X_FERN_HOST) ?? headersList.get(HEADER_HOST);
-
-  if (!domain) {
-    return {
-      rules: {
-        userAgent: "*",
-        disallow: "/",
-      },
-    };
-  }
-  const canonicalUrl = await getCanonicalUrl(domain);
-  const basepath = headersList.get("x-fern-basepath")?.replace(/\/$/, "") ?? "";
-  const baseUrl = withDefaultProtocol(canonicalUrl ?? domain);
-  const sitemap = urlJoin(baseUrl, basepath, "sitemap.xml");
-
-  if (await getSeoDisabled(domain)) {
-    return {
-      sitemap,
-      rules: {
-        userAgent: "*",
-        disallow: "/",
-      },
-    };
-  }
-
-  return {
-    sitemap,
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: "/api/fern-docs/",
-    },
-  };
 }

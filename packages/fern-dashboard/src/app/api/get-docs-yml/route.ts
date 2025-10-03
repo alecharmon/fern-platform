@@ -9,47 +9,31 @@ import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { GitHubLoader } from "@/app/services/github/github-loader";
 
 const GetDocsYmlRequest = GithubIdentificationScheme.and(
-  z.object({
-    orgName: orgNameValidator,
-    branch: z.string(),
-  })
+    z.object({
+        orgName: orgNameValidator,
+        branch: z.string()
+    })
 );
 
 export const POST = withZodValidation(
-  GetDocsYmlRequest,
-  async (
-    req: NextRequest,
-    validatedBody: z.infer<typeof GetDocsYmlRequest>
-  ) => {
-    const { orgName, branch, ...repoData } = validatedBody;
+    GetDocsYmlRequest,
+    async (req: NextRequest, validatedBody: z.infer<typeof GetDocsYmlRequest>) => {
+        const { orgName, branch, ...repoData } = validatedBody;
 
-    return withGithubAuthNextRoute(
-      req,
-      orgName,
-      repoData,
-      async ({ owner, repo, site, githubUrl }) => {
-        // Create GitHubLoader instance
-        const gitLoader = new GitHubLoader(githubUrl);
+        return withGithubAuthNextRoute(req, orgName, repoData, async ({ owner, repo, site, githubUrl }) => {
+            // Create GitHubLoader instance
+            const gitLoader = new GitHubLoader(githubUrl);
 
-        // Get the docs.yml file
-        const docsYmlContent = await gitLoader.getDocsYml(
-          owner,
-          repo,
-          site,
-          branch
-        );
-        if (docsYmlContent.type !== "ok") {
-          return NextResponse.json(
-            { error: "Failed to fetch docs.yml" },
-            { status: 404 }
-          );
-        }
+            // Get the docs.yml file
+            const docsYmlContent = await gitLoader.getDocsYml(owner, repo, site, branch);
+            if (docsYmlContent.type !== "ok") {
+                return NextResponse.json({ error: "Failed to fetch docs.yml" }, { status: 404 });
+            }
 
-        return NextResponse.json({
-          success: true,
-          docsYmlContent: docsYmlContent.result,
+            return NextResponse.json({
+                success: true,
+                docsYmlContent: docsYmlContent.result
+            });
         });
-      }
-    );
-  }
+    }
 );

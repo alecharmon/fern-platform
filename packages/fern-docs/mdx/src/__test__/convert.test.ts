@@ -4,50 +4,50 @@ import path from "path";
 import { htmlToMdx, mdxToHtml } from "../convert";
 
 describe("mdxToHtml and htmlToMdx", () => {
-  const simpleMdx = `# Hello World\n\nThis is a test.`;
-  const mdxWithFrontmatter = `---\ntitle: Test Title\ndescription: Test Description\n---\n\n# Heading\n\nSome content.`;
-  const mdxWithCustom = `# Hello <Custom value="foo" />`;
-  const mdxWithImage = `# Document\n\n![Alt text](image.png "Title")\n\nSome text.`;
-  const mdxWithImageUpload = `# Document\n\n<div data-type="image-upload" />\n\nSome text.`;
-  it("mdxToHtml: simple mdx", () => {
-    const result = mdxToHtml(simpleMdx);
-    expect(result.html).toMatch(
-      /<h1 fve-data-id="[a-f0-9]+" fve-mdx-b64="[A-Za-z0-9+/=]+">Hello World<\/h1>\s*<p fve-data-id="[a-f0-9]+" fve-mdx-b64="[A-Za-z0-9+/=]+">This is a test\.<\/p>/
-    );
-    expect(result.frontmatter).toMatchInlineSnapshot(`{}`);
-  });
+    const simpleMdx = `# Hello World\n\nThis is a test.`;
+    const mdxWithFrontmatter = `---\ntitle: Test Title\ndescription: Test Description\n---\n\n# Heading\n\nSome content.`;
+    const mdxWithCustom = `# Hello <Custom value="foo" />`;
+    const mdxWithImage = `# Document\n\n![Alt text](image.png "Title")\n\nSome text.`;
+    const mdxWithImageUpload = `# Document\n\n<div data-type="image-upload" />\n\nSome text.`;
+    it("mdxToHtml: simple mdx", () => {
+        const result = mdxToHtml(simpleMdx);
+        expect(result.html).toMatch(
+            /<h1 fve-data-id="[a-f0-9]+" fve-mdx-b64="[A-Za-z0-9+/=]+">Hello World<\/h1>\s*<p fve-data-id="[a-f0-9]+" fve-mdx-b64="[A-Za-z0-9+/=]+">This is a test\.<\/p>/
+        );
+        expect(result.frontmatter).toMatchInlineSnapshot(`{}`);
+    });
 
-  it("mdxToHtml: with frontmatter", () => {
-    const result = mdxToHtml(mdxWithFrontmatter);
-    expect(result.frontmatter).toMatchInlineSnapshot(`
+    it("mdxToHtml: with frontmatter", () => {
+        const result = mdxToHtml(mdxWithFrontmatter);
+        expect(result.frontmatter).toMatchInlineSnapshot(`
       {
         "description": "Test Description",
         "title": "Test Title",
       }
     `);
-  });
+    });
 
-  it("mdxToHtml: with custom element", () => {
-    const result = mdxToHtml(mdxWithCustom);
-    expect(result.html).toContain("custom-element-v2");
-    expect(result.frontmatter).toMatchInlineSnapshot(`{}`);
-  });
+    it("mdxToHtml: with custom element", () => {
+        const result = mdxToHtml(mdxWithCustom);
+        expect(result.html).toContain("custom-element-v2");
+        expect(result.frontmatter).toMatchInlineSnapshot(`{}`);
+    });
 
-  it("htmlToMdx: round-trip simple", () => {
-    const { html, frontmatter } = mdxToHtml(simpleMdx);
-    const mdxResult = htmlToMdx(html, frontmatter);
-    expect(mdxResult.mdx).toMatchInlineSnapshot(`
+    it("htmlToMdx: round-trip simple", () => {
+        const { html, frontmatter } = mdxToHtml(simpleMdx);
+        const mdxResult = htmlToMdx(html, frontmatter);
+        expect(mdxResult.mdx).toMatchInlineSnapshot(`
       "# Hello World
 
       This is a test.
       "
     `);
-  });
+    });
 
-  it("htmlToMdx: round-trip with frontmatter", () => {
-    const { html, frontmatter } = mdxToHtml(mdxWithFrontmatter);
-    const mdxResult = htmlToMdx(html, frontmatter);
-    expect(mdxResult.mdx).toMatchInlineSnapshot(`
+    it("htmlToMdx: round-trip with frontmatter", () => {
+        const { html, frontmatter } = mdxToHtml(mdxWithFrontmatter);
+        const mdxResult = htmlToMdx(html, frontmatter);
+        expect(mdxResult.mdx).toMatchInlineSnapshot(`
       "---
       title: Test Title
       description: Test Description
@@ -58,423 +58,376 @@ describe("mdxToHtml and htmlToMdx", () => {
       Some content.
       "
     `);
-  });
+    });
 
-  it("htmlToMdx: round-trip with custom element", () => {
-    const { html, frontmatter } = mdxToHtml(mdxWithCustom);
-    const mdxResult = htmlToMdx(html, frontmatter);
-    expect(mdxResult.mdx).toContain("# Hello");
-    expect(mdxResult.mdx).toContain('<Custom value="foo" />');
-  });
-  it("mdxToHtml: with image", () => {
-    const result = mdxToHtml(mdxWithImage);
-    expect(result.html).toContain("custom-element-v2");
-    const expectedB64 = Buffer.from(
-      '![Alt text](image.png "Title")',
-      "utf-8"
-    ).toString("base64");
-    expect(result.html).toContain(`fve-mdx-b64="${expectedB64}"`);
-    expect(result.frontmatter).toEqual({});
-  });
+    it("htmlToMdx: round-trip with custom element", () => {
+        const { html, frontmatter } = mdxToHtml(mdxWithCustom);
+        const mdxResult = htmlToMdx(html, frontmatter);
+        expect(mdxResult.mdx).toContain("# Hello");
+        expect(mdxResult.mdx).toContain('<Custom value="foo" />');
+    });
+    it("mdxToHtml: with image", () => {
+        const result = mdxToHtml(mdxWithImage);
+        expect(result.html).toContain("custom-element-v2");
+        const expectedB64 = Buffer.from('![Alt text](image.png "Title")', "utf-8").toString("base64");
+        expect(result.html).toContain(`fve-mdx-b64="${expectedB64}"`);
+        expect(result.frontmatter).toEqual({});
+    });
 
-  it("htmlToMdx: round-trip with image", () => {
-    const { html, frontmatter } = mdxToHtml(mdxWithImage);
-    const mdxResult = htmlToMdx(html, frontmatter);
-    expect(mdxResult.mdx).toContain("# Document");
-    // Images should be preserved as the original markdown or converted to HTML syntax
-    expect(mdxResult.mdx).toContain('![Alt text](image.png "Title")');
-    expect(mdxResult.mdx).toContain("Some text.");
-  });
+    it("htmlToMdx: round-trip with image", () => {
+        const { html, frontmatter } = mdxToHtml(mdxWithImage);
+        const mdxResult = htmlToMdx(html, frontmatter);
+        expect(mdxResult.mdx).toContain("# Document");
+        // Images should be preserved as the original markdown or converted to HTML syntax
+        expect(mdxResult.mdx).toContain('![Alt text](image.png "Title")');
+        expect(mdxResult.mdx).toContain("Some text.");
+    });
 
-  it("mdxToHtml: with image-upload div", () => {
-    const result = mdxToHtml(mdxWithImageUpload);
-    expect(result.html).toContain('<div data-type="image-upload"');
-    expect(result.frontmatter).toEqual({});
-  });
+    it("mdxToHtml: with image-upload div", () => {
+        const result = mdxToHtml(mdxWithImageUpload);
+        expect(result.html).toContain('<div data-type="image-upload"');
+        expect(result.frontmatter).toEqual({});
+    });
 
-  it("htmlToMdx: round-trip with image-upload div", () => {
-    const { html, frontmatter } = mdxToHtml(mdxWithImageUpload);
-    const mdxResult = htmlToMdx(html, frontmatter);
-    expect(mdxResult.mdx).toContain("# Document");
-    expect(mdxResult.mdx).toContain('<div data-type="image-upload"');
-    expect(mdxResult.mdx).toContain("Some text.");
-  });
+    it("htmlToMdx: round-trip with image-upload div", () => {
+        const { html, frontmatter } = mdxToHtml(mdxWithImageUpload);
+        const mdxResult = htmlToMdx(html, frontmatter);
+        expect(mdxResult.mdx).toContain("# Document");
+        expect(mdxResult.mdx).toContain('<div data-type="image-upload"');
+        expect(mdxResult.mdx).toContain("Some text.");
+    });
 
-  // File-based snapshot for a larger/complex case
-  const complexMdx = `---\ntitle: Complex\n---\n\n# Title\n\n- List item 1\n- List item 2\n\n<Custom value="bar" />\n\n\n## Subheading\n\n\n\n\nAnother paragraph.`;
-  it("mdxToHtml: complex file snapshot", async () => {
-    const result = mdxToHtml(complexMdx);
-    const snapshotDir = path.join(__dirname, "__snapshots__");
-    if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-    const file = path.join(snapshotDir, "complex-mdxToHtml.json");
-    writeFileSync(file, JSON.stringify(result, null, 2));
-    await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
-  });
+    // File-based snapshot for a larger/complex case
+    const complexMdx = `---\ntitle: Complex\n---\n\n# Title\n\n- List item 1\n- List item 2\n\n<Custom value="bar" />\n\n\n## Subheading\n\n\n\n\nAnother paragraph.`;
+    it("mdxToHtml: complex file snapshot", async () => {
+        const result = mdxToHtml(complexMdx);
+        const snapshotDir = path.join(__dirname, "__snapshots__");
+        if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+        const file = path.join(snapshotDir, "complex-mdxToHtml.json");
+        writeFileSync(file, JSON.stringify(result, null, 2));
+        await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
+    });
 
-  it("htmlToMdx: complex file snapshot", async () => {
-    const { html, frontmatter } = mdxToHtml(complexMdx);
-    const mdxResult = htmlToMdx(html, frontmatter);
-    const snapshotDir = path.join(__dirname, "__snapshots__");
-    if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-    const file = path.join(snapshotDir, "complex-htmlToMdx.json");
-    writeFileSync(file, JSON.stringify(mdxResult, null, 2));
-    await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
-  });
+    it("htmlToMdx: complex file snapshot", async () => {
+        const { html, frontmatter } = mdxToHtml(complexMdx);
+        const mdxResult = htmlToMdx(html, frontmatter);
+        const snapshotDir = path.join(__dirname, "__snapshots__");
+        if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+        const file = path.join(snapshotDir, "complex-htmlToMdx.json");
+        writeFileSync(file, JSON.stringify(mdxResult, null, 2));
+        await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
+    });
 });
 
 describe("Fixture files", () => {
-  let faqMdx: string;
-  let landingPageMdx: string;
-  let complexOverviewMdx: string;
-  let advancedFeaturesMdx: string;
-  let openApiServerMdx: string;
-  let useCasesMdx: string;
-  let eventHandlerFunctionsMdx: string;
+    let faqMdx: string;
+    let landingPageMdx: string;
+    let complexOverviewMdx: string;
+    let advancedFeaturesMdx: string;
+    let openApiServerMdx: string;
+    let useCasesMdx: string;
+    let eventHandlerFunctionsMdx: string;
 
-  beforeAll(async () => {
-    const fs = await import("fs/promises");
-    faqMdx = await fs.readFile(
-      path.join(__dirname, "fixtures/faq.mdx"),
-      "utf-8"
-    );
-    landingPageMdx = await fs.readFile(
-      path.join(__dirname, "fixtures/landing-page.mdx"),
-      "utf-8"
-    );
-    complexOverviewMdx = await fs.readFile(
-      path.join(__dirname, "fixtures/complex-overview.mdx"),
-      "utf-8"
-    );
-    advancedFeaturesMdx = await fs.readFile(
-      path.join(__dirname, "fixtures/advanced-features.mdx"),
-      "utf-8"
-    );
-    openApiServerMdx = await fs.readFile(
-      path.join(__dirname, "fixtures/openapi-server.mdx"),
-      "utf-8"
-    );
-    useCasesMdx = await fs.readFile(
-      path.join(__dirname, "fixtures/use-cases.mdx"),
-      "utf-8"
-    );
-    eventHandlerFunctionsMdx = await fs.readFile(
-      path.join(__dirname, "fixtures/event-handler-functions.md"),
-      "utf-8"
-    );
-  });
-
-  describe("faq.mdx", () => {
-    it("mdxToHtml: converts FAQ frontmatter correctly", () => {
-      const result = mdxToHtml(faqMdx);
-
-      // Verify frontmatter is extracted correctly
-      expect(result.frontmatter).toEqual({
-        title: "Empathic Voice Interface FAQ",
-      });
+    beforeAll(async () => {
+        const fs = await import("fs/promises");
+        faqMdx = await fs.readFile(path.join(__dirname, "fixtures/faq.mdx"), "utf-8");
+        landingPageMdx = await fs.readFile(path.join(__dirname, "fixtures/landing-page.mdx"), "utf-8");
+        complexOverviewMdx = await fs.readFile(path.join(__dirname, "fixtures/complex-overview.mdx"), "utf-8");
+        advancedFeaturesMdx = await fs.readFile(path.join(__dirname, "fixtures/advanced-features.mdx"), "utf-8");
+        openApiServerMdx = await fs.readFile(path.join(__dirname, "fixtures/openapi-server.mdx"), "utf-8");
+        useCasesMdx = await fs.readFile(path.join(__dirname, "fixtures/use-cases.mdx"), "utf-8");
+        eventHandlerFunctionsMdx = await fs.readFile(
+            path.join(__dirname, "fixtures/event-handler-functions.md"),
+            "utf-8"
+        );
     });
 
-    it("htmlToMdx: round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalFrontmatter } = mdxToHtml(faqMdx);
-      const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+    describe("faq.mdx", () => {
+        it("mdxToHtml: converts FAQ frontmatter correctly", () => {
+            const result = mdxToHtml(faqMdx);
 
-      // Verify the round-trip conversion produces valid MDX
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx).toContain("title: Empathic Voice Interface FAQ");
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx).toContain(
-        "We’ve compiled a list of frequently asked questions"
-      );
-      expect(mdxResult.mdx).toContain("<AccordionGroup");
-      expect(mdxResult.mdx).toContain("<Accordion");
-    });
-  });
+            // Verify frontmatter is extracted correctly
+            expect(result.frontmatter).toEqual({
+                title: "Empathic Voice Interface FAQ"
+            });
+        });
 
-  describe("landing-page.mdx", () => {
-    it("mdxToHtml: converts landing page frontmatter correctly", () => {
-      const result = mdxToHtml(landingPageMdx);
+        it("htmlToMdx: round-trip conversion preserves structure", () => {
+            const { html, frontmatter, originalFrontmatter } = mdxToHtml(faqMdx);
+            const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
 
-      // Verify frontmatter is extracted correctly
-      expect(result.frontmatter).toEqual({
-        layout: "custom",
-        "no-image-zoom": true,
-        description:
-          "Cohere's API documentation helps developers easily integrate natural language processing and generation into their products.",
-      });
+            // Verify the round-trip conversion produces valid MDX
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx).toContain("title: Empathic Voice Interface FAQ");
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx).toContain("We’ve compiled a list of frequently asked questions");
+            expect(mdxResult.mdx).toContain("<AccordionGroup");
+            expect(mdxResult.mdx).toContain("<Accordion");
+        });
     });
 
-    it("htmlToMdx: round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalFrontmatter } =
-        mdxToHtml(landingPageMdx);
-      const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+    describe("landing-page.mdx", () => {
+        it("mdxToHtml: converts landing page frontmatter correctly", () => {
+            const result = mdxToHtml(landingPageMdx);
 
-      // Verify the round-trip conversion produces valid MDX
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx).toContain("layout: custom");
-      expect(mdxResult.mdx).toContain("no-image-zoom: true");
-      expect(mdxResult.mdx).toContain("Cohere's API documentation");
-      expect(mdxResult.mdx).toContain("export const LandingPageCard");
-      expect(mdxResult.mdx).toContain("export const EndpointLink");
+            // Verify frontmatter is extracted correctly
+            expect(result.frontmatter).toEqual({
+                layout: "custom",
+                "no-image-zoom": true,
+                description:
+                    "Cohere's API documentation helps developers easily integrate natural language processing and generation into their products."
+            });
+        });
+
+        it("htmlToMdx: round-trip conversion preserves structure", () => {
+            const { html, frontmatter, originalFrontmatter } = mdxToHtml(landingPageMdx);
+            const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+
+            // Verify the round-trip conversion produces valid MDX
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx).toContain("layout: custom");
+            expect(mdxResult.mdx).toContain("no-image-zoom: true");
+            expect(mdxResult.mdx).toContain("Cohere's API documentation");
+            expect(mdxResult.mdx).toContain("export const LandingPageCard");
+            expect(mdxResult.mdx).toContain("export const EndpointLink");
+        });
+
+        it("mdxToHtml: preserves JavaScript exports and complex JSX", () => {
+            const { html } = mdxToHtml(landingPageMdx);
+            const { mdx } = htmlToMdx(html);
+
+            // Check that JavaScript exports are preserved in round-trip conversion
+            expect(mdx).toContain("export const");
+            expect(mdx).toContain("LandingPageCard");
+        });
+
+        it("mdxToHtml: handles CSS-in-JS and style blocks", () => {
+            const { html } = mdxToHtml(landingPageMdx);
+            const { mdx } = htmlToMdx(html);
+
+            // Check that style blocks are preserved in round-trip conversion
+            expect(mdx).toContain("<style>");
+            expect(mdx).toContain("className=");
+        });
     });
 
-    it("mdxToHtml: preserves JavaScript exports and complex JSX", () => {
-      const { html } = mdxToHtml(landingPageMdx);
-      const { mdx } = htmlToMdx(html);
+    describe("complex-overview.mdx", () => {
+        it("htmlToMdx: round-trip conversion preserves structure", () => {
+            const { html, frontmatter, originalFrontmatter } = mdxToHtml(complexOverviewMdx);
+            const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
 
-      // Check that JavaScript exports are preserved in round-trip conversion
-      expect(mdx).toContain("export const");
-      expect(mdx).toContain("LandingPageCard");
+            // Since we're using the new v2 system, we can't expect exact equality
+            // but should check that key content is preserved
+            expect(mdxResult.mdx).toContain("title: Speech to Text");
+
+            // Verify the round-trip conversion produces valid MDX
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx).toContain("title: Speech to Text");
+            expect(mdxResult.mdx).toContain("subtitle: Learn how to turn spoken audio into text with ElevenLabs.");
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx).toContain("## Overview");
+            expect(mdxResult.mdx).toContain(
+                "The ElevenLabs [Speech to Text (STT)](/docs/api-reference/speech-to-text) API"
+            );
+            expect(mdxResult.mdx).toContain("<CardGroup");
+            expect(mdxResult.mdx).toContain("<Card");
+            expect(mdxResult.mdx).toContain("<Info>");
+            expect(mdxResult.mdx).toContain("<Tabs>");
+            expect(mdxResult.mdx).toContain("<Tab");
+            expect(mdxResult.mdx).toContain("<AccordionGroup>");
+            expect(mdxResult.mdx).toContain("<Accordion");
+        });
     });
 
-    it("mdxToHtml: handles CSS-in-JS and style blocks", () => {
-      const { html } = mdxToHtml(landingPageMdx);
-      const { mdx } = htmlToMdx(html);
+    describe("advanced-features.mdx", () => {
+        it("mdxToHtml: converts advanced features frontmatter correctly", () => {
+            const result = mdxToHtml(advancedFeaturesMdx);
 
-      // Check that style blocks are preserved in round-trip conversion
-      expect(mdx).toContain("<style>");
-      expect(mdx).toContain("className=");
-    });
-  });
+            // Verify frontmatter is extracted correctly
+            expect(result.frontmatter).toEqual({
+                title: "Advanced MDX Features Test",
+                subtitle: "A comprehensive test of unusual MDX features",
+                tags: ["test", "mdx", "advanced", "features"],
+                math: true,
+                comments: true
+            });
+        });
 
-  describe("complex-overview.mdx", () => {
-    it("htmlToMdx: round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalFrontmatter } =
-        mdxToHtml(complexOverviewMdx);
-      const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+        it("htmlToMdx: round-trip conversion preserves advanced features", () => {
+            const { html, frontmatter, originalFrontmatter } = mdxToHtml(advancedFeaturesMdx);
+            const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
 
-      // Since we're using the new v2 system, we can't expect exact equality
-      // but should check that key content is preserved
-      expect(mdxResult.mdx).toContain("title: Speech to Text");
+            // Verify the round-trip conversion produces valid MDX
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx).toContain("title: Advanced MDX Features Test");
+            expect(mdxResult.mdx).toContain("subtitle: A comprehensive test of unusual MDX features");
+            expect(mdxResult.mdx).toContain("tags:");
+            expect(mdxResult.mdx).toContain("  - test");
+            expect(mdxResult.mdx).toContain("  - mdx");
+            expect(mdxResult.mdx).toContain("  - advanced");
+            expect(mdxResult.mdx).toContain("  - features");
+            expect(mdxResult.mdx).toContain("math: true");
+            expect(mdxResult.mdx).toContain("comments: true");
+            expect(mdxResult.mdx).toContain("---");
 
-      // Verify the round-trip conversion produces valid MDX
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx).toContain("title: Speech to Text");
-      expect(mdxResult.mdx).toContain(
-        "subtitle: Learn how to turn spoken audio into text with ElevenLabs."
-      );
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx).toContain("## Overview");
-      expect(mdxResult.mdx).toContain(
-        "The ElevenLabs [Speech to Text (STT)](/docs/api-reference/speech-to-text) API"
-      );
-      expect(mdxResult.mdx).toContain("<CardGroup");
-      expect(mdxResult.mdx).toContain("<Card");
-      expect(mdxResult.mdx).toContain("<Info>");
-      expect(mdxResult.mdx).toContain("<Tabs>");
-      expect(mdxResult.mdx).toContain("<Tab");
-      expect(mdxResult.mdx).toContain("<AccordionGroup>");
-      expect(mdxResult.mdx).toContain("<Accordion");
-    });
-  });
+            // Verify advanced features are preserved
+            expect(mdxResult.mdx).toContain("~~strikethrough~~");
+            expect(mdxResult.mdx).toContain("<sup>superscript</sup>");
+            expect(mdxResult.mdx).toContain("<sub>subscript</sub>");
+            expect(mdxResult.mdx).toContain("`inline code`");
+            expect(mdxResult.mdx).toContain("**bold**");
+            expect(mdxResult.mdx).toContain("*italic*");
 
-  describe("advanced-features.mdx", () => {
-    it("mdxToHtml: converts advanced features frontmatter correctly", () => {
-      const result = mdxToHtml(advancedFeaturesMdx);
+            // Verify basic HTML is preserved
+            expect(mdxResult.mdx).toContain("<div");
+            expect(mdxResult.mdx).toContain("className=");
 
-      // Verify frontmatter is extracted correctly
-      expect(result.frontmatter).toEqual({
-        title: "Advanced MDX Features Test",
-        subtitle: "A comprehensive test of unusual MDX features",
-        tags: ["test", "mdx", "advanced", "features"],
-        math: true,
-        comments: true,
-      });
-    });
+            // Verify math expressions are preserved
+            expect(mdxResult.mdx).toContain("$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$");
+            expect(mdxResult.mdx).toContain("\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}");
 
-    it("htmlToMdx: round-trip conversion preserves advanced features", () => {
-      const { html, frontmatter, originalFrontmatter } =
-        mdxToHtml(advancedFeaturesMdx);
-      const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+            // Verify task lists are preserved
+            expect(mdxResult.mdx).toContain("[x] Completed task");
+            expect(mdxResult.mdx).toContain("[ ] Pending task");
 
-      // Verify the round-trip conversion produces valid MDX
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx).toContain("title: Advanced MDX Features Test");
-      expect(mdxResult.mdx).toContain(
-        "subtitle: A comprehensive test of unusual MDX features"
-      );
-      expect(mdxResult.mdx).toContain("tags:");
-      expect(mdxResult.mdx).toContain("  - test");
-      expect(mdxResult.mdx).toContain("  - mdx");
-      expect(mdxResult.mdx).toContain("  - advanced");
-      expect(mdxResult.mdx).toContain("  - features");
-      expect(mdxResult.mdx).toContain("math: true");
-      expect(mdxResult.mdx).toContain("comments: true");
-      expect(mdxResult.mdx).toContain("---");
+            // Verify definition lists are preserved
+            expect(mdxResult.mdx).toContain("<dl>");
+            expect(mdxResult.mdx).toContain("<dt>");
+            expect(mdxResult.mdx).toContain("<dd>");
 
-      // Verify advanced features are preserved
-      expect(mdxResult.mdx).toContain("~~strikethrough~~");
-      expect(mdxResult.mdx).toContain("<sup>superscript</sup>");
-      expect(mdxResult.mdx).toContain("<sub>subscript</sub>");
-      expect(mdxResult.mdx).toContain("`inline code`");
-      expect(mdxResult.mdx).toContain("**bold**");
-      expect(mdxResult.mdx).toContain("*italic*");
+            // Verify footnotes are preserved
+            expect(mdxResult.mdx).toContain("[^1]");
+            expect(mdxResult.mdx).toContain("[^2]");
 
-      // Verify basic HTML is preserved
-      expect(mdxResult.mdx).toContain("<div");
-      expect(mdxResult.mdx).toContain("className=");
+            // Verify comments are preserved
+            expect(mdxResult.mdx).toContain("{/*");
 
-      // Verify math expressions are preserved
-      expect(mdxResult.mdx).toContain(
-        "$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$"
-      );
-      expect(mdxResult.mdx).toContain(
-        "\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}"
-      );
+            // Verify complex tables are preserved
+            expect(mdxResult.mdx).toContain("| Feature | Description | Example | Status |");
+            expect(mdxResult.mdx).toContain("|:--------|:-----------:|--------:|:------:|");
 
-      // Verify task lists are preserved
-      expect(mdxResult.mdx).toContain("[x] Completed task");
-      expect(mdxResult.mdx).toContain("[ ] Pending task");
+            // Verify code blocks are preserved
+            expect(mdxResult.mdx).toContain("```javascript");
+            expect(mdxResult.mdx).toContain("```typescript");
+            expect(mdxResult.mdx).toContain("```css");
 
-      // Verify definition lists are preserved
-      expect(mdxResult.mdx).toContain("<dl>");
-      expect(mdxResult.mdx).toContain("<dt>");
-      expect(mdxResult.mdx).toContain("<dd>");
+            // Verify blockquotes are preserved
+            expect(mdxResult.mdx).toContain("> This is a **blockquote**");
 
-      // Verify footnotes are preserved
-      expect(mdxResult.mdx).toContain("[^1]");
-      expect(mdxResult.mdx).toContain("[^2]");
+            // Verify special characters and Unicode are preserved
+            expect(mdxResult.mdx).toContain("🚀 💻 ⚡ 🎯");
+            expect(mdxResult.mdx).toContain("مرحبا بالعالم");
+            expect(mdxResult.mdx).toContain("α β γ δ ε");
+        });
 
-      // Verify comments are preserved
-      expect(mdxResult.mdx).toContain("{/*");
+        it("mdxToHtml: handles basic HTML and JSX elements", () => {
+            const { html } = mdxToHtml(advancedFeaturesMdx);
+            const { mdx } = htmlToMdx(html);
 
-      // Verify complex tables are preserved
-      expect(mdxResult.mdx).toContain(
-        "| Feature | Description | Example | Status |"
-      );
-      expect(mdxResult.mdx).toContain(
-        "|:--------|:-----------:|--------:|:------:|"
-      );
+            // Check for basic HTML and JSX elements in round-trip conversion
+            expect(mdx).toContain("<div");
+            expect(mdx).toContain("className=");
+        });
 
-      // Verify code blocks are preserved
-      expect(mdxResult.mdx).toContain("```javascript");
-      expect(mdxResult.mdx).toContain("```typescript");
-      expect(mdxResult.mdx).toContain("```css");
+        it("mdxToHtml: preserves event handlers and expressions", () => {
+            const { html } = mdxToHtml(advancedFeaturesMdx);
+            const { mdx } = htmlToMdx(html);
 
-      // Verify blockquotes are preserved
-      expect(mdxResult.mdx).toContain("> This is a **blockquote**");
-
-      // Verify special characters and Unicode are preserved
-      expect(mdxResult.mdx).toContain("🚀 💻 ⚡ 🎯");
-      expect(mdxResult.mdx).toContain("مرحبا بالعالم");
-      expect(mdxResult.mdx).toContain("α β γ δ ε");
+            // Check for event handlers and expressions in HTML
+            expect(mdx).toContain("onClick=");
+            expect(mdx).toContain("{2 + 2}");
+            expect(mdx).toContain("{true ?");
+            expect(mdx).toContain("`${");
+            expect(mdx).toContain("}`");
+        });
     });
 
-    it("mdxToHtml: handles basic HTML and JSX elements", () => {
-      const { html } = mdxToHtml(advancedFeaturesMdx);
-      const { mdx } = htmlToMdx(html);
+    describe("Fixture files - file snapshots", () => {
+        it("mdxToHtml: faq.mdx file snapshot", async () => {
+            const result = mdxToHtml(faqMdx);
+            const snapshotDir = path.join(__dirname, "__snapshots__");
+            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            const file = path.join(snapshotDir, "faq-mdxToHtml.json");
+            writeFileSync(file, JSON.stringify(result, null, 2));
+            await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
+        });
 
-      // Check for basic HTML and JSX elements in round-trip conversion
-      expect(mdx).toContain("<div");
-      expect(mdx).toContain("className=");
+        it("htmlToMdx: faq.mdx file snapshot", async () => {
+            const { html, frontmatter } = mdxToHtml(faqMdx);
+            const mdxResult = htmlToMdx(html, frontmatter);
+            const snapshotDir = path.join(__dirname, "__snapshots__");
+            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            const file = path.join(snapshotDir, "faq-htmlToMdx.json");
+            writeFileSync(file, JSON.stringify(mdxResult, null, 2));
+            await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
+        });
+
+        it("mdxToHtml: landing-page.mdx file snapshot", async () => {
+            const result = mdxToHtml(landingPageMdx);
+            const snapshotDir = path.join(__dirname, "__snapshots__");
+            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            const file = path.join(snapshotDir, "landing-page-mdxToHtml.json");
+            writeFileSync(file, JSON.stringify(result, null, 2));
+            await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
+        });
+
+        it("htmlToMdx: landing-page.mdx file snapshot", async () => {
+            const { html, frontmatter } = mdxToHtml(landingPageMdx);
+            const mdxResult = htmlToMdx(html, frontmatter);
+            const snapshotDir = path.join(__dirname, "__snapshots__");
+            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            const file = path.join(snapshotDir, "landing-page-htmlToMdx.json");
+            writeFileSync(file, JSON.stringify(mdxResult, null, 2));
+            await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
+        });
+
+        it("mdxToHtml: advanced-features.mdx file snapshot", async () => {
+            const result = mdxToHtml(advancedFeaturesMdx);
+            const snapshotDir = path.join(__dirname, "__snapshots__");
+            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            const file = path.join(snapshotDir, "advanced-features-mdxToHtml.json");
+            writeFileSync(file, JSON.stringify(result, null, 2));
+            await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
+        });
+
+        it("htmlToMdx: advanced-features.mdx file snapshot", async () => {
+            const { html, frontmatter } = mdxToHtml(advancedFeaturesMdx);
+            const mdxResult = htmlToMdx(html, frontmatter);
+            const snapshotDir = path.join(__dirname, "__snapshots__");
+            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            const file = path.join(snapshotDir, "advanced-features-htmlToMdx.json");
+            writeFileSync(file, JSON.stringify(mdxResult, null, 2));
+            await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
+        });
     });
 
-    it("mdxToHtml: preserves event handlers and expressions", () => {
-      const { html } = mdxToHtml(advancedFeaturesMdx);
-      const { mdx } = htmlToMdx(html);
-
-      // Check for event handlers and expressions in HTML
-      expect(mdx).toContain("onClick=");
-      expect(mdx).toContain("{2 + 2}");
-      expect(mdx).toContain("{true ?");
-      expect(mdx).toContain("`${");
-      expect(mdx).toContain("}`");
-    });
-  });
-
-  describe("Fixture files - file snapshots", () => {
-    it("mdxToHtml: faq.mdx file snapshot", async () => {
-      const result = mdxToHtml(faqMdx);
-      const snapshotDir = path.join(__dirname, "__snapshots__");
-      if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-      const file = path.join(snapshotDir, "faq-mdxToHtml.json");
-      writeFileSync(file, JSON.stringify(result, null, 2));
-      await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
+    describe("openapi-server.mdx", () => {
+        it("round-trip conversion preserves structure", () => {
+            const { html, frontmatter, originalFrontmatter } = mdxToHtml(openApiServerMdx);
+            const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+            // Check that key content is preserved (can't expect exact equality with v2 system)
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx.length).toBeGreaterThan(100);
+        });
     });
 
-    it("htmlToMdx: faq.mdx file snapshot", async () => {
-      const { html, frontmatter } = mdxToHtml(faqMdx);
-      const mdxResult = htmlToMdx(html, frontmatter);
-      const snapshotDir = path.join(__dirname, "__snapshots__");
-      if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-      const file = path.join(snapshotDir, "faq-htmlToMdx.json");
-      writeFileSync(file, JSON.stringify(mdxResult, null, 2));
-      await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(
-        file
-      );
+    describe("use-cases.mdx", () => {
+        it("round-trip conversion preserves structure", () => {
+            const { html, frontmatter, originalFrontmatter } = mdxToHtml(useCasesMdx);
+            const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+            // Check that key content is preserved (can't expect exact equality with v2 system)
+            expect(mdxResult.mdx).toContain("---");
+            expect(mdxResult.mdx.length).toBeGreaterThan(100);
+        });
     });
 
-    it("mdxToHtml: landing-page.mdx file snapshot", async () => {
-      const result = mdxToHtml(landingPageMdx);
-      const snapshotDir = path.join(__dirname, "__snapshots__");
-      if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-      const file = path.join(snapshotDir, "landing-page-mdxToHtml.json");
-      writeFileSync(file, JSON.stringify(result, null, 2));
-      await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
+    describe("event-handler-functions.md", () => {
+        it("round-trip conversion preserves structure", () => {
+            const { html, frontmatter, originalFrontmatter } = mdxToHtml(eventHandlerFunctionsMdx);
+            const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
+            // Check that key content is preserved (can't expect exact equality with v2 system)
+            expect(mdxResult.mdx).toContain("# Event handler methods");
+            expect(mdxResult.mdx.length).toBeGreaterThan(100);
+        });
     });
-
-    it("htmlToMdx: landing-page.mdx file snapshot", async () => {
-      const { html, frontmatter } = mdxToHtml(landingPageMdx);
-      const mdxResult = htmlToMdx(html, frontmatter);
-      const snapshotDir = path.join(__dirname, "__snapshots__");
-      if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-      const file = path.join(snapshotDir, "landing-page-htmlToMdx.json");
-      writeFileSync(file, JSON.stringify(mdxResult, null, 2));
-      await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(
-        file
-      );
-    });
-
-    it("mdxToHtml: advanced-features.mdx file snapshot", async () => {
-      const result = mdxToHtml(advancedFeaturesMdx);
-      const snapshotDir = path.join(__dirname, "__snapshots__");
-      if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-      const file = path.join(snapshotDir, "advanced-features-mdxToHtml.json");
-      writeFileSync(file, JSON.stringify(result, null, 2));
-      await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
-    });
-
-    it("htmlToMdx: advanced-features.mdx file snapshot", async () => {
-      const { html, frontmatter } = mdxToHtml(advancedFeaturesMdx);
-      const mdxResult = htmlToMdx(html, frontmatter);
-      const snapshotDir = path.join(__dirname, "__snapshots__");
-      if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
-      const file = path.join(snapshotDir, "advanced-features-htmlToMdx.json");
-      writeFileSync(file, JSON.stringify(mdxResult, null, 2));
-      await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(
-        file
-      );
-    });
-  });
-
-  describe("openapi-server.mdx", () => {
-    it("round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalFrontmatter } =
-        mdxToHtml(openApiServerMdx);
-      const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
-      // Check that key content is preserved (can't expect exact equality with v2 system)
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx.length).toBeGreaterThan(100);
-    });
-  });
-
-  describe("use-cases.mdx", () => {
-    it("round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalFrontmatter } = mdxToHtml(useCasesMdx);
-      const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
-      // Check that key content is preserved (can't expect exact equality with v2 system)
-      expect(mdxResult.mdx).toContain("---");
-      expect(mdxResult.mdx.length).toBeGreaterThan(100);
-    });
-  });
-
-  describe("event-handler-functions.md", () => {
-    it("round-trip conversion preserves structure", () => {
-      const { html, frontmatter, originalFrontmatter } = mdxToHtml(
-        eventHandlerFunctionsMdx
-      );
-      const mdxResult = htmlToMdx(html, frontmatter, originalFrontmatter);
-      // Check that key content is preserved (can't expect exact equality with v2 system)
-      expect(mdxResult.mdx).toContain("# Event handler methods");
-      expect(mdxResult.mdx.length).toBeGreaterThan(100);
-    });
-  });
 });

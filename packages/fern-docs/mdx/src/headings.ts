@@ -7,15 +7,15 @@ import { mdastToString } from "./mdast-utils/mdast-to-string";
 import { getPosition } from "./position";
 
 export interface HeadingMetadata {
-  depth: 1 | 2 | 3 | 4 | 5 | 6;
-  title: string;
-  id: string;
+    depth: 1 | 2 | 3 | 4 | 5 | 6;
+    title: string;
+    id: string;
 
-  /**
-   * Position of the heading in the raw markdown
-   */
-  start: number;
-  length: number;
+    /**
+     * Position of the heading in the raw markdown
+     */
+    start: number;
+    length: number;
 }
 
 const slugger = new GithubSlugger();
@@ -26,43 +26,40 @@ const slugger = new GithubSlugger();
  * @param lines lines of the raw markdown (split by "\n") used to calculate the position of the heading
  * @returns
  */
-export function collectRootHeadings(
-  tree: Root,
-  lines: readonly string[]
-): HeadingMetadata[] {
-  slugger.reset();
+export function collectRootHeadings(tree: Root, lines: readonly string[]): HeadingMetadata[] {
+    slugger.reset();
 
-  const headings: HeadingMetadata[] = [];
+    const headings: HeadingMetadata[] = [];
 
-  visit(tree, "heading", (heading, _index, parent) => {
-    if (parent?.type !== "root") {
-      return;
-    }
+    visit(tree, "heading", (heading, _index, parent) => {
+        if (parent?.type !== "root") {
+            return;
+        }
 
-    if (!heading.position) {
-      console.error("Expected heading to have position; Skipping...");
-      return;
-    }
+        if (!heading.position) {
+            console.error("Expected heading to have position; Skipping...");
+            return;
+        }
 
-    // `toString` will strip away all markdown formatting for the title
-    // TODO: we should preserve some formatting within the heading, i.e. `<code>` and `<u>`, etc.
-    const rawTitle = mdastToString(heading, { preserveNewlines: false });
+        // `toString` will strip away all markdown formatting for the title
+        // TODO: we should preserve some formatting within the heading, i.e. `<code>` and `<u>`, etc.
+        const rawTitle = mdastToString(heading, { preserveNewlines: false });
 
-    const extractedTitle = extractAnchorFromHeadingText(rawTitle);
-    const title = extractedTitle.text;
+        const extractedTitle = extractAnchorFromHeadingText(rawTitle);
+        const title = extractedTitle.text;
 
-    let id = extractedTitle.anchor;
+        let id = extractedTitle.anchor;
 
-    if (id == null) {
-      id = slugger.slug(title);
-    } else {
-      // add occurrences to ensure uniqueness
-      slugger.occurrences[id] = (slugger.occurrences[id] ?? 0) + 1;
-    }
+        if (id == null) {
+            id = slugger.slug(title);
+        } else {
+            // add occurrences to ensure uniqueness
+            slugger.occurrences[id] = (slugger.occurrences[id] ?? 0) + 1;
+        }
 
-    const { start, length } = getPosition(lines, heading.position);
-    headings.push({ depth: heading.depth, title, id, start, length });
-  });
+        const { start, length } = getPosition(lines, heading.position);
+        headings.push({ depth: heading.depth, title, id, start, length });
+    });
 
-  return headings;
+    return headings;
 }

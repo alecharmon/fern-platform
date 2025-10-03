@@ -1,11 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "include": [
-    "src/**/*",
-    "next.config.ts",
-    "vitest.config.ts",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["src/**/*", "next.config.ts", "vitest.config.ts", ".next/types/**/*.ts"],
   "compilerOptions": {
     "jsx": "preserve"
   }

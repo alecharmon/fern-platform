@@ -8,7 +8,7 @@ import { DocsV1Read } from "@fern-api/fdr-sdk";
 import { PosthogProvider } from "./posthog-provider";
 
 const FullstoryScript = dynamic(() => import("./FullstoryScript"), {
-  ssr: true,
+    ssr: true
 });
 const GoogleAnalytics = dynamic(() => import("./ga"), { ssr: true });
 const GoogleTagManager = dynamic(() => import("./gtm"), { ssr: true });
@@ -16,26 +16,24 @@ const IntercomScript = dynamic(() => import("./intercom"), { ssr: true });
 const SegmentScript = dynamic(() => import("./segment"), { ssr: true });
 
 export function CustomerAnalytics({
-  config,
-  isPosthogDisabled,
+    config,
+    isPosthogDisabled
 }: {
-  config?: Partial<DocsV1Read.AnalyticsConfig>;
-  isPosthogDisabled: boolean;
+    config?: Partial<DocsV1Read.AnalyticsConfig>;
+    isPosthogDisabled: boolean;
 }) {
-  if (!config) {
-    return null;
-  }
+    if (!config) {
+        return null;
+    }
 
-  return (
-    <>
-      {!isPosthogDisabled && (
-        <PosthogProvider customerConfig={config.posthog} />
-      )}
-      {config.fullstory && <FullstoryScript config={config.fullstory} />}
-      {config.ga4 && <GoogleAnalytics gaId={config.ga4.measurementId} />}
-      {config.gtm && <GoogleTagManager gtmId={config.gtm.containerId} />}
-      {config.intercom && <IntercomScript config={config.intercom} />}
-      {config.segment && <SegmentScript apiKey={config.segment.writeKey} />}
-    </>
-  );
+    return (
+        <>
+            {!isPosthogDisabled && <PosthogProvider customerConfig={config.posthog} />}
+            {config.fullstory && <FullstoryScript config={config.fullstory} />}
+            {config.ga4 && <GoogleAnalytics gaId={config.ga4.measurementId} />}
+            {config.gtm && <GoogleTagManager gtmId={config.gtm.containerId} />}
+            {config.intercom && <IntercomScript config={config.intercom} />}
+            {config.segment && <SegmentScript apiKey={config.segment.writeKey} />}
+        </>
+    );
 }

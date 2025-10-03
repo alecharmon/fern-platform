@@ -12,23 +12,23 @@ import { ReactQueryKey, inferQueryData } from "./queryKeys";
 const QUERY_KEY = ReactQueryKey.myOrganizations();
 
 export function useOrganizations() {
-  return convertQueryResultToLoadable(
-    useQuery<inferQueryData<typeof QUERY_KEY>>({
-      queryKey: QUERY_KEY,
-      queryFn: () => DashboardApiClient.getMyOrganizations(),
-    })
-  );
+    return convertQueryResultToLoadable(
+        useQuery<inferQueryData<typeof QUERY_KEY>>({
+            queryKey: QUERY_KEY,
+            queryFn: () => DashboardApiClient.getMyOrganizations()
+        })
+    );
 }
 
 export function useOrganization(orgName: Auth0OrgName) {
-  const organizations = useOrganizations();
-  if (organizations.type !== "loaded") {
-    return undefined;
-  }
-  return organizations.value.find((org) => org.name === orgName);
+    const organizations = useOrganizations();
+    if (organizations.type !== "loaded") {
+        return undefined;
+    }
+    return organizations.value.find((org) => org.name === orgName);
 }
 
 export function useCurrentOrganization() {
-  const orgName = useOrgNameFromPathname();
-  return useOrganization(orgName);
+    const orgName = useOrgNameFromPathname();
+    return useOrganization(orgName);
 }

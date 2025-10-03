@@ -10,30 +10,30 @@ import getDocsGithubUrl from "./getDocsGithubUrl";
 import { assertGithubAccessByUrl } from "./validators";
 
 export const assertAuthAndFetchGithubUrl = cache(
-  async ({ orgName, docsUrl }: { orgName: Auth0OrgName; docsUrl: DocsUrl }) => {
-    // Validate session
-    const session = await getCurrentSession();
-    if (session == null) {
-      redirect("/");
+    async ({ orgName, docsUrl }: { orgName: Auth0OrgName; docsUrl: DocsUrl }) => {
+        // Validate session
+        const session = await getCurrentSession();
+        if (session == null) {
+            redirect("/");
+        }
+
+        // Validate organization access
+        await assertUserHasOrganizationAccess({
+            token: session.accessToken,
+            orgName
+        });
+
+        // Validate GitHub access
+        const urlResult = await getDocsGithubUrl({
+            url: docsUrl,
+            token: session.accessToken
+        });
+        if (!urlResult.success) {
+            redirect(`/${orgName}/docs`);
+        }
+        const githubUrl = urlResult.githubUrl;
+        await assertGithubAccessByUrl(orgName, docsUrl, githubUrl);
+
+        return { githubUrl, session };
     }
-
-    // Validate organization access
-    await assertUserHasOrganizationAccess({
-      token: session.accessToken,
-      orgName,
-    });
-
-    // Validate GitHub access
-    const urlResult = await getDocsGithubUrl({
-      url: docsUrl,
-      token: session.accessToken,
-    });
-    if (!urlResult.success) {
-      redirect(`/${orgName}/docs`);
-    }
-    const githubUrl = urlResult.githubUrl;
-    await assertGithubAccessByUrl(orgName, docsUrl, githubUrl);
-
-    return { githubUrl, session };
-  }
 );

@@ -52,14 +52,14 @@ export class Discord {
      */
     public createDiscordIntegration(
         request: FernAI.CreateDiscordIntegrationRequest,
-        requestOptions?: Discord.RequestOptions,
+        requestOptions?: Discord.RequestOptions
     ): core.HttpResponsePromise<FernAI.DiscordIntegrationResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createDiscordIntegration(request, requestOptions));
     }
 
     private async __createDiscordIntegration(
         request: FernAI.CreateDiscordIntegrationRequest,
-        requestOptions?: Discord.RequestOptions,
+        requestOptions?: Discord.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.DiscordIntegrationResponse>> {
         const { domain } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -67,21 +67,21 @@ export class Discord {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "discord/install",
+                "discord/install"
             ),
             method: "POST",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.DiscordIntegrationResponse, rawResponse: _response.rawResponse };
@@ -92,13 +92,13 @@ export class Discord {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -108,14 +108,14 @@ export class Discord {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /discord/install.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -131,26 +131,26 @@ export class Discord {
     }
 
     private async __handleDiscordInstallCallback(
-        requestOptions?: Discord.RequestOptions,
+        requestOptions?: Discord.RequestOptions
     ): Promise<core.WithRawResponse<unknown>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "discord/install/callback",
+                "discord/install/callback"
             ),
             method: "GET",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body, rawResponse: _response.rawResponse };
@@ -160,7 +160,7 @@ export class Discord {
             throw new errors.FernAIError({
                 statusCode: _response.error.statusCode,
                 body: _response.error.body,
-                rawResponse: _response.rawResponse,
+                rawResponse: _response.rawResponse
             });
         }
 
@@ -169,14 +169,14 @@ export class Discord {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /discord/install/callback.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

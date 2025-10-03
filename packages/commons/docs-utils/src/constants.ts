@@ -27,14 +27,13 @@ export const REVALIDATE_SECONDS = 60 * 60 * 24 * 6;
  * If the domain is `*.docs.buildwithfern.com`, it's a preview domain and SEO should be disabled.
  */
 export const FERN_DOCS_PREVIEW_DOMAINS = [
-  BUILDWITHFERN_COM,
-  "ferndocs.com",
-  "ferndocs.dev",
-  "buildwithfern.dev",
-  "vercel.app", // special case for Vercel preview deployments
+    BUILDWITHFERN_COM,
+    "ferndocs.com",
+    "ferndocs.dev",
+    "buildwithfern.dev",
+    "vercel.app" // special case for Vercel preview deployments
 ];
-export const FERN_DOCS_STAGING_BUILDWITHFERN_COM =
-  "docs.staging.buildwithfern.com";
+export const FERN_DOCS_STAGING_BUILDWITHFERN_COM = "docs.staging.buildwithfern.com";
 export const FERN_DOCS_DEV_BUILDWITHFERN_COM = "docs.dev.buildwithfern.com";
 export const FERN_DOCS_BUILDWITHFERN_COM = "docs.buildwithfern.com";
 export const FERN_DOCS_FERNDOCS_APP = "ferndocs.app";
@@ -57,20 +56,20 @@ export const FERN_COLOR_AIR = "oklch(99.56% 0.0078 139.44)";
 export const FERN_COLOR_GROUND = "oklch(16.16% 0.021 144.53)";
 
 export const FERN_DOCS_ORIGINS = [
-  "app-dev.buildwithfern.com",
-  "app-staging.buildwithfern.com",
-  "app.buildwithfern.com",
-  "canary-slash.ferndocs.com",
-  "canary.ferndocs.com",
-  "dev.ferndocs.com",
-  "legacy-dev.ferndocs.com",
-  "legacy-staging.ferndocs.com",
-  "legacy.ferndocs.com",
-  "prod-assets.ferndocs.com",
-  "prod-slash.ferndocs.com",
-  "prod.ferndocs.com",
-  "staging.ferndocs.com",
-  "preview.ferndocs.com",
-  "stable.ferndocs.com",
-  "experimental.ferndocs.com",
+    "app-dev.buildwithfern.com",
+    "app-staging.buildwithfern.com",
+    "app.buildwithfern.com",
+    "canary-slash.ferndocs.com",
+    "canary.ferndocs.com",
+    "dev.ferndocs.com",
+    "legacy-dev.ferndocs.com",
+    "legacy-staging.ferndocs.com",
+    "legacy.ferndocs.com",
+    "prod-assets.ferndocs.com",
+    "prod-slash.ferndocs.com",
+    "prod.ferndocs.com",
+    "staging.ferndocs.com",
+    "preview.ferndocs.com",
+    "stable.ferndocs.com",
+    "experimental.ferndocs.com"
 ];

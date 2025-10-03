@@ -17,9 +17,7 @@
   },
   "main": "src/index.ts",
   "module": "src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "pnpm compile:js && pnpm compile:types",

@@ -11,10 +11,7 @@
     "url": "git+https://github.com/fern-api/fern-platform.git",
     "directory": "packages/components"
   },
-  "sideEffects": [
-    "*.css",
-    "*.scss"
-  ],
+  "sideEffects": ["*.css", "*.scss"],
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -54,9 +51,7 @@
     "./mdx/*": "./src/mdx/*.tsx",
     "./navigation/local-storage": "./src/navigation/localStorageUtils.ts"
   },
-  "files": [
-    "src"
-  ],
+  "files": ["src"],
   "scripts": {
     "build-storybook": "storybook build",
     "chromatic": "pnpx chromatic --project-token=chpt_48b3c560025e978",
@@ -73,9 +68,7 @@
     "test": "vitest --run --passWithNoTests --globals --disable-console-intercept"
   },
   "eslintConfig": {
-    "extends": [
-      "plugin:storybook/recommended"
-    ]
+    "extends": ["plugin:storybook/recommended"]
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",

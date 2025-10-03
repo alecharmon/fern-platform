@@ -12,9 +12,7 @@
   "main": "dist/cdk.js",
   "source": "src/cdk.ts",
   "types": "dist/cdk.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsc",
     "cdk": "cdk",

@@ -6,9 +6,9 @@ export { useBooleanState } from "./useBooleanState";
 export { useCopyToClipboard } from "./useCopyToClipboard";
 export { useDebouncedCallback } from "./useDebouncedCallback";
 export {
-  useDeepCompareEffect,
-  useDeepCompareEffectNoCheck,
-  useDeepCompareMemoize,
+    useDeepCompareEffect,
+    useDeepCompareEffectNoCheck,
+    useDeepCompareMemoize
 } from "./useDeepEquals";
 export { useDimensions, type Dimensions } from "./useDimensions";
 export { useEventCallback } from "./useEventCallback";
@@ -30,6 +30,6 @@ export { tunnel } from "./tunnel-rat";
 export { useMinWidth, useIsMobile, useIsDesktop } from "./useBreakpoint";
 export { useIsomorphicLayoutEffect } from "./useIsomorphicLayoutEffect";
 export {
-  isomorphicRequestIdleCallback,
-  isomorphicRequestAnimationFrame,
+    isomorphicRequestIdleCallback,
+    isomorphicRequestAnimationFrame
 } from "./request-callback";

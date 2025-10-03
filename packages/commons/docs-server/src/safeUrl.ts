@@ -1,16 +1,16 @@
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 
 export function safeUrl(url: string | null | undefined): URL | undefined {
-  if (url == null) {
-    return undefined;
-  }
+    if (url == null) {
+        return undefined;
+    }
 
-  url = withDefaultProtocol(url);
+    url = withDefaultProtocol(url);
 
-  try {
-    return new URL(url);
-  } catch (e) {
-    console.error(`[safe-url] ${JSON.stringify(e)}`);
-    return undefined;
-  }
+    try {
+        return new URL(url);
+    } catch (e) {
+        console.error(`[safe-url] ${JSON.stringify(e)}`);
+        return undefined;
+    }
 }

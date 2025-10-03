@@ -1,33 +1,31 @@
 import { NodeId, PlaygroundSettings } from "@fern-api/fdr-sdk/navigation";
 
-export function usePlaygroundSettings(
-  _currentNodeId?: NodeId
-): PlaygroundSettings | undefined {
-  // const navigationNodes = useNodeCollector();
+export function usePlaygroundSettings(_currentNodeId?: NodeId): PlaygroundSettings | undefined {
+    // const navigationNodes = useNodeCollector();
 
-  // const nodeIdToUse = playgroundOpen ? playgroundNodeId : currentNodeId;
+    // const nodeIdToUse = playgroundOpen ? playgroundNodeId : currentNodeId;
 
-  // if (nodeIdToUse) {
-  //   const maybeCurrentHasPlayground = nodeHasPlayground(
-  //     navigationNodes.get(nodeIdToUse)
-  //   );
+    // if (nodeIdToUse) {
+    //   const maybeCurrentHasPlayground = nodeHasPlayground(
+    //     navigationNodes.get(nodeIdToUse)
+    //   );
 
-  //   if (maybeCurrentHasPlayground) {
-  //     return maybeCurrentHasPlayground;
-  //   } else {
-  //     for (const node of [
-  //       ...navigationNodes.getParents(nodeIdToUse),
-  //     ].reverse()) {
-  //       const maybeNodeHasPlayground = nodeHasPlayground(node);
-  //       if (maybeNodeHasPlayground) {
-  //         return maybeNodeHasPlayground;
-  //       }
-  //     }
-  //   }
-  // }
+    //   if (maybeCurrentHasPlayground) {
+    //     return maybeCurrentHasPlayground;
+    //   } else {
+    //     for (const node of [
+    //       ...navigationNodes.getParents(nodeIdToUse),
+    //     ].reverse()) {
+    //       const maybeNodeHasPlayground = nodeHasPlayground(node);
+    //       if (maybeNodeHasPlayground) {
+    //         return maybeNodeHasPlayground;
+    //       }
+    //     }
+    //   }
+    // }
 
-  // return;
-  return undefined;
+    // return;
+    return undefined;
 }
 
 // function nodeHasPlayground(currentNode?: NavigationNode) {

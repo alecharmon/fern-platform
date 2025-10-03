@@ -55,7 +55,7 @@ export class Guidance {
     public createGuidance(
         domain: string,
         request: FernAI.CreateGuidanceRequest,
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): core.HttpResponsePromise<FernAI.CreateGuidanceResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createGuidance(domain, request, requestOptions));
     }
@@ -63,19 +63,19 @@ export class Guidance {
     private async __createGuidance(
         domain: string,
         request: FernAI.CreateGuidanceRequest,
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.CreateGuidanceResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `guidance/${encodeURIComponent(domain)}/create`,
+                `guidance/${encodeURIComponent(domain)}/create`
             ),
             method: "POST",
             headers: _headers,
@@ -85,7 +85,7 @@ export class Guidance {
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.CreateGuidanceResponse, rawResponse: _response.rawResponse };
@@ -96,13 +96,13 @@ export class Guidance {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -112,14 +112,14 @@ export class Guidance {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /guidance/{domain}/create.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -137,7 +137,7 @@ export class Guidance {
     public getGuidanceById(
         domain: string,
         guidanceId: string,
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): core.HttpResponsePromise<FernAI.GetGuidanceResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getGuidanceById(domain, guidanceId, requestOptions));
     }
@@ -145,26 +145,26 @@ export class Guidance {
     private async __getGuidanceById(
         domain: string,
         guidanceId: string,
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.GetGuidanceResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
+                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`
             ),
             method: "GET",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetGuidanceResponse, rawResponse: _response.rawResponse };
@@ -175,13 +175,13 @@ export class Guidance {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -191,16 +191,16 @@ export class Guidance {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling GET /guidance/{domain}/{guidance_id}.",
+                    "Timeout exceeded when calling GET /guidance/{domain}/{guidance_id}."
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -218,7 +218,7 @@ export class Guidance {
     public deleteGuidanceById(
         domain: string,
         guidanceId: string,
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): core.HttpResponsePromise<FernAI.DeleteGuidanceResponse> {
         return core.HttpResponsePromise.fromPromise(this.__deleteGuidanceById(domain, guidanceId, requestOptions));
     }
@@ -226,26 +226,26 @@ export class Guidance {
     private async __deleteGuidanceById(
         domain: string,
         guidanceId: string,
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.DeleteGuidanceResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
+                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`
             ),
             method: "DELETE",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.DeleteGuidanceResponse, rawResponse: _response.rawResponse };
@@ -256,13 +256,13 @@ export class Guidance {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -272,16 +272,16 @@ export class Guidance {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling DELETE /guidance/{domain}/{guidance_id}.",
+                    "Timeout exceeded when calling DELETE /guidance/{domain}/{guidance_id}."
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -301,7 +301,7 @@ export class Guidance {
         domain: string,
         guidanceId: string,
         request: FernAI.UpdateGuidanceRequest = {},
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): core.HttpResponsePromise<FernAI.UpdateGuidanceResponse> {
         return core.HttpResponsePromise.fromPromise(this.__update(domain, guidanceId, request, requestOptions));
     }
@@ -310,19 +310,19 @@ export class Guidance {
         domain: string,
         guidanceId: string,
         request: FernAI.UpdateGuidanceRequest = {},
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.UpdateGuidanceResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`,
+                `guidance/${encodeURIComponent(domain)}/${encodeURIComponent(guidanceId)}`
             ),
             method: "PATCH",
             headers: _headers,
@@ -332,7 +332,7 @@ export class Guidance {
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.UpdateGuidanceResponse, rawResponse: _response.rawResponse };
@@ -343,13 +343,13 @@ export class Guidance {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -359,16 +359,16 @@ export class Guidance {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling PATCH /guidance/{domain}/{guidance_id}.",
+                    "Timeout exceeded when calling PATCH /guidance/{domain}/{guidance_id}."
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -386,7 +386,7 @@ export class Guidance {
     public getGuidances(
         domain: string,
         request: FernAI.GetGuidancesRequest = {},
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): core.HttpResponsePromise<FernAI.GetGuidancesResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getGuidances(domain, request, requestOptions));
     }
@@ -394,7 +394,7 @@ export class Guidance {
     private async __getGuidances(
         domain: string,
         request: FernAI.GetGuidancesRequest = {},
-        requestOptions?: Guidance.RequestOptions,
+        requestOptions?: Guidance.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.GetGuidancesResponse>> {
         const { page, limit } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -409,21 +409,21 @@ export class Guidance {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `guidance/${encodeURIComponent(domain)}`,
+                `guidance/${encodeURIComponent(domain)}`
             ),
             method: "GET",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetGuidancesResponse, rawResponse: _response.rawResponse };
@@ -434,13 +434,13 @@ export class Guidance {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -450,14 +450,14 @@ export class Guidance {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /guidance/{domain}.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

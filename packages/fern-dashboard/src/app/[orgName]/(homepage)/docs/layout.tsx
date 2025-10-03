@@ -3,15 +3,15 @@ import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organizati
 import { EncodedDocsUrl } from "@/utils/types";
 
 export default async function DocsLayout({
-  children,
-  params,
+    children,
+    params
 }: {
-  children: React.ReactNode;
-  params: Promise<{ docsUrl: EncodedDocsUrl; orgName: Auth0OrgName }>;
+    children: React.ReactNode;
+    params: Promise<{ docsUrl: EncodedDocsUrl; orgName: Auth0OrgName }>;
 }) {
-  const { orgName } = await params;
+    const { orgName } = await params;
 
-  await getAuthenticatedSessionOrRedirect(orgName);
+    await getAuthenticatedSessionOrRedirect(orgName);
 
-  return <>{children}</>;
+    return <>{children}</>;
 }

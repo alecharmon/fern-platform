@@ -5,11 +5,5 @@
     "noEmit": true
   },
   "include": ["src/**/*", "vitest.config.ts", "lib/**/*"],
-  "exclude": [
-    "node_modules/**/*",
-    ".serverless/**/*",
-    ".webpack/**/*",
-    "_warmup/**/*",
-    ".vscode/**/*"
-  ]
+  "exclude": ["node_modules/**/*", ".serverless/**/*", ".webpack/**/*", "_warmup/**/*", ".vscode/**/*"]
 }

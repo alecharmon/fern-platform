@@ -5,25 +5,25 @@ import { AskAiEnabledServerSide } from "@/components/ask-ai/AskAiEnabledServerSi
 import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
 
 export default async function DocsSiteNavbar({
-  params,
+    params
 }: Readonly<{ params: Promise<{ orgName: Auth0OrgName; docsUrl: string }> }>) {
-  const { docsUrl } = await params;
+    const { docsUrl } = await params;
 
-  const session = await getCurrentSession();
-  if (session == null) {
-    return null;
-  }
+    const session = await getCurrentSession();
+    if (session == null) {
+        return null;
+    }
 
-  const isEmployee = await isFernEmployee(session.user.sub);
+    const isEmployee = await isFernEmployee(session.user.sub);
 
-  return (
-    <div className="flex">
-      <DocsSiteNavBarItem title="Overview" href="" />
-      <DocsSiteNavBarItem title="Web Analytics" href="web-analytics" />
-      <AskAiEnabledServerSide docsUrl={docsUrl}>
-        <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
-      </AskAiEnabledServerSide>
-      {isEmployee && <DocsSiteNavBarItem title="Settings" href="settings" />}
-    </div>
-  );
+    return (
+        <div className="flex">
+            <DocsSiteNavBarItem title="Overview" href="" />
+            <DocsSiteNavBarItem title="Web Analytics" href="web-analytics" />
+            <AskAiEnabledServerSide docsUrl={docsUrl}>
+                <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
+            </AskAiEnabledServerSide>
+            {isEmployee && <DocsSiteNavBarItem title="Settings" href="settings" />}
+        </div>
+    );
 }

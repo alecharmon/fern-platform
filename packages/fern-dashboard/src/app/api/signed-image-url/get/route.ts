@@ -9,38 +9,35 @@ import { maybeGetCurrentSession } from "../../utils/maybeGetCurrentSession";
 import { getSignedImageUrlBucketName } from "../bucket";
 
 export declare namespace getSignedImageUrl {
-  export type Request = z.infer<typeof GetSignedImageUrlRequest>;
-  export type Response = z.infer<typeof GetSignedImageUrlResponse>;
+    export type Request = z.infer<typeof GetSignedImageUrlRequest>;
+    export type Response = z.infer<typeof GetSignedImageUrlResponse>;
 }
 
 const GetSignedImageUrlRequest = z.object({
-  key: z.string(),
+    key: z.string()
 });
 
 const GetSignedImageUrlResponse = z.object({
-  imageUrl: z.string(),
+    imageUrl: z.string()
 });
 
 export const POST = withZodValidation(
-  GetSignedImageUrlRequest,
-  async (
-    req: NextRequest,
-    validatedBody: z.infer<typeof GetSignedImageUrlRequest>
-  ) => {
-    const maybeSessionData = await maybeGetCurrentSession(req);
-    if (maybeSessionData.errorResponse != null) {
-      return maybeSessionData.errorResponse;
+    GetSignedImageUrlRequest,
+    async (req: NextRequest, validatedBody: z.infer<typeof GetSignedImageUrlRequest>) => {
+        const maybeSessionData = await maybeGetCurrentSession(req);
+        if (maybeSessionData.errorResponse != null) {
+            return maybeSessionData.errorResponse;
+        }
+
+        const { key } = validatedBody;
+
+        const url = await getPresignedUrlForS3Object({
+            bucketName: getSignedImageUrlBucketName(),
+            objectKey: key
+        });
+        const validatedResult = GetSignedImageUrlResponse.parse({
+            imageUrl: url
+        });
+        return NextResponse.json(validatedResult);
     }
-
-    const { key } = validatedBody;
-
-    const url = await getPresignedUrlForS3Object({
-      bucketName: getSignedImageUrlBucketName(),
-      objectKey: key,
-    });
-    const validatedResult = GetSignedImageUrlResponse.parse({
-      imageUrl: url,
-    });
-    return NextResponse.json(validatedResult);
-  }
 );

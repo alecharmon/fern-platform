@@ -18,9 +18,7 @@
   },
   "main": "dist/js/index.js",
   "source": "src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./dist",
     "compile": "pnpm compile:js && pnpm compile:types",

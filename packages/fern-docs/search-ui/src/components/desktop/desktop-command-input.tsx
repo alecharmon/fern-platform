@@ -8,101 +8,90 @@ import { useIsomorphicLayoutEffect } from "swr/_internal";
 
 import * as Command from "../cmdk";
 import { useCommandUx } from "../shared";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
-export const DesktopCommandInputError = forwardRef<
-  HTMLButtonElement,
-  ComponentPropsWithoutRef<typeof TooltipTrigger>
->(({ children, asChild, ...props }, ref) => {
-  const { inputError } = useCommandUx();
-  if (inputError == null) {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp {...props} ref={ref}>
-        {children}
-      </Comp>
-    );
-  }
-  return (
-    <TooltipProvider>
-      <Tooltip open={true}>
-        <TooltipTrigger {...props} ref={ref} asChild={asChild}>
-          {children}
-        </TooltipTrigger>
-        <TooltipPortal>
-          <TooltipContent side="bottom" align="start">
-            <p>{inputError}</p>
-          </TooltipContent>
-        </TooltipPortal>
-      </Tooltip>
-    </TooltipProvider>
-  );
-});
+export const DesktopCommandInputError = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<typeof TooltipTrigger>>(
+    ({ children, asChild, ...props }, ref) => {
+        const { inputError } = useCommandUx();
+        if (inputError == null) {
+            const Comp = asChild ? Slot : "button";
+            return (
+                <Comp {...props} ref={ref}>
+                    {children}
+                </Comp>
+            );
+        }
+        return (
+            <TooltipProvider>
+                <Tooltip open={true}>
+                    <TooltipTrigger {...props} ref={ref} asChild={asChild}>
+                        {children}
+                    </TooltipTrigger>
+                    <TooltipPortal>
+                        <TooltipContent side="bottom" align="start">
+                            <p>{inputError}</p>
+                        </TooltipContent>
+                    </TooltipPortal>
+                </Tooltip>
+            </TooltipProvider>
+        );
+    }
+);
 
 DesktopCommandInputError.displayName = "DesktopCommandInputError";
 
-export const DesktopCommandInput = forwardRef<
-  HTMLInputElement,
-  ComponentPropsWithoutRef<typeof Command.Input>
->(({ children, ...props }, forwardedRef) => {
-  const scrollSelectedIntoView = Command.useScrollSelectedIntoView();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const selectionStateStart = useRef<number | null>(null);
-  const selectionStateEnd = useRef<number | null>(null);
-  const { setInputRef } = useCommandUx();
+export const DesktopCommandInput = forwardRef<HTMLInputElement, ComponentPropsWithoutRef<typeof Command.Input>>(
+    ({ children, ...props }, forwardedRef) => {
+        const scrollSelectedIntoView = Command.useScrollSelectedIntoView();
+        const inputRef = useRef<HTMLInputElement>(null);
+        const selectionStateStart = useRef<number | null>(null);
+        const selectionStateEnd = useRef<number | null>(null);
+        const { setInputRef } = useCommandUx();
 
-  // there's a bug in the cmdk library where the input gets re-mounted when the user types, and the cursor position is lost
-  // so when you're typing in the middle of the input, the cursor gets reset to the end of the input.
-  // this is a workaround to save the cursor position when the user types, and then restore it when the input is mounted again
-  useIsomorphicLayoutEffect(() => {
-    setInputRef(inputRef.current);
-    inputRef.current?.setSelectionRange(
-      selectionStateStart.current,
-      selectionStateEnd.current
-    );
-  });
+        // there's a bug in the cmdk library where the input gets re-mounted when the user types, and the cursor position is lost
+        // so when you're typing in the middle of the input, the cursor gets reset to the end of the input.
+        // this is a workaround to save the cursor position when the user types, and then restore it when the input is mounted again
+        useIsomorphicLayoutEffect(() => {
+            setInputRef(inputRef.current);
+            inputRef.current?.setSelectionRange(selectionStateStart.current, selectionStateEnd.current);
+        });
 
-  // receive a custom event that clears the input when the user presses escape
-  useEffect(() => {
-    const element = inputRef.current;
-    if (!element || props.disabled) {
-      return;
+        // receive a custom event that clears the input when the user presses escape
+        useEffect(() => {
+            const element = inputRef.current;
+            if (!element || props.disabled) {
+                return;
+            }
+            const onClearInput = () => {
+                props.onValueChange?.("");
+            };
+            element.addEventListener("cmdk-fern-clear-input", onClearInput);
+            return () => element.removeEventListener("cmdk-fern-clear-input", onClearInput);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [props.onValueChange, props.disabled]);
+
+        return (
+            <Command.Input
+                {...props}
+                ref={composeRefs(inputRef, forwardedRef)}
+                onChangeCapture={composeEventHandlers(props.onChangeCapture, (e) => {
+                    selectionStateStart.current = e.currentTarget.selectionStart;
+                    selectionStateEnd.current = e.currentTarget.selectionEnd;
+                    scrollSelectedIntoView();
+                })}
+                onBlur={composeEventHandlers(props.onBlur, () => {
+                    selectionStateStart.current = null;
+                    selectionStateEnd.current = null;
+                })}
+                onFocus={composeEventHandlers(props.onFocus, () => {
+                    selectionStateStart.current = null;
+                    selectionStateEnd.current = null;
+                })}
+            >
+                {children}
+            </Command.Input>
+        );
     }
-    const onClearInput = () => {
-      props.onValueChange?.("");
-    };
-    element.addEventListener("cmdk-fern-clear-input", onClearInput);
-    return () =>
-      element.removeEventListener("cmdk-fern-clear-input", onClearInput);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.onValueChange, props.disabled]);
-
-  return (
-    <Command.Input
-      {...props}
-      ref={composeRefs(inputRef, forwardedRef)}
-      onChangeCapture={composeEventHandlers(props.onChangeCapture, (e) => {
-        selectionStateStart.current = e.currentTarget.selectionStart;
-        selectionStateEnd.current = e.currentTarget.selectionEnd;
-        scrollSelectedIntoView();
-      })}
-      onBlur={composeEventHandlers(props.onBlur, () => {
-        selectionStateStart.current = null;
-        selectionStateEnd.current = null;
-      })}
-      onFocus={composeEventHandlers(props.onFocus, () => {
-        selectionStateStart.current = null;
-        selectionStateEnd.current = null;
-      })}
-    >
-      {children}
-    </Command.Input>
-  );
-});
+);
 
 DesktopCommandInput.displayName = "DesktopCommandInput";

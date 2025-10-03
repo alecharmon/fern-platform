@@ -12,24 +12,15 @@ import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
 import { FernTooltipProvider } from "@fern-docs/components";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
-import {
-  Loadable,
-  failed,
-  loaded,
-  loading,
-  notStartedLoading,
-} from "@fern-ui/loadable";
+import { Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { useEventCallback } from "@fern-ui/react-commons";
 
+import { isProxyDisabledAtom, usesApplicationJsonInFormDataValueAtom } from "@/state/api-explorer-flags";
 import {
-  isProxyDisabledAtom,
-  usesApplicationJsonInFormDataValueAtom,
-} from "@/state/api-explorer-flags";
-import {
-  PLAYGROUND_AUTH_STATE_ATOM,
-  PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
-  usePlaygroundEndpointFormState,
-  useResolvedPlaygroundState,
+    PLAYGROUND_AUTH_STATE_ATOM,
+    PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
+    usePlaygroundEndpointFormState,
+    useResolvedPlaygroundState
 } from "@/state/playground";
 
 import { track } from "../../analytics";
@@ -38,287 +29,262 @@ import { executeProxyRest } from "../fetch-utils/executeProxyRest";
 import { executeProxyStream } from "../fetch-utils/executeProxyStream";
 import type { ProxyRequest } from "../types";
 import { PlaygroundResponse } from "../types/playgroundResponse";
-import {
-  buildAuthHeaders,
-  getInitialEndpointRequestFormStateWithExample,
-  serializeFormStateBody,
-} from "../utils";
+import { buildAuthHeaders, getInitialEndpointRequestFormStateWithExample, serializeFormStateBody } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { isLocal } from "../utils/utils";
 import { PlaygroundEndpointContent } from "./PlaygroundEndpointContent";
 import { PlaygroundEndpointPath } from "./PlaygroundEndpointPath";
 
 export const PlaygroundEndpoint = ({
-  context,
-  authForm,
-  dynamicIRsByLanguage,
+    context,
+    authForm,
+    dynamicIRsByLanguage
 }: {
-  context: EndpointContext;
-  authForm: React.ReactNode;
-  dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
+    context: EndpointContext;
+    authForm: React.ReactNode;
+    dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
 }) => {
-  const resolvedPlaygroundState = useResolvedPlaygroundState();
-  const { node, endpoint, auth } = context;
+    const resolvedPlaygroundState = useResolvedPlaygroundState();
+    const { node, endpoint, auth } = context;
 
-  const [formState, setFormState] = usePlaygroundEndpointFormState(context);
+    const [formState, setFormState] = usePlaygroundEndpointFormState(context);
 
-  const resetWithExample = useEventCallback(() => {
-    setFormState(
-      getInitialEndpointRequestFormStateWithExample(
-        context,
-        context.endpoint.examples?.[0],
-        resolvedPlaygroundState
-      )
-    );
-  });
-
-  const resetWithoutExample = useEventCallback(() => {
-    setFormState(
-      getInitialEndpointRequestFormStateWithExample(
-        context,
-        undefined,
-        resolvedPlaygroundState
-      )
-    );
-  });
-
-  const usesApplicationJsonInFormDataValue = useAtomValue(
-    usesApplicationJsonInFormDataValueAtom
-  );
-  const isProxyDisabled = useAtomValue(isProxyDisabledAtom);
-  const [response, setResponse] =
-    useState<Loadable<PlaygroundResponse>>(notStartedLoading());
-
-  const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);
-
-  const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
-
-  const sendRequest = useCallback(async () => {
-    if (endpoint == null) {
-      return;
-    }
-    setResponse(loading());
-    try {
-      track("api_playground_request_sent", {
-        endpointId: endpoint.id,
-        endpointName: node.title,
-        method: endpoint.method,
-        docsRoute: `/${node.slug}`,
-      });
-      const authHeaders = buildAuthHeaders(
-        auth,
-        jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM),
-        {
-          redacted: false,
-        },
-        {
-          formState,
-          endpoint,
-          baseUrl,
-          setValue: setOAuthValue,
-        }
-      );
-      const headers = {
-        ...authHeaders,
-        ...mapValues(formState.headers ?? {}, (value) =>
-          unknownToString(value)
-        ),
-      };
-
-      if (
-        endpoint.method !== "GET" &&
-        endpoint.requests?.[0]?.contentType != null
-      ) {
-        headers["Content-Type"] = endpoint.requests[0].contentType;
-      }
-
-      // Add application/json content type for OpenRPC endpoints
-      if (endpoint.protocol?.type === "openrpc") {
-        headers["Content-Type"] = "application/json";
-      }
-
-      const req: ProxyRequest = {
-        url: buildEndpointUrl({
-          endpoint,
-          pathParameters: formState.pathParameters,
-          queryParameters: formState.queryParameters,
-          baseUrl,
-        }),
-        method: endpoint.method,
-        headers,
-        body: await serializeFormStateBody({
-          shape: endpoint.requests?.[0]?.body,
-          body: formState.body,
-          usesApplicationJsonInFormDataValue,
-          protocol: endpoint.protocol,
-        }),
-      };
-      if (endpoint.responses?.[0]?.body.type === "stream") {
-        const [res, stream] = await executeProxyStream(
-          req,
-          isProxyDisabled || isLocal()
+    const resetWithExample = useEventCallback(() => {
+        setFormState(
+            getInitialEndpointRequestFormStateWithExample(
+                context,
+                context.endpoint.examples?.[0],
+                resolvedPlaygroundState
+            )
         );
+    });
 
-        const time = Date.now();
+    const resetWithoutExample = useEventCallback(() => {
+        setFormState(getInitialEndpointRequestFormStateWithExample(context, undefined, resolvedPlaygroundState));
+    });
 
-        if (res.headers.get("content-type")?.includes("audio/")) {
-          const reader = stream.getReader();
-          const chunks: Uint8Array[] = [];
+    const usesApplicationJsonInFormDataValue = useAtomValue(usesApplicationJsonInFormDataValueAtom);
+    const isProxyDisabled = useAtomValue(isProxyDisabledAtom);
+    const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-          }
+    const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);
 
-          const audioBlob = new Blob(chunks, {
-            type: res.headers.get("content-type") || "",
-          });
-          const audioUrl = URL.createObjectURL(audioBlob);
+    const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
 
-          setResponse(
-            loaded({
-              type: "file",
-              response: {
-                headers: Object.fromEntries(res.headers.entries()),
-                ok: res.ok,
-                redirected: res.redirected,
-                status: res.status,
-                statusText: res.statusText,
-                type: res.type,
-                url: res.url,
-                body: audioUrl,
-              },
-              contentType: res.headers.get("content-type") || "",
-              time: Date.now() - time,
-              size: String(
-                chunks.reduce((total, chunk) => total + chunk.length, 0)
-              ),
-            })
-          );
-
-          return;
+    const sendRequest = useCallback(async () => {
+        if (endpoint == null) {
+            return;
         }
-
-        const reader = stream.getReader();
-        let result = "";
-        const decoder = new TextDecoder();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            break;
-          }
-          result += decoder.decode(value);
-          setResponse(
-            loaded({
-              type: "stream",
-              response: {
-                status: res.status,
-                body: result,
-              },
-              time: Date.now() - time,
-            })
-          );
-        }
-      } else {
-        const res = await executeProxyRest(req, isProxyDisabled || isLocal());
-        setResponse(loaded(res));
-        if (res.type !== "stream") {
-          track("api_playground_request_received", {
-            endpointId: endpoint.id,
-            endpointName: node.title,
-            method: endpoint.method,
-            docsRoute: `/${node.slug}`,
-            response: {
-              status: res.response.status,
-              statusText: res.response.statusText,
-              time: res.time,
-              size: res.size,
-            },
-          });
-        }
-      }
-    } catch (e) {
-      // TODO: sentry
-
-      console.error(
-        "An unexpected error occurred while sending request to the proxy server. This is likely a bug, rather than a user error.",
-        e
-      );
-      setResponse(failed(e));
-    }
-  }, [
-    endpoint,
-    node.title,
-    node.slug,
-    auth,
-    formState,
-    baseUrl,
-    setOAuthValue,
-    usesApplicationJsonInFormDataValue,
-    isProxyDisabled,
-  ]);
-
-  const settings = usePlaygroundSettings();
-
-  return (
-    <FernTooltipProvider>
-      <div className="flex size-full min-h-0 flex-1 shrink flex-col">
-        <div className="flex-0">
-          <PlaygroundEndpointPath
-            method={endpoint.method}
-            formState={formState}
-            sendRequest={() => {
-              void (async () => {
-                try {
-                  await sendRequest();
-                } catch (e) {
-                  console.error("Failed to send request:", e);
+        setResponse(loading());
+        try {
+            track("api_playground_request_sent", {
+                endpointId: endpoint.id,
+                endpointName: node.title,
+                method: endpoint.method,
+                docsRoute: `/${node.slug}`
+            });
+            const authHeaders = buildAuthHeaders(
+                auth,
+                jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM),
+                {
+                    redacted: false
+                },
+                {
+                    formState,
+                    endpoint,
+                    baseUrl,
+                    setValue: setOAuthValue
                 }
-              })();
-            }}
-            environmentId={environmentId}
-            baseUrl={baseUrl}
-            // TODO: this is a temporary fix to show all environments in the playground, unless filtered in the settings
-            // this is so that the playground can be specifically disabled for certain environments
-            options={
-              settings?.environments
-                ? endpoint.environments?.filter(
-                    (env) => settings.environments?.includes(env.id) ?? true
-                  )
-                : endpoint.environments
+            );
+            const headers = {
+                ...authHeaders,
+                ...mapValues(formState.headers ?? {}, (value) => unknownToString(value))
+            };
+
+            if (endpoint.method !== "GET" && endpoint.requests?.[0]?.contentType != null) {
+                headers["Content-Type"] = endpoint.requests[0].contentType;
             }
-            path={endpoint.path}
-            queryParameters={endpoint.queryParameters}
-            sendRequestIcon={
-              <SendHorizonal className="transition-transform group-hover:translate-x-0.5" />
+
+            // Add application/json content type for OpenRPC endpoints
+            if (endpoint.protocol?.type === "openrpc") {
+                headers["Content-Type"] = "application/json";
             }
-            types={context.types}
-          />
-        </div>
-        <div className="flex min-h-0 flex-1 shrink">
-          <PlaygroundEndpointContent
-            authForm={authForm}
-            context={context}
-            formState={formState}
-            setFormState={setFormState}
-            resetWithExample={resetWithExample}
-            resetWithoutExample={resetWithoutExample}
-            response={response}
-            sendRequest={() => {
-              void (async () => {
-                try {
-                  await sendRequest();
-                } catch (e) {
-                  console.error("Failed to send request:", e);
+
+            const req: ProxyRequest = {
+                url: buildEndpointUrl({
+                    endpoint,
+                    pathParameters: formState.pathParameters,
+                    queryParameters: formState.queryParameters,
+                    baseUrl
+                }),
+                method: endpoint.method,
+                headers,
+                body: await serializeFormStateBody({
+                    shape: endpoint.requests?.[0]?.body,
+                    body: formState.body,
+                    usesApplicationJsonInFormDataValue,
+                    protocol: endpoint.protocol
+                })
+            };
+            if (endpoint.responses?.[0]?.body.type === "stream") {
+                const [res, stream] = await executeProxyStream(req, isProxyDisabled || isLocal());
+
+                const time = Date.now();
+
+                if (res.headers.get("content-type")?.includes("audio/")) {
+                    const reader = stream.getReader();
+                    const chunks: Uint8Array[] = [];
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        chunks.push(value);
+                    }
+
+                    const audioBlob = new Blob(chunks, {
+                        type: res.headers.get("content-type") || ""
+                    });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+
+                    setResponse(
+                        loaded({
+                            type: "file",
+                            response: {
+                                headers: Object.fromEntries(res.headers.entries()),
+                                ok: res.ok,
+                                redirected: res.redirected,
+                                status: res.status,
+                                statusText: res.statusText,
+                                type: res.type,
+                                url: res.url,
+                                body: audioUrl
+                            },
+                            contentType: res.headers.get("content-type") || "",
+                            time: Date.now() - time,
+                            size: String(chunks.reduce((total, chunk) => total + chunk.length, 0))
+                        })
+                    );
+
+                    return;
                 }
-              })();
-            }}
-            dynamicIRsByLanguage={dynamicIRsByLanguage}
-          />
-        </div>
-      </div>
-    </FernTooltipProvider>
-  );
+
+                const reader = stream.getReader();
+                let result = "";
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        break;
+                    }
+                    result += decoder.decode(value);
+                    setResponse(
+                        loaded({
+                            type: "stream",
+                            response: {
+                                status: res.status,
+                                body: result
+                            },
+                            time: Date.now() - time
+                        })
+                    );
+                }
+            } else {
+                const res = await executeProxyRest(req, isProxyDisabled || isLocal());
+                setResponse(loaded(res));
+                if (res.type !== "stream") {
+                    track("api_playground_request_received", {
+                        endpointId: endpoint.id,
+                        endpointName: node.title,
+                        method: endpoint.method,
+                        docsRoute: `/${node.slug}`,
+                        response: {
+                            status: res.response.status,
+                            statusText: res.response.statusText,
+                            time: res.time,
+                            size: res.size
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            // TODO: sentry
+
+            console.error(
+                "An unexpected error occurred while sending request to the proxy server. This is likely a bug, rather than a user error.",
+                e
+            );
+            setResponse(failed(e));
+        }
+    }, [
+        endpoint,
+        node.title,
+        node.slug,
+        auth,
+        formState,
+        baseUrl,
+        setOAuthValue,
+        usesApplicationJsonInFormDataValue,
+        isProxyDisabled
+    ]);
+
+    const settings = usePlaygroundSettings();
+
+    return (
+        <FernTooltipProvider>
+            <div className="flex size-full min-h-0 flex-1 shrink flex-col">
+                <div className="flex-0">
+                    <PlaygroundEndpointPath
+                        method={endpoint.method}
+                        formState={formState}
+                        sendRequest={() => {
+                            void (async () => {
+                                try {
+                                    await sendRequest();
+                                } catch (e) {
+                                    console.error("Failed to send request:", e);
+                                }
+                            })();
+                        }}
+                        environmentId={environmentId}
+                        baseUrl={baseUrl}
+                        // TODO: this is a temporary fix to show all environments in the playground, unless filtered in the settings
+                        // this is so that the playground can be specifically disabled for certain environments
+                        options={
+                            settings?.environments
+                                ? endpoint.environments?.filter(
+                                      (env) => settings.environments?.includes(env.id) ?? true
+                                  )
+                                : endpoint.environments
+                        }
+                        path={endpoint.path}
+                        queryParameters={endpoint.queryParameters}
+                        sendRequestIcon={<SendHorizonal className="transition-transform group-hover:translate-x-0.5" />}
+                        types={context.types}
+                    />
+                </div>
+                <div className="flex min-h-0 flex-1 shrink">
+                    <PlaygroundEndpointContent
+                        authForm={authForm}
+                        context={context}
+                        formState={formState}
+                        setFormState={setFormState}
+                        resetWithExample={resetWithExample}
+                        resetWithoutExample={resetWithoutExample}
+                        response={response}
+                        sendRequest={() => {
+                            void (async () => {
+                                try {
+                                    await sendRequest();
+                                } catch (e) {
+                                    console.error("Failed to send request:", e);
+                                }
+                            })();
+                        }}
+                        dynamicIRsByLanguage={dynamicIRsByLanguage}
+                    />
+                </div>
+            </div>
+        </FernTooltipProvider>
+    );
 };

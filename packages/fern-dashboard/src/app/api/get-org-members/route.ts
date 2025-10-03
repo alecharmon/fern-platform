@@ -11,28 +11,28 @@ import { orgNameValidator } from "../utils/validators";
 import handler from "./handler";
 
 export declare namespace getOrgMembers {
-  export type Request = z.infer<typeof GetOrgMembersRequest>;
-  export type Response = ResolvedReturnType<typeof handler>;
+    export type Request = z.infer<typeof GetOrgMembersRequest>;
+    export type Response = ResolvedReturnType<typeof handler>;
 }
 
 export const GetOrgMembersRequest = z.object({
-  orgName: orgNameValidator,
+    orgName: orgNameValidator
 });
 
 export async function POST(req: NextRequest) {
-  const maybeSessionData = await maybeGetCurrentSession(req);
-  if (maybeSessionData.errorResponse != null) {
-    return maybeSessionData.errorResponse;
-  }
-  const { userId, token } = maybeSessionData.data;
+    const maybeSessionData = await maybeGetCurrentSession(req);
+    if (maybeSessionData.errorResponse != null) {
+        return maybeSessionData.errorResponse;
+    }
+    const { userId, token } = maybeSessionData.data;
 
-  const parsedBody = await parseNextRequestBody(req, GetOrgMembersRequest);
-  if (parsedBody.errorResponse != null) {
-    return parsedBody.errorResponse;
-  }
-  const { orgName } = parsedBody.data;
+    const parsedBody = await parseNextRequestBody(req, GetOrgMembersRequest);
+    if (parsedBody.errorResponse != null) {
+        return parsedBody.errorResponse;
+    }
+    const { orgName } = parsedBody.data;
 
-  await assertUserHasOrganizationAccess({ token, orgName });
+    await assertUserHasOrganizationAccess({ token, orgName });
 
-  return NextResponse.json(await handler({ userId, orgName }));
+    return NextResponse.json(await handler({ userId, orgName }));
 }

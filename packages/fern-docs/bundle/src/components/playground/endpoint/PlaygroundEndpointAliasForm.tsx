@@ -10,53 +10,32 @@ import { PlaygroundTypeReferenceForm } from "../form/PlaygroundTypeReferenceForm
 import { PlaygroundEndpointFormSection } from "./PlaygroundEndpointFormSection";
 
 interface PlaygroundEndpointAliasFormProps {
-  alias: ApiDefinition.HttpRequestBodyShape.Alias;
-  types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
-  ignoreHeaders: boolean;
-  setBodyJson: (value: unknown) => void;
-  value: unknown;
+    alias: ApiDefinition.HttpRequestBodyShape.Alias;
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    ignoreHeaders: boolean;
+    setBodyJson: (value: unknown) => void;
+    value: unknown;
 }
 
 export function PlaygroundEndpointAliasForm({
-  alias,
-  types,
-  ignoreHeaders,
-  setBodyJson,
-  value,
+    alias,
+    types,
+    ignoreHeaders,
+    setBodyJson,
+    value
 }: PlaygroundEndpointAliasFormProps): ReactElement<any> {
-  const { shape, isOptional } = useMemo(
-    () => unwrapReference(alias.value, types),
-    [alias.value, types]
-  );
+    const { shape, isOptional } = useMemo(() => unwrapReference(alias.value, types), [alias.value, types]);
 
-  if (shape.type === "object" && !isOptional) {
+    if (shape.type === "object" && !isOptional) {
+        return (
+            <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title="Body Parameters">
+                <PlaygroundObjectForm id="body" shape={shape} onChange={setBodyJson} value={value} types={types} />
+            </PlaygroundEndpointFormSection>
+        );
+    }
     return (
-      <PlaygroundEndpointFormSection
-        ignoreHeaders={ignoreHeaders}
-        title="Body Parameters"
-      >
-        <PlaygroundObjectForm
-          id="body"
-          shape={shape}
-          onChange={setBodyJson}
-          value={value}
-          types={types}
-        />
-      </PlaygroundEndpointFormSection>
+        <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={isOptional ? "Optional Body" : "Body"}>
+            <PlaygroundTypeReferenceForm id="body" shape={shape} onChange={setBodyJson} value={value} types={types} />
+        </PlaygroundEndpointFormSection>
     );
-  }
-  return (
-    <PlaygroundEndpointFormSection
-      ignoreHeaders={ignoreHeaders}
-      title={isOptional ? "Optional Body" : "Body"}
-    >
-      <PlaygroundTypeReferenceForm
-        id="body"
-        shape={shape}
-        onChange={setBodyJson}
-        value={value}
-        types={types}
-      />
-    </PlaygroundEndpointFormSection>
-  );
 }

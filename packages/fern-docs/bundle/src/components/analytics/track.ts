@@ -6,17 +6,12 @@ import { TRACK_EVENT_NAME } from "./constants";
  * @param event - The event name.
  * @param properties - The event properties.
  */
-export function track(
-  event: string,
-  properties?: Record<string, unknown>
-): void {
-  if (typeof window === "undefined") {
-    return;
-  }
+export function track(event: string, properties?: Record<string, unknown>): void {
+    if (typeof window === "undefined") {
+        return;
+    }
 
-  window.dispatchEvent(
-    new CustomEvent(TRACK_EVENT_NAME, { detail: { event, properties } })
-  );
+    window.dispatchEvent(new CustomEvent(TRACK_EVENT_NAME, { detail: { event, properties } }));
 }
 
 /**
@@ -25,17 +20,14 @@ export function track(
  * @param event - The event name.
  * @param properties - The event properties.
  */
-export function trackInternal(
-  event: string,
-  properties?: Record<string, unknown>
-): void {
-  if (typeof window === "undefined") {
-    return;
-  }
+export function trackInternal(event: string, properties?: Record<string, unknown>): void {
+    if (typeof window === "undefined") {
+        return;
+    }
 
-  window.dispatchEvent(
-    new CustomEvent(TRACK_EVENT_NAME, {
-      detail: { event, properties, internal: true },
-    })
-  );
+    window.dispatchEvent(
+        new CustomEvent(TRACK_EVENT_NAME, {
+            detail: { event, properties, internal: true }
+        })
+    );
 }

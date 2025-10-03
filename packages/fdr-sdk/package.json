@@ -47,9 +47,7 @@
       "default": "./dist/js/index.mjs"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./dist",
     "compile": "pnpm compile:js && pnpm compile:types",

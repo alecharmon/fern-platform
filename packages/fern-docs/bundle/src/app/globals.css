@@ -16,9 +16,7 @@
   --page-padding: 1rem;
   --page-margin: calc((100vw - var(--page-width)) / 2);
   --aside-offset: max(0px, calc(var(--page-margin) - var(--page-padding)));
-  --sticky-aside-width: calc(
-    var(--spacing-sidebar-width) + var(--aside-offset)
-  );
+  --sticky-aside-width: calc(var(--spacing-sidebar-width) + var(--aside-offset));
 }
 
 @media (min-width: 768px) {
@@ -35,7 +33,5 @@
 
 @theme inline {
   --spacing-page-padding: var(--page-padding);
-  --spacing-page-width-padded: calc(
-    var(--spacing-page-width) + var(--spacing-page-padding) * 2
-  );
+  --spacing-page-width-padded: calc(var(--spacing-page-width) + var(--spacing-page-padding) * 2);
 }

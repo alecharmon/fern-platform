@@ -7,22 +7,22 @@ import { slugToHref } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 export function useApiPageCenterElement(
-  ref: RefObject<HTMLDivElement | null>,
-  slug: FernNavigation.Slug,
-  skip = false
+    ref: RefObject<HTMLDivElement | null>,
+    slug: FernNavigation.Slug,
+    skip = false
 ): void {
-  const isInView = useInView(ref, {
-    // https://stackoverflow.com/questions/54807535/intersection-observer-api-observe-the-center-of-the-viewport
-    margin: "-50% 0px",
-  });
+    const isInView = useInView(ref, {
+        // https://stackoverflow.com/questions/54807535/intersection-observer-api-observe-the-center-of-the-viewport
+        margin: "-50% 0px"
+    });
 
-  const shouldUpdateSlug = !skip && isInView;
-  const router = useRouter();
+    const shouldUpdateSlug = !skip && isInView;
+    const router = useRouter();
 
-  useEffect(() => {
-    if (shouldUpdateSlug) {
-      router.replace(slugToHref(slug), { scroll: false });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldUpdateSlug, slug]);
+    useEffect(() => {
+        if (shouldUpdateSlug) {
+            router.replace(slugToHref(slug), { scroll: false });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [shouldUpdateSlug, slug]);
 }

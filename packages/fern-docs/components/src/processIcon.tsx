@@ -12,32 +12,26 @@ import { FaIconServer } from "./fa-icon-server";
  * component, which does not yet utilize next image caching. Until that is added, we are leaving
  * the original processIcon function in the bundle.
  */
-export const processIcon = (
-  node: NavigationNode,
-  fallback?: string
-): ReactNode | undefined => {
-  if (!hasMetadata(node) && node.type !== "link") {
+export const processIcon = (node: NavigationNode, fallback?: string): ReactNode | undefined => {
+    if (!hasMetadata(node) && node.type !== "link") {
+        return undefined;
+    }
+
+    if (node.icon?.startsWith("<") && node.icon?.endsWith(">")) {
+        return (
+            <NoZoom>
+                <span className="size-5" dangerouslySetInnerHTML={{ __html: node.icon }} />
+            </NoZoom>
+        );
+    }
+
+    if (node.icon) {
+        return <FaIconServer icon={node.icon} />;
+    }
+
+    if (fallback) {
+        return <FaIconServer icon={fallback} />;
+    }
+
     return undefined;
-  }
-
-  if (node.icon?.startsWith("<") && node.icon?.endsWith(">")) {
-    return (
-      <NoZoom>
-        <span
-          className="size-5"
-          dangerouslySetInnerHTML={{ __html: node.icon }}
-        />
-      </NoZoom>
-    );
-  }
-
-  if (node.icon) {
-    return <FaIconServer icon={node.icon} />;
-  }
-
-  if (fallback) {
-    return <FaIconServer icon={fallback} />;
-  }
-
-  return undefined;
 };

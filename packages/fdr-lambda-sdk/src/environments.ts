@@ -4,7 +4,7 @@
 
 export const FdrLambdaEnvironment = {
     Prod: "https://registry.buildwithfern.com",
-    Lambda: "https://registry-v2.buildwithfern.com",
+    Lambda: "https://registry-v2.buildwithfern.com"
 } as const;
 
 export type FdrLambdaEnvironment = typeof FdrLambdaEnvironment.Prod | typeof FdrLambdaEnvironment.Lambda;

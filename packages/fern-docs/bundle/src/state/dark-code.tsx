@@ -9,10 +9,10 @@ const darkCodeAtom = atom(false);
  * forces dark-mode on all code blocks
  */
 export function DarkCode({ value }: { value: boolean }) {
-  useHydrateAtoms([[darkCodeAtom, value]], { dangerouslyForceHydrate: true });
-  return null;
+    useHydrateAtoms([[darkCodeAtom, value]], { dangerouslyForceHydrate: true });
+    return null;
 }
 
 export function useIsDarkCode() {
-  return useAtomValue(darkCodeAtom);
+    return useAtomValue(darkCodeAtom);
 }

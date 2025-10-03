@@ -5,13 +5,13 @@ import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 
 export function GET(req: NextRequest) {
-  const host = req.nextUrl.host;
-  const domain = getDocsDomainEdge(req);
-  const pathname = req.nextUrl.searchParams.get("path");
-  if (pathname == null) {
-    return NextResponse.json({ error: "path is required" }, { status: 400 });
-  }
+    const host = req.nextUrl.host;
+    const domain = getDocsDomainEdge(req);
+    const pathname = req.nextUrl.searchParams.get("path");
+    if (pathname == null) {
+        return NextResponse.json({ error: "path is required" }, { status: 400 });
+    }
 
-  revalidatePath(`/${host}/${domain}/static/${slugjoin(pathname)}`);
-  return NextResponse.json({ success: true });
+    revalidatePath(`/${host}/${domain}/static/${slugjoin(pathname)}`);
+    return NextResponse.json({ success: true });
 }

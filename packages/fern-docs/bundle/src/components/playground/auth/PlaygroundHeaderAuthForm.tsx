@@ -10,94 +10,74 @@ import { useMemoOne } from "use-memo-one";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { unknownToString } from "@fern-api/ui-core-utils";
 
-import {
-  PLAYGROUND_AUTH_STATE_HEADER_ATOM,
-  PLAYGROUND_RESOLVED_STATE_ATOM,
-} from "@/state/playground";
+import { PLAYGROUND_AUTH_STATE_HEADER_ATOM, PLAYGROUND_RESOLVED_STATE_ATOM } from "@/state/playground";
 
 import { PasswordInputGroup } from "../PasswordInputGroup";
 
 function headerAtom(headerName: string) {
-  return atom(
-    (get) => get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[headerName],
-    (_get, set, change: SetStateAction<string> | typeof RESET) => {
-      set(PLAYGROUND_AUTH_STATE_HEADER_ATOM, ({ headers }) => {
-        const nextHeaderValue =
-          typeof change === "function"
-            ? change(headers[headerName] ?? "")
-            : change;
-        if (nextHeaderValue === RESET) {
-          return {
-            // note: this will remove all undefined values from the object
-            headers: JSON.parse(
-              JSON.stringify({
-                ...headers,
-                [headerName]: undefined,
-              })
-            ),
-          };
+    return atom(
+        (get) => get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[headerName],
+        (_get, set, change: SetStateAction<string> | typeof RESET) => {
+            set(PLAYGROUND_AUTH_STATE_HEADER_ATOM, ({ headers }) => {
+                const nextHeaderValue = typeof change === "function" ? change(headers[headerName] ?? "") : change;
+                if (nextHeaderValue === RESET) {
+                    return {
+                        // note: this will remove all undefined values from the object
+                        headers: JSON.parse(
+                            JSON.stringify({
+                                ...headers,
+                                [headerName]: undefined
+                            })
+                        )
+                    };
+                }
+                return {
+                    headers: {
+                        ...headers,
+                        [headerName]: nextHeaderValue
+                    }
+                };
+            });
         }
-        return {
-          headers: {
-            ...headers,
-            [headerName]: nextHeaderValue,
-          },
-        };
-      });
-    }
-  );
+    );
 }
 
 function isHeaderResettableAtom(headerName: string) {
-  return atom((get) => {
-    const inputHeader = get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[
-      headerName
-    ];
-    const injectedHeader = get(PLAYGROUND_RESOLVED_STATE_ATOM)?.headers?.[
-      headerName
-    ];
-    return injectedHeader != null && injectedHeader !== inputHeader;
-  });
+    return atom((get) => {
+        const inputHeader = get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[headerName];
+        const injectedHeader = get(PLAYGROUND_RESOLVED_STATE_ATOM)?.headers?.[headerName];
+        return injectedHeader != null && injectedHeader !== inputHeader;
+    });
 }
 
 export function PlaygroundHeaderAuthForm({
-  header,
-  disabled,
+    header,
+    disabled
 }: {
-  header: APIV1Read.HeaderAuth;
-  disabled?: boolean;
+    header: APIV1Read.HeaderAuth;
+    disabled?: boolean;
 }): ReactElement<any> {
-  const [value, setValue] = useAtom(
-    useMemoOne(
-      () => headerAtom(header.headerWireValue),
-      [header.headerWireValue]
-    )
-  );
-  const isResettable = useAtomValue(
-    useMemoOne(
-      () => isHeaderResettableAtom(header.headerWireValue),
-      [header.headerWireValue]
-    )
-  );
+    const [value, setValue] = useAtom(useMemoOne(() => headerAtom(header.headerWireValue), [header.headerWireValue]));
+    const isResettable = useAtomValue(
+        useMemoOne(() => isHeaderResettableAtom(header.headerWireValue), [header.headerWireValue])
+    );
 
-  return (
-    <li className="-mx-4 space-y-2 p-4">
-      <label className="inline-flex flex-wrap items-baseline">
-        <span className="font-mono text-sm">
-          {header.nameOverride ?? header.headerWireValue}
-        </span>
-      </label>
-      <div>
-        <PasswordInputGroup
-          onValueChange={setValue}
-          value={unknownToString(value ?? "")}
-          autoComplete="off"
-          data-1p-ignore="true"
-          disabled={disabled}
-          resettable={isResettable}
-          onClickReset={() => setValue(RESET)}
-        />
-      </div>
-    </li>
-  );
+    return (
+        <li className="-mx-4 space-y-2 p-4">
+            <label className="inline-flex flex-wrap items-baseline">
+                <span className="font-mono text-sm">{header.nameOverride ?? header.headerWireValue}</span>
+            </label>
+            <div>
+                <PasswordInputGroup
+                    onValueChange={setValue}
+                    value={unknownToString(value ?? "")}
+                    autoComplete="off"
+                    data-1p-ignore="true"
+                    disabled={disabled}
+                    resettable={isResettable}
+                    onClickReset={() => setValue(RESET)}
+                />
+            </div>
+        </li>
+    );
 }

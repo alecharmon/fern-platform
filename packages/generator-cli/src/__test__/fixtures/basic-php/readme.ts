@@ -3,10 +3,10 @@ import { FernGeneratorCli } from "../../../configuration/generated";
 const CONFIG: FernGeneratorCli.ReadmeConfig = {
     language: FernGeneratorCli.LanguageInfo.php({
         publishInfo: {
-            packageName: "square/square-php-sdk",
-        },
+            packageName: "square/square-php-sdk"
+        }
     }),
-    organization: "basic",
+    organization: "basic"
 };
 
 export default CONFIG;

@@ -50,33 +50,33 @@ export class Index {
      */
     public reconstructQueryIndex(
         domain: string,
-        requestOptions?: Index.RequestOptions,
+        requestOptions?: Index.RequestOptions
     ): core.HttpResponsePromise<FernAI.ReconstructIndexResponse> {
         return core.HttpResponsePromise.fromPromise(this.__reconstructQueryIndex(domain, requestOptions));
     }
 
     private async __reconstructQueryIndex(
         domain: string,
-        requestOptions?: Index.RequestOptions,
+        requestOptions?: Index.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.ReconstructIndexResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `index/${encodeURIComponent(domain)}/reconstruct`,
+                `index/${encodeURIComponent(domain)}/reconstruct`
             ),
             method: "POST",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.ReconstructIndexResponse, rawResponse: _response.rawResponse };
@@ -87,13 +87,13 @@ export class Index {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -103,14 +103,14 @@ export class Index {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /index/{domain}/reconstruct.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -130,7 +130,7 @@ export class Index {
     public syncIndexToQueryIndex(
         domain: string,
         request: FernAI.SyncIndexRequest,
-        requestOptions?: Index.RequestOptions,
+        requestOptions?: Index.RequestOptions
     ): core.HttpResponsePromise<FernAI.SyncIndexResponse> {
         return core.HttpResponsePromise.fromPromise(this.__syncIndexToQueryIndex(domain, request, requestOptions));
     }
@@ -138,19 +138,19 @@ export class Index {
     private async __syncIndexToQueryIndex(
         domain: string,
         request: FernAI.SyncIndexRequest,
-        requestOptions?: Index.RequestOptions,
+        requestOptions?: Index.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.SyncIndexResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `index/${encodeURIComponent(domain)}/sync`,
+                `index/${encodeURIComponent(domain)}/sync`
             ),
             method: "POST",
             headers: _headers,
@@ -160,7 +160,7 @@ export class Index {
             body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.SyncIndexResponse, rawResponse: _response.rawResponse };
@@ -171,13 +171,13 @@ export class Index {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -187,14 +187,14 @@ export class Index {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /index/{domain}/sync.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }
@@ -210,33 +210,33 @@ export class Index {
      */
     public getJobStatus(
         jobId: string,
-        requestOptions?: Index.RequestOptions,
+        requestOptions?: Index.RequestOptions
     ): core.HttpResponsePromise<FernAI.JobStatusResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getJobStatus(jobId, requestOptions));
     }
 
     private async __getJobStatus(
         jobId: string,
-        requestOptions?: Index.RequestOptions,
+        requestOptions?: Index.RequestOptions
     ): Promise<core.WithRawResponse<FernAI.JobStatusResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
+            requestOptions?.headers
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `jobs/${encodeURIComponent(jobId)}/status`,
+                `jobs/${encodeURIComponent(jobId)}/status`
             ),
             method: "GET",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+            abortSignal: requestOptions?.abortSignal
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.JobStatusResponse, rawResponse: _response.rawResponse };
@@ -247,13 +247,13 @@ export class Index {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
+                        _response.rawResponse
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse,
+                        rawResponse: _response.rawResponse
                     });
             }
         }
@@ -263,14 +263,14 @@ export class Index {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /jobs/{job_id}/status.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
+                    rawResponse: _response.rawResponse
                 });
         }
     }

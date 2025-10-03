@@ -8,7 +8,5 @@ import { Slug } from "..";
  * For example, if the original slug is "docs/v1.0.0/foo/bar", the unversionedSlug is "foo/bar".
  */
 export function toUnversionedSlug(slug: Slug, versionSlug: Slug): Slug {
-  return Slug(
-    slug.replace(new RegExp(`^${escapeRegExp(versionSlug)}(/|$)`), "")
-  );
+    return Slug(slug.replace(new RegExp(`^${escapeRegExp(versionSlug)}(/|$)`), ""));
 }

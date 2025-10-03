@@ -10,6 +10,4 @@ export type DocsUrl = string & { __docsUrl: void };
  */
 export type EncodedDocsUrl = string & { __encodedDocsUrl: void };
 
-export type ResolvedReturnType<T extends (...args: any[]) => any> = Awaited<
-  ReturnType<T>
->;
+export type ResolvedReturnType<T extends (...args: any[]) => any> = Awaited<ReturnType<T>>;

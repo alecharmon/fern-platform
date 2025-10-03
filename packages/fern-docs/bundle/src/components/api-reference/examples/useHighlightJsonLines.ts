@@ -31,133 +31,106 @@ type HighlightLineResult = number | [number, number];
  * @param start line number where the json object starts
  * @returns a list of line numbers that match the json path
  */
-export function getJsonLineNumbers(
-  json: unknown,
-  path: JsonPropertyPath,
-  start = 0
-): HighlightLineResult[] {
-  if (!isJson(json)) {
-    return [];
-  }
-
-  const jsonString = JSON.stringify(json, undefined, INDENT_SPACES);
-
-  const part = path[0];
-  if (part == null) {
-    const length = jsonString.split("\n").length;
-    return length === 0
-      ? []
-      : length === 1
-        ? [start]
-        : [[start, start + length - 1]];
-  }
-
-  const query = "$" + getQueryPart(part);
-
-  const results: unknown[] = JSONPath({ path: query, json });
-  if (part.type === "objectFilter") {
-    if (
-      isPlainObject(json) &&
-      json[part.propertyName] === part.requiredStringValue
-    ) {
-      return getJsonLineNumbers(json, path.slice(1), start);
-    }
-  }
-
-  const recursiveMatches = results.map((result) => {
-    // get start of string by matching
-    const toMatch = jsonStringifyAndIndent(
-      result,
-      part.type === "objectProperty" ? part.propertyName : undefined,
-      1
-    );
-
-    const startLine = lineNumberOf(jsonString, toMatch);
-    if (startLine === -1) {
-      return [];
+export function getJsonLineNumbers(json: unknown, path: JsonPropertyPath, start = 0): HighlightLineResult[] {
+    if (!isJson(json)) {
+        return [];
     }
 
-    const jsonLineNumbers = getJsonLineNumbers(
-      result,
-      path.slice(1),
-      startLine
-    );
+    const jsonString = JSON.stringify(json, undefined, INDENT_SPACES);
 
-    return jsonLineNumbers.map(
-      (line): HighlightLineResult =>
-        typeof line === "number"
-          ? start + line
-          : [start + line[0], start + line[1]]
-    );
-  });
+    const part = path[0];
+    if (part == null) {
+        const length = jsonString.split("\n").length;
+        return length === 0 ? [] : length === 1 ? [start] : [[start, start + length - 1]];
+    }
 
-  return recursiveMatches.flat();
+    const query = "$" + getQueryPart(part);
+
+    const results: unknown[] = JSONPath({ path: query, json });
+    if (part.type === "objectFilter") {
+        if (isPlainObject(json) && json[part.propertyName] === part.requiredStringValue) {
+            return getJsonLineNumbers(json, path.slice(1), start);
+        }
+    }
+
+    const recursiveMatches = results.map((result) => {
+        // get start of string by matching
+        const toMatch = jsonStringifyAndIndent(
+            result,
+            part.type === "objectProperty" ? part.propertyName : undefined,
+            1
+        );
+
+        const startLine = lineNumberOf(jsonString, toMatch);
+        if (startLine === -1) {
+            return [];
+        }
+
+        const jsonLineNumbers = getJsonLineNumbers(result, path.slice(1), startLine);
+
+        return jsonLineNumbers.map(
+            (line): HighlightLineResult =>
+                typeof line === "number" ? start + line : [start + line[0], start + line[1]]
+        );
+    });
+
+    return recursiveMatches.flat();
 }
 
-function jsonStringifyAndIndent(
-  json: unknown,
-  key: string | undefined,
-  depth: number
-) {
-  let jsonString = JSON.stringify(json, undefined, INDENT_SPACES);
-  if (key != null) {
-    jsonString = `"${key}": ${jsonString}`;
-  }
-  return jsonString
-    .split("\n")
-    .map((line, idx) => (idx === 0 ? line : "  ".repeat(depth) + line))
-    .join("\n");
+function jsonStringifyAndIndent(json: unknown, key: string | undefined, depth: number) {
+    let jsonString = JSON.stringify(json, undefined, INDENT_SPACES);
+    if (key != null) {
+        jsonString = `"${key}": ${jsonString}`;
+    }
+    return jsonString
+        .split("\n")
+        .map((line, idx) => (idx === 0 ? line : "  ".repeat(depth) + line))
+        .join("\n");
 }
 
 function getQueryPart(path: JsonPropertyPathPart) {
-  switch (path.type) {
-    case "objectProperty":
-      return path.propertyName != null ? `['${path.propertyName}']` : "[*]";
-    case "listItem":
-      return "[*]";
-    case "objectFilter":
-      return `[?(@.${path.propertyName}=='${path.requiredStringValue}')]`;
-  }
+    switch (path.type) {
+        case "objectProperty":
+            return path.propertyName != null ? `['${path.propertyName}']` : "[*]";
+        case "listItem":
+            return "[*]";
+        case "objectFilter":
+            return `[?(@.${path.propertyName}=='${path.requiredStringValue}')]`;
+    }
 }
 
 export function useHighlightJsonLines(
-  json: unknown,
-  hoveredPropertyPath: JsonPropertyPath = [],
-  jsonStartLine = 0
+    json: unknown,
+    hoveredPropertyPath: JsonPropertyPath = [],
+    jsonStartLine = 0
 ): HighlightLineResult[] {
-  return useMemo(() => {
-    if (
-      hoveredPropertyPath.length === 0 ||
-      jsonStartLine < 0 ||
-      typeof window === "undefined"
-    ) {
-      return [];
-    }
+    return useMemo(() => {
+        if (hoveredPropertyPath.length === 0 || jsonStartLine < 0 || typeof window === "undefined") {
+            return [];
+        }
 
-    try {
-      return getJsonLineNumbers(json, hoveredPropertyPath, jsonStartLine + 1);
-    } catch (error) {
-      // TODO: sentry
+        try {
+            return getJsonLineNumbers(json, hoveredPropertyPath, jsonStartLine + 1);
+        } catch (error) {
+            // TODO: sentry
 
-      console.error("Error thrown while highlighting json lines", error);
-      return [];
-    }
-  }, [hoveredPropertyPath, json, jsonStartLine]);
+            console.error("Error thrown while highlighting json lines", error);
+            return [];
+        }
+    }, [hoveredPropertyPath, json, jsonStartLine]);
 }
 
-function isJson(
-  json: unknown
-): json is null | boolean | number | string | object | any[] {
-  if (json === undefined) {
-    return false;
-  }
+function isJson(json: unknown): json is null | boolean | number | string | object | any[] {
+    if (json === undefined) {
+        return false;
+    }
 
-  return (
-    json == null ||
-    Array.isArray(json) ||
-    typeof json === "string" ||
-    typeof json === "number" ||
-    typeof json === "boolean" ||
-    isPlainObject(json)
-  );
+    return (
+        json == null ||
+        Array.isArray(json) ||
+        typeof json === "string" ||
+        typeof json === "number" ||
+        typeof json === "boolean" ||
+        isPlainObject(json)
+    );
 }

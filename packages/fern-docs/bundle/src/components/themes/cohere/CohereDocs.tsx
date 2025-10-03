@@ -7,10 +7,7 @@ import { useSetAtom } from "jotai";
 
 import { cn } from "@fern-docs/components";
 import { FernScrollArea } from "@fern-docs/components";
-import {
-  FERN_COHERE_CONTENT_ID,
-  FERN_FOOTER_ID,
-} from "@fern-docs/components/constants";
+import { FERN_COHERE_CONTENT_ID, FERN_FOOTER_ID } from "@fern-docs/components/constants";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useDomain } from "@fern-docs/components/state/domain";
 import { SCROLL_BODY_ATOM } from "@fern-docs/components/state/viewport";
@@ -21,15 +18,12 @@ import { SidebarNav } from "@fern-docs/components/theming/side-nav";
 import { HeaderTabsRoot } from "@/components/header/HeaderTabsRoot";
 import { SearchPanel } from "@/components/search-panel";
 import { useIsAskAiEnabled } from "@/state/search";
-import {
-  useIsSearchPanelOpen,
-  useIsSearchPanelResizing,
-} from "@/state/search-panel";
+import { useIsSearchPanelOpen, useIsSearchPanelResizing } from "@/state/search-panel";
 
 const CohereDocsStyle = () => {
-  return (
-    <style jsx global>
-      {`
+    return (
+        <style jsx global>
+            {`
         @theme {
           --header-offset: 0px;
           --card-border: #d8cfc1;
@@ -48,120 +42,104 @@ const CohereDocsStyle = () => {
           --bg-color-header-tab-active: #2a2a2a;
         }
       `}
-    </style>
-  );
+        </style>
+    );
 };
 
 export default function CohereDocs({
-  header,
-  sidebar,
-  children,
-  announcement,
-  tabs,
-  isHeaderDisabled = false,
-  showSearchBarInTabs = false,
-  lightHeaderClassName,
-  darkHeaderClassName,
-  lightSidebarClassName,
-  darkSidebarClassName,
+    header,
+    sidebar,
+    children,
+    announcement,
+    tabs,
+    isHeaderDisabled = false,
+    showSearchBarInTabs = false,
+    lightHeaderClassName,
+    darkHeaderClassName,
+    lightSidebarClassName,
+    darkSidebarClassName
 }: {
-  header: React.ReactNode;
-  sidebar: React.ReactNode;
-  children: React.ReactNode;
-  announcement?: React.ReactNode;
-  tabs?: React.ReactNode;
-  isSidebarFixed?: boolean;
-  isHeaderDisabled?: boolean;
-  showSearchBarInTabs?: boolean;
-  lightHeaderClassName?: string;
-  darkHeaderClassName?: string;
-  lightSidebarClassName?: string;
-  darkSidebarClassName?: string;
+    header: React.ReactNode;
+    sidebar: React.ReactNode;
+    children: React.ReactNode;
+    announcement?: React.ReactNode;
+    tabs?: React.ReactNode;
+    isSidebarFixed?: boolean;
+    isHeaderDisabled?: boolean;
+    showSearchBarInTabs?: boolean;
+    lightHeaderClassName?: string;
+    darkHeaderClassName?: string;
+    lightSidebarClassName?: string;
+    darkSidebarClassName?: string;
 }) {
-  const { resolvedTheme } = useTheme();
-  const headerClassName =
-    resolvedTheme === "dark" ? darkHeaderClassName : lightHeaderClassName;
-  const sidebarClassName =
-    resolvedTheme === "dark" ? darkSidebarClassName : lightSidebarClassName;
+    const { resolvedTheme } = useTheme();
+    const headerClassName = resolvedTheme === "dark" ? darkHeaderClassName : lightHeaderClassName;
+    const sidebarClassName = resolvedTheme === "dark" ? darkSidebarClassName : lightSidebarClassName;
 
-  const mainRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const mainRef = useRef<HTMLDivElement>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const setScrollBody = useSetAtom(SCROLL_BODY_ATOM);
-  useEffect(() => {
-    setScrollBody(scrollAreaRef.current);
-  }, [setScrollBody]);
+    const setScrollBody = useSetAtom(SCROLL_BODY_ATOM);
+    useEffect(() => {
+        setScrollBody(scrollAreaRef.current);
+    }, [setScrollBody]);
 
-  const pathname = useCurrentPathname();
-  const isAskAiEnabled = useIsAskAiEnabled();
-  const domain = useDomain();
-  const isSidePanelOpen = useIsSearchPanelOpen();
-  const isSidePanelResizing = useIsSearchPanelResizing();
+    const pathname = useCurrentPathname();
+    const isAskAiEnabled = useIsAskAiEnabled();
+    const domain = useDomain();
+    const isSidePanelOpen = useIsSearchPanelOpen();
+    const isSidePanelResizing = useIsSearchPanelResizing();
 
-  useEffect(() => {
-    scrollAreaRef.current?.scrollTo(0, 0);
-  }, [pathname]);
+    useEffect(() => {
+        scrollAreaRef.current?.scrollTo(0, 0);
+    }, [pathname]);
 
-  return (
-    <div className="fixed inset-0 flex flex-col">
-      <CohereDocsStyle />
-      {announcement}
-      {/* <HeaderContainer header={header} tabs={tabs} /> */}
-      <div
-        className={cn(
-          "width-before-scroll-bar flex min-h-0 flex-1 shrink flex-col gap-3 p-3",
-          "transition-all duration-500 ease-out",
-          isSidePanelResizing && "!transition-none"
-        )}
-        style={{
-          marginRight: isSidePanelOpen
-            ? "var(--ask-ai-panel-width, 24rem)"
-            : "0",
-        }}
-      >
-        <FernHeader
-          className={cn(
-            "flex flex-col gap-3",
-            { "lg:hidden": isHeaderDisabled },
-            headerClassName
-          )}
-          data-theme="cohere"
-        >
-          <div className="border-border-default rounded-2 bg-header-background h-(--header-height-real) flex items-center overflow-clip border px-4">
-            {header}
-          </div>
-          <HeaderTabsRoot
-            showSearchBar={showSearchBarInTabs}
-            className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
-          >
-            {tabs}
-          </HeaderTabsRoot>
-        </FernHeader>
-        <MainCtx.Provider value={mainRef}>
-          <main
-            ref={mainRef}
-            className="flex min-h-0 flex-1 shrink gap-3"
-            data-theme="cohere"
-          >
-            <SidebarNav className={sidebarClassName} data-theme="cohere">
-              {sidebar}
-            </SidebarNav>
-            <div className="bg-sidebar-background border-border-default rounded-2 min-w-0 flex-1 shrink overflow-clip border">
-              <FernScrollArea
-                ref={scrollAreaRef}
-                scrollbars="vertical"
-                className="scroll-pt-4"
-              >
-                <div id={FERN_COHERE_CONTENT_ID}>{children}</div>
+    return (
+        <div className="fixed inset-0 flex flex-col">
+            <CohereDocsStyle />
+            {announcement}
+            {/* <HeaderContainer header={header} tabs={tabs} /> */}
+            <div
+                className={cn(
+                    "width-before-scroll-bar flex min-h-0 flex-1 shrink flex-col gap-3 p-3",
+                    "transition-all duration-500 ease-out",
+                    isSidePanelResizing && "!transition-none"
+                )}
+                style={{
+                    marginRight: isSidePanelOpen ? "var(--ask-ai-panel-width, 24rem)" : "0"
+                }}
+            >
+                <FernHeader
+                    className={cn("flex flex-col gap-3", { "lg:hidden": isHeaderDisabled }, headerClassName)}
+                    data-theme="cohere"
+                >
+                    <div className="border-border-default rounded-2 bg-header-background h-(--header-height-real) flex items-center overflow-clip border px-4">
+                        {header}
+                    </div>
+                    <HeaderTabsRoot
+                        showSearchBar={showSearchBarInTabs}
+                        className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
+                    >
+                        {tabs}
+                    </HeaderTabsRoot>
+                </FernHeader>
+                <MainCtx.Provider value={mainRef}>
+                    <main ref={mainRef} className="flex min-h-0 flex-1 shrink gap-3" data-theme="cohere">
+                        <SidebarNav className={sidebarClassName} data-theme="cohere">
+                            {sidebar}
+                        </SidebarNav>
+                        <div className="bg-sidebar-background border-border-default rounded-2 min-w-0 flex-1 shrink overflow-clip border">
+                            <FernScrollArea ref={scrollAreaRef} scrollbars="vertical" className="scroll-pt-4">
+                                <div id={FERN_COHERE_CONTENT_ID}>{children}</div>
 
-                {/* Enables footer DOM injection */}
-                <footer id={FERN_FOOTER_ID} />
-              </FernScrollArea>
+                                {/* Enables footer DOM injection */}
+                                <footer id={FERN_FOOTER_ID} />
+                            </FernScrollArea>
+                        </div>
+                    </main>
+                </MainCtx.Provider>
             </div>
-          </main>
-        </MainCtx.Provider>
-      </div>
-      {isAskAiEnabled && <SearchPanel domain={domain} />}
-    </div>
-  );
+            {isAskAiEnabled && <SearchPanel domain={domain} />}
+        </div>
+    );
 }

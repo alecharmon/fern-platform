@@ -11,103 +11,94 @@ import { LoginButtonClient } from "./login-button-client";
 import { getApiRouteSupplier } from "./util/getApiRouteSupplier";
 
 export async function LoginButton({
-  loader,
-  size,
-  className,
-  showIcon,
-  disabled,
+    loader,
+    size,
+    className,
+    showIcon,
+    disabled
 }: {
-  loader: DocsLoader;
-  size?: "xs" | "sm" | "lg";
-  className?: string;
-  showIcon?: boolean;
-  disabled?: boolean;
+    loader: DocsLoader;
+    size?: "xs" | "sm" | "lg";
+    className?: string;
+    showIcon?: boolean;
+    disabled?: boolean;
 }) {
-  const [authConfig, authState, { basePath }] = await Promise.all([
-    loader.getAuthConfig(),
-    loader.getAuthState(),
-    loader.getMetadata(),
-  ]);
+    const [authConfig, authState, { basePath }] = await Promise.all([
+        loader.getAuthConfig(),
+        loader.getAuthState(),
+        loader.getMetadata()
+    ]);
 
-  if (!authConfig) {
-    return null;
-  }
+    if (!authConfig) {
+        return null;
+    }
 
-  if (disabled) {
+    if (disabled) {
+        return (
+            <FernButton variant="outlined" className={className} disabled>
+                Login
+            </FernButton>
+        );
+    }
+
+    if (shouldHideLoginButton(authConfig)) {
+        return null;
+    }
+
+    const getApiRoute = getApiRouteSupplier({
+        basepath: basePath,
+        includeTrailingSlash: isTrailingSlashEnabled()
+    });
+
+    const logoutUrl = getApiRoute("/api/fern-docs/auth/logout");
+    const loginUrl = getLoginUrl({ authConfig, authState });
+
+    const href = authState.authed ? logoutUrl : loginUrl;
+
+    if (!href) {
+        return null;
+    }
+
     return (
-      <FernButton variant="outlined" className={className} disabled>
-        Login
-      </FernButton>
+        <LoginButtonClient
+            authed={authState.authed}
+            returnToQueryParam={getReturnToQueryParam(authConfig)}
+            href={href}
+            size={size}
+            className={className}
+            showIcon={showIcon}
+            id="fern-auth-button"
+            disabled={disabled}
+        />
     );
-  }
-
-  if (shouldHideLoginButton(authConfig)) {
-    return null;
-  }
-
-  const getApiRoute = getApiRouteSupplier({
-    basepath: basePath,
-    includeTrailingSlash: isTrailingSlashEnabled(),
-  });
-
-  const logoutUrl = getApiRoute("/api/fern-docs/auth/logout");
-  const loginUrl = getLoginUrl({ authConfig, authState });
-
-  const href = authState.authed ? logoutUrl : loginUrl;
-
-  if (!href) {
-    return null;
-  }
-
-  return (
-    <LoginButtonClient
-      authed={authState.authed}
-      returnToQueryParam={getReturnToQueryParam(authConfig)}
-      href={href}
-      size={size}
-      className={className}
-      showIcon={showIcon}
-      id="fern-auth-button"
-      disabled={disabled}
-    />
-  );
 }
 
 const shouldHideLoginButton = (authConfig: AuthEdgeConfig) => {
-  // todo: deprecate webflow and ory
-  if (
-    authConfig.type === "oauth2" &&
-    (authConfig.partner === "webflow" || authConfig.partner === "ory")
-  ) {
-    return true;
-  }
+    // todo: deprecate webflow and ory
+    if (authConfig.type === "oauth2" && (authConfig.partner === "webflow" || authConfig.partner === "ory")) {
+        return true;
+    }
 
-  // if all pages are allowed
-  if (authConfig.allowlist?.includes("/(.*)")) {
-    return true;
-  }
+    // if all pages are allowed
+    if (authConfig.allowlist?.includes("/(.*)")) {
+        return true;
+    }
 
-  return false;
+    return false;
 };
 
-const getLoginUrl = ({
-  authConfig,
-  authState,
-}: {
-  authConfig: AuthEdgeConfig;
-  authState: AuthState;
-}) => {
-  if (!authState.authed) {
-    return authState.authorizationUrl;
-  }
+const getLoginUrl = ({ authConfig, authState }: { authConfig: AuthEdgeConfig; authState: AuthState }) => {
+    if (!authState.authed) {
+        return authState.authorizationUrl;
+    }
 
-  if (authConfig.type === "basic_token_verification") {
-    return authConfig.redirect;
-  }
+    if (authConfig.type === "basic_token_verification") {
+        return authConfig.redirect;
+    }
 
-  if (authConfig.type === "oauth2" && "auth_endpoint" in authConfig) {
-    return authConfig.auth_endpoint;
-  }
+    if (authConfig.type === "oauth2" && "auth_endpoint" in authConfig) {
+        return authConfig.auth_endpoint;
+    }
 
-  return undefined;
+    return undefined;
 };

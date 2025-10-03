@@ -9,8 +9,7 @@ export const FERN_COHERE_CONTENT_ID = "fern-cohere-content";
 export const FERN_DOCS_ID = "fern-docs";
 export const FERN_FOOTER_ID = "fern-footer";
 export const FERN_HEADER_ID = "fern-header";
-export const FERN_PLAYGROUND_FLOATING_BUTTON_ID =
-  "fern-playground-floating-button";
+export const FERN_PLAYGROUND_FLOATING_BUTTON_ID = "fern-playground-floating-button";
 export const FERN_SEARCH_BUTTON_ID = "fern-search-button";
 export const FERN_ASK_AI_BUTTON_ID = "fern-ask-ai-button";
 export const FERN_ASK_AI_BUTTON_ICON_ID = "fern-ask-ai-button-icon";

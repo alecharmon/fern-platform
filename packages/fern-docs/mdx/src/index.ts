@@ -1,17 +1,17 @@
 export type {
-  MdxJsxAttribute,
-  MdxJsxExpressionAttribute,
-  MdxJsxAttributeValueExpression,
+    MdxJsxAttribute,
+    MdxJsxExpressionAttribute,
+    MdxJsxAttributeValueExpression
 } from "mdast-util-mdx";
 export type { MDXComponents } from "mdx/types";
 export type { PluggableList, Plugin } from "unified";
 export {
-  CONTINUE,
-  EXIT,
-  SKIP,
-  visit,
-  type BuildVisitor,
-  type VisitorResult,
+    CONTINUE,
+    EXIT,
+    SKIP,
+    visit,
+    type BuildVisitor,
+    type VisitorResult
 } from "unist-util-visit";
 export * from "./convert";
 export * from "./declarations";

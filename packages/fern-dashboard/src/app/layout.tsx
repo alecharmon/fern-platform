@@ -20,62 +20,59 @@ import "./globals.css";
 import { getCurrentSession } from "./services/auth0/getCurrentSession";
 
 export const metadata: Metadata = {
-  title: "Fern Dashboard",
+    title: "Fern Dashboard"
 };
 
 export default async function RootLayout({
-  children,
+    children
 }: Readonly<{
-  children: React.JSX.Element;
+    children: React.JSX.Element;
 }>) {
-  const session = await getCurrentSession();
+    const session = await getCurrentSession();
 
-  await applyOrgMappings();
+    await applyOrgMappings();
 
-  return (
-    <html lang="en" suppressHydrationWarning className={gtPlanar.className}>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-dark.min.css"
-        ></link>
-      </head>
-      <PylonScript />
-      <body
-        // id is used to remove the hidePylon class programatically
-        id="body"
-        className={cn(
-          "flex h-[calc(100dvh)] antialiased",
-          HIDE_PYLON_CLASS_NAME
-        )}
-      >
-        <AnimatedNoiseProvider>
-          <NoiseOverlay />
+    return (
+        <html lang="en" suppressHydrationWarning className={gtPlanar.className}>
+            <head>
+                <link
+                    rel="stylesheet"
+                    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/atom-one-dark.min.css"
+                ></link>
+            </head>
+            <PylonScript />
+            <body
+                // id is used to remove the hidePylon class programatically
+                id="body"
+                className={cn("flex h-[calc(100dvh)] antialiased", HIDE_PYLON_CLASS_NAME)}
+            >
+                <AnimatedNoiseProvider>
+                    <NoiseOverlay />
 
-          <Analytics />
-          <SpeedInsights />
+                    <Analytics />
+                    <SpeedInsights />
 
-          <ReactQueryProvider>
-            <PostHogProvider session={session}>
-              <ProgressProvider>{children}</ProgressProvider>
-            </PostHogProvider>
-          </ReactQueryProvider>
-        </AnimatedNoiseProvider>
-        <Toaster
-          position="top-center"
-          richColors
-          toastOptions={{
-            classNames: {
-              icon: "!w-auto",
-              success: "!bg-green-300 !border-green-600 !text-primary",
-              content: "min-w-0",
-            },
-          }}
-          icons={{
-            success: <CheckCircleIcon className="text-primary size-6" />,
-          }}
-        />
-      </body>
-    </html>
-  );
+                    <ReactQueryProvider>
+                        <PostHogProvider session={session}>
+                            <ProgressProvider>{children}</ProgressProvider>
+                        </PostHogProvider>
+                    </ReactQueryProvider>
+                </AnimatedNoiseProvider>
+                <Toaster
+                    position="top-center"
+                    richColors
+                    toastOptions={{
+                        classNames: {
+                            icon: "!w-auto",
+                            success: "!bg-green-300 !border-green-600 !text-primary",
+                            content: "min-w-0"
+                        }
+                    }}
+                    icons={{
+                        success: <CheckCircleIcon className="text-primary size-6" />
+                    }}
+                />
+            </body>
+        </html>
+    );
 }

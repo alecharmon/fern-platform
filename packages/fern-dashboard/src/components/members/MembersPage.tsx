@@ -10,33 +10,29 @@ import { InviteUserDialog } from "./InviteUserDialog";
 import { MembersTable } from "./MembersTable";
 
 export declare namespace MembersPage {
-  export interface Props {
-    session: Auth0SessionData;
-  }
+    export interface Props {
+        session: Auth0SessionData;
+    }
 }
 
 export function MembersPage({ session }: MembersPage.Props) {
-  const org = useCurrentOrganization();
+    const org = useCurrentOrganization();
 
-  const invitations = useOrgInvitations();
-  const members = useOrgMembers();
+    const invitations = useOrgInvitations();
+    const members = useOrgMembers();
 
-  return (
-    <div className="flex min-w-0 flex-1 flex-col">
-      <PageHeader
-        title="Members"
-        subtitle="Manage team members and invitations"
-        farRightContent={
-          <div className="flex md:items-center">
-            <InviteUserDialog org={org} />
-          </div>
-        }
-      />
-      <MembersTable
-        members={members}
-        invitations={invitations}
-        userId={session.user.sub}
-      />
-    </div>
-  );
+    return (
+        <div className="flex min-w-0 flex-1 flex-col">
+            <PageHeader
+                title="Members"
+                subtitle="Manage team members and invitations"
+                farRightContent={
+                    <div className="flex md:items-center">
+                        <InviteUserDialog org={org} />
+                    </div>
+                }
+            />
+            <MembersTable members={members} invitations={invitations} userId={session.user.sub} />
+        </div>
+    );
 }

@@ -13,123 +13,121 @@ import { CodeSnippetExample } from "@/components/api-reference/examples/CodeSnip
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
 
 export function EndpointRequestSnippet({
-  example,
-  endpointDefinition,
-  slugs,
-  className,
+    example,
+    endpointDefinition,
+    slugs,
+    className
 }: {
-  /**
-   * The endpoint locator to use for the request snippet.
-   */
-  endpoint?: string;
-  /**
-   * The example to use for the request snippet.
-   */
-  example?: string | undefined;
-  /**
-   * @internal the rehype-endpoint--examples-snippets plugin will set this
-   */
-  endpointDefinition?: ApiDefinition.EndpointDefinition;
-  /**
-   * @internal the rehype-endpoint-examples-snippets plugin will set this
-   */
-  slugs?: string[];
-  className?: string;
+    /**
+     * The endpoint locator to use for the request snippet.
+     */
+    endpoint?: string;
+    /**
+     * The example to use for the request snippet.
+     */
+    example?: string | undefined;
+    /**
+     * @internal the rehype-endpoint--examples-snippets plugin will set this
+     */
+    endpointDefinition?: ApiDefinition.EndpointDefinition;
+    /**
+     * @internal the rehype-endpoint-examples-snippets plugin will set this
+     */
+    slugs?: string[];
+    className?: string;
 }) {
-  if (endpointDefinition == null) {
-    return null;
-  }
+    if (endpointDefinition == null) {
+        return null;
+    }
 
-  return (
-    <EndpointRequestSnippetInternal
-      endpoint={endpointDefinition}
-      slugs={slugs ?? []}
-      example={example}
-      className={className}
-    />
-  );
+    return (
+        <EndpointRequestSnippetInternal
+            endpoint={endpointDefinition}
+            slugs={slugs ?? []}
+            example={example}
+            className={className}
+        />
+    );
 }
 
 function EndpointRequestSnippetInternal({
-  endpoint,
-  example,
-  slugs,
-  className,
+    endpoint,
+    example,
+    slugs,
+    className
 }: {
-  endpoint: ApiDefinition.EndpointDefinition;
-  example: string | undefined;
-  slugs: string[];
-  className?: string;
+    endpoint: ApiDefinition.EndpointDefinition;
+    example: string | undefined;
+    slugs: string[];
+    className?: string;
 }): ReactElement<any> | null {
-  const slug = useCurrentSlug(slugs);
-  const {
-    selectedExample,
-    selectedExampleKey,
-    availableLanguages,
-    setSelectedExampleKey,
-  } = useExampleSelection(endpoint, example);
+    const slug = useCurrentSlug(slugs);
+    const { selectedExample, selectedExampleKey, availableLanguages, setSelectedExampleKey } = useExampleSelection(
+        endpoint,
+        example
+    );
 
-  const [baseUrl, selectedEnvironmentId] = usePlaygroundBaseUrl(endpoint);
+    const [baseUrl, selectedEnvironmentId] = usePlaygroundBaseUrl(endpoint);
 
-  if (selectedExample == null) {
-    return null;
-  }
+    if (selectedExample == null) {
+        return null;
+    }
 
-  return (
-    <div className={cn("mb-5 mt-3", className)}>
-      <CodeSnippetExample
-        title={
-          <EndpointUrlWithOverflow
-            path={endpoint.path}
-            method={endpoint.method}
-            environmentId={selectedEnvironmentId}
-            baseUrl={baseUrl}
-            options={endpoint.environments}
-            hideCopyButton={true}
-          />
-        }
-        // include both dropdown and api ref button for proper placement
-        languageDropdown={
-          <>
-            {availableLanguages.length > 1 && (
-              <CodeExampleClientDropdown
-                languages={availableLanguages}
-                onValueChange={(language) =>
-                  setSelectedExampleKey((prev) => ({
-                    ...prev,
-                    language,
-                  }))
+    return (
+        <div className={cn("mb-5 mt-3", className)}>
+            <CodeSnippetExample
+                title={
+                    <EndpointUrlWithOverflow
+                        path={endpoint.path}
+                        method={endpoint.method}
+                        environmentId={selectedEnvironmentId}
+                        baseUrl={baseUrl}
+                        options={endpoint.environments}
+                        hideCopyButton={true}
+                    />
                 }
-                value={selectedExampleKey.language}
-              />
-            )}
-            {slug != null && <ApiReferenceButton slug={slug} />}
-          </>
-        }
-        code={selectedExample.code}
-        language={selectedExampleKey.language}
-        json={EMPTY_OBJECT}
-        scrollAreaStyle={{ maxHeight: "500px" }}
-      />
-    </div>
-  );
+                // include both dropdown and api ref button for proper placement
+                languageDropdown={
+                    <>
+                        {availableLanguages.length > 1 && (
+                            <CodeExampleClientDropdown
+                                languages={availableLanguages}
+                                onValueChange={(language) =>
+                                    setSelectedExampleKey((prev) => ({
+                                        ...prev,
+                                        language
+                                    }))
+                                }
+                                value={selectedExampleKey.language}
+                            />
+                        )}
+                        {slug != null && <ApiReferenceButton slug={slug} />}
+                    </>
+                }
+                code={selectedExample.code}
+                language={selectedExampleKey.language}
+                json={EMPTY_OBJECT}
+                scrollAreaStyle={{ maxHeight: "500px" }}
+            />
+        </div>
+    );
 }
 
 function useCurrentSlug(slugs: string[]): string | undefined {
-  const currentVersionSlug = useCurrentVersionSlug();
+    const currentVersionSlug = useCurrentVersionSlug();
 
-  if (slugs.length === 0) {
-    return undefined;
-  }
+    if (slugs.length === 0) {
+        return undefined;
+    }
 
-  if (slugs.length === 1 && slugs[0]) {
-    return slugs[0];
-  }
+    if (slugs.length === 1 && slugs[0]) {
+        return slugs[0];
+    }
 
-  if (currentVersionSlug == null) {
-    return slugs[0];
-  }
+    if (currentVersionSlug == null) {
+        return slugs[0];
+    }
 
-  const slug = slugs.find((slug) => slug.startsWith(currentVersionSlug + "/"));
-  return slug ?? slugs[0];
+    const slug = slugs.find((slug) => slug.startsWith(currentVersionSlug + "/"));
+    return slug ?? slugs[0];
 }
