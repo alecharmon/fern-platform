@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { SparklesIcon } from "@heroicons/react/24/outline";
+import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 import { ExternalLink, Loader2 } from "lucide-react";
 
 import { upgradeFernVersionAction } from "@/app/actions/upgradeFernVersion";

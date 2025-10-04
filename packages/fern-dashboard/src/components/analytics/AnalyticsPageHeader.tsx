@@ -1,4 +1,4 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
+import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
 
 import { cn } from "@/utils/utils";
 

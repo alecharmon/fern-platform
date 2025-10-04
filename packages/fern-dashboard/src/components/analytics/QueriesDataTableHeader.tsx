@@ -1,4 +1,5 @@
-import { ChatBubbleLeftEllipsisIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
+import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Table } from "@tanstack/react-table";
 
 import { Input } from "@/components/ui/input";

@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import ExclamationCircleIcon from "@heroicons/react/24/outline/ExclamationCircleIcon";
 
 import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 

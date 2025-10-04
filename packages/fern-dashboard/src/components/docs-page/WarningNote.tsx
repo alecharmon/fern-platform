@@ -1,4 +1,4 @@
-import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
+import ExclamationTriangleIcon from "@heroicons/react/24/solid/ExclamationTriangleIcon";
 
 import { cn } from "@/utils/utils";
 

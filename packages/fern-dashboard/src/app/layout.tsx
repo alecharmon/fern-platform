@@ -1,12 +1,11 @@
-import type { Metadata } from "next";
-
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import CheckCircleIcon from "@heroicons/react/24/outline/CheckCircleIcon";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
 
 import { NoiseOverlay } from "@/components/NoiseOverlay";
-import { PylonScript } from "@/components/pylon/PylonScript";
 import { HIDE_PYLON_CLASS_NAME } from "@/components/pylon/constants";
+import { PylonScript } from "@/components/pylon/PylonScript";
 import { Toaster } from "@/components/ui/sonner";
 import { applyOrgMappings } from "@/orgMappings";
 import { AnimatedNoiseProvider } from "@/providers/AnimatedNoiseProvider";

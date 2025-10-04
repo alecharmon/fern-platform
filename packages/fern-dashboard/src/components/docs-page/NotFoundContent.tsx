@@ -1,6 +1,5 @@
+import LockClosedIcon from "@heroicons/react/24/outline/LockClosedIcon";
 import React, { ElementType } from "react";
-
-import { LockClosedIcon } from "@heroicons/react/24/outline";
 
 import { LogoutButton } from "../auth/LogoutButton";
 

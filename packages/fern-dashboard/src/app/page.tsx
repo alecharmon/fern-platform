@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { applyOrgMappings } from "@/orgMappings";
 
-import { Auth0SessionData, getCurrentSession } from "./services/auth0/getCurrentSession";
+import { type Auth0SessionData, getCurrentSession } from "./services/auth0/getCurrentSession";
 import { getMyOrganizations } from "./services/auth0/management";
 import { Auth0OrgName } from "./services/auth0/types";
 

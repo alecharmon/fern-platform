@@ -1,6 +1,7 @@
 "use client";
 
-import { ChatBubbleLeftEllipsisIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
+import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 
 import { AnalyticsHistogramTabItem } from "./AnalyticsHistogramTabItem";
 import { RenderType } from "./AnalyticsPageClient";

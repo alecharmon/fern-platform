@@ -1,4 +1,4 @@
-import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
+import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
 import { Sparkles, X } from "lucide-react";
 
 import { FernAI } from "@fern-api/fai-sdk";

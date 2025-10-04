@@ -1,8 +1,7 @@
 "use client";
 
+import CalendarDaysIcon from "@heroicons/react/24/outline/CalendarDaysIcon";
 import { useState } from "react";
-
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 

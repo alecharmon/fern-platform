@@ -1,20 +1,17 @@
 "use client";
 
-import { ComponentProps, ReactElement, forwardRef, useContext, useRef } from "react";
-import Zoom from "react-medium-image-zoom";
-
-import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
-
 import { cn } from "@fern-docs/components";
-import { FernImage } from "@fern-docs/components/FernImage";
 import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
-
+import { FernImage } from "@fern-docs/components/FernImage";
+import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
+import { ComponentProps, forwardRef, ReactElement, useContext, useRef } from "react";
+import Zoom from "react-medium-image-zoom";
+import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useFrontmatter } from "@/docs/components/contexts/frontmatter";
 import { toPixelValue } from "@/docs/components/util/to-pixel-value";
 import { useFileResolver } from "@/providers/FileResolverContext";

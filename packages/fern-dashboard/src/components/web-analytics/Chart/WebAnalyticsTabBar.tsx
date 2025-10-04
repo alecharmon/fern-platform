@@ -1,6 +1,7 @@
 "use client";
 
-import { EyeIcon, UserIcon } from "@heroicons/react/24/outline";
+import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
+import UserIcon from "@heroicons/react/24/outline/UserIcon";
 
 import { AnalyticsHistogramTabItem } from "@/components/analytics/AnalyticsHistogramTabItem";
 

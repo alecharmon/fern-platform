@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { UserIcon } from "@heroicons/react/24/outline";
+import UserIcon from "@heroicons/react/24/outline/UserIcon";
 
 import { cn } from "@/utils/utils";
 

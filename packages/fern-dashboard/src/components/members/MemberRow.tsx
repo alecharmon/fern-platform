@@ -1,6 +1,6 @@
 "use client";
 
-import { UserMinusIcon } from "@heroicons/react/24/outline";
+import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GetMembers200ResponseOneOfInner } from "auth0";
 import { toast } from "sonner";

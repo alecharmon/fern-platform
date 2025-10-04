@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
 
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import EllipsisHorizontalIcon from "@heroicons/react/24/outline/EllipsisHorizontalIcon";
 
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";

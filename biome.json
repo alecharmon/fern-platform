@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -79,7 +79,28 @@
         "useArrayLiterals": "error",
         "useAsConstAssertion": "error",
         "useBlockStatements": "error",
-        "useLiteralEnumMembers": "error"
+        "useLiteralEnumMembers": "error",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": [
+                  "@heroicons/react",
+                  "@heroicons/react/16/outline",
+                  "@heroicons/react/16/solid",
+                  "@heroicons/react/20/outline",
+                  "@heroicons/react/20/solid",
+                  "@heroicons/react/24/outline",
+                  "@heroicons/react/24/solid",
+                  "@heroicons/react/outline",
+                  "@heroicons/react/solid"
+                ],
+                "message": "Import the icon from the full path to avoid importing the entire library."
+              }
+            ]
+          }
+        }
       },
       "suspicious": {
         "noAssignInExpressions": "off",
@@ -261,7 +282,7 @@
         "servers/**/lib/**",
         "servers/**/dist/**",
         "servers/**/generated/**",
-        ".next",
+        "**/.next/**",
         "next-env.d.ts",
         ".vercel",
         ".DS_Store",

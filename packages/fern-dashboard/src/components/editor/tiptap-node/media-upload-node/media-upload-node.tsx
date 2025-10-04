@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
+import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
 

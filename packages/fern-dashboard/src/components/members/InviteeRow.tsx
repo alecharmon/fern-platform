@@ -1,4 +1,5 @@
-import { ClockIcon, UserMinusIcon } from "@heroicons/react/24/outline";
+import ClockIcon from "@heroicons/react/24/outline/ClockIcon";
+import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 

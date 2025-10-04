@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 
-import { ClipboardIcon, LinkIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import ClipboardIcon from "@heroicons/react/24/outline/ClipboardIcon";
+import LinkIcon from "@heroicons/react/24/outline/LinkIcon";
+import PaperAirplaneIcon from "@heroicons/react/24/outline/PaperAirplaneIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
