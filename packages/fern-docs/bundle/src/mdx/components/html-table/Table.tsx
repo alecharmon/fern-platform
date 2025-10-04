@@ -17,7 +17,11 @@ export function Table({ className, sticky, ...rest }: TableProps) {
     const [isFullScreen, setIsFullScreen] = useState(false);
 
     if (sticky) {
-        return <table {...rest} className={cn("fern-table sticky", className)} />;
+        return (
+            <div className="not-prose">
+                <table {...rest} className={cn("fern-table sticky", className)} />
+            </div>
+        );
     }
 
     return (

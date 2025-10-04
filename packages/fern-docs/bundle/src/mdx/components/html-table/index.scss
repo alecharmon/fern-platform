@@ -38,6 +38,8 @@
   }
 
   .fern-table.sticky {
+    @apply text-sm;
+
     thead {
       @apply sticky;
 
