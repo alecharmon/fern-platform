@@ -1,6 +1,7 @@
 import { ReactElement, useEffect, useRef, useState } from "react";
 
 import { useResolvedTheme } from "@/docs/hooks/use-theme";
+import { loadMermaid } from "./loadMermaid";
 
 export function Mermaid({ children }: { children: string }): ReactElement<any> {
     if (typeof window === "undefined" || typeof children !== "string") {
@@ -17,7 +18,8 @@ function MermaidInternal({ code }: { code: string }): ReactElement<any> {
 
     useEffect(() => {
         void (async () => {
-            const mermaid = await import("mermaid").then((m) => m.default);
+            // TODO: if fail to load from jsdelivr, render an error message
+            const mermaid = await loadMermaid();
 
             if (ref.current) {
                 mermaid.initialize({

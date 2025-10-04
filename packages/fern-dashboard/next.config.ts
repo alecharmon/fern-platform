@@ -67,8 +67,20 @@ let nextConfig: NextConfig = {
             "mongodb-client-encryption",
             // monaco-editor is accidentally bundled, but actually uses the jsdelivr cdn
             // so we need to externalize it
-            "monaco-editor"
+            "monaco-editor",
+            // mermaid is explicitly externalized via jsdelivr cdn (similar to monaco-editor)
+            // so we also need to externalize it
+            "mermaid"
         );
+
+        // Suppress warning about dynamic import in mermaid loader
+        config.ignoreWarnings = [
+            ...(config.ignoreWarnings || []),
+            {
+                module: /loadMermaid\.ts$/,
+                message: /Critical dependency: the request of a dependency is an expression/
+            }
+        ];
 
         // esbuild is only used on the server (mdx-bundler), so only externalize it there
         if (isServer) {
