@@ -1,9 +1,9 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import type { NextConfig } from "next";
-import withRspack from "next-rspack";
 
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 import { withSentryConfig } from "@sentry/nextjs";
+import type { NextConfig } from "next";
+import withRspack from "next-rspack";
 
 const CSP_HEADER = `
   default-src 'self';
@@ -135,6 +135,11 @@ let nextConfig: NextConfig = {
     typescript: {
         ignoreBuildErrors: true,
         tsconfigPath: "./tsconfig.app.json"
+    },
+
+    // linting is already handled in ci, so this is not needed
+    eslint: {
+        ignoreDuringBuilds: true
     },
 
     // Exclude esbuild from server bundle to avoid .d.ts parsing issues
