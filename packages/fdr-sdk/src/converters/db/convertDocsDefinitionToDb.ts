@@ -111,6 +111,7 @@ export function convertDocsDefinitionToDb({
             typography: writeShape.config.typography,
             typographyV2: writeShape.config.typographyV2,
             layout: writeShape.config.layout,
+            settings: writeShape.config.settings,
             css: writeShape.config.css,
             js: writeShape.config.js,
             metadata: writeShape.config.metadata,

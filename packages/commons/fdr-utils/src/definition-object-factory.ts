@@ -34,6 +34,7 @@ export class DefinitionObjectFactory {
                 metadata: undefined,
                 redirects: undefined,
                 layout: undefined,
+                settings: undefined,
                 typographyV2: undefined,
                 analyticsConfig: undefined,
                 integrations: undefined,

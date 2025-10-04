@@ -109,6 +109,7 @@ types:
       # styles
       colorsV3: optional<ColorsConfigV3>
       layout: optional<commons.DocsLayoutConfig>
+      settings: optional<commons.DocsSettingsConfig>
       typographyV2: optional<commons.DocsTypographyConfigV2>
 
       # integrations

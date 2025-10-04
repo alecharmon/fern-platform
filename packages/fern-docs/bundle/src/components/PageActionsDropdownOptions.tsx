@@ -161,15 +161,15 @@ export async function constructPageOptions({
         return options;
     }
 
-    if (pageActionConfig.pageActions?.claude !== false) {
+    if (pageActionConfig.pageActions?.options?.claude !== false) {
         options.push(Separator(), OpenWithLLM({ domain, slug, llm: "Claude" }));
     }
 
-    if (pageActionConfig.pageActions?.openAi !== false) {
+    if (pageActionConfig.pageActions?.options?.openAi !== false) {
         options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT" }));
     }
 
-    if (pageActionConfig.pageActions?.cursor !== false) {
+    if (pageActionConfig.pageActions?.options?.cursor !== false) {
         options.push(Separator(), await OpenWithCursor({ domain }));
     }
 

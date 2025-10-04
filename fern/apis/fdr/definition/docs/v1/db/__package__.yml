@@ -74,6 +74,7 @@ types:
       backgroundImage: optional<rootCommons.FileId>
       colorsV3: optional<docsReadV1.ColorsConfigV3>
       layout: optional<commons.DocsLayoutConfig>
+      settings: optional<commons.DocsSettingsConfig>
       typographyV2: optional<commons.DocsTypographyConfigV2>
 
       # integrations

@@ -169,6 +169,16 @@ types:
       disableHeader: optional<boolean>
       hideNavLinks: optional<boolean>
       hideFeedback: optional<boolean>
+      
+  DocsSettingsConfig:
+    properties:
+      searchText: optional<string>
+      disableSearch: optional<boolean>
+      disableFeedback: optional<boolean>
+      darkModeCode: optional<boolean>
+      defaultSearchFilters: optional<boolean>
+      httpSnippets: optional<boolean>
+      hide404Page: optional<boolean>
 
   SearchbarPlacement:
     enum:
@@ -401,8 +411,24 @@ types:
 
   PageActionsConfig:
     properties:
+      default: optional<PageActionOption>
+      options: optional<PageActionOptions>
+    
+  PageActionOption:
+    enum:
+      - copyPage
+      - viewAsMarkdown
+      - askAi
+      - openAi
+      - claude
+      - cursor
+      - vscode
+      
+  PageActionOptions:
+    properties:
       copyPage: optional<boolean>
       viewAsMarkdown: optional<boolean>
+      askAi: optional<boolean>
       openAi: optional<boolean>
       claude: optional<boolean>
       cursor: optional<boolean>

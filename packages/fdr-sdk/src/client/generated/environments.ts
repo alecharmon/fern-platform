@@ -4,6 +4,7 @@
 
 export const FernRegistryEnvironment = {
     Prod: "https://registry.buildwithfern.com",
+    Lambda: "https://registry-v2.buildwithfern.com",
 } as const;
 
-export type FernRegistryEnvironment = typeof FernRegistryEnvironment.Prod;
+export type FernRegistryEnvironment = typeof FernRegistryEnvironment.Prod | typeof FernRegistryEnvironment.Lambda;
