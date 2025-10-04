@@ -9,8 +9,8 @@
   },
   "type": "module",
   "scripts": {
-    "clean": "rm -rf ./lib ./dist ./.next && tsc --build --clean",
-    "compile": "tsc --build",
+    "clean": "rm -rf ./.next",
+    "compile": "exit 0",
     "dashboard:build": "next build",
     "dashboard:dev": "next dev",
     "dashboard:dev:inspect": "NODE_OPTIONS='--inspect' next dev",
