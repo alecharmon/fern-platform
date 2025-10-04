@@ -51,11 +51,11 @@ export function BottomNavigationClient({
     }
 
     return (
-        <nav aria-label="Up next" className="bg-(color:--grayscale-a3) [&>a]:rounded-3 rounded-4 -mx-1 flex p-1">
+        <nav aria-label="Up next" className="fern-footer-nav">
             {prev && (
                 <MaybeFernLink
                     href={prev.href}
-                    className="flex h-16 shrink-0 items-center gap-1 px-3 pr-6"
+                    className="fern-footer-prev"
                     shallow={prev.shallow}
                     onClick={prev.onClick}
                 >
@@ -66,7 +66,7 @@ export function BottomNavigationClient({
             {next && (
                 <MaybeFernLink
                     href={next.href}
-                    className="bg-card-solid hover:border-(color:--accent-a9) border-card-border fern-background-image relative flex h-16 min-w-0 flex-1 shrink items-center justify-end gap-4 overflow-clip border px-3 transition-all hover:transition-none"
+                    className="fern-footer-next fern-background-image"
                     shallow={next.shallow}
                     onClick={next.onClick}
                 >

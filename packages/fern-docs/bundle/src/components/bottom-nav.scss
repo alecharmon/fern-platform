@@ -1,0 +1,13 @@
+@layer components {
+  .fern-footer-nav {
+    @apply bg-(color:--grayscale-a3) [&>a]:rounded-3 rounded-4 -mx-1 flex p-1;
+    
+    .fern-footer-prev {
+      @apply flex h-16 shrink-0 items-center gap-1 px-3 pr-6;
+    }
+    
+    .fern-footer-next {
+      @apply bg-card-solid hover:border-(color:--accent-a9) border-card-border relative flex h-16 min-w-0 flex-1 shrink items-center justify-end gap-4 overflow-clip border px-3 transition-all hover:transition-none;
+    }
+  }
+}
