@@ -12,6 +12,7 @@ import type { AuthEdgeConfig } from "@fern-api/docs-auth";
 // import { track } from "@fern-api/docs-server";
 import {
     type AuthState,
+    DynamicIRsByLanguage,
     type FernFonts,
     cacheSeed,
     cleanBasePath,
@@ -473,7 +474,7 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                     const cached = await kvGet<ApiDefinition.ApiDefinition>(domainKey, key, cacheConfig.cacheKeySuffix);
                     if (cached != null) {
                         const metadata = await getMetadata(cacheConfig)(domainKey);
-                        const dynamicIr = await getDynamicIr(id)(metadata.org, metadata.domain);
+                        const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
                         return await backfillSnippets(cached, dynamicIr, await flagsPromise);
                     }
                 }
@@ -498,7 +499,7 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                 kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             }
             const metadata = await getMetadata(cacheConfig)(domainKey);
-            const dynamicIr = await getDynamicIr(id)(metadata.org, metadata.domain);
+            const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
             return backfillSnippets(pruned, dynamicIr, await flagsPromise);
         },
         [domainKey, cacheSeed(), cacheConfig.cacheKeySuffix],
@@ -960,20 +961,28 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
         };
     });
 
-const getDynamicIr = (apiName: string) =>
-    cache(async (orgId: string, domain: string) => {
-        "use cache";
+const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
+    cache(async (orgId: string, domain: string, apiName: string) => {
         const api = await getApi(domain, apiName);
 
+        // enable semantic versioning
         const configHash = api.snippetsConfiguration
             ? createHash("sha256").update(JSON.stringify(api.snippetsConfiguration)).digest("hex").slice(0, 16)
             : "no-config";
 
-        unstable_cacheTag(
-            `getDynamicIr:org:${orgId}`,
-            `getDynamicIr:api:${apiName}`,
-            `getDynamicIr:config:${configHash}`
-        );
+        try {
+            const cached = await kvGet<DynamicIRsByLanguage>(
+                domain,
+                `dynamicIr:${orgId}:${apiName}:${configHash}`,
+                cacheConfig.cacheKeySuffix
+            );
+            if (cached) {
+                console.log(`Using cached dynamic IR for ${orgId}:${apiName}`);
+                return cached;
+            }
+        } catch (error) {
+            console.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
+        }
 
         const response = await loadDynamicIRWithUrl({
             orgId,
@@ -982,6 +991,15 @@ const getDynamicIr = (apiName: string) =>
         });
 
         if (response) {
+            console.log(`Caching dynamic IR for ${orgId}:${apiName}`);
+            kvSet(
+                domain,
+                `dynamicIr:${orgId}:${apiName}:${configHash}`,
+                response,
+                cacheConfig.kvTtl,
+                cacheConfig.cacheKeySuffix
+            );
+
             return response;
         }
 
@@ -1152,7 +1170,7 @@ export const createCachedDocsLoader = async (
         },
         getDynamicIr: async (apiName: string) => {
             const m = await metadata;
-            return getDynamicIr(apiName)(m.org, m.domain);
+            return getDynamicIr(config)(m.org, m.domain, apiName);
         },
         clearKvCache: () => clearKvCache(domainKey),
         isAskAiEnabled: () => getAskAiEnabled(config)(domainKey)
