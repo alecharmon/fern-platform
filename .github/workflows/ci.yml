@@ -38,7 +38,7 @@ jobs:
       - name: Check dependency deduplication
         run: pnpm dedupe --check
 
-      - name: Format
+      - name: Check format
         run: pnpm format:check
 
       - name: Format YAML

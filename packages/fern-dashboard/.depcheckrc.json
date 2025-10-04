@@ -11,7 +11,8 @@
     "glslify-import",
     "glslify-loader",
     "raw-loader",
-    "aws4"
+    "aws4",
+    "monaco-editor"
   ],
   "ignore-patterns": ["dist"]
 }

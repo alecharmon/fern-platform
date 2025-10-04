@@ -64,7 +64,10 @@ let nextConfig: NextConfig = {
             "@aws-sdk/credential-providers",
             "gcp-metadata",
             "snappy",
-            "mongodb-client-encryption"
+            "mongodb-client-encryption",
+            // monaco-editor is accidentally bundled, but actually uses the jsdelivr cdn
+            // so we need to externalize it
+            "monaco-editor"
         );
 
         // esbuild is only used on the server (mdx-bundler), so only externalize it there
