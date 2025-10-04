@@ -191,16 +191,28 @@ export async function GET(
 
                 if (req.nextUrl.searchParams.get("regenerate") !== "false") {
                     const collector = FernNavigation.NodeCollector.collect(staticRoot);
-                    const batches = chunk(collector.staticPageSlugs, 200);
 
-                    controller.enqueue(`revalidate-queued:urls=${collector.slugs.length};batches=${batches.length}\n`);
+                    // Collect slugs from redirects config, excluding pattern-based redirects
+                    // Pattern-based redirects use path-to-regexp syntax like :slug or :slug*
+                    const redirects = docs.definition.config.redirects ?? [];
+                    const redirectSlugs = redirects
+                        .filter((redirect) => !redirect.source.includes(":"))
+                        .map((redirect) => redirect.source);
+
+                    // Combine static page slugs with redirect slugs, removing duplicates
+                    const allSlugs = Array.from(new Set([...collector.staticPageSlugs, ...redirectSlugs]));
+                    const batches = chunk(allSlugs, 200);
+
+                    controller.enqueue(
+                        `revalidate-queued:urls=${allSlugs.length};batches=${batches.length};redirects=${redirectSlugs.length}\n`
+                    );
 
                     for (let i = 0; i < batches.length; i++) {
                         controller.enqueue(
                             `revalidate-batch:${i * 200 + 1}-${Math.min(
                                 (i + 1) * 200,
-                                collector.slugs.length
-                            )}/${collector.slugs.length}\n`
+                                allSlugs.length
+                            )}/${allSlugs.length}\n`
                         );
                         await Promise.all(
                             (batches[i] ?? []).map(async (slug: string) => {
