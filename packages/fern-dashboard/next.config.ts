@@ -1,9 +1,13 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
+import rspack from "@rspack/core";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import withRspack from "next-rspack";
+import webpack from "webpack";
+
+const isRspackEnabled = process.env.NODE_ENV === "development";
 
 const CSP_HEADER = `
   default-src 'self';
@@ -87,6 +91,15 @@ let nextConfig: NextConfig = {
             config.externals = config.externals || [];
             config.externals.push("esbuild");
         }
+
+        // ignore all test files
+        // Use IgnorePlugin to ignore .test.ts and .test.tsx files
+        config.plugins ??= [];
+        config.plugins.push(
+            new (isRspackEnabled ? rspack : webpack).IgnorePlugin({
+                resourceRegExp: /\.test\.tsx?$/
+            })
+        );
 
         // rspack's internal configuration for "lib" will bundle all shared node_modules into a giant chunk,
         // so we need to kill it
@@ -182,7 +195,7 @@ let nextConfig: NextConfig = {
 };
 
 // only use rspack in development
-if (process.env.NODE_ENV === "development") {
+if (isRspackEnabled) {
     nextConfig = withRspack(nextConfig);
 }
 
