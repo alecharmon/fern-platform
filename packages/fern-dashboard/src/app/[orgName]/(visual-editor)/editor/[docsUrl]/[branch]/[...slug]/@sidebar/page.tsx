@@ -1,17 +1,15 @@
-import { PrefetchedDocsLoader, createEditableDocsLoader } from "@fern-api/docs-loader";
+import { createEditableDocsLoader, PrefetchedDocsLoader } from "@fern-api/docs-loader";
 import { getIsSidebarFixed, getIsSingleOverviewPage } from "@fern-api/docs-utils";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
-import { getClientPageRedirectTarget } from "@fern-docs/components";
+import { getClientPageRedirectTarget } from "@fern-docs/components/navigation/pageUtils";
+import { SidebarClientRootNode } from "@fern-docs/components/sidebar/nodes/SidebarClientRootNode";
 import { SidebarClientTabsRoot } from "@fern-docs/components/sidebar/SidebarClientTabsRoot";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
-import { SidebarClientRootNode } from "@fern-docs/components/sidebar/nodes/SidebarClientRootNode";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
-
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { EncodedDocsUrl } from "@/utils/types";
-
 import { CreatePageButton } from "./CreatePageButton";
 
 export default async function SidebarPage({

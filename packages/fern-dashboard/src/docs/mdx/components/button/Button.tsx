@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode, useRef } from "react";
 
-import { cn } from "@fern-docs/components";
-import { FernButton } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { cn } from "@fern-docs/components/cn";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";

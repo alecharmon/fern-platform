@@ -1,11 +1,10 @@
-import { FC, PropsWithChildren, ReactNode, forwardRef } from "react";
-
+import { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
+import { cn } from "@fern-docs/components/cn";
+import { SemanticColor } from "@fern-docs/components/colors";
+import { FernButton } from "@fern-docs/components/FernButton";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-import { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
-import { cn } from "@fern-docs/components";
-import { FernButton, SemanticColor } from "@fern-docs/components";
+import { FC, forwardRef, PropsWithChildren, ReactNode } from "react";
 
 export declare namespace RequestSelect {
     export interface Props {

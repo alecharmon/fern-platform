@@ -1,10 +1,8 @@
-import { ComponentPropsWithoutRef, forwardRef, memo } from "react";
-
-import { VariantProps, cva } from "class-variance-authority";
+import { cn } from "@fern-docs/components/cn";
+import { Kbd } from "@fern-docs/components/kbd";
+import { cva, VariantProps } from "class-variance-authority";
 import { SearchIcon } from "lucide-react";
-
-import { Kbd } from "@fern-docs/components";
-import { cn } from "@fern-docs/components";
+import { ComponentPropsWithoutRef, forwardRef, memo } from "react";
 
 const buttonVariants = cva(
     "focus-visible:ring-(color:--accent) rounded-2 inline-flex h-9 items-center justify-start gap-2 whitespace-nowrap p-2 text-sm font-medium transition-colors hover:transition-none focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",

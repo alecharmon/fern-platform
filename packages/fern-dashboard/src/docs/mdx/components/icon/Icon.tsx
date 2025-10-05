@@ -1,4 +1,5 @@
-import { FaIcon, cn } from "@fern-docs/components";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { cn } from "@fern-docs/components/cn";
 
 export function Icon({
     className,

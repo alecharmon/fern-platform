@@ -3,7 +3,7 @@
 import { ComponentProps, ReactElement, forwardRef, useContext } from "react";
 import Zoom from "react-medium-image-zoom";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 import { FernImage } from "@fern-docs/components/FernImage";
 import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
 

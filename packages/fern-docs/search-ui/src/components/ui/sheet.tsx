@@ -1,11 +1,10 @@
-import React from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
-
-import { cn } from "@fern-docs/components";
+import React from "react";
 
 const Sheet = SheetPrimitive.Root;
 

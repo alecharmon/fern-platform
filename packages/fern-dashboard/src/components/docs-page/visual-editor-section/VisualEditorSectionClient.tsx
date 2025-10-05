@@ -1,9 +1,7 @@
 "use client";
 
+import { createNavigationLocalStorage } from "@fern-docs/components/navigation/NavigationStorage";
 import { useEffect, useState } from "react";
-
-import { createNavigationLocalStorage } from "@fern-docs/components";
-
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getRelevantUserBranchesForSite } from "@/app/services/dal/mongodb/getRelevantUserBranchesForSite";

@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
-import { SerializableFoundNode } from "@fern-docs/components";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { MdxToHtmlResponse } from "@fern-docs/mdx";
 

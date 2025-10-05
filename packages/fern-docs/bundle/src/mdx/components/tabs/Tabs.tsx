@@ -4,7 +4,7 @@ import React from "react";
 import * as RadixTabs from "@radix-ui/react-tabs";
 
 import { ApiDefinition } from "@fern-api/fdr-sdk";
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 
 import { useProgrammingLanguage } from "@/state/language";

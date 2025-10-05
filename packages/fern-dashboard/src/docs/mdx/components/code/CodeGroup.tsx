@@ -4,7 +4,8 @@ import React from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
-import { CopyToClipboardButton, cn } from "@fern-docs/components";
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
+import { cn } from "@fern-docs/components/cn";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 
 import { HorizontalOverflowMask } from "@/docs/components/HorizontalOverflowMask";

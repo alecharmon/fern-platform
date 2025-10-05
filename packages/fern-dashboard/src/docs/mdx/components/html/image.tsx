@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
 import { FernImage } from "@fern-docs/components/FernImage";
 import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";

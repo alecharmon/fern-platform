@@ -1,14 +1,12 @@
-import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import React from "react";
-
+import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { Button } from "@fern-docs/components/button";
+import { cn } from "@fern-docs/components/cn";
+import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import { CirclePlusIcon } from "lucide-react";
-
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { Button, cn } from "@fern-docs/components";
-import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
-
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import {
     EditorComponentContextValue,
     EditorComponentProvider,
@@ -18,7 +16,6 @@ import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useProgrammingLanguage } from "@/docs/state/language";
 
 export const EMPTY_TAB_CONTENT = `

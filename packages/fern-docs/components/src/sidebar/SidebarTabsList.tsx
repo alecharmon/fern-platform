@@ -1,10 +1,9 @@
+import { slugToHref } from "@fern-api/docs-utils";
+import { hasRedirect, TabChild } from "@fern-api/fdr-sdk/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Lock } from "lucide-react";
 
-import { slugToHref } from "@fern-api/docs-utils";
-import { TabChild, hasRedirect } from "@fern-api/fdr-sdk/navigation";
-
-import { cn } from "..";
+import { cn } from "../cn";
 import { FernLinkTab } from "../FernLinkTab";
 import { processIcon } from "../processIcon";
 

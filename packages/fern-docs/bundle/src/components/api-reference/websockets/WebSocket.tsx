@@ -6,7 +6,8 @@ import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernDropdown, FernScrollArea } from "@fern-docs/components";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 

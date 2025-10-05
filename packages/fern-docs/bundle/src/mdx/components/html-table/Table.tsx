@@ -6,8 +6,9 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Expand } from "lucide-react";
 
-import { cn } from "@fern-docs/components";
-import { FernButton, FernScrollArea } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
+import { cn } from "@fern-docs/components/cn";
 
 interface TableProps extends ComponentProps<"table"> {
     sticky?: boolean;

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 import { useRestoreSidebarScrollPosition } from "@fern-docs/components/hooks/sidebar-scroll";
 import { CustomLayout, GuideLayout, OverviewLayout, PageLayout, ReferenceLayout } from "@fern-docs/components/layouts";
 import { useLayout } from "@fern-docs/components/state/layout";

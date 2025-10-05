@@ -1,8 +1,7 @@
-import { ComponentPropsWithoutRef, forwardRef } from "react";
+import { Kbd } from "@fern-docs/components/kbd";
 
 import { Play } from "lucide-react";
-
-import { Kbd } from "@fern-docs/components";
+import { ComponentPropsWithoutRef, forwardRef } from "react";
 
 import * as Command from "../cmdk";
 

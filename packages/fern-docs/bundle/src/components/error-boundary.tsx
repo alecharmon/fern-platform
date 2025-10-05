@@ -1,11 +1,11 @@
 "use client";
 
+import { SemanticBadge } from "@fern-docs/components/badges/semantic-badge";
+import { cn } from "@fern-docs/components/cn";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { RefreshCcw } from "lucide-react";
 import React, { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
-
-import { RefreshCcw } from "lucide-react";
-
-import { FernTooltip, FernTooltipProvider, SemanticBadge, cn } from "@fern-docs/components";
 
 export function ErrorBoundaryFallback({
     className,

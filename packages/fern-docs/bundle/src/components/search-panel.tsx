@@ -7,7 +7,7 @@ import { isEqual } from "es-toolkit/predicate";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { z } from "zod";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { AlgoliaSearchClientRoot, DesktopAskAiPanel, SEARCH_INDEX } from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";

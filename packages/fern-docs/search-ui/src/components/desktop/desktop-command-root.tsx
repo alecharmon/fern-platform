@@ -1,9 +1,8 @@
-import { ComponentPropsWithoutRef, KeyboardEventHandler, forwardRef, useCallback, useRef, useState } from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
-
-import { cn } from "@fern-docs/components";
+import { ComponentPropsWithoutRef, forwardRef, KeyboardEventHandler, useCallback, useRef, useState } from "react";
 
 import * as Command from "../cmdk";
 import { CommandUxProvider } from "../shared/command-ux";

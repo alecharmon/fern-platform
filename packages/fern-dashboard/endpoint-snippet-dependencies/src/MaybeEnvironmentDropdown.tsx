@@ -1,11 +1,13 @@
-import React, { ReactElement, useEffect, useState } from "react";
-
-import { useAtom } from "jotai";
-
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { sanitizeUrl } from "@fern-api/ui-core-utils";
-import { FernButton, FernDropdown, FernInput, FernTooltip, cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernInput } from "@fern-docs/components/FernInput";
+import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { useBooleanState } from "@fern-ui/react-commons";
+import { useAtom } from "jotai";
+import { ReactElement, useEffect, useState } from "react";
 
 import { SELECTED_ENVIRONMENT_ID_ATOM, SELECTED_ENVIRONMENT_URL_ATOM } from "./state/environment";
 

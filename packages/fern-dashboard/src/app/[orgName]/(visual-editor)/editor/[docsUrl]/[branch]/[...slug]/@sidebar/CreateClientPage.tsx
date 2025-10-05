@@ -1,15 +1,13 @@
 "use client";
 
+import { useRouter } from "@bprogress/next/app";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { createMdxFrontmatter } from "@fern-docs/components/navigation/mdxUtils";
+import { getAllSections, UNNAMED_SECTION_DISPLAY_NAMES } from "@fern-docs/components/navigation/pageUtils";
+import { NavigationContext, SectionWithHierarchy } from "@fern-docs/components/navigation/types";
+import { mdxToHtml } from "@fern-docs/mdx";
 import { useParams } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
-
-import { useRouter } from "@bprogress/next/app";
-
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { NavigationContext, UNNAMED_SECTION_DISPLAY_NAMES, createMdxFrontmatter } from "@fern-docs/components";
-import { SectionWithHierarchy, getAllSections } from "@fern-docs/components";
-import { mdxToHtml } from "@fern-docs/mdx";
-
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

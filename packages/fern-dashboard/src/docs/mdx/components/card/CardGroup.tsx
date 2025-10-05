@@ -1,17 +1,14 @@
-import React, { useRef } from "react";
-
+import { Button } from "@fern-docs/components/button";
+import { cn } from "@fern-docs/components/cn";
 import { CirclePlusIcon } from "lucide-react";
-
-import { Button, cn } from "@fern-docs/components";
-
+import React, { useRef } from "react";
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
+import { IntegerInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { IntegerInputControl } from "@/components/editor/editor-component/controls";
-
 import { CardGroupProvider, useCardGroup } from "./CardGroupContext";
 
 export const EMPTY_CARD_CONTENT = `

@@ -1,6 +1,5 @@
+import { cn } from "@fern-docs/components/cn";
 import React from "react";
-
-import { cn } from "@fern-docs/components";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
     ({ className, type, ...props }, ref) => {

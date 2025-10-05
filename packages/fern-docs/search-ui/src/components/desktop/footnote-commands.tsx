@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai";
 
-import { Badge } from "@fern-docs/components";
+import { Badge } from "@fern-docs/components/badges";
 
 import { useChatbotTurnContext } from "../chatbot/turn-context";
 import { CommandLink } from "../shared/command-link";

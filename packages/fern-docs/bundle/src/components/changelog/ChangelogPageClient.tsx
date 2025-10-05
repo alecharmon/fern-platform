@@ -9,7 +9,7 @@ import { slugToHref } from "@fern-api/docs-utils";
 import { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
-import { Badge } from "@fern-docs/components";
+import { Badge } from "@fern-docs/components/badges";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import { AsideAwareDiv } from "@fern-docs/components/layouts/AsideAwareDiv";

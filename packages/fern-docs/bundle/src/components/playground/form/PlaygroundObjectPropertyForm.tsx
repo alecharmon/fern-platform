@@ -12,8 +12,9 @@ import {
     TypeReference,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
-import { cn } from "@fern-docs/components";
-import { FernButton, FernDropdown } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { cn } from "@fern-docs/components/cn";
 import { useBooleanState } from "@fern-ui/react-commons";
 
 import { withErrorBoundary } from "@/components/error-boundary";

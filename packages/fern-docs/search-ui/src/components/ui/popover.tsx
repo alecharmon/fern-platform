@@ -1,8 +1,7 @@
-import React from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-
-import { cn } from "@fern-docs/components";
+import React from "react";
 
 const Popover = PopoverPrimitive.Root;
 

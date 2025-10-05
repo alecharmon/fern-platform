@@ -7,7 +7,8 @@ import urlJoin from "url-join";
 
 import { APIKeyInjectionConfigEnabled } from "@fern-api/docs-auth";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
-import { FernButton, FernCard } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernCard } from "@fern-docs/components/FernCard";
 
 import { Callout } from "@/mdx/components/callout";
 import {

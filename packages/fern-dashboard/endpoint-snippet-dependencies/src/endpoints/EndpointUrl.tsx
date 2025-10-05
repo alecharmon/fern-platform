@@ -1,18 +1,17 @@
 "use client";
 
-import React, { PropsWithChildren, ReactElement, useMemo, useRef, useState } from "react";
-
-import { composeRefs } from "@radix-ui/react-compose-refs";
-import { noop } from "ts-essentials";
-
 import { HttpOrWssOrGrpc } from "@fern-api/docs-utils";
 import { APIV1Read } from "@fern-api/fdr-sdk";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { sanitizeUrl, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-import { FernTooltip, FernTooltipProvider, cn } from "@fern-docs/components";
-import { CopyToClipboardButton } from "@fern-docs/components";
 import { HttpMethodBadge } from "@fern-docs/components/badges";
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
+import { cn } from "@fern-docs/components/cn";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { useBooleanState, useCopyToClipboard } from "@fern-ui/react-commons";
+import { composeRefs } from "@radix-ui/react-compose-refs";
+import React, { PropsWithChildren, ReactElement, useMemo, useRef, useState } from "react";
+import { noop } from "ts-essentials";
 
 import { MaybeEnvironmentDropdown } from "../MaybeEnvironmentDropdown";
 

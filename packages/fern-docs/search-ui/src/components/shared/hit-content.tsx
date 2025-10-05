@@ -1,13 +1,11 @@
-import { Fragment, ReactElement, ReactNode } from "react";
-import { Highlight, Snippet } from "react-instantsearch";
-
+import { formatUtc } from "@fern-api/ui-core-utils";
+import { AvailabilityBadge, HttpMethodBadge } from "@fern-docs/components/badges";
+import { cn } from "@fern-docs/components/cn";
 import { uniq } from "es-toolkit/array";
 import { ChevronRight } from "lucide-react";
+import { Fragment, ReactElement, ReactNode } from "react";
+import { Highlight, Snippet } from "react-instantsearch";
 import { MarkRequired, UnreachableCaseError } from "ts-essentials";
-
-import { formatUtc } from "@fern-api/ui-core-utils";
-import { cn } from "@fern-docs/components";
-import { AvailabilityBadge, HttpMethodBadge } from "@fern-docs/components/badges";
 
 import { AlgoliaRecordHit, ApiReferenceRecordHit, ChangelogRecordHit, MarkdownRecordHit } from "../../types";
 

@@ -1,8 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { NavigationStore, createNavigationMemoryStorage } from "@fern-docs/components";
-
+import { createNavigationMemoryStorage } from "@fern-docs/components/navigation/NavigationStorage";
+import { NavigationStore } from "@fern-docs/components/navigation/NavigationStore";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PagesStore } from "../PagesStore";
 
 const createTestDocsYml = () => `instances:

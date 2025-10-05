@@ -10,7 +10,7 @@ import { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
-import { FernTooltipProvider } from "@fern-docs/components";
+import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { useEventCallback } from "@fern-ui/react-commons";

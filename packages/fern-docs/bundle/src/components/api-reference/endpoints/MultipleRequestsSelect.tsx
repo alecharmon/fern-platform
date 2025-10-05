@@ -4,8 +4,9 @@ import * as Select from "@radix-ui/react-select";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
-import { cn } from "@fern-docs/components";
-import { FernButton, SemanticColor } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { SemanticColor } from "@fern-docs/components/colors";
+import { cn } from "@fern-docs/components/cn";
 
 export declare namespace RequestSelect {
     export interface Props {

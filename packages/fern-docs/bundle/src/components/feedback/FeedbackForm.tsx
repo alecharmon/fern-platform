@@ -7,8 +7,13 @@ import { atomWithStorage } from "jotai/utils";
 import { LazyMotion, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 
-import { cn } from "@fern-docs/components";
-import { FernButton, FernCheckbox, FernDropdown, FernInput, FernRadioGroup, FernTextarea } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernCheckbox } from "@fern-docs/components/FernCheckbox";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernInput } from "@fern-docs/components/FernInput";
+import { FernRadioGroup } from "@fern-docs/components/FernRadioGroup";
+import { FernTextarea } from "@fern-docs/components/FernTextarea";
+import { cn } from "@fern-docs/components/cn";
 import { useKeyboardPress } from "@fern-ui/react-commons";
 
 const MotionFernRadioGroup = m.create(FernRadioGroup);

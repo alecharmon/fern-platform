@@ -5,8 +5,9 @@ import { ChangeEvent, DragEventHandler, memo, useEffect, useRef, useState } from
 import { File, FilePlus, Mic, X } from "lucide-react";
 import prettyBytes from "pretty-bytes";
 
-import { cn } from "@fern-docs/components";
-import { FernButton, FernButtonGroup, FernCard } from "@fern-docs/components";
+import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
+import { FernCard } from "@fern-docs/components/FernCard";
+import { cn } from "@fern-docs/components/cn";
 
 import { WithLabelInternal } from "../WithLabel";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";

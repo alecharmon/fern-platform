@@ -1,19 +1,18 @@
+import { Button } from "@fern-docs/components/button";
+import { cn } from "@fern-docs/components/cn";
+import { CirclePlusIcon } from "lucide-react";
 import React, {
     ComponentProps,
-    ReactElement,
     createContext,
+    ReactElement,
     useCallback,
     useContext,
     useMemo,
     useRef,
     useState
 } from "react";
-
-import { CirclePlusIcon } from "lucide-react";
-
-import { Button, cn } from "@fern-docs/components";
-
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
+import { CheckboxControl } from "@/components/editor/editor-component/controls";
 import {
     EditorComponentContextValue,
     useEditorComponent
@@ -22,7 +21,6 @@ import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { CheckboxControl } from "@/components/editor/editor-component/controls";
 
 const EMPTY_STEP_CONTENT = `
 <Step title="Title">

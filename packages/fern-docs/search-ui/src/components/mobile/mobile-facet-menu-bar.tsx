@@ -1,11 +1,5 @@
-import { ComponentPropsWithoutRef, Fragment, ReactNode, forwardRef } from "react";
-
-import * as Menubar from "@radix-ui/react-menubar";
-import { Check, ChevronDown, Minus } from "lucide-react";
-
 import { isHttpMethod } from "@fern-api/docs-utils";
 import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
-import { cn } from "@fern-docs/components";
 import {
     AvailabilityBadge,
     AvailabilityDisplayNames,
@@ -13,8 +7,12 @@ import {
     HttpMethodBadge,
     isAvailability
 } from "@fern-docs/components/badges";
+import { cn } from "@fern-docs/components/cn";
 import { FacetFilter } from "@fern-docs/search-keyword";
 import { FacetName } from "@fern-docs/search-keyword/types";
+import * as Menubar from "@radix-ui/react-menubar";
+import { Check, ChevronDown, Minus } from "lucide-react";
+import { ComponentPropsWithoutRef, Fragment, forwardRef, ReactNode } from "react";
 
 import { getFacetDisplay, toFilterLabel } from "../../utils/facet-display";
 import { useFacetFilters, useFacets } from "../search/algolia-search-client";

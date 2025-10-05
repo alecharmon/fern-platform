@@ -1,12 +1,11 @@
 "use client";
 
+import { GitFork, Github, Star } from "lucide-react";
 import React from "react";
 import { preload } from "react-dom";
-
-import { GitFork, Github, Star } from "lucide-react";
 import useSWRImmutable from "swr/immutable";
 
-import { cn } from "..";
+import { cn } from "../cn";
 import { FernLinkButton } from "../FernLinkButton";
 
 /* eslint-disable @typescript-eslint/no-deprecated */

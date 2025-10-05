@@ -6,8 +6,8 @@ import { Play } from "lucide-react";
 
 import { conformExplorerRoute } from "@fern-api/docs-utils";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernTooltip, FernTooltipProvider } from "@fern-docs/components";
-import { cn } from "@fern-docs/components";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { cn } from "@fern-docs/components/cn";
 import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 
 import { usePlaygroundSettings } from "../hooks/usePlaygroundSettings";

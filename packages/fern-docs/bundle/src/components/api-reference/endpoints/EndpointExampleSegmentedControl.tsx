@@ -2,7 +2,8 @@ import { ReactElement } from "react";
 
 import { ChevronDown } from "lucide-react";
 
-import { FernButton, FernButtonGroup, FernDropdown } from "@fern-docs/components";
+import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import { CodeExample } from "../examples/code-example";
 

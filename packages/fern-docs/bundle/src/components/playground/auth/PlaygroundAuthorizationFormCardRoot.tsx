@@ -1,21 +1,18 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-
+import { APIV1Read } from "@fern-api/fdr-sdk";
+import { Button } from "@fern-docs/components/button";
+import { FernCollapse } from "@fern-docs/components/FernCollapse";
+import { useBooleanState } from "@fern-ui/react-commons";
 import { noop } from "es-toolkit/function";
 import { useAtom, useSetAtom } from "jotai";
-
-import { APIV1Read } from "@fern-api/fdr-sdk";
-import { Button, FernCollapse } from "@fern-docs/components";
-import { useBooleanState } from "@fern-ui/react-commons";
-
+import React, { useEffect, useRef } from "react";
 import { useApiKeyInjectionConfig, useInjectedApiKey } from "@/components/services/useApiKeyInjectionConfig";
 import {
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
     useResolvedPlaygroundState
 } from "@/state/playground";
-
 import { PlaygroundCardTriggerApiKeyInjected } from "./PlaygroundCardTriggerApiKeyInjected";
 import { PlaygroundCardTriggerManual } from "./PlaygroundCardTriggerManual";
 

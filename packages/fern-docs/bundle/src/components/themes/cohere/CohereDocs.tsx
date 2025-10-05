@@ -5,8 +5,8 @@ import React, { useEffect, useRef } from "react";
 
 import { useSetAtom } from "jotai";
 
-import { cn } from "@fern-docs/components";
-import { FernScrollArea } from "@fern-docs/components";
+import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
+import { cn } from "@fern-docs/components/cn";
 import { FERN_COHERE_CONTENT_ID, FERN_FOOTER_ID } from "@fern-docs/components/constants";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useDomain } from "@fern-docs/components/state/domain";

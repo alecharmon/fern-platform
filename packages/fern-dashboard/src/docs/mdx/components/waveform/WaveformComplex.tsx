@@ -8,7 +8,7 @@ import { LazyMotion, domAnimation, useMotionValueEvent, useSpring } from "motion
 import * as m from "motion/react-m";
 import * as THREE from "three";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 
 import fragmentShader from "./WaveformComplexShader.frag";
 import vertexShader from "./WaveformComplexShader.vert";

@@ -5,7 +5,8 @@ import React from "react";
 
 import { X } from "lucide-react";
 
-import { FernButton, FernLinkButton } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { tunnel } from "@fern-ui/react-commons";
 
 import { useUrlParams } from "@/hooks/use-url-params";

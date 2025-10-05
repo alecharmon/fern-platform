@@ -1,8 +1,7 @@
-import React from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-
-import { cn } from "@fern-docs/components";
+import React from "react";
 
 const TooltipProvider = TooltipPrimitive.Provider;
 

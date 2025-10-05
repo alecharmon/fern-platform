@@ -1,11 +1,11 @@
 "use client";
 
+import { RefreshCcw } from "lucide-react";
 import React, { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
-
-import { RefreshCcw } from "lucide-react";
-
-import { FernTooltip, FernTooltipProvider, SemanticBadge, cn } from ".";
+import { SemanticBadge } from "./badges";
+import { cn } from "./cn";
+import { FernTooltip, FernTooltipProvider } from "./FernTooltip";
 
 export function ErrorBoundaryFallback({
     className,

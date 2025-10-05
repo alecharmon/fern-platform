@@ -1,41 +1,40 @@
 "use client";
 
+import { UIMessage, useChat } from "@ai-sdk/react";
+import { isNonNullish } from "@fern-api/ui-core-utils";
+import { Button } from "@fern-docs/components/button";
+import { cn } from "@fern-docs/components/cn";
 import {
+    FERN_ASK_AI_PANEL_HEADER_ICON_ID,
+    FERN_ASK_AI_PANEL_HEADER_ID,
+    FERN_ASK_AI_PANEL_INPUT_ID
+} from "@fern-docs/components/constants";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { FacetFilter } from "@fern-docs/search-keyword";
+import { useEventCallback } from "@fern-ui/react-commons";
+import { composeEventHandlers } from "@radix-ui/primitive";
+import { composeRefs } from "@radix-ui/react-compose-refs";
+import { DefaultChatTransport } from "ai";
+import type { Element as HastElement } from "hast";
+import { ArrowUp, CircleAlert, Maximize2, Minimize2, RotateCcw, RotateCw, X } from "lucide-react";
+import React, {
     ComponentPropsWithoutRef,
-    KeyboardEventHandler,
-    ReactElement,
-    ReactNode,
     createElement,
     forwardRef,
     isValidElement,
+    KeyboardEventHandler,
     memo,
+    ReactElement,
+    ReactNode,
     useCallback,
     useEffect,
     useMemo,
     useRef,
     useState
 } from "react";
-import React from "react";
 import { Components } from "react-markdown";
-
-import { UIMessage, useChat } from "@ai-sdk/react";
-import { composeEventHandlers } from "@radix-ui/primitive";
-import { composeRefs } from "@radix-ui/react-compose-refs";
-import { DefaultChatTransport } from "ai";
-import type { Element as HastElement } from "hast";
-import { ArrowUp, CircleAlert, Maximize2, Minimize2, RotateCcw, RotateCw, X } from "lucide-react";
 import { useIsomorphicLayoutEffect } from "swr/_internal";
-
-import { isNonNullish } from "@fern-api/ui-core-utils";
-import { FernButton, FernTooltip, cn } from "@fern-docs/components";
-import { Button } from "@fern-docs/components/button";
-import {
-    FERN_ASK_AI_PANEL_HEADER_ICON_ID,
-    FERN_ASK_AI_PANEL_HEADER_ID,
-    FERN_ASK_AI_PANEL_INPUT_ID
-} from "@fern-docs/components/constants";
-import { FacetFilter } from "@fern-docs/search-keyword";
-import { useEventCallback } from "@fern-ui/react-commons";
 
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
 import { isQueryIdPart } from "../../utils/query-id-part";
@@ -43,9 +42,9 @@ import { AskAiContextPill } from "../ask-ai-context-pill";
 import { FootnoteSup, FootnotesSection } from "../chatbot/footnote";
 import { ChatbotTurnContextProvider } from "../chatbot/turn-context";
 import {
-    SqueezedMessage,
     combineSearchResults,
     ensureMessagePartsHaveNewLines,
+    SqueezedMessage,
     squeezeMessages
 } from "../chatbot/utils";
 import * as Command from "../cmdk";

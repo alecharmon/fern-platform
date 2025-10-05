@@ -1,10 +1,8 @@
 import "server-only";
 
+import { NavigationStoreProvider } from "@fern-docs/components/navigation/NavigationStoreContext";
 import { ThemeProvider } from "next-themes";
 import type React from "react";
-
-import { NavigationStoreProvider } from "@fern-docs/components";
-
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";
 import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import getGithubSourceMetadata from "@/app/api/get-github-source-metadata/handler";

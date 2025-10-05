@@ -1,10 +1,9 @@
 import "server-only";
 
-import React from "react";
-
 import type { FernNavigation } from "@fern-api/fdr-sdk";
-import type { FernDropdown } from "@fern-docs/components";
+import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernLink } from "@fern-docs/components/FernLink";
+import React from "react";
 
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { MdxSerializer } from "@/server/mdx-serializer";

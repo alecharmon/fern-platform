@@ -1,12 +1,11 @@
 "use client";
 
-import { useTheme } from "next-themes";
-
-import { Monitor, Moon, Sun } from "lucide-react";
-
 import { useMounted } from "@fern-ui/react-commons";
 
-import { Button, FernDropdown } from "..";
+import { Monitor, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Button } from "../FernButtonV2";
+import { FernDropdown } from "../FernDropdown";
 
 const themeSwitchOptions = [
     { type: "value", value: "light", label: "Light", icon: <Sun /> },

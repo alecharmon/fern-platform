@@ -1,10 +1,9 @@
-import React from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { X } from "lucide-react";
-
-import { cn } from "@fern-docs/components";
+import React from "react";
 
 const Dialog = DialogPrimitive.Root;
 

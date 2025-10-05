@@ -1,14 +1,13 @@
 "use client";
 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { NavigationContext, getAllSections } from "@fern-docs/components";
-
+import { getAllSections } from "@fern-docs/components/navigation/pageUtils";
+import { NavigationContext } from "@fern-docs/components/navigation/types";
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { Icon } from "@/components/icon/Icon";
 import { Button } from "@/components/ui/button";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useGitPrInfo } from "@/providers/GitPRContext";
-
 import { CreateClientPage } from "./CreateClientPage";
 
 interface CreatePageButtonProps {

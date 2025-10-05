@@ -1,16 +1,14 @@
 "use client";
 
-import { FC, useCallback, useEffect, useRef, useState } from "react";
-
-import { ThumbsDown, ThumbsUp } from "lucide-react";
-
 import { getFaiOrigin } from "@fern-api/docs-server";
 import { FernAIClient } from "@fern-api/fai-sdk";
-import { Button, cn } from "@fern-docs/components";
-import { toast } from "@fern-docs/components";
+import { Button } from "@fern-docs/components/button";
+import { cn } from "@fern-docs/components/cn";
+import { toast } from "@fern-docs/components/FernToast";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useKeyboardPress } from "@fern-ui/react-commons";
-
+import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { track } from "../analytics";
 import { registerPosthogProperties } from "../analytics/posthog";
 import { FeedbackForm } from "./FeedbackForm";

@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode } from "react";
 
-import { cn } from "@fern-docs/components";
-import { FernButton } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { cn } from "@fern-docs/components/cn";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 
 import { DisableFernAnchor } from "@/components/FernAnchor";

@@ -1,6 +1,5 @@
+import { cn } from "@fern-docs/components/cn";
 import { ReactNode } from "react";
-
-import { cn } from "@fern-docs/components";
 
 export const CircleStopIcon = ({
     fill = "currentColor",

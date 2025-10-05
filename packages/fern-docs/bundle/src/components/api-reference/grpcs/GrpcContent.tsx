@@ -4,7 +4,7 @@ import React from "react";
 
 import { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernDropdown } from "@fern-docs/components";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 

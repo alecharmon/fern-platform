@@ -1,19 +1,15 @@
 "use client";
 
-import { useState } from "react";
-
 import { useRouter } from "@bprogress/next/app";
-
-import { createNavigationLocalStorage } from "@fern-docs/components";
-
+import { createNavigationLocalStorage } from "@fern-docs/components/navigation/NavigationStorage";
+import { useState } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { GithubSourceRepo } from "@/app/services/github/types";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
-import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
+import { constructEditorSlug, ROOT_SLUG_ALIAS } from "@/utils/editor-routing";
 import { DocsUrl, EncodedDocsUrl } from "@/utils/types";
-
 import { BranchListItem } from "./BranchListItem";
 import { GoToEditorButton } from "./GoToEditorButton";
 import { VisualEditorHeader } from "./visual-editor-section/VisualEditorHeader";

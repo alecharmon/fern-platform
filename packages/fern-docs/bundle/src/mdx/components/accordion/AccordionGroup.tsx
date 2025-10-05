@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 
-import { cn } from "@fern-docs/components";
-import * as AccordionComponent from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
+import * as AccordionComponent from "@fern-docs/components/accordion";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 
 import { unwrapChildren } from "../../common/unwrap-children";

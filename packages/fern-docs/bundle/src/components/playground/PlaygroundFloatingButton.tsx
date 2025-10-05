@@ -3,7 +3,7 @@
 import { ChevronUp, SquareTerminal } from "lucide-react";
 
 import { conformExplorerRoute } from "@fern-api/docs-utils";
-import { FernTooltip, FernTooltipProvider } from "@fern-docs/components";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 import { FERN_PLAYGROUND_FLOATING_BUTTON_ID } from "@fern-docs/components/constants";
 import { useCurrentVersionSlug } from "@fern-docs/components/state/navigation";

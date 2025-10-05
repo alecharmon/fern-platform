@@ -4,7 +4,7 @@ import { composeRefs } from "@radix-ui/react-compose-refs";
 import fastdom from "fastdom";
 import { noop } from "ts-essentials";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 
 export const HorizontalOverflowMask = React.forwardRef<HTMLDivElement, PropsWithChildren<{ className?: string }>>(
     function HorizontalOverflowMask({ children, className }, forwardedRef) {

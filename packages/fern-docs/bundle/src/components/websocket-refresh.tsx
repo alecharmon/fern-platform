@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 
 import { Loading } from "./Loading";
 

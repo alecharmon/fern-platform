@@ -1,12 +1,10 @@
 "use client";
 
-import { ComponentProps, PropsWithChildren, ReactElement, ReactNode, createElement, forwardRef, useRef } from "react";
-
 import { Slot } from "@radix-ui/react-slot";
-
-import { FernTooltip } from "./FernTooltip";
+import { ComponentProps, createElement, forwardRef, PropsWithChildren, ReactElement, ReactNode, useRef } from "react";
 import { cn } from "./cn";
 import { SemanticColor } from "./colors";
+import { FernTooltip } from "./FernTooltip";
 import { FaIcon } from "./fa-icon";
 
 export interface FernButtonSharedProps {

@@ -1,4 +1,4 @@
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 
 import { HorizontalOverflowMask } from "@/components/HorizontalOverflowMask";
 

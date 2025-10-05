@@ -1,6 +1,8 @@
 import { ChevronDown } from "lucide-react";
 
-import { FaIcon, FernButton, FernDropdown } from "@fern-docs/components";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import { getIconForClient, getLanguageDisplayName } from "../examples/code-example";
 

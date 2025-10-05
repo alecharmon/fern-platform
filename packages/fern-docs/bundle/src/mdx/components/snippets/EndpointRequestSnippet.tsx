@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 import { useCurrentVersionSlug } from "@fern-docs/components/state/navigation";
 
 import { ApiReferenceButton } from "@/components/ApiReferenceButton";

@@ -1,6 +1,6 @@
 import { ComponentProps, FC } from "react";
 
-import { FernSdk } from "@fern-docs/components";
+import { FernSdk } from "@fern-docs/components/FernSdk";
 
 import { useProgrammingLanguage } from "@/docs/state/language";
 

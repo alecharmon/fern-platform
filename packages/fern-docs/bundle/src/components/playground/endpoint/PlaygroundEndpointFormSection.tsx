@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactElement, ReactNode } from "react";
 
-import { FernCard } from "@fern-docs/components";
+import { FernCard } from "@fern-docs/components/FernCard";
 
 interface PlaygroundEndpointFormSection {
     title?: ReactNode;

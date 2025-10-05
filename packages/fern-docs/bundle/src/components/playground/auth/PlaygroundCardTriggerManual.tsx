@@ -1,14 +1,11 @@
-import { ReactElement } from "react";
-
-import { useAtomValue } from "jotai";
-import { Key } from "lucide-react";
-
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-import { Button, SemanticBadge } from "@fern-docs/components";
-
+import { SemanticBadge } from "@fern-docs/components/badges";
+import { Button } from "@fern-docs/components/button";
+import { useAtomValue } from "jotai";
+import { Key } from "lucide-react";
+import { ReactElement } from "react";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
-
 import { PlaygroundAuthState } from "../types";
 import { isMultiAuthToken } from "../utils/parse-auth-options";
 

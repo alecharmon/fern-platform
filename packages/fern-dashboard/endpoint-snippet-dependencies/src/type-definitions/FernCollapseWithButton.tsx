@@ -2,8 +2,9 @@ import { FC, PropsWithChildren, ReactNode } from "react";
 
 import { X } from "lucide-react";
 
-import { cn } from "@fern-docs/components";
-import { FernButton, FernButtonProps, FernCollapse } from "@fern-docs/components";
+import { FernButton, FernButtonProps } from "@fern-docs/components/FernButton";
+import { FernCollapse } from "@fern-docs/components/FernCollapse";
+import { cn } from "@fern-docs/components/cn";
 
 interface FernCollapseWithButtonProps {
     isOpen: boolean;

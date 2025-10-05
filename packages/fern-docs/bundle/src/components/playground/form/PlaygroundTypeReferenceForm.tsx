@@ -9,8 +9,12 @@ import {
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-import { FernDatetimeInput, FernInput, FernNumericInput, FernSwitch, FernTextarea } from "@fern-docs/components";
-import { cn } from "@fern-docs/components";
+import { FernDatetimeInput } from "@fern-docs/components/FernDatetimeInput";
+import { FernInput } from "@fern-docs/components/FernInput";
+import { FernNumericInput } from "@fern-docs/components/FernNumericInput";
+import { FernSwitch } from "@fern-docs/components/FernSwitch";
+import { FernTextarea } from "@fern-docs/components/FernTextarea";
+import { cn } from "@fern-docs/components/cn";
 
 import { withErrorBoundary } from "@/components/error-boundary";
 

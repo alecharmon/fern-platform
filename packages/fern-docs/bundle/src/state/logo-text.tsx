@@ -3,7 +3,7 @@
 import { atom, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 
 const logoTextAtom = atom<string | undefined>(undefined);
 

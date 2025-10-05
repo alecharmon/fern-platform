@@ -9,7 +9,8 @@ import * as m from "motion/react-m";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { FernButton, cn } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { cn } from "@fern-docs/components/cn";
 import { FERN_ANNOUNCEMENT_ID } from "@fern-docs/components/constants";
 
 import { ErrorBoundary } from "../error-boundary";

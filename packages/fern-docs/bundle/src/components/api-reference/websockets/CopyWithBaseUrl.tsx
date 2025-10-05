@@ -2,7 +2,7 @@
 
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { WebSocketChannel, toColonEndpointPathLiteral } from "@fern-api/fdr-sdk/api-definition";
-import { CopyToClipboardButton } from "@fern-docs/components";
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
 

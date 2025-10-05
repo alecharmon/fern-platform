@@ -1,7 +1,8 @@
 import { isValidElement, useEffect, useRef } from "react";
 
-import { cn } from "@fern-docs/components";
-import { FaIcon, FernCard } from "@fern-docs/components";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { FernCard } from "@fern-docs/components/FernCard";
+import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
 
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";

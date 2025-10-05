@@ -11,7 +11,7 @@ import {
     prune
 } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernDropdown } from "@fern-docs/components";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { MdxSerializer } from "@/server/mdx-serializer";

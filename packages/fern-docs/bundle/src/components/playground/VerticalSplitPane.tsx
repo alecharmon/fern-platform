@@ -2,7 +2,7 @@
 
 import { Children, ComponentProps, PropsWithChildren, ReactElement, useCallback, useRef, useState } from "react";
 
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 
 import { useResizeX, useResizeY } from "./useSplitPlane";
 

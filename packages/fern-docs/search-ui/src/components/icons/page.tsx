@@ -1,8 +1,7 @@
-import { SVGProps, forwardRef } from "react";
+import { FaIcon } from "@fern-docs/components/fa-icon";
 
 import { ChevronsLeftRight, FileText, Hash, History, Webhook } from "lucide-react";
-
-import { FaIcon } from "@fern-docs/components";
+import { forwardRef, SVGProps } from "react";
 
 export const PageIcon = forwardRef<
     SVGSVGElement,

@@ -1,8 +1,7 @@
-import { forwardRef } from "react";
-
+import { Button } from "@fern-docs/components/button";
+import { FernInput, FernInputProps } from "@fern-docs/components/FernInput";
 import { randomBytes } from "crypto-browserify";
-
-import { Button, FernInput, FernInputProps } from "@fern-docs/components";
+import { forwardRef } from "react";
 
 export const IdempotentInputGroup = forwardRef<HTMLInputElement, FernInputProps>((props, forwardedRef) => {
     function generateIdempotencyKey() {

@@ -4,7 +4,7 @@ import { type ReactNode } from "react";
 import { Copy, ExternalLink } from "lucide-react";
 
 import { DocsV1Read } from "@fern-api/fdr-sdk";
-import { FernDropdown } from "@fern-docs/components";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import { isSelfHosted } from "@/server/isSelfHosted";
 

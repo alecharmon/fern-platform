@@ -6,8 +6,8 @@ import { escapeRegExp } from "es-toolkit/string";
 
 import { conformExplorerRoute } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { cn } from "@fern-docs/components";
-import { FernTooltip } from "@fern-docs/components";
+import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { cn } from "@fern-docs/components/cn";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { HttpMethodBadge } from "@fern-docs/components/badges";
 

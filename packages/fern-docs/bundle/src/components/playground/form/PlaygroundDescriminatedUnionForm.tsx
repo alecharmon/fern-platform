@@ -7,7 +7,9 @@ import { ChevronDown } from "lucide-react";
 
 import { DiscriminatedUnionType, TypeDefinition, unwrapObjectType } from "@fern-api/fdr-sdk/api-definition";
 import { titleCase } from "@fern-api/ui-core-utils";
-import { FernButton, FernDropdown, FernSegmentedControl } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
 
 import { castToRecord, getEmptyValueForObjectProperties } from "../utils";
 import { PlaygroundObjectPropertiesForm } from "./PlaygroundObjectPropertyForm";

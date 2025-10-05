@@ -7,7 +7,8 @@ import { useState } from "react";
 import { useSetAtom } from "jotai";
 import { Check, ChevronDown, Copy } from "lucide-react";
 
-import { FernButton, FernDropdown } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { useIsAskAiEnabled } from "@/state/search";

@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernButton, FernButtonGroup } from "@fern-docs/components";
+import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernLink } from "@fern-docs/components/FernLink";
 
 const USE_EXAMPLE_TEXT = "Use example";

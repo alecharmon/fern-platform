@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { Empty } from "@fern-docs/components";
+import { Empty } from "@fern-docs/components/Empty";
 
 export interface EnumDefinitionDetailsProps {
     elements: {

@@ -1,7 +1,7 @@
-import { ComponentPropsWithoutRef, forwardRef, useRef, useState } from "react";
-
-import { cn } from "@fern-docs/components";
 import { Button } from "@fern-docs/components/button";
+
+import { cn } from "@fern-docs/components/cn";
+import { ComponentPropsWithoutRef, forwardRef, useRef, useState } from "react";
 
 import { FERN_SEARCH_MOBILE_COMMAND_ID } from "../../constants";
 import { FacetFilter } from "../../types";

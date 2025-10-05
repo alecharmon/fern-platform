@@ -1,6 +1,6 @@
 "use client";
 
-import { FernTooltip, FernTooltipProvider } from "@fern-docs/components";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { AbstractHeaderContent } from "@fern-docs/components/abstract/AbstractHeaderContent";
 import { FERN_SEARCH_BUTTON_ID } from "@fern-docs/components/constants";
 import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";

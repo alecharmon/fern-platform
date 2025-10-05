@@ -1,25 +1,19 @@
 "use client";
 
-import { ReactElement, useState } from "react";
-
-import { useAtom } from "jotai";
-import { HelpCircle, Key, User } from "lucide-react";
-
 import { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
-import {
-    FernButton,
-    FernDropdown,
-    FernSegmentedControl,
-    FernTooltip,
-    FernTooltipProvider
-} from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { useAtom } from "jotai";
+import { HelpCircle, Key, User } from "lucide-react";
+import { ReactElement, useState } from "react";
 
 import { Callout } from "@/mdx/components/callout";
 import { PLAYGROUND_AUTH_STATE_OAUTH_ATOM, usePlaygroundEndpointFormState } from "@/state/playground";
-
-import { PasswordInputGroup } from "../PasswordInputGroup";
 import { PlaygroundEndpointForm } from "../endpoint";
+import { PasswordInputGroup } from "../PasswordInputGroup";
 import { oAuthClientCredentialReferencedEndpointLoginFlow } from "../utils/oauth";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { useClosePlaygroundAuthorizationFormCard } from "./PlaygroundAuthorizationFormCardRoot";

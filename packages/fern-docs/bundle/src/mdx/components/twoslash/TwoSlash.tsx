@@ -3,7 +3,7 @@ import * as jsxRuntime from "react/jsx-runtime";
 
 import { useMDXComponents } from "@mdx-js/react";
 
-import { CopyToClipboardButton } from "@fern-docs/components";
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 
 interface TwoSlashProps {
     content: {

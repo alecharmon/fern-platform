@@ -1,10 +1,9 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef } from "react";
-
-import { BuiltWithFern as BuiltWithFernComponent } from "@fern-docs/components";
+import { BuiltWithFern as BuiltWithFernComponent } from "@fern-docs/components/BuiltWithFern";
 import { BUILTWITHFERN_ID } from "@fern-docs/components/constants";
 import { useDomain } from "@fern-docs/components/state/domain";
+import { createContext, useContext, useEffect, useRef } from "react";
 
 import { useIsWhitelabeled } from "@/state/whitelabeled";
 

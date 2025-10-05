@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, createContext, useContext, useRef, useSyncExternalStore } from "react";
+import { createContext, ReactNode, useContext, useRef, useSyncExternalStore } from "react";
 
 import { NavigationSnapshot, NavigationStore } from "./NavigationStore";
 

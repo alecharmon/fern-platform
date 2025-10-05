@@ -1,18 +1,15 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-
-import { CirclePlusIcon } from "lucide-react";
-
-import * as AccordionComponent from "@fern-docs/components";
-import { Button } from "@fern-docs/components";
+import * as AccordionComponent from "@fern-docs/components/accordion";
+import { Button } from "@fern-docs/components/button";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
-
+import { CirclePlusIcon } from "lucide-react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { cn } from "@/utils/utils";
 
 export interface AccordionGroupProps {

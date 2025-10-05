@@ -1,15 +1,14 @@
+import type { NodeId } from "@fern-api/fdr-sdk/navigation";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { NodeId } from "@fern-api/fdr-sdk/navigation";
-import {
+import type { NavigationStore } from "@fern-docs/components/navigation/NavigationStore";
+import type {
     BuildPageDataProps,
     BuildPageDataResult,
     NavigationContext,
-    NavigationStore,
     PageData,
     SectionWithHierarchy
-} from "@fern-docs/components";
-import { ChangedNodes, Frontmatter, MdxToHtmlResponse, htmlToMdx } from "@fern-docs/mdx";
-
+} from "@fern-docs/components/navigation/types";
+import { ChangedNodes, Frontmatter, htmlToMdx, MdxToHtmlResponse } from "@fern-docs/mdx";
 import {
     compareFrontmatter,
     createPageContents,

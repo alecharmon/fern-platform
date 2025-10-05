@@ -1,10 +1,8 @@
-import { cloneElement, isValidElement, useState } from "react";
-
-import { ChevronDown, ChevronUp, Minus } from "lucide-react";
-
-import { cn } from "@fern-docs/components";
 import { Badge } from "@fern-docs/components/badges";
+import { cn } from "@fern-docs/components/cn";
 import { FacetFilter } from "@fern-docs/search-keyword";
+import { ChevronDown, ChevronUp, Minus } from "lucide-react";
+import { cloneElement, isValidElement, useState } from "react";
 
 import { getFacetDisplay, toFilterLabel } from "../../utils/facet-display";
 import { useFacets } from "../search/algolia-search-client";

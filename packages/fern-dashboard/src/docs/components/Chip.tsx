@@ -2,8 +2,8 @@
 
 import React from "react";
 
-import { Badge } from "@fern-docs/components";
-import { FernTooltip } from "@fern-docs/components";
+import { Badge } from "@fern-docs/components/badges";
+import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
 
 type ChipProps = {

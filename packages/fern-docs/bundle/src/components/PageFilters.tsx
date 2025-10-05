@@ -2,7 +2,10 @@
 
 import { ChevronDown } from "lucide-react";
 
-import { Badge, FernButton, FernDropdown, FernTooltip } from "@fern-docs/components";
+import { Badge } from "@fern-docs/components/badges";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernTooltip } from "@fern-docs/components/FernTooltip";
 
 import { useSelectedFilters, useSetSelectedFilters } from "@/state/search";
 

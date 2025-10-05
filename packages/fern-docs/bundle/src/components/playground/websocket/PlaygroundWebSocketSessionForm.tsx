@@ -5,8 +5,10 @@ import { Dispatch, FC, SetStateAction, useCallback } from "react";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
-import { cn } from "@fern-docs/components";
-import { FernButton, FernCard, FernScrollArea } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernCard } from "@fern-docs/components/FernCard";
+import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
+import { cn } from "@fern-docs/components/cn";
 
 import { WebSocketMessagesVirtualized } from "@/components/api-reference/websockets/WebSocketMessagesVirtualized";
 

@@ -6,7 +6,9 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { TypeDefinition, UndiscriminatedUnionType } from "@fern-api/fdr-sdk/api-definition";
-import { FernButton, FernDropdown, FernSegmentedControl } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
 
 import { renderTypeShorthand } from "../../type-shorthand";
 import { getEmptyValueForType, matchesTypeReference } from "../utils";

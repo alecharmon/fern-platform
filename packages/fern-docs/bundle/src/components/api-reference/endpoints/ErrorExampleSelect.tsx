@@ -1,11 +1,11 @@
-import { FC, Fragment, PropsWithChildren, ReactNode, forwardRef } from "react";
+import { statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
+import { cn } from "@fern-docs/components/cn";
+import { SemanticColor } from "@fern-docs/components/colors";
 
+import { FernButton } from "@fern-docs/components/FernButton";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-import { cn } from "@fern-docs/components";
-import { FernButton, SemanticColor, statusCodeToIntent } from "@fern-docs/components";
-
+import { FC, Fragment, forwardRef, PropsWithChildren, ReactNode } from "react";
 import { CodeExample } from "../examples/code-example";
 import { ExamplesByStatusCode, StatusCode } from "../type-definitions/EndpointContent";
 import { useEndpointContext } from "./EndpointContext";

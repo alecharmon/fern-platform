@@ -1,9 +1,8 @@
-import React from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
-
-import { cn } from "@fern-docs/components";
+import React from "react";
 
 const Select = SelectPrimitive.Root;
 

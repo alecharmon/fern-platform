@@ -1,8 +1,7 @@
 "use client";
 
-import { ComponentPropsWithoutRef, ReactNode, createContext, forwardRef, useContext } from "react";
-
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
+import { ComponentPropsWithoutRef, createContext, forwardRef, ReactNode, useContext } from "react";
 
 import { Anthropic } from "../icons/anthropic";
 import { Cohere } from "../icons/cohere";

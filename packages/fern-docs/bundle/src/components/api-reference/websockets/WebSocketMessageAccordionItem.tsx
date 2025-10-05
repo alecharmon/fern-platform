@@ -1,14 +1,13 @@
 "use client";
 
-import { FC } from "react";
-import React from "react";
-
+import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
+import { cn } from "@fern-docs/components/cn";
+import { useFernCollapseOverflow } from "@fern-docs/components/FernCollapse";
+import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter/FernSyntaxHighlighter";
 import * as Accordion from "@radix-ui/react-accordion";
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
-
-import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
-import { CopyToClipboardButton, FernSyntaxHighlighter, cn, useFernCollapseOverflow } from "@fern-docs/components";
-
+import React, { FC } from "react";
 import { WebSocketMessage } from "./WebSocketMessages";
 
 export interface WebSocketMessageAccordionItemProps {

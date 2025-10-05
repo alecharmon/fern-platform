@@ -4,7 +4,11 @@ import { useAtom } from "jotai";
 
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { sanitizeUrl } from "@fern-api/ui-core-utils";
-import { FernButton, FernDropdown, FernInput, FernTooltip, cn } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FernInput } from "@fern-docs/components/FernInput";
+import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { cn } from "@fern-docs/components/cn";
 import { useBooleanState } from "@fern-ui/react-commons";
 
 import { SELECTED_ENVIRONMENT_ID_ATOM, SELECTED_ENVIRONMENT_URL_ATOM } from "@/state/environment";

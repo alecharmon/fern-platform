@@ -3,8 +3,8 @@ import { FC, PropsWithChildren, ReactElement, isValidElement, useRef } from "rea
 import { Bell, Check, CheckCircle, Info, Pin, Rocket, Star, TriangleAlert } from "lucide-react";
 
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-import { cn } from "@fern-docs/components";
-import { FaIcon } from "@fern-docs/components";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { cn } from "@fern-docs/components/cn";
 
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {

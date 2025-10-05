@@ -1,9 +1,8 @@
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
-
-import { NavigationStorage, createNavigationLocalStorage } from "./NavigationStorage";
 import { createCommitFromChanges, generateSimpleHash, handleCommitSuccess } from "./commitUtils";
 import { loadAllPageData, loadPageData, savePageData } from "./mdxUtils";
+import { createNavigationLocalStorage, NavigationStorage } from "./NavigationStorage";
 import {
     buildClientFoundNodes,
     buildClientNodesByParent,

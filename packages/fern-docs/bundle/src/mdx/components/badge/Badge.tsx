@@ -1,6 +1,6 @@
 import { ComponentPropsWithoutRef, forwardRef } from "react";
 
-import { SemanticColor } from "@fern-docs/components";
+import { SemanticColor } from "@fern-docs/components/colors";
 import { Badge as BadgeComponent, SemanticBadge } from "@fern-docs/components/badges";
 
 export const Badge = forwardRef<

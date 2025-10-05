@@ -2,8 +2,9 @@
 
 import { MouseEventHandler, PropsWithChildren, ReactElement, ReactNode, forwardRef } from "react";
 
-import { cn } from "@fern-docs/components";
-import { CopyToClipboardButton, SemanticColor } from "@fern-docs/components";
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
+import { SemanticColor } from "@fern-docs/components/colors";
+import { cn } from "@fern-docs/components/cn";
 
 import { useIsDarkCode } from "@/state/dark-code";
 

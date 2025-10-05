@@ -1,9 +1,8 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
-
-import { Button } from "..";
 import { cn } from "../cn";
+import { Button } from "../FernButtonV2";
 import { useIsDismissableSidebarOpen } from "../state/mobile";
 
 export function MobileMenuButton({ className }: { className?: string }) {

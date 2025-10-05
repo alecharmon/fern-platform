@@ -1,7 +1,9 @@
 import { ComponentProps, ReactNode, RefObject, useEffect, useRef } from "react";
 
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
-import { CopyToClipboardButton, ExpandCodeButton, cn } from "@fern-docs/components";
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
+import { ExpandCodeButton } from "@fern-docs/components/ExpandCodeButton";
+import { cn } from "@fern-docs/components/cn";
 import {
     CodeBlockWithClipboardButton,
     FernSyntaxHighlighter,

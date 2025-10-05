@@ -2,7 +2,8 @@ import { forwardRef } from "react";
 
 import { Eye, Lock } from "lucide-react";
 
-import { FernButton, FernInput, FernInputProps } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernInput, FernInputProps } from "@fern-docs/components/FernInput";
 import { useBooleanState } from "@fern-ui/react-commons";
 
 export const PasswordInputGroup = forwardRef<HTMLInputElement, FernInputProps>((props, forwardedRef) => {

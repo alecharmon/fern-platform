@@ -7,7 +7,8 @@ import { RESET } from "jotai/utils";
 import { ChevronDown } from "lucide-react";
 
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
-import { FernButton, FernDropdown } from "@fern-docs/components";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import {
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,

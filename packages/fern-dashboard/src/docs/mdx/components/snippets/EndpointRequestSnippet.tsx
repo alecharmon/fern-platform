@@ -6,7 +6,9 @@ import { ChevronDown } from "lucide-react";
 
 import { EndpointUrlWithOverflow } from "@fern-api/endpoint-snippet-dependencies";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { FaIcon, FernButton, FernDropdown } from "@fern-docs/components";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";

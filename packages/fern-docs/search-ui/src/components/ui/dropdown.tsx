@@ -1,10 +1,8 @@
-import React from "react";
-
+import { cn } from "@fern-docs/components/cn";
+import { Kbd } from "@fern-docs/components/kbd";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
-
-import { Kbd } from "@fern-docs/components";
-import { cn } from "@fern-docs/components";
+import React from "react";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 

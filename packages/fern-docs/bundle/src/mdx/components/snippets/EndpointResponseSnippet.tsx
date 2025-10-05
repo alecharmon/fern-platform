@@ -1,6 +1,6 @@
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
-import { cn } from "@fern-docs/components";
+import { cn } from "@fern-docs/components/cn";
 
 import { useExampleSelection } from "@/components/api-reference/endpoints/useExampleSelection";
 import { CodeSnippetExample } from "@/components/api-reference/examples/CodeSnippetExample";

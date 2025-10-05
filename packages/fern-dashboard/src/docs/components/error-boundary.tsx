@@ -1,12 +1,12 @@
 "use client";
 
-import React, { PropsWithChildren, useEffect } from "react";
-import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
-
+import { SemanticBadge } from "@fern-docs/components/badges/semantic-badge";
+import { cn } from "@fern-docs/components/cn";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import * as Sentry from "@sentry/nextjs";
 import { RefreshCcw } from "lucide-react";
-
-import { FernTooltip, FernTooltipProvider, SemanticBadge, cn } from "@fern-docs/components";
+import React, { PropsWithChildren, useEffect } from "react";
+import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
 export function ErrorBoundaryFallback({
     className,

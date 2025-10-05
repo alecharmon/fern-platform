@@ -5,7 +5,7 @@ import React, { ReactElement } from "react";
 import { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
-import { Badge } from "@fern-docs/components";
+import { Badge } from "@fern-docs/components/badges";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { AsideAwareDiv } from "@fern-docs/components/layouts/AsideAwareDiv";
 import { SetLayout } from "@fern-docs/components/state/layout";
