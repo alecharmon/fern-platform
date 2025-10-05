@@ -11,20 +11,24 @@
   "type": "module",
   "exports": {
     "./plugins": {
-      "types": "./dist/plugins/index.d.ts",
-      "default": "./dist/plugins/index.js"
+      "types": "./dist/types/plugins/index.d.ts",
+      "import": "./dist/js/plugins/index.mjs",
+      "require": "./dist/js/plugins/index.js"
     },
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/js/index.mjs",
+      "require": "./dist/js/index.js"
     }
   },
   "files": ["dist"],
   "scripts": {
-    "clean": "rm -rf ./lib ./dist && tsc --build --clean",
-    "compile": "tsc --build",
+    "clean": "rm -rf ./lib ./dist",
+    "compile": "pnpm compile:js && pnpm compile:types",
+    "compile:js": "tsup",
+    "compile:types": "tsc --emitDeclarationOnly --outDir dist/types",
     "depcheck": "depcheck",
-    "dev": "tsc --watch",
+    "dev": "tsup --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint:eslint": "eslint --max-warnings 0 .",
@@ -83,6 +87,7 @@
     "@types/node": "^22.0.0",
     "depcheck": "^1.4.7",
     "stylelint": "^16.1.0",
+    "tsup": "^8.0.0",
     "typescript": "^5",
     "vitest": "^3.2.4"
   }

@@ -2,11 +2,15 @@
  * An enhanced version of https://github.com/rehypejs/rehype-slug/blob/main/lib/index.js
  * which considers mdx jsx elements too
  */
+
 import GithubSlugger from "github-slugger";
-
-import { CONTINUE, Hast, Unified, hastToString, isMdxJsxAttribute, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
-
+import { visit } from "unist-util-visit";
+import { CONTINUE } from "unist-util-visit-parents";
+import { hastToString } from "../hast-utils";
+import { isMdxJsxAttribute, isMdxJsxElementHast } from "../mdx-utils";
 import { extractAttributeValueLiteral } from "../mdx-utils/extract-literal";
+import type { Hast } from "../types";
+import type { Unified } from "../unified";
 
 const slugs = new GithubSlugger();
 

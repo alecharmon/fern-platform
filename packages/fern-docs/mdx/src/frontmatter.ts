@@ -1,6 +1,5 @@
+import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import grayMatter from "gray-matter";
-
-import * as FernDocs from "@fern-api/fdr-sdk/docs";
 
 export function getFrontmatter(content: string): {
     data: FernDocs.Frontmatter;

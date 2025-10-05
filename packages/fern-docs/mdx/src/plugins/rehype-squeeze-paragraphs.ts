@@ -1,6 +1,6 @@
 import type { Doctype, Element, ElementContent, Root } from "hast";
-import { MdxjsEsmHast } from "mdast-util-mdxjs-esm";
-import { type Plugin } from "unified";
+import type { MdxjsEsmHast } from "mdast-util-mdxjs-esm";
+import type { Plugin } from "unified";
 import { SKIP, visit } from "unist-util-visit";
 
 import { isMdxJsxElementHast } from "../mdx-utils/is-mdx-element";

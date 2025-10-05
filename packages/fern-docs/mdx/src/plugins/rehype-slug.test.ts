@@ -1,5 +1,5 @@
-import { hastToMarkdown, toTree } from "@fern-docs/mdx";
-
+import { hastToMarkdown } from "../hast-utils/hast-to-markdown";
+import { toTree } from "../parse";
 import { rehypeSlug } from "./rehype-slug";
 
 const handleSlug = (rehypeSlug as any)({

@@ -1,10 +1,10 @@
 // inspired by https://github.com/remcohaszing/hast-util-properties-to-mdx-jsx-attributes
+
+import { Hast, isMdxJsxElementHast, Mdast, mdastFromMarkdown, SKIP, Unified, visit } from "@fern-docs/mdx";
 import { compact, flatten } from "es-toolkit/array";
 import { escape } from "es-toolkit/string";
 import { propertiesToMdxJsxAttributes } from "hast-util-properties-to-mdx-jsx-attributes";
 import parseNumericRange from "parse-numeric-range";
-
-import { Hast, Mdast, SKIP, Unified, isMdxJsxElementHast, mdastFromMarkdown, visit } from "@fern-docs/mdx";
 
 export const rehypeCodeBlock: Unified.Plugin<[], Hast.Root> = () => {
     return (tree) => {

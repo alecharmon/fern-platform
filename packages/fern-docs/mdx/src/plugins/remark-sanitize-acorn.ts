@@ -3,7 +3,7 @@ import { walk } from "estree-walker";
 import type { Root } from "mdast";
 import { SKIP, visit } from "unist-util-visit";
 
-import { Unified } from "../unified";
+import type { Unified } from "../unified";
 
 interface Options {
     /**

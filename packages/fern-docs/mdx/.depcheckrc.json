@@ -8,8 +8,7 @@
     "mdx",
     "vite",
     "estree",
-    "estree-jsx",
-    "@fern-docs/mdx"
+    "estree-jsx"
   ],
   "ignore-patterns": ["dist"]
 }

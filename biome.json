@@ -547,6 +547,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["packages/fern-docs/mdx/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useImportType": "error"
+          }
+        }
+      }
     }
   ],
   "assist": {

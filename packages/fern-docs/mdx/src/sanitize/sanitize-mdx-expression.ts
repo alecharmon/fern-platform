@@ -1,4 +1,4 @@
-import { VFileMessage } from "vfile-message";
+import type { VFileMessage } from "vfile-message";
 
 import { mdastFromMarkdown } from "../mdast-utils/mdast-from-markdown";
 import { getStart, isPoint } from "../position";
@@ -46,7 +46,7 @@ export function sanitizeMdxExpression(content: string): [string, handled: boolea
             mdastFromMarkdown(content, "mdx");
             break;
         } catch (e) {
-            if (e instanceof VFileMessage) {
+            if (isVFileMessage(e)) {
                 const errorContext: ErrorContext = {
                     error: e,
                     handled: false,
@@ -55,7 +55,7 @@ export function sanitizeMdxExpression(content: string): [string, handled: boolea
                 errors.push(errorContext);
 
                 if (e.ruleId === RULE_IDS.END_TAG_MISMATCH) {
-                    const [newContent, handled] = handleEndTagMismatch(content, e);
+                    const [newContent, handled] = handleEndTagMismatch(content, e as VFileMessage);
                     errorContext.handled = handled;
                     if (handled) {
                         content = newContent;
@@ -68,7 +68,7 @@ export function sanitizeMdxExpression(content: string): [string, handled: boolea
                     e.ruleId === RULE_IDS.UNEXPECTED_CHARACTER ||
                     e.ruleId === RULE_IDS.ACORN
                 ) {
-                    const [newContent, handled] = handleUnexpectedEOF(content, e);
+                    const [newContent, handled] = handleUnexpectedEOF(content, e as VFileMessage);
                     errorContext.handled = handled;
                     if (handled) {
                         content = newContent;
@@ -77,7 +77,7 @@ export function sanitizeMdxExpression(content: string): [string, handled: boolea
                 }
 
                 if (e.ruleId === RULE_IDS.UNEXPECTED_CHARACTER || e.ruleId === RULE_IDS.UNEXPECTED_LAZY) {
-                    const [newContent, handled] = handleUnexpectedCharacter(content, e);
+                    const [newContent, handled] = handleUnexpectedCharacter(content, e as VFileMessage);
                     errorContext.handled = handled;
                     if (handled) {
                         content = newContent;
@@ -86,7 +86,7 @@ export function sanitizeMdxExpression(content: string): [string, handled: boolea
                 }
 
                 if (e.ruleId === RULE_IDS.SPREAD_EXTRA) {
-                    const [newContent, handled] = handleSpreadExtra(content, e);
+                    const [newContent, handled] = handleSpreadExtra(content, e as VFileMessage);
                     errorContext.handled = handled;
                     if (handled) {
                         content = newContent;
@@ -95,7 +95,7 @@ export function sanitizeMdxExpression(content: string): [string, handled: boolea
                 }
 
                 // fallback 1: escape the current line
-                const [newContent, handled] = escapeCurrentLine(content, e);
+                const [newContent, handled] = escapeCurrentLine(content, e as VFileMessage);
                 errorContext.handled = handled;
                 if (handled) {
                     content = newContent;
@@ -125,6 +125,12 @@ export function sanitizeMdxExpression(content: string): [string, handled: boolea
     });
 
     return [content, errors.length === 0 || errors.every((e) => e.handled)];
+}
+
+// Use a duck-typing check instead of instanceof, since VFileMessage is a type-only import
+// to avoid importing nodejs dependencies
+function isVFileMessage(e: any): e is VFileMessage {
+    return typeof e === "object" && e !== null && typeof e.message === "string" && typeof e.ruleId === "string";
 }
 
 function escapeAllUnescapedOpeningBrackets(content: string): string {

@@ -1,4 +1,4 @@
-import { MdxFlowExpression, MdxTextExpression } from "mdast-util-mdx";
+import type { MdxFlowExpression, MdxTextExpression } from "mdast-util-mdx";
 import type {
     MdxJsxFlowElement,
     MdxJsxFlowElementHast,

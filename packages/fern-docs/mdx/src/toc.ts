@@ -1,11 +1,9 @@
+import { isNonNullish } from "@fern-api/ui-core-utils";
 import { slug } from "github-slugger";
 import type { Root } from "hast";
 import { headingRank } from "hast-util-heading-rank";
 import { SKIP } from "unist-util-visit";
 import { visitParents } from "unist-util-visit-parents";
-
-import { isNonNullish } from "@fern-api/ui-core-utils";
-import { Hast, markdownToString } from "@fern-docs/mdx";
 
 import { hastToString } from "./hast-utils";
 import { hastGetBooleanValue } from "./hast-utils/hast-get-boolean-value";
@@ -13,6 +11,8 @@ import { isHastElement } from "./hast-utils/is-hast-element";
 import { extractAttributeArrayLiteral, extractAttributeValueLiteral } from "./mdx-utils/extract-literal";
 import { isMdxJsxElementHast } from "./mdx-utils/is-mdx-element";
 import { isMdxJsxAttribute } from "./mdx-utils/is-mdx-jsx-attr";
+import { markdownToString } from "./mdx-utils/markdown-to-string";
+import type { Hast } from "./types";
 
 interface FeatureProps {
     flag: string;

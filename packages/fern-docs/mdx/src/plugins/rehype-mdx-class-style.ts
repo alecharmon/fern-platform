@@ -4,7 +4,7 @@ import { visit } from "unist-util-visit";
 import { parseStringStyle } from "../hast-utils/parse-string-style";
 import { isMdxJsxElementHast } from "../mdx-utils/is-mdx-element";
 import { unknownToMdxJsxAttribute } from "../mdx-utils/unknown-to-mdx-jsx-attr";
-import { Unified } from "../unified";
+import type { Unified } from "../unified";
 
 /**
  * Handles cases where customer is migrating from md w/ html to mdx w/ jsx

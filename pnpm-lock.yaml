@@ -2461,6 +2461,9 @@ importers:
       stylelint:
         specifier: ^16.1.0
         version: 16.14.1(typescript@5.7.3)
+      tsup:
+        specifier: ^8.0.0
+        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.8.0)
       typescript:
         specifier: 5.7.3
         version: 5.7.3

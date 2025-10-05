@@ -1,6 +1,6 @@
 import type { Element } from "hast";
 import type { Heading } from "mdast";
-import { State } from "mdast-util-to-hast";
+import type { State } from "mdast-util-to-hast";
 
 /**
  * This allows us to extract anchors that were overridden in the markdown, instead of using the default slug.

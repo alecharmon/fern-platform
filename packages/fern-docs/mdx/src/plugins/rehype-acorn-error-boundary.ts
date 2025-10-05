@@ -3,7 +3,7 @@ import { CONTINUE, visit } from "unist-util-visit";
 
 import { isMdxExpression, isMdxJsxElementHast } from "../mdx-utils";
 import { unknownToMdxJsxAttribute } from "../mdx-utils/unknown-to-mdx-jsx-attr";
-import { Unified } from "../unified";
+import type { Unified } from "../unified";
 
 interface AcornErrorBoundaryOptions {
     errorBoundaryComponentName?: string;

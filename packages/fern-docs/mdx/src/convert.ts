@@ -1,17 +1,17 @@
 import { createHash } from "crypto";
-import { ElementContent, Root as HastRoot } from "hast";
+import type { ElementContent, Root as HastRoot } from "hast";
 import { fromHtml } from "hast-util-from-html";
 import { toHtml } from "hast-util-to-html";
-import { Handle as ToMdastHandle, toMdast, defaultHandlers as toMdastDefaultHandlers } from "hast-util-to-mdast";
+import { type Handle as ToMdastHandle, toMdast, defaultHandlers as toMdastDefaultHandlers } from "hast-util-to-mdast";
 import yaml from "js-yaml";
-import { Parents as MdastParents, Nodes, Root } from "mdast";
+import type { Parents as MdastParents, Nodes, Root } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { frontmatterFromMarkdown, frontmatterToMarkdown } from "mdast-util-frontmatter";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
 import { mdxFromMarkdown, mdxToMarkdown } from "mdast-util-mdx";
 import {
-    Handler as ToHastHandler,
-    State as ToHastState,
+    type Handler as ToHastHandler,
+    type State as ToHastState,
     toHast,
     defaultHandlers as toHastDefaultHandlers
 } from "mdast-util-to-hast";
@@ -20,7 +20,7 @@ import { frontmatter as fm } from "micromark-extension-frontmatter";
 import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
 
-import { MdxJsxElement } from "./mdast";
+import type { MdxJsxElement } from "./mdast";
 
 // Options for how yaml is written to the frontmatter
 const FRONTMATTER_YAML_OPTIONS: yaml.DumpOptions = {
@@ -115,9 +115,9 @@ export type Frontmatter = Record<string, unknown>;
 
 // Re-export mdast types for external use
 export type {
+    Content as MdastContent,
     Node as MdastNode,
-    Nodes as MdastNodes,
-    Content as MdastContent
+    Nodes as MdastNodes
 } from "mdast";
 
 // Response from mdxToAST

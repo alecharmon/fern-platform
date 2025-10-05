@@ -1,4 +1,4 @@
-import { HeadingMetadata, collectRootHeadings } from "./headings";
+import { collectRootHeadings, type HeadingMetadata } from "./headings";
 import { toTree } from "./parse";
 
 export interface MarkdownSectionRoot {

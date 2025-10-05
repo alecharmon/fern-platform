@@ -1,6 +1,6 @@
 import type { Program } from "estree";
 import { walk } from "estree-walker";
-import { MdxJsxAttributeValueExpression } from "mdast-util-mdx-jsx";
+import type { MdxJsxAttributeValueExpression } from "mdast-util-mdx-jsx";
 
 type Literal = string | number | bigint | boolean | RegExp | null | undefined;
 
@@ -95,7 +95,9 @@ export function extractArrayLiteral(estree?: Program | null | undefined): Litera
  *  - <Component prop={["a", "b"]} />
  *  - <Component prop={<div />} />
  */
-export function extractAttributeValueLiteral(value: string | MdxJsxAttributeValueExpression | null | undefined) {
+export function extractAttributeValueLiteral(
+    value: string | MdxJsxAttributeValueExpression | null | undefined
+): Literal | undefined {
     if (typeof value === "string") {
         return value;
     }

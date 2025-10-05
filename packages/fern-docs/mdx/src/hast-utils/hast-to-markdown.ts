@@ -1,5 +1,5 @@
 import type { Root as HastRoot } from "hast";
-import { State, toMdast } from "hast-util-to-mdast";
+import { type State, toMdast } from "hast-util-to-mdast";
 
 import { mdastToMarkdown } from "../mdast-utils/mdast-to-markdown";
 
