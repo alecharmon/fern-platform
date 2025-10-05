@@ -1,4 +1,4 @@
-import { MdxJsxExpressionAttribute } from "@fern-docs/mdx";
+import type { MdxJsxExpressionAttribute } from "@fern-docs/mdx";
 
 // example: intent="warning"
 export interface StringAttribute {

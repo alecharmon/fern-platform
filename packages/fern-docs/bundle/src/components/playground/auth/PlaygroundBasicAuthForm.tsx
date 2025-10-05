@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect } from "react";
 
 import { useAtom, useAtomValue } from "jotai/react";
 import { RESET } from "jotai/utils";

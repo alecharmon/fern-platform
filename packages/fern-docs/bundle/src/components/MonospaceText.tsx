@@ -1,4 +1,4 @@
-import { ComponentProps, PropsWithChildren, forwardRef } from "react";
+import { type ComponentProps, type PropsWithChildren, forwardRef } from "react";
 
 import { cn } from "@fern-docs/components/cn";
 

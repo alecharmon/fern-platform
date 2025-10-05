@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { getEnv } from "@vercel/functions";
 import { kv } from "@vercel/kv";

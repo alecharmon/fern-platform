@@ -1,5 +1,5 @@
 import { revalidatePath, revalidateTag } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
@@ -14,8 +14,14 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
 import { pruneWithAuthState } from "@fern-api/docs-server/withRbac";
 import { HEADER_X_FERN_HOST, slugToHref, withoutStaging } from "@fern-api/docs-utils";
-import { ApiDefinition, DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
-import { ApiDefinitionV1ToLatest, EndpointId, WebSocketId, WebhookId, prune } from "@fern-api/fdr-sdk/api-definition";
+import { type ApiDefinition, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
+import {
+    ApiDefinitionV1ToLatest,
+    type EndpointId,
+    type WebSocketId,
+    type WebhookId,
+    prune
+} from "@fern-api/fdr-sdk/api-definition";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 

@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import { ArrowRight, Loader2 } from "lucide-react";
 
-import { GithubSourceRepo } from "@/app/services/github/types";
-import { DocsUrl } from "@/utils/types";
+import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { Button } from "../ui/button";
 import { BranchPRInfo } from "./BranchPRInfo";

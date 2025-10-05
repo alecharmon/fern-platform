@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, memo, useEffect, useRef } from "react";
+import { type ReactElement, memo, useEffect, useRef } from "react";
 
 import { FernLink } from "../FernLink";
 import { cn } from "../cn";

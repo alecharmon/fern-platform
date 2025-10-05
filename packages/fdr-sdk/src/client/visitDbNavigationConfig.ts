@@ -1,4 +1,4 @@
-import { DocsV1Db } from ".";
+import type { DocsV1Db } from ".";
 
 export interface DbNavigationConfigVisitor<T> {
     versioned: (config: DocsV1Db.VersionedNavigationConfig) => T;

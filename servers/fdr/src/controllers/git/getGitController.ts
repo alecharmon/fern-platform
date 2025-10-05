@@ -1,6 +1,6 @@
 import { PullRequestNotFoundError, RepositoryNotFoundError } from "../../api/generated/api";
 import { GitService } from "../../api/generated/api/resources/git/service/GitService";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 
 export function getGitController(app: FdrApplication): GitService {
     async function checkIsFernUser(authorization: string | undefined) {

@@ -1,4 +1,4 @@
-import { GetServerSidePropsResult, GetStaticPropsResult } from "next";
+import type { GetServerSidePropsResult, GetStaticPropsResult } from "next";
 
 import { UnreachableCaseError } from "ts-essentials";
 

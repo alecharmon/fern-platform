@@ -1,17 +1,25 @@
 "use client";
 
-import { PropsWithChildren, ReactNode, createContext, useCallback, useContext, useEffect, useMemo } from "react";
+import {
+    type PropsWithChildren,
+    type ReactNode,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo
+} from "react";
 import { Configure } from "react-instantsearch";
 import { InstantSearchNext } from "react-instantsearch-nextjs";
 
-import { LiteClient, liteClient } from "algoliasearch/lite";
+import { type LiteClient, liteClient } from "algoliasearch/lite";
 import { uniq } from "es-toolkit/array";
 import { preload } from "swr";
 import useSWRImmutable from "swr/immutable";
 
 import { getDevice, getPlatform } from "@fern-api/ui-core-utils";
 import type { FacetName, FacetsResponse } from "@fern-docs/search-keyword";
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 import { useLazyRef } from "@fern-ui/react-commons";
 
 import { toAlgoliaFacetFilters } from "../../utils/facet-filters";

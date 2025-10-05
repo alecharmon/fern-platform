@@ -1,5 +1,5 @@
 import { slugToHref } from "@fern-api/docs-utils";
-import { hasRedirect, TabChild } from "@fern-api/fdr-sdk/navigation";
+import { hasRedirect, type TabChild } from "@fern-api/fdr-sdk/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Lock } from "lucide-react";
 

@@ -1,4 +1,4 @@
-import { Result } from "execa";
+import type { Result } from "execa";
 
 import { loggingExeca } from "./loggingExeca";
 

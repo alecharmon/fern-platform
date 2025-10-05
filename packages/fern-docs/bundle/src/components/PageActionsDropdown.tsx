@@ -1,6 +1,6 @@
 "use client";
 
-import { ParamValue } from "next/dist/server/request/params";
+import type { ParamValue } from "next/dist/server/request/params";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 

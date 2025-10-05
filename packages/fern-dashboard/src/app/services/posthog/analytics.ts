@@ -6,7 +6,7 @@
  * construction of queries and processing of results.
  */
 import { PostHogClient } from "./client";
-import {
+import type {
     AnalyticsConfig,
     AnalyticsMetrics,
     DateRangeOptions,

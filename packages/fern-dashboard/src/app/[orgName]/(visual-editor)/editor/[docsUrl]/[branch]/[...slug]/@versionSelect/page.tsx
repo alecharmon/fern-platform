@@ -8,7 +8,7 @@ import { VersionDropdown } from "@fern-docs/components/header/VersionDropdown";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 export default async function VersionSelectPage({
     params

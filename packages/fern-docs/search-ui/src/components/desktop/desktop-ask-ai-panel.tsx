@@ -1,6 +1,6 @@
 "use client";
 
-import { UIMessage, useChat } from "@ai-sdk/react";
+import { type UIMessage, useChat } from "@ai-sdk/react";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { Button } from "@fern-docs/components/button";
 import { cn } from "@fern-docs/components/cn";
@@ -11,29 +11,30 @@ import {
 } from "@fern-docs/components/constants";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 import { useEventCallback } from "@fern-ui/react-commons";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { DefaultChatTransport } from "ai";
 import type { Element as HastElement } from "hast";
 import { ArrowUp, CircleAlert, Maximize2, Minimize2, RotateCcw, RotateCw, X } from "lucide-react";
-import React, {
-    ComponentPropsWithoutRef,
+import type React from "react";
+import {
+    type ComponentPropsWithoutRef,
     createElement,
     forwardRef,
     isValidElement,
-    KeyboardEventHandler,
+    type KeyboardEventHandler,
     memo,
-    ReactElement,
-    ReactNode,
+    type ReactElement,
+    type ReactNode,
     useCallback,
     useEffect,
     useMemo,
     useRef,
     useState
 } from "react";
-import { Components } from "react-markdown";
+import type { Components } from "react-markdown";
 import { useIsomorphicLayoutEffect } from "swr/_internal";
 
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
@@ -44,7 +45,7 @@ import { ChatbotTurnContextProvider } from "../chatbot/turn-context";
 import {
     combineSearchResults,
     ensureMessagePartsHaveNewLines,
-    SqueezedMessage,
+    type SqueezedMessage,
     squeezeMessages
 } from "../chatbot/utils";
 import * as Command from "../cmdk";

@@ -1,10 +1,10 @@
 import { Button } from "@fern-docs/components/button";
 
 import { cn } from "@fern-docs/components/cn";
-import { ComponentPropsWithoutRef, forwardRef, useRef, useState } from "react";
+import { type ComponentPropsWithoutRef, forwardRef, useRef, useState } from "react";
 
 import { FERN_SEARCH_MOBILE_COMMAND_ID } from "../../constants";
-import { FacetFilter } from "../../types";
+import type { FacetFilter } from "../../types";
 import { FACET_DISPLAY_NAME_MAP } from "../../utils/facet-display";
 import * as Command from "../cmdk";
 import { useFacetFilters } from "../search/useFacetFilters";

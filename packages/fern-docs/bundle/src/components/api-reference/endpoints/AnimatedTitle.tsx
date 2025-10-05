@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 
 export const AnimatedTitle: FC<{ children: string }> = ({ children: nextChild }) => {
     const [displayText, setDisplayText] = useState(nextChild);

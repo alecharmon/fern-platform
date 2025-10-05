@@ -1,7 +1,7 @@
 import "server-only";
 
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";

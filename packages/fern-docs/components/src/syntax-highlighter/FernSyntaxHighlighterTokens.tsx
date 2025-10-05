@@ -10,7 +10,7 @@ import { parseStringStyle, visit } from "@fern-docs/mdx";
 import { FernScrollArea } from "../FernScrollArea";
 import { cn } from "../cn";
 import { HastToJSX } from "./HastToJsx";
-import { HighlightedTokens } from "./fernShiki";
+import type { HighlightedTokens } from "./fernShiki";
 import { type HighlightLine, flattenHighlightLines, getMaxHeight } from "./utils";
 
 export interface ScrollToHandle {

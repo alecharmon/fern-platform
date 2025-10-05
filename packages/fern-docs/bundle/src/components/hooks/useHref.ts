@@ -1,6 +1,6 @@
 import urlJoin from "url-join";
 
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 
 export function getToHref(includeTrailingSlash = false): (slug: FernNavigation.Slug, host?: string) => string {

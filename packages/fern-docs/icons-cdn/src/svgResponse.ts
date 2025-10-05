@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
 import {
-  AbstractElement,
-  IconPrefix,
+  type AbstractElement,
+  type IconPrefix,
   findIconDefinition,
   icon,
 } from "@fortawesome/fontawesome-svg-core";
-import { IconName } from "@fortawesome/free-brands-svg-icons";
+import type { IconName } from "@fortawesome/free-brands-svg-icons";
 
 // This gets called on every request
 export function svgResponse(

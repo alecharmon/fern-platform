@@ -1,5 +1,5 @@
-import { Auth0OrgName } from "@/app/services/auth0/types";
-import { GithubRepoValidationError } from "@/app/services/dal/github/validators";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import type { GithubRepoValidationError } from "@/app/services/dal/github/validators";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import { getValidationErrorMessage } from "@/utils/errors";
 

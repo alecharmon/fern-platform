@@ -1,6 +1,14 @@
 // inspired by https://github.com/remcohaszing/hast-util-properties-to-mdx-jsx-attributes
 
-import { Hast, isMdxJsxElementHast, Mdast, mdastFromMarkdown, SKIP, Unified, visit } from "@fern-docs/mdx";
+import {
+    type Hast,
+    isMdxJsxElementHast,
+    type Mdast,
+    mdastFromMarkdown,
+    SKIP,
+    type Unified,
+    visit
+} from "@fern-docs/mdx";
 import { compact, flatten } from "es-toolkit/array";
 import { escape } from "es-toolkit/string";
 import { propertiesToMdxJsxAttributes } from "hast-util-properties-to-mdx-jsx-attributes";

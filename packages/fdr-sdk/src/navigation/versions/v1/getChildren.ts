@@ -1,6 +1,6 @@
 import { UnreachableCaseError } from "ts-essentials";
 
-import { NavigationNode } from "./NavigationNode";
+import type { NavigationNode } from "./NavigationNode";
 import { isLeaf } from "./NavigationNodeLeaf";
 
 export function getChildren(node: NavigationNode): readonly NavigationNode[] {

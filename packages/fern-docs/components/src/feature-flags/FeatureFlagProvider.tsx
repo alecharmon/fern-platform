@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-import { FeatureFlagsConfig } from "../state/feature-flags";
+import type { FeatureFlagsConfig } from "../state/feature-flags";
 
 const LDFeatureFlagProvider = dynamic(
     () => import("./LDFeatureFlagProvider").then((mod) => mod.LDFeatureFlagProvider),

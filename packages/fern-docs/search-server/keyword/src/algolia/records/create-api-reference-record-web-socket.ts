@@ -1,4 +1,4 @@
-import { ApiReferenceRecord, EndpointBaseRecord } from "../types";
+import type { ApiReferenceRecord, EndpointBaseRecord } from "../types";
 
 interface CreateApiReferenceRecordWebSocketOptions {
     endpointBase: EndpointBaseRecord;

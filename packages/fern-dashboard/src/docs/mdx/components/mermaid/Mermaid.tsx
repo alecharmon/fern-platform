@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { type ReactElement, useEffect, useRef, useState } from "react";
 
 import { useResolvedTheme } from "@/docs/hooks/use-theme";
 import { loadMermaid } from "./loadMermaid";

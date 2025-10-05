@@ -1,16 +1,16 @@
 import { sortBy } from "es-toolkit/array";
 import { isEqual } from "es-toolkit/predicate";
 
-import { ApiDefinition } from "@fern-api/fdr-sdk";
+import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 
-import {
+import type {
     ExamplesByKeyAndStatusCode,
     ExamplesByLanguageKeyAndStatusCode,
     ExamplesByStatusCode,
     SelectedExampleKey
 } from "../type-definitions/EndpointContent";
-import { CodeExample } from "./code-example";
+import type { CodeExample } from "./code-example";
 
 /**
  * Group examples by language, title, and status code.

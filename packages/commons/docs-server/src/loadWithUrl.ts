@@ -5,7 +5,7 @@ import { cache } from "react";
 import { Agent, setGlobalDispatcher } from "undici";
 
 import { isPreviewDomain, withoutStaging } from "@fern-api/docs-utils";
-import { APIResponse, FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import { type APIResponse, FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";

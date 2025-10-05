@@ -1,5 +1,5 @@
 import { toJson } from "../json.js";
-import { APIResponse } from "./APIResponse.js";
+import type { APIResponse } from "./APIResponse.js";
 import { createRequestUrl } from "./createRequestUrl.js";
 import { getErrorResponseBody } from "./getErrorResponseBody.js";
 import { getFetchFn } from "./getFetchFn.js";

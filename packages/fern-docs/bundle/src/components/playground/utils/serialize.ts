@@ -1,10 +1,15 @@
 import { compact, flatten } from "es-toolkit/array";
 
-import { FormDataField, HttpRequestBodyShape, Protocol, wrapOpenRPCRequest } from "@fern-api/fdr-sdk/api-definition";
+import {
+    type FormDataField,
+    type HttpRequestBodyShape,
+    type Protocol,
+    wrapOpenRPCRequest
+} from "@fern-api/fdr-sdk/api-definition";
 import { assertNever, isNonNullish } from "@fern-api/ui-core-utils";
 
 import { blobToDataURL } from "../fetch-utils/blobToDataURL";
-import { PlaygroundFormStateBody, ProxyRequest, SerializableFile, SerializableFormDataEntryValue } from "../types";
+import type { PlaygroundFormStateBody, ProxyRequest, SerializableFile, SerializableFormDataEntryValue } from "../types";
 
 export const serializeFormStateBody = async ({
     shape,

@@ -1,8 +1,8 @@
 import { createPruneKey } from "@fern-api/docs-loader";
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
-import { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 

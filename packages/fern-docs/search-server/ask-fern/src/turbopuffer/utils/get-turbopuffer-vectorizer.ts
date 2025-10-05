@@ -1,4 +1,4 @@
-import { Embedding, EmbeddingModel, embedMany } from "ai";
+import { type Embedding, type EmbeddingModel, embedMany } from "ai";
 
 export function getTurbopufferVectorizer(
     embeddingModel: EmbeddingModel<string>

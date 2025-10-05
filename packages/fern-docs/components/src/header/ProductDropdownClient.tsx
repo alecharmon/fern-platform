@@ -3,7 +3,7 @@
 import { ChevronDown, ChevronsUpDown } from "lucide-react";
 
 import { slugToHref } from "@fern-api/docs-utils";
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { useIsDesktop } from "@fern-ui/react-commons";
 
 import { FernDropdown } from "../FernDropdown";

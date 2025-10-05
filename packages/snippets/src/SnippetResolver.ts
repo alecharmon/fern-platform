@@ -1,8 +1,8 @@
-import { FernIr } from "@fern-api/dynamic-ir-sdk";
-import { generatorExec } from "@fern-api/dynamic-ir-sdk/api";
+import type { FernIr } from "@fern-api/dynamic-ir-sdk";
+import type { generatorExec } from "@fern-api/dynamic-ir-sdk/api";
 
 import { EndpointProvider } from "./EndpointProvider";
-import { Language } from "./Language";
+import type { Language } from "./Language";
 import csharp from "./config/csharp/config.json";
 import go from "./config/go/config.json";
 import java from "./config/java/config.json";
@@ -10,7 +10,7 @@ import php from "./config/php/config.json";
 import python from "./config/python/config.json";
 import ruby from "./config/ruby/config.json";
 import typescript from "./config/typescript/config.json";
-import { SnippetInput } from "./types";
+import type { SnippetInput } from "./types";
 
 export interface SnippetResolverArgs {
     snippetInputs: SnippetInput[];

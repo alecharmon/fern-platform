@@ -2,7 +2,7 @@ import "server-only";
 
 import React from "react";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { cn } from "@fern-docs/components/cn";

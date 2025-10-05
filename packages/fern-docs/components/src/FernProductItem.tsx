@@ -1,6 +1,6 @@
 "use client";
 
-import { FernDropdown } from "./FernDropdown";
+import type { FernDropdown } from "./FernDropdown";
 import { FernSelectionItem } from "./FernSelectionItem";
 import { cn } from "./cn";
 

@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "@bprogress/next/app";
 
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 export declare namespace DocsSiteSelect {

@@ -3,12 +3,12 @@
 import { ChevronDown, ChevronsUpDown, Lock, Tag } from "lucide-react";
 
 import { slugToHref } from "@fern-api/docs-utils";
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { useIsDesktop } from "@fern-ui/react-commons";
 
 import { FernLinkDropdown } from "../FernLinkDropdown";
 import { FernSelectionItem } from "../FernSelectionItem";
-import { Availability, AvailabilityBadge, AvailabilityFullyQualifiedDisplayNames } from "../badges";
+import { type Availability, AvailabilityBadge, AvailabilityFullyQualifiedDisplayNames } from "../badges";
 import { cn } from "../cn";
 import { useCurrentVersionId, useCurrentVersionSlug } from "../state/navigation";
 

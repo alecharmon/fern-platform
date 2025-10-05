@@ -1,7 +1,7 @@
 import { generateChangelog, generateCommitMessage } from "@libs/cohere";
 import { execFernCli, findFernWorkspaces } from "@libs/fern";
-import { DEFAULT_REMOTE_NAME, Repository, cloneRepo, configureGit } from "@libs/github";
-import { Octokit } from "octokit";
+import { DEFAULT_REMOTE_NAME, type Repository, cloneRepo, configureGit } from "@libs/github";
+import type { Octokit } from "octokit";
 
 import { createOrUpdatePullRequest, getOrUpdateBranch } from "@fern-api/github";
 

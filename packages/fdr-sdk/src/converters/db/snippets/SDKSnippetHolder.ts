@@ -1,4 +1,4 @@
-import { APIV1Read, APIV1Write, FdrAPI } from "../../../client";
+import type { APIV1Read, APIV1Write, FdrAPI } from "../../../client";
 
 export interface SnippetsConfigWithSdkId {
     typescriptSdk?: APIV1Write.TypescriptPackage & { sdkId: string };

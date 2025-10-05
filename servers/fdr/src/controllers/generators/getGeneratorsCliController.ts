@@ -4,7 +4,7 @@ import {
     NoValidClisFoundError
 } from "../../api/generated/api/resources/generators";
 import { CliService } from "../../api/generated/api/resources/generators/resources/cli/service/CliService";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 
 export function getGeneratorsCliController(app: FdrApplication): CliService {
     return new CliService({

@@ -3,10 +3,10 @@ import { keyBy } from "es-toolkit/array";
 import { mapValues } from "es-toolkit/object";
 
 import {
-    APIV1Db,
-    APIV1Read,
+    type APIV1Db,
+    type APIV1Read,
     DocsV1Db,
-    DocsV1Read,
+    type DocsV1Read,
     FdrAPI,
     FernNavigation,
     convertDbAPIDefinitionToRead,
@@ -19,7 +19,7 @@ import { DocsV1ReadService } from "../../../api";
 import { UnauthorizedError } from "../../../api/generated/api";
 import { DomainNotRegisteredError } from "../../../api/generated/api/resources/docs/resources/v1/resources/read";
 import type { FdrApplication } from "../../../app";
-import { LoadDocsDefinitionByUrlResponse } from "../../../db";
+import type { LoadDocsDefinitionByUrlResponse } from "../../../db";
 import { readBuffer } from "../../../util";
 import { getFilesV2 } from "../../../util/getFilesV2";
 

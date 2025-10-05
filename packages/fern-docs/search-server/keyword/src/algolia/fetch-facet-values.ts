@@ -1,8 +1,8 @@
-import { Algoliasearch } from "algoliasearch";
+import type { Algoliasearch } from "algoliasearch";
 import { zip } from "es-toolkit/array";
 
 import { SEARCH_INDEX } from "./constants";
-import { FacetName, SEARCHABLE_FACET_ATTRIBUTES } from "./types";
+import { type FacetName, SEARCHABLE_FACET_ATTRIBUTES } from "./types";
 
 export type FacetsResponse = Partial<Record<FacetName, { value: string; count: number }[]>>;
 

@@ -1,10 +1,10 @@
-import React, { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 
 import { AvailabilityBadge, HttpMethodBadge } from "@fern-docs/components/badges";
 import type { FacetsResponse } from "@fern-docs/search-keyword";
 import { type FacetName, SEARCHABLE_FACET_ATTRIBUTES } from "@fern-docs/search-keyword/types";
 
-import { FilterOption } from "../types";
+import type { FilterOption } from "../types";
 
 const FACET_DISPLAY_MAP: Record<string, Record<string, ReactNode>> = {
     method: {

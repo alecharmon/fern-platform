@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, createContext, useContext, useMemo } from "react";
+import { type Dispatch, type SetStateAction, createContext, useContext, useMemo } from "react";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { noop } from "ts-essentials";

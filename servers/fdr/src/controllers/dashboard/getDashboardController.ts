@@ -1,5 +1,5 @@
 import { DashboardService } from "../../api/generated/api/resources/dashboard/service/DashboardService";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 
 export function getDashboardController(app: FdrApplication): DashboardService {
     return new DashboardService({

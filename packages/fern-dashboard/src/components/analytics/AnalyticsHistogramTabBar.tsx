@@ -4,7 +4,7 @@ import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLe
 import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 
 import { AnalyticsHistogramTabItem } from "./AnalyticsHistogramTabItem";
-import { RenderType } from "./AnalyticsPageClient";
+import type { RenderType } from "./AnalyticsPageClient";
 
 export function AnalyticsHistogramTabBar({
     renderType,

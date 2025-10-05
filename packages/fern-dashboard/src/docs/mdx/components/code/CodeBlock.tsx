@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";

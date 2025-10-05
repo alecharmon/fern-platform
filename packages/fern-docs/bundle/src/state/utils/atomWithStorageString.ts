@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import identity from "@fern-api/ui-core-utils/identity";
 

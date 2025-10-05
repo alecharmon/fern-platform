@@ -1,8 +1,8 @@
 import { readFile } from "fs/promises";
 
-import { AbsoluteFilePath } from "@fern-api/fs-utils";
+import type { AbsoluteFilePath } from "@fern-api/fs-utils";
 
-import { FernGeneratorCli } from "./generated";
+import type { FernGeneratorCli } from "./generated";
 
 export async function loadReferenceConfig({
     absolutePathToConfig

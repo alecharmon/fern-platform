@@ -6,7 +6,7 @@ import { ChevronDownIcon } from "lucide-react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { GithubPrStatus } from "@/app/services/github/types";
+import type { GithubPrStatus } from "@/app/services/github/types";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 
 import { StatusBadge } from "../ui/StatusBadge";

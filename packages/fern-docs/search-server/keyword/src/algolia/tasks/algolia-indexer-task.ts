@@ -1,12 +1,12 @@
 import { algoliasearch } from "algoliasearch";
 import { assert } from "ts-essentials";
 
-import { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
+import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { loadDocsWithUrl } from "@fern-docs/search-utils";
 
 import { browseAllObjectsForDomain } from "../browse-all-objects";
 import { createAlgoliaRecords } from "../records/create-algolia-records";
-import { AlgoliaRecord } from "../types";
+import type { AlgoliaRecord } from "../types";
 
 interface AlgoliaIndexerPayload {
     /**

@@ -1,12 +1,12 @@
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 import React from "react";
 
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
 import { PropertyWithShape } from "./ObjectProperty";
-import { PropertyLocation } from "./TypeReferenceDefinitions";
+import type { PropertyLocation } from "./TypeReferenceDefinitions";
 
 type IconInfo = {
     content: string;

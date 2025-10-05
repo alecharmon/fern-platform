@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 import { Prose } from "../mdx/prose";
 import { SetLayout } from "../state/layout";

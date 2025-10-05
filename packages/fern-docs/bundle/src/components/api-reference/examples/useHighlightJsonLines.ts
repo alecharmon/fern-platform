@@ -6,7 +6,7 @@ import { JSONPath } from "jsonpath-plus";
 
 import { isPlainObject } from "@fern-api/ui-core-utils";
 
-import { JsonPropertyPath, JsonPropertyPathPart } from "./JsonPropertyPath";
+import type { JsonPropertyPath, JsonPropertyPathPart } from "./JsonPropertyPath";
 import { lineNumberOf } from "./utils";
 
 const INDENT_SPACES = 2;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import React from "react";
+import type React from "react";
 
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";

@@ -1,6 +1,6 @@
 import { uniqBy } from "es-toolkit/array";
 
-import { TurbopufferRecord } from "../types";
+import type { TurbopufferRecord } from "../types";
 
 export function convertTpufRecordToCitation(results: TurbopufferRecord[]) {
     return results.map((result) => {

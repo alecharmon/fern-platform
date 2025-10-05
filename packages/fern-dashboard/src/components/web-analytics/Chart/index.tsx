@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getPageViewsByDay, getVisitorsByDay } from "@/app/actions/getWebAnalytics";
-import { DateRangeOptions } from "@/app/services/posthog/types";
+import type { DateRangeOptions } from "@/app/services/posthog/types";
 
 import GroupBySelect from "./GroupBySelect";
 import WebAnalyticsAreaChart from "./WebAnalyticsAreaChart";

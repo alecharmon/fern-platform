@@ -1,9 +1,9 @@
 import "server-only";
 
 import { createPruneKey } from "@fern-api/docs-loader";
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import {
-    ApiDefinition,
+    type ApiDefinition,
     createEndpointContext,
     createGrpcContext,
     createWebSocketContext,
@@ -11,10 +11,10 @@ import {
     prune
 } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { constructPageOptions } from "../PageActionsDropdownOptions";
 import { EndpointContent } from "./endpoints/EndpointContent";

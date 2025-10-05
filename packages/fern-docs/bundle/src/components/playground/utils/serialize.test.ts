@@ -1,6 +1,6 @@
-import { HttpRequestBodyShape, PropertyKey, TypeShape } from "@fern-api/fdr-sdk/api-definition";
+import { type HttpRequestBodyShape, PropertyKey, type TypeShape } from "@fern-api/fdr-sdk/api-definition";
 
-import { PlaygroundFormStateBody } from "../types";
+import type { PlaygroundFormStateBody } from "../types";
 import { serializeFormStateBody } from "./serialize";
 
 const STRING_VALUE_SHAPE: TypeShape = {

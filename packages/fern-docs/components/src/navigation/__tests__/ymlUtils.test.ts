@@ -1,4 +1,4 @@
-import { DocsYmlUpdate, StoredNavigationData } from "../types";
+import type { DocsYmlUpdate, StoredNavigationData } from "../types";
 import { buildDocsYmlWithUpdates } from "../ymlUtils";
 
 describe("buildDocsYmlWithUpdates", () => {

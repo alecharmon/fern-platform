@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, Context } from "aws-lambda";
+import type { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import handler after mock is configured

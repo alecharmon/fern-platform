@@ -4,10 +4,10 @@
 import React from "react";
 
 import { render } from "@testing-library/react";
-import { Atom, atom } from "jotai";
+import { type Atom, atom } from "jotai";
 import { freezeAtom } from "jotai/utils";
 
-import { FernUser } from "@fern-api/docs-auth";
+import type { FernUser } from "@fern-api/docs-auth";
 
 import { If } from "./If";
 

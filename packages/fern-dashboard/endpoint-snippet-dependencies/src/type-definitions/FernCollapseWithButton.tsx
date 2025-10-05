@@ -1,8 +1,8 @@
-import { FC, PropsWithChildren, ReactNode } from "react";
+import type { FC, PropsWithChildren, ReactNode } from "react";
 
 import { X } from "lucide-react";
 
-import { FernButton, FernButtonProps } from "@fern-docs/components/FernButton";
+import { FernButton, type FernButtonProps } from "@fern-docs/components/FernButton";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
 import { cn } from "@fern-docs/components/cn";
 

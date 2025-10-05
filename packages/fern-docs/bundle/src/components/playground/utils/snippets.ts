@@ -1,6 +1,6 @@
 import type { Snippets } from "@fern-api/fdr-sdk";
 
-import { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
+import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
 
 export function convertToCustomSnippetPayload(
     formState: PlaygroundEndpointRequestFormState,

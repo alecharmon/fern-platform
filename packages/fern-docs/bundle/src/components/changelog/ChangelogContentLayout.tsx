@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, ReactElement, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactElement, ReactNode } from "react";
 
 import { cn } from "@fern-docs/components/cn";
 

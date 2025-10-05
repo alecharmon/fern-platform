@@ -1,4 +1,9 @@
-import { AuthOption, convertAuthOptionsToToken, parseAuthOptions, returnSelectedOption } from "./parse-auth-options";
+import {
+    type AuthOption,
+    convertAuthOptionsToToken,
+    parseAuthOptions,
+    returnSelectedOption
+} from "./parse-auth-options";
 
 describe("parseAuthOptions", () => {
     it("should parse valid token with single key-value pair", () => {

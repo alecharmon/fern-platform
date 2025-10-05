@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 
 import { slugToHref } from "@fern-api/docs-utils";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
 import { FERN_STREAM_ATOM } from "@fern-docs/components/state/stream";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";

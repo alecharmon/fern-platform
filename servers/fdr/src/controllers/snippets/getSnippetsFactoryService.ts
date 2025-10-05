@@ -1,5 +1,5 @@
 import { SnippetsFactoryService } from "../../api";
-import { type FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 
 export function getSnippetsFactoryService(app: FdrApplication): SnippetsFactoryService {
     return new SnippetsFactoryService({

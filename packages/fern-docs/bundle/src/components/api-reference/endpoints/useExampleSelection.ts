@@ -2,21 +2,21 @@
 
 import React, { useMemo } from "react";
 
-import { SetStateAction } from "jotai";
+import type { SetStateAction } from "jotai";
 import { RESET } from "jotai/utils";
 
-import { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { useDeepCompareMemoize } from "@fern-ui/react-commons";
 
 import { getProgrammingLanguage, useDefaultProgrammingLanguage, useProgrammingLanguage } from "@/state/language";
 
-import { CodeExample } from "../examples/code-example";
+import type { CodeExample } from "../examples/code-example";
 import {
     getAvailableLanguages,
     groupExamplesByLanguageKeyAndStatusCode,
     selectExampleToRender
 } from "../examples/example-groups";
-import {
+import type {
     ExamplesByKeyAndStatusCode,
     ExamplesByStatusCode,
     SelectedExampleKey

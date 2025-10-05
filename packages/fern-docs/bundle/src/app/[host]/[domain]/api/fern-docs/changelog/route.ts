@@ -1,9 +1,9 @@
 import { unstable_cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-import { Feed, Item } from "feed";
+import { Feed, type Item } from "feed";
 import urlJoin from "url-join";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
@@ -11,7 +11,7 @@ import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { COOKIE_FERN_TOKEN, getRedirectForPath, slugToHref } from "@fern-api/docs-utils";
-import { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { NodeCollector } from "@fern-api/fdr-sdk/navigation";

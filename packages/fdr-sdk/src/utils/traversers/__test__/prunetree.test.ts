@@ -1,6 +1,6 @@
 import { prunetree } from "../prunetree";
-import { DeleterAction } from "../types";
-import { FIXTURE, Record } from "./fixture";
+import type { DeleterAction } from "../types";
+import { FIXTURE, type Record } from "./fixture";
 
 const DELETER = (parent: Record | undefined, child: Record): DeleterAction => {
     if (parent == null) {

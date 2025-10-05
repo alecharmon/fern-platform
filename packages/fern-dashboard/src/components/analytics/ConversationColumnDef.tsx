@@ -1,8 +1,8 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 
-import { FernAI } from "@fern-api/fai-sdk";
+import type { FernAI } from "@fern-api/fai-sdk";
 
 export const columns: ColumnDef<FernAI.Query>[] = [
     {

@@ -1,9 +1,9 @@
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import {
     CONTINUE,
-    Hast,
+    type Hast,
     SKIP,
-    Unified,
+    type Unified,
     hastMdxJsxElementHastToProps,
     isMdxJsxElementHast,
     unknownToMdxJsxAttribute,

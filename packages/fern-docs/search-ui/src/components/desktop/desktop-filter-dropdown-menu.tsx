@@ -1,6 +1,6 @@
 import { Badge } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { cloneElement, isValidElement, useState } from "react";
 

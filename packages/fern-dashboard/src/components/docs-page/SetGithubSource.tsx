@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { validateUrlIsGithubUrl } from "@/app/services/github/github";
 import { ReactQueryKey } from "@/state/queryKeys";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { ErrorEditSourceToast, ErrorInvalidGithubUrlToast, SuccessfulEditSourceToast } from "../editor/EditorToasts";
 import { Button } from "../ui/button";

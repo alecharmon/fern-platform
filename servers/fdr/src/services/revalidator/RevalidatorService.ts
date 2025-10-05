@@ -1,7 +1,7 @@
-import { FernDocs } from "@fern-fern/fern-docs-sdk";
+import type { FernDocs } from "@fern-fern/fern-docs-sdk";
 
-import { FdrApplication } from "../../app";
-import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
+import type { FdrApplication } from "../../app";
+import type { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 
 export type RevalidatedPathsResponse = {
     successful: FernDocs.SuccessfulRevalidation[];

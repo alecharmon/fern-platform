@@ -1,4 +1,4 @@
-import { DocsV2Read } from "@fern-api/fdr-sdk";
+import type { DocsV2Read } from "@fern-api/fdr-sdk";
 
 import { getRedirectForPath } from "../getRedirectForPath";
 

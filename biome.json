@@ -76,10 +76,6 @@
         "noDoneCallback": "error",
         "noNamespace": "off",
         "noNonNullAssertion": "off",
-        "useArrayLiterals": "error",
-        "useAsConstAssertion": "error",
-        "useBlockStatements": "error",
-        "useLiteralEnumMembers": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {
@@ -100,7 +96,12 @@
               }
             ]
           }
-        }
+        },
+        "useArrayLiterals": "error",
+        "useAsConstAssertion": "error",
+        "useBlockStatements": "error",
+        "useImportType": "error",
+        "useLiteralEnumMembers": "error"
       },
       "suspicious": {
         "noAssignInExpressions": "off",
@@ -544,16 +545,6 @@
         "rules": {
           "suspicious": {
             "noPrototypeBuiltins": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["packages/fern-docs/mdx/**/*.ts"],
-      "linter": {
-        "rules": {
-          "style": {
-            "useImportType": "error"
           }
         }
       }

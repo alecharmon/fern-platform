@@ -5,7 +5,7 @@ import { join } from "path";
 import tmp from "tmp-promise";
 import { expect, test } from "vitest";
 
-import { ApiDefinition, DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
+import { ApiDefinition, type DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
 
 import { createTurbopufferRecords } from "../turbopuffer/records/create-turbopuffer-records";
 

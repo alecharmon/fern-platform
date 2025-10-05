@@ -1,8 +1,8 @@
-import { ReactElement, useRef } from "react";
+import { type ReactElement, useRef } from "react";
 
 import { useAtomValue, useSetAtom } from "jotai";
 
-import { DynamicIRsByLanguage } from "@fern-api/docs-server";
+import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
@@ -16,12 +16,12 @@ import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/
 
 import { PlaygroundRequestPreview } from "../PlaygroundRequestPreview";
 import { PlaygroundCodeSnippetResolverBuilder } from "../code-snippets/resolver";
-import { PlaygroundEndpointRequestFormState } from "../types";
+import type { PlaygroundEndpointRequestFormState } from "../types";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import {
-    DynamicSnippetLanguage,
+    type DynamicSnippetLanguage,
     PlaygroundDynamicRequestPreview,
-    PlaygroundDynamicRequestPreviewRef
+    type PlaygroundDynamicRequestPreviewRef
 } from "./PlaygroundDynamicRequestPreview";
 
 interface PlaygroundEndpointRequestCardProps {

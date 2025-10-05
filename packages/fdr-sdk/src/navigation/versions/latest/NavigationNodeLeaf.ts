@@ -1,4 +1,4 @@
-import { LinkNode } from ".";
+import type { LinkNode } from ".";
 import type { NavigationNode } from "./NavigationNode";
 import { type NavigationNodeApiLeaf, isApiLeaf } from "./NavigationNodeApiLeaf";
 import { type NavigationNodeMarkdownLeaf, isMarkdownLeaf } from "./NavigationNodePageLeaf";

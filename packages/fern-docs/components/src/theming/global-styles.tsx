@@ -1,6 +1,6 @@
-import { FernFonts } from "@fern-api/docs-server/generateFonts";
-import { ArrayOf12, FERN_COLOR_ACCENT, FernColorTheme } from "@fern-api/docs-utils";
-import { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { FernFonts } from "@fern-api/docs-server/generateFonts";
+import { type ArrayOf12, FERN_COLOR_ACCENT, type FernColorTheme } from "@fern-api/docs-utils";
+import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 
 const FONT_MONO = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
 const FONT_SANS =

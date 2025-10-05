@@ -1,4 +1,4 @@
-import { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 
 export class DashboardFileResolver {

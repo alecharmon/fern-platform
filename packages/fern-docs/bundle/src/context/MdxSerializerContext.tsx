@@ -1,4 +1,4 @@
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 let serializeStore: MdxSerializer | undefined;
 

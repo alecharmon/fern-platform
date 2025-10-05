@@ -1,5 +1,5 @@
 import { pageDataToMdx } from "./mdxUtils";
-import { ConfigChange, PageChange, StoredNavigationData } from "./types";
+import type { ConfigChange, PageChange, StoredNavigationData } from "./types";
 import { buildDocsYmlWithUpdates } from "./ymlUtils";
 
 export function createCommitFromChanges(

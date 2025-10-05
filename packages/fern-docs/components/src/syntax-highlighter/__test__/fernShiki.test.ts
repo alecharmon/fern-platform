@@ -1,4 +1,4 @@
-import { Root } from "hast";
+import type { Root } from "hast";
 import { visit } from "unist-util-visit";
 
 import { highlightTokens, memoizedGetHighlighterInstance } from "../fernShiki";

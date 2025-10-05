@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren, ReactNode } from "react";
+import type { FC, PropsWithChildren, ReactNode } from "react";
 import React from "react";
 
 import * as Collapsible from "@radix-ui/react-collapsible";

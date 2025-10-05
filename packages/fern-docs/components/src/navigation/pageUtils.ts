@@ -1,7 +1,7 @@
 import { FernNavigation } from "@fern-api/fdr-sdk";
-import { NodeId } from "@fern-api/fdr-sdk/navigation";
+import type { NodeId } from "@fern-api/fdr-sdk/navigation";
 
-import {
+import type {
     BuildPageDataProps,
     BuildPageDataResult,
     NavigationNodeLike,

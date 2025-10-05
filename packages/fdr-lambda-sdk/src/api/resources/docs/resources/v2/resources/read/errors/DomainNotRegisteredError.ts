@@ -3,7 +3,7 @@
  */
 
 import * as errors from "../../../../../../../../errors/index.js";
-import * as core from "../../../../../../../../core/index.js";
+import type * as core from "../../../../../../../../core/index.js";
 
 export class DomainNotRegisteredError extends errors.FdrLambdaError {
     constructor(rawResponse?: core.RawResponse) {

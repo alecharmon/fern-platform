@@ -1,10 +1,10 @@
-import { UIMessage } from "@ai-sdk/react";
-import { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from "ai";
+import type { UIMessage } from "@ai-sdk/react";
+import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from "ai";
 import { z } from "zod";
 
 import { isNonNullish } from "@fern-api/ui-core-utils";
 
-import { AskFernRecordHit } from "../../types";
+import type { AskFernRecordHit } from "../../types";
 
 const SearchResult = z.object({
     title: z.string(),

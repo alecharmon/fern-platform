@@ -1,6 +1,6 @@
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
-import { DocsUrl } from "./types";
+import type { DocsUrl } from "./types";
 
 export function getDocsSiteUrl({ mainUrl }: FdrAPI.dashboard.DocsSite): DocsUrl {
     return convertFdrDocsSiteUrlToDocsUrl(mainUrl);

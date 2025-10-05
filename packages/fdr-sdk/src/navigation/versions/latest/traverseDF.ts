@@ -1,7 +1,7 @@
 import { dfs } from "../../../utils/traversers/dfs";
-import { TraverserVisit } from "../../../utils/traversers/types";
-import { NavigationNode } from "./NavigationNode";
-import { NavigationNodeParent } from "./NavigationNodeParent";
+import type { TraverserVisit } from "../../../utils/traversers/types";
+import type { NavigationNode } from "./NavigationNode";
+import type { NavigationNodeParent } from "./NavigationNodeParent";
 import { getChildren } from "./getChildren";
 
 /**

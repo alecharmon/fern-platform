@@ -1,6 +1,6 @@
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 
-import { EncodedDocsUrl } from "./types";
+import type { EncodedDocsUrl } from "./types";
 
 export const ROOT_SLUG_ALIAS = "root";
 

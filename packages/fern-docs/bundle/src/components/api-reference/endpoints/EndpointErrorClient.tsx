@@ -1,8 +1,8 @@
 "use client";
 
-import { MouseEventHandler } from "react";
+import type { MouseEventHandler } from "react";
 
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { cn } from "@fern-docs/components/cn";
 import { AvailabilityBadge, StatusCodeBadge } from "@fern-docs/components/badges";

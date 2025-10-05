@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ComponentProps, ReactElement, useContext, useState } from "react";
+import React, { type ComponentProps, type ReactElement, useContext, useState } from "react";
 
 import { Check, Link2 } from "lucide-react";
 import { AnimatePresence, LazyMotion, domAnimation } from "motion/react";

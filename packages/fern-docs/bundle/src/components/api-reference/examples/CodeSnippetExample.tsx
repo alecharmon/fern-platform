@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, createRef, useCallback, useEffect, useMemo } from "react";
+import React, { type FC, createRef, useCallback, useEffect, useMemo } from "react";
 
 import { isEqual } from "es-toolkit/predicate";
 
@@ -9,7 +9,7 @@ import { useResizeObserver } from "@fern-ui/react-commons";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 
-import { JsonPropertyPath } from "./JsonPropertyPath";
+import type { JsonPropertyPath } from "./JsonPropertyPath";
 import { TitledExample } from "./TitledExample";
 import { useHighlightJsonLines } from "./useHighlightJsonLines";
 

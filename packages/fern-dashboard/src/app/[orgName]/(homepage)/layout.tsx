@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { SidepanelProvider } from "@/components/layout/SidepanelContext";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
 
-import { Auth0OrgName } from "../../services/auth0/types";
+import type { Auth0OrgName } from "../../services/auth0/types";
 import { OrgNameProvider } from "../context/OrgNameContext";
 
 export default async function AuthedLayout({

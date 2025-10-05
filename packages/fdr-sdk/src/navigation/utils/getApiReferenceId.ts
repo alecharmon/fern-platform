@@ -1,6 +1,6 @@
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
-import { FernNavigation } from "../..";
+import type { FernNavigation } from "../..";
 
 const RETURN_UNDEFINED = () => undefined;
 const RETURN_API_DEFINITION_ID = (node: FernNavigation.WithApiDefinitionId) => node.apiDefinitionId;

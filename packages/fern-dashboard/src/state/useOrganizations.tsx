@@ -2,12 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { convertQueryResultToLoadable } from "./convertQueryResultToLoadable";
-import { ReactQueryKey, inferQueryData } from "./queryKeys";
+import { ReactQueryKey, type inferQueryData } from "./queryKeys";
 
 const QUERY_KEY = ReactQueryKey.myOrganizations();
 

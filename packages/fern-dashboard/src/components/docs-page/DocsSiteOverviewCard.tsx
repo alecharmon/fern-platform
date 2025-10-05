@@ -1,6 +1,6 @@
 "use client";
 
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import Card from "../ui/card";
 import { DocsSiteLink } from "./DocsSiteLink";

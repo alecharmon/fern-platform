@@ -1,4 +1,4 @@
-import { AttributeValue } from "../editor-mdx-renderer/types";
+import type { AttributeValue } from "../editor-mdx-renderer/types";
 
 // Base Control class
 export abstract class Control {

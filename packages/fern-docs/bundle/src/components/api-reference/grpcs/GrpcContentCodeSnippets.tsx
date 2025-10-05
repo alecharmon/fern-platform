@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components/cn";
 
 import { JsonCodeSnippetExample } from "../examples/CodeSnippetExample";

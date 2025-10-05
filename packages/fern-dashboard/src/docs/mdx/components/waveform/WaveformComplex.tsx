@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { OrthographicCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";

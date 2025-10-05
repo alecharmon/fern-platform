@@ -4,7 +4,7 @@ import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
 
 import { UnauthorizedError } from "../../api/generated/api";
 import { TokensService } from "../../api/generated/api/resources/tokens/service/TokensService";
-import { type FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 import { getTokenFromAuthHeader } from "../../services/auth/AuthService";
 
 export function getTokensService(app: FdrApplication): TokensService {

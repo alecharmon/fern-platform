@@ -1,7 +1,7 @@
 import urljoin from "url-join";
 
-import { ProxyRequest } from "../types";
-import { PlaygroundResponse } from "../types/playgroundResponse";
+import type { ProxyRequest } from "../types";
+import type { PlaygroundResponse } from "../types/playgroundResponse";
 import { toBodyInit } from "./requestToBodyInit";
 
 const PROXY_URL = "https://proxy.ferndocs.com/";

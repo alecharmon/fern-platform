@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React from "react";
+import type React from "react";
 
 import EllipsisHorizontalIcon from "@heroicons/react/24/outline/EllipsisHorizontalIcon";
 

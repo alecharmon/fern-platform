@@ -1,8 +1,8 @@
-import React, { SetStateAction } from "react";
+import React, { type SetStateAction } from "react";
 
-import { RESET } from "jotai/utils";
+import type { RESET } from "jotai/utils";
 
-import { HttpRequest, HttpResponse } from "@fern-api/fdr-sdk/api-definition";
+import type { HttpRequest, HttpResponse } from "@fern-api/fdr-sdk/api-definition";
 import { Separator } from "@fern-docs/components/Separator";
 
 export interface EndpointSectionProps {

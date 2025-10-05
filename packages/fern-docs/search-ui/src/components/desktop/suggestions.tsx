@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { experimental_useObject } from "@ai-sdk/react";
 import { debounce } from "es-toolkit/function";

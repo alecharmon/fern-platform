@@ -1,8 +1,8 @@
-import { ReactElement, useCallback } from "react";
+import { type ReactElement, useCallback } from "react";
 
 import { PlusCircle } from "lucide-react";
 
-import { EndpointDefinition, HttpRequestBodyShape, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointDefinition, HttpRequestBodyShape, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
@@ -12,7 +12,11 @@ import { Markdown } from "@/mdx/components/Markdown";
 import { renderTypeShorthandRoot } from "../../type-shorthand";
 import { PlaygroundFileUploadForm } from "../form/PlaygroundFileUploadForm";
 import { PlaygroundObjectPropertyForm } from "../form/PlaygroundObjectPropertyForm";
-import { PlaygroundEndpointRequestFormState, PlaygroundFormDataEntryValue, PlaygroundFormStateBody } from "../types";
+import type {
+    PlaygroundEndpointRequestFormState,
+    PlaygroundFormDataEntryValue,
+    PlaygroundFormStateBody
+} from "../types";
 import { formDataFieldIsRequired, getEmptyValueForField } from "../utils";
 import { isValidFile } from "../utils/utils";
 

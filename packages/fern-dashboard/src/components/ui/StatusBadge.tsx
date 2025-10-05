@@ -1,4 +1,4 @@
-import { GithubPrStatus } from "@/app/services/github/types";
+import type { GithubPrStatus } from "@/app/services/github/types";
 import { cn } from "@/utils/utils";
 
 export type StatusBadgeType = "live" | "loading" | "uncommitted" | GithubPrStatus;

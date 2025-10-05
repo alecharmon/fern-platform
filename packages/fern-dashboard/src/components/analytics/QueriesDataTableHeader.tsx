@@ -1,11 +1,11 @@
 import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
-import { Table } from "@tanstack/react-table";
+import type { Table } from "@tanstack/react-table";
 
 import { Input } from "@/components/ui/input";
 
 import { ExportButton } from "./ExportButton";
-import { TimeRangeOption, TimeRangeSelect } from "./TimeRangeSelect";
+import { type TimeRangeOption, TimeRangeSelect } from "./TimeRangeSelect";
 import { TimeRange } from "./utils/get-request-params";
 
 const QUERIES_TIME_RANGE_OPTIONS: TimeRangeOption[] = [

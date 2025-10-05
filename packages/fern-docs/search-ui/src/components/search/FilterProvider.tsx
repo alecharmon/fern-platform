@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { atom, useAtom } from "jotai";
 import { atomWithDefault } from "jotai/utils";
 
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 
 export const filtersAtom = atomWithDefault<readonly FacetFilter[]>(() => []);
 

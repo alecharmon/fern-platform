@@ -7,7 +7,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { getS3Client } from "@/app/services/s3";
 
-import { MaybeErrorResponse } from "../../utils/MaybeErrorResponse";
+import type { MaybeErrorResponse } from "../../utils/MaybeErrorResponse";
 import { getSignedImageUrlBucketName } from "../bucket";
 
 export default async function generateSignedUploadUrlHandler({

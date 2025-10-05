@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, FormEvent, useCallback, useMemo, useRef, useState } from "react";
+import { type FC, type FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
@@ -9,7 +9,7 @@ import * as m from "motion/react-m";
 
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCheckbox } from "@fern-docs/components/FernCheckbox";
-import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { FernRadioGroup } from "@fern-docs/components/FernRadioGroup";
 import { FernTextarea } from "@fern-docs/components/FernTextarea";

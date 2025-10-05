@@ -1,12 +1,12 @@
 "use client";
 
-import React, { Fragment, ReactElement, useEffect, useMemo } from "react";
+import React, { Fragment, type ReactElement, useEffect, useMemo } from "react";
 
 import { chunk } from "es-toolkit/array";
 import { useAtomValue } from "jotai";
 
 import { slugToHref } from "@fern-api/docs-utils";
-import { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
 import { Badge } from "@fern-docs/components/badges";

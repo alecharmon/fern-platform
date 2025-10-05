@@ -1,4 +1,4 @@
-import { UIDataTypes, UIMessagePart, UITools } from "ai";
+import type { UIDataTypes, UIMessagePart, UITools } from "ai";
 
 export const isQueryIdPart = (
     part: UIMessagePart<UIDataTypes, UITools>

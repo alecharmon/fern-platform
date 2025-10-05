@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, createContext, useContext, useState } from "react";
+import { type ReactNode, createContext, useContext, useState } from "react";
 
 export const CurrentPageContext = createContext<{
     currentFilename: string | null;

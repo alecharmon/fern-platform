@@ -4,8 +4,8 @@ import { evaluateEnv } from "@libs/env";
 import { execFernCli } from "@libs/fern";
 import { DEFAULT_REMOTE_NAME, cloneRepo, configureGit } from "@libs/github";
 import { setupGithubApp } from "@libs/github/octokit";
-import { App } from "octokit";
-import { SimpleGit } from "simple-git";
+import type { App } from "octokit";
+import type { SimpleGit } from "simple-git";
 
 // A bit of hardcoding to be able to use an existing repo, as opposed to make one and
 // manage app installation, etc all within a test

@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { type ReactElement, useEffect, useState } from "react";
 
 import { useAtom } from "jotai";
 
@@ -9,7 +9,7 @@ import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { cn } from "@fern-docs/components/cn";
-import { useBooleanState } from "@fern-ui/react-commons";
+import type { useBooleanState } from "@fern-ui/react-commons";
 
 import { SELECTED_ENVIRONMENT_ID_ATOM, SELECTED_ENVIRONMENT_URL_ATOM } from "@/state/environment";
 

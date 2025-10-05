@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 

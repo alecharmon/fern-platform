@@ -1,6 +1,6 @@
 import urljoin from "url-join";
 
-import { FernNavigation } from "..";
+import type { FernNavigation } from "..";
 import { NodeCollector } from "../navigation/NodeCollector";
 
 export function testGetAllUrlsFromDocsConfig(root: FernNavigation.RootNode, domain: string): void {

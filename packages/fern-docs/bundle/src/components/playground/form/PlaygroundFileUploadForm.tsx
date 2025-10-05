@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, DragEventHandler, memo, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, type DragEventHandler, memo, useEffect, useRef, useState } from "react";
 
 import { File, FilePlus, Mic, X } from "lucide-react";
 import prettyBytes from "pretty-bytes";

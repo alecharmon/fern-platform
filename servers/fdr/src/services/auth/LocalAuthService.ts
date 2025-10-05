@@ -1,4 +1,4 @@
-import { AuthService, OrgIdsResponse } from "./AuthService";
+import type { AuthService, OrgIdsResponse } from "./AuthService";
 
 export class LocalAuthServiceImpl implements AuthService {
     orgIds: string[];

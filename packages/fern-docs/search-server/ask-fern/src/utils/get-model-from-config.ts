@@ -1,7 +1,7 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createCohere } from "@ai-sdk/cohere";
-import { LanguageModel } from "ai";
+import type { LanguageModel } from "ai";
 import { createFallback } from "ai-fallback";
 
 import { anthropicApiKey, cohereApiKey } from "@fern-api/docs-server/env-variables";

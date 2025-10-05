@@ -1,4 +1,4 @@
-import { CustomIconProps } from "./types";
+import type { CustomIconProps } from "./types";
 
 export function HeadingDropdown(props: CustomIconProps) {
     return (

@@ -1,7 +1,7 @@
-import { MarkOptional, UnreachableCaseError } from "ts-essentials";
+import { type MarkOptional, UnreachableCaseError } from "ts-essentials";
 
 import { FernNavigation } from "../..";
-import { DeleterAction } from "../../utils/traversers/types";
+import type { DeleterAction } from "../../utils/traversers/types";
 
 /**
  * @param parent delete node from this parent (mutable)

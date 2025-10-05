@@ -1,15 +1,15 @@
 import "server-only";
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
-import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getValidationErrorMessage } from "@/utils/errors";
 
 import { getOwnerAndRepoFromGithubUrl } from "../../github/github";
 import { assertUserHasOrganizationAccess } from "../organization";
 import type { GithubIdentificationSchemeType, RepoIdentifier } from "./types";
-import { GithubRepoValidationError, validateGithubRepoAccess } from "./validators";
+import { type GithubRepoValidationError, validateGithubRepoAccess } from "./validators";
 
 export interface ParsedRepoData {
     owner: string;

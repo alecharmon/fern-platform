@@ -1,6 +1,6 @@
-import { UseQueryResult } from "@tanstack/react-query";
+import type { UseQueryResult } from "@tanstack/react-query";
 
-import { Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
+import { type Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 
 export function convertQueryResultToLoadable<T, E = Error>(queryResult: UseQueryResult<T, E>): Loadable<T, E> {
     if (queryResult.isSuccess) {

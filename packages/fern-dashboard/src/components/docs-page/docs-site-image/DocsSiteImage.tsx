@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import ExclamationCircleIcon from "@heroicons/react/24/outline/ExclamationCircleIcon";
 
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { useHomepageImageUrl } from "@/state/useHomepageImageUrl";
 

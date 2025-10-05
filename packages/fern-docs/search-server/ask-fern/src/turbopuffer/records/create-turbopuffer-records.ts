@@ -1,19 +1,19 @@
 import { flatten } from "es-toolkit/array";
 
 import { slugToHref } from "@fern-api/docs-utils";
-import { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
 import {
-    ApiDefinitionId,
-    NavigationNodePage,
+    type ApiDefinitionId,
+    type NavigationNodePage,
     NodeCollector,
-    PageId,
-    RootNode,
+    type PageId,
+    type RootNode,
     getPageId,
     hasMarkdown,
     isApiLeaf
 } from "@fern-api/fdr-sdk/navigation";
 
-import { TurbopufferRecordWithoutVector } from "../types";
+import type { TurbopufferRecordWithoutVector } from "../types";
 import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";
 import { createEndpointBaseRecordWebSocket } from "./create-endpoint-record-web-socket";
 import { createEndpointBaseRecordWebhook } from "./create-endpoint-record-webhook";

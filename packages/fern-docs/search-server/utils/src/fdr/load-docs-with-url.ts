@@ -1,6 +1,6 @@
 import { mapValues } from "es-toolkit/object";
 
-import { ApiDefinition, DocsV1Read, FdrClient, FernNavigation } from "@fern-api/fdr-sdk";
+import { ApiDefinition, type DocsV1Read, FdrClient, FernNavigation } from "@fern-api/fdr-sdk";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 
 export interface LoadDocsWithUrlPayload {

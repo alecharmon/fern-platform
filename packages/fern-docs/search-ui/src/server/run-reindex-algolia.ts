@@ -1,7 +1,7 @@
 import "server-only";
 
 import {
-    AlgoliaIndexerTaskResponse,
+    type AlgoliaIndexerTaskResponse,
     SEARCH_INDEX,
     algoliaIndexSettingsTask,
     algoliaIndexerTask

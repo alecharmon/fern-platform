@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
 
-import { DocsV1Write, FdrAPI, convertDocsDefinitionToDb } from "@fern-api/fdr-sdk";
+import { DocsV1Write, type FdrAPI, convertDocsDefinitionToDb } from "@fern-api/fdr-sdk";
 
 import { DocsV1WriteService } from "../../../api";
 import { DocsRegistrationIdNotFound } from "../../../api/generated/api/resources/docs/resources/v1/resources/write/errors";
 import type { FdrApplication } from "../../../app";
-import { type S3DocsFileInfo } from "../../../services/s3";
+import type { S3DocsFileInfo } from "../../../services/s3";
 import { writeBuffer } from "../../../util";
 
 const DOCS_REGISTRATIONS: Record<DocsV1Write.DocsRegistrationId, DocsRegistrationInfo> = {};

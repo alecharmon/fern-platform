@@ -1,4 +1,4 @@
-import { APIV1Write } from "../../../client";
+import type { APIV1Write } from "../../../client";
 import { generateWebhookPayloadExample } from "./generateHttpBodyExample";
 
 export function generateWebhookExample({

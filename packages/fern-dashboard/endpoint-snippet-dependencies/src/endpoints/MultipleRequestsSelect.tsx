@@ -1,10 +1,10 @@
-import { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
+import type { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
-import { SemanticColor } from "@fern-docs/components/colors";
+import type { SemanticColor } from "@fern-docs/components/colors";
 import { FernButton } from "@fern-docs/components/FernButton";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FC, forwardRef, PropsWithChildren, ReactNode } from "react";
+import { type FC, forwardRef, type PropsWithChildren, type ReactNode } from "react";
 
 export declare namespace RequestSelect {
     export interface Props {

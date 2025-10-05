@@ -1,6 +1,6 @@
 import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { GithubCommitableFile } from "@/app/services/github/types";
+import type { GithubCommitableFile } from "@/app/services/github/types";
 
 export default async function postGitCommit(request: {
     owner: string;

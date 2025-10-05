@@ -1,8 +1,8 @@
 import "server-only";
 
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { DocsSiteSwitcher } from "./DocsSiteSwitcher";
 

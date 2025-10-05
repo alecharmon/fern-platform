@@ -1,4 +1,4 @@
-import React, { Fragment, ReactElement } from "react";
+import React, { Fragment, type ReactElement } from "react";
 
 import { Separator } from "@fern-docs/components/Separator";
 

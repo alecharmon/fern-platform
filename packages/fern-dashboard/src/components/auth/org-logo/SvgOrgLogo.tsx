@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 import { useOrgSvgLogo } from "@/state/useOrgSvgLogo";
 import { cn } from "@/utils/utils";

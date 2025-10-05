@@ -2,7 +2,7 @@
 
 import { forwardRef } from "react";
 
-import { UIColor } from "../colors";
+import type { UIColor } from "../colors";
 import { Badge, type BadgeProps } from "./badge";
 
 export type Availability =

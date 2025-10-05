@@ -3,8 +3,8 @@ import utc from "dayjs/plugin/utc.js";
 
 import { FernNavigation } from "../../../..";
 import type { DocsV1Read } from "../../../../client/types";
-import { NodeIdGenerator } from "./NodeIdGenerator";
-import { SlugGenerator } from "./SlugGenerator";
+import type { NodeIdGenerator } from "./NodeIdGenerator";
+import type { SlugGenerator } from "./SlugGenerator";
 
 dayjs.extend(utc);
 

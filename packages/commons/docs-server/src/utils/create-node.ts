@@ -1,24 +1,24 @@
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import {
     ApiDefinitionId,
-    ApiReferenceNode,
+    type ApiReferenceNode,
     EndpointId,
-    EndpointNode,
-    NavigationChild,
+    type EndpointNode,
+    type NavigationChild,
     NodeId,
     PageId,
-    PageNode,
-    ProductGroupNode,
+    type PageNode,
+    type ProductGroupNode,
     ProductId,
-    ProductNode,
+    type ProductNode,
     RoleId,
-    RootNode,
-    SectionNode,
+    type RootNode,
+    type SectionNode,
     Slug,
-    TabNode,
-    UnversionedNode,
-    VersionNode,
-    VersionedNode
+    type TabNode,
+    type UnversionedNode,
+    type VersionNode,
+    type VersionedNode
 } from "@fern-api/fdr-sdk/navigation";
 
 export function createEndpointNode(node: Partial<EndpointNode>): EndpointNode {

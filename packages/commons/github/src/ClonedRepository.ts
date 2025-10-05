@@ -1,6 +1,6 @@
 import { cp, lstat, readFile, readdir, rm } from "fs/promises";
 import path, { resolve } from "path";
-import { SimpleGit } from "simple-git";
+import type { SimpleGit } from "simple-git";
 
 import { FERNIGNORE, GITIGNORE, GIT_DIR, README_FILEPATH } from "./constants";
 

@@ -4,9 +4,9 @@ import { SemanticBadge } from "@fern-docs/components/badges";
 import { Button } from "@fern-docs/components/button";
 import { useAtomValue } from "jotai";
 import { Key } from "lucide-react";
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
-import { PlaygroundAuthState } from "../types";
+import type { PlaygroundAuthState } from "../types";
 import { isMultiAuthToken } from "../utils/parse-auth-options";
 
 interface PlaygroundCardTriggerManualProps {

@@ -1,4 +1,4 @@
-import { type EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
 
 export function buildPath(path: EndpointDefinition["path"], pathParameters?: Record<string, unknown>): string {

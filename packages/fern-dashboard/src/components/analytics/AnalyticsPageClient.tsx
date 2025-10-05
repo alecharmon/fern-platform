@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import { FernAI } from "@fern-api/fai-sdk";
+import type { FernAI } from "@fern-api/fai-sdk";
 
 import { getDomainAnalytics } from "@/app/actions/getAnalytics";
 import { getQueries } from "@/app/actions/getQueries";

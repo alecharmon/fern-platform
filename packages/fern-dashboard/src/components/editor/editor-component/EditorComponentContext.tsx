@@ -1,8 +1,9 @@
 "use client";
 
-import React, { ReactNode, createContext, useContext } from "react";
+import type React from "react";
+import { type ReactNode, createContext, useContext } from "react";
 
-import { KeyedAttributes } from "../editor-mdx-renderer/types";
+import type { KeyedAttributes } from "../editor-mdx-renderer/types";
 
 export interface EditorComponentContextValue {
     keyedAttributes: KeyedAttributes;

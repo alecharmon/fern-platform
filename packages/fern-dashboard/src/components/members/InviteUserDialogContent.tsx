@@ -9,8 +9,8 @@ import { toast } from "sonner";
 
 import { createInviteLink } from "@/app/actions/createInviteLink";
 import { inviteUserToOrg } from "@/app/actions/inviteUserToOrg";
-import { Auth0Organization } from "@/app/services/auth0/types";
-import { ReactQueryKey, inferQueryData } from "@/state/queryKeys";
+import type { Auth0Organization } from "@/app/services/auth0/types";
+import { ReactQueryKey, type inferQueryData } from "@/state/queryKeys";
 import { getOrgDisplayName } from "@/utils/getOrgDisplayName";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 

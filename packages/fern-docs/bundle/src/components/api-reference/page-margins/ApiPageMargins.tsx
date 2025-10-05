@@ -1,4 +1,4 @@
-import { type MouseEventHandler, type PropsWithChildren } from "react";
+import type { MouseEventHandler, PropsWithChildren } from "react";
 
 import { cn } from "@fern-docs/components/cn";
 

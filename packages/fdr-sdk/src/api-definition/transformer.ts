@@ -1,7 +1,7 @@
 import identity from "@fern-api/ui-core-utils/identity";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
-import * as Latest from "./latest";
+import type * as Latest from "./latest";
 
 /**
  * Visitor for API definitions.

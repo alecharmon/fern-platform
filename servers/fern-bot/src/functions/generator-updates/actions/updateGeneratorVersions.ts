@@ -1,6 +1,6 @@
-import { Env } from "@libs/env";
+import type { Env } from "@libs/env";
 import { setupGithubApp } from "@libs/github/octokit";
-import { App } from "octokit";
+import type { App } from "octokit";
 
 import { updateVersionInternal } from "../shared/updateGeneratorInternal";
 

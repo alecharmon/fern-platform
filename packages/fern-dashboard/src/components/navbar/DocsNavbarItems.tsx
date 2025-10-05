@@ -1,9 +1,9 @@
 import "server-only";
 
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";

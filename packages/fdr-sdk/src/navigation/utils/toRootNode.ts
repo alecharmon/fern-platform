@@ -1,4 +1,4 @@
-import { DocsV2Read, FernNavigation } from "../..";
+import { type DocsV2Read, FernNavigation } from "../..";
 import { FernNavigationV1ToLatest } from "../migrators/v1ToV2";
 import { mutableUpdatePointsTo } from "./updatePointsTo";
 

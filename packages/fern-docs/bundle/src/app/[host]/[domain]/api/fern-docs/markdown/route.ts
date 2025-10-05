@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server/analytics/posthog";

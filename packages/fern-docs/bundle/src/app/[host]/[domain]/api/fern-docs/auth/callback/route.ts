@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 
 import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { getAllowedRedirectUrls } from "@fern-api/docs-server/auth/allowed-redirects";

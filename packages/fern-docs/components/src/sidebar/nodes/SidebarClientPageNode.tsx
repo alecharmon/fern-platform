@@ -1,17 +1,17 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ReactNode, useMemo, useRef } from "react";
+import { type ReactNode, useMemo, useRef } from "react";
 
 import { MinusCircleIcon } from "lucide-react";
 
-import { NodeId } from "@fern-api/fdr-sdk/navigation";
+import type { NodeId } from "@fern-api/fdr-sdk/navigation";
 
 import { useScrollSidebarNodeIntoView } from "../../hooks/sidebar-scroll";
 import { useSafeNavigation } from "../../navigation";
 import { useIsSelectedSidebarNode } from "../../state/navigation";
 import { SidebarLink } from "../SidebarLink";
-import { SidebarPageNodeProps } from "./SidebarPageNode";
+import type { SidebarPageNodeProps } from "./SidebarPageNode";
 
 // Mirror the SidebarPageNodeProps interface
 interface SidebarClientPageNodeProps extends SidebarPageNodeProps {}

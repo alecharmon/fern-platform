@@ -1,6 +1,6 @@
 import { useServerInsertedHTML } from "next/navigation";
 import Script from "next/script";
-import React, { ReactNode, useEffect } from "react";
+import React, { type ReactNode, useEffect } from "react";
 
 import { useSafeListenTrackEvents } from "./use-track";
 

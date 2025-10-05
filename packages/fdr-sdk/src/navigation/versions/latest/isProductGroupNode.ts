@@ -1,4 +1,4 @@
-import { NavigationNode, ProductGroupNode } from ".";
+import type { NavigationNode, ProductGroupNode } from ".";
 
 export function isProductGroupNode(node: NavigationNode): node is ProductGroupNode {
     return node.type === "productgroup";

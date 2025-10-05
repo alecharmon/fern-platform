@@ -2,8 +2,8 @@
 
 import React, { useCallback } from "react";
 
-import { ApiDefinition } from "@fern-api/fdr-sdk";
-import { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
+import type { ApiDefinition } from "@fern-api/fdr-sdk";
+import type { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 

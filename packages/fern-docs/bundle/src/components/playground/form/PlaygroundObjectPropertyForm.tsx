@@ -1,15 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { FC, memo, useCallback, useEffect, useMemo, useState } from "react";
+import { type FC, memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { PlusCircle } from "lucide-react";
 
 import {
-    ObjectProperty,
-    TypeDefinition,
-    TypeId,
-    TypeReference,
+    type ObjectProperty,
+    type TypeDefinition,
+    type TypeId,
+    type TypeReference,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { FernButton } from "@fern-docs/components/FernButton";

@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { AskAiEnabledServerSide } from "@/components/ask-ai/AskAiEnabledServerSide";
 import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
 

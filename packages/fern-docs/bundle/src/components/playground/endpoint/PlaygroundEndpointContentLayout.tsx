@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, ReactNode, useRef, useState } from "react";
+import { type ReactElement, type ReactNode, useRef, useState } from "react";
 
 import { useIsMobile, useResizeObserver } from "@fern-ui/react-commons";
 

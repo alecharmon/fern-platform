@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import React from "react";
 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";

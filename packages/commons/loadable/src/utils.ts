@@ -1,6 +1,6 @@
 import { keys } from "@fern-api/ui-core-utils";
 
-import { Loadable, Loading, NotFailed, failed, isFailed, isLoaded, loaded, loading } from "./Loadable";
+import { type Loadable, type Loading, type NotFailed, failed, isFailed, isLoaded, loaded, loading } from "./Loadable";
 import { visitLoadable } from "./visitor";
 
 export function getLoadableValue<V>(loadable: Loadable<V> | undefined): V | undefined {

@@ -5,11 +5,11 @@ import React from "react";
 
 import { compact } from "es-toolkit/array";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { withPrunedNavigationLoader } from "@fern-api/docs-server/withPrunedNavigation";
 import { addLeadingSlash, conformTrailingSlash, getRedirectForPath, slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
-import { Slug } from "@fern-api/fdr-sdk/navigation";
+import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";

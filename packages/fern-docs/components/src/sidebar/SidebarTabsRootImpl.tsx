@@ -2,7 +2,7 @@
 
 import * as Tabs from "@radix-ui/react-tabs";
 
-import { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 
 import { cn } from "../cn";
 import { useCurrentTabId } from "../state/navigation";

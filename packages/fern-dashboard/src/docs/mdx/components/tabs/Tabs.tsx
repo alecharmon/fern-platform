@@ -4,11 +4,20 @@ import { cn } from "@fern-docs/components/cn";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import { CirclePlusIcon } from "lucide-react";
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    createContext,
+    type ReactNode,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from "react";
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
 import { TextInputControl } from "@/components/editor/editor-component/controls";
 import {
-    EditorComponentContextValue,
+    type EditorComponentContextValue,
     EditorComponentProvider,
     useEditorComponent
 } from "@/components/editor/editor-component/EditorComponentContext";

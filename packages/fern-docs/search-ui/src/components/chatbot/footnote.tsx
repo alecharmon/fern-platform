@@ -9,7 +9,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { useEffect } from "react";
 import { CONTINUE, EXIT, visit } from "unist-util-visit";
 
-import { AskFernRecordHit } from "../../types";
+import type { AskFernRecordHit } from "../../types";
 import { PageIcon } from "../icons/page";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { useChatbotTurnContext } from "./turn-context";

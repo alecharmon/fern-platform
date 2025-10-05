@@ -1,10 +1,10 @@
 import { uniqBy } from "es-toolkit/array";
 
 import {
-    HttpRequestBodyShape,
-    TypeDefinition,
-    TypeReference,
-    TypeShapeOrReference,
+    type HttpRequestBodyShape,
+    type TypeDefinition,
+    type TypeReference,
+    type TypeShapeOrReference,
     unwrapObjectType,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";

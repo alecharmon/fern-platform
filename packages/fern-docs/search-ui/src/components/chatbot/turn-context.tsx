@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode, createContext, useContext, useRef } from "react";
+import { type ReactNode, createContext, useContext, useRef } from "react";
 
-import { PrimitiveAtom, atom } from "jotai";
+import { type PrimitiveAtom, atom } from "jotai";
 
 export interface Footnote {
     ids: string[];

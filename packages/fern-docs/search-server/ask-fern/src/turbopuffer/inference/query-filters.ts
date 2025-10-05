@@ -1,7 +1,7 @@
-import { FilterCondition, FilterConnective, FilterOperator, Filters } from "@turbopuffer/turbopuffer";
+import type { FilterCondition, FilterConnective, FilterOperator, Filters } from "@turbopuffer/turbopuffer";
 
 import { EVERYONE_ROLE } from "@fern-api/docs-utils";
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 
 export function buildNegationFilters(field: string, values: string[] = []): FilterCondition[] {
     return values.map((v) => [field, "NotEq", v]);

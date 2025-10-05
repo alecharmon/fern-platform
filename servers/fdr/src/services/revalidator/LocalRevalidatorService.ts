@@ -1,6 +1,6 @@
-import { FdrApplication } from "../../app";
-import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
-import { RevalidatedPathsResponse, RevalidatorService } from "./RevalidatorService";
+import type { FdrApplication } from "../../app";
+import type { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
+import type { RevalidatedPathsResponse, RevalidatorService } from "./RevalidatorService";
 
 export class LocalRevalidatorServiceImpl implements RevalidatorService {
     async revalidate(params: {

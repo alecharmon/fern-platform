@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { type ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 type SidepanelContent = ReactNode | null;
 

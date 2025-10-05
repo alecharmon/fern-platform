@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { execa } from "execa";
 import express from "express";
-import http from "http";
+import type http from "http";
 
 import { FdrClient } from "@fern-api/fdr-sdk";
 
 import { register } from "../../api";
-import { FdrApplication, FdrConfig } from "../../app";
+import type { FdrApplication, FdrConfig } from "../../app";
 import { getApiLatestService } from "../../controllers/api/getApiLatestService";
 import { getReadApiService } from "../../controllers/api/getApiReadService";
 import { getRegisterApiService } from "../../controllers/api/getRegisterApiService";

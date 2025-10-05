@@ -1,4 +1,4 @@
-import { Algoliasearch } from "algoliasearch";
+import type { Algoliasearch } from "algoliasearch";
 
 import { FILTERABLE_FACET_ATTRIBUTES, SEARCHABLE_ATTRIBUTES, SEARCHABLE_FACET_ATTRIBUTES } from "./types";
 

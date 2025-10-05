@@ -5,7 +5,7 @@ import { forwardRef, useMemo } from "react";
 import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
 import { useDeepCompareMemoize } from "@fern-ui/react-commons";
 
-import { FernSyntaxHighlighterTokens, ScrollToHandle } from "./FernSyntaxHighlighterTokens";
+import { FernSyntaxHighlighterTokens, type ScrollToHandle } from "./FernSyntaxHighlighterTokens";
 import { FernSyntaxHighlighterTokensVirtualized } from "./FernSyntaxHighlighterTokensVirtualized";
 import { createRawTokens, highlightTokens, useHighlighter } from "./fernShiki";
 import { TemplateTooltip } from "./template-tooltip";

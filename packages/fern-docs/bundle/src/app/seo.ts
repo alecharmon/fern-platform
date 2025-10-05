@@ -1,4 +1,4 @@
-import { FileIdOrUrl } from "@fern-api/fdr-sdk/docs";
+import type { FileIdOrUrl } from "@fern-api/fdr-sdk/docs";
 
 export function toImageDescriptor(
     files: Record<string, { src: string; width?: number; height?: number; alt?: string }>,

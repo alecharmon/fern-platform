@@ -2,11 +2,11 @@ import { forwardRef } from "react";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-import { GrpcMethod, HttpOrWssOrGrpc } from "@fern-api/docs-utils";
+import { GrpcMethod, type HttpOrWssOrGrpc } from "@fern-api/docs-utils";
 
-import { UIColor } from "../colors";
+import type { UIColor } from "../colors";
 import { FaIcon } from "../fa-icon";
-import { Badge, BadgeProps } from "./badge";
+import { Badge, type BadgeProps } from "./badge";
 
 const METHOD_COLOR_SCHEMES: Record<HttpOrWssOrGrpc, UIColor> = {
     GET: "green",

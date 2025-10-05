@@ -1,8 +1,8 @@
-import winston from "winston";
+import type winston from "winston";
 
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
 
-import { FernRegistryError } from "../../api/generated";
+import type { FernRegistryError } from "../../api/generated";
 import { UnauthorizedError, UnavailableError, UserNotInOrgError } from "../../api/generated/api";
 import type { FdrApplication, FdrConfig } from "../../app";
 

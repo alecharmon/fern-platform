@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 
 import { createNavigationMemoryStorage } from "../NavigationStorage";
 import { NavigationStore } from "../NavigationStore";

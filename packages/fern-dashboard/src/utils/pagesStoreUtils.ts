@@ -1,7 +1,7 @@
-import { NodeId } from "@fern-api/fdr-sdk/navigation";
-import { MdxToHtmlResponse } from "@fern-docs/mdx";
+import type { NodeId } from "@fern-api/fdr-sdk/navigation";
+import type { MdxToHtmlResponse } from "@fern-docs/mdx";
 
-import { PageContents, PageDependencies, PageMetadata, PagesStoreEntry } from "../providers/PagesStore";
+import type { PageContents, PageDependencies, PageMetadata, PagesStoreEntry } from "../providers/PagesStore";
 
 export function createPageEntry(
     metadata: PageMetadata | null, // Optional because frontmatter is not required in source MDX

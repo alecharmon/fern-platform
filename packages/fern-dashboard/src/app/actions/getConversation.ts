@@ -1,6 +1,6 @@
 "use server";
 
-import { FernAI } from "@fern-api/fai-sdk";
+import type { FernAI } from "@fern-api/fai-sdk";
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { getFaiClient } from "../services/fai/getFaiClient";

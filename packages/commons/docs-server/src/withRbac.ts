@@ -1,11 +1,11 @@
 import "server-only";
 
-import { PathnameViewerRules } from "@fern-api/docs-auth";
+import type { PathnameViewerRules } from "@fern-api/docs-auth";
 import { EVERYONE_ROLE, matchPath, slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import {
     type NavigationNode,
-    NavigationNodeParent,
+    type NavigationNodeParent,
     Pruner,
     type RootNode,
     hasMetadata

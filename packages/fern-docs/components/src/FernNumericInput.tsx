@@ -1,6 +1,14 @@
 "use client";
 
-import { ComponentProps, MouseEventHandler, forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import {
+    type ComponentProps,
+    type MouseEventHandler,
+    forwardRef,
+    useCallback,
+    useEffect,
+    useRef,
+    useState
+} from "react";
 
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { Minus, Plus } from "lucide-react";

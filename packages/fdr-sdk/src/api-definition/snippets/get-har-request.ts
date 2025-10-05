@@ -9,7 +9,7 @@ import {
     type ExampleEndpointRequest,
     buildEndpointUrl
 } from "../";
-import { ApiAuth } from "../../client/APIV1Read";
+import type { ApiAuth } from "../../client/APIV1Read";
 
 export function getHarRequest(
     endpoint: EndpointDefinition,

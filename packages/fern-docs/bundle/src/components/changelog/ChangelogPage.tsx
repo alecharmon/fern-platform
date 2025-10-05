@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { compact } from "es-toolkit/compat";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
@@ -14,7 +14,7 @@ import { type TableOfContentsItem, makeToc, toTree } from "@fern-docs/mdx";
 import { PageHeader } from "@/components/PageHeader";
 import { Markdown } from "@/mdx/components/Markdown";
 import { MdxContent } from "@/mdx/components/MdxContent";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import ChangelogPageClient from "./ChangelogPageClient";
 

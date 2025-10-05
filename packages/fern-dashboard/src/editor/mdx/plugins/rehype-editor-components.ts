@@ -1,4 +1,4 @@
-import { CONTINUE, Hast, Unified, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
+import { CONTINUE, type Hast, type Unified, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
 
 /**
  * Rehype plugin that converts component names for the editor environment.

@@ -6,13 +6,13 @@ import { mapValues } from "es-toolkit/object";
 import { useAtomValue, useSetAtom } from "jotai";
 import { SendHorizonal } from "lucide-react";
 
-import { DynamicIRsByLanguage } from "@fern-api/docs-server";
+import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
-import { Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
+import { type Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { useEventCallback } from "@fern-ui/react-commons";
 
 import { isProxyDisabledAtom, usesApplicationJsonInFormDataValueAtom } from "@/state/api-explorer-flags";
@@ -28,7 +28,7 @@ import { usePlaygroundSettings } from "../../hooks/usePlaygroundSettings";
 import { executeProxyRest } from "../fetch-utils/executeProxyRest";
 import { executeProxyStream } from "../fetch-utils/executeProxyStream";
 import type { ProxyRequest } from "../types";
-import { PlaygroundResponse } from "../types/playgroundResponse";
+import type { PlaygroundResponse } from "../types/playgroundResponse";
 import { buildAuthHeaders, getInitialEndpointRequestFormStateWithExample, serializeFormStateBody } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { isLocal } from "../utils/utils";

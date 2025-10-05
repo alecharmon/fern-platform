@@ -7,7 +7,7 @@ import { AvailabilityBadge } from "@fern-docs/components/badges";
 
 import { PropertyKey } from "./PropertyKey";
 import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible } from "./TypeDefinitionContext";
-import { PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
+import { type PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 
 export interface ObjectPropertyProps {
     property: ApiDefinition.ObjectProperty;

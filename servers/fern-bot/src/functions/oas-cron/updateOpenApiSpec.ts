@@ -1,6 +1,6 @@
 import { evaluateEnv } from "@libs/env";
 import { handlerWrapper } from "@libs/handler-wrapper";
-import { RepoData } from "@libs/schemas";
+import type { RepoData } from "@libs/schemas";
 
 import { updateOpenApiSpecInternal } from "./actions/updateOpenApiSpec";
 

@@ -1,4 +1,4 @@
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
 
 import { EndpointRequestSection } from "@/components/api-reference/endpoints/EndpointRequestSection";

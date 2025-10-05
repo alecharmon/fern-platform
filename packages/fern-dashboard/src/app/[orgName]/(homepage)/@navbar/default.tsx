@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { DocsNavbarItem } from "@/components/navbar/DocsNavbarItem";
 import { DocsNavbarItems } from "@/components/navbar/DocsNavbarItems";

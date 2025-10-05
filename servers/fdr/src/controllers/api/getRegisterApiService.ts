@@ -1,15 +1,18 @@
 import urlJoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
 
-import { APIV1Db, APIV1Write, FdrAPI, SDKSnippetHolder, convertAPIDefinitionToDb } from "@fern-api/fdr-sdk";
+import { type APIV1Db, type APIV1Write, FdrAPI, SDKSnippetHolder, convertAPIDefinitionToDb } from "@fern-api/fdr-sdk";
 
 import { APIV1WriteService } from "../../api";
-import { SdkRequest } from "../../api/generated/api";
-import { DynamicIr, DynamicIrUpload } from "../../api/generated/api/resources/api/resources/v1/resources/register";
+import type { SdkRequest } from "../../api/generated/api";
+import type { DynamicIr, DynamicIrUpload } from "../../api/generated/api/resources/api/resources/v1/resources/register";
 import type { FdrApplication } from "../../app";
 import { LOGGER } from "../../app/FdrApplication";
-import { SdkIdForPackage } from "../../db/sdk/SdkDao";
-import { SnippetTemplatesByEndpoint, SnippetTemplatesByEndpointIdentifier } from "../../db/snippets/SnippetTemplate";
+import type { SdkIdForPackage } from "../../db/sdk/SdkDao";
+import type {
+    SnippetTemplatesByEndpoint,
+    SnippetTemplatesByEndpointIdentifier
+} from "../../db/snippets/SnippetTemplate";
 import { writeBuffer } from "../../util";
 
 const REGISTER_API_DEFINITION_META = {

@@ -5,7 +5,7 @@ import { chunkToBytes, formatUtc, measureBytes } from "@fern-api/ui-core-utils";
 import { getFrontmatter, markdownToString } from "@fern-docs/mdx";
 import { maybePrepareMdxContent } from "@fern-docs/search-utils";
 
-import { BaseRecord, ChangelogRecord } from "../types";
+import type { BaseRecord, ChangelogRecord } from "../types";
 
 interface CreateChangelogRecordOptions {
     base: BaseRecord;

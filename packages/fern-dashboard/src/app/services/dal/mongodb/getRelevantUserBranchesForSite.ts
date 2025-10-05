@@ -1,13 +1,13 @@
 "use server";
 
 import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-import { UnzippedEditorDocument, visualEditorStorage } from "@fern-api/visual-editor-server";
+import { type UnzippedEditorDocument, visualEditorStorage } from "@fern-api/visual-editor-server";
 import { branchMatchesUser } from "@fern-docs/components/navigation/local-storage";
 
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { getCurrentSession } from "../../auth0/getCurrentSession";
-import { Auth0OrgName } from "../../auth0/types";
+import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
 
 /**

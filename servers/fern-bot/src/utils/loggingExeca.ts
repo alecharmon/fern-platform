@@ -1,4 +1,4 @@
-import { Options as ExecaOptions, Result, execa } from "execa";
+import { type Options as ExecaOptions, type Result, execa } from "execa";
 
 export declare namespace loggingExeca {
     export interface Options extends ExecaOptions {

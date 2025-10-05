@@ -4,8 +4,8 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkSmartypants from "remark-smartypants";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
-import { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import { serialize } from "@fern-api/next-mdx-remote/serialize";
 import {
@@ -31,7 +31,7 @@ import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
 import { rehypeCodeBlock } from "../plugins/rehype-code-block";
 import { rehypeFiles } from "../plugins/rehype-files";
-import { RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
+import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
 import { rehypeParamField } from "../plugins/rehype-param-field";
 import { rehypeSteps } from "../plugins/rehype-steps";
@@ -39,7 +39,7 @@ import { rehypeTable } from "../plugins/rehype-table";
 import { rehypeTabs } from "../plugins/rehype-tabs";
 import { rehypeExtractAsides } from "../plugins/rehypeExtractAsides";
 import { remarkExtractTitle } from "../plugins/remark-extract-title";
-import { SerializeMdxResponse } from "./serialize";
+import type { SerializeMdxResponse } from "./serialize";
 
 type SerializeOptions = NonNullable<Parameters<typeof serialize>[1]>;
 

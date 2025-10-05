@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { ErrorResponse } from "@fern-api/fdr-sdk/api-definition";
+import type { ErrorResponse } from "@fern-api/fdr-sdk/api-definition";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
 
 import { useEndpointContext } from "./EndpointContext";

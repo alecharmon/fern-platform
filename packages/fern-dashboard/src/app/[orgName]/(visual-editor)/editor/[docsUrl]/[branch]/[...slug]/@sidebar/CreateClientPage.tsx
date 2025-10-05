@@ -4,11 +4,11 @@ import { useRouter } from "@bprogress/next/app";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { createMdxFrontmatter } from "@fern-docs/components/navigation/mdxUtils";
 import { getAllSections, UNNAMED_SECTION_DISPLAY_NAMES } from "@fern-docs/components/navigation/pageUtils";
-import { NavigationContext, SectionWithHierarchy } from "@fern-docs/components/navigation/types";
+import type { NavigationContext, SectionWithHierarchy } from "@fern-docs/components/navigation/types";
 import { mdxToHtml } from "@fern-docs/mdx";
 import { useParams } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,7 +18,7 @@ import { useGitPrInfo } from "@/providers/GitPRContext";
 import { usePages } from "@/providers/PagesStoreContext";
 import { constructEditorSlug } from "@/utils/editor-routing";
 import { pageTitleToSlug } from "@/utils/pageTitleToSlug";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 interface CreateClientPageProps {
     children: React.ReactNode;

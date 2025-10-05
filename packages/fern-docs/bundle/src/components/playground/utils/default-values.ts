@@ -1,18 +1,18 @@
 import { UnreachableCaseError } from "ts-essentials";
 
 import {
-    FormDataField,
-    HttpRequestBodyShape,
-    ObjectProperty,
-    TypeDefinition,
-    TypeShapeOrReference,
+    type FormDataField,
+    type HttpRequestBodyShape,
+    type ObjectProperty,
+    type TypeDefinition,
+    type TypeShapeOrReference,
     unwrapDiscriminatedUnionVariant,
     unwrapObjectType,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
-import { PlaygroundFormDataEntryValue, PlaygroundFormStateBody } from "../types";
+import type { PlaygroundFormDataEntryValue, PlaygroundFormStateBody } from "../types";
 
 export function getEmptyValueForObjectProperties(
     properties: ObjectProperty[] = [],

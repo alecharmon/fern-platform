@@ -1,5 +1,5 @@
 import { getMatchablePermutationsForEndpoint } from "@fern-api/docs-server/processRequestSnippetComponents";
-import { EndpointDefinition, EnvironmentId, PathPart, PropertyKey } from "@fern-api/fdr-sdk/api-definition";
+import { type EndpointDefinition, EnvironmentId, type PathPart, PropertyKey } from "@fern-api/fdr-sdk/api-definition";
 
 function literal(value: string): PathPart.Literal {
     return {

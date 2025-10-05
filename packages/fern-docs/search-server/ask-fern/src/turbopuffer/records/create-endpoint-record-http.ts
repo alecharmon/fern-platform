@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { flatten } from "es-toolkit/array";
 
-import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
+import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import {
     createDelimitedRolesetString,
@@ -10,7 +10,7 @@ import {
     toDescription
 } from "@fern-docs/search-utils";
 
-import { TurbopufferRecord } from "../types";
+import type { TurbopufferRecord } from "../types";
 
 interface RequestProperty {
     key: string;

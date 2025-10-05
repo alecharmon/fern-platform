@@ -1,4 +1,4 @@
-import { AuthorizationURLOptions, WorkOS } from "@workos-inc/node";
+import { type AuthorizationURLOptions, WorkOS } from "@workos-inc/node";
 import { once } from "es-toolkit/function";
 
 import { isLocal } from "../isLocal";

@@ -6,7 +6,7 @@ import { type EndpointDefinition, buildEndpointUrl } from "@fern-api/fdr-sdk/api
 import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
 import { executeProxyRest } from "../fetch-utils/executeProxyRest";
-import { PlaygroundEndpointRequestFormState, ProxyRequest } from "../types";
+import type { PlaygroundEndpointRequestFormState, ProxyRequest } from "../types";
 import { serializeFormStateBody } from "./serialize";
 
 export interface OAuthClientCredentialReferencedEndpointLoginFlowProps {

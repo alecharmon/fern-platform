@@ -1,4 +1,4 @@
-import { ApiDefinition } from "@fern-api/fdr-sdk";
+import type { ApiDefinition } from "@fern-api/fdr-sdk";
 
 export function shouldRenderAuth(endpoint: ApiDefinition.EndpointDefinition, auth: ApiDefinition.AuthScheme): boolean {
     if (

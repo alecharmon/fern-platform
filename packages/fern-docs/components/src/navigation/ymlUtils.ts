@@ -1,6 +1,6 @@
 import yaml from "js-yaml";
 
-import { DocsConfig, StoredNavigationData } from "./types";
+import type { DocsConfig, StoredNavigationData } from "./types";
 
 export function buildDocsYmlWithUpdates(navigationData: StoredNavigationData): string {
     const { baseContent, pendingUpdates } = navigationData.docsYmlState;

@@ -1,4 +1,4 @@
-import { Metadata, Viewport } from "next/types";
+import type { Metadata, Viewport } from "next/types";
 import { experimental_taintUniqueValue } from "react";
 
 import { isLocal } from "@fern-api/docs-server/isLocal";

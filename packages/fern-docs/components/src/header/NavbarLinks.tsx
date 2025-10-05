@@ -2,7 +2,7 @@ import React from "react";
 
 import { ArrowRight } from "lucide-react";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 
 import { FernLinkButton } from "../FernLinkButton";
 import { cn } from "../cn";

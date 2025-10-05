@@ -4,7 +4,7 @@ import { isNonNullish } from "@fern-api/ui-core-utils";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
-import { APIV1Read } from "../../client";
+import type { APIV1Read } from "../../client";
 import { SupportedLanguage } from "../../client/generated/api/resources/api/resources/v1/resources/read/resources/endpoint/types/SupportedLanguage";
 import { ROOT_PACKAGE_ID } from "../../navigation/consts";
 import { LOOP_TOLERANCE } from "../const";

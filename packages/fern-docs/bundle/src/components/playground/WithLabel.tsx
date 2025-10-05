@@ -1,12 +1,12 @@
-import { FC, PropsWithChildren, ReactNode } from "react";
+import type { FC, PropsWithChildren, ReactNode } from "react";
 
 import { HelpCircle, X } from "lucide-react";
 
 import {
-    ObjectProperty,
-    TypeDefinition,
-    WithAvailability,
-    WithDescription,
+    type ObjectProperty,
+    type TypeDefinition,
+    type WithAvailability,
+    type WithDescription,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { FernButton } from "@fern-docs/components/FernButton";

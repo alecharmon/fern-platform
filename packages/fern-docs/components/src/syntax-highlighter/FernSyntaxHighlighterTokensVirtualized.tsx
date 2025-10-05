@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { ItemProps, TableVirtuoso, TableVirtuosoHandle } from "react-virtuoso";
+import { type ItemProps, TableVirtuoso, type TableVirtuosoHandle } from "react-virtuoso";
 
 import type { Element } from "hast";
 
@@ -10,8 +10,8 @@ import { parseStringStyle, visit } from "@fern-docs/mdx";
 import { FernScrollArea } from "../FernScrollArea";
 import { cn } from "../cn";
 import {
-    FernSyntaxHighlighterTokensProps,
-    ScrollToHandle,
+    type FernSyntaxHighlighterTokensProps,
+    type ScrollToHandle,
     fernSyntaxHighlighterTokenPropsAreEqual
 } from "./FernSyntaxHighlighterTokens";
 import { HastToJSX } from "./HastToJsx";

@@ -1,5 +1,5 @@
 import { TypeDefinitionSlotsServer as SharedTypeDefinitionSlotsServer } from "@fern-api/endpoint-snippet-dependencies";
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 
 import { Chip, ChipSizeProvider } from "@/docs/components/Chip";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";

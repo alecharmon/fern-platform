@@ -1,5 +1,5 @@
 import { cn } from "@fern-docs/components/cn";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export const SparklesIcon = ({
     id,

@@ -1,6 +1,6 @@
-import { FernNavigation } from "@fern-api/fdr-sdk";
-import { NodeId } from "@fern-api/fdr-sdk/navigation";
-import { Frontmatter, MdxToHtmlResponse } from "@fern-docs/mdx";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
+import type { NodeId } from "@fern-api/fdr-sdk/navigation";
+import type { Frontmatter, MdxToHtmlResponse } from "@fern-docs/mdx";
 
 /** Serializable subset of FernNavigation.utils.Node.Found */
 export type SerializableFoundNode = Pick<

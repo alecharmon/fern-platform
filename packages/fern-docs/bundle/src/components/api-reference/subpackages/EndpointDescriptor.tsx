@@ -1,4 +1,4 @@
-import { MouseEventHandler } from "react";
+import type { MouseEventHandler } from "react";
 
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";

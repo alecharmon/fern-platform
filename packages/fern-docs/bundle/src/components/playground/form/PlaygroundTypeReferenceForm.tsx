@@ -1,11 +1,11 @@
 "use client";
 
-import { ReactElement, memo, useCallback, useState } from "react";
+import { type ReactElement, memo, useCallback, useState } from "react";
 
 import {
-    ObjectProperty,
-    TypeDefinition,
-    TypeShapeOrReference,
+    type ObjectProperty,
+    type TypeDefinition,
+    type TypeShapeOrReference,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";

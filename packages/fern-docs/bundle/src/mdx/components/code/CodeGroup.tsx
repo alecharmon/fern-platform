@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import React from "react";
+import type React from "react";
 
 import * as Tabs from "@radix-ui/react-tabs";
 

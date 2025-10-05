@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 
 import { SemanticColor } from "../colors";
-import { SemanticBadge, SemanticBadgeProps } from "./semantic-badge";
+import { SemanticBadge, type SemanticBadgeProps } from "./semantic-badge";
 
 interface StatusCodeBadgeProps extends Omit<SemanticBadgeProps, "intent"> {
     statusCode: number | string;

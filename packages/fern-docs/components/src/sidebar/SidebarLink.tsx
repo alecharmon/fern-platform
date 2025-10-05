@@ -1,6 +1,6 @@
 "use client";
 
-import { HTMLAttributeAnchorTarget, PropsWithChildren, ReactNode, forwardRef, useRef } from "react";
+import { type HTMLAttributeAnchorTarget, type PropsWithChildren, type ReactNode, forwardRef, useRef } from "react";
 import React from "react";
 
 import { composeEventHandlers } from "@radix-ui/primitive";

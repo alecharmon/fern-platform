@@ -1,4 +1,4 @@
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 
 export const getIsSingleOverviewPage = (found: FernNavigation.utils.Node.Found) => {
     let isSingleOverviewPage = false;

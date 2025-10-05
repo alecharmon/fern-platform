@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactElement } from "react";
+import type { PropsWithChildren, ReactElement } from "react";
 
 import { FernDropdown } from "./FernDropdown";
 import { FernLink } from "./FernLink";

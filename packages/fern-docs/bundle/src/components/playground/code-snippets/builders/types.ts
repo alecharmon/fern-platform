@@ -1,7 +1,7 @@
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildEndpointUrl, wrapOpenRPCRequest } from "@fern-api/fdr-sdk/api-definition";
 
-import { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../../types";
+import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../../types";
 
 export abstract class PlaygroundCodeSnippetBuilder {
     protected url: string;

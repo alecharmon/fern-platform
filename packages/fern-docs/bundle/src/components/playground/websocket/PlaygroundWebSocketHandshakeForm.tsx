@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, FC, SetStateAction, useCallback } from "react";
+import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
 
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import { FernCard } from "@fern-docs/components/FernCard";
@@ -8,7 +8,7 @@ import { FernCard } from "@fern-docs/components/FernCard";
 import { Callout } from "@/mdx/components/callout";
 
 import { PlaygroundObjectPropertiesForm } from "../form/PlaygroundObjectPropertyForm";
-import { PlaygroundWebSocketRequestFormState } from "../types";
+import type { PlaygroundWebSocketRequestFormState } from "../types";
 
 interface PlaygroundWebSocketHandshakeFormProps {
     context: WebSocketContext;

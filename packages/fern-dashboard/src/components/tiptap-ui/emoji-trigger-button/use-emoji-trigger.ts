@@ -4,7 +4,7 @@ import * as React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import type { Node } from "@tiptap/pm/model";
-import { type Editor } from "@tiptap/react";
+import type { Editor } from "@tiptap/react";
 import { SmilePlusIcon } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";

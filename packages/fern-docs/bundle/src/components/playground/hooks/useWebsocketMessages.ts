@@ -4,7 +4,7 @@ import { useCallback } from "react";
 
 import { atom, useAtom } from "jotai";
 
-import { WebSocketMessage } from "@/components/api-reference/websockets/WebSocketMessages";
+import type { WebSocketMessage } from "@/components/api-reference/websockets/WebSocketMessages";
 
 const WEBSOCKET_MESSAGES_ATOM = atom<Record<string, WebSocketMessage[]>>({});
 

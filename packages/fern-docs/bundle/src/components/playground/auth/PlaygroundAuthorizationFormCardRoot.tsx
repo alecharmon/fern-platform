@@ -1,6 +1,6 @@
 "use client";
 
-import { APIV1Read } from "@fern-api/fdr-sdk";
+import type { APIV1Read } from "@fern-api/fdr-sdk";
 import { Button } from "@fern-docs/components/button";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
 import { useBooleanState } from "@fern-ui/react-commons";

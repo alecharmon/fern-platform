@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 
 export class DocsWorkspaceDao {
     private prisma: PrismaClient;

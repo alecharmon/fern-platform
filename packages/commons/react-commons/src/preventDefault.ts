@@ -1,4 +1,4 @@
-import { SyntheticEvent } from "react";
+import type { SyntheticEvent } from "react";
 
 export const PREVENT_DEFAULT = (event: SyntheticEvent): void => {
     event.preventDefault();

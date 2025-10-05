@@ -1,5 +1,5 @@
 import { revalidateTag } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { kv } from "@vercel/kv";
 import { escapeRegExp } from "es-toolkit/string";

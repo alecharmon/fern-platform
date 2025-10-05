@@ -1,6 +1,6 @@
 "use client";
 
-import { DangerousTransmittableDocsLoaderData, PrefetchedDocsLoader } from "@fern-api/docs-loader/client";
+import { type DangerousTransmittableDocsLoaderData, PrefetchedDocsLoader } from "@fern-api/docs-loader/client";
 
 import { SidebarTabsRootImpl } from "./SidebarTabsRootImpl";
 

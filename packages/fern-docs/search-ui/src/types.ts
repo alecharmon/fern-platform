@@ -1,5 +1,5 @@
 import type { BaseHit, Hit } from "instantsearch.js";
-import { MarkRequired } from "ts-essentials";
+import type { MarkRequired } from "ts-essentials";
 
 import {
     type AlgoliaRecord,

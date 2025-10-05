@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";

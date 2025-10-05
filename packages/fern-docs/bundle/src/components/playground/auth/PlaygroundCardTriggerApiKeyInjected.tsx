@@ -1,11 +1,11 @@
 import { useSearchParams } from "next/navigation";
-import { ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect } from "react";
 
 import { useAtomValue, useSetAtom } from "jotai";
 import { Key, User } from "lucide-react";
 import urlJoin from "url-join";
 
-import { APIKeyInjectionConfigEnabled } from "@fern-api/docs-auth";
+import type { APIKeyInjectionConfigEnabled } from "@fern-api/docs-auth";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";

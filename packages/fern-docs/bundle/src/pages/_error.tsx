@@ -1,4 +1,4 @@
-import { GetServerSideProps } from "next";
+import type { GetServerSideProps } from "next";
 import Error from "next/error";
 
 import { isEmpty } from "es-toolkit/compat";

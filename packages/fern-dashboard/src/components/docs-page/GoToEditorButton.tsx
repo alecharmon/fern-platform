@@ -9,9 +9,9 @@ import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTool
 import { generateBranchName } from "@fern-docs/components/navigation/local-storage";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { ROOT_SLUG_ALIAS, constructEditorSlug } from "@/utils/editor-routing";
-import { DocsUrl, EncodedDocsUrl } from "@/utils/types";
+import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 
 import { Button } from "../ui/button";
 

@@ -1,6 +1,6 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
 
-import { Generator } from "../../../api/generated/api/resources/generators";
+import type { Generator } from "../../../api/generated/api/resources/generators";
 import { createMockFdrApplication } from "../../mock";
 
 const fdrApplication = createMockFdrApplication({

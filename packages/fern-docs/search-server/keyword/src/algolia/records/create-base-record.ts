@@ -2,7 +2,7 @@ import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { createRoleFacet, createViewersForNodes } from "@fern-docs/search-utils";
 
-import { BaseRecord } from "../types";
+import type { BaseRecord } from "../types";
 
 interface CreateBaseRecordOptions {
     domain: string;

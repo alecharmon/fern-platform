@@ -1,6 +1,6 @@
 import { UnreachableCaseError } from "ts-essentials";
 
-import { NavigationNodeParent } from "../versions";
+import type { NavigationNodeParent } from "../versions";
 
 export function hasChildren(node: NavigationNodeParent): boolean {
     switch (node.type) {

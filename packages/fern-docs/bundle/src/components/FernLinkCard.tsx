@@ -1,5 +1,5 @@
-import { LinkProps } from "next/link";
-import { PropsWithChildren, forwardRef } from "react";
+import type { LinkProps } from "next/link";
+import { type PropsWithChildren, forwardRef } from "react";
 
 import { cn } from "@fern-docs/components/cn";
 import { FernLink } from "@fern-docs/components/FernLink";

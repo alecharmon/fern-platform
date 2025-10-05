@@ -1,7 +1,7 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
 
 import { ApiIdRequiredError, OrgIdAndApiIdNotFound } from "../../api/generated/api/resources/snippets/errors";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 import { AuthUtility } from "./AuthUtils";
 
 export interface ResolvedAPI {

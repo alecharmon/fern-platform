@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 
 export const GrpcContext = React.createContext<{
     example:

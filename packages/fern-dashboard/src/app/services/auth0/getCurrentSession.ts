@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 import { getAuth0Client } from "@/app/services/auth0/auth0";
 
-import { Auth0User, Auth0UserID } from "./types";
+import { type Auth0User, Auth0UserID } from "./types";
 
 export interface Auth0SessionData {
     user: Auth0User;

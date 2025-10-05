@@ -2,8 +2,8 @@
 
 import { useRef } from "react";
 
-import { ApiDefinition } from "@fern-api/fdr-sdk";
-import { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { ApiDefinition } from "@fern-api/fdr-sdk";
+import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";

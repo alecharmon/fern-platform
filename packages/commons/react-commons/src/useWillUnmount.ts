@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 
-import createHandlerSetter, { CallbackSetter } from "./factory/createHandlerSetter";
+import createHandlerSetter, { type CallbackSetter } from "./factory/createHandlerSetter";
 
 /**
  * Returns a callback setter for a callback to be performed when the component will unmount.

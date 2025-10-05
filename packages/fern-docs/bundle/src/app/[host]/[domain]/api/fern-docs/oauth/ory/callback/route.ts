@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-import { FernUser, OryAccessTokenSchema } from "@fern-api/docs-auth";
+import { type FernUser, OryAccessTokenSchema } from "@fern-api/docs-auth";
 import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { signFernJWT } from "@fern-api/docs-server/auth/FernJWT";
 import { getAllowedRedirectUrls } from "@fern-api/docs-server/auth/allowed-redirects";

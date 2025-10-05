@@ -1,6 +1,6 @@
 import "server-only";
 
-import { Metadata } from "next/types";
+import type { Metadata } from "next/types";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";

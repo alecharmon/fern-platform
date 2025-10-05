@@ -4,12 +4,12 @@ import React from "react";
 
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import { StoreApi, UseBoundStore, create } from "zustand";
+import { type StoreApi, type UseBoundStore, create } from "zustand";
 
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { useIsomorphicLayoutEffect, useLazyRef } from "@fern-ui/react-commons";
 
-import { ExpandedNodesState, createInitialExpandedNodes, invertParentChildMap } from "./navigation-server";
+import { type ExpandedNodesState, createInitialExpandedNodes, invertParentChildMap } from "./navigation-server";
 
 type SidebarAction =
     | { type: "toggle"; nodeId: FernNavigation.NodeId }

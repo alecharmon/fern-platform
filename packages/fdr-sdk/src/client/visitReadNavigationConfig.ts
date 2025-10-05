@@ -1,4 +1,4 @@
-import { DocsV1Read } from "./types";
+import type { DocsV1Read } from "./types";
 
 export interface ReadNavigationConfigVisitor<T> {
     versioned: (config: DocsV1Read.VersionedNavigationConfig) => T;

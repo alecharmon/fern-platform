@@ -19,14 +19,20 @@ import remarkSmartypants from "remark-smartypants";
 import remarkSqueezeParagraphs from "remark-squeeze-paragraphs";
 import { noop } from "ts-essentials";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { postToSlack } from "@fern-api/docs-server/slack";
 import { isDevelopment, isPreviewDomain } from "@fern-api/docs-utils";
-import { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
-import { Hast, type PluggableList, customHeadingHandler, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
+import {
+    type Hast,
+    type PluggableList,
+    customHeadingHandler,
+    sanitizeBreaks,
+    sanitizeMdxExpression
+} from "@fern-docs/mdx";
 import {
     rehypeAcornErrorBoundary,
     rehypeExpressionToMd,
@@ -48,7 +54,7 @@ import { rehypeEndpointExampleSnippets } from "../plugins/rehype-endpoint-exampl
 import { rehypeEndpointSchemaSnippets } from "../plugins/rehype-endpoint-schema-snippet";
 import { rehypeExtractAsides } from "../plugins/rehype-extract-asides";
 import { rehypeFiles } from "../plugins/rehype-files";
-import { RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
+import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
 import { rehypeParamField } from "../plugins/rehype-param-field";
 import { rehypeSteps } from "../plugins/rehype-steps";

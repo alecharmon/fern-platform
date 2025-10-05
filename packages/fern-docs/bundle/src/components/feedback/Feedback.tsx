@@ -8,7 +8,7 @@ import { toast } from "@fern-docs/components/FernToast";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useKeyboardPress } from "@fern-ui/react-commons";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { track } from "../analytics";
 import { registerPosthogProperties } from "../analytics/posthog";
 import { FeedbackForm } from "./FeedbackForm";

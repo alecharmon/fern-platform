@@ -1,4 +1,4 @@
-import { GrpcProxyRequest } from "@generated/api";
+import type { GrpcProxyRequest } from "@generated/api";
 import { handlerWrapper } from "@libs/handler-wrapper";
 
 import { proxyGrpcInternal } from "./actions/proxyGrpc";

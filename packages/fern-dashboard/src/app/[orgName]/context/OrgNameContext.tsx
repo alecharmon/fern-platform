@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 
 const OrgNameContext = createContext<Auth0OrgName | null>(null);
 

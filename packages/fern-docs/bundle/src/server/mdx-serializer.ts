@@ -5,13 +5,13 @@ import { cache } from "react";
 
 import { Semaphore } from "es-toolkit";
 
-import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import type { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { cacheSeed } from "@fern-api/docs-server/cache-seed";
-import { Frontmatter } from "@fern-api/fdr-sdk/docs";
+import type { Frontmatter } from "@fern-api/fdr-sdk/docs";
 
 import { serializeMdx as internalSerializeMdx } from "@/mdx/bundler/serialize";
 import { serializeMdxImpl as internalSerializeNextMdxRemote } from "@/mdx/bundler/serializeWithNextMdxRemote";
-import { RehypeLinksOptions } from "@/mdx/plugins/rehype-links";
+import type { RehypeLinksOptions } from "@/mdx/plugins/rehype-links";
 
 export type MdxSerializerOptions = {
     /**

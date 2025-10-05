@@ -1,4 +1,4 @@
-import { RehypeShikiOptions } from "@shikijs/rehype";
+import type { RehypeShikiOptions } from "@shikijs/rehype";
 import { transformerNotationDiff, transformerNotationFocus, transformerNotationHighlight } from "@shikijs/transformers";
 import { transformerTwoslash } from "@shikijs/twoslash";
 import { bundleMDX } from "mdx-bundler";

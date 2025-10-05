@@ -1,13 +1,13 @@
 import { statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
 import { cn } from "@fern-docs/components/cn";
-import { SemanticColor } from "@fern-docs/components/colors";
+import type { SemanticColor } from "@fern-docs/components/colors";
 
 import { FernButton } from "@fern-docs/components/FernButton";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FC, Fragment, forwardRef, PropsWithChildren, ReactNode } from "react";
-import { CodeExample } from "../examples/code-example";
-import { ExamplesByStatusCode, StatusCode } from "../type-definitions/EndpointContent";
+import { type FC, Fragment, forwardRef, type PropsWithChildren, type ReactNode } from "react";
+import type { CodeExample } from "../examples/code-example";
+import type { ExamplesByStatusCode, StatusCode } from "../type-definitions/EndpointContent";
 import { useEndpointContext } from "./EndpointContext";
 
 export declare namespace ErrorExampleSelect {

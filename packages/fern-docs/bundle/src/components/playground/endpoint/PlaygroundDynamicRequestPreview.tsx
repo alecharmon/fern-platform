@@ -4,14 +4,14 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "r
 
 import { useAtomValue } from "jotai";
 
-import { DynamicIRsByLanguage } from "@fern-api/docs-server";
+import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { SnippetResolver } from "@fern-api/snippets";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 
-import { PlaygroundEndpointRequestFormState } from "../types";
+import type { PlaygroundEndpointRequestFormState } from "../types";
 import { returnSelectedOption } from "../utils/parse-auth-options";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 

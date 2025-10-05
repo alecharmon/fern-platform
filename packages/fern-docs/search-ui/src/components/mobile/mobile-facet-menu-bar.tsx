@@ -8,11 +8,11 @@ import {
     isAvailability
 } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
-import { FacetFilter } from "@fern-docs/search-keyword";
-import { FacetName } from "@fern-docs/search-keyword/types";
+import type { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetName } from "@fern-docs/search-keyword/types";
 import * as Menubar from "@radix-ui/react-menubar";
 import { Check, ChevronDown, Minus } from "lucide-react";
-import { ComponentPropsWithoutRef, Fragment, forwardRef, ReactNode } from "react";
+import { type ComponentPropsWithoutRef, Fragment, forwardRef, type ReactNode } from "react";
 
 import { getFacetDisplay, toFilterLabel } from "../../utils/facet-display";
 import { useFacetFilters, useFacets } from "../search/algolia-search-client";

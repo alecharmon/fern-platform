@@ -1,6 +1,6 @@
 "use client";
 
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 
 import { renderTypeShorthand } from "@/components/type-shorthand";
 

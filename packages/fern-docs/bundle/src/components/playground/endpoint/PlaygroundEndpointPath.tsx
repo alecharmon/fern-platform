@@ -1,4 +1,4 @@
-import { FC, Fragment, ReactNode } from "react";
+import { type FC, Fragment, type ReactNode } from "react";
 
 import { omitBy } from "es-toolkit/object";
 import { isUndefined } from "es-toolkit/predicate";
@@ -26,7 +26,7 @@ import { useAllEnvironmentIds } from "@/state/environment";
 
 import { closeButton } from "../PlaygroundCloseButton";
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
-import { PlaygroundRequestFormState } from "../types";
+import type { PlaygroundRequestFormState } from "../types";
 import { isLocal } from "../utils/utils";
 
 interface PlaygroundEndpointPathProps {

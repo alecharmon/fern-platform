@@ -4,7 +4,7 @@ import { Prose } from "@fern-docs/components/mdx/prose";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 import { getMdxSerializer } from "@/context/MdxSerializerContext";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { MdxContent } from "./MdxContent";
 

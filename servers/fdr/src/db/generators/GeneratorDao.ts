@@ -1,13 +1,13 @@
 import * as prisma from "@prisma/client";
 
-import { APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
+import { type APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
 
 import {
-    Generator,
-    GeneratorId,
+    type Generator,
+    type GeneratorId,
     GeneratorLanguage,
-    GeneratorScripts,
-    GeneratorType
+    type GeneratorScripts,
+    type GeneratorType
 } from "../../api/generated/api/resources/generators";
 import { assertNever, readBuffer, writeBuffer } from "../../util";
 

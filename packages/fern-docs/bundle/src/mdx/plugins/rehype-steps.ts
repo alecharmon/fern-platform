@@ -4,11 +4,11 @@ import { toEstree } from "hast-util-to-estree";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import {
     CONTINUE,
-    Hast,
-    MdxJsxAttribute,
-    MdxJsxExpressionAttribute,
+    type Hast,
+    type MdxJsxAttribute,
+    type MdxJsxExpressionAttribute,
     SKIP,
-    Unified,
+    type Unified,
     isHastElement,
     isMdxJsxElementHast,
     unknownToMdxJsxAttribute,

@@ -1,4 +1,4 @@
-import { SerializableFile } from "@/components/playground/types/serializable";
+import type { SerializableFile } from "@/components/playground/types/serializable";
 
 export async function resolveSerializableFile(
     file: Pick<SerializableFile, "dataUrl" | "type">

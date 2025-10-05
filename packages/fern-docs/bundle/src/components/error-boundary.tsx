@@ -4,7 +4,8 @@ import { SemanticBadge } from "@fern-docs/components/badges/semantic-badge";
 import { cn } from "@fern-docs/components/cn";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { RefreshCcw } from "lucide-react";
-import React, { PropsWithChildren } from "react";
+import type React from "react";
+import type { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
 export function ErrorBoundaryFallback({

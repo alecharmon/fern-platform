@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren, ReactElement, isValidElement, useRef } from "react";
+import { type FC, type PropsWithChildren, type ReactElement, isValidElement, useRef } from "react";
 
 import { Bell, Check, CheckCircle, Info, Pin, Rocket, Star, TriangleAlert } from "lucide-react";
 

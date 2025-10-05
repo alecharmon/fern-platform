@@ -1,4 +1,8 @@
-import { SnippetHttpRequest, SnippetHttpRequestBodyFormValue, convertToCurl } from "@fern-api/fdr-sdk/api-definition";
+import {
+    type SnippetHttpRequest,
+    type SnippetHttpRequestBodyFormValue,
+    convertToCurl
+} from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
 import { convertPlaygroundFormDataEntryValueToResolvedExampleEndpointRequest } from "../../types";

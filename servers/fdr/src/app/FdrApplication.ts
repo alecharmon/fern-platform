@@ -5,14 +5,14 @@ import { FdrDao } from "../db";
 import { type AuthService, AuthServiceImpl } from "../services/auth";
 import { LocalAuthServiceImpl } from "../services/auth/LocalAuthService";
 import { type DatabaseService, DatabaseServiceImpl } from "../services/db";
-import { DocsDefinitionCache, DocsDefinitionCacheImpl } from "../services/docs-cache/DocsDefinitionCache";
+import { type DocsDefinitionCache, DocsDefinitionCacheImpl } from "../services/docs-cache/DocsDefinitionCache";
 import RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
 import { LocalRevalidatorServiceImpl } from "../services/revalidator/LocalRevalidatorService";
-import { RevalidatorService, RevalidatorServiceImpl } from "../services/revalidator/RevalidatorService";
+import { type RevalidatorService, RevalidatorServiceImpl } from "../services/revalidator/RevalidatorService";
 import { type S3Service, S3ServiceImpl } from "../services/s3";
 import { LocalSlackServiceImpl } from "../services/slack/LocalSlackService";
-import { SlackService, SlackServiceImpl } from "../services/slack/SlackService";
-import { type FdrConfig } from "./FdrConfig";
+import { type SlackService, SlackServiceImpl } from "../services/slack/SlackService";
+import type { FdrConfig } from "./FdrConfig";
 
 export interface FdrServices {
     readonly auth: AuthService;

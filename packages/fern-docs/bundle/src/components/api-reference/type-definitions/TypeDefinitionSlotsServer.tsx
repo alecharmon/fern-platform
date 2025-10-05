@@ -1,8 +1,8 @@
 // import "server-only";
-import { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 
 import { TypeDefinitionSlotsProvider } from "./TypeDefinitionSlotsClient";
-import { PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
+import { type PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 
 export function TypeDefinitionSlotsServer({
     types,

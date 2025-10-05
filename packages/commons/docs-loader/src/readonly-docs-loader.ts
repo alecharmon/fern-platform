@@ -12,7 +12,7 @@ import type { AuthEdgeConfig } from "@fern-api/docs-auth";
 // import { track } from "@fern-api/docs-server";
 import {
     type AuthState,
-    DynamicIRsByLanguage,
+    type DynamicIRsByLanguage,
     type FernFonts,
     cacheSeed,
     cleanBasePath,

@@ -1,4 +1,9 @@
-import { EndpointDefinition, Environment, EnvironmentId, WebSocketChannel } from "@fern-api/fdr-sdk/api-definition";
+import type {
+    EndpointDefinition,
+    Environment,
+    EnvironmentId,
+    WebSocketChannel
+} from "@fern-api/fdr-sdk/api-definition";
 import { sanitizeUrl } from "@fern-api/ui-core-utils";
 
 import { useSelectedEnvironmentId, useSelectedEnvironmentUrl } from "@/state/environment";

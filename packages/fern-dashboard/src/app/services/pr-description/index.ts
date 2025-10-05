@@ -1,5 +1,5 @@
 import { Anthropic } from "@anthropic-ai/sdk";
-import { Octokit } from "@octokit/core";
+import type { Octokit } from "@octokit/core";
 
 import { DEFAULT_PR_TITLE } from "../github/github";
 

@@ -1,11 +1,11 @@
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect } from "react";
 
-import { NodeViewProps, NodeViewWrapper } from "@tiptap/react";
+import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 
 import FernEditorMDXRenderer from "@/components/editor/editor-mdx-renderer/FernEditorMDXRenderer";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 import { UnsupportedContent } from "../UnsupportedContent";
 

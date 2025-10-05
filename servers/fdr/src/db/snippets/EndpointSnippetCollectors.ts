@@ -1,4 +1,4 @@
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import type { FdrAPI } from "@fern-api/fdr-sdk";
 
 export class EndpointSnippetCollector {
     private snippetsByEndpoint: Record<FdrAPI.EndpointPathLiteral, FdrAPI.SnippetsByEndpointMethod> = {};

@@ -1,7 +1,7 @@
 "use client";
 
-import { CSSProperties } from "react";
-import React from "react";
+import type { CSSProperties } from "react";
+import type React from "react";
 
 import { AbstractHeaderContent } from "@fern-docs/components/abstract/AbstractHeaderContent";
 import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";

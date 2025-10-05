@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { createDelimitedRolesetString, createViewersForNodes } from "@fern-docs/search-utils";
 
 import { maybeRemoveCodeBlocks } from "../post-process/chunks/maybe-remove-code-blocks";
@@ -13,7 +13,7 @@ import { maybeRemoveIconTags } from "../post-process/shared/maybe-remove-icon-ta
 import { maybeRemoveStyleTags } from "../post-process/shared/maybe-remove-style-tags";
 import { maybeRemoveWrappingTags } from "../post-process/shared/maybe-remove-wrapping-tags";
 import { maybeReplaceCarriageReturns } from "../post-process/shared/maybe-replace-carriage-returns";
-import { TurbopufferRecordWithoutVector } from "../types";
+import type { TurbopufferRecordWithoutVector } from "../types";
 
 const SHARED_PROCESSORS = [
     maybeReplaceCarriageReturns,

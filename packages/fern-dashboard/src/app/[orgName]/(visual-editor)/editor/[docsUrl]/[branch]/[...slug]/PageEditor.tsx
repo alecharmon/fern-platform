@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-import { Editor, EditorEvents } from "@tiptap/react";
+import type { Editor, EditorEvents } from "@tiptap/react";
 
 import { getChangedNodesFromHtml } from "@fern-docs/mdx";
 

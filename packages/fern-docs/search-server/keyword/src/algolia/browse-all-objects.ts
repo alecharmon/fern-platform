@@ -1,4 +1,4 @@
-import { type Algoliasearch, type BrowseResponse } from "algoliasearch";
+import type { Algoliasearch, BrowseResponse } from "algoliasearch";
 
 export async function browseAllObjectsForDomain(
     algolia: Algoliasearch,

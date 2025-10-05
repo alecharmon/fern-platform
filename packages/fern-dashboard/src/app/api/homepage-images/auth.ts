@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 
 import { FernVenusApi } from "@fern-api/venus-api-sdk";
 
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
-import { MaybeErrorResponse } from "../utils/MaybeErrorResponse";
+import type { MaybeErrorResponse } from "../utils/MaybeErrorResponse";
 import { getDocsUrlOwner } from "../utils/getDocsUrlMetadata";
 
 export async function ensureUserOwnsUrl({ token, url }: { token: string; url: string }): Promise<MaybeErrorResponse> {

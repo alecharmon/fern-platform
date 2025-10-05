@@ -4,9 +4,9 @@ import assertNever from "@fern-api/ui-core-utils/assertNever";
 
 import { FernNavigation } from "../..";
 import {
-    DocsV1Db,
-    DocsV1Read,
-    DocsV1Write,
+    type DocsV1Db,
+    type DocsV1Read,
+    type DocsV1Write,
     FdrAPI,
     visitDbNavigationConfig,
     visitUnversionedDbNavigationConfig,

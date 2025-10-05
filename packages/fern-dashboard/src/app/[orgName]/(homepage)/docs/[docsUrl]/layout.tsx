@@ -3,11 +3,11 @@ import "server-only";
 import { notFound, redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 export default async function DocsLayout({
     navbar,

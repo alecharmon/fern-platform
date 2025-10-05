@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
 
-import { Auth0Organization } from "@/app/services/auth0/types";
+import type { Auth0Organization } from "@/app/services/auth0/types";
 
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";

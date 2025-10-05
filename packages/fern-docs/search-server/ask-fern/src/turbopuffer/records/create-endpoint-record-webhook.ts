@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 
-import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
+import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
 import { truncateToBytes } from "@fern-api/ui-core-utils";
 import {
     createDelimitedRolesetString,
@@ -9,7 +9,7 @@ import {
     toDescription
 } from "@fern-docs/search-utils";
 
-import { TurbopufferRecord } from "../types";
+import type { TurbopufferRecord } from "../types";
 
 export function createEndpointBaseRecordWebhook({
     parents,

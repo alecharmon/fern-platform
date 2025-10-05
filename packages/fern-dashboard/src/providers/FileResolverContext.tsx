@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react";
 
 import { DashboardFileResolver } from "@fern-api/docs-server/dashboard-file-resolver";
-import { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 
 export const FileResolverContext = createContext<{
     resolveFileSrc: DashboardFileResolver["getResolvedFileData"];

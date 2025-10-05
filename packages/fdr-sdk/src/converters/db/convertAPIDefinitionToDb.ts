@@ -4,7 +4,7 @@ import isEqual from "fast-deep-equal";
 import assertNever from "@fern-api/ui-core-utils/assertNever";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
 
-import { APIV1Db, APIV1Read, APIV1Write, FdrAPI } from "../../client";
+import { type APIV1Db, type APIV1Read, type APIV1Write, FdrAPI } from "../../client";
 import {
     generateEndpointErrorExample,
     generateEndpointNonStreamResponseExample,
@@ -12,7 +12,7 @@ import {
     generateEndpointSuccessExample
 } from "./examples/generateEndpointExampleCall";
 import { generateWebhookExample } from "./examples/generateWebhookExample";
-import { SDKSnippetHolder } from "./snippets/SDKSnippetHolder";
+import type { SDKSnippetHolder } from "./snippets/SDKSnippetHolder";
 
 export function convertAPIDefinitionToDb(
     writeShape: APIV1Write.ApiDefinition,

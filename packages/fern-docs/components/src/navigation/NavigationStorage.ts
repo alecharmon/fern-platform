@@ -1,5 +1,5 @@
 import { getBranchNameFromStorageKey } from "./localStorageUtils";
-import { StoredNavigationData } from "./types";
+import type { StoredNavigationData } from "./types";
 
 export const NAVIGATION_STORAGE_KEY = "fern-navigation-storage:";
 

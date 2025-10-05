@@ -1,6 +1,6 @@
 import { Redis } from "@upstash/redis";
 
-import { RedisCacheKey, RedisCacheKeyType, inferCachedData } from "./cacheKey";
+import type { RedisCacheKey, RedisCacheKeyType, inferCachedData } from "./cacheKey";
 
 let redis: Redis | undefined;
 

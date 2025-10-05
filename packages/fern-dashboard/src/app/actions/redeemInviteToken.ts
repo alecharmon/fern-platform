@@ -2,7 +2,7 @@
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { addUserToOrg, doesUserBelongToOrg, getInviteToken, invalidateInviteToken } from "../services/auth0/management";
-import { Auth0OrgName, Auth0UserID } from "../services/auth0/types";
+import { type Auth0OrgName, Auth0UserID } from "../services/auth0/types";
 
 export type RedeemInviteTokenErrors =
     | { type: "NOT_LOGGED_IN" }

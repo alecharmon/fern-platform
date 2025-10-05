@@ -1,6 +1,7 @@
 "use client";
 
-import React, { ReactNode, RefObject, createContext, useContext, useEffect, useState } from "react";
+import type React from "react";
+import { type ReactNode, type RefObject, createContext, useContext, useEffect, useState } from "react";
 
 import * as Popover from "@radix-ui/react-popover";
 import { EllipsisVertical, Trash2, TriangleAlert } from "lucide-react";
@@ -11,13 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/utils/utils";
 
-import { AttributeValue } from "../editor-mdx-renderer/types";
+import type { AttributeValue } from "../editor-mdx-renderer/types";
 import { useEditorComponent } from "./EditorComponentContext";
 import {
-    AttributeConfig,
-    AttributeValues,
+    type AttributeConfig,
+    type AttributeValues,
     CheckboxControl,
-    Control,
+    type Control,
     IntegerInputControl,
     SelectControl,
     TextInputControl

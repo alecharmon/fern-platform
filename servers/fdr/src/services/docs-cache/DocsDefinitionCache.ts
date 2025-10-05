@@ -1,15 +1,15 @@
 import { AuthType } from "@prisma/client";
 
-import { DocsV1Db, DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk";
+import type { DocsV1Db, DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk";
 
 import { FernRegistry } from "../../api/generated";
 import { DomainNotRegisteredError } from "../../api/generated/api/resources/docs/resources/v2/resources/read";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 import { getDocsDefinition, getDocsForDomain } from "../../controllers/docs/v1/getDocsReadService";
-import { DocsRegistrationInfo } from "../../controllers/docs/v2/getDocsWriteV2Service";
-import { FdrDao } from "../../db";
+import type { DocsRegistrationInfo } from "../../controllers/docs/v2/getDocsWriteV2Service";
+import type { FdrDao } from "../../db";
 import { Semaphore } from "../revalidator/Semaphore";
-import RedisDocsDefinitionStore from "./RedisDocsDefinitionStore";
+import type RedisDocsDefinitionStore from "./RedisDocsDefinitionStore";
 
 const DOCS_DOMAIN_REGX = /^([^.\s]+)/;
 

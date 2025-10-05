@@ -1,5 +1,5 @@
 import type { NodeId } from "@fern-api/fdr-sdk/navigation";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { NavigationStore } from "@fern-docs/components/navigation/NavigationStore";
 import type {
     BuildPageDataProps,
@@ -8,7 +8,7 @@ import type {
     PageData,
     SectionWithHierarchy
 } from "@fern-docs/components/navigation/types";
-import { ChangedNodes, Frontmatter, htmlToMdx, MdxToHtmlResponse } from "@fern-docs/mdx";
+import { type ChangedNodes, type Frontmatter, htmlToMdx, type MdxToHtmlResponse } from "@fern-docs/mdx";
 import {
     compareFrontmatter,
     createPageContents,
@@ -16,7 +16,7 @@ import {
     createPageKey,
     createPageMetadata
 } from "../utils/pagesStoreUtils";
-import { SaveEvent } from "./types";
+import type { SaveEvent } from "./types";
 
 type Filename = string;
 

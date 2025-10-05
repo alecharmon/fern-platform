@@ -1,8 +1,8 @@
 "use client";
 
 import { useNavigation } from "@fern-docs/components/navigation/NavigationStoreContext";
-import { createContext, ReactNode, useContext, useRef, useSyncExternalStore } from "react";
-import { PagesSnapshot, PagesStore } from "./PagesStore";
+import { createContext, type ReactNode, useContext, useRef, useSyncExternalStore } from "react";
+import { type PagesSnapshot, PagesStore } from "./PagesStore";
 
 export type { PagesSnapshot };
 

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 
-import { NavigationStorage, createNavigationMemoryStorage } from "../NavigationStorage";
+import { type NavigationStorage, createNavigationMemoryStorage } from "../NavigationStorage";
 
 const MOCK_ORG_NAME = "test-org";
 const MOCK_DOCS_URL = "https://test.com";

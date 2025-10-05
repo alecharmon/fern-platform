@@ -1,6 +1,6 @@
-import { DocsV1Db, DocsV1Read } from "@fern-api/fdr-sdk";
+import { type DocsV1Db, DocsV1Read } from "@fern-api/fdr-sdk";
 
-import { FdrApplication } from "../app";
+import type { FdrApplication } from "../app";
 
 export async function getFilesV2(docsDbDefinition: DocsV1Db.DocsDefinitionDb, app: FdrApplication) {
     let promisedFiles: Promise<[DocsV1Read.FileId, DocsV1Read.File_]>[];

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, createRef, useEffect, useState } from "react";
+import { type ReactElement, createRef, useEffect, useState } from "react";
 
 import { Forward, Pause, Play, Rewind, RotateCcw, Volume2, VolumeOff } from "lucide-react";
 

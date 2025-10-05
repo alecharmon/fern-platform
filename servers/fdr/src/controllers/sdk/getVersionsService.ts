@@ -5,10 +5,10 @@ import { getLatestTag } from "@fern-api/github";
 import {
     FailedToComputeExistingVersion,
     FailedToIncrementVersion,
-    Language
+    type Language
 } from "../../api/generated/api/resources/sdks";
 import { VersionsService } from "../../api/generated/api/resources/sdks/resources/versions/service/VersionsService";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 import { getLatestVersionFromNpm, getLatestVersionFromPypi } from "./getLatestVersion";
 
 export function getVersionsService(_app: FdrApplication): VersionsService {

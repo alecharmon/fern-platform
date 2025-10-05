@@ -1,5 +1,5 @@
 import { bfs } from "./bfs";
-import { DeleterAction } from "./types";
+import type { DeleterAction } from "./types";
 
 interface PruneTreeOptions<NODE, PARENT extends NODE = NODE, POINTER = NODE> {
     /**

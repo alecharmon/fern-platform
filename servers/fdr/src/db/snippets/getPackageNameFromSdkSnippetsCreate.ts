@@ -1,8 +1,8 @@
-import { Language, PrismaClient } from "@prisma/client";
+import { Language, type PrismaClient } from "@prisma/client";
 
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import type { FdrAPI } from "@fern-api/fdr-sdk";
 
-import { BadRequestError, Sdk, SdkRequest } from "../../api/generated/api";
+import { BadRequestError, type Sdk, type SdkRequest } from "../../api/generated/api";
 import { assertNever } from "../../util";
 
 export function getPackageNameFromSdkSnippetsCreate(create: FdrAPI.SdkSnippetsCreate): string {

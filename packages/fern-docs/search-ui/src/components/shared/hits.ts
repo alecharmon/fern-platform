@@ -1,4 +1,4 @@
-import { AlgoliaRecordHit } from "../../types";
+import type { AlgoliaRecordHit } from "../../types";
 
 export interface GroupedHit {
     title: string;

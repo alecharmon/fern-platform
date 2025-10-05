@@ -1,6 +1,6 @@
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 export default async function DocsLayout({
     children,

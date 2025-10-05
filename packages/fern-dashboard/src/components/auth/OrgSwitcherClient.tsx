@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
 import { ChevronDown } from "lucide-react";
 
-import { Auth0OrgName, Auth0Organization } from "@/app/services/auth0/types";
+import type { Auth0OrgName, Auth0Organization } from "@/app/services/auth0/types";
 import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
 import { Button } from "@/components/ui/button";
 import { getOrgDisplayName } from "@/utils/getOrgDisplayName";

@@ -1,10 +1,10 @@
 import { groupBy } from "es-toolkit/array";
 
-import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
-import { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
+import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
+import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { measureBytes } from "@fern-api/ui-core-utils";
 
-import { AlgoliaRecord } from "../types";
+import type { AlgoliaRecord } from "../types";
 import { createApiReferenceRecordGrpc } from "./create-api-reference-record-grpc";
 import { createApiReferenceRecordHttp } from "./create-api-reference-record-http";
 import { createApiReferenceRecordWebSocket } from "./create-api-reference-record-web-socket";

@@ -4,7 +4,7 @@ import { cache } from "react";
 
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import type { FdrAPI } from "@fern-api/fdr-sdk";
 
 const V1_FDR_KEY = "v1/fdr.json";
 

@@ -1,4 +1,4 @@
-import { Editor } from "@tiptap/react";
+import type { Editor } from "@tiptap/react";
 import {
     ChevronDown,
     ChevronsDown,
@@ -27,7 +27,7 @@ import { EMPTY_STEPS_CONTENT } from "@/docs/mdx/components/steps";
 import { EMPTY_TABS_CONTENT } from "@/docs/mdx/components/tabs/Tabs";
 import { EMPTY_EMBED_CONTENT } from "@/editor/components/Embed";
 
-import { SuggestionItem } from "../tiptap-ui-utils/suggestion-menu";
+import type { SuggestionItem } from "../tiptap-ui-utils/suggestion-menu";
 import { createCustomElementNode } from "./extension-custom-element/create-custom-element-node";
 
 const handleCustomNodeInsert = (editor: Editor, content: string) => {

@@ -1,4 +1,4 @@
-import { OAuth2ClientCredentials } from "@fern-api/docs-auth";
+import type { OAuth2ClientCredentials } from "@fern-api/docs-auth";
 
 export function getOAuth2AuthorizationUrl(
     authConfig: OAuth2ClientCredentials,

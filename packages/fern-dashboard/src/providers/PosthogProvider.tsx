@@ -1,13 +1,14 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import React, { useEffect } from "react";
+import type React from "react";
+import { useEffect } from "react";
 
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 
-import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { PostHogIdentify } from "@/components/posthog/PostHogIdentify";
 import { PostHogPageView } from "@/components/posthog/PostHogPageView";
 import { isProduction } from "@/utils/environment";

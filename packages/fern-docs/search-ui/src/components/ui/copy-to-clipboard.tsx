@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, forwardRef, useEffect, useRef, useState } from "react";
+import { type ComponentPropsWithoutRef, forwardRef, useEffect, useRef, useState } from "react";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { Slot } from "@radix-ui/react-slot";

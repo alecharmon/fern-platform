@@ -1,5 +1,5 @@
 import { bundleEditorMDX } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/bundleEditorMdx";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 interface CacheEntry {
     code: string;

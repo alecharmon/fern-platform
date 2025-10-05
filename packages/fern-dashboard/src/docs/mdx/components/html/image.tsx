@@ -4,7 +4,7 @@ import { cn } from "@fern-docs/components/cn";
 import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
 import { FernImage } from "@fern-docs/components/FernImage";
 import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
-import { ComponentProps, forwardRef, ReactElement, useContext, useRef } from "react";
+import { type ComponentProps, forwardRef, type ReactElement, useContext, useRef } from "react";
 import Zoom from "react-medium-image-zoom";
 import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";

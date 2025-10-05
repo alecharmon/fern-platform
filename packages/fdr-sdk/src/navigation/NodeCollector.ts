@@ -4,7 +4,7 @@ import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
 
 import { FernNavigation } from "./..";
 import { pruneVersionNode } from "./utils/pruneVersionNode";
-import { NavigationNodeWithMetadata, isProductNode } from "./versions";
+import { type NavigationNodeWithMetadata, isProductNode } from "./versions";
 
 interface NavigationNodeWithMetadataAndParents {
     node: FernNavigation.NavigationNodeWithMetadata;

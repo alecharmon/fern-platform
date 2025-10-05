@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { atom, useAtomValue, useSetAtom } from "jotai";
 
-import { FernDocs } from "@fern-api/fdr-sdk";
+import type { FernDocs } from "@fern-api/fdr-sdk";
 
 const layoutAtom = atom<FernDocs.Layout>("guide");
 

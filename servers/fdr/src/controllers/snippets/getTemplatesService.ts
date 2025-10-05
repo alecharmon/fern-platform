@@ -1,6 +1,6 @@
 import { TemplatesService } from "../../api";
 import { SnippetNotFound, UnauthorizedError } from "../../api/generated/api";
-import { type FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 import { APIResolver } from "./APIResolver";
 
 export function getTemplatesService(app: FdrApplication): TemplatesService {

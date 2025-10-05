@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useRef } from "react";
+import { type ReactElement, type ReactNode, useRef } from "react";
 
 import { FernButton } from "@fern-docs/components/FernButton";
 import { cn } from "@fern-docs/components/cn";

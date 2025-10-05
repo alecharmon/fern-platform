@@ -1,6 +1,6 @@
 "use client";
 
-import { TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
+import type { TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
 
 import { renderTypeShorthandRoot } from "@/docs/components/type-shorthand";
 

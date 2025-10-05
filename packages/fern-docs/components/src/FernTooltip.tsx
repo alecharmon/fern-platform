@@ -1,9 +1,9 @@
 "use client";
 
-import { FC, ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { VariantProps, cva } from "class-variance-authority";
+import { type VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "./cn";
 

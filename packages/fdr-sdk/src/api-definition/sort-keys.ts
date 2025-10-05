@@ -5,7 +5,7 @@ import isPlainObject from "@fern-api/ui-core-utils/isPlainObject";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
 import type * as Latest from "./latest";
-import { TypeShapeOrReference } from "./types";
+import type { TypeShapeOrReference } from "./types";
 import { unwrapDiscriminatedUnionVariant, unwrapObjectType } from "./unwrap";
 
 function sortKeysBy(obj: Record<string, unknown>, order: string[]): Record<string, unknown> {

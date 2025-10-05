@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ComponentPropsWithoutRef } from "react";
+import React, { type ComponentPropsWithoutRef } from "react";
 
 import { useIsMobile } from "@fern-ui/react-commons";
 

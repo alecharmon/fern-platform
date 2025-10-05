@@ -1,4 +1,4 @@
-import { DocsUrl } from "./types";
+import type { DocsUrl } from "./types";
 
 export function parseDocsUrlParam({ docsUrl }: { docsUrl: string }): DocsUrl {
     return decodeURIComponent(docsUrl) as DocsUrl;

@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { Check } from "lucide-react";

@@ -3,7 +3,7 @@ import {
     NoValidGeneratorsFoundError
 } from "../../api/generated/api/resources/generators";
 import { VersionsService } from "../../api/generated/api/resources/generators/resources/versions/service/VersionsService";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 
 export function getGeneratorsVersionsController(app: FdrApplication): VersionsService {
     return new VersionsService({

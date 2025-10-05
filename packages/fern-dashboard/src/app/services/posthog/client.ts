@@ -6,7 +6,7 @@
  * HogQL queries against PostHog's API. It does not contain business logic
  * for specific analytics queries.
  */
-import { HogQLQueryRequest, HogQLQueryResponse, PostHogClientConfig } from "./types";
+import type { HogQLQueryRequest, HogQLQueryResponse, PostHogClientConfig } from "./types";
 
 export class PostHogClientError extends Error {
     constructor(

@@ -2,7 +2,7 @@
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { createInviteToken } from "../services/auth0/management";
-import { Auth0OrgName } from "../services/auth0/types";
+import type { Auth0OrgName } from "../services/auth0/types";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function createInviteLink({ orgName }: { orgName: Auth0OrgName }) {

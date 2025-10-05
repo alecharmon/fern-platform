@@ -1,8 +1,8 @@
-import { ApiDefinition } from "@fern-api/fdr-sdk";
+import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import { measureBytes, truncateToBytes } from "@fern-api/ui-core-utils";
 import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
 
-import { ApiReferenceRecord, EndpointBaseRecord } from "../types";
+import type { ApiReferenceRecord, EndpointBaseRecord } from "../types";
 
 interface CreateApiReferenceRecordGrpcOptions {
     grpcBase: EndpointBaseRecord;

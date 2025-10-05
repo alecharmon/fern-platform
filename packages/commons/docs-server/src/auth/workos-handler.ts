@@ -1,7 +1,7 @@
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 
-import { AuthState } from "./getAuthState";
+import type { AuthState } from "./getAuthState";
 import { preferPreview } from "./origin";
 import { getWorkosSSOAuthorizationUrl } from "./workos";
 import { encryptSession, getSessionFromToken, refreshSession, toSessionUserInfo } from "./workos-session";

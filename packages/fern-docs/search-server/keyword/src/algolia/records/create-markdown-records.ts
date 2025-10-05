@@ -2,10 +2,10 @@ import { compact, flatten } from "es-toolkit/array";
 import { decode } from "html-entities";
 
 import { chunkToBytes, isNonNullish, measureBytes, truncateToBytes } from "@fern-api/ui-core-utils";
-import { MarkdownSectionRoot, getFrontmatter, markdownToString, splitMarkdownIntoSections } from "@fern-docs/mdx";
+import { type MarkdownSectionRoot, getFrontmatter, markdownToString, splitMarkdownIntoSections } from "@fern-docs/mdx";
 import { maybePrepareMdxContent } from "@fern-docs/search-utils";
 
-import { BaseRecord, Hierarchy, MarkdownRecord } from "../types";
+import type { BaseRecord, Hierarchy, MarkdownRecord } from "../types";
 
 interface CreateMarkdownRecordsOptions {
     base: BaseRecord;

@@ -1,13 +1,13 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import chromium from "@sparticuz/chromium";
-import puppeteer, { Browser, Page } from "puppeteer-core";
+import puppeteer, { type Browser, type Page } from "puppeteer-core";
 import sharp from "sharp";
 import { setTimeout } from "timers/promises";
 
 import { getS3Client } from "@/app/services/s3";
 import { isProduction } from "@/utils/environment";
 
-import { MaybeErrorResponse } from "../../utils/MaybeErrorResponse";
+import type { MaybeErrorResponse } from "../../utils/MaybeErrorResponse";
 import {
     HOMEPAGE_SCREENSHOT_HEIGHT,
     HOMEPAGE_SCREENSHOT_WIDTH,
@@ -15,7 +15,7 @@ import {
     getHomepageImagesS3BucketName
 } from "../constants";
 import { getS3KeyForHomepageScreenshot } from "../getS3KeyForHomepageScreenshot";
-import { Theme } from "../types";
+import type { Theme } from "../types";
 
 export default async function generateHomepageImages({ url }: { url: string }): Promise<MaybeErrorResponse> {
     let browser: Browser;

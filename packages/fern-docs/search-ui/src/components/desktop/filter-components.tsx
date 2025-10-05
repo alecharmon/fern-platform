@@ -6,7 +6,7 @@ import { ListFilter, Plus } from "lucide-react";
 
 import { Badge } from "@fern-docs/components/badges";
 import { Button } from "@fern-docs/components/button";
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 
 import { getFacetDisplay, toFilterOptions } from "../../utils/facet-display";
 import { Filter } from "../icons/filter";

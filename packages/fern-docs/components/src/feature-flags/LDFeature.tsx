@@ -1,8 +1,8 @@
 import { isEqual } from "es-toolkit/predicate";
 import { camelCase } from "es-toolkit/string";
-import { LDFlagSet, useFlags } from "launchdarkly-react-client-sdk";
+import { type LDFlagSet, useFlags } from "launchdarkly-react-client-sdk";
 
-import { FeatureProps, WithFeatureFlagsProps } from "./types";
+import type { FeatureProps, WithFeatureFlagsProps } from "./types";
 
 const ldFlagPredicate = <T,>(flagKey: string, fallbackValue: T, match: T): ((flags: LDFlagSet) => boolean) => {
     return (flags: LDFlagSet) => {

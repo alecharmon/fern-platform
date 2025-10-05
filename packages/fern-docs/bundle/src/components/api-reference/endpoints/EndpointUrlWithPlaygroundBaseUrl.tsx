@@ -1,7 +1,7 @@
 "use client";
 
-import { HttpOrWssOrGrpc } from "@fern-api/docs-utils";
-import { EndpointDefinition, WebSocketChannel } from "@fern-api/fdr-sdk/api-definition";
+import type { HttpOrWssOrGrpc } from "@fern-api/docs-utils";
+import type { EndpointDefinition, WebSocketChannel } from "@fern-api/fdr-sdk/api-definition";
 
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
 import { EndpointUrlWithOverflow } from "./EndpointUrlWithOverflow";

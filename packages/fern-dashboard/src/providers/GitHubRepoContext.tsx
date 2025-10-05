@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import { GithubSourceRepo } from "@/app/services/github/types";
+import type { GithubSourceRepo } from "@/app/services/github/types";
 
 interface GitHubRepoContextValue {
     branch: string;

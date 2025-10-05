@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 
 import { FernAudioPlayer } from "@fern-docs/components/FernAudioPlayer";
 

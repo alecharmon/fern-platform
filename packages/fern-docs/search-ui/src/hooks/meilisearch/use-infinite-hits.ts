@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useInfiniteHits } from "react-instantsearch";
+import type { useInfiniteHits } from "react-instantsearch";
 
 import type { SendEventForHits } from "instantsearch.js/es/lib/utils";
 

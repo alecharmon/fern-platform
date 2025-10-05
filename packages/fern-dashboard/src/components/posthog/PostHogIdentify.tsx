@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { User } from "@auth0/nextjs-auth0/types";
+import type { User } from "@auth0/nextjs-auth0/types";
 import { usePostHog } from "posthog-js/react";
 
 export declare namespace PostHogIdentify {

@@ -1,4 +1,4 @@
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { SidebarRootNodeImpl } from "./SidebarRootNodeImpl";

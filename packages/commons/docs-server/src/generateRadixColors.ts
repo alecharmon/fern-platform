@@ -6,7 +6,7 @@ import * as RadixColors from "@radix-ui/colors";
 import BezierEasing from "bezier-easing";
 import Color from "colorjs.io";
 
-import { ArrayOf12, ColorPalette, arrayOf12, grayScaleNames, scaleNames } from "@fern-api/docs-utils";
+import { type ArrayOf12, type ColorPalette, arrayOf12, grayScaleNames, scaleNames } from "@fern-api/docs-utils";
 
 const lightColors = Object.fromEntries(
     scaleNames.map((scaleName) => [

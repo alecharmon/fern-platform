@@ -9,7 +9,7 @@ import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 import { CreatePageButton } from "./CreatePageButton";
 
 export default async function SidebarPage({

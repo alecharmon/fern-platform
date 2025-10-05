@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { ComponentProps, ReactElement } from "react";
+import React, { type ComponentProps, type ReactElement } from "react";
 
 import type { MDXComponents } from "@fern-docs/mdx";
 

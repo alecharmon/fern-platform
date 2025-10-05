@@ -5,7 +5,7 @@ import titleCase from "@fern-api/ui-core-utils/titleCase";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
 import { FernNavigation } from "../../../..";
-import { APIV1Read, DocsV1Read } from "../../../../client/types";
+import { APIV1Read, type DocsV1Read } from "../../../../client/types";
 import { ApiDefinitionHolder } from "../../../ApiDefinitionHolder";
 import { ROOT_PACKAGE_ID } from "../../../consts";
 import { isSubpackage } from "../../../utils/isSubpackage";

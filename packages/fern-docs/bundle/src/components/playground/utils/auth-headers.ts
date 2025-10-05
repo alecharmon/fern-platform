@@ -2,12 +2,12 @@ import { decodeJwt } from "jose";
 import { noop } from "ts-essentials";
 
 import { obfuscateSecret } from "@fern-api/fdr-sdk";
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
-import { PlaygroundAuthState } from "../types";
+import type { PlaygroundAuthState } from "../types";
 import {
-    OAuthClientCredentialReferencedEndpointLoginFlowProps,
+    type OAuthClientCredentialReferencedEndpointLoginFlowProps,
     oAuthClientCredentialReferencedEndpointLoginFlow
 } from "./oauth";
 import { returnSelectedOption } from "./parse-auth-options";

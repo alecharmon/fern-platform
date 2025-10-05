@@ -1,16 +1,16 @@
 import "server-only";
 
-import React from "react";
+import type React from "react";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
+import { type Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 
 import { MdxAside } from "@/mdx/bundler/component";
 import { MdxContent } from "@/mdx/components/MdxContent";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
 import { constructPageOptions } from "../PageActionsDropdownOptions";

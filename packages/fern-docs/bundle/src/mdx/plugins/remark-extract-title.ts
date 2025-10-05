@@ -1,6 +1,6 @@
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
-import { type Mdast, Unified, mdastToString } from "@fern-docs/mdx";
+import { type Mdast, type Unified, mdastToString } from "@fern-docs/mdx";
 
 /**
  * Extracts the title from the first content child of the document.

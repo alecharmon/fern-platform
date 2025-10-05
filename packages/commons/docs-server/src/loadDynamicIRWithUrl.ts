@@ -1,10 +1,10 @@
 import { cache } from "react";
 
-import { APIV1Write } from "@fern-api/fdr-sdk";
+import type { APIV1Write } from "@fern-api/fdr-sdk";
 
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
-import { DynamicIRsByLanguage, loadDynamicIRFromS3 } from "./loadDynamicIRFromS3";
+import { type DynamicIRsByLanguage, loadDynamicIRFromS3 } from "./loadDynamicIRFromS3";
 
 export type DynamicIRsByAPI = Record<string, DynamicIRsByLanguage>;
 

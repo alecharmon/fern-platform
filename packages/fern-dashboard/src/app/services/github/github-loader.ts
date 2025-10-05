@@ -1,10 +1,10 @@
 import "server-only";
 
-import { Octokit } from "@octokit/core";
+import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
 import z from "zod";
 
-import {
+import type {
     FernProject,
     GetDocsYmlResult,
     GetFernConfigJsonResult,

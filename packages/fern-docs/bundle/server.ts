@@ -2,7 +2,7 @@ import next from "next";
 
 import express from "express";
 import { createServer } from "http";
-import { AddressInfo } from "net";
+import type { AddressInfo } from "net";
 import { parse } from "url";
 
 const dev = process.env.NODE_ENV !== "production";

@@ -1,13 +1,13 @@
 "use client";
 
-import { FernAI } from "@fern-api/fai-sdk";
+import type { FernAI } from "@fern-api/fai-sdk";
 
 import { cn } from "@/utils/utils";
 
 import { AnalyticsHistogramChart } from "./AnalyticsHistogramChart";
 import { AnalyticsHistogramTabBar } from "./AnalyticsHistogramTabBar";
-import { BORDER_STYLES, RenderType } from "./AnalyticsPageClient";
-import { TimeRangeOption, TimeRangeSelect } from "./TimeRangeSelect";
+import { BORDER_STYLES, type RenderType } from "./AnalyticsPageClient";
+import { type TimeRangeOption, TimeRangeSelect } from "./TimeRangeSelect";
 import { TimeRange } from "./utils/get-request-params";
 import { parseLabel } from "./utils/parse-label";
 

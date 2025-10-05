@@ -1,5 +1,5 @@
 import { Button } from "@fern-docs/components/button";
-import { FernInput, FernInputProps } from "@fern-docs/components/FernInput";
+import { FernInput, type FernInputProps } from "@fern-docs/components/FernInput";
 import { randomBytes } from "crypto-browserify";
 import { forwardRef } from "react";
 

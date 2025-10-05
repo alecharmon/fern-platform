@@ -3,7 +3,7 @@
 import React, { useCallback } from "react";
 
 import { ApiDefinition } from "@fern-api/fdr-sdk";
-import { HttpResponse } from "@fern-api/fdr-sdk/api-definition";
+import type { HttpResponse } from "@fern-api/fdr-sdk/api-definition";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 

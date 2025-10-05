@@ -3,7 +3,7 @@
 import React from "react";
 
 import { getTypeIdWithLocation } from "./TypeDefinitionSlotsServer";
-import { PropertyLocation } from "./TypeReferenceDefinitions";
+import type { PropertyLocation } from "./TypeReferenceDefinitions";
 
 const TypeDefinitionSlots = React.createContext<Record<string, React.ReactNode>>({});
 

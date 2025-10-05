@@ -1,11 +1,11 @@
 "use client";
 
 import {
-    ComponentProps,
-    MouseEventHandler,
-    PropsWithChildren,
-    ReactElement,
-    ReactNode,
+    type ComponentProps,
+    type MouseEventHandler,
+    type PropsWithChildren,
+    type ReactElement,
+    type ReactNode,
     cloneElement,
     forwardRef,
     useCallback,

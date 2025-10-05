@@ -1,11 +1,11 @@
 "use client";
 
-import { ComponentPropsWithoutRef, KeyboardEventHandler, ReactNode, forwardRef, useRef } from "react";
+import { type ComponentPropsWithoutRef, KeyboardEventHandler, type ReactNode, forwardRef, useRef } from "react";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 
-import { SqueezedMessage } from "../chatbot/utils";
+import type { SqueezedMessage } from "../chatbot/utils";
 import { useFacetFilters } from "../search/useFacetFilters";
 import { CommandAskAIGroup } from "../shared";
 import { DesktopCommandContent } from "./desktop-command";

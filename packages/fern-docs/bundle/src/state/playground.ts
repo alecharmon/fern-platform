@@ -1,13 +1,13 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { type Dispatch, type SetStateAction, useEffect } from "react";
 
-import { WritableAtom, atom, useAtomValue } from "jotai";
+import { type WritableAtom, atom, useAtomValue } from "jotai";
 import { RESET, atomFamily, atomWithStorage, useAtomCallback } from "jotai/utils";
 import { useCallbackOne } from "use-memo-one";
 
-import { EndpointContext, WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { EndpointContext, WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useDomain } from "@fern-docs/components/state/domain";
 import { fernUserAtom } from "@fern-docs/components/state/fern-user";
 
@@ -17,10 +17,10 @@ import {
     PLAYGROUND_AUTH_STATE_HEADER_INITIAL,
     PLAYGROUND_AUTH_STATE_OAUTH_INITIAL,
     type PlaygroundAuthState,
-    PlaygroundAuthStateBasicAuth,
-    PlaygroundAuthStateBearerToken,
-    PlaygroundAuthStateHeader,
-    PlaygroundAuthStateOAuth,
+    type PlaygroundAuthStateBasicAuth,
+    type PlaygroundAuthStateBearerToken,
+    type PlaygroundAuthStateHeader,
+    type PlaygroundAuthStateOAuth,
     PlaygroundAuthStateSchema,
     type PlaygroundEndpointRequestFormState,
     type PlaygroundRequestFormState,

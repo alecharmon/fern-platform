@@ -1,6 +1,6 @@
 "use client";
 
-import { Atom, atom, useAtomValue } from "jotai";
+import { type Atom, atom, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 
 import type { FernUser } from "@fern-api/docs-auth";

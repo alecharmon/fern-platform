@@ -1,4 +1,4 @@
-import { HttpMethod } from "./latest";
+import type { HttpMethod } from "./latest";
 
 type StatusCodeMessagesByMethod = Partial<Record<HttpMethod, string>>;
 

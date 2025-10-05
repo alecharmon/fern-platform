@@ -1,4 +1,4 @@
-import { ComponentProps, ReactElement, RefObject, forwardRef, useEffect, useRef, useState } from "react";
+import { type ComponentProps, type ReactElement, type RefObject, forwardRef, useEffect, useRef, useState } from "react";
 
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import * as Tooltip from "@radix-ui/react-tooltip";

@@ -1,8 +1,8 @@
 import dynamic from "next/dynamic";
-import React from "react";
+import type React from "react";
 
 import { ErrorBoundary } from "../error-boundary";
-import { WithFeatureFlagsProps } from "./types";
+import type { WithFeatureFlagsProps } from "./types";
 
 // note: this is a dynamic import because we don't want to load the LD Feature component on every page load
 const LDFeatures = dynamic(

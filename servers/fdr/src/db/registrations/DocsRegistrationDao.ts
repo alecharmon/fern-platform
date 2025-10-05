@@ -1,8 +1,8 @@
-import { AuthType, PrismaClient } from "@prisma/client";
+import type { AuthType, PrismaClient } from "@prisma/client";
 
-import { DocsV1Write, FdrAPI } from "@fern-api/fdr-sdk";
+import { type DocsV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 
-import { S3DocsFileInfo } from "../../services/s3";
+import type { S3DocsFileInfo } from "../../services/s3";
 import { readBuffer, writeBuffer } from "../../util";
 import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 

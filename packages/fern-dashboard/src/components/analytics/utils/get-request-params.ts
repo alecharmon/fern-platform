@@ -1,4 +1,4 @@
-import { FernAI } from "@fern-api/fai-sdk";
+import type { FernAI } from "@fern-api/fai-sdk";
 
 export enum TimeRange {
     LAST_WEEK = "LAST_WEEK",

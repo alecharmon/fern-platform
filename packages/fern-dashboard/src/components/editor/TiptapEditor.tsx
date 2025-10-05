@@ -4,7 +4,13 @@ import { useEffect } from "react";
 
 import CodeBlock from "@tiptap/extension-code-block";
 import Placeholder from "@tiptap/extension-placeholder";
-import { EditorProvider, EditorProviderProps, Extension, ReactNodeViewRenderer, useCurrentEditor } from "@tiptap/react";
+import {
+    EditorProvider,
+    type EditorProviderProps,
+    type Extension,
+    ReactNodeViewRenderer,
+    useCurrentEditor
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { createLowlight } from "lowlight";
 
@@ -17,7 +23,7 @@ import BubbleMenu from "./BubbleMenu";
 import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
 import { createCodeBlockComponent } from "./extension-code-block/CodeBlockComponent";
-import { LowlightInstance } from "./extension-code-block/types";
+import type { LowlightInstance } from "./extension-code-block/types";
 import CustomElement from "./extension-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
 import { LowlightPlugin } from "./tiptap-node/lowlight/lowlight-plugin";

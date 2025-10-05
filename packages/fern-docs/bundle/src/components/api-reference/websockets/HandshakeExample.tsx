@@ -2,8 +2,8 @@
 
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import {
-    ExampleWebSocketSession,
-    WebSocketChannel,
+    type ExampleWebSocketSession,
+    type WebSocketChannel,
     toColonEndpointPathLiteral
 } from "@fern-api/fdr-sdk/api-definition";
 

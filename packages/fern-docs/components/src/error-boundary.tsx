@@ -1,7 +1,8 @@
 "use client";
 
 import { RefreshCcw } from "lucide-react";
-import React, { PropsWithChildren } from "react";
+import type React from "react";
+import type { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 import { SemanticBadge } from "./badges";
 import { cn } from "./cn";

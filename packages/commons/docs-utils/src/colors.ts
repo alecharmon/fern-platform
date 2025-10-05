@@ -1,4 +1,4 @@
-import { FileData } from "./types/file-data";
+import type { FileData } from "./types/file-data";
 
 export type RgbaColor = { r: number; g: number; b: number; a?: number };
 

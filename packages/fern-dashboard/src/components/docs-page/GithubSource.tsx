@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import { Cog, Loader2 } from "lucide-react";
 
-import { GithubRepoValidationResult } from "@/app/services/dal/github/validators";
+import type { GithubRepoValidationResult } from "@/app/services/dal/github/validators";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
-import { GithubSourceRepo } from "@/app/services/github/types";
-import { DocsUrl } from "@/utils/types";
+import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";

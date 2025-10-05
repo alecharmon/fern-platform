@@ -1,9 +1,9 @@
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import type { FdrAPI } from "@fern-api/fdr-sdk";
 
 import { SnippetsService } from "../../api";
 import { InvalidPageError, SnippetTemplateNotFoundError, UnauthorizedError } from "../../api/generated/api";
-import { type FdrApplication } from "../../app";
-import { DbSnippetsPage } from "../../db/snippets/SnippetsDao";
+import type { FdrApplication } from "../../app";
+import type { DbSnippetsPage } from "../../db/snippets/SnippetsDao";
 import { APIResolver } from "./APIResolver";
 
 export function getSnippetsService(app: FdrApplication): SnippetsService {

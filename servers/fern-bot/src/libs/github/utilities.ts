@@ -1,9 +1,9 @@
 import { doesPathExist } from "@libs/fs";
-import { components } from "@octokit/openapi-types";
+import type { components } from "@octokit/openapi-types";
 import { mkdir } from "fs/promises";
-import { Octokit } from "octokit";
+import type { Octokit } from "octokit";
 import * as path from "path";
-import simpleGit, { SimpleGit } from "simple-git";
+import simpleGit, { type SimpleGit } from "simple-git";
 import tmp from "tmp-promise";
 
 export const DEFAULT_REMOTE_NAME = "origin";

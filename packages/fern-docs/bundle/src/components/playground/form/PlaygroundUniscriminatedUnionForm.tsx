@@ -5,7 +5,7 @@ import { memo, useCallback, useMemo, useState } from "react";
 
 import { ChevronDown } from "lucide-react";
 
-import { TypeDefinition, UndiscriminatedUnionType } from "@fern-api/fdr-sdk/api-definition";
+import type { TypeDefinition, UndiscriminatedUnionType } from "@fern-api/fdr-sdk/api-definition";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";

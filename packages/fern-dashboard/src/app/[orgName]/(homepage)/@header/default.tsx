@@ -4,7 +4,7 @@ import { PopoverArrow } from "@radix-ui/react-popover";
 import { Book, RotateCcw } from "lucide-react";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { OrgSwitcher } from "@/components/auth/OrgSwitcher";
 import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
@@ -14,7 +14,7 @@ import { SupportHeaderLink } from "@/components/layout/SupportHeaderLink";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 export default async function HeaderLayout({
     params

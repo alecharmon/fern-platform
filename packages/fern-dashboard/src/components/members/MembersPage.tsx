@@ -1,6 +1,6 @@
 "use client";
 
-import { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { useOrgInvitations } from "@/state/useOrgInvitations";
 import { useOrgMembers } from "@/state/useOrgMembers";
 import { useCurrentOrganization } from "@/state/useOrganizations";

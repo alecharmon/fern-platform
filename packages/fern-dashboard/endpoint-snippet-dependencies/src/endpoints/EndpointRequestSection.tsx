@@ -1,5 +1,5 @@
 /* eslint-disable unused-imports/no-unused-vars */
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { compact } from "es-toolkit/array";
 

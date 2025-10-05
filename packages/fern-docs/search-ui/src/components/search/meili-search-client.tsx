@@ -1,6 +1,6 @@
 "use client";
 
-import { PropsWithChildren, ReactNode, createContext, useContext, useMemo } from "react";
+import { type PropsWithChildren, type ReactNode, createContext, useContext, useMemo } from "react";
 
 import { MeiliSearch } from "meilisearch";
 

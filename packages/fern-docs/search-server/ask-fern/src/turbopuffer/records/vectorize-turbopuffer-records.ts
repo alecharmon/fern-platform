@@ -1,7 +1,7 @@
 import { zipWith } from "es-toolkit/array";
 import { encode } from "gpt-tokenizer";
 
-import { TurbopufferRecord, TurbopufferRecordWithoutVector } from "../types";
+import type { TurbopufferRecord, TurbopufferRecordWithoutVector } from "../types";
 
 export async function vectorizeTurbopufferRecords(
     records: TurbopufferRecordWithoutVector[],

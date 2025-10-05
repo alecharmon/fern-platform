@@ -2,7 +2,7 @@ import { FdrAPI } from "@fern-api/fdr-sdk";
 
 import { UnauthorizedError } from "../../api/generated/api/resources/commons/errors";
 import { OrgIdNotFound, OrgIdRequiredError } from "../../api/generated/api/resources/snippets/errors";
-import { FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 
 export class AuthUtility {
     constructor(

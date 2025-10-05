@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import React from "react";
+import type React from "react";
 
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";

@@ -4,7 +4,7 @@ import React, { useCallback, useState } from "react";
 
 import { CalendarIcon, MinusIcon, PlusIcon } from "lucide-react";
 
-import { DateRangeOptions } from "@/app/services/posthog/types";
+import type { DateRangeOptions } from "@/app/services/posthog/types";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 

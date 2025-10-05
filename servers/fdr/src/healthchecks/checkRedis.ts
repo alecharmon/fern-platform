@@ -1,7 +1,7 @@
 import { OrgId } from "../api/generated/api";
 import { LOGGER } from "../app/FdrApplication";
-import { CachedDocsResponse } from "../services/docs-cache/DocsDefinitionCache";
-import RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
+import type { CachedDocsResponse } from "../services/docs-cache/DocsDefinitionCache";
+import type RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
 
 const HEALTHCHECK_KEY = "https://healthcheck.buildwithfern.com";
 const HEALTHCHECK_DOCS_RESPONSE: CachedDocsResponse = {

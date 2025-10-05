@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { ComponentProps, PropsWithChildren, createElement, forwardRef } from "react";
+import type Link from "next/link";
+import { type ComponentProps, type PropsWithChildren, createElement, forwardRef } from "react";
 
-import { ButtonContent, FernButtonSharedProps, getButtonClassName } from "./FernButton";
+import { ButtonContent, type FernButtonSharedProps, getButtonClassName } from "./FernButton";
 import { Button } from "./FernButtonV2";
 import { FernLink } from "./FernLink";
 

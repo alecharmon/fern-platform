@@ -6,9 +6,9 @@ import { useRouter } from "@bprogress/next/app";
 import { toast } from "sonner";
 
 import { archiveSite } from "@/app/actions/archiveSite";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { delay } from "@/utils/delay";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { Button } from "../ui/button";
 

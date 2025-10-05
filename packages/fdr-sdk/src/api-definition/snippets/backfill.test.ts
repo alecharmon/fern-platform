@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ApiDefinition, ApiDefinitionId, EndpointId, EnvironmentId } from "../latest";
+import { type ApiDefinition, ApiDefinitionId, EndpointId, EnvironmentId } from "../latest";
 import { backfillSnippets } from "./backfill";
 
 describe("backfillSnippets", () => {

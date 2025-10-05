@@ -6,7 +6,6 @@
     "moduleResolution": "Bundler",
     "module": "ESNext",
     "types": ["node", "vitest/globals"],
-    "verbatimModuleSyntax": true,
     "isolatedDeclarations": true
   },
   "include": ["./src/**/*"],

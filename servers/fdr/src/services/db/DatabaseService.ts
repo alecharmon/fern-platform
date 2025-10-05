@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 
-import { APIV1Db, FdrAPI } from "@fern-api/fdr-sdk";
+import type { APIV1Db, FdrAPI } from "@fern-api/fdr-sdk";
 
 export interface DatabaseService {
     readonly prisma: PrismaClient;

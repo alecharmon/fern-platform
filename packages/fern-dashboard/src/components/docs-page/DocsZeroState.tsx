@@ -1,4 +1,4 @@
-import { User } from "@auth0/nextjs-auth0/types";
+import type { User } from "@auth0/nextjs-auth0/types";
 import { PlusIcon } from "lucide-react";
 
 import { Button } from "../ui/button";

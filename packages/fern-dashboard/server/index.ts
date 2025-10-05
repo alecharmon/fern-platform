@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 
 import { DocsWorkspaceDao } from "./daos/docs-workspace";
 import { UserDao } from "./daos/user";

@@ -1,6 +1,6 @@
-import { MeiliSearch } from "meilisearch";
+import type { MeiliSearch } from "meilisearch";
 
-import { FacetName, SEARCHABLE_FACET_ATTRIBUTES } from "../algolia/types";
+import { type FacetName, SEARCHABLE_FACET_ATTRIBUTES } from "../algolia/types";
 
 export type FacetsResponse = Partial<Record<FacetName, { value: string; count: number }[]>>;
 

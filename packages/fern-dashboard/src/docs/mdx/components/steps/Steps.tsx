@@ -2,9 +2,9 @@ import { Button } from "@fern-docs/components/button";
 import { cn } from "@fern-docs/components/cn";
 import { CirclePlusIcon } from "lucide-react";
 import React, {
-    ComponentProps,
+    type ComponentProps,
     createContext,
-    ReactElement,
+    type ReactElement,
     useCallback,
     useContext,
     useMemo,
@@ -14,7 +14,7 @@ import React, {
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
 import { CheckboxControl } from "@/components/editor/editor-component/controls";
 import {
-    EditorComponentContextValue,
+    type EditorComponentContextValue,
     useEditorComponent
 } from "@/components/editor/editor-component/EditorComponentContext";
 import {

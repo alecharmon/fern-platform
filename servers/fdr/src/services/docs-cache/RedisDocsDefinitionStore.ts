@@ -1,7 +1,7 @@
-import { Cluster, Redis } from "ioredis";
+import { type Cluster, Redis } from "ioredis";
 
 import { LOGGER } from "../../app/FdrApplication";
-import { CachedDocsResponse } from "./DocsDefinitionCache";
+import type { CachedDocsResponse } from "./DocsDefinitionCache";
 
 export declare namespace RedisDocsDefinitionStore {
     interface Args {

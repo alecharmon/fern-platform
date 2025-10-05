@@ -5,7 +5,7 @@ import * as auth0Management from "@/app/services/auth0/management";
 import { getAuth0ClientId } from "../services/auth0/auth0";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { getAuth0ManagementClient } from "../services/auth0/management";
-import { Auth0OrgName } from "../services/auth0/types";
+import type { Auth0OrgName } from "../services/auth0/types";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function inviteUserToOrg({ inviteeEmail, orgName }: { inviteeEmail: string; orgName: Auth0OrgName }) {

@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useState } from "react";
+import { type ReactElement, type ReactNode, useState } from "react";
 
 import { FernTabs } from "@fern-docs/components/FernTabs";
 

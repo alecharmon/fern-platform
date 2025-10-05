@@ -6,8 +6,8 @@ import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 import { ExternalLink, Loader2 } from "lucide-react";
 
 import { upgradeFernVersionAction } from "@/app/actions/upgradeFernVersion";
-import { Auth0OrgName } from "@/app/services/auth0/types";
-import { DocsUrl } from "@/utils/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import type { DocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
 
 import { ErrorUpgradeFernCliVersionToast } from "../editor/EditorToasts";

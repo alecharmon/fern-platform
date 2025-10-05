@@ -1,4 +1,4 @@
-import { CfnOutput, Duration, Stack, StackProps } from "aws-cdk-lib";
+import { CfnOutput, Duration, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
@@ -6,10 +6,10 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
-import { Construct } from "constructs";
+import type { Construct } from "constructs";
 import * as path from "path";
 
-import { EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
+import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 
 interface FdrLambdaDeployOptions {
     isPreview?: boolean;

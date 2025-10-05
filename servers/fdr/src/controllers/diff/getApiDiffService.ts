@@ -1,9 +1,9 @@
-import { APIV1Db, FdrAPI } from "@fern-api/fdr-sdk";
+import { type APIV1Db, FdrAPI } from "@fern-api/fdr-sdk";
 
 import { DiffService } from "../../api";
-import { PathParameter, PathParameterDiff, QueryParameter, QueryParameterDiff } from "../../api/generated/api";
+import type { PathParameter, PathParameterDiff, QueryParameter, QueryParameterDiff } from "../../api/generated/api";
 import { ApiDoesNotExistError } from "../../api/generated/api/resources/api/resources/v1/resources/read/errors";
-import { type FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 
 export function getApiDiffService(app: FdrApplication): DiffService {
     return new DiffService({

@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useMemo } from "react";
+import { type FC, useMemo } from "react";
 
 import { useAtom, useAtomValue } from "jotai";
 
@@ -12,7 +12,7 @@ import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/
 
 import { PlaygroundCodeSnippetResolverBuilder } from "./code-snippets/resolver";
 import { useSnippet } from "./code-snippets/useSnippet";
-import { PlaygroundEndpointRequestFormState } from "./types";
+import type { PlaygroundEndpointRequestFormState } from "./types";
 import { usePlaygroundBaseUrl } from "./utils/select-environment";
 
 interface PlaygroundRequestPreviewProps {

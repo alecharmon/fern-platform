@@ -1,7 +1,7 @@
 import * as RadixColors from "@radix-ui/colors";
 import Color from "colorjs.io";
 
-import { ArrayOf12, ColorPalette, FERN_COLOR_ACCENT } from "@fern-api/docs-utils";
+import { type ArrayOf12, type ColorPalette, FERN_COLOR_ACCENT } from "@fern-api/docs-utils";
 
 import { darkGrayColors, generateRadixColors, lightGrayColors } from "./generateRadixColors";
 

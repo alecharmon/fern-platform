@@ -1,4 +1,4 @@
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { createNavigationMemoryStorage } from "@fern-docs/components/navigation/NavigationStorage";
 import { NavigationStore } from "@fern-docs/components/navigation/NavigationStore";
 import { beforeEach, describe, expect, it, vi } from "vitest";

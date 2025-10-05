@@ -1,20 +1,20 @@
 /* eslint-disable unused-imports/no-unused-vars */
-import { APIV1Db, DocsV1Db } from "@fern-api/fdr-sdk";
+import type { APIV1Db, DocsV1Db } from "@fern-api/fdr-sdk";
 
 import { FdrApplication, type FdrConfig } from "../app";
-import { type FdrServices } from "../app/FdrApplication";
-import { type AlgoliaSearchRecord, type AlgoliaService, ConfigSegmentTuple } from "../services/algolia";
-import { type AuthService } from "../services/auth";
-import { OrgIdsResponse } from "../services/auth/AuthService";
-import { RevalidatedPathsResponse, RevalidatorService } from "../services/revalidator/RevalidatorService";
-import {
+import type { FdrServices } from "../app/FdrApplication";
+import type { AlgoliaSearchRecord, AlgoliaService, ConfigSegmentTuple } from "../services/algolia";
+import type { AuthService } from "../services/auth";
+import type { OrgIdsResponse } from "../services/auth/AuthService";
+import type { RevalidatedPathsResponse, RevalidatorService } from "../services/revalidator/RevalidatorService";
+import type {
     FailedToDeleteIndexSegment,
     FailedToRegisterDocsNotification,
     FailedToRevalidatePathsNotification,
     GeneratingDocsNotification,
     SlackService
 } from "../services/slack/SlackService";
-import { ParsedBaseUrl } from "../util/ParsedBaseUrl";
+import type { ParsedBaseUrl } from "../util/ParsedBaseUrl";
 
 export class MockAlgoliaService implements AlgoliaService {
     generateSearchApiKey(_filters: string): string {

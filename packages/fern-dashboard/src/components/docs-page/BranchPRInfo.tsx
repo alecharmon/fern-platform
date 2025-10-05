@@ -2,10 +2,10 @@
 
 import { GitPullRequest, GitPullRequestDraft } from "lucide-react";
 
-import { GithubSourceRepo } from "@/app/services/github/types";
+import type { GithubSourceRepo } from "@/app/services/github/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { GitPRProvider, useGitPrInfo } from "@/providers/GitPRContext";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { ClickablePrNumber } from "../editor/ClickablePrNumber";
 import { PRTitleEditor } from "../editor/PRTitleEditor";

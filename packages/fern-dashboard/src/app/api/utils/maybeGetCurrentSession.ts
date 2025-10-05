@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { decodeAccessToken, getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
-import { Auth0UserID } from "@/app/services/auth0/types";
+import type { Auth0UserID } from "@/app/services/auth0/types";
 
-import { MaybeErrorResponse } from "./MaybeErrorResponse";
+import type { MaybeErrorResponse } from "./MaybeErrorResponse";
 import { parseAuthHeader } from "./parseAuthHeader";
 
 export interface ApiSessionData {

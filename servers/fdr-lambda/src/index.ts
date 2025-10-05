@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Pool } from "pg";
 
 // Create connection pool outside handler for connection reuse

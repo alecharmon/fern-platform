@@ -3,11 +3,11 @@ import { AvailabilityBadge, HttpMethodBadge } from "@fern-docs/components/badges
 import { cn } from "@fern-docs/components/cn";
 import { uniq } from "es-toolkit/array";
 import { ChevronRight } from "lucide-react";
-import { Fragment, ReactElement, ReactNode } from "react";
+import { Fragment, type ReactElement, type ReactNode } from "react";
 import { Highlight, Snippet } from "react-instantsearch";
-import { MarkRequired, UnreachableCaseError } from "ts-essentials";
+import { type MarkRequired, UnreachableCaseError } from "ts-essentials";
 
-import { AlgoliaRecordHit, ApiReferenceRecordHit, ChangelogRecordHit, MarkdownRecordHit } from "../../types";
+import type { AlgoliaRecordHit, ApiReferenceRecordHit, ChangelogRecordHit, MarkdownRecordHit } from "../../types";
 
 const headingLevels = ["h0", "h1", "h2", "h3", "h4", "h5", "h6"] as const;
 

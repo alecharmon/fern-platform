@@ -1,4 +1,4 @@
-import { ResultItem } from "../types";
+import type { ResultItem } from "../types";
 
 export function resultsToRanks(results: ResultItem[]): Record<string, number> {
     return results.reduce<Record<string, number>>((acc, item, index) => {

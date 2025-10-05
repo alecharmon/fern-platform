@@ -1,6 +1,10 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
 
-import { CliReleaseRequest, InvalidVersionError, ReleaseType } from "../../../api/generated/api/resources/generators";
+import {
+    type CliReleaseRequest,
+    InvalidVersionError,
+    ReleaseType
+} from "../../../api/generated/api/resources/generators";
 import { noncifySemanticVersion } from "../../../db/generators/noncifySemanticVersion";
 import { createMockFdrApplication } from "../../mock";
 

@@ -1,6 +1,14 @@
 import { toEstree } from "hast-util-to-estree";
 
-import { Estree, type Hast, SKIP, Unified, extractJsxFromEstree, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
+import {
+    type Estree,
+    type Hast,
+    SKIP,
+    type Unified,
+    extractJsxFromEstree,
+    isMdxJsxElementHast,
+    visit
+} from "@fern-docs/mdx";
 
 /**
  * Extracts all the children of an <Aside> tag and replaces it with a new <Main> and <Aside> tag

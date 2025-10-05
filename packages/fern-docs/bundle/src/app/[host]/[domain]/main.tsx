@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { last } from "es-toolkit/array";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { getIsSidebarFixed } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 
@@ -14,7 +14,7 @@ import { BottomNavigation } from "@/components/bottom-nav";
 import ChangelogEntryPage from "@/components/changelog/ChangelogEntryPage";
 import ChangelogPage, { ChangelogPageEntry, ChangelogPageOverview } from "@/components/changelog/ChangelogPage";
 import { LayoutEvaluator } from "@/components/layouts/LayoutEvaluator";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 export async function DocsMainContent({
     loader,

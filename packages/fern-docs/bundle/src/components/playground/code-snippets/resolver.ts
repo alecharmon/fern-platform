@@ -1,8 +1,8 @@
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
-import { type APIV1Read } from "@fern-api/fdr-sdk/client/types";
+import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { unknownToString } from "@fern-api/ui-core-utils";
 
-import { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
+import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
 import { buildAuthHeaders } from "../utils";
 import { shouldRenderAuth } from "../utils/should-render-auth";
 import { CurlSnippetBuilder } from "./builders/curl";

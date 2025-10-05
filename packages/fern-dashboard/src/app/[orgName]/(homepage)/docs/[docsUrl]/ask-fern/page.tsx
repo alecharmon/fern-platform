@@ -1,4 +1,4 @@
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import AnalyticsPage from "@/components/analytics/AnalyticsPage";
 import { AskAiEnabledServerSide } from "@/components/ask-ai/AskAiEnabledServerSide";

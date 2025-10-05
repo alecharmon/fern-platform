@@ -1,4 +1,4 @@
-import { CodeExample } from "../examples/code-example";
+import type { CodeExample } from "../examples/code-example";
 
 export type Language = string;
 export type StatusCode = string;

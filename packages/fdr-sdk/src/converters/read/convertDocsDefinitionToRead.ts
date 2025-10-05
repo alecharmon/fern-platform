@@ -1,7 +1,7 @@
 import { mapValues } from "es-toolkit/object";
 
-import { APIV1Db, APIV1Read, DocsV1Db, DocsV1Read } from "../../client";
-import { FernRegistry } from "../../client/generated";
+import type { APIV1Db, APIV1Read, DocsV1Db, DocsV1Read } from "../../client";
+import type { FernRegistry } from "../../client/generated";
 import { convertDbDocsConfigToRead } from "./convertDbDocsConfigToRead";
 
 export function convertDocsDefinitionToRead({

@@ -10,7 +10,7 @@ import { MdxServerComponentProseSuspense } from "@/mdx/components/server-compone
 import { PropertyContainer, TypeDefinitionAnchor } from "../endpoints/TypeDefinitionAnchor";
 import { PropertyKey } from "./PropertyKey";
 import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible } from "./TypeDefinitionContext";
-import { PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
+import { type PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 import { TypeShorthand } from "./TypeShorthand";
 
 export const ObjectProperty = React.memo(function ObjectProperty({

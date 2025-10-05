@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactElement, useMemo } from "react";
+import { type ReactElement, useMemo } from "react";
 
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { unwrapReference } from "@fern-api/fdr-sdk/api-definition";
 
 import { PlaygroundObjectForm } from "../form/PlaygroundObjectForm";

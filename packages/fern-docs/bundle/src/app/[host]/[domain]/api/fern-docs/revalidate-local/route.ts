@@ -1,5 +1,5 @@
 import { revalidateTag } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";

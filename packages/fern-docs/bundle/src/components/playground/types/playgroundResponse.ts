@@ -1,4 +1,4 @@
-import { ProxyResponse } from "./proxy";
+import type { ProxyResponse } from "./proxy";
 
 export declare namespace PlaygroundResponse {
     export interface Stream {

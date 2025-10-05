@@ -1,4 +1,4 @@
-import { Auth0OrgName } from "../auth0/types";
+import type { Auth0OrgName } from "../auth0/types";
 import { DashboardApiClient } from "../dashboard-api/client";
 
 export const DEFAULT_PR_TITLE = "Visual Editor: Update";

@@ -1,7 +1,7 @@
 import "server-only";
 
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 

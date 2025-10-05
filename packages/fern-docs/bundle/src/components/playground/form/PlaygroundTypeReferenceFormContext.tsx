@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, createContext, useContext } from "react";
+import { type Dispatch, type SetStateAction, createContext, useContext } from "react";
 
 interface PlaygroundTypeReferenceFormContextValue {
     isNullSelected: boolean;

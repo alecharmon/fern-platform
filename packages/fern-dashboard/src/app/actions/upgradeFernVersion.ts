@@ -1,12 +1,12 @@
 "use server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { GithubCommitableFile } from "@/app/services/github/types";
-import { DocsUrl } from "@/utils/types";
+import type { GithubCommitableFile } from "@/app/services/github/types";
+import type { DocsUrl } from "@/utils/types";
 
 import postGitCommit from "../api/post-git-commit/handler";
 import postCreatePr from "../api/post-git-create-pr/handler";
-import { Auth0OrgName } from "../services/auth0/types";
+import type { Auth0OrgName } from "../services/auth0/types";
 import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExists";
 import { withGithubAuth } from "../services/dal/github/middleware";
 import { getUpgradePrBranchName } from "../services/dal/github/request-utils";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, FC, SetStateAction, useCallback, useMemo } from "react";
+import { type Dispatch, type FC, type SetStateAction, useCallback, useMemo } from "react";
 
 import { type EndpointContext, PropertyKey } from "@fern-api/fdr-sdk/api-definition";
 import { EMPTY_ARRAY, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
@@ -9,7 +9,7 @@ import { PlaygroundFileUploadForm } from "../form/PlaygroundFileUploadForm";
 import { PlaygroundObjectForm } from "../form/PlaygroundObjectForm";
 import { PlaygroundObjectPropertiesForm } from "../form/PlaygroundObjectPropertyForm";
 import { PlaygroundOpenRPCParamsForm } from "../form/PlaygroundOpenRPCParamsForm";
-import { PlaygroundEndpointRequestFormState, PlaygroundFormStateBody } from "../types";
+import type { PlaygroundEndpointRequestFormState, PlaygroundFormStateBody } from "../types";
 import { PlaygroundEndpointAliasForm } from "./PlaygroundEndpointAliasForm";
 import { PlaygroundEndpointFormSection } from "./PlaygroundEndpointFormSection";
 import { PlaygroundEndpointMultipartForm } from "./PlaygroundEndpointMultipartForm";

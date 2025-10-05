@@ -1,8 +1,8 @@
 import assertNever from "@fern-api/ui-core-utils/assertNever";
 
-import { APIV1Write } from "../../../client";
+import type { APIV1Write } from "../../../client";
 import {
-    ResolveTypeById,
+    type ResolveTypeById,
     generateExampleFromTypeReference,
     generateExampleFromTypeShape,
     generateHttpRequestBodyExample,

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 
 import { useDomain } from "@fern-docs/components/state/domain";
 import AbstractDefaultDocs from "@fern-docs/components/theming/AbstractDefaultDocs";

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 
 import { Loader2 } from "lucide-react";
 
-import { RedeemInviteTokenErrors, redeemInviteToken } from "@/app/actions/redeemInviteToken";
+import { type RedeemInviteTokenErrors, redeemInviteToken } from "@/app/actions/redeemInviteToken";
 import { GithubLoginButton, GoogleLoginButton } from "@/components/auth/LoginButton";
 import { LoginImage } from "@/components/login-page/LoginImage";
 import { Button } from "@/components/ui/button";

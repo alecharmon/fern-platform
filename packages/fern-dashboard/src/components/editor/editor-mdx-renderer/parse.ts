@@ -1,6 +1,6 @@
-import { MdastNodes, MdxJsxExpressionAttribute, astToMDX, mdxToAST } from "@fern-docs/mdx";
+import { type MdastNodes, type MdxJsxExpressionAttribute, astToMDX, mdxToAST } from "@fern-docs/mdx";
 
-import { AttributeValue, JSXElement, JSXElementChildren, ParsedMarkdownElement } from "./types";
+import type { AttributeValue, JSXElement, JSXElementChildren, ParsedMarkdownElement } from "./types";
 
 const richTextComponents = [
     "Callout",

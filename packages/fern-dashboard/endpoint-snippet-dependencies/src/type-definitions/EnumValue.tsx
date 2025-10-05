@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 

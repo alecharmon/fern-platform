@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
-import { Auth0UserID } from "../../auth0/types";
+import type { Auth0UserID } from "../../auth0/types";
 
 export type RepoIdentifier =
     | {

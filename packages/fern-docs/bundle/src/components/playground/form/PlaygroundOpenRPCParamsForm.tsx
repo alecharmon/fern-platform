@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactElement, useMemo } from "react";
+import { type ReactElement, useMemo } from "react";
 
-import { TypeDefinition, TypeShape, unwrapObjectType } from "@fern-api/fdr-sdk/api-definition";
+import { type TypeDefinition, type TypeShape, unwrapObjectType } from "@fern-api/fdr-sdk/api-definition";
 
 import { PlaygroundOpenRPCParametersForm } from "./PlaygroundOpenRPCParameterForm";
 

@@ -1,13 +1,13 @@
 "use client";
 
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 
 import { Mic, RotateCcw } from "lucide-react";
 import { AnimatePresence, LazyMotion, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 
 import { FernButton } from "@fern-docs/components/FernButton";
-import { FernInput, FernInputProps } from "@fern-docs/components/FernInput";
+import { FernInput, type FernInputProps } from "@fern-docs/components/FernInput";
 
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { PlaygroundAudioControls } from "./PlaygroundAudioControls";

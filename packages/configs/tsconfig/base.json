@@ -24,6 +24,7 @@
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
+    "verbatimModuleSyntax": true,
     "target": "es2022",
     "types": ["vitest/globals"]
   },

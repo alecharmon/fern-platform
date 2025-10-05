@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { getToggleStatus, isAskAiEnabled, reindexAskAi, toggleAskAi } from "@/app/actions/toggleAskAi";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { Button } from "../ui/button";

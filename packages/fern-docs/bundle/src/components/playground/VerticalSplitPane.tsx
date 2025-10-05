@@ -1,6 +1,14 @@
 "use client";
 
-import { Children, ComponentProps, PropsWithChildren, ReactElement, useCallback, useRef, useState } from "react";
+import {
+    Children,
+    type ComponentProps,
+    type PropsWithChildren,
+    type ReactElement,
+    useCallback,
+    useRef,
+    useState
+} from "react";
 
 import { cn } from "@fern-docs/components/cn";
 

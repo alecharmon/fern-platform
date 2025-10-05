@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
 
 import { SnippetResolver } from "../SnippetResolver";
-import { SnippetInput } from "../types";
+import type { SnippetInput } from "../types";
 import csharpFixture from "./fixtures/demo/csharp.json";
 import goFixture from "./fixtures/demo/go.json";
 import javaFixture from "./fixtures/demo/java.json";

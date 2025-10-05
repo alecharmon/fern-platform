@@ -1,4 +1,4 @@
-import { FileData } from "./file-data";
+import type { FileData } from "./file-data";
 
 export interface LogoConfiguration {
     height: number | undefined;

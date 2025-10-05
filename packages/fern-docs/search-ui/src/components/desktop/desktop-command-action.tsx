@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, forwardRef } from "react";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { CircleStop, CornerDownLeft } from "lucide-react";

@@ -1,11 +1,11 @@
 import { preload } from "react-dom";
 
-import useSWR, { Fetcher, SWRConfiguration, SWRResponse } from "swr";
+import useSWR, { type Fetcher, type SWRConfiguration, type SWRResponse } from "swr";
 import useSWRImmutable from "swr/immutable";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { withSkewProtection } from "../util/withSkewProtection";
-import { FernDocsApiRoute, useApiRoute } from "./useApiRoute";
+import { type FernDocsApiRoute, useApiRoute } from "./useApiRoute";
 
 interface Options<T> extends SWRConfiguration<T, Error, Fetcher<T>> {
     disabled?: boolean;

@@ -1,8 +1,8 @@
-import { SnippetHttpRequestBodyFormValue } from "@fern-api/fdr-sdk/api-definition";
+import type { SnippetHttpRequestBodyFormValue } from "@fern-api/fdr-sdk/api-definition";
 import { assertNever } from "@fern-api/ui-core-utils";
 
-import { PlaygroundFormDataEntryValue } from "./formDataEntryValue";
-import { JsonVariant } from "./jsonVariant";
+import type { PlaygroundFormDataEntryValue } from "./formDataEntryValue";
+import type { JsonVariant } from "./jsonVariant";
 
 export type PlaygroundRequestFormState = PlaygroundEndpointRequestFormState | PlaygroundWebSocketRequestFormState;
 

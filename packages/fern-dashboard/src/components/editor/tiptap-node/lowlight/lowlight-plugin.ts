@@ -3,7 +3,7 @@ import type { Node as ProsemirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 
-import { LowlightInstance } from "../../extension-code-block/types";
+import type { LowlightInstance } from "../../extension-code-block/types";
 
 function parseNodes(nodes: any[], className: string[] = []): { text: string; classes: string[] }[] {
     return nodes

@@ -1,4 +1,4 @@
-import { DocsV1Read } from "../../client";
+import type { DocsV1Read } from "../../client";
 
 export const DEFAULT_DARK_MODE_ACCENT_PRIMARY: DocsV1Read.RgbaColor = {
     r: 129,

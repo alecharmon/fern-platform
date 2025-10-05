@@ -1,8 +1,8 @@
-import React, { ComponentProps, PropsWithChildren } from "react";
+import React, { type ComponentProps, type PropsWithChildren } from "react";
 
 import { last } from "es-toolkit/array";
 
-import { FernLink } from "@fern-docs/components/FernLink";
+import type { FernLink } from "@fern-docs/components/FernLink";
 
 import { Button } from "../button";
 import { Card } from "../card";

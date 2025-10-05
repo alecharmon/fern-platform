@@ -1,8 +1,12 @@
 // import "server-only";
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 
 import { TypeDefinitionSlotsProvider } from "./TypeDefinitionSlotsClient";
-import { PropertyLocation, TypeReferenceDefinitions, TypeReferenceDefinitionsProps } from "./TypeReferenceDefinitions";
+import {
+    type PropertyLocation,
+    TypeReferenceDefinitions,
+    type TypeReferenceDefinitionsProps
+} from "./TypeReferenceDefinitions";
 
 export interface TypeDefinitionSlotsServerProps {
     types: Record<string, ApiDefinition.TypeDefinition>;

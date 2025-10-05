@@ -1,4 +1,4 @@
-import { JWTPayload, createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
+import { type JWTPayload, createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
 import urlJoin from "url-join";
 
 import { type OAuth2Ory, type OAuthTokenResponse, OAuthTokenResponseSchema } from "@fern-api/docs-auth";

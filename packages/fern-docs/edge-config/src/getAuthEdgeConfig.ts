@@ -1,4 +1,4 @@
-import { ApiKeyDemo, ApiKeySchema, type AuthEdgeConfig, AuthEdgeConfigSchema } from "@fern-api/docs-auth";
+import { type ApiKeyDemo, ApiKeySchema, type AuthEdgeConfig, AuthEdgeConfigSchema } from "@fern-api/docs-auth";
 import { withoutStaging } from "@fern-api/docs-utils";
 
 import { getEdge } from "./getEdge";

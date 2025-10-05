@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { SignJWT, decodeJwt } from "jose";
 import urlJoin from "url-join";
 import { WebflowClient } from "webflow-api";
 import type { OauthScope } from "webflow-api/api/types/OAuthScope";
 
-import { APIKeyInjectionConfig, OryAccessTokenSchema } from "@fern-api/docs-auth";
+import { type APIKeyInjectionConfig, OryAccessTokenSchema } from "@fern-api/docs-auth";
 import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { getOAuth2AuthorizationUrl } from "@fern-api/docs-server/auth/oauth2";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";

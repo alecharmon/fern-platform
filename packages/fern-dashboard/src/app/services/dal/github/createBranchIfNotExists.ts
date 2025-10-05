@@ -2,9 +2,9 @@
 
 import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { assertUserHasOrganizationAccess } from "../organization";
 

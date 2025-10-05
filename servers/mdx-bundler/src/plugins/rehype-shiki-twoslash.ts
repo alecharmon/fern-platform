@@ -1,5 +1,5 @@
-import { CONTINUE, Hast, SKIP, Unified, visit } from "@fern-docs/mdx";
-import rehypeShiki, { RehypeShikiOptions } from "@shikijs/rehype";
+import { CONTINUE, type Hast, SKIP, type Unified, visit } from "@fern-docs/mdx";
+import rehypeShiki, { type RehypeShikiOptions } from "@shikijs/rehype";
 
 export const conditionalRehypeShiki: Unified.Plugin<[RehypeShikiOptions], Hast.Root> = function (options) {
     const originalPlugin = rehypeShiki.call(this, options);

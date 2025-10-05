@@ -1,11 +1,11 @@
 import { compact, flatten } from "es-toolkit/array";
 
-import { GrpcMethod } from "@fern-api/docs-utils";
-import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
+import type { GrpcMethod } from "@fern-api/docs-utils";
+import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
 import { measureBytes, truncateToBytes, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
 
-import { BaseRecord, EndpointBaseRecord } from "../types";
+import type { BaseRecord, EndpointBaseRecord } from "../types";
 
 interface CreateEndpointBaseRecordGrpc {
     node: FernNavigation.GrpcNode;

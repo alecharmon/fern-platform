@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { FernAI } from "@fern-api/fai-sdk";
+import type { FernAI } from "@fern-api/fai-sdk";
 
 import { getAllQueries } from "@/app/actions/getAllQueries";
 import { cn } from "@/utils/utils";
@@ -12,7 +12,7 @@ import { BORDER_STYLES } from "./AnalyticsPageClient";
 import { columns } from "./ConversationColumnDef";
 import { QueriesDataTable } from "./QueriesDataTable";
 import { exportToCSV } from "./utils/export-to-csv";
-import { TimeRange } from "./utils/get-request-params";
+import type { TimeRange } from "./utils/get-request-params";
 
 export function QueriesTable({
     queries,

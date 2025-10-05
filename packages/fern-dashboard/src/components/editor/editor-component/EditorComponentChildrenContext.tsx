@@ -1,6 +1,7 @@
 "use client";
 
-import React, { ReactNode, createContext, useContext } from "react";
+import type React from "react";
+import { type ReactNode, createContext, useContext } from "react";
 
 interface EditorComponentChildrenContextValue {
     appendChildrenMdx: (newChild: string) => unknown;

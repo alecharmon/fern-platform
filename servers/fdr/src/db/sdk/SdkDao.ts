@@ -1,10 +1,10 @@
-import { Language, Prisma, PrismaClient } from "@prisma/client";
+import { Language, type Prisma, type PrismaClient } from "@prisma/client";
 
-import { APIV1Write } from "@fern-api/fdr-sdk";
+import type { APIV1Write } from "@fern-api/fdr-sdk";
 
 import { LOGGER } from "../../app/FdrApplication";
 import { SdkIdFactory } from "../snippets/SdkIdFactory";
-import { SdkId } from "../types";
+import type { SdkId } from "../types";
 
 type PrismaTransaction = Omit<
     PrismaClient<Prisma.PrismaClientOptions, never>,

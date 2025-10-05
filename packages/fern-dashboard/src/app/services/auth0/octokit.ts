@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/core";
 
 import { getUserGithubToken } from "./management";
-import { Auth0UserID } from "./types";
+import type { Auth0UserID } from "./types";
 
 export async function getUserOctokit(userId: Auth0UserID) {
     const gitHubToken = await getUserGithubToken(userId);

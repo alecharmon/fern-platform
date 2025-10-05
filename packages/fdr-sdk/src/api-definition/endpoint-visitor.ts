@@ -1,4 +1,4 @@
-import * as Latest from "./latest";
+import type * as Latest from "./latest";
 import { Transformer } from "./transformer";
 
 interface EndpointDefinitionVisitor {

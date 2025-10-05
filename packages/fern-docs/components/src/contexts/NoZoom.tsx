@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, createContext } from "react";
+import { type ReactNode, createContext } from "react";
 
 export const NoZoomContext = createContext<boolean>(false);
 

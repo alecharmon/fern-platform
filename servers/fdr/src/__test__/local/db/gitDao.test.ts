@@ -1,6 +1,6 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
 
-import { PullRequest, PullRequestState } from "../../../api/generated/api";
+import { type PullRequest, PullRequestState } from "../../../api/generated/api";
 import { createMockFdrApplication } from "../../mock";
 
 const fdrApplication = createMockFdrApplication({

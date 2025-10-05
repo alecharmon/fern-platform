@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 
 import { Plus, X } from "lucide-react";
 
-import { TypeDefinition, TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
+import type { TypeDefinition, TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
 import { isPlainObject, unknownToString } from "@fern-api/ui-core-utils";
 import { FernButton } from "@fern-docs/components/FernButton";
 

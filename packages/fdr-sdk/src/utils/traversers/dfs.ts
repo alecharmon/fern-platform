@@ -1,4 +1,4 @@
-import { SKIP, STOP, TraverserGetChildren, TraverserVisit } from "./types";
+import { SKIP, STOP, type TraverserGetChildren, type TraverserVisit } from "./types";
 
 export function dfs<N, P extends N = N>(
     root: N,

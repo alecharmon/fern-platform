@@ -2,12 +2,12 @@
 
 import React from "react";
 
-import { GetMembers200ResponseOneOfInner } from "auth0";
+import type { GetMembers200ResponseOneOfInner } from "auth0";
 
-import { Loadable, getLoadableValue } from "@fern-ui/loadable";
+import { type Loadable, getLoadableValue } from "@fern-ui/loadable";
 
-import { Auth0UserID } from "@/app/services/auth0/types";
-import { OrgInvitation } from "@/state/types";
+import type { Auth0UserID } from "@/app/services/auth0/types";
+import type { OrgInvitation } from "@/state/types";
 
 import { InviteeRow } from "./InviteeRow";
 import { MemberRow } from "./MemberRow";

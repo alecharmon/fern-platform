@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, PropsWithChildren, ReactNode, memo } from "react";
+import { type ComponentPropsWithoutRef, type PropsWithChildren, type ReactNode, memo } from "react";
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { TooltipPortal } from "@radix-ui/react-tooltip";

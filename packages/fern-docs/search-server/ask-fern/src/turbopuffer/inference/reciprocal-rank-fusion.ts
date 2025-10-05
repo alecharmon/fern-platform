@@ -1,6 +1,6 @@
 import { isNonNullish } from "@fern-api/ui-core-utils";
 
-import { ResultItem } from "../types";
+import type { ResultItem } from "../types";
 import { resultsToRanks } from "./results-to-ranks";
 
 export function reciprocalRankFusion(bm25: ResultItem[], vector: ResultItem[], k: number = 60): ResultItem[] {

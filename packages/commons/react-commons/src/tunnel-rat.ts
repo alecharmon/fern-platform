@@ -1,6 +1,7 @@
 "use client";
 
-import React, { PropsWithChildren, ReactNode } from "react";
+import type React from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 import { atom, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";

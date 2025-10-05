@@ -1,4 +1,4 @@
-import { ComponentProps, RefObject, forwardRef, useEffect, useRef } from "react";
+import { type ComponentProps, type RefObject, forwardRef, useEffect, useRef } from "react";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";

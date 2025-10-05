@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import { SidebarApiPackageChild } from "./SidebarApiPackageChild";

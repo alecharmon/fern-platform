@@ -1,6 +1,6 @@
 import urljoin from "url-join";
 
-import { ProxyRequest } from "../types";
+import type { ProxyRequest } from "../types";
 import { toBodyInit } from "./requestToBodyInit";
 
 const PROXY_URL = "https://proxy.ferndocs.com/";

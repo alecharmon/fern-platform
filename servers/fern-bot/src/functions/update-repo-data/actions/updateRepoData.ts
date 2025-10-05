@@ -1,8 +1,8 @@
 import { S3 } from "@aws-sdk/client-s3";
-import { Env } from "@libs/env";
+import type { Env } from "@libs/env";
 import { setupGithubApp } from "@libs/github";
 import { json2csv } from "json-2-csv";
-import { App } from "octokit";
+import type { App } from "octokit";
 
 interface RepoData {
     id: string;

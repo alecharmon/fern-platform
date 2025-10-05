@@ -1,6 +1,6 @@
-import { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
 
-import { Language } from "./Language";
+import type { Language } from "./Language";
 
 export type DynamicIR = dynamic.DynamicIntermediateRepresentation;
 export interface SnippetInput {

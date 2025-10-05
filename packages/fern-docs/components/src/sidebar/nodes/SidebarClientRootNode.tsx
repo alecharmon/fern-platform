@@ -1,6 +1,6 @@
 "use client";
 
-import { DangerousTransmittableDocsLoaderData, PrefetchedDocsLoader } from "@fern-api/docs-loader/client";
+import { type DangerousTransmittableDocsLoaderData, PrefetchedDocsLoader } from "@fern-api/docs-loader/client";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { SidebarRootNodeImpl } from "./SidebarRootNodeImpl";

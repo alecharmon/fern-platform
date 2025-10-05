@@ -1,4 +1,4 @@
-import { NodeId, PlaygroundSettings } from "@fern-api/fdr-sdk/navigation";
+import type { NodeId, PlaygroundSettings } from "@fern-api/fdr-sdk/navigation";
 
 export function usePlaygroundSettings(_currentNodeId?: NodeId): PlaygroundSettings | undefined {
     // const navigationNodes = useNodeCollector();

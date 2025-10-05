@@ -1,7 +1,7 @@
 import {
-    ObjectProperty,
-    TypeDefinition,
-    TypeShapeOrReference,
+    type ObjectProperty,
+    type TypeDefinition,
+    type TypeShapeOrReference,
     unwrapObjectType,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";

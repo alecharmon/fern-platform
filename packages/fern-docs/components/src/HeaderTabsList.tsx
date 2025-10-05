@@ -2,7 +2,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { Lock } from "lucide-react";
 
 import { slugToHref } from "@fern-api/docs-utils";
-import { TabChild, hasRedirect } from "@fern-api/fdr-sdk/navigation";
+import { type TabChild, hasRedirect } from "@fern-api/fdr-sdk/navigation";
 
 import { FernLinkTab } from "./FernLinkTab";
 import { cn } from "./cn";

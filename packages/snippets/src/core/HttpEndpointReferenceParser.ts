@@ -1,6 +1,6 @@
-import { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
 
-import { HttpMethodSchema } from "./HttpMethodSchema";
+import type { HttpMethodSchema } from "./HttpMethodSchema";
 
 export declare namespace HttpEndpointReferenceParser {
     export type ValidationResult = Valid | Invalid;

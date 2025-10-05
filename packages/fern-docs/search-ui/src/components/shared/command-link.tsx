@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, forwardRef, useCallback, useEffect, useRef } from "react";
+import { type ComponentPropsWithoutRef, forwardRef, useCallback, useEffect, useRef } from "react";
 
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { Slot } from "@radix-ui/react-slot";

@@ -1,4 +1,4 @@
-import { FernAI } from "@fern-api/fai-sdk";
+import type { FernAI } from "@fern-api/fai-sdk";
 
 function escapeCSVField(value: string): string {
     const normalized = value.replace(/\r/g, "\\r").replace(/\n/g, "\\n");

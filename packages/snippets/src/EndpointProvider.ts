@@ -1,5 +1,5 @@
 import { DynamicSnippetsGenerator as CSharp } from "@fern-api/csharp-dynamic-snippets";
-import { dynamic, generatorExec } from "@fern-api/dynamic-ir-sdk/api";
+import type { dynamic, generatorExec } from "@fern-api/dynamic-ir-sdk/api";
 import { DynamicSnippetsGenerator as Go } from "@fern-api/go-dynamic-snippets";
 import { DynamicSnippetsGenerator as Java } from "@fern-api/java-dynamic-snippets";
 import { DynamicSnippetsGenerator as PHP } from "@fern-api/php-dynamic-snippets";
@@ -8,9 +8,9 @@ import { DynamicSnippetsGenerator as Ruby } from "@fern-api/ruby-dynamic-snippet
 import { DynamicSnippetsGenerator as TypeScript } from "@fern-api/typescript-dynamic-snippets";
 
 import { EndpointSnippetGenerator } from "./EndpointSnippetGenerator";
-import { Language } from "./Language";
-import { Options } from "./Options";
-import { AbstractDynamicSnippetsGenerator } from "./core/AbstractDynamicSnippetsGenerator";
+import type { Language } from "./Language";
+import type { Options } from "./Options";
+import type { AbstractDynamicSnippetsGenerator } from "./core/AbstractDynamicSnippetsGenerator";
 import { HttpEndpointReferenceParser } from "./core/HttpEndpointReferenceParser";
 
 export class EndpointProvider {

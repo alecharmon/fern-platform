@@ -11,7 +11,7 @@ import { FernCollapseWithButtonUncontrolled } from "./FernCollapseWithButtonUnco
 import { ObjectProperty } from "./ObjectProperty";
 import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
 import { WithSeparator } from "./TypeDefinitionDetails";
-import { PropertyLocation } from "./TypeReferenceDefinitions";
+import type { PropertyLocation } from "./TypeReferenceDefinitions";
 import { UndiscriminatedUnionVariant } from "./UndiscriminatedUnionVariant";
 
 export declare namespace InternalTypeDefinition {

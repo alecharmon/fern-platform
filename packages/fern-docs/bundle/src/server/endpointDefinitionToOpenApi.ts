@@ -1,5 +1,5 @@
 import { dump as yamlStringify } from "js-yaml";
-import { OpenAPIV3, OpenAPIV3_1 } from "openapi-types";
+import type { OpenAPIV3, OpenAPIV3_1 } from "openapi-types";
 
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";

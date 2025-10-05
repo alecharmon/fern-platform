@@ -1,12 +1,12 @@
 "use client";
 
-import { CSSProperties, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import React from "react";
 
 import fastdom from "fastdom";
 import { useCallbackOne } from "use-memo-one";
 
-import { FernUser } from "@fern-api/docs-auth";
+import type { FernUser } from "@fern-api/docs-auth";
 import type { TableOfContentsItem as TableOfContentsItemType } from "@fern-docs/mdx";
 
 import { cn } from "../cn";

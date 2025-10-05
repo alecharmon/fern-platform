@@ -1,7 +1,7 @@
 import { useIsHovering } from "@fern-ui/react-commons";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
-import { ComponentPropsWithoutRef, forwardRef } from "react";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 import { cn } from "./cn";
 import { FernLogo, FernLogoFill } from "./FernLogo";
 import { FernTooltip, FernTooltipProvider } from "./FernTooltip";

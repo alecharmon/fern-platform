@@ -1,20 +1,20 @@
-import { generatePrDescription } from "@/app/api/generate-pr-description/route";
-import { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
-import { getGithubSourceMetadata } from "@/app/api/get-github-source-metadata/route";
-import { getMyOrganizations } from "@/app/api/get-my-organizations/route";
-import { getOrgInvitations } from "@/app/api/get-org-invitations/route";
-import { getOrgMembers } from "@/app/api/get-org-members/route";
-import { getPrForBranch } from "@/app/api/get-pr-for-branch/route";
-import { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
-import { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
-import { postDocsGithubSource } from "@/app/api/post-docs-github-source/route";
-import { postGitCommit } from "@/app/api/post-git-commit/route";
-import { postCreatePr } from "@/app/api/post-git-create-pr/route";
-import { preloadEditorData } from "@/app/api/preload-editor-data/route";
-import { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
-import { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
-import { updatePrStatus } from "@/app/api/update-pr-status/route";
-import { updatePrTitle } from "@/app/api/update-pr-title/route";
+import type { generatePrDescription } from "@/app/api/generate-pr-description/route";
+import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
+import type { getGithubSourceMetadata } from "@/app/api/get-github-source-metadata/route";
+import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
+import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
+import type { getOrgMembers } from "@/app/api/get-org-members/route";
+import type { getPrForBranch } from "@/app/api/get-pr-for-branch/route";
+import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
+import type { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
+import type { postDocsGithubSource } from "@/app/api/post-docs-github-source/route";
+import type { postGitCommit } from "@/app/api/post-git-commit/route";
+import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
+import type { preloadEditorData } from "@/app/api/preload-editor-data/route";
+import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
+import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
+import type { updatePrStatus } from "@/app/api/update-pr-status/route";
+import type { updatePrTitle } from "@/app/api/update-pr-title/route";
 
 export const DashboardApiClient = {
     getMyOrganizations: () => typedFetch<getMyOrganizations.Response>("/api/get-my-organizations"),

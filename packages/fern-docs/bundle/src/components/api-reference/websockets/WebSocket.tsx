@@ -5,8 +5,8 @@ import { ArrowDown, ArrowUp, Wifi } from "lucide-react";
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
@@ -16,7 +16,7 @@ import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PlaygroundButton } from "@/components/playground/PlaygroundButton";
 import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKeyboardTrigger";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { EndpointSection } from "../endpoints/EndpointSection";
@@ -30,7 +30,7 @@ import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefin
 import { CardedSection } from "./CardedSection";
 import { CopyWithBaseUrl } from "./CopyWithBaseUrl";
 import { HandshakeExample } from "./HandshakeExample";
-import { WebSocketMessage, WebSocketMessages } from "./WebSocketMessages";
+import { type WebSocketMessage, WebSocketMessages } from "./WebSocketMessages";
 
 export async function WebSocketContent({
     serialize,

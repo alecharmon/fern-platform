@@ -1,4 +1,4 @@
-import { EndpointDefinition, EnvironmentId, PathPart, PropertyKey } from "@fern-api/fdr-sdk/api-definition";
+import { type EndpointDefinition, EnvironmentId, type PathPart, PropertyKey } from "@fern-api/fdr-sdk/api-definition";
 
 import { getMatchablePermutationsForEndpoint } from "../../../../../commons/docs-server/src/processRequestSnippetComponents";
 

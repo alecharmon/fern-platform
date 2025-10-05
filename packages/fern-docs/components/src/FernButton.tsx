@@ -1,9 +1,17 @@
 "use client";
 
 import { Slot } from "@radix-ui/react-slot";
-import { ComponentProps, createElement, forwardRef, PropsWithChildren, ReactElement, ReactNode, useRef } from "react";
+import {
+    type ComponentProps,
+    createElement,
+    forwardRef,
+    type PropsWithChildren,
+    type ReactElement,
+    type ReactNode,
+    useRef
+} from "react";
 import { cn } from "./cn";
-import { SemanticColor } from "./colors";
+import type { SemanticColor } from "./colors";
 import { FernTooltip } from "./FernTooltip";
 import { FaIcon } from "./fa-icon";
 

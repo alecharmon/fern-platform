@@ -1,6 +1,6 @@
 "use client";
 
-import { PropsWithChildren, RefObject, forwardRef } from "react";
+import { type PropsWithChildren, type RefObject, forwardRef } from "react";
 
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 

@@ -1,11 +1,11 @@
 import "server-only";
 
-import { AsyncOrSync } from "ts-essentials";
+import type { AsyncOrSync } from "ts-essentials";
 
-import { AuthEdgeConfig, FernUser } from "@fern-api/docs-auth";
+import type { AuthEdgeConfig, FernUser } from "@fern-api/docs-auth";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { PreviewUrlAuth, getAuthEdgeConfig, getPreviewUrlAuthConfig } from "@fern-docs/edge-config";
+import { type PreviewUrlAuth, getAuthEdgeConfig, getPreviewUrlAuthConfig } from "@fern-docs/edge-config";
 
 import { isLocal } from "../isLocal";
 import { isSelfHosted } from "../isSelfHosted";

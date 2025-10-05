@@ -1,7 +1,8 @@
 import { Button } from "@fern-docs/components/button";
 import { cn } from "@fern-docs/components/cn";
 import { CirclePlusIcon } from "lucide-react";
-import React, { useRef } from "react";
+import type React from "react";
+import { useRef } from "react";
 import { useEditorComponentChildren } from "@/components/editor/editor-component";
 import { IntegerInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";

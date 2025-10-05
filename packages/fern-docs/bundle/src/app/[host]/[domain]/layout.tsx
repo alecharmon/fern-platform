@@ -1,7 +1,7 @@
 import "server-only";
 
 import Script from "next/script";
-import { Metadata } from "next/types";
+import type { Metadata } from "next/types";
 import React from "react";
 import { preload } from "react-dom";
 
@@ -9,14 +9,14 @@ import { getEnv } from "@vercel/functions";
 import { compact } from "es-toolkit/array";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-import { DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk/client/types";
+import type { DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk/client/types";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FeatureFlagProvider } from "@fern-docs/components/feature-flags/FeatureFlagProvider";
 import { Domain } from "@fern-docs/components/state/domain";
-import { LaunchDarklyInfo } from "@fern-docs/components/state/feature-flags";
+import type { LaunchDarklyInfo } from "@fern-docs/components/state/feature-flags";
 import { RootNodeProvider, SetBasePath } from "@fern-docs/components/state/navigation";
 import {
     getAllSidebarRootNodes,

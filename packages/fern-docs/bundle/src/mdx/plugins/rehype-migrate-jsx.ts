@@ -1,4 +1,4 @@
-import { Hast, Unified, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
+import { type Hast, type Unified, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
 
 export const rehypeMigrateJsx: Unified.Plugin<[Record<string, string>?], Hast.Root> = (mapping = {}) => {
     return (ast: Hast.Root) => {

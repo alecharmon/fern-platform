@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-import { z } from "zod";
+import type { z } from "zod";
 
 /**
  * Higher-order function that adds Zod request body validation to any handler

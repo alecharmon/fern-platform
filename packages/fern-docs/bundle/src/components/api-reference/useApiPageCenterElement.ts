@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { RefObject, useEffect } from "react";
+import { type RefObject, useEffect } from "react";
 
 import { useInView } from "motion/react";
 

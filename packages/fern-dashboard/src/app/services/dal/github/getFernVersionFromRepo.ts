@@ -1,9 +1,9 @@
 import "server-only";
 
-import { FernConfigJsonErrors } from "@fern-api/docs-loader";
+import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
 
 import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { GitHubLoader } from "../../github/github-loader";
 

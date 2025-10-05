@@ -4,8 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { rescindInvitation } from "@/app/actions/rescindInvitation";
-import { ReactQueryKey, inferQueryData } from "@/state/queryKeys";
-import { OrgInvitation } from "@/state/types";
+import { ReactQueryKey, type inferQueryData } from "@/state/queryKeys";
+import type { OrgInvitation } from "@/state/types";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { DropdownMenuItem } from "../ui/dropdown-menu";

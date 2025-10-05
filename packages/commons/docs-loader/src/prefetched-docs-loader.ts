@@ -1,11 +1,11 @@
-import { AuthEdgeConfig } from "@fern-api/docs-auth";
-import { AuthState } from "@fern-api/docs-server/auth/getAuthState";
-import { DocsLoader, DocsMetadata } from "@fern-api/docs-server/docs-loader";
-import { FernFonts } from "@fern-api/docs-server/generateFonts";
-import { DynamicIRsByLanguage } from "@fern-api/docs-server/loadDynamicIRFromS3";
+import type { AuthEdgeConfig } from "@fern-api/docs-auth";
+import type { AuthState } from "@fern-api/docs-server/auth/getAuthState";
+import type { DocsLoader, DocsMetadata } from "@fern-api/docs-server/docs-loader";
+import type { FernFonts } from "@fern-api/docs-server/generateFonts";
+import type { DynamicIRsByLanguage } from "@fern-api/docs-server/loadDynamicIRFromS3";
 import type { EdgeFlags, FernColorTheme, HttpMethod } from "@fern-api/docs-utils";
-import { FileData } from "@fern-api/docs-utils/types/file-data";
-import { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { ApiDefinition, DocsV1Read } from "@fern-api/fdr-sdk";
 import type {
     AuthScheme,

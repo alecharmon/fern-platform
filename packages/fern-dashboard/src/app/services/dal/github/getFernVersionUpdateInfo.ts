@@ -1,10 +1,10 @@
 import "server-only";
 
 import { MIN_VE_CLI_VERSION, compareVersions, getLatestFernCliVersion } from "@/utils/fernCliVersion";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { checkUpgradePrStatus } from "./checkUpgradePrStatus";
-import { GetFernVersionFromRepoError, getFernVersionFromRepo } from "./getFernVersionFromRepo";
+import { type GetFernVersionFromRepoError, getFernVersionFromRepo } from "./getFernVersionFromRepo";
 
 export type GetFernVersionUpdateInfoResult = {
     current: string;

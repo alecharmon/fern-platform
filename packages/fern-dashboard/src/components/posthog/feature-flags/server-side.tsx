@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
-import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 
 import { getServerSidePosthog } from "../getServerSidePosthog";
-import { PosthogFeatureFlag, PosthogFeatureFlags } from "./flags";
+import type { PosthogFeatureFlag, PosthogFeatureFlags } from "./flags";
 
 export declare namespace FeatureFlaggedServerSide {
     export interface Props {

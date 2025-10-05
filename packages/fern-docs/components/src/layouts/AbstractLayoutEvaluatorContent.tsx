@@ -1,6 +1,6 @@
 import "server-only";
 
-import React from "react";
+import type React from "react";
 
 import { UnreachableCaseError } from "ts-essentials";
 

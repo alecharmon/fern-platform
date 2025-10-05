@@ -1,4 +1,4 @@
-import { Stack, StackProps } from "aws-cdk-lib";
+import { Stack, type StackProps } from "aws-cdk-lib";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as actions from "aws-cdk-lib/aws-cloudwatch-actions";
@@ -11,9 +11,9 @@ import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { PrivateDnsNamespace } from "aws-cdk-lib/aws-servicediscovery";
 import * as sns from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
-import { Construct } from "constructs";
+import type { Construct } from "constructs";
 
-import { EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/resources/environments";
+import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/resources/environments";
 
 const CONTAINER_NAME = "fai";
 const SERVICE_NAME = "fai";

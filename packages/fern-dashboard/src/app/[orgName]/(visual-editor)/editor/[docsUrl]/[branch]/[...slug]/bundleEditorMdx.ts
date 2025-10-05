@@ -1,12 +1,12 @@
 "use server";
 
 import { createEditableDocsLoader } from "@fern-api/docs-loader";
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { bundleMDX as internalBundleMDX } from "@/editor/mdx/bundle";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 const BATCH_SIZE = 25;
 

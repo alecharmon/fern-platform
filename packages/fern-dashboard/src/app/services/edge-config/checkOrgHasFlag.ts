@@ -1,4 +1,4 @@
-import { OrgEdgeFlags } from "@fern-api/docs-utils";
+import type { OrgEdgeFlags } from "@fern-api/docs-utils";
 import { getEdgeFlagsForOrg } from "@fern-docs/edge-config";
 
 export async function checkOrgHasFlag(orgName: string, flagKey: keyof OrgEdgeFlags): Promise<boolean> {

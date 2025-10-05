@@ -1,4 +1,4 @@
-import { EndpointPathLiteral, EndpointPathPart } from "../client/APIV1Read";
+import { EndpointPathLiteral, type EndpointPathPart } from "../client/APIV1Read";
 
 /**
  * Commonly used in Express.js and how we render paths in the UI.

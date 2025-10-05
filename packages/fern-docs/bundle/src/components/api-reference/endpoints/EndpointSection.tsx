@@ -1,13 +1,14 @@
-import React, { SetStateAction } from "react";
+import type React from "react";
+import type { SetStateAction } from "react";
 
-import { RESET } from "jotai/utils";
+import type { RESET } from "jotai/utils";
 
-import { HttpRequest, HttpResponse } from "@fern-api/fdr-sdk/api-definition";
+import type { HttpRequest, HttpResponse } from "@fern-api/fdr-sdk/api-definition";
 import { Separator } from "@fern-docs/components/Separator";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 
-import { SelectedExampleKey } from "../type-definitions/EndpointContent";
+import type { SelectedExampleKey } from "../type-definitions/EndpointContent";
 import { RequestSelect } from "./MultipleRequestsSelect";
 import { ResponseSelect } from "./MultipleResponsesSelect";
 import { SectionContainer, TypeDefinitionAnchor } from "./TypeDefinitionAnchor";

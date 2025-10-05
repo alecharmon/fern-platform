@@ -1,13 +1,13 @@
 "use client";
 
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { EMPTY_OBJECT, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { StatusCodeBadge, statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
 import { cn } from "@fern-docs/components/cn";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { sortBy } from "es-toolkit/array";
-import { memo, ReactNode, useCallback, useMemo } from "react";
+import { memo, type ReactNode, useCallback, useMemo } from "react";
 import { WebSocketMessages } from "@/components/api-reference/websockets/WebSocketMessages";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
@@ -16,7 +16,7 @@ import { CodeSnippetExample, JsonCodeSnippetExample } from "../examples/CodeSnip
 import type { CodeExample } from "../examples/code-example";
 import { TitledExample } from "../examples/TitledExample";
 import { lineNumberOf } from "../examples/utils";
-import { StatusCode } from "../type-definitions/EndpointContent";
+import type { StatusCode } from "../type-definitions/EndpointContent";
 import { CodeExampleClientDropdown } from "./CodeExampleClientDropdown";
 import { useEndpointContext } from "./EndpointContext";
 import { EndpointExampleSegmentedControl } from "./EndpointExampleSegmentedControl";

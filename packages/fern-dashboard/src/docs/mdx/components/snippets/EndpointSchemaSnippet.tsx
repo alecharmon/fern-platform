@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useRef } from "react";
 
 import { WithSeparator } from "@fern-api/endpoint-snippet-dependencies";
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {

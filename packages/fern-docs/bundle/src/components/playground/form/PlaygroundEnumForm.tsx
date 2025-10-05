@@ -6,7 +6,7 @@ import { memo, useMemo } from "react";
 import { sortBy } from "es-toolkit/array";
 import { ChevronDown } from "lucide-react";
 
-import { EnumValue } from "@fern-api/fdr-sdk/api-definition";
+import type { EnumValue } from "@fern-api/fdr-sdk/api-definition";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 

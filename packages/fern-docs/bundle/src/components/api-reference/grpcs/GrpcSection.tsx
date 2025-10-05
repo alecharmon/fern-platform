@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 import { cn } from "@fern-docs/components/cn";
 import { Separator } from "@fern-docs/components/Separator";

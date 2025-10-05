@@ -3,7 +3,14 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useMDXComponents } from "@mdx-js/react";
 import { getMDXComponent } from "mdx-bundler/client";
 
-import { MdastNodes, MdxJsxAttribute, MdxJsxExpressionAttribute, astToMDX, htmlToMdx, mdxToHtml } from "@fern-docs/mdx";
+import {
+    type MdastNodes,
+    type MdxJsxAttribute,
+    type MdxJsxExpressionAttribute,
+    astToMDX,
+    htmlToMdx,
+    mdxToHtml
+} from "@fern-docs/mdx";
 
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { EditorComponentChildrenProvider } from "@/components/editor/editor-component/EditorComponentChildrenContext";
@@ -11,12 +18,12 @@ import { EditorComponentProvider } from "@/components/editor/editor-component/Ed
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
-import { EncodedDocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
 
 import { UnsupportedContent } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
 import { parseMDX } from "./parse";
-import { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
+import type { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
 
 function buildMdxElement(
     name: string,

@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
+import React, { type PropsWithChildren, useEffect, useRef, useState } from "react";
 
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import fastdom from "fastdom";

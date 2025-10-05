@@ -1,8 +1,8 @@
-import React from "react";
+import type React from "react";
 
-import { AuthState } from "@fern-api/docs-server/auth/getAuthState";
+import type { AuthState } from "@fern-api/docs-server/auth/getAuthState";
 import { withPrunedNavigation } from "@fern-api/docs-server/withPrunedNavigation";
-import { EdgeFlags } from "@fern-api/docs-utils";
+import type { EdgeFlags } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { SidebarRootChild } from "./SidebarRootChild";

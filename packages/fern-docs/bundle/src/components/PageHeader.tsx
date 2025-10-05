@@ -6,7 +6,7 @@ import { FernLink } from "@fern-docs/components/FernLink";
 import React from "react";
 
 import { MdxServerComponent } from "@/mdx/components/server-component";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { FernBreadcrumbs } from "./FernBreadcrumbs";
 import { PageActionsDropdown } from "./PageActionsDropdown";

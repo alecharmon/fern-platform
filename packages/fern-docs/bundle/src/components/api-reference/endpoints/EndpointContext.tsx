@@ -4,7 +4,7 @@ import React from "react";
 
 import { noop } from "ts-essentials";
 
-import {
+import type {
     EndpointDefinition,
     ErrorResponse,
     HttpRequest,

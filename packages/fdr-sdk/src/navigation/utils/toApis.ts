@@ -1,7 +1,7 @@
 import { mapValues } from "es-toolkit/object";
 
 import { ApiDefinition } from "../..";
-import { DocsV2Read } from "../../client";
+import type { DocsV2Read } from "../../client";
 
 export function toApis(docs: DocsV2Read.LoadDocsForUrlResponse) {
     return {

@@ -1,4 +1,4 @@
-import { ComponentProps, ReactElement } from "react";
+import type { ComponentProps, ReactElement } from "react";
 
 import { FernButtonGroup } from "@fern-docs/components/FernButton";
 import { cn } from "@fern-docs/components/cn";

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { PlaygroundCodeSnippetResolver } from "./resolver";
+import type { PlaygroundCodeSnippetResolver } from "./resolver";
 import { useApiDefinition } from "./useApiDefinition";
 
 export function useSnippet(resolver: PlaygroundCodeSnippetResolver, lang: "curl" | "python" | "typescript"): string {

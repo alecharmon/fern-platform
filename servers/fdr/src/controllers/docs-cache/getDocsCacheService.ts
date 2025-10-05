@@ -1,5 +1,5 @@
 import { DocsCacheService } from "../../api/generated/api/resources/docsCache/service/DocsCacheService";
-import { type FdrApplication } from "../../app";
+import type { FdrApplication } from "../../app";
 import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 
 export function getDocsCacheService(app: FdrApplication): DocsCacheService {

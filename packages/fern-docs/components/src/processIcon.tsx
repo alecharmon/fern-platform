@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { NavigationNode } from "@fern-api/fdr-sdk/navigation";
+import type { NavigationNode } from "@fern-api/fdr-sdk/navigation";
 import { hasMetadata } from "@fern-api/fdr-sdk/navigation";
 
 import { NoZoom } from "./contexts/NoZoom";

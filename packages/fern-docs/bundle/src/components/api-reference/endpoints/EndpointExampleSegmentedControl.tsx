@@ -1,11 +1,11 @@
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 
 import { ChevronDown } from "lucide-react";
 
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
-import { CodeExample } from "../examples/code-example";
+import type { CodeExample } from "../examples/code-example";
 
 export function EndpointExampleSegmentedControl({
     segmentedControlExamples,

@@ -1,4 +1,4 @@
-import { Frontmatter } from "../client/generated/api/resources/docs/resources/latest";
+import type { Frontmatter } from "../client/generated/api/resources/docs/resources/latest";
 
 export const EMPTY_FRONTMATTER: Frontmatter = {
     title: undefined,

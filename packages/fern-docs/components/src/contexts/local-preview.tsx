@@ -1,6 +1,6 @@
 "use client";
 
-import { PropsWithChildren, ReactElement, createContext, useContext } from "react";
+import { type PropsWithChildren, type ReactElement, createContext, useContext } from "react";
 
 const LocalPreviewContext = createContext<boolean>(false);
 

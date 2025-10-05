@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
-import { DocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 
 export default async function DocsHeader({ params }: Readonly<{ params: Promise<{ docsUrl: DocsUrl }> }>) {
     const { docsUrl: encodedDocsUrl } = await params;

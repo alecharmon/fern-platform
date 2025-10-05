@@ -1,5 +1,5 @@
 // Types that are stored in the DB
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 
 export type ReferencedAPIDefinitionIds = string[];
 export type IndexSegmentIds = string[];

@@ -1,4 +1,4 @@
-import { Auth0Organization } from "@/app/services/auth0/types";
+import type { Auth0Organization } from "@/app/services/auth0/types";
 
 export declare namespace OrgPlaceholderLogo {
     export interface Props {

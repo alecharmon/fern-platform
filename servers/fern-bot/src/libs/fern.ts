@@ -1,4 +1,4 @@
-import { Result, execa } from "execa";
+import { type Result, execa } from "execa";
 import { readFile, readdir } from "fs/promises";
 import yaml from "js-yaml";
 import path from "path";

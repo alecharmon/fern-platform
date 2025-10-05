@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, isValidElement, memo, useContext, useMemo } from "react";
+import { type FC, isValidElement, memo, useContext, useMemo } from "react";
 import React from "react";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 

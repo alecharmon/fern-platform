@@ -1,4 +1,4 @@
-import { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
 
 export abstract class AbstractDynamicSnippetsGenerator {
     /**

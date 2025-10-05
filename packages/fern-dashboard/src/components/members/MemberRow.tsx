@@ -2,12 +2,12 @@
 
 import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { GetMembers200ResponseOneOfInner } from "auth0";
+import type { GetMembers200ResponseOneOfInner } from "auth0";
 import { toast } from "sonner";
 
 import { removeUserFromOrg } from "@/app/actions/removeUserFromOrg";
 import { Auth0UserID } from "@/app/services/auth0/types";
-import { ReactQueryKey, inferQueryData } from "@/state/queryKeys";
+import { ReactQueryKey, type inferQueryData } from "@/state/queryKeys";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { DropdownMenuItem } from "../ui/dropdown-menu";

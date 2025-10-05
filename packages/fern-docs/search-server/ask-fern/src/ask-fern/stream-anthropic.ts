@@ -1,12 +1,12 @@
 import {
-    EmbeddingModel,
-    LanguageModel,
-    ModelMessage,
+    type EmbeddingModel,
+    type LanguageModel,
+    type ModelMessage,
     NoSuchToolError,
-    UIDataTypes,
-    UIMessage,
-    UIMessagePart,
-    UITools,
+    type UIDataTypes,
+    type UIMessage,
+    type UIMessagePart,
+    type UITools,
     convertToModelMessages,
     createUIMessageStream,
     createUIMessageStreamResponse,
@@ -20,10 +20,10 @@ import z from "zod";
 import { postToSlack, track } from "@fern-api/docs-server";
 import { fernToken_admin, getFaiOrigin } from "@fern-api/docs-server/env-variables";
 import { FernAIClient } from "@fern-api/fai-sdk";
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 
 import {
-    TurbopufferRecord,
+    type TurbopufferRecord,
     convertTpufRecordsToDocuments,
     createChatSystemPrompt,
     getTurbopufferNamespace

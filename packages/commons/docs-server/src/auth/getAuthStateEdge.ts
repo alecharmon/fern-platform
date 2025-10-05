@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { extractOrgFromPreview } from "@fern-api/docs-utils";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";

@@ -1,9 +1,9 @@
 import "server-only";
 
-import { AuthEdgeConfig } from "@fern-api/docs-auth";
-import { AuthState } from "@fern-api/docs-server/auth/getAuthState";
+import type { AuthEdgeConfig } from "@fern-api/docs-auth";
+import type { AuthState } from "@fern-api/docs-server/auth/getAuthState";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isTrailingSlashEnabled } from "@fern-api/docs-utils";
 import { FernButton } from "@fern-docs/components/FernButton";
 

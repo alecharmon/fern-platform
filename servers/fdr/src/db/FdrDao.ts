@@ -1,16 +1,16 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 
-import { APIDefinitionDao, APIDefinitionDaoImpl } from "./api/APIDefinitionDao";
-import { DocsV2Dao, DocsV2DaoImpl } from "./docs/DocsV2Dao";
+import { type APIDefinitionDao, APIDefinitionDaoImpl } from "./api/APIDefinitionDao";
+import { type DocsV2Dao, DocsV2DaoImpl } from "./docs/DocsV2Dao";
 import { type IndexSegmentDao, IndexSegmentDaoImpl } from "./docs/IndexSegmentDao";
 import { CliVersionsDaoImpl } from "./generators/CliVersionsDao";
 import { GeneratorsDaoImpl } from "./generators/GeneratorDao";
 import { GeneratorVersionsDaoImpl } from "./generators/GeneratorVersionsDao";
 import { GitDaoImpl } from "./git/GitDao";
 import { DocsRegistrationDao } from "./registrations/DocsRegistrationDao";
-import { SdkDao, SdkDaoImpl } from "./sdk/SdkDao";
+import { type SdkDao, SdkDaoImpl } from "./sdk/SdkDao";
 import { type SnippetAPIsDao, SnippetAPIsDaoImpl } from "./snippetApis/SnippetAPIsDao";
-import { SnippetTemplateDao, SnippetTemplateDaoImpl } from "./snippets/SnippetTemplate";
+import { type SnippetTemplateDao, SnippetTemplateDaoImpl } from "./snippets/SnippetTemplate";
 import { type SnippetsDao, SnippetsDaoImpl } from "./snippets/SnippetsDao";
 
 export class FdrDao {

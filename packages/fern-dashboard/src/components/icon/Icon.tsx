@@ -9,7 +9,7 @@ import {
     Link,
     List,
     ListOrdered,
-    LucideProps,
+    type LucideProps,
     MessageSquareQuote,
     Plus,
     Strikethrough,
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 import { HeadingDropdown } from "./custom/HeadingDropdown";
-import { CustomIconProps } from "./custom/types";
+import type { CustomIconProps } from "./custom/types";
 
 // Map icon names to their corresponding components
 const ICONS = {

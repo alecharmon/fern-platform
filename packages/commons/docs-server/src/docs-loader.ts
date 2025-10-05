@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-import { AuthEdgeConfig } from "@fern-api/docs-auth";
-import { FernColorTheme } from "@fern-api/docs-utils";
-import { EdgeFlags } from "@fern-api/docs-utils";
-import { HttpMethod } from "@fern-api/docs-utils";
-import { FileData } from "@fern-api/docs-utils/types/file-data";
-import { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
-import { ApiDefinition, DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
-import {
+import type { AuthEdgeConfig } from "@fern-api/docs-auth";
+import type { FernColorTheme } from "@fern-api/docs-utils";
+import type { EdgeFlags } from "@fern-api/docs-utils";
+import type { HttpMethod } from "@fern-api/docs-utils";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { ApiDefinition, DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
+import type {
     AuthScheme,
     EndpointId,
     ObjectProperty,
@@ -15,11 +15,11 @@ import {
     TypeDefinition,
     TypeId
 } from "@fern-api/fdr-sdk/api-definition";
-import { Slug } from "@fern-api/fdr-sdk/navigation";
+import type { Slug } from "@fern-api/fdr-sdk/navigation";
 
-import { AuthState } from "./auth/getAuthState";
-import { FernFonts } from "./generateFonts";
-import { DynamicIRsByLanguage } from "./loadDynamicIRFromS3";
+import type { AuthState } from "./auth/getAuthState";
+import type { FernFonts } from "./generateFonts";
+import type { DynamicIRsByLanguage } from "./loadDynamicIRFromS3";
 
 /**
  * Conditionally wraps type T in Promise based on IsAsync flag.

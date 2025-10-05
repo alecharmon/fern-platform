@@ -8,7 +8,7 @@ import { atomWithStorage } from "jotai/utils";
 import useSWR from "swr";
 import { z } from "zod";
 
-import { FacetsResponse, SEARCH_INDEX } from "@fern-docs/search-keyword";
+import { type FacetsResponse, SEARCH_INDEX } from "@fern-docs/search-keyword";
 import { useIsMobile } from "@fern-ui/react-commons";
 
 import {

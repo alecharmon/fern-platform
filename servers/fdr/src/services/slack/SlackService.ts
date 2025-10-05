@@ -1,8 +1,8 @@
 import { WebClient } from "@slack/web-api";
-import winston from "winston";
+import type winston from "winston";
 
 import type { FdrApplication, FdrConfig } from "../../app";
-import { RevalidatedPathsResponse } from "../revalidator/RevalidatorService";
+import type { RevalidatedPathsResponse } from "../revalidator/RevalidatorService";
 
 export interface FailedToRegisterDocsNotification {
     domain: string;

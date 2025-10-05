@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import Image, { StaticImageData } from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 import { useIsFirstClientSideRender } from "@/utils/useIsFirstClientSideRender";
 

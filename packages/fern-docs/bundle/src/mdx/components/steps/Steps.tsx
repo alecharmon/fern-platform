@@ -1,4 +1,4 @@
-import React, { ComponentProps, ReactElement } from "react";
+import React, { type ComponentProps, type ReactElement } from "react";
 
 import { cn } from "@fern-docs/components/cn";
 

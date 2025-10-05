@@ -1,13 +1,13 @@
-import { HttpResponse } from "@fern-api/fdr-sdk/api-definition";
+import type { HttpResponse } from "@fern-api/fdr-sdk/api-definition";
 import { statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
 import { cn } from "@fern-docs/components/cn";
-import { SemanticColor } from "@fern-docs/components/colors";
+import type { SemanticColor } from "@fern-docs/components/colors";
 import { FernButton } from "@fern-docs/components/FernButton";
 import * as Select from "@radix-ui/react-select";
-import { RESET } from "jotai/utils";
+import type { RESET } from "jotai/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FC, forwardRef, PropsWithChildren, ReactNode, SetStateAction } from "react";
-import { SelectedExampleKey } from "../type-definitions/EndpointContent";
+import { type FC, forwardRef, type PropsWithChildren, type ReactNode, type SetStateAction } from "react";
+import type { SelectedExampleKey } from "../type-definitions/EndpointContent";
 
 export declare namespace ResponseSelect {
     export interface Props {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, ReactElement } from "react";
+import { Fragment, type ReactElement } from "react";
 
 import { ChevronRight } from "lucide-react";
 

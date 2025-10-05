@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
-import { ResolvedReturnType } from "@/utils/types";
+import type { ResolvedReturnType } from "@/utils/types";
 
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";

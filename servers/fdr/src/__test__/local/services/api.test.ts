@@ -3,7 +3,7 @@ import { expect, inject, it } from "vitest";
 
 import { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 
-import { DynamicIr } from "../../../api/generated/api/resources/api/resources/v1/resources/register";
+import type { DynamicIr } from "../../../api/generated/api/resources/api/resources/v1/resources/register";
 import { createApiDefinition, createApiDefinitionLatest, getAPIResponse, getClient } from "../util";
 
 export const EMPTY_REGISTER_API_DEFINITION: APIV1Write.ApiDefinition = {

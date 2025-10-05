@@ -1,6 +1,6 @@
-import { MDXContentProps, getMDXExport as getMDXExportOriginal } from "mdx-bundler/client";
+import { type MDXContentProps, getMDXExport as getMDXExportOriginal } from "mdx-bundler/client";
 
-import { TableOfContentsItem, isToc } from "@fern-docs/mdx";
+import { type TableOfContentsItem, isToc } from "@fern-docs/mdx";
 
 export function getMDXExport(
     mdx: { code: string } | undefined,

@@ -1,6 +1,6 @@
 import { atomWithStorage } from "jotai/utils";
 import { noop } from "ts-essentials";
-import { z } from "zod";
+import type { z } from "zod";
 
 export function atomWithStorageValidation<VALUE>(
     key: string,

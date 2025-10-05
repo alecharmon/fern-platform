@@ -1,7 +1,7 @@
 import { unstable_cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { uniqBy } from "es-toolkit/array";
 

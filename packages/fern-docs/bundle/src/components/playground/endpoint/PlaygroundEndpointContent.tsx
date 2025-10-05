@@ -1,11 +1,11 @@
-import { Dispatch, ReactElement, SetStateAction, useDeferredValue } from "react";
+import { type Dispatch, type ReactElement, type SetStateAction, useDeferredValue } from "react";
 
-import { DynamicIRsByLanguage } from "@fern-api/docs-server";
+import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
-import { Loadable } from "@fern-ui/loadable";
+import type { Loadable } from "@fern-ui/loadable";
 
-import { PlaygroundEndpointRequestFormState } from "../types";
-import { PlaygroundResponse } from "../types/playgroundResponse";
+import type { PlaygroundEndpointRequestFormState } from "../types";
+import type { PlaygroundResponse } from "../types/playgroundResponse";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { isLocal } from "../utils/utils";
 import { PlaygroundEndpointContentLayout } from "./PlaygroundEndpointContentLayout";

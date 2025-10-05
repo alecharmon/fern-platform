@@ -1,7 +1,7 @@
 "use client";
 
 // import { Property, TypeIdKey, TypeId } from "@fern-api/fdr-sdk/navigation";
-import { ReactElement, useCallback, useMemo } from "react";
+import { type ReactElement, useCallback, useMemo } from "react";
 
 import { noop } from "ts-essentials";
 

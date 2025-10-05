@@ -1,10 +1,10 @@
 import { slugToHref } from "@fern-api/docs-utils";
-import { FileData } from "@fern-api/docs-utils/types/file-data";
-import { LogoConfiguration } from "@fern-api/docs-utils/types/logo-configuration";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { LogoConfiguration } from "@fern-api/docs-utils/types/logo-configuration";
 import type { FileIdOrUrl, Frontmatter } from "@fern-api/fdr-sdk/docs";
 import { isPlainObject } from "@fern-api/ui-core-utils";
 
-import { DocsLoader } from "./docs-loader";
+import type { DocsLoader } from "./docs-loader";
 
 const DEFAULT_LOGO_HEIGHT = 20;
 

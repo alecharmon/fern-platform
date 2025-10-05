@@ -1,9 +1,9 @@
 "use client";
 
-import { MouseEventHandler, PropsWithChildren, ReactElement, ReactNode, forwardRef } from "react";
+import { type MouseEventHandler, type PropsWithChildren, type ReactElement, type ReactNode, forwardRef } from "react";
 
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
-import { SemanticColor } from "@fern-docs/components/colors";
+import type { SemanticColor } from "@fern-docs/components/colors";
 import { cn } from "@fern-docs/components/cn";
 
 import { useIsDarkCode } from "@/state/dark-code";

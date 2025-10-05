@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, forwardRef } from "react";
+import { type ReactElement, forwardRef } from "react";
 
 import { escapeRegExp } from "es-toolkit/string";
 

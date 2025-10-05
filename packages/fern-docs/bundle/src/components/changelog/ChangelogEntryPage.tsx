@@ -1,8 +1,9 @@
 import "server-only";
 
-import React, { ReactElement } from "react";
+import type React from "react";
+import type { ReactElement } from "react";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { Badge } from "@fern-docs/components/badges";
@@ -12,7 +13,7 @@ import { SetLayout } from "@fern-docs/components/state/layout";
 
 import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
-import { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { PageFilters } from "../PageFilters";
 import { ChangelogContentLayout } from "./ChangelogContentLayout";

@@ -1,12 +1,12 @@
 import Image from "next/image";
 
-import { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { createFileResolver } from "@fern-api/docs-server/file-resolver";
 import { getProducts } from "@fern-api/docs-server/handle-node-fallbacks";
-import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 
 import { processIcon } from "../processIcon";
-import { ProductDropdownClient, ProductDropdownItem } from "./ProductDropdownClient";
+import { ProductDropdownClient, type ProductDropdownItem } from "./ProductDropdownClient";
 
 export declare namespace ProductDropdown {
     export interface Props {}

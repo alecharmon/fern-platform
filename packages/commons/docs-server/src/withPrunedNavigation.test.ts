@@ -1,4 +1,4 @@
-import { NodeId, RootNode, SidebarRootChild, Slug } from "@fern-api/fdr-sdk/navigation";
+import { NodeId, type RootNode, type SidebarRootChild, Slug } from "@fern-api/fdr-sdk/navigation";
 
 import { createNestedSectionNode, createPageNode, createSectionNode } from "./utils/create-node";
 import { withPrunedNavigation } from "./withPrunedNavigation";

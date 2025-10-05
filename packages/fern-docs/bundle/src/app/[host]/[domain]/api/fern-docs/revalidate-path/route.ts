@@ -1,5 +1,5 @@
 import { revalidatePath } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";

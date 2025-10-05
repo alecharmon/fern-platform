@@ -1,7 +1,7 @@
 import {
     CONTINUE,
-    Hast,
-    Unified,
+    type Hast,
+    type Unified,
     isMdxJsxAttribute,
     isMdxJsxElementHast,
     unknownToMdxJsxAttribute,

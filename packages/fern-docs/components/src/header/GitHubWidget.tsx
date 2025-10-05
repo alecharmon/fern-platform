@@ -1,7 +1,7 @@
 "use client";
 
 import { GitFork, Github, Star } from "lucide-react";
-import React from "react";
+import type React from "react";
 import { preload } from "react-dom";
 import useSWRImmutable from "swr/immutable";
 

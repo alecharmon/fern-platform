@@ -3,7 +3,7 @@ import "server-only";
 import { createOpenAI } from "@ai-sdk/openai";
 import { embed, embedMany } from "ai";
 
-import { TurbopufferRecord, queryTurbopuffer, turbopufferUpsertTask } from "@fern-docs/search-ask-fern";
+import { type TurbopufferRecord, queryTurbopuffer, turbopufferUpsertTask } from "@fern-docs/search-ask-fern";
 
 import { fdrEnvironment, fernToken_admin, turbopufferApiKey } from "./env-variables";
 

@@ -1,8 +1,8 @@
-import { EmbeddingModel } from "ai";
+import type { EmbeddingModel } from "ai";
 import { embed } from "ai";
 
 import { turbopufferApiKey } from "@fern-api/docs-server/env-variables";
-import { FacetFilter } from "@fern-docs/search-keyword";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 
 import { queryTurbopuffer } from "../turbopuffer";
 

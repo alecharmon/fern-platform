@@ -1,4 +1,4 @@
-import { CONTINUE, Hast, SKIP, Unified, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
+import { CONTINUE, type Hast, SKIP, type Unified, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
 
 export const rehypeTabs: Unified.Plugin<[], Hast.Root> = () => {
     return (ast: Hast.Root) => {
