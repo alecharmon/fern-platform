@@ -10,7 +10,7 @@ export default defineConfig({
     splitting: false,
     sourcemap: true,
     clean: true,
-    external: ["@fern-api/fdr-sdk", "@fern-api/ui-core-utils"],
+    external: ["@fern-api/fdr-sdk", "@fern-api/ui-core-utils", "vfile"],
     noExternal: [
         "collapse-white-space",
         "estree-util-value-to-estree",

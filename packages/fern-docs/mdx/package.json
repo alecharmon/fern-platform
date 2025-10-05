@@ -79,6 +79,7 @@
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
     "unist-util-visit-parents": "^6.0.1",
+    "vfile": "^6.0.1",
     "vfile-message": "^4.0.2"
   },
   "devDependencies": {
