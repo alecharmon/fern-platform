@@ -24,7 +24,7 @@
     "docs:self-hosted-bundle:build": "NODE_ENV=production bash scripts/build-selfhosted-bundle.sh",
     "docs:self-hosted-fdr:compile": "bash scripts/compile-selfhosted-fdr.sh",
     "docs:self-served-bundle:build": "bash scripts/build-selfserved-bundle.sh",
-    "docs:self-served-bundle:start": "NODE_ENV=production pnpm --filter=@fern-docs/bundle docs:start:local",
+    "docs:self-served-bundle:start": "bash scripts/run-selfserved-bundle.sh",
     "docs:start": "turbo docs:start",
     "fai:dev": "bash scripts/run-local-fai.sh",
     "fai:generate": "pnpm fern generate --api fai && pnpm turbo --filter=@fern-api/fai-sdk compile",

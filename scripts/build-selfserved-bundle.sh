@@ -14,3 +14,5 @@ fi
 NODE_ENV=production pnpm --filter=@fern-docs/bundle docs:build:selfserved
 cp -r packages/fern-docs/bundle/.next/static packages/fern-docs/bundle/.next/standalone/packages/fern-docs/bundle/.next
 find packages/fern-docs/bundle/.next -depth -mindepth 1 -not -path "packages/fern-docs/bundle/.next/standalone*" -exec rm -rf {} \;
+
+NODE_ENV=production pnpm --filter=@fern-docs/bundle docs:start:local
