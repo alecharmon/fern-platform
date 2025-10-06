@@ -1,4 +1,4 @@
-import type { ResponseWithBody } from "./ResponseWithBody.js";
+import { ResponseWithBody } from "./ResponseWithBody.js";
 
 export type BinaryResponse = {
     /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/bodyUsed) */
@@ -26,7 +26,7 @@ export function getBinaryResponse(response: ResponseWithBody): BinaryResponse {
         },
         stream: () => response.body,
         arrayBuffer: response.arrayBuffer.bind(response),
-        blob: response.blob.bind(response)
+        blob: response.blob.bind(response),
     };
     if ("bytes" in response && typeof response.bytes === "function") {
         binaryResponse.bytes = response.bytes.bind(response);

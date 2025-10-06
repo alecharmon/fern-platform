@@ -312,7 +312,8 @@
         ".yarn-cache",
         ".pnpm-cache",
         "packages/fern-docs/icons-cdn/**/*.json",
-        "packages/fern-docs/icons-cdn/**/*.ts"
+        "packages/fern-docs/icons-cdn/**/*.ts",
+        "packages/fai-sdk/**"
       ],
       "linter": {
         "enabled": false

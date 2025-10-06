@@ -17,6 +17,7 @@ from fai.models.db.settings_db import SettingsDb  # noqa: F401
 from fai.models.db.slack_context_db import SlackContextDb  # noqa: F401
 from fai.models.db.slack_integration_db import SlackIntegrationDb  # noqa: F401
 from fai.models.db.slack_message_cache_db import SlackMessageCacheDb  # noqa: F401
+from fai.models.db.slack_message_classification_db import SlackMessageClassificationDb  # noqa: F401
 
 
 async def init() -> None:

@@ -3,8 +3,8 @@
  */
 
 import * as errors from "../../errors/index.js";
-import type * as FernAI from "../index.js";
-import type * as core from "../../core/index.js";
+import * as FernAI from "../index.js";
+import * as core from "../../core/index.js";
 
 export class UnprocessableEntityError extends errors.FernAIError {
     constructor(body: FernAI.HttpValidationError, rawResponse?: core.RawResponse) {
@@ -12,7 +12,7 @@ export class UnprocessableEntityError extends errors.FernAIError {
             message: "UnprocessableEntityError",
             statusCode: 422,
             body: body,
-            rawResponse: rawResponse
+            rawResponse: rawResponse,
         });
         Object.setPrototypeOf(this, UnprocessableEntityError.prototype);
     }

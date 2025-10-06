@@ -1291,7 +1291,7 @@ async def handle_slack_oauth_callback(code: str, state: str | None = None) -> JS
         raise HTTPException(status_code=500, detail="OAuth callback failed")
 
 
-@fai_app.get("/slack/get-install", openapi_extra={"x-fern-audiences": ["internal"]})
+@fai_app.get("/slack/get-install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]})
 async def get_slack_install_link(domain: str) -> JSONResponse:
     try:
         async with async_session_maker() as session:

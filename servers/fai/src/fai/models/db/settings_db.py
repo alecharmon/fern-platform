@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     String,
@@ -17,10 +18,17 @@ class SettingsDb(Base):
     last_reindex_time = Column(DateTime, nullable=True)
     job_id = Column(String, nullable=True)
 
+    docs_enabled = Column(Boolean, nullable=False, default=True)
+    slack_enabled = Column(Boolean, nullable=False, default=True)
+    discord_enabled = Column(Boolean, nullable=False, default=True)
+
     def to_api(self) -> Settings:
         return Settings(
             domain=self.domain,
             org_name=self.org_name,
             last_reindex_time=self.last_reindex_time,
             job_id=self.job_id,
+            docs_enabled=self.docs_enabled,
+            slack_enabled=self.slack_enabled,
+            discord_enabled=self.discord_enabled,
         )

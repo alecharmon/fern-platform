@@ -54,14 +54,14 @@ export class Settings {
      */
     public getSettings(
         request: FernAI.GetSettingsRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): core.HttpResponsePromise<FernAI.GetSettingsResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getSettings(request, requestOptions));
     }
 
     private async __getSettings(
         request: FernAI.GetSettingsRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.GetSettingsResponse>> {
         const { domain } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -69,21 +69,21 @@ export class Settings {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers
+            requestOptions?.headers,
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "settings/ask-ai"
+                "settings/ask-ai",
             ),
             method: "GET",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal
+            abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetSettingsResponse, rawResponse: _response.rawResponse };
@@ -94,13 +94,13 @@ export class Settings {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse
+                        _response.rawResponse,
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse
+                        rawResponse: _response.rawResponse,
                     });
             }
         }
@@ -110,14 +110,97 @@ export class Settings {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /settings/ask-ai.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Get settings for a domain and organization.
+     *
+     * @param {FernAI.GetDocsSettingsRequest} request
+     * @param {Settings.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.settings.getDocsSettings({
+     *         domain: "domain"
+     *     })
+     */
+    public getDocsSettings(
+        request: FernAI.GetDocsSettingsRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.GetSettingsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getDocsSettings(request, requestOptions));
+    }
+
+    private async __getDocsSettings(
+        request: FernAI.GetDocsSettingsRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.GetSettingsResponse>> {
+        const { domain } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["domain"] = domain;
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                "settings/ask-ai/docs",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.GetSettingsResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /settings/ask-ai/docs.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
                 });
         }
     }
@@ -138,14 +221,14 @@ export class Settings {
      */
     public toggleAskAi(
         request: FernAI.ToggleAskAiRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): core.HttpResponsePromise<FernAI.ToggleAskAiResponse> {
         return core.HttpResponsePromise.fromPromise(this.__toggleAskAi(request, requestOptions));
     }
 
     private async __toggleAskAi(
         request: FernAI.ToggleAskAiRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ToggleAskAiResponse>> {
         const { domain, org_name: orgName } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -154,21 +237,21 @@ export class Settings {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers
+            requestOptions?.headers,
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "settings/ask-ai/toggle"
+                "settings/ask-ai/toggle",
             ),
             method: "POST",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal
+            abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.ToggleAskAiResponse, rawResponse: _response.rawResponse };
@@ -179,13 +262,13 @@ export class Settings {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse
+                        _response.rawResponse,
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse
+                        rawResponse: _response.rawResponse,
                     });
             }
         }
@@ -195,14 +278,14 @@ export class Settings {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /settings/ask-ai/toggle.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
         }
     }
@@ -223,14 +306,14 @@ export class Settings {
      */
     public reindexAskAi(
         request: FernAI.ReindexAskAiRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): core.HttpResponsePromise<FernAI.ToggleAskAiResponse> {
         return core.HttpResponsePromise.fromPromise(this.__reindexAskAi(request, requestOptions));
     }
 
     private async __reindexAskAi(
         request: FernAI.ReindexAskAiRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ToggleAskAiResponse>> {
         const { domain, org_name: orgName } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -239,21 +322,21 @@ export class Settings {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers
+            requestOptions?.headers,
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "settings/ask-ai/reindex"
+                "settings/ask-ai/reindex",
             ),
             method: "POST",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal
+            abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.ToggleAskAiResponse, rawResponse: _response.rawResponse };
@@ -264,13 +347,13 @@ export class Settings {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse
+                        _response.rawResponse,
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse
+                        rawResponse: _response.rawResponse,
                     });
             }
         }
@@ -280,14 +363,14 @@ export class Settings {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /settings/ask-ai/reindex.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
         }
     }
@@ -307,14 +390,14 @@ export class Settings {
      */
     public getToggleStatus(
         request: FernAI.GetToggleStatusRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): core.HttpResponsePromise<FernAI.ToggleStatusResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getToggleStatus(request, requestOptions));
     }
 
     private async __getToggleStatus(
         request: FernAI.GetToggleStatusRequest,
-        requestOptions?: Settings.RequestOptions
+        requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ToggleStatusResponse>> {
         const { domain } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -322,21 +405,21 @@ export class Settings {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers
+            requestOptions?.headers,
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "settings/ask-ai/toggle/status"
+                "settings/ask-ai/toggle/status",
             ),
             method: "GET",
             headers: _headers,
             queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal
+            abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.ToggleStatusResponse, rawResponse: _response.rawResponse };
@@ -347,13 +430,13 @@ export class Settings {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse
+                        _response.rawResponse,
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse
+                        rawResponse: _response.rawResponse,
                     });
             }
         }
@@ -363,16 +446,16 @@ export class Settings {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling GET /settings/ask-ai/toggle/status."
+                    "Timeout exceeded when calling GET /settings/ask-ai/toggle/status.",
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
         }
     }

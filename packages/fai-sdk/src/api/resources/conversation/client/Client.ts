@@ -52,7 +52,7 @@ export class Conversation {
     public getConversationById(
         domain: string,
         conversationId: string,
-        requestOptions?: Conversation.RequestOptions
+        requestOptions?: Conversation.RequestOptions,
     ): core.HttpResponsePromise<FernAI.GetConversationResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getConversationById(domain, conversationId, requestOptions));
     }
@@ -60,26 +60,26 @@ export class Conversation {
     private async __getConversationById(
         domain: string,
         conversationId: string,
-        requestOptions?: Conversation.RequestOptions
+        requestOptions?: Conversation.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.GetConversationResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers
+            requestOptions?.headers,
         );
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `conversation/${encodeURIComponent(domain)}/${encodeURIComponent(conversationId)}`
+                `conversation/${encodeURIComponent(domain)}/${encodeURIComponent(conversationId)}`,
             ),
             method: "GET",
             headers: _headers,
             queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal
+            abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
             return { data: _response.body as FernAI.GetConversationResponse, rawResponse: _response.rawResponse };
@@ -90,13 +90,13 @@ export class Conversation {
                 case 422:
                     throw new FernAI.UnprocessableEntityError(
                         _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse
+                        _response.rawResponse,
                     );
                 default:
                     throw new errors.FernAIError({
                         statusCode: _response.error.statusCode,
                         body: _response.error.body,
-                        rawResponse: _response.rawResponse
+                        rawResponse: _response.rawResponse,
                     });
             }
         }
@@ -106,16 +106,16 @@ export class Conversation {
                 throw new errors.FernAIError({
                     statusCode: _response.error.statusCode,
                     body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling GET /conversation/{domain}/{conversation_id}."
+                    "Timeout exceeded when calling GET /conversation/{domain}/{conversation_id}.",
                 );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse
+                    rawResponse: _response.rawResponse,
                 });
         }
     }
