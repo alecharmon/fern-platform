@@ -18,11 +18,18 @@ import type { EncodedDocsUrl } from "@/utils/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page(props: { params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }> }) {
+export default async function Page(props: {
+    params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
     const { orgName, docsUrl: encodedDocsUrl } = await props.params;
+    const searchParams = await props.searchParams;
 
     const session = await getAuthenticatedSessionOrRedirect(orgName);
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
+
+    // Only skip cache if explicitly requested via query param (e.g., ?refresh=true)
+    const skipCache = searchParams.refresh === "true";
 
     // Validate that the docsUrl belongs to this organization so that we avoid errors in the page
     const response = await getDocsSitesForOrg({
@@ -77,33 +84,31 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
             githubUrl = urlResult.githubUrl;
 
             try {
-                const validation = await validateGithubRepoAccess(
-                    orgName,
-                    docsUrl,
-                    {
-                        type: "url",
-                        githubUrl
-                    },
-                    true // Skip cache so that we can force re-fetch on page load
-                );
-
-                let sourceRepo = undefined;
-
-                // If user has all required access, fetch the source repo metadata
-                if (validation.ok) {
-                    try {
-                        sourceRepo = await getGithubSourceMetadataHandler({
-                            githubUrl,
-                            userId: session.user.sub
-                        });
-                    } catch (error) {
+                // Parallelize validation and metadata fetching for better performance
+                const [validation, sourceRepo] = await Promise.all([
+                    validateGithubRepoAccess(
+                        orgName,
+                        docsUrl,
+                        {
+                            type: "url",
+                            githubUrl
+                        },
+                        skipCache // Only skip cache when explicitly requested
+                    ),
+                    // Optimistically fetch metadata in parallel (will be used if validation succeeds)
+                    getGithubSourceMetadataHandler({
+                        githubUrl,
+                        userId: session.user.sub
+                    }).catch((error) => {
                         console.error("Failed to fetch source repo metadata:", error);
-                    }
-                }
+                        return undefined;
+                    })
+                ]);
 
                 githubAuthState = {
                     validationResult: validation,
-                    sourceRepo,
+                    // Only include sourceRepo if validation succeeded
+                    sourceRepo: validation.ok ? sourceRepo : undefined,
                     isLoading: false
                 };
             } catch (error) {
