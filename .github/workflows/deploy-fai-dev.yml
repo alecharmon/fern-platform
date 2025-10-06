@@ -34,6 +34,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+          run_install: false
       - name: Create .env file
         run: |
           cd servers/fai
@@ -56,5 +61,5 @@ jobs:
           cd servers/fai
           ./scripts/create_docker.sh "${git_version}"
           cd deploy
-          npm install
+          pnpm install
           VERSION="${git_version}" npm run cdk deploy fai-dev2 --require-approval never --progress events
