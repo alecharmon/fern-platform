@@ -40,22 +40,22 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
     if (node.type === "endpoint") {
         const context = createEndpointContext(node, api);
         if (!context) return null;
-        const authForm = context.auth != null && (
+        const authForm = context.auths[0] != null && (
             <PlaygroundAuthorizationFormCard
                 loader={loader}
                 apiDefinitionId={node.apiDefinitionId}
-                auth={context.auth}
+                auth={context.auths[0]}
             />
         );
         return <PlaygroundEndpoint context={context} authForm={authForm} dynamicIRsByLanguage={dynamicIRsByLanguage} />;
     } else if (node.type === "webSocket") {
         const context = createWebSocketContext(node, api);
         if (!context) return null;
-        const authForm = context.auth != null && (
+        const authForm = context.auths[0] != null && (
             <PlaygroundAuthorizationFormCard
                 loader={loader}
                 apiDefinitionId={node.apiDefinitionId}
-                auth={context.auth}
+                auth={context.auths[0]}
             />
         );
         return <PlaygroundWebSocket context={context} authForm={authForm} />;

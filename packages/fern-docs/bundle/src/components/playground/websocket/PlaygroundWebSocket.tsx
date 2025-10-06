@@ -94,7 +94,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
 
             socket.current.onopen = () => {
                 const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
-                const authHeaders = buildAuthHeaders(context.auth, authState, {
+                const authHeaders = buildAuthHeaders(context.auths[0], authState, {
                     redacted: false
                 });
                 const headers = {
@@ -145,7 +145,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
     }, [
         baseUrl,
         context.channel.path,
-        context.auth,
+        context.auths,
         formState.pathParameters,
         formState.queryParameters,
         formState.headers,

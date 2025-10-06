@@ -80,8 +80,8 @@ export class PlaygroundCodeSnippetResolver {
         setOAuthValue: (value: (prev: any) => any) => void
     ) {
         const authHeaders = buildAuthHeaders(
-            this.context.auth != null && shouldRenderAuth(this.context.endpoint, this.context.auth)
-                ? this.context.auth
+            this.context.auths[0] != null && shouldRenderAuth(this.context.endpoint, this.context.auths[0])
+                ? this.context.auths[0]
                 : undefined,
             authState,
             { redacted: isAuthHeadersRedacted },

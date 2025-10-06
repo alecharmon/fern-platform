@@ -35,7 +35,7 @@ export class CurlSnippetBuilder extends PlaygroundCodeSnippetBuilder {
                 url: this.url,
                 searchParams: this.formState.queryParameters,
                 headers: this.formState.headers,
-                basicAuth: this.context.auth?.type === "basicAuth" ? this.authState.basicAuth : undefined,
+                basicAuth: this.context.auths[0]?.type === "basicAuth" ? this.authState.basicAuth : undefined,
                 body: this.#convertFormStateToBody(),
                 redacted: this.redacted
             },

@@ -45,7 +45,8 @@ export const PlaygroundEndpoint = ({
     dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
 }) => {
     const resolvedPlaygroundState = useResolvedPlaygroundState();
-    const { node, endpoint, auth } = context;
+    const { node, endpoint, auths } = context;
+    const auth = auths[0];
 
     const [formState, setFormState] = usePlaygroundEndpointFormState(context);
 

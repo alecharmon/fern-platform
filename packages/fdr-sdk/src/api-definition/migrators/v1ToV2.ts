@@ -125,7 +125,7 @@ export class ApiDefinitionV1ToLatest {
             webhooks: this.webhooks,
             types: this.types,
             subpackages: this.subpackages,
-            auths: this.v1.auth ? { [AUTH_SCHEME_ID]: this.v1.auth } : {},
+            auths: this.v1.authSchemes ? this.v1.authSchemes : this.v1.auth ? { [AUTH_SCHEME_ID]: this.v1.auth } : {},
             globalHeaders: this.migrateParameters(this.v1.globalHeaders),
             snippetsConfiguration: this.v1.snippetsConfiguration
         };
@@ -173,7 +173,7 @@ export class ApiDefinitionV1ToLatest {
             availability: v1.availability,
             method: v1.method,
             path: v1.path.parts.filter((part) => part.value !== ""),
-            auth: v1.authed ? [AUTH_SCHEME_ID] : undefined,
+            auth: v1.authV2 ? v1.authV2 : v1.authed ? [AUTH_SCHEME_ID] : undefined,
             defaultEnvironment: v1.defaultEnvironment,
             environments: v1.environments,
             pathParameters: this.migrateParameters(v1.path.pathParameters),

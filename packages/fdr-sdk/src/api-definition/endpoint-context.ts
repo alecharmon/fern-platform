@@ -15,7 +15,7 @@ export type EndpointContext = {
     node: EndpointNode;
     endpoint: EndpointDefinition;
     globalHeaders: ObjectProperty[];
-    auth: AuthScheme | undefined;
+    auths: AuthScheme[];
     types: Record<TypeId, TypeDefinition>;
 };
 
@@ -34,7 +34,7 @@ export function createEndpointContext(
     return {
         node,
         endpoint,
-        auth: endpoint.auth?.map((id) => api.auths[id])[0],
+        auths: endpoint.auth?.map((id) => api.auths[id]).filter((auth): auth is AuthScheme => auth != null) ?? [],
         globalHeaders: api.globalHeaders ?? [],
         types: api.types
     };
@@ -44,7 +44,7 @@ export type WebSocketContext = {
     node: WebSocketNode;
     channel: WebSocketChannel;
     globalHeaders: ObjectProperty[];
-    auth: AuthScheme | undefined;
+    auths: AuthScheme[];
     types: Record<TypeId, TypeDefinition>;
 };
 
@@ -63,7 +63,7 @@ export function createWebSocketContext(
     return {
         node,
         channel,
-        auth: channel.auth?.map((id) => api.auths[id])[0],
+        auths: channel.auth?.map((id) => api.auths[id]).filter((auth): auth is AuthScheme => auth != null) ?? [],
         globalHeaders: api.globalHeaders ?? [],
         types: api.types
     };

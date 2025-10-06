@@ -107,6 +107,7 @@ describe("PlaygroundCodeSnippetBuilder", () => {
         responseHeaders: undefined,
         namespace: undefined
     };
+
     const formState: PlaygroundEndpointRequestFormState = {
         type: "endpoint",
         headers: {
@@ -131,7 +132,7 @@ describe("PlaygroundCodeSnippetBuilder", () => {
     const context: EndpointContext = {
         node,
         endpoint,
-        auth: undefined,
+        auths: [],
         types: {},
         globalHeaders: []
     };
