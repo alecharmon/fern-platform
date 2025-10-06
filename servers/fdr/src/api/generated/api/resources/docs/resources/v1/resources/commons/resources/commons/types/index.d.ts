@@ -1,4 +1,7 @@
 export * from "./AiChatConfig";
+export * from "./AiChatLocation";
+export * from "./AiChatDatasource";
+export * from "./AiChatWebsiteDatasource";
 export * from "./AiModel";
 export * from "./FileIdOrUrl";
 export * from "./RgbaColor";

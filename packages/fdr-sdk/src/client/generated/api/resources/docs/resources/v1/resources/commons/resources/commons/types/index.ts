@@ -1,4 +1,7 @@
 export * from "./AiChatConfig.js";
+export * from "./AiChatLocation.js";
+export * from "./AiChatDatasource.js";
+export * from "./AiChatWebsiteDatasource.js";
 export * from "./AiModel.js";
 export * from "./FileIdOrUrl.js";
 export * from "./RgbaColor.js";

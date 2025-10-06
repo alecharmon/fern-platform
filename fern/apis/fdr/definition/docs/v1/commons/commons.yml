@@ -10,7 +10,27 @@ types:
         type: optional<AIModel> 
       systemPrompt: 
         type: optional<string>
-  
+      location:
+        type: optional<list<AIChatLocation>>
+      datasources:
+        type: optional<list<AIChatDatasource>>
+
+  AIChatLocation:
+    enum:
+      - docs
+      - slack
+      - discord
+      
+  AIChatDatasource: 
+    discriminated: false
+    union: 
+      - AIChatWebsiteDatasource
+
+  AIChatWebsiteDatasource: 
+    properties: 
+      url: string
+      title: optional<string>
+
   AIModel: 
     enum: 
       - value: claude-3.5

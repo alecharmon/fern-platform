@@ -5,4 +5,6 @@ import * as FernRegistry from "../../../../../../../../../index";
 export interface AiChatConfig {
     model: FernRegistry.docs.v1.commons.AiModel | undefined;
     systemPrompt: string | undefined;
+    location: FernRegistry.docs.v1.commons.AiChatLocation[] | undefined;
+    datasources: FernRegistry.docs.v1.commons.AiChatDatasource[] | undefined;
 }
