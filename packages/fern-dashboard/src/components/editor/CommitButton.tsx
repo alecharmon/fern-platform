@@ -119,34 +119,35 @@ export function CommitButton() {
                 files: gitFiles
             });
             if (response.success) {
-                SuccessfulCommitToast();
+                // Show success toast and update state
+                SuccessfulCommitToast(gitPrUrl);
                 setChangesCommitted(true);
-
-                // Handle commit success through PagesStore (coordinates both stores)
                 handleCommitSuccess(allFilesToCommit);
+
+                // If no PR exists yet, try to create one (but don't block success)
+                if (!gitPrUrl) {
+                    if (!baseBranch) {
+                        ErrorNoBaseBranchToast();
+                        return;
+                    }
+                    const newPrUrl = await handleCreatePr({
+                        orgName,
+                        branch,
+                        owner,
+                        site,
+                        repo,
+                        baseBranch,
+                        title: prTitle,
+                        onAiGenerationComplete: refetchPrData
+                    });
+                    if (newPrUrl) {
+                        setPrUrl(newPrUrl);
+                        localStorage.setItem(`gitPrUrl-${branch}`, newPrUrl);
+                    }
+                }
             } else {
                 ErrorFullCommitToast();
-            }
-
-            if (response.success && !gitPrUrl) {
-                if (!baseBranch) {
-                    ErrorNoBaseBranchToast();
-                    return;
-                }
-                const newPrUrl = await handleCreatePr({
-                    orgName,
-                    branch,
-                    owner,
-                    site,
-                    repo,
-                    baseBranch,
-                    title: prTitle,
-                    onAiGenerationComplete: refetchPrData
-                });
-                if (newPrUrl) {
-                    setPrUrl(newPrUrl);
-                    localStorage.setItem(`gitPrUrl-${branch}`, newPrUrl);
-                }
+                console.error("Failed to commit changes:", response.error || response);
             }
         } catch (error) {
             ErrorFullCommitToast();

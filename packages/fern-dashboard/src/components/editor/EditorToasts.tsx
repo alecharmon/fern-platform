@@ -4,7 +4,23 @@ import { toast } from "sonner";
  * This file contains reusable toasts that are used in the editor.
  */
 
-export function SuccessfulCommitToast() {
+export function SuccessfulCommitToast(prUrl?: string) {
+    if (prUrl) {
+        return toast.success(
+            <div className="flex items-center gap-2">
+                <span>Successfully committed changes!</span>
+                <a
+                    href={prUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-foreground"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    View PR
+                </a>
+            </div>
+        );
+    }
     return toast.success("Successfully committed changes!");
 }
 
