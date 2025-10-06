@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish'
+        description: "Version to publish"
         required: false
         type: string
   schedule:
-    - cron: '0 6 * * 1'  # Runs at 6 AM UTC every Monday
+    - cron: "0 6 * * 1" # Runs at 6 AM UTC every Monday
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -22,7 +22,7 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     needs: test
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -81,7 +81,7 @@ jobs:
 
       - name: Build FDR CJS
         run: pnpm --filter @fern-platform/fdr build:tsup:cjs
-        
+
       - name: Build self-hosted bundle
         run: pnpm docs:self-hosted-bundle:build
 

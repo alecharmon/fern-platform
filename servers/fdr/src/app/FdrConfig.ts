@@ -33,11 +33,13 @@ const MINIO_USERNAME = "MINIO_USERNAME";
 const MINIO_PASSWORD = "MINIO_PASSWORD";
 const MINIO_URL = "MINIO_URL";
 const MINIO_BUCKET_NAME = "MINIO_BUCKET_NAME";
+const S3_FORCE_PATH_STYLE = "S3_FORCE_PATH_STYLE";
 
 export interface S3Config {
     bucketName: string;
     bucketRegion: string;
     urlOverride?: string;
+    forcePathStyle?: boolean;
 }
 
 export interface FdrConfig {
@@ -64,7 +66,8 @@ function getSelfHostedS3Config(): S3Config {
     return {
         bucketName: getEnvironmentVariableOrThrow(MINIO_BUCKET_NAME),
         bucketRegion: "global",
-        urlOverride: getEnvironmentVariableOrThrow(MINIO_URL)
+        urlOverride: getEnvironmentVariableOrThrow(MINIO_URL),
+        forcePathStyle: process.env[S3_FORCE_PATH_STYLE] === "true"
     };
 }
 

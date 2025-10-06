@@ -16,8 +16,90 @@ fi
 
 # -----------  Start Postgres setup  -----------
 echo "Starting PostgreSQL service..."
-# Use pg_ctl instead of service command (which doesn't exist in Wolfi)
-su - postgres -c "pg_ctl -D /var/lib/postgresql/data start"
+
+# Function to start PostgreSQL - always initializes at runtime to avoid permission conflicts
+start_postgresql() {
+    local CURRENT_UID=$(id -u)
+
+    # Always use /tmp for PostgreSQL to work with any UID
+    export PGDATA=/tmp/postgresql/data
+    export PGHOST=/tmp
+
+    # Clean up any previous attempts
+    rm -rf "$PGDATA" 2>/dev/null || true
+    mkdir -p "$PGDATA"
+
+    echo "Initializing PostgreSQL cluster in $PGDATA (UID: $CURRENT_UID)..."
+
+    # Check if running as root - root cannot run initdb directly
+    if [ "$CURRENT_UID" -eq 0 ]; then
+        echo "Running as root, using 'su - postgres' to initialize and run PostgreSQL..."
+
+        # Change ownership of the data directory to postgres user
+        chown -R postgres:postgres "$PGDATA"
+
+        # Initialize as postgres user
+        if ! su - postgres -c "initdb -D $PGDATA --auth-local=trust --auth-host=trust --username=postgres"; then
+            echo "ERROR: Failed to initialize PostgreSQL as postgres user"
+            return 1
+        fi
+
+        # Start PostgreSQL as postgres user
+        if ! su - postgres -c "pg_ctl -D $PGDATA -o \"-c listen_addresses='localhost' -c unix_socket_directories='/tmp' -c shared_buffers=128MB -c max_connections=200\" -l $PGDATA/logfile start"; then
+            echo "ERROR: Failed to start PostgreSQL"
+            cat "$PGDATA/logfile" 2>/dev/null
+            return 1
+        fi
+    else
+        echo "Running as UID $CURRENT_UID, initializing PostgreSQL directly..."
+
+        # Non-root can run initdb directly
+        if ! initdb -D "$PGDATA" --auth-local=trust --auth-host=trust --username=postgres; then
+            echo "ERROR: Failed to initialize PostgreSQL"
+            return 1
+        fi
+
+        # Start PostgreSQL
+        if ! pg_ctl -D "$PGDATA" \
+            -o "-c listen_addresses='localhost' -c unix_socket_directories='/tmp' -c shared_buffers=128MB -c max_connections=200" \
+            -l "$PGDATA/logfile" \
+            start; then
+            echo "ERROR: Failed to start PostgreSQL"
+            cat "$PGDATA/logfile" 2>/dev/null
+            return 1
+        fi
+    fi
+
+    echo "PostgreSQL started successfully"
+
+    # Wait for PostgreSQL to be ready
+    for i in {1..30}; do
+        if pg_isready -h /tmp -p 5432 2>/dev/null; then
+            echo "PostgreSQL is ready"
+            break
+        fi
+        echo "Waiting for PostgreSQL to start... ($i/30)"
+        sleep 1
+    done
+
+    # Create the database
+    echo "Creating database 'fdr'..."
+    if [ "$CURRENT_UID" -eq 0 ]; then
+        su - postgres -c "createdb -h /tmp -U postgres fdr" 2>/dev/null || true
+    else
+        createdb -h /tmp -U postgres fdr 2>/dev/null || true
+    fi
+
+    # Update DATABASE_URL for Prisma to use the Unix socket
+    export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fdr?host=/tmp"
+    echo "DATABASE_URL configured for Unix socket in /tmp"
+
+    return 0
+}
+
+# Start PostgreSQL with appropriate method
+start_postgresql
+
 echo "PostgreSQL service started."
 
 # Use pidof or ps to get postgres PID (pgrep might not be available)
@@ -27,16 +109,65 @@ echo "PostgreSQL PID: $postgres_pid"
 echo "Creating Postgres database..."
 
 echo "Running database migrations..."
-DATABASE_URL=${DATABASE_URL} prisma migrate deploy --schema /prisma/schema.prisma
+
+# Handle Prisma migrations with fallback for write permissions
+run_prisma_migrations() {
+    # First try the standard migration
+    if DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/fdr} \
+        prisma migrate deploy --schema /prisma/schema.prisma 2>/dev/null; then
+        echo "Prisma migrations completed successfully"
+        return 0
+    fi
+
+    echo "Standard Prisma migration failed, trying with alternative engine location..."
+
+    # Set alternative Prisma engine locations if we don't have write access
+    export PRISMA_QUERY_ENGINE_BINARY="${PRISMA_QUERY_ENGINE_BINARY:-/opt/prisma-engines/query-engine}"
+    export PRISMA_MIGRATION_ENGINE_BINARY="${PRISMA_MIGRATION_ENGINE_BINARY:-/opt/prisma-engines/migration-engine}"
+    export PRISMA_INTROSPECTION_ENGINE_BINARY="${PRISMA_INTROSPECTION_ENGINE_BINARY:-/opt/prisma-engines/introspection-engine}"
+    export PRISMA_FMT_BINARY="${PRISMA_FMT_BINARY:-/opt/prisma-engines/prisma-fmt}"
+
+    # Try again with the alternative locations
+    DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/fdr} \
+        prisma migrate deploy --schema /prisma/schema.prisma || {
+        echo "Warning: Prisma migrations failed, but continuing..."
+        return 1
+    }
+}
+
+run_prisma_migrations
 # -----------  End Postgres setup  -----------
 
 # -----------  Start MeiliSearch setup  -----------
 export MEILI_HTTP_ADDR=0.0.0.0:7700
 
 echo "Starting MeiliSearch..."
-./meilisearch --master-key="fern123!" > /var/log/meilisearch.log 2>&1 &
+# Change to /tmp so MeiliSearch's default data directory (./data.ms) is created there
+cd /tmp
+/meilisearch --master-key="fern123!" > /tmp/meilisearch.log 2>&1 &
 meili_pid=$!
 echo "MeiliSearch PID: $meili_pid"
+
+# Wait for MeiliSearch to be ready
+echo "Waiting for MeiliSearch to start..."
+MEILI_ATTEMPTS=0
+MAX_MEILI_ATTEMPTS=30
+until curl -f -H "Authorization: Bearer fern123!" http://localhost:7700/health 2>/dev/null; do
+    MEILI_ATTEMPTS=$((MEILI_ATTEMPTS + 1))
+    if [ $MEILI_ATTEMPTS -ge $MAX_MEILI_ATTEMPTS ]; then
+        echo "WARNING: MeiliSearch failed to start after $MAX_MEILI_ATTEMPTS attempts"
+        echo "WARNING: Search functionality will not work"
+        echo "MeiliSearch logs:"
+        cat /tmp/meilisearch.log 2>/dev/null || echo "No log file found"
+        break
+    fi
+    echo "MeiliSearch not ready yet, waiting 2 seconds... ($MEILI_ATTEMPTS/$MAX_MEILI_ATTEMPTS)"
+    sleep 2
+done
+
+if [ $MEILI_ATTEMPTS -lt $MAX_MEILI_ATTEMPTS ]; then
+    echo "MeiliSearch is ready!"
+fi
 
 export MEILISEARCH_URL="http://localhost:7700"
 # -----------  End MeiliSearch setup  -----------
@@ -75,27 +206,14 @@ if [ -n "$CUSTOM_DOMAIN" ] && [ "$CUSTOM_DOMAIN" != "null" ]; then
     export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
 fi
 
-# Make bucket public
+# Always use path-style S3 access for self-hosted mode (simpler and more reliable)
+# This tells the AWS SDK to generate URLs like http://localhost:9000/bucket/file
+# instead of http://bucket.localhost:9000/file
+export S3_FORCE_PATH_STYLE=true
 
-# map custom domain to local machine
-echo "127.0.0.1 $ORG_NAME.docs.buildwithfern.com.localhost" >> /etc/hosts
-echo "::1 $ORG_NAME.docs.buildwithfern.com.localhost" >> /etc/hosts
-
-# If CUSTOM_DOMAIN is set and not null, set CUSTOM_DOMAIN_CLEANED for later use
-if [ -n "$CUSTOM_DOMAIN" ] && [ "$CUSTOM_DOMAIN" != "null" ]; then
-    CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
-    echo "127.0.0.1 $CUSTOM_DOMAIN_CLEANED.localhost" >> /etc/hosts
-    echo "::1 $CUSTOM_DOMAIN_CLEANED.localhost" >> /etc/hosts
-else
-    CUSTOM_DOMAIN_CLEANED=""
-fi
-
-# use the cleaned custom domain for files origin, if it exists
-if [ -n "$CUSTOM_DOMAIN_CLEANED" ] && [ "$CUSTOM_DOMAIN_CLEANED" != "null" ]; then
-    FILES_ORIGIN=${CUSTOM_DOMAIN_CLEANED}
-else
-    FILES_ORIGIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL}
-fi
+# Configure FILES_ORIGIN for the Next.js app
+# Use path-based routing for consistency with FDR
+NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}"
 
 # -----------  End MINIO setup  -----------
 
@@ -134,7 +252,7 @@ NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
 NEXT_PUBLIC_MINIO_BUCKET_HOST=${MINIO_URL} \
 NEXT_PUBLIC_MINIO_ACCESS_KEY=${MINIO_ROOT_USER} \
 NEXT_PUBLIC_MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD} \
-NEXT_PUBLIC_FILES_ORIGIN="http://${FILES_ORIGIN}.localhost:9000" \
+NEXT_PUBLIC_FILES_ORIGIN="${NEXT_PUBLIC_FILES_ORIGIN}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
@@ -151,11 +269,24 @@ fi
 # --------------  Finish nextapp --------------
 
 echo "Calling /api/fern-docs/search/v2/reindex/meilisearch route..."
-until curl -f -X GET http://localhost:3000/api/fern-docs/search/v2/reindex/meilisearch; do
-    echo "Reindex route not ready yet, retrying in 2 seconds..."
+# Try to reindex search, but don't block startup if it fails
+# This is non-critical - docs will work without search
+REINDEX_ATTEMPTS=0
+MAX_REINDEX_ATTEMPTS=10
+until curl -f -X GET http://localhost:3000/api/fern-docs/search/v2/reindex/meilisearch 2>/dev/null; do
+    REINDEX_ATTEMPTS=$((REINDEX_ATTEMPTS + 1))
+    if [ $REINDEX_ATTEMPTS -ge $MAX_REINDEX_ATTEMPTS ]; then
+        echo "WARNING: Failed to reindex search after $MAX_REINDEX_ATTEMPTS attempts"
+        echo "WARNING: Docs will be available but search functionality may not work"
+        echo "WARNING: This is expected in restricted environments where MeiliSearch cannot run"
+        break
+    fi
+    echo "Reindex route not ready yet, retrying in 2 seconds... (attempt $REINDEX_ATTEMPTS/$MAX_REINDEX_ATTEMPTS)"
     sleep 2
 done
-echo "Successfully called /api/fern-docs/search/v2/reindex/meilisearch"
+if [ $REINDEX_ATTEMPTS -lt $MAX_REINDEX_ATTEMPTS ]; then
+    echo "Successfully called /api/fern-docs/search/v2/reindex/meilisearch"
+fi
 
 echo "All services started. Tailing logs to keep the container running."
 tail -f /dev/null

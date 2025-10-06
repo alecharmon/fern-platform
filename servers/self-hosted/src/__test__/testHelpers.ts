@@ -10,7 +10,12 @@ export interface TestContainer {
  */
 export async function getContainerId(nameFilter: string): Promise<string> {
     const { stdout: containerId } = await execa("docker", ["ps", "-q", "--filter", nameFilter]);
-    return containerId;
+    // Handle case where multiple containers match - take the first one
+    const firstContainerId = containerId.trim().split("\n")[0];
+    if (!firstContainerId) {
+        throw new Error(`No container found matching filter: ${nameFilter}`);
+    }
+    return firstContainerId;
 }
 
 /**

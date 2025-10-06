@@ -10,6 +10,8 @@
     "docker-scout:check": "docker scout cves fern-self-hosted:latest --format sarif --output sarif.json --only-severity critical,high --only-fixed",
     "docker:build": "docker buildx build ../../. --load -f Dockerfile.self_hosted -t fern-self-hosted:latest",
     "docker:run": "docker run -p 9000:9000 -p 9001:9001 -p 8080:8080 -p 3000:3000 -p 7700:7700 -it -v $(pwd)/fern:/fern -v $(pwd)/fern-docs:/fern-docs -v $(pwd)/scripts:/scripts fern-self-hosted:latest",
+    "docker:run:nonroot": "docker run -p 9000:9000 -p 9001:9001 -p 8080:8080 -p 3000:3000 -p 7700:7700 -it --user 65532:65532 -v $(pwd)/fern:/fern:ro fern-self-hosted:latest",
+    "docker:run:restricted": "docker run -p 9000:9000 -p 9001:9001 -p 8080:8080 -p 3000:3000 -p 7700:7700 -it --user 65532:65532 --security-opt no-new-privileges --cap-drop ALL -v $(pwd)/fern:/fern:ro fern-self-hosted:latest",
     "fdr:build": "pnpm --filter @fern-platform/fdr build:tsup:cjs",
     "test:self-hosted": "vitest src/__test__ --globals --config src/__test__/vitest.config.ts"
   },

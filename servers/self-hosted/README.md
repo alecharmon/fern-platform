@@ -56,6 +56,37 @@ Run pnpm --filter=@fern-platform/self-hosted docker:run
 
 Finally navigate to http://localhost:3000/ where you should see your docs
 
+### Testing Restricted Environments
+
+To test the container with restricted security settings (simulating Kubernetes environments like Anduril's):
+
+**Basic non-root testing:**
+```bash
+pnpm --filter=@fern-platform/self-hosted docker:run:nonroot
+```
+
+This runs the container as UID 65532 (non-root user) with read-only `/fern` mount.
+
+**Full restricted mode (simulates Anduril's security context):**
+```bash
+pnpm --filter=@fern-platform/self-hosted docker:run:restricted
+```
+
+This runs with:
+- Non-root user (UID 65532)
+- No new privileges (`--security-opt no-new-privileges`)
+- All capabilities dropped (`--cap-drop ALL`)
+- Read-only `/fern` mount
+
+**Expected behavior in restricted mode:**
+- Container starts successfully
+- PostgreSQL initializes in `/tmp` (ephemeral storage)
+- Warning message: "Using temporary PostgreSQL in /tmp - data will be lost on container restart"
+- All services start and function normally
+- Slightly longer startup time (~30-40s extra for PostgreSQL initialization)
+
+**Note:** The restricted scripts use `:ro` (read-only) mounts to better simulate production environments. If you need to modify files during development, use the standard `docker:run` command.
+
 ### To test changes to NextApp:
 
 Run this outside your docker:

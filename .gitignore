@@ -77,3 +77,9 @@ analyze
 test-results
 
 **/*.tar.gz
+
+# Local folder for dev tools
+.local
+
+# Claude
+**/settings.local.json

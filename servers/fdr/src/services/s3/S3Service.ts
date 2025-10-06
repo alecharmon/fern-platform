@@ -97,6 +97,7 @@ export class S3ServiceImpl implements S3Service {
         this.publicDocsS3 = new S3Client({
             ...(config.publicDocsS3.urlOverride != null ? { endpoint: config.publicDocsS3.urlOverride } : {}),
             region: config.publicDocsS3.bucketRegion,
+            forcePathStyle: config.publicDocsS3.forcePathStyle ?? false,
             credentials: {
                 accessKeyId: config.awsAccessKey,
                 secretAccessKey: config.awsSecretKey
@@ -105,6 +106,7 @@ export class S3ServiceImpl implements S3Service {
         this.privateDocsS3 = new S3Client({
             ...(config.privateDocsS3.urlOverride != null ? { endpoint: config.privateDocsS3.urlOverride } : {}),
             region: config.privateDocsS3.bucketRegion,
+            forcePathStyle: config.privateDocsS3.forcePathStyle ?? false,
             credentials: {
                 accessKeyId: config.awsAccessKey,
                 secretAccessKey: config.awsSecretKey
@@ -115,6 +117,7 @@ export class S3ServiceImpl implements S3Service {
                 ? { endpoint: config.dbDocsDefinitionS3.urlOverride }
                 : {}),
             region: config.dbDocsDefinitionS3.bucketRegion,
+            forcePathStyle: config.dbDocsDefinitionS3.forcePathStyle ?? false,
             credentials: {
                 accessKeyId: config.awsAccessKey,
                 secretAccessKey: config.awsSecretKey
@@ -125,6 +128,7 @@ export class S3ServiceImpl implements S3Service {
                 ? { endpoint: config.privateApiDefinitionSourceS3.urlOverride }
                 : {}),
             region: config.privateApiDefinitionSourceS3.bucketRegion,
+            forcePathStyle: config.privateApiDefinitionSourceS3.forcePathStyle ?? false,
             credentials: {
                 accessKeyId: config.awsAccessKey,
                 secretAccessKey: config.awsSecretKey
@@ -419,7 +423,8 @@ export class S3ServiceImpl implements S3Service {
     }
 
     constructS3DocsKeyWithoutTime({ domain, filepath }: { domain: string; filepath: DocsV1Write.FilePath }): string {
-        return `${domain}/${filepath}`;
+        // In self-hosted mode, bucket already represents the domain, so don't duplicate
+        return this.config.localModeOverride ? filepath : `${domain}/${filepath}`;
     }
 
     constructS3DynamicIrKey({

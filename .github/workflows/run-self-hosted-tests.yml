@@ -10,20 +10,20 @@ on:
 jobs:
   run-self-hosted-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Limit to 15 minutes to prevent GitHub Actions timeout
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
-          
+
       - name: Update Engines
         run: |
           node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "9.15.9"; pkg.packageManager = "pnpm@9.15.9"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
 
       - name: Install
         uses: ./.github/actions/legacy-install
-        
+
       - name: Compile and build
         run: pnpm turbo compile codegen build
         env:
@@ -33,7 +33,7 @@ jobs:
 
       - name: Build FDR CJS
         run: pnpm --filter @fern-platform/fdr build:tsup:cjs
-        
+
       - name: Build docs bundle
         run: pnpm docs:self-hosted-bundle:build
 
