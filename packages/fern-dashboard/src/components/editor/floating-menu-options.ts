@@ -12,7 +12,8 @@ import {
     ListOrderedIcon,
     Megaphone,
     MousePointerClick,
-    Square
+    Square,
+    Table
 } from "lucide-react";
 
 import { EMPTY_ACCORDION_CONTENT, EMPTY_ACCORDION_GROUP_CONTENT } from "@/docs/mdx/components/accordion";
@@ -71,6 +72,17 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
             editor.chain().focus().setMediaUploadNode().run();
         }
     },
+    {
+        title: "Embed",
+        subtext: "Embed external content",
+        aliases: ["embed", "iframe", "external", "media"],
+        badge: CodeXml,
+        group: "Media",
+        keywords: ["embed", "iframe", "external", "media"],
+        onSelect: ({ editor }) => {
+            handleCustomNodeInsert(editor, EMPTY_EMBED_CONTENT);
+        }
+    },
 
     // Component items
     {
@@ -93,6 +105,17 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
         keywords: ["accordion", "accordion group", "accordiongroup"],
         onSelect: ({ editor }) => {
             handleCustomNodeInsert(editor, EMPTY_ACCORDION_GROUP_CONTENT);
+        }
+    },
+    {
+        title: "Button",
+        subtext: "Add a button",
+        aliases: ["button"],
+        badge: MousePointerClick,
+        group: "Components",
+        keywords: ["button"],
+        onSelect: ({ editor }) => {
+            handleCustomNodeInsert(editor, EMPTY_BUTTON_CONTENT);
         }
     },
     {
@@ -129,61 +152,6 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
         }
     },
     {
-        title: "Parameter Field",
-        subtext: "Add a parameter field",
-        aliases: ["parameter", "parameter field"],
-        badge: List,
-        group: "Components",
-        keywords: ["parameter", "parameter field"],
-        onSelect: ({ editor }) => {
-            handleCustomNodeInsert(editor, EMPTY_PARAM_FIELD_CONTENT);
-        }
-    },
-    {
-        title: "Steps",
-        subtext: "Add step-by-step instructions",
-        aliases: ["steps", "step", "step group"],
-        badge: ListOrderedIcon,
-        group: "Components",
-        keywords: ["steps", "step", "step group"],
-        onSelect: ({ editor }) => {
-            handleCustomNodeInsert(editor, EMPTY_STEPS_CONTENT);
-        }
-    },
-    {
-        title: "Tabs",
-        subtext: "Add a tab group",
-        aliases: ["tabs", "tab", "option"],
-        badge: Folder,
-        group: "Components",
-        keywords: ["tabs", "tab", "option"],
-        onSelect: ({ editor }) => {
-            handleCustomNodeInsert(editor, EMPTY_TABS_CONTENT);
-        }
-    },
-    {
-        title: "Button",
-        subtext: "Add a button",
-        aliases: ["button"],
-        badge: MousePointerClick,
-        group: "Components",
-        keywords: ["button"],
-        onSelect: ({ editor }) => {
-            handleCustomNodeInsert(editor, EMPTY_BUTTON_CONTENT);
-        }
-    },
-    {
-        title: "Embed",
-        subtext: "Embed external content",
-        aliases: ["embed", "iframe", "external", "media"],
-        badge: CodeXml,
-        group: "Components",
-        keywords: ["embed", "iframe", "external", "media"],
-        onSelect: ({ editor }) => {
-            handleCustomNodeInsert(editor, EMPTY_EMBED_CONTENT);
-        }
-    },
-    {
         title: "Endpoint Request Snippet",
         subtext: "Show a code sample for an API request",
         aliases: ["endpoint", "request", "api", "code", "snippet"],
@@ -214,6 +182,50 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
         keywords: ["endpoint", "schema", "api", "definition", "type"],
         onSelect: ({ editor }) => {
             handleCustomNodeInsert(editor, EMPTY_ENDPOINT_SCHEMA_SNIPPET);
+        }
+    },
+    {
+        title: "Parameter Field",
+        subtext: "Add a parameter field",
+        aliases: ["parameter", "parameter field"],
+        badge: List,
+        group: "Components",
+        keywords: ["parameter", "parameter field"],
+        onSelect: ({ editor }) => {
+            handleCustomNodeInsert(editor, EMPTY_PARAM_FIELD_CONTENT);
+        }
+    },
+    {
+        title: "Steps",
+        subtext: "Add step-by-step instructions",
+        aliases: ["steps", "step", "step group"],
+        badge: ListOrderedIcon,
+        group: "Components",
+        keywords: ["steps", "step", "step group"],
+        onSelect: ({ editor }) => {
+            handleCustomNodeInsert(editor, EMPTY_STEPS_CONTENT);
+        }
+    },
+    {
+        title: "Table",
+        subtext: "Add a table",
+        aliases: ["table"],
+        badge: Table,
+        group: "Components",
+        keywords: ["table"],
+        onSelect: ({ editor }) => {
+            editor.chain().focus().insertTable().run();
+        }
+    },
+    {
+        title: "Tabs",
+        subtext: "Add a tab group",
+        aliases: ["tabs", "tab", "option"],
+        badge: Folder,
+        group: "Components",
+        keywords: ["tabs", "tab", "option"],
+        onSelect: ({ editor }) => {
+            handleCustomNodeInsert(editor, EMPTY_TABS_CONTENT);
         }
     }
 ];

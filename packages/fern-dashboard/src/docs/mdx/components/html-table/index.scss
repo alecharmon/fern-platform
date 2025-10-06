@@ -11,7 +11,8 @@
   .fern-table {
     @apply w-full;
 
-    thead tr th {
+    thead tr th,
+    .fern-table-header {
       @apply bg-(color:--grayscale-a2);
     }
 

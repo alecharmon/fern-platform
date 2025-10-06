@@ -71,4 +71,51 @@
   .prose-inherit-colors a:hover {
     opacity: 1;
   }
+
+  .fern-table-root {
+    div:has(> tr),
+    div:has(> th),
+    div:has(> td) {
+      width: 100%;
+      display: table;
+      table-layout: fixed;
+    }
+    p {
+      margin: 0;
+    }
+
+    td {
+      @apply px-2;
+    }
+  }
+
+  .fern-table-root {
+    td,
+    th {
+      border-right: 1px dashed transparent;
+    }
+  }
+
+  .ProseMirror-selectednode .fern-table-root,
+  .table-node:hover {
+    td,
+    th {
+      border-right: 1px dashed var(--grayscale-4);
+    }
+  }
+
+  .table-header-actions-menu {
+    opacity: 0;
+  }
+  .ProseMirror-selectednode,
+  .table-node:hover {
+    .table-header-actions-menu {
+      opacity: 1;
+    }
+  }
+
+  .table-node:hover td:last-child,
+  .table-node:hover th:last-child {
+    border-right-color: transparent;
+  }
 }

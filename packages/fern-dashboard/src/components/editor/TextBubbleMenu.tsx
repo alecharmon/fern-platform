@@ -1,11 +1,10 @@
-import type { MouseEventHandler } from "react";
-
 import { useCurrentEditor } from "@tiptap/react";
 import { BubbleMenu as EditorBubbleMenu } from "@tiptap/react/menus";
+import type { MouseEventHandler } from "react";
 
 import { Icon } from "@/components/icon/Icon";
 
-type BubbleMenuAction =
+type TextBubbleMenuAction =
     | "setNodeType"
     | "toggleBold"
     | "toggleItalic"
@@ -16,10 +15,10 @@ type BubbleMenuAction =
     | "toggleBulletList"
     | "toggleOrderedList";
 
-export default function BubbleMenu() {
+export default function TextBubbleMenu() {
     const { editor } = useCurrentEditor();
 
-    function menuItemClickHandler(action: BubbleMenuAction) {
+    function menuItemClickHandler(action: TextBubbleMenuAction) {
         return () => {
             if (!editor) return;
 
@@ -60,19 +59,18 @@ export default function BubbleMenu() {
     return (
         <EditorBubbleMenu
             options={{ placement: "top-start" }}
-            shouldShow={({ editor: { isFocused }, state: { selection } }) => {
+            shouldShow={({ editor, state: { selection } }) => {
                 // Don't show the bubble menu if the selection is an image or image upload
                 if (
-                    // @ts-expect-error - type issue with tiptap
-                    selection?.node?.type?.name === "custom-element-v2" ||
-                    // @ts-expect-error - type issue with tiptap
-                    selection?.node?.type?.name === "mediaUpload"
+                    editor.isActive("custom-element-v2") ||
+                    editor.isActive("mediaUpload") ||
+                    editor.isActive("table")
                 ) {
                     return false;
                 }
 
                 // Check if we have an active selection
-                return isFocused && !selection.empty;
+                return editor.isFocused && !selection.empty;
             }}
         >
             <div className="border-1 rounded-2 text-gray-1100 flex items-center gap-px border-gray-500 bg-white p-1 shadow-sm">
@@ -84,18 +82,20 @@ export default function BubbleMenu() {
                     iconProps={{ variant: "Underline" }}
                     onClick={menuItemClickHandler("toggleUnderline")}
                 />
-                {/* 
-        TODO: Add strikethrough
-        <BubbleMenuItem
-          iconProps={{ variant: "Strikethrough" }}
-          onClick={menuItemClickHandler("toggleStrike")}
-        /> */}
                 {/*
-        TODO: Add link
-         <BubbleMenuItem
-          iconProps={{ variant: "Link" }}
-          onClick={menuItemClickHandler("setLink")}
-        /> */}
+                    TODO: Add strikethrough
+                    <BubbleMenuItem
+                        iconProps={{ variant: "Strikethrough" }}
+                        onClick={menuItemClickHandler("toggleStrike")}
+                    />
+                */}
+                {/*
+                    TODO: Add link
+                    <BubbleMenuItem
+                        iconProps={{ variant: "Link" }}
+                        onClick={menuItemClickHandler("setLink")}
+                    />
+                */}
                 <BubbleMenuItem iconProps={{ variant: "Code" }} onClick={menuItemClickHandler("toggleCode")} />
                 <BubbleMenuSeparator />
                 <BubbleMenuItem iconProps={{ variant: "List" }} onClick={menuItemClickHandler("toggleBulletList")} />

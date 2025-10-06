@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-
 import CodeBlock from "@tiptap/extension-code-block";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
 import {
     EditorProvider,
     type EditorProviderProps,
@@ -13,19 +12,22 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { createLowlight } from "lowlight";
+import { useEffect } from "react";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useEditor } from "@/providers/EditorContext";
 import { cn } from "@/utils/utils";
-
-import BubbleMenu from "./BubbleMenu";
-import FloatingMenu from "./FloatingMenu";
-import NodeHoverHandle from "./NodeHoverHandle";
 import { createCodeBlockComponent } from "./extension-code-block/CodeBlockComponent";
 import type { LowlightInstance } from "./extension-code-block/types";
 import CustomElement from "./extension-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
+import FloatingMenu from "./FloatingMenu";
+import NodeHoverHandle from "./NodeHoverHandle";
+import TableNodeView from "./TableNodeView";
+import TextBubbleMenu from "./TextBubbleMenu";
+import TableHeaderNodeView from "./table/TableHeaderNodeView";
+import TableRowNodeView from "./table/TableRowNodeView";
 import { LowlightPlugin } from "./tiptap-node/lowlight/lowlight-plugin";
 import {
     ConfiguredFileHandler,
@@ -77,6 +79,57 @@ const extensions = [
         addProseMirrorPlugins() {
             return [LowlightPlugin({ name: "codeBlock", lowlight, defaultLanguage: null })];
         }
+    }),
+    Table.extend({
+        addNodeView() {
+            return ReactNodeViewRenderer(TableNodeView, { as: "table" });
+        },
+        addKeyboardShortcuts() {
+            return {
+                "Mod-a": ({ editor }) => {
+                    // If we're inside a table cell, override the default to only select the cell content
+                    // AI generated:
+                    const { selection } = editor.state;
+                    const { $from } = selection;
+
+                    for (let d = $from.depth; d > 0; d--) {
+                        const node = $from.node(d);
+                        if (node.type.name === "tableCell" || node.type.name === "tableHeader") {
+                            const cellStart = $from.before(d) + 1;
+                            const cellEnd = $from.after(d) - 1;
+                            editor.commands.setTextSelection({
+                                from: cellStart,
+                                to: cellEnd
+                            });
+                            return true;
+                        }
+                    }
+
+                    // If not in a table cell, use default behavior
+                    return false;
+                }
+            };
+        }
+    }),
+    TableRow.extend({
+        addNodeView() {
+            return ReactNodeViewRenderer(TableRowNodeView, {
+                as: "tr"
+            });
+        }
+    }),
+    TableHeader.extend({
+        addNodeView() {
+            return ReactNodeViewRenderer(TableHeaderNodeView, {
+                as: "th",
+                className: "fern-table-header"
+            });
+        }
+    }),
+    TableKit.configure({
+        table: false,
+        tableRow: false,
+        tableHeader: false
     })
 ] as Extension[];
 export declare namespace TiptapEditor {
@@ -141,7 +194,7 @@ export default function TiptapEditor({
         Context here: https://github.com/ueberdosis/tiptap/issues/4619#issuecomment-1869042861 */}
                 {!isEditingDisabled && !disableDragging && <NodeHoverHandle />}
                 {!isEditingDisabled && <FloatingMenu />}
-                {!isEditingDisabled && <BubbleMenu />}
+                {!isEditingDisabled && <TextBubbleMenu />}
             </div>
             <EditorContextUpdater />
             <TipTapEditingDisabledListener />
