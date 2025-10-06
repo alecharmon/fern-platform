@@ -3,12 +3,14 @@ import "server-only";
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
 import { HiddenSidebar } from "@fern-docs/components/state/layout";
 
+import { NotFound404Tracker } from "./analytics/NotFound404Tracker";
 import ReturnHomeButton from "./ReturnHomeButton";
 
 // todo: don't hide the sidebar if disable-header is true
 export default async function NotFoundContent() {
     return (
         <>
+            <NotFound404Tracker />
             <HiddenSidebar />
             <div className="flex h-[calc(100svh-var(--header-height)-6rem)] w-screen flex-col items-center justify-center gap-6">
                 <GradientExclamation />
