@@ -125,18 +125,11 @@ let nextConfig: NextConfig = {
 
         // glslify is used to import 3d shaders (WaveformComplexShader)
         // into the bundle
+        // Note: rspack doesn't support webpack loaders, so we use webpack's built-in support
         config.module.rules.push({
             test: /\.(glsl|vs|fs|vert|frag)$/,
             exclude: /node_modules/,
-            use: [
-                "raw-loader",
-                {
-                    loader: "glslify-loader",
-                    options: {
-                        transform: ["glslify-import"]
-                    }
-                }
-            ]
+            type: "asset/source"
         });
 
         // analyze the bundle using rsdoctor

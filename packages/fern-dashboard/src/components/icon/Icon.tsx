@@ -13,6 +13,7 @@ import {
     MessageSquareQuote,
     Plus,
     Strikethrough,
+    Trash2,
     Type,
     Underline
 } from "lucide-react";
@@ -35,6 +36,7 @@ const ICONS = {
     MessageSquareQuote,
     Plus,
     Strikethrough,
+    Trash2,
     Type,
     Underline,
     HeadingDropdown

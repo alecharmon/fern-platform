@@ -1,8 +1,14 @@
+import { useState } from "react";
+
+import * as Popover from "@radix-ui/react-popover";
 import { useCurrentEditor } from "@tiptap/react";
 import { BubbleMenu as EditorBubbleMenu } from "@tiptap/react/menus";
 import type { MouseEventHandler } from "react";
 
 import { Icon } from "@/components/icon/Icon";
+import { cn } from "@/utils/utils";
+
+import { LinkPopover } from "./LinkPopover";
 
 type TextBubbleMenuAction =
     | "setNodeType"
@@ -10,13 +16,13 @@ type TextBubbleMenuAction =
     | "toggleItalic"
     | "toggleUnderline"
     | "toggleStrike"
-    | "setLink"
     | "toggleCode"
     | "toggleBulletList"
     | "toggleOrderedList";
 
 export default function TextBubbleMenu() {
     const { editor } = useCurrentEditor();
+    const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
 
     function menuItemClickHandler(action: TextBubbleMenuAction) {
         return () => {
@@ -39,10 +45,6 @@ export default function TextBubbleMenu() {
                 case "toggleStrike":
                     editor.chain().focus().toggleStrike().run();
                     break;
-                case "setLink":
-                    // TODO: This should open an additional popover to edit the link
-                    editor.chain().focus().setLink({ href: "https://www.google.com" }).run();
-                    break;
                 case "toggleCode":
                     editor.chain().focus().toggleCode().run();
                     break;
@@ -54,6 +56,10 @@ export default function TextBubbleMenu() {
                     break;
             }
         };
+    }
+
+    if (!editor) {
+        return null;
     }
 
     return (
@@ -82,20 +88,37 @@ export default function TextBubbleMenu() {
                     iconProps={{ variant: "Underline" }}
                     onClick={menuItemClickHandler("toggleUnderline")}
                 />
-                {/*
-                    TODO: Add strikethrough
-                    <BubbleMenuItem
-                        iconProps={{ variant: "Strikethrough" }}
-                        onClick={menuItemClickHandler("toggleStrike")}
-                    />
-                */}
-                {/*
-                    TODO: Add link
-                    <BubbleMenuItem
-                        iconProps={{ variant: "Link" }}
-                        onClick={menuItemClickHandler("setLink")}
-                    />
-                */}
+                <Popover.Root open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
+                    <Popover.Trigger asChild>
+                        <button
+                            className="rounded-1 cursor-pointer p-1 transition-colors hover:bg-gray-300 hover:transition-none"
+                            onMouseDown={(e) => e.preventDefault()}
+                        >
+                            <div className="flex size-6 items-center justify-center">
+                                <Icon variant="Link" size={20} />
+                            </div>
+                        </button>
+                    </Popover.Trigger>
+                    <Popover.Portal>
+                        <Popover.Content
+                            className={cn(
+                                "bg-popover text-popover-foreground border-border-default z-50 w-80 rounded-lg border p-0 shadow-md",
+                                "data-[state=open]:animate-in data-[state=closed]:animate-out",
+                                "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+                                "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+                                "data-[side=bottom]:slide-in-from-top-2",
+                                "data-[side=left]:slide-in-from-right-2",
+                                "data-[side=right]:slide-in-from-left-2",
+                                "data-[side=top]:slide-in-from-bottom-2"
+                            )}
+                            sideOffset={5}
+                            onOpenAutoFocus={(e) => e.preventDefault()}
+                            onCloseAutoFocus={(e) => e.preventDefault()}
+                        >
+                            <LinkPopover editor={editor} onClose={() => setLinkPopoverOpen(false)} />
+                        </Popover.Content>
+                    </Popover.Portal>
+                </Popover.Root>
                 <BubbleMenuItem iconProps={{ variant: "Code" }} onClick={menuItemClickHandler("toggleCode")} />
                 <BubbleMenuSeparator />
                 <BubbleMenuItem iconProps={{ variant: "List" }} onClick={menuItemClickHandler("toggleBulletList")} />

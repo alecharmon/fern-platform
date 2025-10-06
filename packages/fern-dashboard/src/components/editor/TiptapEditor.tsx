@@ -1,6 +1,7 @@
 "use client";
 
 import CodeBlock from "@tiptap/extension-code-block";
+import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Table, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
 import {
@@ -62,6 +63,14 @@ const extensions = [
         },
         gapcursor: false,
         codeBlock: false
+    }),
+    Link.configure({
+        openOnClick: false,
+        autolink: true,
+        linkOnPaste: true,
+        HTMLAttributes: {
+            class: "text-blue-600 underline cursor-pointer hover:text-blue-800"
+        }
     }),
     FVEAttributesExtension.configure({
         types: dataAttributeNodeTypes
