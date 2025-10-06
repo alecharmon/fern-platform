@@ -1,12 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import React, { type ComponentProps } from "react";
-
-import { NodeViewWrapper } from "@tiptap/react";
 
 import type { MDXComponents } from "@fern-docs/mdx";
 
-import { UnsupportedContent } from "@/components/editor/UnsupportedContent";
 import { ErrorBoundary, ErrorBoundaryFallback } from "@/docs/components/error-boundary";
 import { Embed } from "@/editor/components/Embed";
 
@@ -50,10 +48,10 @@ import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
 import { Tab, TabGroup } from "./tabs";
 
-// const ElevenLabsWaveform = dynamic(
-//   () => import("./waveform/WaveformComplex").then((mod) => mod.default),
-//   { ssr: false, loading: () => <div className="h-[400px]" /> } // prevent layout shift
-// );
+const ElevenLabsWaveform = dynamic(
+    () => import("./waveform/WaveformComplex").then((mod) => mod.default),
+    { ssr: false, loading: () => <div className="h-[400px]" /> } // prevent layout shift
+);
 
 const FERN_COMPONENTS = {
     Accordion,
@@ -103,11 +101,7 @@ const FERN_COMPONENTS = {
 // internal-use only
 const INTERNAL_COMPONENTS = {
     ErrorBoundary,
-    ElevenLabsWaveform: () => (
-        <NodeViewWrapper>
-            <UnsupportedContent>ElevenLabsWaveform is not supported in the editor.</UnsupportedContent>
-        </NodeViewWrapper>
-    ),
+    ElevenLabsWaveform,
 
     /**
      * deprecated but kept for backwards compatibility
