@@ -34,6 +34,7 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
     const configPromise = loader.getConfig();
     const authStatePromise = loader.getAuthState(slugToHref(slug));
     const edgeFlagsPromise = loader.getEdgeFlags();
+    const settingsPromise = loader.getSettings();
 
     // Await configPromise with timing
     let config;
@@ -131,8 +132,10 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
     if (found.type === "notFound") {
         console.error(`[${loader.domain}] Not found: ${slug}`);
 
+        const settings = await settingsPromise;
+
         // returning "notFound: true" here renders our custom 404 page (not-found.tsx)
-        if (edgeFlags.is404PageHidden && found.redirect != null) {
+        if ((edgeFlags.is404PageHidden || settings.hide404Page) && found.redirect != null) {
             redirect(prepareRedirect(found.redirect));
         }
 
