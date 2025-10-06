@@ -98,20 +98,28 @@ export async function GET(
                         });
                 }
 
-                // Revalidate the LLMs full text cache
-                const llmsFullPromise = fetch(`${req.nextUrl.origin}/api/fern-docs/llms-full.txt`, {
-                    method: "HEAD",
-                    cache: "no-store",
-                    headers: { [HEADER_X_FERN_HOST]: domain },
-                    signal: AbortSignal.timeout(600_000)
-                })
-                    .then(() => {
-                        controller.enqueue(`llms-full-revalidated\n`);
+                // Revalidate cache endpoints
+                const cacheEndpoints = [
+                    { path: "/api/fern-docs/llms-full.txt", name: "llms-full" },
+                    { path: "/api/fern-docs/favicon.ico", name: "api-favicon" },
+                    { path: "/favicon.ico", name: "base-favicon" }
+                ];
+
+                const cachePromises = cacheEndpoints.map(({ path, name }) =>
+                    fetch(`${req.nextUrl.origin}${path}`, {
+                        method: "HEAD",
+                        cache: "no-store",
+                        headers: { [HEADER_X_FERN_HOST]: domain },
+                        signal: AbortSignal.timeout(600_000)
                     })
-                    .catch((e: unknown) => {
-                        console.error(`[revalidate:llms-full-revalidate] error: ${JSON.stringify(e)}`);
-                        controller.enqueue(`llms-full-revalidate-failed:error=${escapeRegExp(String(e))}\n`);
-                    });
+                        .then(() => {
+                            controller.enqueue(`${name}-revalidated\n`);
+                        })
+                        .catch((e: unknown) => {
+                            console.error(`[revalidate:${name}-revalidate] error: ${JSON.stringify(e)}`);
+                            controller.enqueue(`${name}-revalidate-failed:error=${escapeRegExp(String(e))}\n`);
+                        })
+                );
 
                 const root = convertResponseToRootNode(docs, edgeFlags);
                 let staticRoot = root;
@@ -310,8 +318,8 @@ export async function GET(
 
                 // finish reindexing before returning
                 await reindexPromise;
-                // finish caching llms full txt before returning
-                await llmsFullPromise;
+                // finish revalidating cache endpoints before returning
+                await Promise.all(cachePromises);
 
                 const end = performance.now();
                 console.log(`Reindex took ${end - start}ms`);

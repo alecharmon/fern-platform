@@ -12,6 +12,6 @@ export function GET(req: NextRequest) {
         return NextResponse.json({ error: "path is required" }, { status: 400 });
     }
 
-    revalidatePath(`/${host}/${domain}/static/${slugjoin(pathname)}`);
+    revalidatePath(`/${host}/${domain}/${slugjoin(pathname)}`);
     return NextResponse.json({ success: true });
 }
