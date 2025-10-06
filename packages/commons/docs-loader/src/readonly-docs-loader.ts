@@ -1065,7 +1065,7 @@ function calcDefaultPageWidth(sidebarWidth: number, contentWidth: number) {
 
 const getAuthConfig = getAuthEdgeConfig;
 
-const getAskAiEnabled = (cacheConfig: Required<CacheConfig>) =>
+const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domain: string) => {
         "use cache";
         unstable_cacheTag(domain, "askAiEnabled");
@@ -1090,7 +1090,7 @@ const getAskAiEnabled = (cacheConfig: Required<CacheConfig>) =>
                 await new FernAIClient({
                     baseUrl: process.env.FAI_SERVER_URL ?? "https://fai.buildwithfern.com",
                     token: process.env.FERN_TOKEN ?? ""
-                }).settings.getSettings({ domain })
+                }).settings.getDocsSettings({ domain })
             ).ask_ai_enabled;
 
             kvSet(domain, "askAiEnabled", result, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -1120,7 +1120,7 @@ export const createCachedDocsLoader = async (
 ): Promise<
     DocsLoader & {
         clearKvCache: () => Promise<void>;
-        isAskAiEnabled: () => Promise<boolean>;
+        isAskAiEnabledForDocs: () => Promise<boolean>;
     }
 > => {
     assertDocsDomain(domainKey);
@@ -1198,7 +1198,7 @@ export const createCachedDocsLoader = async (
             return getDynamicIr(config)(m.org, m.domain, apiName);
         },
         clearKvCache: () => clearKvCache(domainKey),
-        isAskAiEnabled: () => getAskAiEnabled(config)(domainKey)
+        isAskAiEnabledForDocs: () => getAskAiEnabledForDocs(config)(domainKey)
     };
 };
 

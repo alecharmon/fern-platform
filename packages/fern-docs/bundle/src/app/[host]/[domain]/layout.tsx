@@ -75,7 +75,7 @@ export default async function Layout({
         loader.getLayout(),
         loader.getSettings(),
         loader.getFonts(),
-        loader.isAskAiEnabled(),
+        loader.isAskAiEnabledForDocs(),
         deprecated_getCustomerAnalytics(domain),
         getLaunchDarklyInfo(loader)
     ]);
