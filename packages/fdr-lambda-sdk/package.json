@@ -34,8 +34,8 @@
   "dependencies": {},
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
-    "tsup": "^8.3.5",
-    "typescript": "^5",
-    "vitest": "^3.2.4"
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

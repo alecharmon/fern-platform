@@ -41,7 +41,7 @@
     "@swc/core": "catalog:",
     "@types/node": "^22.0.0",
     "depcheck": "^1.4.7",
-    "typescript": "^5",
-    "vitest": "^3.2.4"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

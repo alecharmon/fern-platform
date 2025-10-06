@@ -43,7 +43,7 @@
     "depcheck": "^1.4.7",
     "next": "catalog:",
     "stylelint": "^16.1.0",
-    "typescript": "^5",
-    "vitest": "^3.2.4"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

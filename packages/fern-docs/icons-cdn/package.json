@@ -34,17 +34,17 @@
     "@fortawesome/sharp-regular-svg-icons": "^7.0.1",
     "@fortawesome/sharp-solid-svg-icons": "^7.0.1",
     "@fortawesome/sharp-thin-svg-icons": "^7.0.1",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@next/bundle-analyzer": "catalog:",
-    "@types/node": "^22.0.0",
-    "depcheck": "^1.4.7",
+    "@types/node": "catalog:",
+    "depcheck": "catalog:",
     "next": "catalog:",
-    "stylelint": "^16.1.0",
-    "typescript": "^5",
-    "vitest": "^3.2.4"
+    "stylelint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

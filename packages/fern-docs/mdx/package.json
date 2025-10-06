@@ -47,7 +47,7 @@
     "@types/mdx": "^2.0.13",
     "@types/unist": "^3.0.3",
     "collapse-white-space": "^2.1.0",
-    "es-toolkit": "^1.32.0",
+    "es-toolkit": "catalog:",
     "estree-util-is-identifier-name": "^3.0.0",
     "estree-util-value-to-estree": "^3.3.3",
     "estree-walker": "^3.0.3",
@@ -75,7 +75,7 @@
     "micromark-extension-math": "^3.1.0",
     "micromark-extension-mdxjs": "^3.0.0",
     "style-to-object": "^1.0.8",
-    "ts-essentials": "^10.0.4",
+    "ts-essentials": "catalog:",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
     "unist-util-visit-parents": "^6.0.1",
@@ -85,11 +85,11 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/estree-jsx": "^1.0.5",
-    "@types/node": "^22.0.0",
-    "depcheck": "^1.4.7",
-    "stylelint": "^16.1.0",
-    "tsup": "^8.0.0",
-    "typescript": "^5",
-    "vitest": "^3.2.4"
+    "@types/node": "catalog:",
+    "depcheck": "catalog:",
+    "stylelint": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

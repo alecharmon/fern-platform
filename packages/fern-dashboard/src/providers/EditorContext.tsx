@@ -1,8 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
-
 import type { Editor } from "@tiptap/react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 /**
  * This context is used to store the editor instance and provide it to the components that need it.

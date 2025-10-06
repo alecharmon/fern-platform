@@ -29,14 +29,14 @@
   },
   "dependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
-    "ts-essentials": "^10.0.4"
+    "ts-essentials": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
-    "@types/node": "^22.0.0",
-    "depcheck": "^1.4.7",
-    "stylelint": "^16.1.0",
-    "typescript": "^5",
-    "vitest": "^3.2.4"
+    "@types/node": "catalog:",
+    "depcheck": "catalog:",
+    "stylelint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

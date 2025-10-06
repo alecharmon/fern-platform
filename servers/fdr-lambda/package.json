@@ -20,9 +20,9 @@
     "@types/node": "^22.0.0",
     "@types/pg": "^8.11.0",
     "pg": "^8.11.3",
-    "tsup": "^8.0.0",
-    "typescript": "^5",
-    "vitest": "^1.0.0"
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "packageManager": "pnpm@9.0.0"
 }

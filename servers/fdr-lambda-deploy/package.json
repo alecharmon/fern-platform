@@ -21,6 +21,6 @@
     "@types/node": "^22.0.0",
     "aws-cdk": "^2.1029.1",
     "ts-node": "^10.9.1",
-    "typescript": "^5"
+    "typescript": "catalog:"
   }
 }
