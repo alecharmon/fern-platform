@@ -75,6 +75,33 @@ export class AnalyticsService {
         };
     }
 
+    private getSelectAndGroupByClause(
+        type: "pageviews" | "visitors",
+        groupBy?: number
+    ): {
+        selectClause: string;
+        groupByClause: string;
+    } {
+        let selectClause: string;
+        let groupByClause: string;
+
+        switch (groupBy) {
+            case 7:
+                selectClause = `toDate(toStartOfWeek(timestamp)) as date, count(*) as ${type}`;
+                groupByClause = `GROUP BY toDate(toStartOfWeek(timestamp))`;
+                break;
+            case 30:
+                selectClause = `toDate(toStartOfMonth(timestamp)) as date, count(*) as ${type}`;
+                groupByClause = `GROUP BY toDate(toStartOfMonth(timestamp))`;
+                break;
+            default:
+                selectClause = `to_date(timestamp) as date, count(*) as ${type}`;
+                groupByClause = `GROUP BY to_date(timestamp)`;
+        }
+
+        return { selectClause, groupByClause };
+    }
+
     /**
      * Get time series data for pageviews over a period
      */
@@ -82,28 +109,7 @@ export class AnalyticsService {
         const { groupBy } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
-        let selectClause: string;
-        let groupByClause: string;
-
-        if (groupBy === 7) {
-            // Weekly grouping using toStartOfWeek for grouping
-            selectClause = `
-        toDate(toStartOfWeek(timestamp)) as date,
-        count(*) as pageviews`;
-            groupByClause = `GROUP BY toDate(toStartOfWeek(timestamp))`;
-        } else if (groupBy === 30) {
-            // Monthly grouping using toStartOfMonth
-            selectClause = `
-        toDate(toStartOfMonth(timestamp)) as date,
-        count(*) as pageviews`;
-            groupByClause = `GROUP BY toDate(toStartOfMonth(timestamp))`;
-        } else {
-            // Daily grouping (groupBy === 1 or undefined)
-            selectClause = `
-        to_date(timestamp) as date,
-        count(*) as pageviews`;
-            groupByClause = `GROUP BY to_date(timestamp)`;
-        }
+        const { selectClause, groupByClause } = this.getSelectAndGroupByClause("pageviews", groupBy);
 
         const query = `
       SELECT ${selectClause}
@@ -157,24 +163,18 @@ export class AnalyticsService {
         let selectClause: string;
         let groupByClause: string;
 
-        if (groupBy === 7) {
-            // Weekly grouping using toStartOfWeek for grouping
-            selectClause = `
-        toDate(toStartOfWeek(timestamp)) as date,
-        uniq(distinct_id) as visitors`;
-            groupByClause = `GROUP BY toDate(toStartOfWeek(timestamp))`;
-        } else if (groupBy === 30) {
-            // Monthly grouping using toStartOfMonth
-            selectClause = `
-        toDate(toStartOfMonth(timestamp)) as date,
-        uniq(distinct_id) as visitors`;
-            groupByClause = `GROUP BY toDate(toStartOfMonth(timestamp))`;
-        } else {
-            // Daily grouping (groupBy === 1 or undefined)
-            selectClause = `
-        to_date(timestamp) as date,
-        uniq(distinct_id) as visitors`;
-            groupByClause = `GROUP BY to_date(timestamp)`;
+        switch (groupBy) {
+            case 7:
+                selectClause = `toDate(toStartOfWeek(timestamp)) as date, uniq(distinct_id) as visitors`;
+                groupByClause = `GROUP BY toDate(toStartOfWeek(timestamp))`;
+                break;
+            case 30:
+                selectClause = `toDate(toStartOfMonth(timestamp)) as date, uniq(distinct_id) as visitors`;
+                groupByClause = `GROUP BY toDate(toStartOfMonth(timestamp))`;
+                break;
+            default:
+                selectClause = `to_date(timestamp) as date, uniq(distinct_id) as visitors`;
+                groupByClause = `GROUP BY to_date(timestamp)`;
         }
 
         const query = `
@@ -217,37 +217,80 @@ export class AnalyticsService {
 
         return results;
     }
-
     /**
      * Get top pages by pageviews
      */
     async getTopPages(
-        options: { dateRange?: DateRangeOptions; limit?: number; includeInternal?: boolean } = {}
-    ): Promise<{ path: string; pageviews: number }[]> {
-        const { limit = 10 } = options;
+        options: TimeSeriesOptions & {
+            limit?: number;
+            orderBy?: "visitors" | "views";
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ path: string; visitors: number; views: number }[]> {
+        const { limit = 10, orderBy = "views", order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
         const query = `
-      SELECT 
-        properties.$pathname as path,
-        count(*) as pageviews
+      SELECT properties.$pathname as path, uniq(distinct_id) as visitors, count(*) as views
       FROM events 
       WHERE 
         event = '$pageview' 
         AND properties.$host = '${this.config.baseSiteUrl}'
         ${whereClause}
       GROUP BY properties.$pathname
-      ORDER BY pageviews DESC
+      ORDER BY ${orderBy} ${order.toUpperCase()}
       LIMIT ${limit}
     `;
 
-        const response = await this.client.query<[string, number]>(query, {
+        const response = await this.client.query<[string, number, number]>(query, {
             name: `top-pages-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
         });
 
         return response.results.map((row) => ({
             path: row[0] || "/",
-            pageviews: row[1]
+            visitors: row[1],
+            views: row[2]
+        }));
+    }
+
+    /**
+     * Get top countries by pageviews
+     */
+    async getTopCountries(
+        options: TimeSeriesOptions & {
+            limit?: number;
+            orderBy?: "visitors" | "views";
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ country: string; visitors: number; views: number }[]> {
+        const { limit = 10, orderBy = "visitors", order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        const query = `
+      SELECT 
+        properties.$geoip_country_code as country, 
+        uniq(distinct_id) as visitors, 
+        count(*) as views
+      FROM events 
+      WHERE 
+        event = '$pageview' 
+        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND properties.$geoip_country_code IS NOT NULL
+        AND properties.$geoip_country_code != ''
+        ${whereClause}
+      GROUP BY properties.$geoip_country_code
+      ORDER BY ${orderBy} ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, number, number]>(query, {
+            name: `top-countries-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            country: row[0] || "Unknown",
+            visitors: row[1],
+            views: row[2]
         }));
     }
 

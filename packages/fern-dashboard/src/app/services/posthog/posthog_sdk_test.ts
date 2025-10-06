@@ -19,6 +19,60 @@ function formatNumber(num: number): string {
     return new Intl.NumberFormat("en-US").format(num);
 }
 
+function getCountryFlag(country: string): string | null {
+    // Map common country names to their flag emojis
+    const countryFlags: Record<string, string> = {
+        "United States": "🇺🇸",
+        USA: "🇺🇸",
+        "United Kingdom": "🇬🇧",
+        UK: "🇬🇧",
+        England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+        Canada: "🇨🇦",
+        Germany: "🇩🇪",
+        France: "🇫🇷",
+        Spain: "🇪🇸",
+        Italy: "🇮🇹",
+        Netherlands: "🇳🇱",
+        Poland: "🇵🇱",
+        Brazil: "🇧🇷",
+        Mexico: "🇲🇽",
+        Argentina: "🇦🇷",
+        Japan: "🇯🇵",
+        China: "🇨🇳",
+        "South Korea": "🇰🇷",
+        India: "🇮🇳",
+        Australia: "🇦🇺",
+        "New Zealand": "🇳🇿",
+        Turkey: "🇹🇷",
+        Russia: "🇷🇺",
+        Ukraine: "🇺🇦",
+        Switzerland: "🇨🇭",
+        Sweden: "🇸🇪",
+        Norway: "🇳🇴",
+        Denmark: "🇩🇰",
+        Finland: "🇫🇮",
+        Belgium: "🇧🇪",
+        Austria: "🇦🇹",
+        Ireland: "🇮🇪",
+        Portugal: "🇵🇹",
+        Greece: "🇬🇷",
+        Israel: "🇮🇱",
+        Singapore: "🇸🇬",
+        Malaysia: "🇲🇾",
+        Thailand: "🇹🇭",
+        Indonesia: "🇮🇩",
+        Philippines: "🇵🇭",
+        Vietnam: "🇻🇳",
+        "South Africa": "🇿🇦",
+        Egypt: "🇪🇬",
+        "Saudi Arabia": "🇸🇦",
+        "United Arab Emirates": "🇦🇪",
+        UAE: "🇦🇪"
+    };
+
+    return countryFlags[country] || null;
+}
+
 function printMetrics(metrics: any, unitCount: number, unitLabel: string, url: string) {
     console.log("\n" + colors.bright + colors.blue + "━".repeat(50) + colors.reset);
     console.log(colors.bright + `📊 Analytics for ${colors.cyan}${url}${colors.reset}`);
@@ -185,22 +239,116 @@ async function main() {
 
             console.log(colors.dim + "\n⏳ Fetching time series data..." + colors.reset);
 
-            const timeSeries = await analytics.getPageViewsTimeSeries({
-                dateRange,
-                groupBy
-            });
+            // Fetch both page views and visitors time series
+            const [pageViewsTimeSeries, visitorsTimeSeries] = await Promise.all([
+                analytics.getPageViewsTimeSeries({
+                    dateRange,
+                    groupBy
+                }),
+                analytics.getVisitorsTimeSeries({
+                    dateRange,
+                    groupBy
+                })
+            ]);
 
+            // Display page views
             console.log("\n" + colors.bright + `📊 ${groupByLabel} Page Views:` + colors.reset);
             console.log(colors.dim + "   Date         Views" + colors.reset);
             console.log(colors.dim + "   " + "─".repeat(25) + colors.reset);
 
-            timeSeries.forEach(({ date, value }) => {
-                const barLength = Math.floor((value / Math.max(...timeSeries.map((d) => d.value))) * 20);
+            pageViewsTimeSeries.forEach(({ date, value }) => {
+                const barLength = Math.floor((value / Math.max(...pageViewsTimeSeries.map((d) => d.value))) * 20);
                 const bar = "█".repeat(barLength);
                 console.log(
                     `   ${colors.dim}${date}${colors.reset}  ${colors.green}${bar}${colors.reset} ${formatNumber(value)}`
                 );
             });
+
+            // Display visitors
+            console.log("\n" + colors.bright + `👥 ${groupByLabel} Unique Visitors:` + colors.reset);
+            console.log(colors.dim + "   Date         Visitors" + colors.reset);
+            console.log(colors.dim + "   " + "─".repeat(28) + colors.reset);
+
+            visitorsTimeSeries.forEach(({ date, value }) => {
+                const barLength = Math.floor((value / Math.max(...visitorsTimeSeries.map((d) => d.value))) * 20);
+                const bar = "█".repeat(barLength);
+                console.log(
+                    `   ${colors.dim}${date}${colors.reset}  ${colors.cyan}${bar}${colors.reset} ${formatNumber(value)}`
+                );
+            });
+        }
+
+        // Ask if they want to see top pages
+        const showTopPages = await rl.question(colors.bright + "\n📄 Show top pages? (y/N): " + colors.reset);
+
+        if (showTopPages.toLowerCase() === "y") {
+            console.log(colors.dim + "\n⏳ Fetching top pages data..." + colors.reset);
+
+            const topPages = await analytics.getTopPages({
+                dateRange,
+                limit: 10
+            });
+
+            console.log("\n" + colors.bright + colors.blue + "━".repeat(80) + colors.reset);
+            console.log(colors.bright + "🏆 Top Pages" + colors.reset);
+            console.log(colors.bright + colors.blue + "━".repeat(80) + colors.reset);
+
+            // Header
+            console.log(
+                colors.dim + "   PATH".padEnd(50) + "VISITORS".padStart(12) + "VIEWS".padStart(12) + colors.reset
+            );
+            console.log(colors.dim + "   " + "─".repeat(76) + colors.reset);
+
+            // Rows
+            topPages.forEach(({ path, visitors, views }) => {
+                const truncatedPath = path.length > 47 ? path.slice(0, 44) + "..." : path;
+                console.log(
+                    `   ${truncatedPath.padEnd(47)} ` +
+                        `${colors.green}${formatNumber(visitors).padStart(10)}${colors.reset}  ` +
+                        `${colors.yellow}${formatNumber(views).padStart(10)}${colors.reset}`
+                );
+            });
+
+            console.log(colors.bright + colors.blue + "━".repeat(80) + colors.reset);
+        }
+
+        // Ask if they want to see top countries
+        const showTopCountries = await rl.question(colors.bright + "\n🌍 Show top countries? (y/N): " + colors.reset);
+
+        if (showTopCountries.toLowerCase() === "y") {
+            console.log(colors.dim + "\n⏳ Fetching top countries data..." + colors.reset);
+
+            const topCountries = await analytics.getTopCountries({
+                dateRange,
+                limit: 10
+            });
+
+            console.log("\n" + colors.bright + colors.blue + "━".repeat(80) + colors.reset);
+            console.log(colors.bright + "🌍 Top Countries" + colors.reset);
+            console.log(colors.bright + colors.blue + "━".repeat(80) + colors.reset);
+
+            // Header
+            console.log(
+                colors.dim + "   COUNTRY".padEnd(40) + "VISITORS".padStart(12) + "VIEWS".padStart(12) + colors.reset
+            );
+            console.log(colors.dim + "   " + "─".repeat(76) + colors.reset);
+
+            // Rows
+            topCountries.forEach(({ country, visitors, views }) => {
+                // Get country flag emoji
+                const flag = getCountryFlag(country);
+                const countryDisplay = flag ? `${flag}  ${country}` : country;
+                const truncatedCountry =
+                    countryDisplay.length > 37 ? countryDisplay.slice(0, 34) + "..." : countryDisplay;
+
+                console.log(
+                    `   ${truncatedCountry.padEnd(37)} ` +
+                        `${colors.green}${formatNumber(visitors).padStart(10)}${colors.reset}  ` +
+                        `${colors.yellow}${formatNumber(views).padStart(10)}${colors.reset}`
+                );
+            });
+
+            console.log(colors.bright + colors.blue + "━".repeat(80) + colors.reset);
         }
     } catch (error) {
         console.error(

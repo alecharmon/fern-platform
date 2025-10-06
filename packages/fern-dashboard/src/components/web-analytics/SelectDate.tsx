@@ -95,9 +95,7 @@ export default function SelectDate({ value, onChange }: SelectDateProps) {
     };
 
     const handlePresetChange = (preset: (typeof PRESET_RANGES)[number]) => {
-        console.log("preset!!!", preset);
         if (preset.dateRange) {
-            console.log("preset.dateRange!!!", preset.dateRange);
             onChange(preset.dateRange);
             setIsOpen(false);
         }
@@ -145,10 +143,8 @@ export default function SelectDate({ value, onChange }: SelectDateProps) {
     };
 
     const displayValue = getDisplayValue();
-    console.log("displayValue!!!", { displayValue, value });
 
     const handleSelectChange = (selectedValue: string) => {
-        console.log("Selected value:", selectedValue);
         const preset = PRESET_RANGES.find((p) => p.value === selectedValue);
         if (preset) {
             handlePresetChange(preset);

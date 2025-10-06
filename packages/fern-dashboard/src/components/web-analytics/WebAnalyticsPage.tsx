@@ -9,6 +9,7 @@ import type { DateRangeOptions } from "@/app/services/posthog/types";
 
 import WebAnalyticsChart from "./Chart";
 import SelectDate from "./SelectDate";
+import AnalyticsTables from "./Tables";
 
 interface WebAnalyticsPageProps {
     docsUrl: string;
@@ -50,6 +51,9 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
 
             {/* Page Views Area Chart */}
             <WebAnalyticsChart dateRange={dateRange} docsUrl={docsUrl} groupBy={groupBy} setGroupBy={setGroupBy} />
+
+            {/* Analytics Tables - Top Pages and Countries */}
+            <AnalyticsTables docsUrl={docsUrl} dateRange={dateRange} />
         </div>
     );
 }

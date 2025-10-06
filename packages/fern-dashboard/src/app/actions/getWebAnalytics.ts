@@ -4,11 +4,18 @@ import { z } from "zod";
 
 import { fernToken_admin } from "@fern-api/docs-server";
 
+import type { AnalyticsField, AnalyticsSortDir } from "@/components/web-analytics/constants";
+
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import getDocsSitesForOrg from "../services/dal/fdr/getDocsSitesForOrg";
 import { getAnalyticsService } from "../services/posthog";
 import type { DateRangeOptions } from "../services/posthog/types";
+
+const DEFAULT_RANGE = {
+    type: "last_n_days" as const,
+    days: 7
+};
 
 // Schema for web analytics request
 const GetWebAnalyticsSchema = z.object({
@@ -38,6 +45,13 @@ const GetWebAnalyticsSchema = z.object({
     groupBy: z.number().optional() // Number of days to group by (7 for weekly, 30 for monthly)
 });
 
+// Extended schema for table requests with sorting parameters
+const TableRequestSchema = GetWebAnalyticsSchema.extend({
+    limit: z.number().int().min(1).max(100).optional(),
+    orderBy: z.enum(["visitors", "views"]).optional(),
+    order: z.enum(["asc", "desc"]).optional()
+});
+
 export type GetWebAnalyticsRequest = z.infer<typeof GetWebAnalyticsSchema>;
 
 export interface WebAnalyticsMetrics {
@@ -50,6 +64,12 @@ export interface GetWebAnalyticsResponse {
     metrics: WebAnalyticsMetrics;
     baseSiteUrl: string;
     dateRange: DateRangeOptions;
+}
+
+export interface TableRequest extends GetWebAnalyticsRequest {
+    limit?: number;
+    orderBy?: AnalyticsField;
+    order?: AnalyticsSortDir;
 }
 
 function getBaseDomain(rawUrl: string) {
@@ -110,21 +130,16 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
     // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
 
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
     const hasAccess = await verifyDomainAccess(validated.docsUrl);
-
     if (!hasAccess) {
         throw new Error("You don't have access to analytics for this docs site");
     }
 
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
     // Default date range if not provided
-    const dateRange = validated.dateRange || {
-        type: "last_n_days" as const,
-        days: 7
-    };
+    const dateRange = validated.dateRange || DEFAULT_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -160,21 +175,17 @@ export async function getPageViewsByDay(
     // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
 
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
     // Verify access using the composable function
     const hasAccess = await verifyDomainAccess(validated.docsUrl);
     if (!hasAccess) {
         throw new Error("You don't have access to analytics for this docs site");
     }
 
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
     // Default date range if not provided
-    const dateRange = validated.dateRange || {
-        type: "last_n_days" as const,
-        days: 7
-    };
+    const dateRange = validated.dateRange || DEFAULT_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -203,21 +214,18 @@ export async function getVisitorsByDay(
     // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
 
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
     // Verify access using the composable function
     const hasAccess = await verifyDomainAccess(validated.docsUrl);
     if (!hasAccess) {
         throw new Error("You don't have access to analytics for this docs site");
     }
 
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
     // Default date range if not provided
-    const dateRange = validated.dateRange || {
-        type: "last_n_days" as const,
-        days: 7
-    };
+    const dateRange = validated.dateRange || DEFAULT_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -235,4 +243,89 @@ export async function getVisitorsByDay(
     });
 
     return { timeSeries };
+}
+
+/**
+ * Server action to fetch top pages from PostHog
+ */
+export async function getTopPages(
+    request: TableRequest
+): Promise<{ topPages: { path: string; visitors: number; views: number }[] }> {
+    // Validate input
+    const validated = TableRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Initialize PostHog analytics service
+    const analytics = getAnalyticsService({
+        userId,
+        baseSiteUrl: baseDomain
+    });
+
+    // Fetch top pages from PostHog
+    const topPages = await analytics.getTopPages({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit || 10,
+        orderBy: validated.orderBy || "views",
+        order: validated.order || "desc"
+    });
+
+    return { topPages };
+}
+
+/**
+ * Server action to fetch top countries from PostHog
+ */
+export async function getTopCountries(request: TableRequest): Promise<{
+    topCountries: { country: string; visitors: number; views: number }[];
+}> {
+    // Validate input
+    const validated = TableRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Initialize PostHog analytics service
+    const analytics = getAnalyticsService({
+        userId,
+        baseSiteUrl: baseDomain
+    });
+
+    // Fetch top countries from PostHog
+    const topCountries = await analytics.getTopCountries({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit || 10,
+        orderBy: validated.orderBy || "visitors",
+        order: validated.order || "desc"
+    });
+
+    return { topCountries };
 }
