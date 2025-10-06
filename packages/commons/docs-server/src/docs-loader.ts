@@ -6,6 +6,7 @@ import type { EdgeFlags } from "@fern-api/docs-utils";
 import type { HttpMethod } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { FernSettingsConfig } from "@fern-api/docs-utils/types/settings-config";
 import type { ApiDefinition, DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
 import type {
     AuthScheme,
@@ -151,6 +152,8 @@ export interface DocsLoader<IsAsync extends boolean = true> {
     getFonts: () => MaybePromise<FernFonts, IsAsync>;
 
     getLayout: () => MaybePromise<FernLayoutConfig, IsAsync>;
+
+    getSettings: () => MaybePromise<FernSettingsConfig, IsAsync>;
 
     getAuthState: (pathname?: string) => MaybePromise<AuthState, IsAsync>;
 

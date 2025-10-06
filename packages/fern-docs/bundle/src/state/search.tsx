@@ -69,7 +69,7 @@ export const SearchV2Trigger = React.memo(function SearchV2Trigger(
     const isInitialized = useAtomValue(searchInitializedAtom);
     const toggleSearchDialog = useToggleSearchDialog();
     const isLocalEnvironment = isLocal();
-    const placeholder = "Search";
+    const placeholder = props.placeholder ?? "Search";
 
     return (
         <DesktopSearchButton
@@ -82,6 +82,7 @@ export const SearchV2Trigger = React.memo(function SearchV2Trigger(
             onClick={composeEventHandlers(props.onClick, toggleSearchDialog)}
             variant={isInitialized && !isLocalEnvironment ? "default" : "loading"}
             placeholder={placeholder}
+            disabled={props.disabled ?? false}
         />
     );
 });

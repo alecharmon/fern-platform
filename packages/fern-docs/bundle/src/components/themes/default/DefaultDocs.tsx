@@ -25,7 +25,8 @@ export default function DefaultDocs({
     lightHeaderClassName,
     darkHeaderClassName,
     lightSidebarClassName,
-    darkSidebarClassName
+    darkSidebarClassName,
+    searchPlaceholder = "Search"
 }: {
     header: React.ReactNode;
     versionSelect?: React.ReactNode;
@@ -42,6 +43,7 @@ export default function DefaultDocs({
     darkHeaderClassName?: string;
     lightSidebarClassName?: string;
     darkSidebarClassName?: string;
+    searchPlaceholder?: string;
 }) {
     const domain = useDomain();
     const isSidePanelOpen = useIsSearchPanelOpen();
@@ -60,7 +62,11 @@ export default function DefaultDocs({
                 isHeaderDisabled={isHeaderDisabled}
                 isSidePanelOpen={isSidePanelOpen}
                 isSidePanelResizing={isResizing}
-                headerTabs={<HeaderTabsRoot showSearchBar={showSearchBarInTabs}>{tabs}</HeaderTabsRoot>}
+                headerTabs={
+                    <HeaderTabsRoot showSearchBar={showSearchBarInTabs} placeholder={searchPlaceholder}>
+                        {tabs}
+                    </HeaderTabsRoot>
+                }
                 lightHeaderClassName={lightHeaderClassName}
                 darkHeaderClassName={darkHeaderClassName}
                 lightSidebarClassName={lightSidebarClassName}

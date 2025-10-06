@@ -16,7 +16,6 @@ import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import { SearchV2Trigger } from "@/state/search";
-import { SearchPanelTrigger } from "@/state/search-panel";
 
 import { LoginButton } from "./login-button";
 
@@ -39,15 +38,15 @@ export default async function SharedLayout({
 }) {
     const isLocalEnvironment = isLocal() || isSelfHosted();
 
-    const [config, edgeFlags, colors, layout, root] = await Promise.all([
+    const [config, settings, edgeFlags, colors, layout, root] = await Promise.all([
         loader.getConfig(),
+        loader.getSettings(),
         loader.getEdgeFlags(),
         loader.getColors(),
         loader.getLayout(),
         loader.getRoot()
     ]);
     const theme = edgeFlags.isCohereTheme ? "cohere" : "default";
-    const isAskAiEnabled = edgeFlags.isAskAiEnabled;
     const announcementText = config.announcement?.text;
 
     const serialize = createCachedMdxSerializer(loader, {
@@ -101,6 +100,7 @@ export default async function SharedLayout({
                     }
                     forceHeader={edgeFlags.isCohereTheme}
                     headerDisabled={layout.isHeaderDisabled}
+                    placeholder={settings.searchText}
                 />
             }
             productSelect={
@@ -147,8 +147,8 @@ export default async function SharedLayout({
                                     "mt-3": showHeaderInSidebar && hasProductsOrVersions
                                 })}
                                 isSearchInSidebar={true}
+                                placeholder={settings.searchText}
                             />
-                            {isAskAiEnabled && <SearchPanelTrigger isSearchInSidebar={true} />}
                         </div>
                     }
                 >
@@ -161,6 +161,7 @@ export default async function SharedLayout({
                     {versionSelect}
                 </React.Suspense>
             }
+            searchPlaceholder={settings.searchText}
         >
             {children}
         </ThemedDocs>

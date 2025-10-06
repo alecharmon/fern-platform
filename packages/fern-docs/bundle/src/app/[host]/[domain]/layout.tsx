@@ -60,6 +60,7 @@ export default async function Layout({
         files,
         colors,
         layout,
+        settings,
         fonts,
         isAskAiEnabled,
         deprecated_customerAnalytics,
@@ -72,6 +73,7 @@ export default async function Layout({
         loader.getFiles(),
         loader.getColors(),
         loader.getLayout(),
+        loader.getSettings(),
         loader.getFonts(),
         loader.isAskAiEnabled(),
         deprecated_getCustomerAnalytics(domain),
@@ -130,7 +132,9 @@ export default async function Layout({
                 />
                 <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>{children}</FeatureFlagProvider>
                 <React.Suspense fallback={null}>
-                    {!edgeFlags.isSearchDisabled && !isLocalEnvironment && <SearchV2 domain={domain} />}
+                    {!edgeFlags.isSearchDisabled && !isLocalEnvironment && !settings.disableSearch && (
+                        <SearchV2 domain={domain} />
+                    )}
                 </React.Suspense>
                 {jsConfig != null && <JavascriptProvider config={jsConfig} />}
                 {VERCEL_ENV === "production" && (

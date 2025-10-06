@@ -721,6 +721,30 @@ const getNavigationNode = (cacheConfig: Required<CacheConfig>) =>
         return node;
     });
 
+const getSettings = (cacheConfig: Required<CacheConfig>) =>
+    cache(async (domainKey: string) => {
+        "use cache";
+        unstable_cacheTag(domainKey, "getSettings");
+
+        const config = await getConfig(cacheConfig)(domainKey);
+        if (!config) {
+            console.error("Could not find config for domainKey", domainKey);
+            notFound();
+        }
+
+        const settings = config.settings;
+
+        return {
+            darkModeCode: settings?.darkModeCode ?? false,
+            defaultSearchFilters: settings?.defaultSearchFilters ?? false,
+            disableFeedback: settings?.disableFeedback ?? false,
+            disableSearch: settings?.disableSearch ?? false,
+            hide404Page: settings?.hide404Page ?? false,
+            httpSnippets: settings?.httpSnippets ?? false,
+            searchText: settings?.searchText ?? "Search"
+        };
+    });
+
 const getConfig = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         // Check in-memory cache first
@@ -1161,6 +1185,7 @@ export const createCachedDocsLoader = async (
         getPage: (pageId) => getPage(config)(domainKey, pageId, options?.returnRawMarkdown),
         getColors: () => getColors(config)(domainKey),
         getLayout: () => getLayout(config)(domainKey),
+        getSettings: () => getSettings(config)(domainKey),
         getFonts: () => getFonts(config)(domainKey),
         getAuthState,
         getEdgeFlags: () => cachedGetEdgeFlags(domainKey),

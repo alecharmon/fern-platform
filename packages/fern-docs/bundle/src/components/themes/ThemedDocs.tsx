@@ -23,7 +23,8 @@ export function ThemedDocs({
     lightSidebarClassName,
     darkSidebarClassName,
     lightHeaderClassName,
-    darkHeaderClassName
+    darkHeaderClassName,
+    searchPlaceholder = "Search"
 }: {
     theme?: FernTheme;
     announcement?: React.ReactNode;
@@ -41,6 +42,7 @@ export function ThemedDocs({
     darkSidebarClassName?: string;
     lightHeaderClassName?: string;
     darkHeaderClassName?: string;
+    searchPlaceholder?: string;
 }) {
     const Docs = THEMES[theme];
     return (
@@ -59,6 +61,7 @@ export function ThemedDocs({
             darkSidebarClassName={darkSidebarClassName}
             lightHeaderClassName={lightHeaderClassName}
             darkHeaderClassName={darkHeaderClassName}
+            searchPlaceholder={searchPlaceholder}
         >
             {children}
         </Docs>

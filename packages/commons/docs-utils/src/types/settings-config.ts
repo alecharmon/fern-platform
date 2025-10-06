@@ -1,0 +1,35 @@
+export type HttpSnippetLanguage =
+    | "curl"
+    | "csharp"
+    | "go"
+    | "java"
+    | "javascript"
+    | "php"
+    | "python"
+    | "ruby"
+    | "swift"
+    | "typescript";
+export const HttpSnippetLanguage = {
+    Curl: "curl",
+    Csharp: "csharp",
+    Go: "go",
+    Java: "java",
+    Javascript: "javascript",
+    Php: "php",
+    Python: "python",
+    Ruby: "ruby",
+    Swift: "swift",
+    Typescript: "typescript"
+} as const;
+
+export type HttpSnippetsConfig = boolean | HttpSnippetLanguage[];
+
+export interface FernSettingsConfig {
+    searchText: string | undefined;
+    disableSearch: boolean | undefined;
+    disableFeedback: boolean | undefined;
+    darkModeCode: boolean | undefined;
+    defaultSearchFilters: boolean | undefined;
+    httpSnippets: HttpSnippetsConfig | undefined;
+    hide404Page: boolean | undefined;
+}

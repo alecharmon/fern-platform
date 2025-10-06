@@ -65,7 +65,7 @@ export const SearchV2Trigger = React.memo(function SearchV2Trigger(
     const isInitialized = useAtomValue(searchInitializedAtom);
     const toggleSearchDialog = useToggleSearchDialog();
     const isLocalEnvironment = isLocal();
-    const placeholder = "Search";
+    const placeholder = props.placeholder ?? "Search";
 
     return (
         <DesktopSearchButton

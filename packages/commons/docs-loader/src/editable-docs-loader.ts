@@ -65,6 +65,8 @@ class EditableDocsLoader implements DocsLoader {
 
     getLayout = () => this.readOnlyDocsLoader.getLayout();
 
+    getSettings = () => this.readOnlyDocsLoader.getSettings();
+
     getAuthState = (pathname?: string) => this.readOnlyDocsLoader.getAuthState(pathname);
 
     getEdgeFlags = () => this.readOnlyDocsLoader.getEdgeFlags();

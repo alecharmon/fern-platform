@@ -20,7 +20,8 @@ export function HeaderContent({
     navbarLinks,
     loginButton,
     forceHeader = false,
-    headerDisabled = false
+    headerDisabled = false,
+    placeholder = "Search"
 }: {
     logo: React.ReactNode;
     versionSelect: React.ReactNode;
@@ -32,6 +33,7 @@ export function HeaderContent({
     loginButton?: React.ReactNode;
     forceHeader?: boolean;
     headerDisabled?: boolean;
+    placeholder?: string;
 }) {
     const isAskAiEnabled = useIsAskAiEnabled();
     return (
@@ -52,6 +54,7 @@ export function HeaderContent({
                         aria-label="Search"
                         className="fern-header-search-bar flex-1 overflow-hidden"
                         isSearchInSidebar={false}
+                        placeholder={placeholder}
                     />
                     {isAskAiEnabled && <SearchPanelTrigger aria-label="Ask AI" />}
                 </div>

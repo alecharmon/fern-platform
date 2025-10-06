@@ -6,6 +6,7 @@ import type { DynamicIRsByLanguage } from "@fern-api/docs-server/loadDynamicIRFr
 import type { EdgeFlags, FernColorTheme, HttpMethod } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { FernSettingsConfig } from "@fern-api/docs-utils/types/settings-config";
 import type { ApiDefinition, DocsV1Read } from "@fern-api/fdr-sdk";
 import type {
     AuthScheme,
@@ -79,6 +80,10 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
 
     getLayout(): FernLayoutConfig {
         return this.layout;
+    }
+
+    getSettings(): FernSettingsConfig {
+        return this.notSupported("getSettings");
     }
 
     getAuthConfig(): AuthEdgeConfig | undefined {
