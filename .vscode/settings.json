@@ -26,15 +26,6 @@
   "scss.validate": false,
   "css.validate": false,
   "typescript.tsdk": "node_modules/typescript/lib",
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[yaml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "vitest.disableWorkspaceWarning": true,
   "files.associations": {
     "*.css": "tailwindcss",

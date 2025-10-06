@@ -34,6 +34,13 @@ This repo contains both unit tests and integration (end-to-end) tests.
 
 To run the unit tests: `pnpm test`.
 
+### Lint/formatting
+
+This repo uses [Biome](https://biomejs.dev) for linting and formatting.
+- Check for lint issues: `pnpm lint:biome`
+- Check for format issue: `pnpm format:check`
+- Auto-format: `pnpm format`
+
 ### Docs UI
 
 To build and run the NextJS docs UI, first make sure vercel is installed:
