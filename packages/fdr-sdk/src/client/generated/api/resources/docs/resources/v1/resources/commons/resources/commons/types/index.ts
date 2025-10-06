@@ -23,6 +23,8 @@ export * from "./ClearBitConfig.js";
 export * from "./HeapConfig.js";
 export * from "./DocsLayoutConfig.js";
 export * from "./DocsSettingsConfig.js";
+export * from "./HttpSnippetsConfig.js";
+export * from "./HttpSnippetLanguage.js";
 export * from "./SearchbarPlacement.js";
 export * from "./TabsPlacement.js";
 export * from "./ContentAlignment.js";

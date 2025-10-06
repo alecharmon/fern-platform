@@ -23,6 +23,8 @@ export * from "./ClearBitConfig";
 export * from "./HeapConfig";
 export * from "./DocsLayoutConfig";
 export * from "./DocsSettingsConfig";
+export * from "./HttpSnippetsConfig";
+export * from "./HttpSnippetLanguage";
 export * from "./SearchbarPlacement";
 export * from "./TabsPlacement";
 export * from "./ContentAlignment";
