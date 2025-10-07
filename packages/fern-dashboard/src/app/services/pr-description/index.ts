@@ -218,34 +218,57 @@ export class PrDescriptionServiceImpl implements PrDescriptionService {
                 apiKey: this.anthropicApiKey
             });
 
-            const prompt = `You are a helpful assistant that generates concise, descriptive pull request titles and detailed descriptions based on code diffs.
+            const prompt = `Generate a concise PR title and description from this code diff.
 
 Current PR title: "${currentTitle}"
 Current PR description: "${currentDescription}"
-
-Here is the diff for the pull request:
 
 \`\`\`diff
 ${diff}
 \`\`\`
 
-Please generate both a new title and description for this pull request.
+**Title (max 50 chars):**
+- Use conventional commit style when appropriate (feat:, fix:, docs:, style:, refactor:, etc.)
+- Describe what changed, not why
+- Be specific and direct
 
-**Title Requirements:**
-- Concise (max 100 characters)
-- Clear and descriptive
-- Follow conventional commit message style if applicable
-- Focus on what the changes accomplish
-- Be specific but concise
+**Description (max 400 chars):**
+Write 1-3 direct sentences OR 2-3 bullet points stating what changed.
 
-**Description Requirements:**
-- Short description of the changes
-- Max 1000 characters
+Rules:
+- State the changes factually and concisely
+- No meta-commentary (avoid "This PR...", "These changes...", "This updates...")
+- No explanations of purpose or reasoning
+- No introductory phrases or summaries
+- Assume reader knows the codebase
 
-Please respond in the with the title on one line and the description lines there after:
+Good examples:
+"Fix bad links found via automated testing."
+
+"Fixes all broken links on API Preview Overview Page"
+
+"Update API reference with the endpoint to install Discord."
+
+"Change information architecture to add a new tab."
+
+"Clarify that self hosting is coming soon for <product>."
+
+"Minor fix for "RX" instead of "prescription""
+
+"Updated some colors in the CSS for accessibility."
+
+"- Renamed validateUser() to authenticateUser()
+- Changed error messages to include error codes  
+- Added TypeScript type annotations"
+
+Bad examples:
+"This PR makes formatting improvements to several MDX documentation files, including:"
+"The changes are primarily formatting-focused with minimal content changes."
+"This PR updates the authentication flow to improve security and add new features."
+
+Format your response as:
 [TITLE]
-[DESCRIPTION]
-`;
+[DESCRIPTION]`;
 
             const response = await anthropic.messages.create({
                 model: "claude-3-5-sonnet-20241022",
