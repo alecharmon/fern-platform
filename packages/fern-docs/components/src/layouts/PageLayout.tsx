@@ -1,7 +1,8 @@
 import type React from "react";
 
 import { Prose } from "../mdx/prose";
-import { HiddenSidebar, SetLayout } from "../state/layout";
+import { HiddenSidebar } from "../theming/HiddenSidebar";
+import { SetLayout } from "../state/layout";
 
 interface PageLayoutProps {
     header?: React.ReactNode;

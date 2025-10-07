@@ -1,17 +1,15 @@
 import "server-only";
 
-import { redirect } from "next/navigation";
-
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { getTabs } from "@fern-api/docs-server/handle-node-fallbacks";
 import { getIsSidebarFixed, getIsSingleOverviewPage, slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
+import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SidebarTabsRoot } from "@fern-docs/components/sidebar/SidebarTabsRoot";
-import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
-import { HiddenSidebar } from "@fern-docs/components/state/layout";
-
+import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
+import { redirect } from "next/navigation";
 import { getFernToken } from "@/app/fern-token";
 
 export default async function SidebarPage({
