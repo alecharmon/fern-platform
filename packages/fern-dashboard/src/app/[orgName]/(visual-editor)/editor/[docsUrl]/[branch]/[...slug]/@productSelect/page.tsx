@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createEditableDocsLoader } from "@fern-api/docs-loader";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getFallbackProduct } from "@fern-api/docs-server/handle-node-fallbacks";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
@@ -18,7 +18,8 @@ export default async function ProductSelectPage({
     const session = await getCurrentSession();
     const { docsUrl, slug, branch } = await params;
     const host = await getHostFromHeaders();
-    const loader = await createEditableDocsLoader({
+    // Use cached loader - this will reuse the loader created in layout.tsx
+    const loader = await getCachedEditableDocsLoader({
         host,
         encodedDocsUrl: docsUrl,
         fernToken: session?.accessToken,

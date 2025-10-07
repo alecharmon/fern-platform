@@ -1,6 +1,5 @@
 import "server-only";
 
-import { createEditableDocsLoader } from "@fern-api/docs-loader";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { getPageId, type NodeId, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
@@ -9,7 +8,7 @@ import { notFound, redirect } from "next/navigation";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
-import { GitHubLoader } from "@/app/services/github/github-loader";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { constructEditorSlug, ROOT_SLUG_ALIAS } from "@/utils/editor-routing";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
@@ -40,11 +39,12 @@ export default async function Page({
 
     const slugAlias = slugArray.join("/");
 
-    const loader = await createEditableDocsLoader({
+    // Use cached loader - this will reuse the loader created in layout.tsx
+    const loader = await getCachedEditableDocsLoader({
         host,
         encodedDocsUrl: docsUrl,
         fernToken: session.accessToken,
-        gitLoader: new GitHubLoader(githubUrl),
+        githubUrl,
         branchName: branch
     });
 

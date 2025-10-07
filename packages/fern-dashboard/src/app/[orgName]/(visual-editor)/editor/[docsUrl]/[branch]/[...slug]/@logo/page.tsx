@@ -1,4 +1,3 @@
-import { createEditableDocsLoader } from "@fern-api/docs-loader";
 import { createFileResolver } from "@fern-api/docs-server/file-resolver";
 import { withLogo } from "@fern-api/docs-server/withLogo";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
@@ -7,6 +6,7 @@ import { AbstractLogo } from "@fern-docs/components/abstract/logo";
 import { getFrontmatter } from "@fern-docs/mdx";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import type { EncodedDocsUrl } from "@/utils/types";
 
@@ -18,7 +18,8 @@ export default async function LogoPage({
     const session = await getCurrentSession();
     const { docsUrl, slug, branch } = await params;
     const host = await getHostFromHeaders();
-    const loader = await createEditableDocsLoader({
+    // Use cached loader - this will reuse the loader created in layout.tsx
+    const loader = await getCachedEditableDocsLoader({
         host,
         encodedDocsUrl: docsUrl,
         fernToken: session?.accessToken,

@@ -1,4 +1,5 @@
-import { createEditableDocsLoader, PrefetchedDocsLoader } from "@fern-api/docs-loader";
+import { PrefetchedDocsLoader } from "@fern-api/docs-loader";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getIsSidebarFixed, getIsSingleOverviewPage } from "@fern-api/docs-utils";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
@@ -24,7 +25,8 @@ export default async function SidebarPage({
     const clientNodeId = resolvedSearchParams["client-node-id"];
     const session = await getCurrentSession();
     const host = await getHostFromHeaders();
-    const loader = await createEditableDocsLoader({
+    // Use cached loader - this will reuse the loader created in layout.tsx
+    const loader = await getCachedEditableDocsLoader({
         host,
         encodedDocsUrl: docsUrl,
         fernToken: session?.accessToken,

@@ -1,4 +1,4 @@
-import { createEditableDocsLoader } from "@fern-api/docs-loader";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { AbstractHeaderTabsRoot } from "@fern-docs/components/abstract/AbstractHeaderTabsRoot";
 import { FERN_SEARCH_BUTTON_ID } from "@fern-docs/components/constants";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
@@ -58,12 +58,12 @@ export default async function VisualEditorPreviewLayout({
     });
     const host = await getHostFromHeaders();
 
-    // TODO: createEditableDocsLoader should be called here once, and data passed to child pages (@...) rather than called in those places as well
-    const loader = await createEditableDocsLoader({
+    // Use cached loader to prevent duplicate creation across parallel routes
+    const loader = await getCachedEditableDocsLoader({
         host,
         encodedDocsUrl: docsUrl,
         fernToken: session.accessToken,
-        gitLoader: new GitHubLoader(githubUrl),
+        githubUrl,
         branchName: branch
     });
 
