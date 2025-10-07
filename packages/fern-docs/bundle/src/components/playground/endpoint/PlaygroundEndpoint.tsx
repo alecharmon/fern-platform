@@ -82,7 +82,10 @@ export const PlaygroundEndpoint = ({
                 endpointId: endpoint.id,
                 endpointName: node.title,
                 method: endpoint.method,
-                docsRoute: `/${node.slug}`
+                docsRoute: `/${node.slug}`,
+                endpointRoute: endpoint.path
+                    .map((part) => (part.type === "pathParameter" ? `:${part.value}` : part.value))
+                    .join("")
             });
             const authHeaders = buildAuthHeaders(
                 auth,
