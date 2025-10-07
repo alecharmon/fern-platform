@@ -295,6 +295,345 @@ export class AnalyticsService {
     }
 
     /**
+     * Get traffic by channel type (Direct, Referral, Organic Search, etc.)
+     * Uses PostHog's official channel type calculation logic
+     */
+    async getChannels(
+        options: TimeSeriesOptions & {
+            limit?: number;
+            orderBy?: "visitors" | "views";
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ channel: string; visitors: number; views: number }[]> {
+        const { limit = 10, orderBy = "visitors", order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        // PostHog's official channel type calculation logic (posthog doesn't seem to offer the channel data directly via HogQL)
+        // See: https://posthog.com/docs/data/channel-type
+        const query = `
+      SELECT 
+        CASE
+          -- Cross-network (check first as per PostHog docs)
+          WHEN properties.utm_campaign = 'cross-network'
+               THEN 'Cross-Network'
+               
+          -- Direct traffic (including null referring domain)
+          WHEN (properties.$referring_domain = '$direct' OR properties.$referring_domain IS NULL OR properties.$referring_domain = '')
+               AND (properties.utm_medium IS NULL OR properties.utm_medium = '')
+               AND (properties.utm_source IS NULL OR properties.utm_source = '' OR properties.utm_source = 'direct' OR properties.utm_source = '(direct)')
+               THEN 'Direct'
+          
+          -- Check if traffic is paid (has utm_medium indicators or gclid/gad_source)
+          WHEN properties.utm_medium IN ('cpc', 'cpm', 'cpv', 'cpa', 'ppc', 'retargeting')
+               OR properties.utm_medium LIKE 'paid%'
+               OR properties.gclid IS NOT NULL
+               OR properties.gad_source IS NOT NULL
+               THEN
+            CASE
+              -- Paid Search
+              WHEN properties.utm_source IN ('google', 'bing', 'yahoo', 'baidu', 'yandex', 'duckduckgo')
+                   OR properties.$referring_domain LIKE '%google.%'
+                   OR properties.$referring_domain LIKE '%bing.%'
+                   OR properties.$referring_domain LIKE '%yahoo.%'
+                   OR properties.$referring_domain LIKE '%baidu.%'
+                   OR properties.gad_source = '1'
+                   THEN 'Paid Search'
+              -- Paid Social
+              WHEN properties.utm_source IN ('facebook', 'instagram', 'linkedin', 'twitter', 'pinterest', 'reddit', 'tiktok')
+                   OR properties.$referring_domain LIKE '%facebook.%'
+                   OR properties.$referring_domain LIKE '%instagram.%'
+                   OR properties.$referring_domain LIKE '%linkedin.%'
+                   OR properties.$referring_domain LIKE '%twitter.%'
+                   OR properties.utm_medium IN ('sm', 'social-media', 'social-network', 'social')
+                   THEN 'Paid Social'
+              -- Paid Video
+              WHEN properties.utm_source IN ('youtube', 'vimeo', 'twitch', 'dailymotion')
+                   OR properties.$referring_domain LIKE '%youtube.%'
+                   OR properties.$referring_domain LIKE '%vimeo.%'
+                   OR properties.$referring_domain LIKE '%twitch.%'
+                   OR properties.utm_medium = 'video'
+                   OR properties.utm_campaign LIKE '%video%'
+                   THEN 'Paid Video'
+              -- Paid Shopping
+              WHEN properties.utm_source IN ('amazon', 'ebay', 'etsy', 'wish', 'alibaba')
+                   OR properties.$referring_domain LIKE '%amazon.%'
+                   OR properties.$referring_domain LIKE '%ebay.%'
+                   OR properties.$referring_domain LIKE '%etsy.%'
+                   OR properties.utm_campaign LIKE '%shop%'
+                   OR properties.utm_campaign LIKE '%shopping%'
+                   THEN 'Paid Shopping'
+              -- Display
+              WHEN properties.utm_medium IN ('display', 'cpm', 'banner', 'interstitial')
+                   THEN 'Display'
+              ELSE 'Paid Unknown'
+            END
+          
+          -- Email (check before organic categories as per PostHog docs)
+          WHEN properties.utm_source IN ('email', 'e_mail', 'e-mail', 'mail')
+               OR properties.utm_medium IN ('email', 'e_mail', 'e-mail', 'mail')
+               OR properties.$referring_domain LIKE '%mail.%'
+               OR properties.$referring_domain IN ('mail.google.com', 'outlook.live.com', 'mail.yahoo.com')
+               THEN 'Email'
+          
+          -- SMS
+          WHEN properties.utm_source = 'sms'
+               OR properties.utm_medium = 'sms'
+               THEN 'SMS'
+          
+          -- Organic Search
+          WHEN properties.utm_source IN ('google', 'bing', 'yahoo', 'baidu', 'yandex', 'duckduckgo')
+               OR properties.$referring_domain LIKE '%google.%'
+               OR properties.$referring_domain LIKE '%bing.%'
+               OR properties.$referring_domain LIKE '%yahoo.%'
+               OR properties.$referring_domain LIKE '%baidu.%'
+               OR properties.$referring_domain LIKE '%duckduckgo.%'
+               THEN 'Organic Search'
+          
+          -- Organic Social
+          WHEN properties.utm_source IN ('facebook', 'instagram', 'linkedin', 'twitter', 'pinterest', 'reddit', 'tiktok')
+               OR properties.$referring_domain LIKE '%facebook.%'
+               OR properties.$referring_domain LIKE '%instagram.%'
+               OR properties.$referring_domain LIKE '%linkedin.%'
+               OR properties.$referring_domain LIKE '%twitter.%'
+               OR properties.$referring_domain LIKE '%reddit.%'
+               OR properties.utm_medium IN ('sm', 'social-media', 'social-network', 'social')
+               THEN 'Organic Social'
+          
+          -- Organic Video
+          WHEN properties.utm_source IN ('youtube', 'vimeo', 'twitch', 'dailymotion', 'tiktok')
+               OR properties.$referring_domain LIKE '%youtube.%'
+               OR properties.$referring_domain LIKE '%vimeo.%'
+               OR properties.$referring_domain LIKE '%twitch.%'
+               OR properties.$referring_domain LIKE '%tiktok.%'
+               OR properties.utm_medium = 'video'
+               OR properties.utm_campaign LIKE '%video%'
+               THEN 'Organic Video'
+          
+          -- Organic Shopping
+          WHEN properties.utm_source IN ('amazon', 'ebay', 'etsy', 'wish', 'alibaba')
+               OR properties.$referring_domain LIKE '%amazon.%'
+               OR properties.$referring_domain LIKE '%ebay.%'
+               OR properties.$referring_domain LIKE '%etsy.%'
+               OR properties.utm_campaign LIKE '%shop%'
+               OR properties.utm_campaign LIKE '%shopping%'
+               THEN 'Organic Shopping'
+          
+          -- Affiliate
+          WHEN properties.utm_medium = 'affiliate'
+               THEN 'Affiliate'
+          
+          -- Referral
+          WHEN properties.utm_medium IN ('referral', 'link', 'app')
+               OR (properties.$referring_domain IS NOT NULL
+                   AND properties.$referring_domain != ''
+                   AND properties.$referring_domain != '$direct')
+               THEN 'Referral'
+          
+          -- Push
+          WHEN properties.utm_source = 'firebase'
+               OR properties.utm_medium IN ('push', 'notification', 'mobile')
+               OR properties.utm_medium LIKE '%push'
+               THEN 'Push'
+          
+          -- Audio
+          WHEN properties.utm_medium = 'audio'
+               THEN 'Audio'
+          
+          -- Unknown - this might not appear in PostHog UI if they filter it out
+          ELSE 'Unknown'
+        END as channel,
+        uniq(distinct_id) as visitors,
+        count(*) as views
+      FROM events 
+      WHERE 
+        event = '$pageview' 
+        AND properties.$host = '${this.config.baseSiteUrl}'
+        ${whereClause}
+      GROUP BY channel
+      ORDER BY ${orderBy} ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, number, number]>(query, {
+            name: `channels-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            channel: row[0] || "Direct",
+            visitors: row[1],
+            views: row[2]
+        }));
+    }
+
+    /**
+     * Get top referring domains (excluding direct traffic)
+     * Groups by base domain to combine www and non-www variants
+     */
+    async getReferringDomains(
+        options: TimeSeriesOptions & {
+            limit?: number;
+            orderBy?: "visitors" | "views";
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ domain: string; visitors: number; views: number }[]> {
+        const { limit = 10, orderBy = "visitors", order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        // Extract root domain (removes all subdomains including www)
+        // This regex extracts the last two parts of the domain (e.g., example.com from sub.example.com)
+        const query = `
+      SELECT 
+        if(
+          position(properties.$referring_domain, '.') > 0,
+          replaceRegexpOne(properties.$referring_domain, '^.*?([^.]+\\\\.[^.]+)$', '\\\\1'),
+          properties.$referring_domain
+        ) as domain,
+        uniq(distinct_id) as visitors,
+        count(*) as views
+      FROM events 
+      WHERE 
+        event = '$pageview' 
+        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND properties.$referring_domain IS NOT NULL
+        AND properties.$referring_domain != ''
+        AND properties.$referring_domain != '$direct'
+        ${whereClause}
+      GROUP BY domain
+      ORDER BY ${orderBy} ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, number, number]>(query, {
+            name: `referring-domains-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            domain: row[0] || "Unknown",
+            visitors: row[1],
+            views: row[2]
+        }));
+    }
+
+    /**
+     * Get traffic by device type (Desktop, Mobile, Tablet, etc.)
+     */
+    async getDeviceTypes(
+        options: TimeSeriesOptions & {
+            limit?: number;
+            orderBy?: "visitors" | "views";
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ deviceType: string; visitors: number; views: number }[]> {
+        const { limit = 10, orderBy = "visitors", order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        const query = `
+      SELECT 
+        properties.$device_type as deviceType,
+        uniq(distinct_id) as visitors,
+        count(*) as views
+      FROM events 
+      WHERE 
+        event = '$pageview' 
+        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND properties.$device_type IS NOT NULL
+        AND properties.$device_type != ''
+        ${whereClause}
+      GROUP BY properties.$device_type
+      ORDER BY ${orderBy} ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, number, number]>(query, {
+            name: `device-types-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        // Normalize device type names to match PostHog UI
+        const normalizeDeviceType = (type: string): string => {
+            const normalized = type.toLowerCase();
+            switch (normalized) {
+                case "desktop":
+                    return "Desktop";
+                case "mobile":
+                case "mobile phone":
+                    return "Mobile";
+                case "tablet":
+                    return "Tablet";
+                case "console":
+                case "game console":
+                    return "Console";
+                case "tv":
+                case "smart tv":
+                    return "TV";
+                default:
+                    // Capitalize first letter
+                    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+            }
+        };
+
+        return response.results.map((row) => ({
+            deviceType: normalizeDeviceType(row[0] || "Unknown"),
+            visitors: row[1],
+            views: row[2]
+        }));
+    }
+
+    /**
+     * Get LLM file views (llms.txt, llms-full.txt, .md files) broken down by agent vs human
+     */
+    async getLLMFileViews(
+        options: TimeSeriesOptions & {
+            limit?: number;
+            orderBy?: "agentViews" | "humanViews" | "totalViews";
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ path: string; agentViews: number; humanViews: number }[]> {
+        const { limit = 20, orderBy = "totalViews", order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        // Determine the ORDER BY clause based on the orderBy parameter
+        let orderByClause: string;
+        if (orderBy === "agentViews") {
+            orderByClause = `countIf(properties.possibleBot = true AND properties.userAgent != 'node')`;
+        } else if (orderBy === "humanViews") {
+            orderByClause = `countIf(properties.possibleBot = false OR properties.userAgent = 'node')`;
+        } else {
+            // totalViews (default)
+            orderByClause = `(countIf(properties.possibleBot = true AND properties.userAgent != 'node') + countIf(properties.possibleBot = false OR properties.userAgent = 'node'))`;
+        }
+
+        const query = `
+      SELECT 
+        properties.path as path,
+        countIf(properties.possibleBot = true AND properties.userAgent != 'node') as agentViews,
+        countIf(properties.possibleBot = false OR properties.userAgent = 'node') as humanViews
+      FROM events 
+      WHERE 
+        event = 'static_content_served' 
+        AND properties.domain = '${this.config.baseSiteUrl}'
+        AND (
+          properties.path LIKE '%llms.txt'
+          OR properties.path LIKE '%llms-full.txt'
+          OR properties.path LIKE '%.md'
+        )
+        ${whereClause}
+      GROUP BY properties.path
+      ORDER BY ${orderByClause} ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, number, number]>(query, {
+            name: `llm-files-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            path: row[0] || "/",
+            agentViews: row[1],
+            humanViews: row[2]
+        }));
+    }
+
+    /**
      * Get the configuration for this analytics service
      */
     getConfig(): Readonly<AnalyticsConfig> {

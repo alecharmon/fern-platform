@@ -52,7 +52,7 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
             {/* Page Views Area Chart */}
             <WebAnalyticsChart dateRange={dateRange} docsUrl={docsUrl} groupBy={groupBy} setGroupBy={setGroupBy} />
 
-            {/* Analytics Tables - Top Pages and Countries */}
+            {/* Analytics Tables - Top Pages, Countries, and LLM Files */}
             <AnalyticsTables docsUrl={docsUrl} dateRange={dateRange} />
         </div>
     );

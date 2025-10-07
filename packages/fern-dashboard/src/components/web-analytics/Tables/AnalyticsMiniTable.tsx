@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
+import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
+
 interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     title: string;
     data: T[] | undefined;
@@ -21,9 +23,26 @@ interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     showGradient?: boolean;
     gradientKey?: string;
     onSort?: (field: string, direction: "asc" | "desc") => void;
+    maxLength?: number;
 }
 
 type SortDirection = "asc" | "desc";
+
+function TruncatedText({ text, className, maxLength = 45 }: { text: string; className?: string; maxLength?: number }) {
+    const needsTooltip = text.length > maxLength;
+
+    if (!needsTooltip) {
+        return <span className={className}>{text}</span>;
+    }
+
+    const truncatedText = text.slice(0, maxLength) + "...";
+
+    return (
+        <DashboardTooltip content={text} delayDuration={500}>
+            <span className={className}>{truncatedText}</span>
+        </DashboardTooltip>
+    );
+}
 
 export default function AnalyticsMiniTable<T extends Record<string, any>>({
     title,
@@ -34,7 +53,8 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
     getItemKey,
     showGradient = false,
     gradientKey = "visitors",
-    onSort
+    onSort,
+    maxLength = 45
 }: AnalyticsMiniTableProps<T>) {
     const [sortField, setSortField] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -81,7 +101,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
 
     if (error) {
         return (
-            <div className="border-border flex w-[49%] flex-col gap-3 rounded-lg border bg-white p-6 dark:bg-transparent">
+            <div className="border-border flex w-full flex-col gap-3 rounded-lg border bg-white p-6 lg:w-[49%] dark:bg-transparent">
                 <span className="text-destructive text-sm">Error loading {title.toLowerCase()}</span>
             </div>
         );
@@ -90,7 +110,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
     const maxGradientValue = showGradient && data ? Math.max(...data.map((item) => item[gradientKey] || 0)) : 1;
 
     return (
-        <div className="border-border flex w-[49%] flex-col gap-3 rounded-lg border bg-white dark:bg-transparent">
+        <div className="border-border flex w-full flex-col gap-3 rounded-lg border bg-white lg:w-[49%] dark:bg-transparent">
             <div className="space-y-1">
                 {/* Header */}
                 <div className="flex justify-between border-b px-4 py-4">
@@ -164,10 +184,16 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                                     }}
                                                 />
                                             )}
-                                            <span className="relative z-10 px-2">
-                                                {columns[0]?.render
-                                                    ? columns[0]?.render(item, index)
-                                                    : item[columns[0]?.key || ""]}
+                                            <span className="z-10 flex px-2">
+                                                {columns[0]?.render ? (
+                                                    columns[0].render(item, index)
+                                                ) : (
+                                                    <TruncatedText
+                                                        text={String(item[columns[0]?.key || ""])}
+                                                        className="truncate"
+                                                        maxLength={maxLength}
+                                                    />
+                                                )}
                                             </span>
                                         </span>
 

@@ -12,7 +12,7 @@ import getDocsSitesForOrg from "../services/dal/fdr/getDocsSitesForOrg";
 import { getAnalyticsService } from "../services/posthog";
 import type { DateRangeOptions } from "../services/posthog/types";
 
-const DEFAULT_RANGE = {
+const DEFAULT_DATE_RANGE = {
     type: "last_n_days" as const,
     days: 7
 };
@@ -52,6 +52,13 @@ const TableRequestSchema = GetWebAnalyticsSchema.extend({
     order: z.enum(["asc", "desc"]).optional()
 });
 
+// Extended schema for LLM file views requests with specific sorting parameters
+const LLMFileViewsRequestSchema = GetWebAnalyticsSchema.extend({
+    limit: z.number().int().min(1).max(100).optional(),
+    orderBy: z.enum(["agentViews", "humanViews", "totalViews"]).optional(),
+    order: z.enum(["asc", "desc"]).optional()
+});
+
 export type GetWebAnalyticsRequest = z.infer<typeof GetWebAnalyticsSchema>;
 
 export interface WebAnalyticsMetrics {
@@ -71,6 +78,8 @@ export interface TableRequest extends GetWebAnalyticsRequest {
     orderBy?: AnalyticsField;
     order?: AnalyticsSortDir;
 }
+
+export type LLMFileViewsRequest = z.infer<typeof LLMFileViewsRequestSchema>;
 
 function getBaseDomain(rawUrl: string) {
     const decodedUrl = decodeURIComponent(rawUrl);
@@ -139,7 +148,7 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
     const session = await getCurrentSessionOrThrow();
     const userId = session.user.sub;
     // Default date range if not provided
-    const dateRange = validated.dateRange || DEFAULT_RANGE;
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -185,7 +194,7 @@ export async function getPageViewsByDay(
     const session = await getCurrentSessionOrThrow();
     const userId = session.user.sub;
     // Default date range if not provided
-    const dateRange = validated.dateRange || DEFAULT_RANGE;
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -225,7 +234,7 @@ export async function getVisitorsByDay(
     const userId = session.user.sub;
 
     // Default date range if not provided
-    const dateRange = validated.dateRange || DEFAULT_RANGE;
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -265,7 +274,7 @@ export async function getTopPages(
     const userId = session.user.sub;
 
     // Default date range if not provided
-    const dateRange = validated.dateRange || DEFAULT_RANGE;
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -307,7 +316,7 @@ export async function getTopCountries(request: TableRequest): Promise<{
     const session = await getCurrentSessionOrThrow();
     const userId = session.user.sub;
     // Default date range if not provided
-    const dateRange = validated.dateRange || DEFAULT_RANGE;
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
@@ -328,4 +337,176 @@ export async function getTopCountries(request: TableRequest): Promise<{
     });
 
     return { topCountries };
+}
+
+/**
+ * Server action to fetch LLM file views (llms.txt, llms-full.txt, .md files) from PostHog
+ */
+export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
+    llmFileViews: { path: string; agentViews: number; humanViews: number }[];
+}> {
+    // Validate input
+    const validated = LLMFileViewsRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Initialize PostHog analytics service
+    const analytics = getAnalyticsService({
+        userId,
+        baseSiteUrl: baseDomain
+    });
+
+    // Fetch LLM file views from PostHog
+    const llmFileViews = await analytics.getLLMFileViews({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit || 20,
+        orderBy: validated.orderBy || "humanViews",
+        order: validated.order || "desc"
+    });
+
+    return { llmFileViews };
+}
+
+/**
+ * Server action to fetch channel data from PostHog
+ */
+export async function getChannels(request: TableRequest): Promise<{
+    channels: { channel: string; visitors: number; views: number }[];
+}> {
+    // Validate input
+    const validated = TableRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Initialize PostHog analytics service
+    const analytics = getAnalyticsService({
+        userId,
+        baseSiteUrl: baseDomain
+    });
+
+    // Fetch channels from PostHog
+    const channels = await analytics.getChannels({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit || 20,
+        orderBy: validated.orderBy || "visitors",
+        order: validated.order || "desc"
+    });
+
+    return { channels };
+}
+
+/**
+ * Server action to fetch device type data from PostHog
+ */
+export async function getDeviceTypes(request: TableRequest): Promise<{
+    deviceTypes: { deviceType: string; visitors: number; views: number }[];
+}> {
+    // Validate input
+    const validated = TableRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Initialize PostHog analytics service
+    const analytics = getAnalyticsService({
+        userId,
+        baseSiteUrl: baseDomain
+    });
+
+    // Fetch device types from PostHog
+    const deviceTypes = await analytics.getDeviceTypes({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit || 10,
+        orderBy: validated.orderBy || "visitors",
+        order: validated.order || "desc"
+    });
+
+    return { deviceTypes };
+}
+
+/**
+ * Server action to fetch referring domains from PostHog
+ */
+export async function getReferringDomains(request: TableRequest): Promise<{
+    referringDomains: { domain: string; visitors: number; views: number }[];
+}> {
+    // Validate input
+    const validated = TableRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Initialize PostHog analytics service
+    const analytics = getAnalyticsService({
+        userId,
+        baseSiteUrl: baseDomain
+    });
+
+    // Fetch referring domains from PostHog
+    const referringDomains = await analytics.getReferringDomains({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit || 10,
+        orderBy: validated.orderBy || "visitors",
+        order: validated.order || "desc"
+    });
+
+    return { referringDomains };
 }
