@@ -1,5 +1,1373 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`backfillSnippets > should backfill dynamic snippets for all languages 1`] = `
+{
+  "csharp": [
+    {
+      "code": "using global::System.Threading.Tasks;
+using Cat;
+
+namespace Usage;
+
+public class Example
+{
+    public async global::System.Threading.Tasks.Task Do() {
+        var client = new CatcatcatTreeClient(
+            clientOptions: new ClientOptions{
+                BaseUrl = "https://api.example.com/v1"
+            }
+        );
+
+        await client.Users.CreateUserAsync(
+            new CreateUserRequest{
+                Name = "John Doe",
+                Email = "john.doe@example.com",
+                Password = "securePassword123",
+                Role = CreateUserRequestRole.User
+            }
+        );
+    }
+
+}
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "csharp",
+      "name": undefined,
+    },
+  ],
+  "curl": [
+    {
+      "code": "curl -X POST https://api.example.com/v1/users \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}'",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "curl",
+      "name": undefined,
+    },
+  ],
+  "go": [
+    {
+      "code": "package example
+
+import (
+    client "github.com/fern-demo/cat-demo-go/v/client"
+    option "github.com/fern-demo/cat-demo-go/v/option"
+    context "context"
+    v "github.com/fern-demo/cat-demo-go/v"
+)
+
+func do() () {
+    client := client.NewClient(
+        option.WithBaseURL(
+            "https://api.example.com/v1",
+        ),
+    )
+    client.Users.CreateUser(
+        context.TODO(),
+        &v.CreateUserRequest{
+            Name: "John Doe",
+            Email: "john.doe@example.com",
+            Password: "securePassword123",
+            Role: v.CreateUserRequestRoleUser.Ptr(),
+        },
+    )
+}
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "go",
+      "name": undefined,
+    },
+  ],
+  "java": [
+    {
+      "code": "package com.example.usage;
+
+import com.catcatcat.tree.Cat;
+import com.catcatcat.tree.resources.users.requests.CreateUserRequest;
+import com.catcatcat.tree.resources.users.types.CreateUserRequestRole;
+
+public class Example {
+    public static void run() {
+        Cat client = Cat
+            .builder()
+            .url("https://api.example.com/v1")
+            .build();
+
+        client.users().createUser(
+            CreateUserRequest
+                .builder()
+                .name("John Doe")
+                .email("john.doe@example.com")
+                .password("securePassword123")
+                .role(CreateUserRequestRole.USER)
+                .build()
+        );
+    }
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "java",
+      "name": undefined,
+    },
+  ],
+  "php": [
+    {
+      "code": "<?php
+
+namespace Example;
+
+use Cat\\CatClient;
+use Cat\\Users\\Requests\\CreateUserRequest;
+use Cat\\Users\\Types\\CreateUserRequestRole;
+
+$client = new CatClient(
+    options: [
+        'baseUrl' => 'https://api.example.com/v1',
+    ],
+);
+$client->users->createUser(
+    new CreateUserRequest([
+        'name' => 'John Doe',
+        'email' => 'john.doe@example.com',
+        'password' => 'securePassword123',
+        'role' => CreateUserRequestRole::User->value,
+    ]),
+);
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "php",
+      "name": undefined,
+    },
+  ],
+  "python": [
+    {
+      "code": "from catcatcat import CatClient
+
+client = CatClient(
+    base_url="https://api.example.com/v1"
+)
+
+client.users.create_user(
+    name="John Doe",
+    email="john.doe@example.com",
+    password="securePassword123",
+    role="user"
+)
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "python",
+      "name": undefined,
+    },
+  ],
+  "ruby": [
+    {
+      "code": "require "catcatcat"
+
+client = catcatcat::Client.new(base_url: 'https://api.example.com/v1');
+
+client.users.create_user({
+    name:'John Doe',
+    email:'john.doe@example.com',
+    password:'securePassword123'
+});
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "ruby",
+      "name": undefined,
+    },
+  ],
+  "swift": [
+    {
+      "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1/users")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "swift",
+      "name": undefined,
+    },
+  ],
+  "typescript": [
+    {
+      "code": "import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com/v1",
+    });
+    await client.users.createUser({
+        name: "John Doe",
+        email: "john.doe@example.com",
+        password: "securePassword123",
+        role: "user",
+    });
+}
+main();
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "typescript",
+      "name": undefined,
+    },
+  ],
+}
+`;
+
+exports[`backfillSnippets > should backfill dynamic snippets for typescript 1`] = `
+{
+  "csharp": [
+    {
+      "code": "var client = new RestClient("https://api.example.com/v1/users");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "csharp",
+      "name": undefined,
+    },
+  ],
+  "curl": [
+    {
+      "code": "curl -X POST https://api.example.com/v1/users \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}'",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "curl",
+      "name": undefined,
+    },
+  ],
+  "go": [
+    {
+      "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.example.com/v1/users"
+
+	payload := strings.NewReader("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "go",
+      "name": undefined,
+    },
+  ],
+  "java": [
+    {
+      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+  .asString();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "java",
+      "name": undefined,
+    },
+  ],
+  "php": [
+    {
+      "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.example.com/v1/users', [
+  'body' => '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "php",
+      "name": undefined,
+    },
+  ],
+  "python": [
+    {
+      "code": "import requests
+
+url = "https://api.example.com/v1/users"
+
+payload = {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "securePassword123",
+    "role": "user"
+}
+headers = {"Content-Type": "application/json"}
+
+response = requests.post(url, json=payload, headers=headers)
+
+print(response.json())",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "python",
+      "name": undefined,
+    },
+  ],
+  "ruby": [
+    {
+      "code": "require 'uri'
+require 'net/http'
+
+url = URI("https://api.example.com/v1/users")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(url)
+request["Content-Type"] = 'application/json'
+request.body = "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}"
+
+response = http.request(request)
+puts response.read_body",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "ruby",
+      "name": undefined,
+    },
+  ],
+  "swift": [
+    {
+      "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1/users")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "swift",
+      "name": undefined,
+    },
+  ],
+  "typescript": [
+    {
+      "code": "import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com/v1",
+    });
+    await client.users.createUser({
+        name: "John Doe",
+        email: "john.doe@example.com",
+        password: "securePassword123",
+        role: "user",
+    });
+}
+main();
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "typescript",
+      "name": undefined,
+    },
+  ],
+}
+`;
+
+exports[`backfillSnippets > should backfill dynamic snippets for typescript and python 1`] = `
+{
+  "csharp": [
+    {
+      "code": "var client = new RestClient("https://api.example.com/v1/users");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "csharp",
+      "name": undefined,
+    },
+  ],
+  "curl": [
+    {
+      "code": "curl -X POST https://api.example.com/v1/users \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}'",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "curl",
+      "name": undefined,
+    },
+  ],
+  "go": [
+    {
+      "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.example.com/v1/users"
+
+	payload := strings.NewReader("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "go",
+      "name": undefined,
+    },
+  ],
+  "java": [
+    {
+      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+  .asString();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "java",
+      "name": undefined,
+    },
+  ],
+  "php": [
+    {
+      "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.example.com/v1/users', [
+  'body' => '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "php",
+      "name": undefined,
+    },
+  ],
+  "python": [
+    {
+      "code": "from catcatcat import CatClient
+
+client = CatClient(
+    base_url="https://api.example.com/v1"
+)
+
+client.users.create_user(
+    name="John Doe",
+    email="john.doe@example.com",
+    password="securePassword123",
+    role="user"
+)
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "python",
+      "name": undefined,
+    },
+  ],
+  "ruby": [
+    {
+      "code": "require 'uri'
+require 'net/http'
+
+url = URI("https://api.example.com/v1/users")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(url)
+request["Content-Type"] = 'application/json'
+request.body = "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}"
+
+response = http.request(request)
+puts response.read_body",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "ruby",
+      "name": undefined,
+    },
+  ],
+  "swift": [
+    {
+      "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1/users")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "swift",
+      "name": undefined,
+    },
+  ],
+  "typescript": [
+    {
+      "code": "import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com/v1",
+    });
+    await client.users.createUser({
+        name: "John Doe",
+        email: "john.doe@example.com",
+        password: "securePassword123",
+        role: "user",
+    });
+}
+main();
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "typescript",
+      "name": undefined,
+    },
+  ],
+}
+`;
+
+exports[`backfillSnippets > should backfill dynamic snippets with multiple examples and error example for typescript 1`] = `
+{
+  "csharp": [
+    {
+      "code": "var client = new RestClient("https://api.example.com/v1/users");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "csharp",
+      "name": undefined,
+    },
+  ],
+  "curl": [
+    {
+      "code": "curl -X POST https://api.example.com/v1/users \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}'",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "curl",
+      "name": undefined,
+    },
+  ],
+  "go": [
+    {
+      "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.example.com/v1/users"
+
+	payload := strings.NewReader("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "go",
+      "name": undefined,
+    },
+  ],
+  "java": [
+    {
+      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+  .asString();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "java",
+      "name": undefined,
+    },
+  ],
+  "php": [
+    {
+      "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.example.com/v1/users', [
+  'body' => '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "php",
+      "name": undefined,
+    },
+  ],
+  "python": [
+    {
+      "code": "import requests
+
+url = "https://api.example.com/v1/users"
+
+payload = {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "securePassword123",
+    "role": "user"
+}
+headers = {"Content-Type": "application/json"}
+
+response = requests.post(url, json=payload, headers=headers)
+
+print(response.json())",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "python",
+      "name": undefined,
+    },
+  ],
+  "ruby": [
+    {
+      "code": "require 'uri'
+require 'net/http'
+
+url = URI("https://api.example.com/v1/users")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(url)
+request["Content-Type"] = 'application/json'
+request.body = "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}"
+
+response = http.request(request)
+puts response.read_body",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "ruby",
+      "name": undefined,
+    },
+  ],
+  "swift": [
+    {
+      "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1/users")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "swift",
+      "name": undefined,
+    },
+  ],
+  "typescript": [
+    {
+      "code": "import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com/v1",
+    });
+    await client.users.createUser({
+        name: "John Doe",
+        email: "john.doe@example.com",
+        password: "securePassword123",
+        role: "user",
+    });
+}
+main();
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "typescript",
+      "name": undefined,
+    },
+  ],
+}
+`;
+
+exports[`backfillSnippets > should backfill dynamic snippets with multiple examples for typescript 1`] = `
+{
+  "csharp": [
+    {
+      "code": "var client = new RestClient("https://api.example.com/v1/users");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "csharp",
+      "name": undefined,
+    },
+  ],
+  "curl": [
+    {
+      "code": "curl -X POST https://api.example.com/v1/users \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}'",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "curl",
+      "name": undefined,
+    },
+  ],
+  "go": [
+    {
+      "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.example.com/v1/users"
+
+	payload := strings.NewReader("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "go",
+      "name": undefined,
+    },
+  ],
+  "java": [
+    {
+      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
+  .asString();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "java",
+      "name": undefined,
+    },
+  ],
+  "php": [
+    {
+      "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.example.com/v1/users', [
+  'body' => '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "php",
+      "name": undefined,
+    },
+  ],
+  "python": [
+    {
+      "code": "import requests
+
+url = "https://api.example.com/v1/users"
+
+payload = {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "securePassword123",
+    "role": "user"
+}
+headers = {"Content-Type": "application/json"}
+
+response = requests.post(url, json=payload, headers=headers)
+
+print(response.json())",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "python",
+      "name": undefined,
+    },
+  ],
+  "ruby": [
+    {
+      "code": "require 'uri'
+require 'net/http'
+
+url = URI("https://api.example.com/v1/users")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(url)
+request["Content-Type"] = 'application/json'
+request.body = "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}"
+
+response = http.request(request)
+puts response.read_body",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "ruby",
+      "name": undefined,
+    },
+  ],
+  "swift": [
+    {
+      "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "role": "user"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1/users")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "swift",
+      "name": undefined,
+    },
+  ],
+  "typescript": [
+    {
+      "code": "import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com/v1",
+    });
+    await client.users.createUser({
+        name: "John Doe",
+        email: "john.doe@example.com",
+        password: "securePassword123",
+        role: "user",
+    });
+}
+main();
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "typescript",
+      "name": undefined,
+    },
+  ],
+}
+`;
+
+exports[`backfillSnippets > should backfill dynamic snippets with multiple examples for typescript 2`] = `
+{
+  "csharp": [
+    {
+      "code": "var client = new RestClient("https://api.example.com/v1/users");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"name\\": \\"Jane Admin\\",\\n  \\"email\\": \\"jane.admin@example.com\\",\\n  \\"password\\": \\"adminPass456\\",\\n  \\"role\\": \\"admin\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "csharp",
+      "name": undefined,
+    },
+  ],
+  "curl": [
+    {
+      "code": "curl -X POST https://api.example.com/v1/users \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "name": "Jane Admin",
+  "email": "jane.admin@example.com",
+  "password": "adminPass456",
+  "role": "admin"
+}'",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "curl",
+      "name": undefined,
+    },
+  ],
+  "go": [
+    {
+      "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.example.com/v1/users"
+
+	payload := strings.NewReader("{\\n  \\"name\\": \\"Jane Admin\\",\\n  \\"email\\": \\"jane.admin@example.com\\",\\n  \\"password\\": \\"adminPass456\\",\\n  \\"role\\": \\"admin\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "go",
+      "name": undefined,
+    },
+  ],
+  "java": [
+    {
+      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"name\\": \\"Jane Admin\\",\\n  \\"email\\": \\"jane.admin@example.com\\",\\n  \\"password\\": \\"adminPass456\\",\\n  \\"role\\": \\"admin\\"\\n}")
+  .asString();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "java",
+      "name": undefined,
+    },
+  ],
+  "php": [
+    {
+      "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.example.com/v1/users', [
+  'body' => '{
+  "name": "Jane Admin",
+  "email": "jane.admin@example.com",
+  "password": "adminPass456",
+  "role": "admin"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "php",
+      "name": undefined,
+    },
+  ],
+  "python": [
+    {
+      "code": "import requests
+
+url = "https://api.example.com/v1/users"
+
+payload = {
+    "name": "Jane Admin",
+    "email": "jane.admin@example.com",
+    "password": "adminPass456",
+    "role": "admin"
+}
+headers = {"Content-Type": "application/json"}
+
+response = requests.post(url, json=payload, headers=headers)
+
+print(response.json())",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "python",
+      "name": undefined,
+    },
+  ],
+  "ruby": [
+    {
+      "code": "require 'uri'
+require 'net/http'
+
+url = URI("https://api.example.com/v1/users")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(url)
+request["Content-Type"] = 'application/json'
+request.body = "{\\n  \\"name\\": \\"Jane Admin\\",\\n  \\"email\\": \\"jane.admin@example.com\\",\\n  \\"password\\": \\"adminPass456\\",\\n  \\"role\\": \\"admin\\"\\n}"
+
+response = http.request(request)
+puts response.read_body",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "ruby",
+      "name": undefined,
+    },
+  ],
+  "swift": [
+    {
+      "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "name": "Jane Admin",
+  "email": "jane.admin@example.com",
+  "password": "adminPass456",
+  "role": "admin"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1/users")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "swift",
+      "name": undefined,
+    },
+  ],
+  "typescript": [
+    {
+      "code": "import { CatClient } from "@treetreetree/treetreetree-js";
+
+async function main() {
+    const client = new CatClient({
+        environment: "https://api.example.com/v1",
+    });
+    await client.users.createUser({
+        name: "Jane Admin",
+        email: "jane.admin@example.com",
+        password: "adminPass456",
+        role: "admin",
+    });
+}
+main();
+",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "typescript",
+      "name": undefined,
+    },
+  ],
+}
+`;
+
 exports[`backfillSnippets > should backfill snippets for a search endpoint example 1`] = `
 {
   "csharp": [
@@ -237,6 +1605,175 @@ let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1
 request.httpMethod = "POST"
 request.allHTTPHeaderFields = headers
 request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "swift",
+      "name": undefined,
+    },
+  ],
+}
+`;
+
+exports[`backfillSnippets > should skip head method for dynamic snippets 1`] = `
+{
+  "csharp": [
+    {
+      "code": "var client = new RestClient("https://api.example.com/v1/users/123");
+var request = new RestRequest(Method.HEAD);
+IRestResponse response = client.Execute(request);",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "csharp",
+      "name": undefined,
+    },
+  ],
+  "curl": [
+    {
+      "code": "curl -X HEAD https://api.example.com/v1/users/123",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "curl",
+      "name": undefined,
+    },
+  ],
+  "go": [
+    {
+      "code": "package main
+
+import (
+	"fmt"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.example.com/v1/users/123"
+
+	req, _ := http.NewRequest("HEAD", url, nil)
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "go",
+      "name": undefined,
+    },
+  ],
+  "java": [
+    {
+      "code": "HttpResponse<String> response = Unirest.head("https://api.example.com/v1/users/123")
+  .asString();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "java",
+      "name": undefined,
+    },
+  ],
+  "javascript": [
+    {
+      "code": "const url = 'https://api.example.com/v1/users/123';
+const options = {method: 'HEAD'};
+
+try {
+  const response = await fetch(url, options);
+  const data = await response.json();
+  console.log(data);
+} catch (error) {
+  console.error(error);
+}",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "javascript",
+      "name": undefined,
+    },
+  ],
+  "php": [
+    {
+      "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('HEAD', 'https://api.example.com/v1/users/123');
+
+echo $response->getBody();",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "php",
+      "name": undefined,
+    },
+  ],
+  "python": [
+    {
+      "code": "import requests
+
+url = "https://api.example.com/v1/users/123"
+
+response = requests.head(url)
+
+print(response.json())",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "python",
+      "name": undefined,
+    },
+  ],
+  "ruby": [
+    {
+      "code": "require 'uri'
+require 'net/http'
+
+url = URI("https://api.example.com/v1/users/123")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Head.new(url)
+
+response = http.request(request)
+puts response.read_body",
+      "description": undefined,
+      "generated": true,
+      "install": undefined,
+      "language": "ruby",
+      "name": undefined,
+    },
+  ],
+  "swift": [
+    {
+      "code": "import Foundation
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.example.com/v1/users/123")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "HEAD"
 
 let session = URLSession.shared
 let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in

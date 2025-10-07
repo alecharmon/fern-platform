@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { HTTPSnippet, type TargetId } from "httpsnippet-lite";
 
 import { SnippetResolver } from "@fern-api/snippets";
@@ -167,27 +168,23 @@ async function backfillSnippetsForExample(
             }
 
             // process request body similar to getHarRequest
-            let processedRequestBody = example.requestBody;
-            if (
-                processedRequestBody != null &&
-                processedRequestBody.type === "json" &&
-                processedRequestBody.value &&
-                typeof processedRequestBody.value === "object"
-            ) {
-                const filteredValue = Object.fromEntries(
-                    Object.entries(processedRequestBody.value).filter(([_, valueObj]) => {
-                        // keep arrays and primitive values
-                        if (Array.isArray(valueObj) || typeof valueObj !== "object" || valueObj == null) {
-                            return true;
-                        }
-                        // for objects, only filter out empty objects without a value property
-                        return Object.keys(valueObj).length > 0;
-                    })
-                );
-                processedRequestBody = {
-                    ...processedRequestBody,
-                    value: filteredValue
-                };
+            let bodyValue = undefined;
+            if (example.requestBody != null && example.requestBody.type === "json" && example.requestBody.value) {
+                if (typeof example.requestBody.value === "object") {
+                    const filteredValue = Object.fromEntries(
+                        Object.entries(example.requestBody.value).filter(([_, valueObj]) => {
+                            // keep arrays and primitive values
+                            if (Array.isArray(valueObj) || typeof valueObj !== "object" || valueObj == null) {
+                                return true;
+                            }
+                            // for objects, only filter out empty objects without a value property
+                            return Object.keys(valueObj).length > 0;
+                        })
+                    );
+                    bodyValue = filteredValue;
+                } else {
+                    bodyValue = example.requestBody.value;
+                }
             }
 
             const request = {
@@ -198,7 +195,7 @@ async function backfillSnippetsForExample(
                 pathParameters: example.pathParameters,
                 queryParameters: example.queryParameters,
                 headers: example.headers,
-                requestBody: processedRequestBody,
+                requestBody: bodyValue,
                 method: endpoint.method
             };
 
