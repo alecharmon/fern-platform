@@ -56,12 +56,7 @@ async function processBatch(
                 });
                 request.resolve({ code: result.code });
             } else {
-                // Cache the error
-                bundleCache.set(request.mdx, {
-                    code: "",
-                    error: result.error,
-                    timestamp: Date.now()
-                });
+                // Don't cache errors - they should be retried on next request
                 request.reject(new Error(result.error));
             }
         });
@@ -113,10 +108,11 @@ export async function cachedBundleMDX(
         // Evict stale entries asynchronously
         void Promise.resolve().then(() => evictStaleEntries());
 
-        if (cachedEntry.error) {
-            throw new Error(cachedEntry.error);
+        // Only return cached successful results, not errors
+        if (!cachedEntry.error) {
+            return { code: cachedEntry.code };
         }
-        return { code: cachedEntry.code };
+        // If cached entry has an error, treat it as a cache miss and retry
     }
 
     // Use batched bundling for cache miss
