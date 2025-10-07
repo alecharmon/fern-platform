@@ -461,6 +461,36 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
 
       return res.send();
     },
+    addAlgoliaPreviewWhitelistEntry: async (req, res) => {
+      await app.services.auth.checkUserBelongsToOrg({
+        authHeader: req.headers.authorization,
+        orgId: "fern",
+      });
+
+      await app.dao.docsV2().addAlgoliaPreviewWhitelistEntry(req.body.domain);
+
+      return res.send();
+    },
+    removeAlgoliaPreviewWhitelistEntry: async (req, res) => {
+      await app.services.auth.checkUserBelongsToOrg({
+        authHeader: req.headers.authorization,
+        orgId: "fern",
+      });
+
+      await app.dao.docsV2().removeAlgoliaPreviewWhitelistEntry(req.body.domain);
+
+      return res.send();
+    },
+    listAlgoliaPreviewWhitelist: async (req, res) => {
+      await app.services.auth.checkUserBelongsToOrg({
+        authHeader: req.headers.authorization,
+        orgId: "fern",
+      });
+
+      const domains = await app.dao.docsV2().listAlgoliaPreviewWhitelist();
+
+      return res.send({ domains });
+    },
   });
 }
 

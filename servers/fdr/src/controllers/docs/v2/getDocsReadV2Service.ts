@@ -172,7 +172,8 @@ export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
                     isPreviewUrl: metadata.isPreview,
                     org: metadata.orgId,
                     url: req.body.url,
-                    gitUrl: metadata.gitUrl != null ? DocsV1Write.Url(metadata.gitUrl) : undefined
+                    gitUrl: metadata.gitUrl != null ? DocsV1Write.Url(metadata.gitUrl) : undefined,
+                    enableAlgoliaOnPreview: metadata.enableAlgoliaOnPreview
                 });
             }
             throw new DomainNotRegisteredError();

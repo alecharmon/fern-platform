@@ -106,17 +106,52 @@ service:
         - rootCommons.UnauthorizedError 
     
     setDocsUrlMetadata:
-      auth: true    
+      auth: true
       method: POST
       path: /set-metadata-for-url
       request:
         name: SetDocsUrlMetadataRequest
         body:
           properties:
-            url: rootCommons.Url          
+            url: rootCommons.Url
             githubUrl: optional<rootCommons.Url>
       errors:
         - DocsNotFoundError
+        - rootCommons.UnauthorizedError
+
+    addAlgoliaPreviewWhitelistEntry:
+      auth: true
+      method: POST
+      path: /algolia-preview-whitelist/add
+      docs: Add a domain to the Algolia preview whitelist to enable search on preview URLs
+      request:
+        name: AddAlgoliaPreviewWhitelistRequest
+        body:
+          properties:
+            domain: string
+      errors:
+        - rootCommons.UnauthorizedError
+
+    removeAlgoliaPreviewWhitelistEntry:
+      auth: true
+      method: POST
+      path: /algolia-preview-whitelist/remove
+      docs: Remove a domain from the Algolia preview whitelist
+      request:
+        name: RemoveAlgoliaPreviewWhitelistRequest
+        body:
+          properties:
+            domain: string
+      errors:
+        - rootCommons.UnauthorizedError
+
+    listAlgoliaPreviewWhitelist:
+      auth: true
+      method: GET
+      path: /algolia-preview-whitelist/list
+      docs: List all domains in the Algolia preview whitelist
+      response: ListAlgoliaPreviewWhitelistResponse
+      errors:
         - rootCommons.UnauthorizedError 
 
 types:
@@ -132,6 +167,10 @@ types:
     extends: v1DocsWrite.StartDocsRegisterResponse
     properties:
       previewUrl: string
+
+  ListAlgoliaPreviewWhitelistResponse:
+    properties:
+      domains: list<string>
 
   InvalidDomainErrorBody:
     properties:

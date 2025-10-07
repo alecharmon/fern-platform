@@ -34,6 +34,7 @@ export interface LoadDocsMetadata {
     path: string;
     isPreview: boolean;
     gitUrl?: string;
+    enableAlgoliaOnPreview: boolean;
 }
 
 export interface SetDocsMetadataRequest {
@@ -113,6 +114,10 @@ export interface DocsV2Dao {
     listDocsSitesForOrg(orgID: string): Promise<ListDocsSitesForOrgResponse>;
 
     setIsDocsDefinitionArchived({ url, isArchived }: { url: ParsedBaseUrl; isArchived: boolean }): Promise<void>;
+
+    addAlgoliaPreviewWhitelistEntry(domain: string): Promise<void>;
+    removeAlgoliaPreviewWhitelistEntry(domain: string): Promise<void>;
+    listAlgoliaPreviewWhitelist(): Promise<string[]>;
 }
 
 export class DocsV2DaoImpl implements DocsV2Dao {
@@ -195,12 +200,19 @@ export class DocsV2DaoImpl implements DocsV2Dao {
             return undefined;
         }
 
+        const whitelist = await this.prisma.algoliaPreviewDomainWhitelist.findUnique({
+            where: {
+                domain: url.hostname
+            }
+        });
+
         return {
             orgId: FdrAPI.OrgId(docsDomain.orgID),
             domain: docsDomain.domain,
             path: docsDomain.path,
             isPreview: docsDomain.isPreview,
-            gitUrl: docsDomain.githubUrl ?? undefined
+            gitUrl: docsDomain.githubUrl ?? undefined,
+            enableAlgoliaOnPreview: whitelist != null
         };
     }
 
@@ -505,6 +517,29 @@ export class DocsV2DaoImpl implements DocsV2Dao {
                 isArchived
             }
         });
+    }
+
+    public async addAlgoliaPreviewWhitelistEntry(domain: string): Promise<void> {
+        await this.prisma.algoliaPreviewDomainWhitelist.upsert({
+            where: { domain },
+            update: {},
+            create: { domain }
+        });
+    }
+
+    public async removeAlgoliaPreviewWhitelistEntry(domain: string): Promise<void> {
+        await this.prisma.algoliaPreviewDomainWhitelist
+            .delete({
+                where: { domain }
+            })
+            .catch(() => {});
+    }
+
+    public async listAlgoliaPreviewWhitelist(): Promise<string[]> {
+        const whitelist = await this.prisma.algoliaPreviewDomainWhitelist.findMany({
+            select: { domain: true }
+        });
+        return whitelist.map((entry) => entry.domain);
     }
 }
 

@@ -89,7 +89,6 @@ async def toggle_ask_ai(
     org_name: str,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
 ) -> JSONResponse:
     """Toggle Ask AI setting and return job_id for tracking."""
     LOGGER.info(f"Toggling Ask AI for domain {domain} and org_name {org_name}")

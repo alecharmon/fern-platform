@@ -7,4 +7,5 @@ export interface DocsUrlMetadata {
     org: FernRegistry.OrgId;
     isPreviewUrl: boolean;
     gitUrl: FernRegistry.Url | undefined;
+    enableAlgoliaOnPreview: boolean;
 }

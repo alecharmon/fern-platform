@@ -101,12 +101,13 @@ service:
       docs: Prepopulates the FDR read S3 bucket with docs definitions
 
 types:
-  DocsUrlMetadata: 
-    properties: 
+  DocsUrlMetadata:
+    properties:
       url: rootCommons.Url
       org: rootCommons.OrgId
       isPreviewUrl: boolean
       gitUrl: optional<rootCommons.Url>
+      enableAlgoliaOnPreview: boolean
 
   GetDocsConfigByIdResponse:
     properties:

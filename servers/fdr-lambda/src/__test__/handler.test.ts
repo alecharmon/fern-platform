@@ -66,9 +66,13 @@ describe("Lambda Handler", () => {
                 githubUrl: null
             };
 
-            mockQuery.mockResolvedValueOnce({
-                rows: [mockMetadata]
-            });
+            mockQuery
+                .mockResolvedValueOnce({
+                    rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: []
+                });
 
             const event = createMockEvent("/v2/registry/docs/metadata-for-url", "POST", {
                 url: "https://docs.example.com"
@@ -81,7 +85,8 @@ describe("Lambda Handler", () => {
             expect(JSON.parse(result.body)).toEqual({
                 url: "https://docs.example.com",
                 org: "test-org",
-                isPreviewUrl: false
+                isPreviewUrl: false,
+                enableAlgoliaOnPreview: false
             });
         });
 
@@ -94,9 +99,13 @@ describe("Lambda Handler", () => {
                 githubUrl: "https://github.com/example/repo"
             };
 
-            mockQuery.mockResolvedValueOnce({
-                rows: [mockMetadata]
-            });
+            mockQuery
+                .mockResolvedValueOnce({
+                    rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: [{ domain: "docs.example.com" }]
+                });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
                 url: "https://docs.example.com"
@@ -110,7 +119,8 @@ describe("Lambda Handler", () => {
                 url: "https://docs.example.com",
                 org: "test-org",
                 isPreviewUrl: false,
-                gitUrl: "https://github.com/example/repo"
+                gitUrl: "https://github.com/example/repo",
+                enableAlgoliaOnPreview: true
             });
             expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('FROM "DocsV2"'), ["docs.example.com"]);
         });
@@ -157,9 +167,13 @@ describe("Lambda Handler", () => {
                 githubUrl: null
             };
 
-            mockQuery.mockResolvedValueOnce({
-                rows: [mockMetadata]
-            });
+            mockQuery
+                .mockResolvedValueOnce({
+                    rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: []
+                });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
                 url: "docs.letta.com"
@@ -172,7 +186,8 @@ describe("Lambda Handler", () => {
             expect(JSON.parse(result.body)).toEqual({
                 url: "docs.letta.com",
                 org: "test-org",
-                isPreviewUrl: false
+                isPreviewUrl: false,
+                enableAlgoliaOnPreview: false
             });
             expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('FROM "DocsV2"'), ["docs.letta.com"]);
         });
@@ -186,9 +201,13 @@ describe("Lambda Handler", () => {
                 githubUrl: null
             };
 
-            mockQuery.mockResolvedValueOnce({
-                rows: [mockMetadata]
-            });
+            mockQuery
+                .mockResolvedValueOnce({
+                    rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: []
+                });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
                 url: "http://docs.example.com"
@@ -210,9 +229,13 @@ describe("Lambda Handler", () => {
                 githubUrl: null
             };
 
-            mockQuery.mockResolvedValueOnce({
-                rows: [mockMetadata]
-            });
+            mockQuery
+                .mockResolvedValueOnce({
+                    rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: []
+                });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
                 url: "buildwithfern.com/docs"
@@ -249,9 +272,13 @@ describe("Lambda Handler", () => {
                 githubUrl: null
             };
 
-            mockQuery.mockResolvedValueOnce({
-                rows: [mockMetadata]
-            });
+            mockQuery
+                .mockResolvedValueOnce({
+                    rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: []
+                });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
                 url: "https://preview.example.com/preview"
@@ -264,6 +291,7 @@ describe("Lambda Handler", () => {
             const body = JSON.parse(result.body);
             expect(body.gitUrl).toBeUndefined();
             expect(body.isPreviewUrl).toBe(true);
+            expect(body.enableAlgoliaOnPreview).toBe(false);
         });
     });
 

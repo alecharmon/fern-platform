@@ -4,3 +4,5 @@ export { RegisterDocsRequest } from "./RegisterDocsRequest";
 export { TransferDomainOwnershipRequest } from "./TransferDomainOwnershipRequest";
 export { SetIsArchivedRequest } from "./SetIsArchivedRequest";
 export { SetDocsUrlMetadataRequest } from "./SetDocsUrlMetadataRequest";
+export { AddAlgoliaPreviewWhitelistRequest } from "./AddAlgoliaPreviewWhitelistRequest";
+export { RemoveAlgoliaPreviewWhitelistRequest } from "./RemoveAlgoliaPreviewWhitelistRequest";

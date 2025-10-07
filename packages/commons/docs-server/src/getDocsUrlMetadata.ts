@@ -26,12 +26,14 @@ export const uncachedGetDocsUrlMetadata = async (
     url: string;
     org: string;
     isPreview: boolean;
+    enableAlgoliaOnPreview: boolean;
 }> => {
     if (isLocal()) {
         return {
             url: domain,
             org: domain.split(".")[0] ?? domain,
-            isPreview: true
+            isPreview: true,
+            enableAlgoliaOnPreview: false
         };
     }
 
@@ -55,7 +57,8 @@ export const uncachedGetDocsUrlMetadata = async (
         return {
             url: response.url,
             org: response.org,
-            isPreview: response.isPreviewUrl
+            isPreview: response.isPreviewUrl,
+            enableAlgoliaOnPreview: response.enableAlgoliaOnPreview
         };
     } catch (error) {
         console.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {

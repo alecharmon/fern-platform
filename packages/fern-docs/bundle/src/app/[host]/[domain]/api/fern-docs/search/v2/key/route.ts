@@ -42,7 +42,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const domain = getDocsDomainEdge(req);
 
     const metadata = await getDocsUrlMetadata(domain);
-    if (metadata.isPreview) {
+    if (metadata.isPreview && !metadata.enableAlgoliaOnPreview) {
         return NextResponse.json("Search is not supported for preview URLs", {
             status: 400
         });

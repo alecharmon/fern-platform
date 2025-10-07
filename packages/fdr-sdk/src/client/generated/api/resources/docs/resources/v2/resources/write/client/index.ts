@@ -5,3 +5,6 @@ export * as finishDocsRegister from "./finishDocsRegister.js";
 export * as transferOwnershipOfDomain from "./transferOwnershipOfDomain.js";
 export * as setIsArchived from "./setIsArchived.js";
 export * as setDocsUrlMetadata from "./setDocsUrlMetadata.js";
+export * as addAlgoliaPreviewWhitelistEntry from "./addAlgoliaPreviewWhitelistEntry.js";
+export * as removeAlgoliaPreviewWhitelistEntry from "./removeAlgoliaPreviewWhitelistEntry.js";
+export * as listAlgoliaPreviewWhitelist from "./listAlgoliaPreviewWhitelist.js";

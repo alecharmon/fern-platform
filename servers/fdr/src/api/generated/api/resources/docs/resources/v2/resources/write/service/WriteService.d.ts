@@ -36,6 +36,21 @@ export interface WriteServiceMethods {
         cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
         locals: any;
     }, next: express.NextFunction): void | Promise<void>;
+    addAlgoliaPreviewWhitelistEntry(req: express.Request<never, never, FernRegistry.docs.v2.write.AddAlgoliaPreviewWhitelistRequest, never>, res: {
+        send: () => Promise<void>;
+        cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+        locals: any;
+    }, next: express.NextFunction): void | Promise<void>;
+    removeAlgoliaPreviewWhitelistEntry(req: express.Request<never, never, FernRegistry.docs.v2.write.RemoveAlgoliaPreviewWhitelistRequest, never>, res: {
+        send: () => Promise<void>;
+        cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+        locals: any;
+    }, next: express.NextFunction): void | Promise<void>;
+    listAlgoliaPreviewWhitelist(req: express.Request<never, FernRegistry.docs.v2.write.ListAlgoliaPreviewWhitelistResponse, never, never>, res: {
+        send: (responseBody: FernRegistry.docs.v2.write.ListAlgoliaPreviewWhitelistResponse) => Promise<void>;
+        cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+        locals: any;
+    }, next: express.NextFunction): void | Promise<void>;
 }
 export declare class WriteService {
     private readonly methods;

@@ -1,5 +1,6 @@
 export * from "./ImageFilePath";
 export * from "./StartDocsPreviewRegisterResponse";
+export * from "./ListAlgoliaPreviewWhitelistResponse";
 export * from "./InvalidDomainErrorBody";
 export * from "./InvliadCustomDomainErrorBody";
 export * from "./OverlappingCustomDomains";

@@ -1,5 +1,6 @@
 export * from "./ImageFilePath.js";
 export * from "./StartDocsPreviewRegisterResponse.js";
+export * from "./ListAlgoliaPreviewWhitelistResponse.js";
 export * from "./InvalidDomainErrorBody.js";
 export * from "./InvliadCustomDomainErrorBody.js";
 export * from "./OverlappingCustomDomains.js";

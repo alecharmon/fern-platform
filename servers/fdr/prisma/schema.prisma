@@ -96,6 +96,11 @@ model OverwrittenAlgoliaIndex {
   @@map("overwritten_algolia_indexes")
 }
 
+model AlgoliaPreviewDomainWhitelist {
+  domain    String   @id
+  @@map("algolia_preview_domain_whitelist")
+}
+
 model SnippetTemplate {
   id                 String                         @id
   orgId              String

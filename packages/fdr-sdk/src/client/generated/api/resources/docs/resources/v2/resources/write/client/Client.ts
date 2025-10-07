@@ -596,6 +596,266 @@ export class Write {
         };
     }
 
+    /**
+     * Add a domain to the Algolia preview whitelist to enable search on preview URLs
+     *
+     * @param {FernRegistry.docs.v2.write.AddAlgoliaPreviewWhitelistRequest} request
+     * @param {Write.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.write.addAlgoliaPreviewWhitelistEntry({
+     *         domain: "domain"
+     *     })
+     */
+    public addAlgoliaPreviewWhitelistEntry(
+        request: FernRegistry.docs.v2.write.AddAlgoliaPreviewWhitelistRequest,
+        requestOptions?: Write.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<void, FernRegistry.docs.v2.write.addAlgoliaPreviewWhitelistEntry.Error>
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__addAlgoliaPreviewWhitelistEntry(request, requestOptions));
+    }
+
+    private async __addAlgoliaPreviewWhitelistEntry(
+        request: FernRegistry.docs.v2.write.AddAlgoliaPreviewWhitelistRequest,
+        requestOptions?: Write.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<core.APIResponse<void, FernRegistry.docs.v2.write.addAlgoliaPreviewWhitelistEntry.Error>>
+    > {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                "/v2/registry/docs/algolia-preview-whitelist/add",
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: undefined,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.docs.v2.write.addAlgoliaPreviewWhitelistEntry.Error)?.error) {
+                case "UnauthorizedError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error
+                                .body as FernRegistry.docs.v2.write.addAlgoliaPreviewWhitelistEntry.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.docs.v2.write.addAlgoliaPreviewWhitelistEntry.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
+    /**
+     * Remove a domain from the Algolia preview whitelist
+     *
+     * @param {FernRegistry.docs.v2.write.RemoveAlgoliaPreviewWhitelistRequest} request
+     * @param {Write.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.write.removeAlgoliaPreviewWhitelistEntry({
+     *         domain: "domain"
+     *     })
+     */
+    public removeAlgoliaPreviewWhitelistEntry(
+        request: FernRegistry.docs.v2.write.RemoveAlgoliaPreviewWhitelistRequest,
+        requestOptions?: Write.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<void, FernRegistry.docs.v2.write.removeAlgoliaPreviewWhitelistEntry.Error>
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__removeAlgoliaPreviewWhitelistEntry(request, requestOptions));
+    }
+
+    private async __removeAlgoliaPreviewWhitelistEntry(
+        request: FernRegistry.docs.v2.write.RemoveAlgoliaPreviewWhitelistRequest,
+        requestOptions?: Write.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<void, FernRegistry.docs.v2.write.removeAlgoliaPreviewWhitelistEntry.Error>
+        >
+    > {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                "/v2/registry/docs/algolia-preview-whitelist/remove",
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: undefined,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (
+                (_response.error.body as FernRegistry.docs.v2.write.removeAlgoliaPreviewWhitelistEntry.Error)?.error
+            ) {
+                case "UnauthorizedError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error
+                                .body as FernRegistry.docs.v2.write.removeAlgoliaPreviewWhitelistEntry.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.docs.v2.write.removeAlgoliaPreviewWhitelistEntry.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
+    /**
+     * List all domains in the Algolia preview whitelist
+     *
+     * @param {Write.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.write.listAlgoliaPreviewWhitelist()
+     */
+    public listAlgoliaPreviewWhitelist(
+        requestOptions?: Write.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<
+            FernRegistry.docs.v2.write.ListAlgoliaPreviewWhitelistResponse,
+            FernRegistry.docs.v2.write.listAlgoliaPreviewWhitelist.Error
+        >
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__listAlgoliaPreviewWhitelist(requestOptions));
+    }
+
+    private async __listAlgoliaPreviewWhitelist(
+        requestOptions?: Write.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<
+                FernRegistry.docs.v2.write.ListAlgoliaPreviewWhitelistResponse,
+                FernRegistry.docs.v2.write.listAlgoliaPreviewWhitelist.Error
+            >
+        >
+    > {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                "/v2/registry/docs/algolia-preview-whitelist/list",
+            ),
+            method: "GET",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.docs.v2.write.ListAlgoliaPreviewWhitelistResponse,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.docs.v2.write.listAlgoliaPreviewWhitelist.Error)?.error) {
+                case "UnauthorizedError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FernRegistry.docs.v2.write.listAlgoliaPreviewWhitelist.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.docs.v2.write.listAlgoliaPreviewWhitelist.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
     protected async _getAuthorizationHeader(): Promise<string | undefined> {
         const bearer = await core.Supplier.get(this._options.token);
         if (bearer != null) {

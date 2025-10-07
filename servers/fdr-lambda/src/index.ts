@@ -14,6 +14,7 @@ interface DocsUrlMetadata {
     org: string;
     isPreviewUrl: boolean;
     gitUrl?: string;
+    enableAlgoliaOnPreview: boolean;
 }
 
 interface GetMetadataForUrlRequest {
@@ -64,12 +65,18 @@ async function getMetadataForUrl(url: string): Promise<DocsUrlMetadata | null> {
         return null;
     }
 
+    const whitelistResult = await pool.query(
+        `SELECT "domain" FROM "algolia_preview_domain_whitelist" WHERE "domain" = $1 LIMIT 1`,
+        [hostname]
+    );
+
     const row = result.rows[0];
     return {
         url,
         org: row.orgID,
         isPreviewUrl: row.isPreview,
-        gitUrl: row.githubUrl ?? undefined
+        gitUrl: row.githubUrl ?? undefined,
+        enableAlgoliaOnPreview: whitelistResult.rows.length > 0
     };
 }
 
