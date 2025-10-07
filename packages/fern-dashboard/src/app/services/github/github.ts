@@ -1,8 +1,8 @@
 import type { Auth0OrgName } from "../auth0/types";
 import { DashboardApiClient } from "../dashboard-api/client";
 
-export const DEFAULT_PR_TITLE = "Visual Editor: Update";
-export const DEFAULT_COMMIT_MESSAGE = "Visual Editor: Update";
+export const DEFAULT_PR_TITLE = "Fern Editor: Update";
+export const DEFAULT_COMMIT_MESSAGE = "Fern Editor: Update";
 
 export async function handleCreatePr({
     orgName,

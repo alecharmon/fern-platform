@@ -322,7 +322,7 @@ export class GitHubLoader implements GitLoader {
             owner,
             repo,
             path: projectResult.result.project.docsYmlPath,
-            message: "Update docs.yml - add new page via visual editor",
+            message: "Update docs.yml - add new page via fern editor",
             content: Buffer.from(content, "utf8").toString("base64"),
             sha: currentFile.data.sha,
             branch: ref

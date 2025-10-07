@@ -19,7 +19,7 @@ export function VEPreviewImage({ className }: { className?: string }) {
         <div className={`relative h-full w-full ${className ?? ""}`}>
             <Image
                 src={veLight}
-                alt="Visual Editor Preview"
+                alt="Fern Editor Preview"
                 fill
                 placeholder="blur"
                 aria-hidden={resolvedTheme !== "light"}
@@ -31,7 +31,7 @@ export function VEPreviewImage({ className }: { className?: string }) {
             />
             <Image
                 src={veDark}
-                alt="Visual Editor Preview"
+                alt="Fern Editor Preview"
                 fill
                 placeholder="blur"
                 aria-hidden={resolvedTheme !== "dark"}

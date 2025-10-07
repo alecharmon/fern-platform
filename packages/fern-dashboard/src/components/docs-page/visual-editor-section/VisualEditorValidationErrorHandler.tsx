@@ -32,7 +32,7 @@ export function VisualEditorValidationErrorHandler({ error, orgName, site, githu
                                 </a>
                             </>
                         ) : (
-                            "To get started, connect a Github repo above and install the Fern app on your chosen repository."
+                            "To get started, connect a GitHub repo above and install the Fern GitHub app."
                         )}
                         .
                     </p>

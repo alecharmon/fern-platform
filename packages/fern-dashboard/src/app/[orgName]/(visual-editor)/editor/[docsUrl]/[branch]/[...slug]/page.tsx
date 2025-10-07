@@ -123,7 +123,7 @@ export default async function Page({
     }
 
     return (
-        // TODO: Currently, we are force-hiding the table of contents is within Visual Editor.
+        // TODO: Currently, we are force-hiding the table of contents is within Fern Editor.
         // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
         // on the tiptap editor's content.
         <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={undefined}>

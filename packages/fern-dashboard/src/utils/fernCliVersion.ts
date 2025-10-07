@@ -9,8 +9,8 @@ export async function getLatestFernCliVersion(): Promise<string> {
 }
 
 /**
- * VISUAL EDITOR MIN VERSION:
- * This is the minimum version of the Fern CLI that is recommended to use the Visual Editor.
+ * FERN EDITOR MIN VERSION:
+ * This is the minimum version of the Fern CLI that is recommended to use the Fern Editor.
  * Prior to this version, the rawMarkdown field is not available in the docs definition.
  *
  * Please update this value when we have new recommended minimum versions so that we surface

@@ -29,7 +29,7 @@ export function SuccessfulEditSourceToast() {
 }
 
 export function ErrorInvalidGithubUrlToast() {
-    return toast.error("Invalid Github URL. Please update and try again.");
+    return toast.error("Invalid GitHub URL. Please update and try again.");
 }
 
 export function ErrorEditSourceToast() {

@@ -44,7 +44,7 @@ export async function VisualEditorSection({
                 <VisualEditorValidationErrorHandler
                     error={{
                         type: "UNEXPECTED_ERROR",
-                        message: "Github URL or base branch is was not found."
+                        message: "GitHub URL or base branch is was not found."
                     }}
                     githubUrl={githubUrl}
                     orgName={orgName}

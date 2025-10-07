@@ -36,7 +36,7 @@ export async function CriticalUpdateWarning({
                 <div className="flex flex-col">
                     <p className="text-md">Your Fern CLI version is incompatible</p>
                     <p className="text-muted-foreground text-xs">
-                        Upgrade to use the latest features of Fern’s Visual Editor.
+                        Upgrade to use the latest features of the Fern Editor.
                     </p>
                 </div>
                 <div>

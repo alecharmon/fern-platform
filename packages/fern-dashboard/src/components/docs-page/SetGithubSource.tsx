@@ -82,7 +82,7 @@ export function SetGithubSourcePopover({
                     <div className="flex items-center gap-2 p-2">
                         <div className="border-border flex flex-1 items-center rounded-md border pr-0.5">
                             <Input
-                                placeholder="Paste Github URL..."
+                                placeholder="Paste GitHub repo URL..."
                                 value={inputUrl}
                                 onChange={(e) => setInputUrl(e.target.value)}
                                 onKeyDown={(e) => {
