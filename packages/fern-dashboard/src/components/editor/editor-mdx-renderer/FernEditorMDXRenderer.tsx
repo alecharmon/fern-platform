@@ -15,7 +15,6 @@ import {
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { EditorComponentChildrenProvider } from "@/components/editor/editor-component/EditorComponentChildrenContext";
 import { EditorComponentProvider } from "@/components/editor/editor-component/EditorComponentContext";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
@@ -128,8 +127,8 @@ interface ErrorState {
 
 type MDXRendererState = BundlingState | BundledState | ErrorState;
 
-// Loading component for terminal elements
-const LoadingTerminalElement = React.memo(() => <Skeleton className="my-2 h-16 w-full" />);
+// Loading component for terminal elements - subtle placeholder instead of skeleton
+const LoadingTerminalElement = React.memo(() => <div className="my-2 min-h-16 animate-pulse rounded-md bg-muted/30" />);
 LoadingTerminalElement.displayName = "LoadingTerminalElement";
 
 // MDX renderer component for terminal elements

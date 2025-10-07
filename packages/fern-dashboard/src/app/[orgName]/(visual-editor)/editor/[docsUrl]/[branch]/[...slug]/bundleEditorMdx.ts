@@ -8,8 +8,6 @@ import { bundleMDX as internalBundleMDX } from "@/editor/mdx/bundle";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import type { EncodedDocsUrl } from "@/utils/types";
 
-const BATCH_SIZE = 25;
-
 type BundleResult = { ok: true; code: string } | { ok: false; error: string };
 
 export async function bundleEditorMDX(
@@ -19,8 +17,6 @@ export async function bundleEditorMDX(
         branch?: string;
     }
 ): Promise<BundleResult[]> {
-    const results: BundleResult[] = [];
-
     // Try to create a loader if docsUrl is provided
     let loader: DocsLoader | undefined;
 
@@ -45,23 +41,21 @@ export async function bundleEditorMDX(
         }
     }
 
-    for (let i = 0; i < sources.length; i += BATCH_SIZE) {
-        const batch = sources.slice(i, i + BATCH_SIZE);
-        const batchResults = await Promise.all(
-            batch.map(async (source) => {
-                try {
-                    const result = await internalBundleMDX(source, { loader });
-                    return { ok: true as const, code: result.code };
-                } catch (error) {
-                    return {
-                        ok: false as const,
-                        error: error instanceof Error ? error.message : String(error)
-                    };
-                }
-            })
-        );
-        results.push(...batchResults);
-    }
+    // Process all sources in parallel for maximum performance
+    // The client-side batching (10ms window) already handles request grouping
+    const results = await Promise.all(
+        sources.map(async (source) => {
+            try {
+                const result = await internalBundleMDX(source, { loader });
+                return { ok: true as const, code: result.code };
+            } catch (error) {
+                return {
+                    ok: false as const,
+                    error: error instanceof Error ? error.message : String(error)
+                };
+            }
+        })
+    );
 
     return results;
 }

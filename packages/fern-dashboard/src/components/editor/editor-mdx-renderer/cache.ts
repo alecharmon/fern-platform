@@ -156,7 +156,8 @@ interface BatchContext {
 
 // Batch collector for requests - now keyed by docsUrl+branch combination
 const batchContexts = new Map<string, BatchContext>();
-const BATCH_WINDOW_MS = 100;
+// Reduced batch window for faster response - batching happens automatically via React renders
+const BATCH_WINDOW_MS = 10;
 
 /**
  * Batched version of bundleMDX that collects requests and processes them together
