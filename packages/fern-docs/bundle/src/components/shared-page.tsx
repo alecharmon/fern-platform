@@ -7,7 +7,13 @@ import { compact } from "es-toolkit/array";
 
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { withPrunedNavigationLoader } from "@fern-api/docs-server/withPrunedNavigation";
-import { addLeadingSlash, conformTrailingSlash, getRedirectForPath, slugToHref } from "@fern-api/docs-utils";
+import {
+    addLeadingSlash,
+    conformTrailingSlash,
+    getRedirectForPath,
+    prepareRedirect,
+    slugToHref
+} from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
@@ -291,17 +297,6 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
             />
         </FeedbackPopoverProvider>
     );
-}
-
-function prepareRedirect(destination: string): string {
-    if (destination.startsWith("http://") || destination.startsWith("https://")) {
-        // triggers a throw in the server-side if the destination url is invalid
-        const url = new URL(destination);
-        destination = String(url);
-    } else {
-        destination = encodeURI(slugToHref(destination));
-    }
-    return destination;
 }
 
 async function getNeighbor(

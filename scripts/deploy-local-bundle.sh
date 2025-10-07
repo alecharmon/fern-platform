@@ -24,5 +24,9 @@ fi
 echo "Moving unzipdir to .next..."
 mv unzipdir .next
 
+cd .next
+pnpm i esbuild
+node install-esbuild.js
+
 popd > /dev/null
 echo "App preview bundle prepared at $PREVIEW_DIR/.next"

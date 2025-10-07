@@ -1,11 +1,16 @@
 import "server-only";
 
-import { RedirectType, redirect } from "next/navigation";
+import { permanentRedirect, RedirectType, redirect } from "next/navigation";
 import React from "react";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { conformTrailingSlash } from "@fern-api/docs-utils";
-import { conformExplorerRoute } from "@fern-api/docs-utils";
+import {
+    conformExplorerRoute,
+    conformTrailingSlash,
+    getRedirectForPath,
+    prepareRedirect,
+    slugToHref
+} from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 
 import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
@@ -25,6 +30,15 @@ export default async function ExplorerPage({
     const slug = FernNavigation.slugjoin(slugProp);
 
     const loader = await createCachedDocsLoader(host, domain);
+
+    // Check for configured redirects FIRST (configured redirects take precedence)
+    const [config, baseUrl] = await Promise.all([loader.getConfig(), loader.getMetadata()]);
+    const configuredRedirect = getRedirectForPath(slugToHref(slug), baseUrl, config.redirects);
+    if (configuredRedirect != null) {
+        const redirectFn = configuredRedirect.permanent ? permanentRedirect : redirect;
+        redirectFn(prepareRedirect(configuredRedirect.destination));
+    }
+
     const root = await loader.getRoot();
 
     const found = FernNavigation.utils.findNode(root, slug);

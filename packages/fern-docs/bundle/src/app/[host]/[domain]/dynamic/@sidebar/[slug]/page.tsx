@@ -2,14 +2,21 @@ import "server-only";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { getTabs } from "@fern-api/docs-server/handle-node-fallbacks";
-import { getIsSidebarFixed, getIsSingleOverviewPage, slugToHref } from "@fern-api/docs-utils";
+import {
+    getIsSidebarFixed,
+    getIsSingleOverviewPage,
+    getRedirectForPath,
+    prepareRedirect,
+    slugToHref
+} from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SidebarTabsRoot } from "@fern-docs/components/sidebar/SidebarTabsRoot";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
-import { redirect } from "next/navigation";
+import { permanentRedirect, redirect } from "next/navigation";
+
 import { getFernToken } from "@/app/fern-token";
 
 export default async function SidebarPage({
@@ -19,10 +26,17 @@ export default async function SidebarPage({
 }) {
     const { host, domain, slug } = await params;
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
-    const config = await loader.getConfig();
+    const [config, baseUrl] = await Promise.all([loader.getConfig(), loader.getMetadata()]);
     const isSidebarFixed = getIsSidebarFixed(config);
 
     const showHiddenNodes = (await loader.getEdgeFlags()).isAuthenticatedPagesDiscoverable;
+
+    // Check for configured redirects FIRST (before findNode)
+    const configuredRedirect = getRedirectForPath(slugToHref(slugjoin(slug)), baseUrl, config.redirects);
+    if (configuredRedirect != null) {
+        const redirectFn = configuredRedirect.permanent ? permanentRedirect : redirect;
+        redirectFn(prepareRedirect(configuredRedirect.destination));
+    }
 
     const root = await loader.getRoot();
 
@@ -63,15 +77,4 @@ export default async function SidebarPage({
             )}
         </>
     );
-}
-
-function prepareRedirect(destination: string): string {
-    if (destination.startsWith("http://") || destination.startsWith("https://")) {
-        // triggers a throw in the server-side if the destination url is invalid
-        const url = new URL(destination);
-        destination = String(url);
-    } else {
-        destination = encodeURI(slugToHref(destination));
-    }
-    return destination;
 }

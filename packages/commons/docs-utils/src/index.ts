@@ -15,3 +15,4 @@ export * from "./layout";
 export * from "./changelog";
 export * from "./string";
 export * from "./isLikelyBrowser";
+export * from "./prepareRedirect";
