@@ -116,8 +116,34 @@ RUN mkdir -p /nextapp && \
 RUN apk add --no-cache jq yq
 
 # ----------- Start Buf CLI setup -----------
-RUN wget https://github.com/bufbuild/buf/releases/latest/download/buf-Linux-x86_64 -O /usr/local/bin/buf && \
+RUN wget https://github.com/bufbuild/buf/releases/download/v1.57.2/buf-Linux-x86_64 -O /usr/local/bin/buf && \
     chmod +x /usr/local/bin/buf
+
+# Pre-install buf's npm dependencies into a reusable location
+RUN mkdir -p /opt/buf-modules && \
+    cd /opt/buf-modules && \
+    echo '{"dependencies":{"@bufbuild/protobuf":"^2.2.5","@bufbuild/protoplugin":"2.2.5"}}' > package.json && \
+    NPM_CONFIG_USERCONFIG=/dev/null npm install --no-audit --no-fund && \
+    chmod -R 777 /opt/buf-modules
+
+# Replace npm with a wrapper that provides pre-installed modules for buf
+RUN mv /usr/bin/npm /usr/bin/npm-real && \
+    printf '#!/bin/sh\n' > /usr/bin/npm && \
+    printf 'if [ "$1" = "install" ] && [ -f "package.json" ] && grep -q "@bufbuild/protobuf" package.json 2>/dev/null; then\n' >> /usr/bin/npm && \
+    printf '  if [ -d "/opt/buf-modules/node_modules" ]; then\n' >> /usr/bin/npm && \
+    printf '    cp -r /opt/buf-modules/node_modules . 2>/dev/null && exit 0\n' >> /usr/bin/npm && \
+    printf '  fi\n' >> /usr/bin/npm && \
+    printf 'fi\n' >> /usr/bin/npm && \
+    printf 'exec /usr/bin/npm-real "$@"\n' >> /usr/bin/npm && \
+    chmod +x /usr/bin/npm
+
+# Verify buf can export with the wrapper
+RUN mkdir -p /tmp/buf-test && \
+    cd /tmp/buf-test && \
+    echo 'syntax = "proto3"; package test; message TestMessage { string field = 1; }' > test.proto && \
+    echo 'version: v2' > buf.yaml && \
+    buf export . --output /tmp/buf-output && \
+    cd / && rm -rf /tmp/buf-test /tmp/buf-output
 # ----------- End Buf CLI setup -----------
 
 # ----------- Setup for non-root execution -----------
