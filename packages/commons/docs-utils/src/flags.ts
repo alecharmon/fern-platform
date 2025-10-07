@@ -20,10 +20,8 @@ export interface EdgeFlags {
     is404PageHidden: boolean;
     isAuthenticatedPagesDiscoverable: boolean;
     isAuthedPreview: boolean;
-    isSearchDisabled: boolean;
     isDefaultSearchFilterOn: boolean;
     isChangelogRedirects: boolean;
-    isPosthogDisabled: boolean;
     isNextMdxRef: boolean;
     isLlmsTxtDisabled: boolean;
 }
@@ -50,10 +48,8 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     is404PageHidden: false,
     isAuthenticatedPagesDiscoverable: false,
     isAuthedPreview: false,
-    isSearchDisabled: false,
     isDefaultSearchFilterOn: false,
     isChangelogRedirects: false,
-    isPosthogDisabled: false,
     isNextMdxRef: false,
     isLlmsTxtDisabled: false
 };

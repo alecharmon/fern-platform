@@ -136,15 +136,12 @@ export default async function Layout({
                 />
                 <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>{children}</FeatureFlagProvider>
                 <React.Suspense fallback={null}>
-                    {!edgeFlags.isSearchDisabled && !isLocalEnvironment && !settings.disableSearch && (
-                        <SearchV2 domain={domain} />
-                    )}
+                    {!isLocalEnvironment && !settings.disableSearch && <SearchV2 domain={domain} />}
                 </React.Suspense>
                 {jsConfig != null && <JavascriptProvider config={jsConfig} />}
                 {VERCEL_ENV === "production" && (
                     <CustomerAnalytics
                         config={mergeCustomerAnalytics(deprecated_customerAnalytics, config.analyticsConfig)}
-                        isPosthogDisabled={edgeFlags.isPosthogDisabled}
                     />
                 )}
             </RootNodeProvider>

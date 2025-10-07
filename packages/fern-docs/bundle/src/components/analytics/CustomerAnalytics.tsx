@@ -15,20 +15,14 @@ const GoogleTagManager = dynamic(() => import("./gtm"), { ssr: true });
 const IntercomScript = dynamic(() => import("./intercom"), { ssr: true });
 const SegmentScript = dynamic(() => import("./segment"), { ssr: true });
 
-export function CustomerAnalytics({
-    config,
-    isPosthogDisabled
-}: {
-    config?: Partial<DocsV1Read.AnalyticsConfig>;
-    isPosthogDisabled: boolean;
-}) {
+export function CustomerAnalytics({ config }: { config?: Partial<DocsV1Read.AnalyticsConfig> }) {
     if (!config) {
         return null;
     }
 
     return (
         <>
-            {!isPosthogDisabled && <PosthogProvider customerConfig={config.posthog} />}
+            <PosthogProvider customerConfig={config.posthog} />
             {config.fullstory && <FullstoryScript config={config.fullstory} />}
             {config.ga4 && <GoogleAnalytics gaId={config.ga4.measurementId} />}
             {config.gtm && <GoogleTagManager gtmId={config.gtm.containerId} />}

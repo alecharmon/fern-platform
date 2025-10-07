@@ -35,10 +35,8 @@ const EDGE_FLAGS = [
     "grpc-endpoints" as const,
     "authenticated-pages-discoverable" as const,
     "authed-previews" as const,
-    "search-disabled" as const,
     "default-search-filter-on" as const,
     "changelog-redirects" as const,
-    "posthog-disabled" as const,
     "next-mdx-ref" as const,
     "llms-txt-disabled" as const,
     "dynamic-snippets" as const
@@ -98,10 +96,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             config["authenticated-pages-discoverable"]
         );
         const isAuthedPreview = checkDomainMatchesCustomers(domain, config["authed-previews"]);
-        const isSearchDisabled = checkDomainMatchesCustomers(domain, config["search-disabled"]);
         const isDefaultSearchFilterOn = checkDomainMatchesCustomers(domain, config["default-search-filter-on"]);
         const isChangelogRedirects = checkDomainMatchesCustomers(domain, config["changelog-redirects"]);
-        const isPosthogDisabled = checkDomainMatchesCustomers(domain, config["posthog-disabled"]);
         const isNextMdxRef = checkDomainMatchesCustomers(domain, config["next-mdx-ref"]);
         const isLlmsTxtDisabled = checkDomainMatchesCustomers(domain, config["llms-txt-disabled"]);
         return {
@@ -126,10 +122,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             is404PageHidden,
             isAuthenticatedPagesDiscoverable,
             isAuthedPreview,
-            isSearchDisabled,
             isDefaultSearchFilterOn,
             isChangelogRedirects,
-            isPosthogDisabled,
             isNextMdxRef,
             isLlmsTxtDisabled
         };
@@ -157,10 +151,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             is404PageHidden: false,
             isAuthenticatedPagesDiscoverable: false,
             isAuthedPreview: false,
-            isSearchDisabled: false,
             isDefaultSearchFilterOn: false,
             isChangelogRedirects: false,
-            isPosthogDisabled: false,
             isNextMdxRef: false,
             isLlmsTxtDisabled: false
         };
