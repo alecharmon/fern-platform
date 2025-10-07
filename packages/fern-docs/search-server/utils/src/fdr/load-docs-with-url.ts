@@ -23,7 +23,6 @@ export interface LoadDocsWithUrlPayload {
     isApiScrollingDisabled?: boolean;
     useJavaScriptAsTypeScript?: boolean;
     alwaysEnableJavaScriptFetch?: boolean;
-    usesApplicationJsonInFormDataValue?: boolean;
 }
 
 interface LoadDocsWithUrlResponse {
@@ -70,8 +69,7 @@ export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<
         ...mapValues(docs.body.definition.apis, (api) =>
             ApiDefinition.ApiDefinitionV1ToLatest.from(api, {
                 useJavaScriptAsTypeScript: payload.useJavaScriptAsTypeScript ?? false,
-                alwaysEnableJavaScriptFetch: payload.alwaysEnableJavaScriptFetch ?? false,
-                usesApplicationJsonInFormDataValue: payload.usesApplicationJsonInFormDataValue ?? false
+                alwaysEnableJavaScriptFetch: payload.alwaysEnableJavaScriptFetch ?? false
             }).migrate()
         ),
         ...docs.body.definition.apisV2

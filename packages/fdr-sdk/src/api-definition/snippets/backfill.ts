@@ -30,7 +30,6 @@ export async function backfillSnippets(
     apiDefinition: ApiDefinition,
     dynamicIr: DynamicIRsByLanguage | undefined,
     flags: {
-        usesApplicationJsonInFormDataValue: boolean;
         isHttpSnippetsEnabled: boolean;
         alwaysEnableJavaScriptFetch: boolean;
     }
@@ -66,11 +65,9 @@ async function backfillSnippetsForExample(
     endpoint: EndpointDefinition,
     example: ExampleEndpointCall,
     {
-        usesApplicationJsonInFormDataValue,
         isHttpSnippetsEnabled,
         alwaysEnableJavaScriptFetch
     }: {
-        usesApplicationJsonInFormDataValue: boolean;
         isHttpSnippetsEnabled: boolean;
         alwaysEnableJavaScriptFetch: boolean;
     }
@@ -89,8 +86,7 @@ async function backfillSnippetsForExample(
                 endpoint,
                 example,
                 endpointAuth != null ? apiDefinition.auths[endpointAuth] : undefined
-            ),
-            { usesApplicationJsonInFormDataValue }
+            )
         );
         pushSnippet({
             name: undefined,

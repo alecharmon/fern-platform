@@ -21,8 +21,7 @@ function testNavigationConfigConverter(fixtureName: string): void {
     const v2Apis = Object.values(fixture.definition.apis).map((api) =>
         ApiDefinitionV1ToLatest.from(api, {
             useJavaScriptAsTypeScript: false,
-            alwaysEnableJavaScriptFetch: false,
-            usesApplicationJsonInFormDataValue: false
+            alwaysEnableJavaScriptFetch: false
         }).migrate()
     );
 

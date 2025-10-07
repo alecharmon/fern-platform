@@ -30,8 +30,7 @@ export function readFixtureToRootNode(fixture: DocsV2Read.LoadDocsForUrlResponse
                     api.id,
                     ApiDefinition.ApiDefinitionV1ToLatest.from(api, {
                         useJavaScriptAsTypeScript: false,
-                        alwaysEnableJavaScriptFetch: false,
-                        usesApplicationJsonInFormDataValue: false
+                        alwaysEnableJavaScriptFetch: false
                     }).migrate()
                 ];
             })

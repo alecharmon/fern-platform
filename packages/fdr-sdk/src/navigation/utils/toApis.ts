@@ -8,8 +8,7 @@ export function toApis(docs: DocsV2Read.LoadDocsForUrlResponse) {
         ...mapValues(docs.definition.apis, (api) =>
             ApiDefinition.ApiDefinitionV1ToLatest.from(api, {
                 useJavaScriptAsTypeScript: false,
-                alwaysEnableJavaScriptFetch: false,
-                usesApplicationJsonInFormDataValue: false
+                alwaysEnableJavaScriptFetch: false
             }).migrate()
         ),
         ...docs.definition.apisV2

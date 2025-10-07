@@ -13,10 +13,8 @@ export interface EdgeFlags {
     isBatchStreamToggleDisabled: boolean;
     isAudioFileDownloadSpanSummary: boolean;
     isAudioExampleInternal: boolean;
-    usesApplicationJsonInFormDataValue: boolean;
     isBinaryOctetStreamAudioPlayer: boolean;
     isCohereTheme: boolean;
-    isFileForgeHackEnabled: boolean;
     is404PageHidden: boolean;
     isAuthenticatedPagesDiscoverable: boolean;
     isAuthedPreview: boolean;
@@ -41,10 +39,8 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isBatchStreamToggleDisabled: false,
     isAudioFileDownloadSpanSummary: false,
     isAudioExampleInternal: false,
-    usesApplicationJsonInFormDataValue: false,
     isBinaryOctetStreamAudioPlayer: false,
     isCohereTheme: false,
-    isFileForgeHackEnabled: false,
     is404PageHidden: false,
     isAuthenticatedPagesDiscoverable: false,
     isAuthedPreview: false,

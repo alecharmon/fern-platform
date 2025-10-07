@@ -14,12 +14,10 @@ import type { PlaygroundFormStateBody, ProxyRequest, SerializableFile, Serializa
 export const serializeFormStateBody = async ({
     shape,
     body,
-    usesApplicationJsonInFormDataValue,
     protocol
 }: {
     shape: HttpRequestBodyShape | undefined;
     body: PlaygroundFormStateBody | undefined;
-    usesApplicationJsonInFormDataValue: boolean;
     protocol?: Protocol;
 }): Promise<ProxyRequest.SerializableBody | undefined> => {
     if (protocol?.type === "openrpc") {
@@ -64,9 +62,7 @@ export const serializeFormStateBody = async ({
                             (p): p is FormDataField.Property => p.key === key && p.type === "property"
                         );
 
-                        const contentType =
-                            compact(flatten([property?.contentType]))[0] ??
-                            (usesApplicationJsonInFormDataValue ? "application/json" : undefined);
+                        const contentType = compact(flatten([property?.contentType]))[0];
 
                         if (property?.exploded) {
                             // For exploded form fields, convert value to array if not already
@@ -95,7 +91,7 @@ export const serializeFormStateBody = async ({
                     case "exploded":
                         formDataValue[key] = {
                             ...value,
-                            contentType: usesApplicationJsonInFormDataValue ? "application/json" : undefined
+                            contentType: undefined
                         };
                         break;
                     default:

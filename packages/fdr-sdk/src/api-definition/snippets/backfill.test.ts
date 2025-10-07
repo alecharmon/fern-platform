@@ -116,7 +116,6 @@ describe("backfillSnippets", () => {
         };
 
         const flags = {
-            usesApplicationJsonInFormDataValue: false,
             isHttpSnippetsEnabled: true,
             alwaysEnableJavaScriptFetch: true
         };
@@ -225,7 +224,6 @@ describe("backfillSnippets", () => {
         };
 
         const flags = {
-            usesApplicationJsonInFormDataValue: false,
             isHttpSnippetsEnabled: true,
             alwaysEnableJavaScriptFetch: true
         };
@@ -378,7 +376,6 @@ describe("backfillSnippets", () => {
         };
 
         const flags = {
-            usesApplicationJsonInFormDataValue: false,
             isHttpSnippetsEnabled: true,
             alwaysEnableJavaScriptFetch: true
         };
@@ -586,7 +583,6 @@ describe("backfillSnippets", () => {
         };
 
         const flags = {
-            usesApplicationJsonInFormDataValue: false,
             isHttpSnippetsEnabled: true,
             alwaysEnableJavaScriptFetch: true
         };
@@ -718,7 +714,6 @@ describe("backfillSnippets", () => {
         };
 
         const flags = {
-            usesApplicationJsonInFormDataValue: false,
             isHttpSnippetsEnabled: true,
             alwaysEnableJavaScriptFetch: true
         };
@@ -843,7 +838,6 @@ describe("backfillSnippets", () => {
         };
 
         const flags = {
-            usesApplicationJsonInFormDataValue: false,
             isHttpSnippetsEnabled: true,
             alwaysEnableJavaScriptFetch: true
         };
@@ -965,7 +959,6 @@ describe("backfillSnippets", () => {
         };
 
         const flags = {
-            usesApplicationJsonInFormDataValue: false,
             isHttpSnippetsEnabled: true,
             alwaysEnableJavaScriptFetch: true
         };

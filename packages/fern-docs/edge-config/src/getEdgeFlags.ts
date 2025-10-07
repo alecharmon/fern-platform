@@ -27,10 +27,8 @@ const EDGE_FLAGS = [
     "batch-stream-toggle-disabled" as const,
     "audio-file-download-span-summary" as const,
     "audio-example-internal" as const,
-    "uses-application-json-in-form-data-value" as const,
     "binary-octet-stream-audio-player" as const,
     "cohere-theme" as const,
-    "file-forge-hack-enabled" as const,
     "hide-404-page" as const,
     "grpc-endpoints" as const,
     "authenticated-pages-discoverable" as const,
@@ -80,16 +78,11 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             config["audio-file-download-span-summary"]
         );
         const isAudioExampleInternal = checkDomainMatchesCustomers(domain, config["audio-example-internal"]);
-        const usesApplicationJsonInFormDataValue = checkDomainMatchesCustomers(
-            domain,
-            config["uses-application-json-in-form-data-value"]
-        );
         const isBinaryOctetStreamAudioPlayer = checkDomainMatchesCustomers(
             domain,
             config["binary-octet-stream-audio-player"]
         );
         const isCohereTheme = checkDomainMatchesCustomers(domain, config["cohere-theme"]);
-        const isFileForgeHackEnabled = checkDomainMatchesCustomers(domain, config["file-forge-hack-enabled"]);
         const is404PageHidden = checkDomainMatchesCustomers(domain, config["hide-404-page"]);
         const isAuthenticatedPagesDiscoverable = checkDomainMatchesCustomers(
             domain,
@@ -115,10 +108,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isBatchStreamToggleDisabled,
             isAudioFileDownloadSpanSummary,
             isAudioExampleInternal,
-            usesApplicationJsonInFormDataValue,
             isBinaryOctetStreamAudioPlayer,
             isCohereTheme,
-            isFileForgeHackEnabled,
             is404PageHidden,
             isAuthenticatedPagesDiscoverable,
             isAuthedPreview,
@@ -144,10 +135,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isBatchStreamToggleDisabled: false,
             isAudioFileDownloadSpanSummary: false,
             isAudioExampleInternal: false,
-            usesApplicationJsonInFormDataValue: false,
             isBinaryOctetStreamAudioPlayer: false,
             isCohereTheme: false,
-            isFileForgeHackEnabled: false,
             is404PageHidden: false,
             isAuthenticatedPagesDiscoverable: false,
             isAuthedPreview: false,

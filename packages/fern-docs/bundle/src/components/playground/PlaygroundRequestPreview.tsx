@@ -7,7 +7,6 @@ import { useAtom, useAtomValue } from "jotai";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 
-import { isFileForgeHackEnabledAtom } from "@/state/api-explorer-flags";
 import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/state/playground";
 
 import { PlaygroundCodeSnippetResolverBuilder } from "./code-snippets/resolver";
@@ -22,15 +21,11 @@ interface PlaygroundRequestPreviewProps {
 }
 
 export const PlaygroundRequestPreview: FC<PlaygroundRequestPreviewProps> = ({ context, formState, requestType }) => {
-    const isFileForgeHackEnabled = useAtomValue(isFileForgeHackEnabledAtom);
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
     const [oAuthValue, setOAuthValue] = useAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
 
-    const builder = useMemo(
-        () => new PlaygroundCodeSnippetResolverBuilder(context, true, isFileForgeHackEnabled),
-        [context, isFileForgeHackEnabled]
-    );
+    const builder = useMemo(() => new PlaygroundCodeSnippetResolverBuilder(context, true), [context]);
 
     const resolver = useMemo(
         () => oAuthValue && builder.createRedacted(authState, formState, baseUrl, setOAuthValue),

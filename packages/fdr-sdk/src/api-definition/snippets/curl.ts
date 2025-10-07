@@ -2,7 +2,7 @@ import { compact } from "es-toolkit/array";
 import qs from "qs";
 import { UnreachableCaseError } from "ts-essentials";
 
-import { isNonNullish, isPlainObject, unknownToString } from "@fern-api/ui-core-utils";
+import { isPlainObject, unknownToString } from "@fern-api/ui-core-utils";
 
 import { obfuscateSecret } from "../../utils/obfuscate-secret";
 import type * as Latest from "../latest";
@@ -18,13 +18,9 @@ function requiresUrlEncode(str: string): boolean {
     return encodeURIComponent(str) !== str;
 }
 
-interface Flags {
-    usesApplicationJsonInFormDataValue: boolean;
-}
-
-export function convertToCurl(request: SnippetHttpRequest, opts: Flags): string {
+export function convertToCurl(request: SnippetHttpRequest): string {
     try {
-        return unsafeStringifyHttpRequestExampleToCurl(request, opts);
+        return unsafeStringifyHttpRequestExampleToCurl(request);
     } catch (e) {
         console.error(`[convert-to-curl] ${JSON.stringify(e)}`);
 
@@ -93,11 +89,7 @@ function getBodyBytesString(filename: string): string[] {
     return [`--data-binary @${filename.includes(" ") ? `"${filename}"` : filename}`];
 }
 
-function getBodyFormValueJsonString(
-    value: unknown | null | undefined,
-    key: string,
-    usesApplicationJsonInFormDataValue: boolean
-): string[] {
+function getBodyFormValueJsonString(value: unknown | null | undefined, key: string): string[] {
     if (value == null) {
         return [];
     }
@@ -109,9 +101,7 @@ function getBodyFormValueJsonString(
 
     const stringValue = JSON.stringify(value, null, 2);
 
-    return [
-        `-F ${key}='${stringValue.replace(/'/g, "'\\''")}${usesApplicationJsonInFormDataValue ? ";type=application/json" : ""}'`
-    ];
+    return [`-F ${key}='${stringValue.replace(/'/g, "'\\''")}'`];
 }
 
 function getBodyFormValueFilenamesStrings({ files }: SnippetHttpRequestBodyFormValueFilenames, key: string): string[] {
@@ -135,40 +125,28 @@ function getBodyFormValueFilenameString(
     ];
 }
 
-function getBodyFormValueString(
-    value: SnippetHttpRequestBodyFormValue,
-    key: string,
-    usesApplicationJsonInFormDataValue: boolean
-): string[] {
+function getBodyFormValueString(value: SnippetHttpRequestBodyFormValue, key: string): string[] {
     switch (value.type) {
         case "json":
-            return getBodyFormValueJsonString(value.value, key, usesApplicationJsonInFormDataValue);
+            return getBodyFormValueJsonString(value.value, key);
         case "filename":
             return getBodyFormValueFilenameString(value, key);
         case "filenames":
             return getBodyFormValueFilenamesStrings(value, key);
         case "exploded":
-            return (value.value ?? []).flatMap((item) =>
-                getBodyFormValueJsonString(item, key, usesApplicationJsonInFormDataValue)
-            );
+            return (value.value ?? []).flatMap((item) => getBodyFormValueJsonString(item, key));
         default:
             throw new UnreachableCaseError(value);
     }
 }
 
-function getBodyFormString(
-    value: Record<string, SnippetHttpRequestBodyFormValue>,
-    usesApplicationJsonInFormDataValue: boolean
-): string[] {
-    return Object.entries(value).flatMap(([key, value]) =>
-        getBodyFormValueString(value, key, usesApplicationJsonInFormDataValue)
-    );
+function getBodyFormString(value: Record<string, SnippetHttpRequestBodyFormValue>): string[] {
+    return Object.entries(value).flatMap(([key, value]) => getBodyFormValueString(value, key));
 }
 
 function getBodyDataString(
     method: string,
     body: SnippetHttpRequest["body"] | null | undefined,
-    usesApplicationJsonInFormDataValue: boolean,
     protocol: Latest.Protocol | undefined
 ): string[] {
     if (method === "GET") {
@@ -188,16 +166,22 @@ function getBodyDataString(
         case "bytes":
             return getBodyBytesString(body.filename);
         case "form":
-            return getBodyFormString(body.value, usesApplicationJsonInFormDataValue);
+            return getBodyFormString(body.value);
         default:
             throw new UnreachableCaseError(body);
     }
 }
 
-function unsafeStringifyHttpRequestExampleToCurl(
-    { method, url, searchParams, headers, basicAuth, body, protocol, redacted }: SnippetHttpRequest,
-    { usesApplicationJsonInFormDataValue }: Flags
-): string {
+function unsafeStringifyHttpRequestExampleToCurl({
+    method,
+    url,
+    searchParams,
+    headers,
+    basicAuth,
+    body,
+    protocol,
+    redacted
+}: SnippetHttpRequest): string {
     const httpRequest = getHttpRequest(method, url, searchParams);
 
     const headersStrings = getHeadersString(
@@ -223,9 +207,7 @@ function unsafeStringifyHttpRequestExampleToCurl(
         ...(isFormUrlEncoded && body?.type === "json" && isPlainObject(body.value) ? body.value : {})
     });
 
-    const bodyDataStrings = isFormUrlEncoded
-        ? []
-        : getBodyDataString(method, body, usesApplicationJsonInFormDataValue, protocol);
+    const bodyDataStrings = isFormUrlEncoded ? [] : getBodyDataString(method, body, protocol);
 
     const allStrings = compact([...headersStrings, ...basicAuthStrings, ...urlQueriesGetStrings, ...bodyDataStrings]);
 
@@ -242,7 +224,7 @@ function toUrlEncoded(urlQueries: Record<string, unknown>): [string, string][] {
         arrayFormat: "repeat",
         skipNulls: true,
         filter: (prefix, value) => {
-            if (value !== null && typeof value !== "object") {
+            if (value != null && typeof value !== "object") {
                 return String(value);
             }
             return value;

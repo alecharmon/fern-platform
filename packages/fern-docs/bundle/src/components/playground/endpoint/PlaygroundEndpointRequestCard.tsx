@@ -1,6 +1,6 @@
 import { type ReactElement, useRef } from "react";
 
-import { useAtomValue, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
@@ -10,7 +10,6 @@ import { FernCard } from "@fern-docs/components/FernCard";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 
 import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
-import { isFileForgeHackEnabledAtom } from "@/state/api-explorer-flags";
 import { useProgrammingLanguage } from "@/state/language";
 import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/state/playground";
 
@@ -70,7 +69,6 @@ export function PlaygroundEndpointRequestCard({
     formState,
     dynamicIRsByLanguage
 }: PlaygroundEndpointRequestCardProps): ReactElement<any> | null {
-    const isFileForgeHackEnabled = useAtomValue(isFileForgeHackEnabledAtom);
     const [requestType, setRequestType] = useRequestType(dynamicIRsByLanguage);
     const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
@@ -140,11 +138,12 @@ export function PlaygroundEndpointRequestCard({
 
                             // otherwise, use the fallback resolver
                             const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
-                            const resolver = new PlaygroundCodeSnippetResolverBuilder(
-                                context,
-                                true,
-                                isFileForgeHackEnabled
-                            ).create(authState, formState, baseUrl, setOAuthValue);
+                            const resolver = new PlaygroundCodeSnippetResolverBuilder(context, true).create(
+                                authState,
+                                formState,
+                                baseUrl,
+                                setOAuthValue
+                            );
                             return resolver.resolve(getFallbackRequestType());
                         }}
                         className="-mr-2"

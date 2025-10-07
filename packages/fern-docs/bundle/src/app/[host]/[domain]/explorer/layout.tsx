@@ -28,9 +28,7 @@ export default async function Layout({
             <PlaygroundKeyboardTrigger />
             <PlaygroundCloseButton />
             <ApiExplorerFlags
-                isFileForgeHackEnabled={edgeFlags.isFileForgeHackEnabled}
                 isProxyDisabled={edgeFlags.isProxyDisabled}
-                usesApplicationJsonInFormDataValue={edgeFlags.usesApplicationJsonInFormDataValue}
                 isBinaryOctetStreamAudioPlayer={edgeFlags.isBinaryOctetStreamAudioPlayer}
             />
             <HorizontalSplitPane

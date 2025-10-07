@@ -51,8 +51,7 @@ export const oAuthClientCredentialReferencedEndpointLoginFlow = async ({
         headers,
         body: await serializeFormStateBody({
             shape: endpoint.requests?.[0]?.body,
-            body: formState.body,
-            usesApplicationJsonInFormDataValue: false
+            body: formState.body
         })
     };
     const res = await executeProxyRest(req);

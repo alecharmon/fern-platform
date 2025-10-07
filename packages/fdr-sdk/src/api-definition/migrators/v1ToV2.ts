@@ -28,11 +28,6 @@ interface Flags {
      * In @fern-ui/ui's resolver, we generate http-snippets for JavaScript.
      */
     alwaysEnableJavaScriptFetch: boolean;
-
-    /**
-     * If true, the generated form data snippet will always include the `application/json` content type.
-     */
-    usesApplicationJsonInFormDataValue: boolean;
 }
 
 function isSubpackage(package_: APIV1Read.ApiDefinitionPackage): package_ is APIV1Read.ApiDefinitionSubpackage {
@@ -700,7 +695,7 @@ export class ApiDefinitionV1ToLatest {
         });
 
         if (!userProvidedLanguages.has(SupportedLanguage.Curl)) {
-            const code = convertToCurl(toSnippetHttpRequest(endpoint, example, this.auth), flags);
+            const code = convertToCurl(toSnippetHttpRequest(endpoint, example, this.auth));
             push(SupportedLanguage.Curl, {
                 language: SupportedLanguage.Curl,
                 code,

@@ -25,8 +25,7 @@ test("Check generated turbopuffer indices", { timeout: 60000 }, async () => {
             ...mapValues(payload.definition.apis, (api) =>
                 ApiDefinition.ApiDefinitionV1ToLatest.from(api, {
                     useJavaScriptAsTypeScript: payload.useJavaScriptAsTypeScript ?? false,
-                    alwaysEnableJavaScriptFetch: payload.alwaysEnableJavaScriptFetch ?? false,
-                    usesApplicationJsonInFormDataValue: payload.usesApplicationJsonInFormDataValue ?? false
+                    alwaysEnableJavaScriptFetch: payload.alwaysEnableJavaScriptFetch ?? false
                 }).migrate()
             ),
             ...payload.definition.apisV2

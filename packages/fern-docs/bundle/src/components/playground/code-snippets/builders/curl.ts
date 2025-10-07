@@ -9,13 +9,6 @@ import { convertPlaygroundFormDataEntryValueToResolvedExampleEndpointRequest } f
 import { PlaygroundCodeSnippetBuilder } from "./types";
 
 export class CurlSnippetBuilder extends PlaygroundCodeSnippetBuilder {
-    private isFileForgeHackEnabled = false;
-
-    public setFileForgeHackEnabled(isFileForgeHackEnabled: boolean): this {
-        this.isFileForgeHackEnabled = isFileForgeHackEnabled;
-        return this;
-    }
-
     public override build(): string {
         // If the endpoint protocol is OpenRPC, ensure we add the application/json Content-Type header
         if (this.context.endpoint.protocol?.type === "openrpc") {
@@ -29,18 +22,15 @@ export class CurlSnippetBuilder extends PlaygroundCodeSnippetBuilder {
             };
         }
 
-        return convertToCurl(
-            {
-                method: this.context.endpoint.method,
-                url: this.url,
-                searchParams: this.formState.queryParameters,
-                headers: this.formState.headers,
-                basicAuth: this.context.auths[0]?.type === "basicAuth" ? this.authState.basicAuth : undefined,
-                body: this.#convertFormStateToBody(),
-                redacted: this.redacted
-            },
-            { usesApplicationJsonInFormDataValue: this.isFileForgeHackEnabled }
-        );
+        return convertToCurl({
+            method: this.context.endpoint.method,
+            url: this.url,
+            searchParams: this.formState.queryParameters,
+            headers: this.formState.headers,
+            basicAuth: this.context.auths[0]?.type === "basicAuth" ? this.authState.basicAuth : undefined,
+            body: this.#convertFormStateToBody(),
+            redacted: this.redacted
+        });
     }
 
     #convertFormStateToBody(): SnippetHttpRequest["body"] {

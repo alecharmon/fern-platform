@@ -15,7 +15,7 @@ import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { type Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { useEventCallback } from "@fern-ui/react-commons";
 
-import { isProxyDisabledAtom, usesApplicationJsonInFormDataValueAtom } from "@/state/api-explorer-flags";
+import { isProxyDisabledAtom } from "@/state/api-explorer-flags";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
@@ -64,7 +64,6 @@ export const PlaygroundEndpoint = ({
         setFormState(getInitialEndpointRequestFormStateWithExample(context, undefined, resolvedPlaygroundState));
     });
 
-    const usesApplicationJsonInFormDataValue = useAtomValue(usesApplicationJsonInFormDataValueAtom);
     const isProxyDisabled = useAtomValue(isProxyDisabledAtom);
     const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
 
@@ -126,7 +125,6 @@ export const PlaygroundEndpoint = ({
                 body: await serializeFormStateBody({
                     shape: endpoint.requests?.[0]?.body,
                     body: formState.body,
-                    usesApplicationJsonInFormDataValue,
                     protocol: endpoint.protocol
                 })
             };
@@ -220,17 +218,7 @@ export const PlaygroundEndpoint = ({
             );
             setResponse(failed(e));
         }
-    }, [
-        endpoint,
-        node.title,
-        node.slug,
-        auth,
-        formState,
-        baseUrl,
-        setOAuthValue,
-        usesApplicationJsonInFormDataValue,
-        isProxyDisabled
-    ]);
+    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue, isProxyDisabled]);
 
     const settings = usePlaygroundSettings();
 

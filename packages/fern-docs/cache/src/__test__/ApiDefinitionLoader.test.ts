@@ -84,9 +84,7 @@ describe("curl snippet generation", () => {
             ]
         };
 
-        const curlCode = convertToCurl(toSnippetHttpRequest(endpoint, example, undefined), {
-            usesApplicationJsonInFormDataValue: false
-        });
+        const curlCode = convertToCurl(toSnippetHttpRequest(endpoint, example, undefined));
 
         const loader = ApiDefinitionLoader.create("testdomain", ApiDefinitionId("testdefinitionid"));
 

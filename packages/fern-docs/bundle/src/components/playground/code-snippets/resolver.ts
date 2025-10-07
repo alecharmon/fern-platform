@@ -12,8 +12,7 @@ import { TypescriptFetchSnippetBuilder } from "./builders/typescript";
 export class PlaygroundCodeSnippetResolverBuilder {
     constructor(
         private context: EndpointContext,
-        private isSnippetTemplatesEnabled: boolean,
-        private isFileForgeHackEnabled: boolean
+        private isSnippetTemplatesEnabled: boolean
     ) {}
 
     public create(
@@ -28,7 +27,6 @@ export class PlaygroundCodeSnippetResolverBuilder {
             formState,
             false,
             this.isSnippetTemplatesEnabled,
-            this.isFileForgeHackEnabled,
             playgroundEnvironment,
             setOAuthValue
         );
@@ -46,7 +44,6 @@ export class PlaygroundCodeSnippetResolverBuilder {
             formState,
             true,
             this.isSnippetTemplatesEnabled,
-            this.isFileForgeHackEnabled,
             playgroundEnvironment,
             setOAuthValue
         );
@@ -75,7 +72,6 @@ export class PlaygroundCodeSnippetResolver {
         private formState: PlaygroundEndpointRequestFormState,
         private isAuthHeadersRedacted: boolean,
         public isSnippetTemplatesEnabled: boolean,
-        private isFileForgeHackEnabled: boolean,
         private baseUrl: string | undefined,
         setOAuthValue: (value: (prev: any) => any) => void
     ) {
@@ -102,9 +98,13 @@ export class PlaygroundCodeSnippetResolver {
 
     public toCurl(): string {
         const formState = { ...this.formState, headers: this.headers };
-        return new CurlSnippetBuilder(this.context, formState, this.authState, this.baseUrl, this.isAuthHeadersRedacted)
-            .setFileForgeHackEnabled(this.isFileForgeHackEnabled)
-            .build();
+        return new CurlSnippetBuilder(
+            this.context,
+            formState,
+            this.authState,
+            this.baseUrl,
+            this.isAuthHeadersRedacted
+        ).build();
     }
 
     public toTypescriptFetch(): string {

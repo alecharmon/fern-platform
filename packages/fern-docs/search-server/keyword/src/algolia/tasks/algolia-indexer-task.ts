@@ -49,7 +49,6 @@ interface AlgoliaIndexerPayload {
     isApiScrollingDisabled?: boolean;
     useJavaScriptAsTypeScript?: boolean;
     alwaysEnableJavaScriptFetch?: boolean;
-    usesApplicationJsonInFormDataValue?: boolean;
 }
 
 export interface AlgoliaIndexerTaskResponse {
