@@ -123,7 +123,7 @@ export async function getAuthStateInternal({
         } else {
             return (pathname) => ({
                 authed: false,
-                ok: true,
+                ok: false,
                 authorizationUrl: getAuthorizationUrl(authConfig, host, domain, pathname),
                 partner
             });

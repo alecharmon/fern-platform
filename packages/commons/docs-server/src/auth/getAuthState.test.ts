@@ -64,7 +64,7 @@ describe("getAuthState", () => {
         }).then((get) => get());
         expect(authStateBadToken.partner).toBe("custom");
         expect(authStateBadToken.authed).toBe(false);
-        expect(authStateBadToken.ok).toBe(true);
+        expect(authStateBadToken.ok).toBe(false);
         if (!authStateBadToken.authed) {
             const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
 
@@ -84,7 +84,7 @@ describe("getAuthState", () => {
         }).then((get) => get("/docs/test"));
 
         expect(authStateBadTokenWithPathname.authed).toBe(false);
-        expect(authStateBadTokenWithPathname.ok).toBe(true);
+        expect(authStateBadTokenWithPathname.ok).toBe(false);
         if (!authStateBadTokenWithPathname.authed) {
             const authorizationUrl = new URL(authStateBadTokenWithPathname.authorizationUrl ?? "http://f");
 
@@ -123,7 +123,7 @@ describe("getAuthState", () => {
             authConfig: ORY_AUTH_CONFIG
         }).then((get) => get());
         expect(authStateBadToken.authed).toBe(false);
-        expect(authStateBadToken.ok).toBe(true);
+        expect(authStateBadToken.ok).toBe(false);
         if (!authStateBadToken.authed) {
             const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
 
@@ -145,7 +145,7 @@ describe("getAuthState", () => {
         }).then((get) => get("/docs/test"));
 
         expect(authStateBadTokenWithPathname.authed).toBe(false);
-        expect(authStateBadTokenWithPathname.ok).toBe(true);
+        expect(authStateBadTokenWithPathname.ok).toBe(false);
         if (!authStateBadTokenWithPathname.authed) {
             const authorizationUrl = new URL(authStateBadTokenWithPathname.authorizationUrl ?? "http://f");
 
@@ -171,7 +171,7 @@ describe("getAuthState", () => {
 
         // even if the JWT is a valid Fern JWT, at the moment we don't support Fern Tokens generated from ORY OAuth
         expect(authStateGoodToken.authed).toBe(false);
-        expect(authStateGoodToken.ok).toBe(true);
+        expect(authStateGoodToken.ok).toBe(false);
     });
 
     it("should handle oauth with webflow", async () => {
@@ -189,7 +189,7 @@ describe("getAuthState", () => {
             authConfig: WORKOS_AUTH_CONFIG
         }).then((get) => get());
         expect(authStateBadToken.authed).toBe(false);
-        expect(authStateBadToken.ok).toBe(true);
+        expect(authStateBadToken.ok).toBe(false);
         if (!authStateBadToken.authed) {
             const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
 
@@ -211,7 +211,7 @@ describe("getAuthState", () => {
         }).then((get) => get("/docs/test"));
 
         expect(authStateBadTokenWithPathname.authed).toBe(false);
-        expect(authStateBadTokenWithPathname.ok).toBe(true);
+        expect(authStateBadTokenWithPathname.ok).toBe(false);
         if (!authStateBadTokenWithPathname.authed) {
             const authorizationUrl = new URL(authStateBadTokenWithPathname.authorizationUrl ?? "http://f");
 
@@ -235,7 +235,7 @@ describe("getAuthState", () => {
 
         // even if the JWT is a valid Fern JWT, at the moment we don't support Fern tokens generated from Webflow OAuth
         expect(authStateGoodToken.authed).toBe(false);
-        expect(authStateGoodToken.ok).toBe(true);
+        expect(authStateGoodToken.ok).toBe(false);
     });
 
     it("should handle generalized oauth2", async () => {
@@ -257,7 +257,7 @@ describe("getAuthState", () => {
             authConfig: GENERAL_OAUTH_CONFIG
         }).then((get) => get());
         expect(authStateBadToken.authed).toBe(false);
-        expect(authStateBadToken.ok).toBe(true);
+        expect(authStateBadToken.ok).toBe(false);
         if (!authStateBadToken.authed) {
             const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
 
@@ -280,7 +280,7 @@ describe("getAuthState", () => {
         }).then((get) => get("/docs/test"));
 
         expect(authStateBadTokenWithPathname.authed).toBe(false);
-        expect(authStateBadTokenWithPathname.ok).toBe(true);
+        expect(authStateBadTokenWithPathname.ok).toBe(false);
         if (!authStateBadTokenWithPathname.authed) {
             const authorizationUrl = new URL(authStateBadTokenWithPathname.authorizationUrl ?? "http://f");
 
@@ -305,7 +305,7 @@ describe("getAuthState", () => {
 
         // even if the JWT is a valid Fern JWT, at the moment we don't support Fern tokens generated from OAuth2
         expect(authStateGoodToken.authed).toBe(false);
-        expect(authStateGoodToken.ok).toBe(true);
+        expect(authStateGoodToken.ok).toBe(false);
     });
 
     it("should handle generalized oauth2 with authorize query params", async () => {
@@ -327,7 +327,7 @@ describe("getAuthState", () => {
             authConfig: GENERAL_OAUTH_CONFIG
         }).then((get) => get());
         expect(authStateBadToken.authed).toBe(false);
-        expect(authStateBadToken.ok).toBe(true);
+        expect(authStateBadToken.ok).toBe(false);
         if (!authStateBadToken.authed) {
             const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
 
@@ -351,7 +351,7 @@ describe("getAuthState", () => {
         }).then((get) => get("/docs/test"));
 
         expect(authStateBadTokenWithPathname.authed).toBe(false);
-        expect(authStateBadTokenWithPathname.ok).toBe(true);
+        expect(authStateBadTokenWithPathname.ok).toBe(false);
         if (!authStateBadTokenWithPathname.authed) {
             const authorizationUrl = new URL(authStateBadTokenWithPathname.authorizationUrl ?? "http://f");
 
@@ -376,7 +376,7 @@ describe("getAuthState", () => {
 
         // even if the JWT is a valid Fern JWT, at the moment we don't support Fern tokens generated from OAuth2
         expect(authStateGoodToken.authed).toBe(false);
-        expect(authStateGoodToken.ok).toBe(true);
+        expect(authStateGoodToken.ok).toBe(false);
     });
 
     it("should handle sso with workos", async () => {
