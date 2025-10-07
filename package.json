@@ -100,6 +100,7 @@
     "react-dom": "catalog:",
     "shiki": "3.2.1",
     "tar-fs": "^3.0.9",
+    "tmp": "^0.2.4",
     "typescript": "catalog:",
     "unified": "11.0.5",
     "url-join": "^5.0.0",
