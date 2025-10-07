@@ -1,20 +1,18 @@
 // inspired by https://github.com/remcohaszing/hast-util-properties-to-mdx-jsx-attributes
 
-import {
-    type Hast,
-    isMdxJsxElementHast,
-    type Mdast,
-    mdastFromMarkdown,
-    SKIP,
-    type Unified,
-    visit
-} from "@fern-docs/mdx";
+import type { Root as HastRoot } from "hast";
+import type { RootContent as MdastRootContent } from "mdast";
+import { SKIP, visit } from "unist-util-visit";
+
+import { mdastFromMarkdown } from "../mdast-utils/mdast-from-markdown";
+import { isMdxJsxElementHast } from "../mdx-utils";
+import type { Unified } from "../unified";
 import { compact, flatten } from "es-toolkit/array";
 import { escape } from "es-toolkit/string";
 import { propertiesToMdxJsxAttributes } from "hast-util-properties-to-mdx-jsx-attributes";
 import parseNumericRange from "parse-numeric-range";
 
-export const rehypeCodeBlock: Unified.Plugin<[], Hast.Root> = () => {
+export const rehypeCodeBlock: Unified.Plugin<[], HastRoot> = () => {
     return (tree) => {
         visit(tree, (node) => {
             if (!isMdxJsxElementHast(node)) {
@@ -76,7 +74,7 @@ export const rehypeCodeBlock: Unified.Plugin<[], Hast.Root> = () => {
             }
 
             const meta = codeNode.data?.meta ?? "";
-            let replacement: Mdast.RootContent | undefined;
+            let replacement: MdastRootContent | undefined;
 
             try {
                 replacement = mdastFromMarkdown(`<CodeBlock ${migrateMeta(meta)} />`, "mdx").children[0];

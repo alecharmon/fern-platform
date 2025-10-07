@@ -29,7 +29,7 @@ import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested
 import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
-import { rehypeCodeBlock } from "../plugins/rehype-code-block";
+import { rehypeCodeBlock } from "@fern-docs/mdx/plugins";
 import { rehypeFiles } from "../plugins/rehype-files";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";

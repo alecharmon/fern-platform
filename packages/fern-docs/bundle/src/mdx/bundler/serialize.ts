@@ -48,7 +48,7 @@ import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested
 import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
-import { rehypeCodeBlock } from "../plugins/rehype-code-block";
+import { rehypeCodeBlock } from "@fern-docs/mdx/plugins";
 import { rehypeCollectJsx } from "../plugins/rehype-collect-jsx";
 import { rehypeEndpointExampleSnippets } from "../plugins/rehype-endpoint-example-snippets";
 import { rehypeEndpointSchemaSnippets } from "../plugins/rehype-endpoint-schema-snippet";

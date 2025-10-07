@@ -1,4 +1,4 @@
-import { migrateMeta } from "./rehype-code-block";
+import { migrateMeta } from "@fern-docs/mdx/plugins";
 
 describe("migrateMeta", () => {
     it("should migrate numerical ranges", () => {

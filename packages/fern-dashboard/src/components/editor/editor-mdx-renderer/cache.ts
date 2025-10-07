@@ -189,7 +189,6 @@ async function batchedBundleMDX(
                     void Promise.resolve().then(() => {
                         processBatch(ctx.requests, ctx.options).catch((error: unknown) => {
                             // If batch processing fails entirely, reject all requests
-                            console.error("Batch processing failed:", error);
                             ctx.requests.forEach((req) => {
                                 req.reject(error instanceof Error ? error : new Error(String(error)));
                             });

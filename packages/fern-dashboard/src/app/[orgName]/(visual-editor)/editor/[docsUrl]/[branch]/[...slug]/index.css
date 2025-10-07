@@ -54,12 +54,12 @@
 
   .prose-inherit-colors p,
   .prose-inherit-colors li,
-  .prose-inherit-colors span,
+  .prose-inherit-colors span:not(.code-block-line-content span),
   .prose-inherit-colors div,
   .prose-inherit-colors blockquote,
   .prose-inherit-colors strong,
   .prose-inherit-colors em,
-  .prose-inherit-colors code {
+  .prose-inherit-colors code:not(.code-block code) {
     color: inherit !important;
   }
 
