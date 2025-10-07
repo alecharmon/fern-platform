@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
-import { cn } from "@/utils/utils";
 
 const MonacoEditor = dynamic(() => import("./editor"), {
     ssr: false
@@ -91,13 +90,12 @@ export default function DevPanel() {
         }
     }
 
+    if (!panelOpen) {
+        return null;
+    }
+
     return (
-        <div
-            className={cn(
-                "flex max-w-[600px] flex-col transition-all duration-300 ease-in-out",
-                panelOpen ? "ml-2 w-1/3 translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0"
-            )}
-        >
+        <div className="ml-2 flex h-full flex-col">
             <div className="text-muted-foreground flex items-center justify-center gap-2 pb-3 pt-4">
                 <Code2 className="size-4" />
                 <h3 className="text-sm font-medium">Dev Mode</h3>

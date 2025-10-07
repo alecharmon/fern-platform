@@ -38,6 +38,7 @@ import { Table } from "./html-table";
 import { Icon } from "./icon/Icon";
 import { If } from "./if";
 import { Json } from "./json";
+import { Markdown } from "./Markdown";
 import { Mermaid } from "./mermaid";
 import { ParamField } from "./parameters/ParamField";
 import { EndpointRequestSnippet } from "./snippets/EndpointRequestSnippet";
@@ -78,6 +79,7 @@ const FERN_COMPONENTS = {
     Icon,
     If,
     Json,
+    Markdown,
     Mermaid,
     ParamField,
     Step,

@@ -18,6 +18,7 @@ import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAut
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
+import { ResizablePanelsWrapper } from "@/components/editor/ResizablePanelsWrapper";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
 import { FileResolverProvider } from "@/providers/FileResolverContext";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
@@ -86,7 +87,7 @@ export default async function VisualEditorPreviewLayout({
     const sidebarRootNodesToChildToParentsMap = getSidebarRootNodeIdToChildToParentsMap(sidebarRootNodes);
 
     return (
-        <div className="m-2 flex h-[calc(100vh-var(--header-toolbar-height))]">
+        <div className="m-2 h-[calc(100vh-var(--header-toolbar-height))]">
             <FileResolverProvider files={files}>
                 <Providers skipProgressProvider={true}>
                     <FernThemeProvider
@@ -107,111 +108,125 @@ export default async function VisualEditorPreviewLayout({
                             darkSelector=".dark #preview-container"
                         />
                         <RootNodeProvider sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}>
-                            <div className="border-1 flex flex-1 flex-col overflow-hidden rounded-2xl border-gray-500 shadow-lg">
-                                {/* BOUNDARY NOTE: All items within the #preview-container will be themed with domain-specific styles. */}
-                                <EditorRoutingProvider
-                                    value={{
-                                        orgName,
-                                        docsUrl,
-                                        branch
-                                    }}
-                                >
-                                    <div id="preview-container">
-                                        <EditorLinkInterceptor />
-                                        <AbstractDefaultDocs
-                                            header={
-                                                <PreviewHeader
-                                                    navbarLinks={<NavbarLinks loader={loader} />}
-                                                    headertabs={headertabs}
+                            <ResizablePanelsWrapper
+                                left={
+                                    <div className="border-1 flex h-full flex-col overflow-hidden rounded-2xl border-gray-500 shadow-lg">
+                                        {/* BOUNDARY NOTE: All items within the #preview-container will be themed with domain-specific styles. */}
+                                        <EditorRoutingProvider
+                                            value={{
+                                                orgName,
+                                                docsUrl,
+                                                branch
+                                            }}
+                                        >
+                                            <div id="preview-container">
+                                                <EditorLinkInterceptor />
+                                                <AbstractDefaultDocs
+                                                    header={
+                                                        <PreviewHeader
+                                                            navbarLinks={<NavbarLinks loader={loader} />}
+                                                            headertabs={headertabs}
+                                                            versionSelect={versionSelect}
+                                                            productSelect={productSelect}
+                                                            logo={logo}
+                                                            showSearchBar={layout.searchbarPlacement === "HEADER"}
+                                                        />
+                                                    }
+                                                    lightSidebarClassName={
+                                                        colors.light?.sidebarBackgroundTheme === "dark"
+                                                            ? "dark"
+                                                            : undefined
+                                                    }
+                                                    darkSidebarClassName={
+                                                        colors.dark?.sidebarBackgroundTheme === "light"
+                                                            ? "light"
+                                                            : undefined
+                                                    }
+                                                    lightHeaderClassName={
+                                                        colors.light?.headerBackgroundTheme === "dark"
+                                                            ? "dark"
+                                                            : undefined
+                                                    }
+                                                    darkHeaderClassName={
+                                                        colors.dark?.headerBackgroundTheme === "light"
+                                                            ? "light"
+                                                            : undefined
+                                                    }
+                                                    isHeaderDisabled={layout.isHeaderDisabled}
                                                     versionSelect={versionSelect}
                                                     productSelect={productSelect}
-                                                    logo={logo}
-                                                    showSearchBar={layout.searchbarPlacement === "HEADER"}
-                                                />
-                                            }
-                                            lightSidebarClassName={
-                                                colors.light?.sidebarBackgroundTheme === "dark" ? "dark" : undefined
-                                            }
-                                            darkSidebarClassName={
-                                                colors.dark?.sidebarBackgroundTheme === "light" ? "light" : undefined
-                                            }
-                                            lightHeaderClassName={
-                                                colors.light?.headerBackgroundTheme === "dark" ? "dark" : undefined
-                                            }
-                                            darkHeaderClassName={
-                                                colors.dark?.headerBackgroundTheme === "light" ? "light" : undefined
-                                            }
-                                            isHeaderDisabled={layout.isHeaderDisabled}
-                                            versionSelect={versionSelect}
-                                            productSelect={productSelect}
-                                            isSidebarFixed={
-                                                !!colors.dark?.sidebarBackground ||
-                                                !!colors.light?.sidebarBackground ||
-                                                layout.isHeaderDisabled
-                                            }
-                                            sidebar={
-                                                <SidebarContainer
-                                                    logo={<React.Suspense fallback={null}>{logo}</React.Suspense>}
-                                                    showSearchBar={layout.searchbarPlacement === "SIDEBAR"}
-                                                    showHeaderInSidebar={showHeaderInSidebar}
-                                                    productSelect={
-                                                        <React.Suspense fallback={null} key="product-select-3">
-                                                            {productSelect}
-                                                        </React.Suspense>
+                                                    isSidebarFixed={
+                                                        !!colors.dark?.sidebarBackground ||
+                                                        !!colors.light?.sidebarBackground ||
+                                                        layout.isHeaderDisabled
                                                     }
-                                                    versionSelect={
-                                                        <React.Suspense fallback={null} key="version-select-3">
-                                                            {versionSelect}
-                                                        </React.Suspense>
+                                                    sidebar={
+                                                        <SidebarContainer
+                                                            logo={
+                                                                <React.Suspense fallback={null}>{logo}</React.Suspense>
+                                                            }
+                                                            showSearchBar={layout.searchbarPlacement === "SIDEBAR"}
+                                                            showHeaderInSidebar={showHeaderInSidebar}
+                                                            productSelect={
+                                                                <React.Suspense fallback={null} key="product-select-3">
+                                                                    {productSelect}
+                                                                </React.Suspense>
+                                                            }
+                                                            versionSelect={
+                                                                <React.Suspense fallback={null} key="version-select-3">
+                                                                    {versionSelect}
+                                                                </React.Suspense>
+                                                            }
+                                                            navbarLinks={
+                                                                <React.Suspense fallback={null}>
+                                                                    <NavbarLinks loader={loader} />
+                                                                </React.Suspense>
+                                                            }
+                                                            loginButton={
+                                                                <React.Suspense fallback={null}>
+                                                                    {/* <LoginButton
+                                  loader={loader}
+                                  className="my-6 flex w-full justify-between lg:hidden"
+                                  showIcon
+                                /> */}
+                                                                </React.Suspense>
+                                                            }
+                                                            searchBar={<DesktopSearchButton />}
+                                                        >
+                                                            {sidebar}
+                                                        </SidebarContainer>
                                                     }
-                                                    navbarLinks={
-                                                        <React.Suspense fallback={null}>
-                                                            <NavbarLinks loader={loader} />
-                                                        </React.Suspense>
+                                                    headerTabs={
+                                                        <AbstractHeaderTabsRoot
+                                                            searchBar={
+                                                                showSearchBarInHeaderTabs && (
+                                                                    <DesktopSearchButton
+                                                                        id={FERN_SEARCH_BUTTON_ID}
+                                                                        className="fern-header-search-bar cursor-not-allowed overflow-hidden"
+                                                                    />
+                                                                )
+                                                            }
+                                                        >
+                                                            {headertabs}
+                                                        </AbstractHeaderTabsRoot>
                                                     }
-                                                    loginButton={
-                                                        <React.Suspense fallback={null}>
-                                                            {/* <LoginButton
-                              loader={loader}
-                              className="my-6 flex w-full justify-between lg:hidden"
-                              showIcon
-                            /> */}
-                                                        </React.Suspense>
-                                                    }
-                                                    searchBar={<DesktopSearchButton />}
+                                                    hasProductsOrVersions={hasProductsOrVersions}
+                                                    // announcement={<div>Announcement</div>}
                                                 >
-                                                    {sidebar}
-                                                </SidebarContainer>
-                                            }
-                                            headerTabs={
-                                                <AbstractHeaderTabsRoot
-                                                    searchBar={
-                                                        showSearchBarInHeaderTabs && (
-                                                            <DesktopSearchButton
-                                                                id={FERN_SEARCH_BUTTON_ID}
-                                                                className="fern-header-search-bar cursor-not-allowed overflow-hidden"
-                                                            />
-                                                        )
-                                                    }
-                                                >
-                                                    {headertabs}
-                                                </AbstractHeaderTabsRoot>
-                                            }
-                                            hasProductsOrVersions={hasProductsOrVersions}
-                                            // announcement={<div>Announcement</div>}
-                                        >
-                                            <div className="flex h-[var(--preview-container-height)] flex-1 justify-center overflow-y-scroll">
-                                                {children}
+                                                    <div className="flex h-[var(--preview-container-height)] flex-1 justify-center overflow-y-scroll">
+                                                        {children}
+                                                    </div>
+                                                </AbstractDefaultDocs>
                                             </div>
-                                        </AbstractDefaultDocs>
+                                        </EditorRoutingProvider>
                                     </div>
-                                </EditorRoutingProvider>
-                            </div>
+                                }
+                                right={devPanel}
+                            />
                         </RootNodeProvider>
                     </FernThemeProvider>
                 </Providers>
             </FileResolverProvider>
-            {devPanel}
         </div>
     );
 }
