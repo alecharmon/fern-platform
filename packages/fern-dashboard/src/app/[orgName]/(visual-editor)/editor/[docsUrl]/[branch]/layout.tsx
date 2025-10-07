@@ -1,8 +1,8 @@
 import "server-only";
 
-import { NavigationStoreProvider } from "@fern-docs/components/navigation/NavigationStoreContext";
 import { ThemeProvider } from "next-themes";
 import type React from "react";
+
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";
 import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import getGithubSourceMetadata from "@/app/api/get-github-source-metadata/handler";
@@ -10,6 +10,8 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import createBranchIfNotExists from "@/app/services/dal/github/createBranchIfNotExists";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
+import { GitHubLoader } from "@/app/services/github/github-loader";
+import { ClientNavigationProvider } from "@/components/editor/ClientNavigationProvider";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { PreviewOnlyNotification } from "@/components/editor/PreviewOnlyNotification";
 import { BranchProvider } from "@/providers/BranchContext";
@@ -18,7 +20,6 @@ import { DevModeProvider } from "@/providers/DevModeProvider";
 import { EditorProvider } from "@/providers/EditorContext";
 import { GitHubRepoProvider } from "@/providers/GitHubRepoContext";
 import { GitPRProvider } from "@/providers/GitPRContext";
-import { PagesStoreProvider } from "@/providers/PagesStoreContext";
 import { throwDigestibleError } from "@/utils/errors";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
@@ -86,35 +87,55 @@ export default async function EditorLayout({
             branchFailed = true;
         });
 
+    // TODO: lazy load this so we don't block the initial server render?
+    const githubLoader = new GitHubLoader(githubUrl);
+
+    // Use the repo's default branch by passing preferDefaultBranch=true
+    const docsYmlResult = await githubLoader.getDocsYml(
+        sourceRepo.owner,
+        sourceRepo.repo,
+        docsUrl,
+        branch, // fallback branch if default branch logic fails
+        true // preferDefaultBranch = true
+    );
+    const initialDocsYmlContent = docsYmlResult.type === "ok" ? docsYmlResult.result : null;
+
+    if (docsYmlResult.type !== "ok") {
+        console.error(docsYmlResult.error);
+    }
+
     return (
         <EditorShell>
             <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false} disableTransitionOnChange>
                 <OrgNameProvider orgName={orgName}>
                     <BranchProvider branch={branch} branchFailed={branchFailed}>
-                        <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo}>
-                            <NavigationStoreProvider branchName={branch} orgName={orgName} docsUrl={docsUrl}>
-                                <PagesStoreProvider branchName={branch}>
-                                    <CurrentPageProvider>
-                                        <ClientMDXProvider>
-                                            <DevModeProvider>
-                                                <EditorProvider>
-                                                    <GitPRProvider
-                                                        owner={sourceRepo.owner}
-                                                        repo={sourceRepo.repo}
-                                                        baseBranch={sourceRepo.baseBranch}
-                                                        branch={branch}
-                                                        site={docsUrl}
-                                                    >
-                                                        <HeaderToolbar session={session} docsUrl={docsUrl} />
-                                                        <PreviewOnlyNotification />
-                                                        {children}
-                                                    </GitPRProvider>
-                                                </EditorProvider>
-                                            </DevModeProvider>
-                                        </ClientMDXProvider>
-                                    </CurrentPageProvider>
-                                </PagesStoreProvider>
-                            </NavigationStoreProvider>
+                        <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl}>
+                            <ClientNavigationProvider
+                                branchName={branch}
+                                orgName={orgName}
+                                docsUrl={docsUrl}
+                                initialDocsYmlContent={initialDocsYmlContent}
+                            >
+                                <CurrentPageProvider>
+                                    <ClientMDXProvider>
+                                        <DevModeProvider>
+                                            <EditorProvider>
+                                                <GitPRProvider
+                                                    owner={sourceRepo.owner}
+                                                    repo={sourceRepo.repo}
+                                                    baseBranch={sourceRepo.baseBranch}
+                                                    branch={branch}
+                                                    site={docsUrl}
+                                                >
+                                                    <HeaderToolbar session={session} docsUrl={docsUrl} />
+                                                    <PreviewOnlyNotification />
+                                                    {children}
+                                                </GitPRProvider>
+                                            </EditorProvider>
+                                        </DevModeProvider>
+                                    </ClientMDXProvider>
+                                </CurrentPageProvider>
+                            </ClientNavigationProvider>
                         </GitHubRepoProvider>
                     </BranchProvider>
                 </OrgNameProvider>

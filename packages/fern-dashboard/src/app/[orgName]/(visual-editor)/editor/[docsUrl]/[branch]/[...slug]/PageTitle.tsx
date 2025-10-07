@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+import { useNavigation } from "@fern-docs/components/navigation";
+
 import { AutoResizingInput } from "@/components/input/AutoResizingInput";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
-import { usePages } from "@/providers/PagesStoreContext";
 
 export declare namespace PageTitle {
     export interface Props {
@@ -18,27 +19,21 @@ export default function PageTitle({ className, filename, initialText }: PageTitl
     const [text, setText] = useState(initialText ?? "");
     const isEditingDisabled = useEditingDisabled();
 
-    const { updatePage, frontmatterData } = usePages();
+    const { updatePageFrontmatter, subscribePageSaveEvent } = useNavigation();
 
-    // Watch for frontmatter changes from dev panel and update text accordingly
+    // Subscribe to save events from @devPanel
     useEffect(() => {
-        const currentFrontmatter = frontmatterData[filename];
-        if (currentFrontmatter?.title) {
-            const newTitle = String(currentFrontmatter.title);
-            if (newTitle !== text) {
-                setText(newTitle);
-            }
-        } else if (text) {
-            setText("");
-        }
-    }, [frontmatterData, filename, text]);
+        const unsubscribe = subscribePageSaveEvent((event) => {
+            setText(event.frontmatter.title ? String(event.frontmatter.title) : "");
+        });
+
+        return unsubscribe;
+    }, [filename, subscribePageSaveEvent]);
 
     function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         const nextText = e.target.value;
         setText(nextText);
-        updatePage(filename, {
-            frontmatter: { title: nextText }
-        });
+        updatePageFrontmatter(filename, { title: nextText });
     }
 
     return (

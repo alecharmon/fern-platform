@@ -91,3 +91,13 @@ export function SuccessfulUploadMediaToast() {
 export function ErrorUpgradeFernCliVersionToast(error: string = "") {
     toast.error("Failed to upgrade Fern CLI version. Please try again. " + error);
 }
+
+export function PageDeletedUndoToast(pageTitle: string, onUndo: () => void) {
+    return toast.success(`Page "${pageTitle}" deleted from site`, {
+        action: {
+            label: "Undo",
+            onClick: onUndo
+        },
+        duration: 8000 // Show for 8 seconds to give user time to undo
+    });
+}

@@ -1,4 +1,3 @@
-import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { AbstractHeaderTabsRoot } from "@fern-docs/components/abstract/AbstractHeaderTabsRoot";
 import { FERN_SEARCH_BUTTON_ID } from "@fern-docs/components/constants";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
@@ -16,7 +15,7 @@ import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/des
 import React from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
-import { GitHubLoader } from "@/app/services/github/github-loader";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";

@@ -25,6 +25,7 @@ import type { Slug } from "@fern-api/fdr-sdk/navigation";
  */
 export interface DangerousTransmittableDocsLoaderData {
     domain: string;
+    config: Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">;
     authState: AuthState;
     edgeFlags: EdgeFlags;
     layout: FernLayoutConfig;
@@ -38,11 +39,13 @@ export interface DangerousTransmittableDocsLoaderData {
 export class PrefetchedDocsLoader implements DocsLoader<false> {
     domain: string;
 
+    private config: Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">;
     private authState: AuthState;
     private edgeFlags: EdgeFlags;
     private layout: FernLayoutConfig;
 
-    constructor({ domain, authState, edgeFlags, layout }: DangerousTransmittableDocsLoaderData) {
+    constructor({ config, domain, authState, edgeFlags, layout }: DangerousTransmittableDocsLoaderData) {
+        this.config = config;
         this.domain = domain;
         this.authState = authState;
         this.edgeFlags = edgeFlags;
@@ -59,6 +62,7 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
      */
     serializable(): DangerousTransmittableDocsLoaderData {
         return {
+            config: this.config,
             domain: this.domain,
             authState: this.authState,
             edgeFlags: this.edgeFlags,
@@ -74,16 +78,16 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.authState;
     }
 
+    getConfig(): Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root"> {
+        return this.config;
+    }
+
     getEdgeFlags(): EdgeFlags {
         return this.edgeFlags;
     }
 
     getLayout(): FernLayoutConfig {
         return this.layout;
-    }
-
-    getSettings(): FernSettingsConfig {
-        return this.notSupported("getSettings");
     }
 
     getAuthConfig(): AuthEdgeConfig | undefined {
@@ -143,10 +147,6 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("unsafe_getFullRoot");
     }
 
-    getConfig(): Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root"> {
-        return this.notSupported("getConfig");
-    }
-
     getPage(_pageId: string): {
         filename: string;
         markdown: string;
@@ -173,6 +173,10 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
 
     getDynamicIr(_apiName: string): DynamicIRsByLanguage | undefined {
         return this.notSupported("getDynamicIr");
+    }
+
+    getSettings(): FernSettingsConfig {
+        return this.notSupported("getSettings");
     }
 
     private notAllowed(methodName: string): never {

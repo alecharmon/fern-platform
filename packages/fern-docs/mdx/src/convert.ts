@@ -7,7 +7,6 @@ import yaml from "js-yaml";
 import type { Parents as MdastParents, Nodes, Root } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { frontmatterFromMarkdown, frontmatterToMarkdown } from "mdast-util-frontmatter";
-import { gfmFromMarkdown, gfmToMarkdown } from "mdast-util-gfm";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
 import { mdxFromMarkdown, mdxToMarkdown } from "mdast-util-mdx";
 import {
@@ -18,7 +17,6 @@ import {
 } from "mdast-util-to-hast";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { frontmatter as fm } from "micromark-extension-frontmatter";
-import { gfm } from "micromark-extension-gfm";
 import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
 
@@ -113,13 +111,14 @@ export type NodeId = string;
 export type ChangedNodes = Record<NodeId, boolean>;
 
 // Frontmatter included in mdx
-export type Frontmatter = Record<string, unknown>;
+/** If MDX does not contain a YAML frontmatter block, frontmatter should be null */
+export type Frontmatter = Record<string, unknown> | null;
 
 // Re-export mdast types for external use
 export type {
-    Content as MdastContent,
     Node as MdastNode,
-    Nodes as MdastNodes
+    Nodes as MdastNodes,
+    Content as MdastContent
 } from "mdast";
 
 // Response from mdxToAST
@@ -152,8 +151,8 @@ interface MdxToHtmlOptions {
 export function mdxToAST(rootContent: string): MdxToASTResponse {
     // Get mdast from root mdx content
     const mdast = fromMarkdown(rootContent, {
-        extensions: [mdxjs(), fm(["yaml"]), math(), gfm()],
-        mdastExtensions: [mdxFromMarkdown(), frontmatterFromMarkdown(["yaml"]), mathFromMarkdown(), gfmFromMarkdown()]
+        extensions: [mdxjs(), fm(["yaml"]), math()],
+        mdastExtensions: [mdxFromMarkdown(), frontmatterFromMarkdown(["yaml"]), mathFromMarkdown()]
     });
 
     // Get frontmatter from mdast (expects only one frontmatter node)
@@ -162,7 +161,7 @@ export function mdxToAST(rootContent: string): MdxToASTResponse {
 
     // Parse frontmatter from yaml
     const parsedFrontmatter = originalFrontmatter && yaml.load(originalFrontmatter);
-    const frontmatter = isValidFrontmatter(parsedFrontmatter) ? parsedFrontmatter : {};
+    const frontmatter = isValidFrontmatter(parsedFrontmatter) ? parsedFrontmatter : null;
 
     return { mdast, frontmatter, originalFrontmatter };
 }
@@ -178,7 +177,7 @@ export function astToMDX(mdast: Nodes, originalFrontmatter?: string): string {
 
     // Convert mdast back to MDX string
     const mdxBody = toMarkdown(mdast, {
-        extensions: [mdxToMarkdown(), frontmatterToMarkdown(["yaml"]), mathToMarkdown(), gfmToMarkdown()]
+        extensions: [mdxToMarkdown(), frontmatterToMarkdown(["yaml"]), mathToMarkdown()]
     });
 
     mdxContent += mdxBody;
@@ -326,15 +325,30 @@ export interface HtmlToMdxResponse {
     mdx: string;
 }
 
+export interface HtmlToMdxOptions {
+    /**
+     * Frontmatter to include in the mdx
+     */
+    frontmatter?: Frontmatter;
+    /**
+     * The original formatting of the frontmatter string
+     */
+    originalFrontmatter?: string;
+    /**
+     * Whether consider frontmatter changed; used in conjunction with originalFrontmatter
+     */
+    changedFrontmatter?: boolean;
+    /**
+     * Changed nodes in the html
+     */
+    changedNodes?: ChangedNodes;
+}
+
 // Convert html to mdx
 // TODO: we might be able to further optimize by refactoring this and getChangedNodesFromHtml
-export function htmlToMdx(
-    html: string,
-    frontmatter?: Frontmatter,
-    originalFrontmatter?: string,
-    changedNodes?: ChangedNodes,
-    changedFrontmatter?: boolean
-): HtmlToMdxResponse {
+export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxResponse {
+    const { frontmatter, originalFrontmatter, changedFrontmatter, changedNodes } = options ?? {};
+
     // Get hast from html
     const hast = fromHtml(html);
 
@@ -529,12 +543,7 @@ export function htmlToMdx(
 
     // Get mdx from mdast
     const mdx = toMarkdown(mdast, {
-        extensions: [
-            mdxToMarkdown(),
-            frontmatterToMarkdown(["yaml"]),
-            mathToMarkdown({ singleDollarTextMath: false }),
-            gfmToMarkdown()
-        ],
+        extensions: [mdxToMarkdown(), frontmatterToMarkdown(["yaml"]), mathToMarkdown({ singleDollarTextMath: false })],
         // TODO: float configurations up to make them more discoverable
         // Use hyphen instead of asterisk for unordered lists
         bullet: "-"

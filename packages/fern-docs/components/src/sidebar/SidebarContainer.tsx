@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-
-import { FernScrollArea } from "../FernScrollArea";
 import { cn } from "../cn";
 import { FERN_SIDEBAR_SCROLL_AREA_ID } from "../constants";
+import { FernScrollArea } from "../FernScrollArea";
 import { ThemeSwitch } from "../header/theme-switch";
 import { useDismountMeasureSidebarScrollPosition } from "../hooks/sidebar-scroll";
 import { MobileSidebarHeaderLinks } from "./MobileSidebarHeaderLinks";
@@ -51,10 +50,15 @@ export const SidebarContainer = React.memo(function SidebarContainer({
                 scrollbars="vertical"
                 ref={ref}
             >
-                {loginButton}
+                <React.Fragment key="login-button">{loginButton}</React.Fragment>
                 {children}
-                <MobileSidebarHeaderLinks hideInDesktop={!showHeaderInSidebar}>{navbarLinks}</MobileSidebarHeaderLinks>
-                <ThemeSwitch className={cn("mx-auto mt-8 flex", !showHeaderInSidebar && "lg:hidden")} />
+                <MobileSidebarHeaderLinks hideInDesktop={!showHeaderInSidebar} key="mobile-sidebar-header-links">
+                    {navbarLinks}
+                </MobileSidebarHeaderLinks>
+                <ThemeSwitch
+                    className={cn("mx-auto mt-8 flex", !showHeaderInSidebar && "lg:hidden")}
+                    key="theme-switch"
+                />
             </FernScrollArea>
         </>
     );

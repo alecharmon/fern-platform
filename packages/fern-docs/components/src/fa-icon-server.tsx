@@ -56,11 +56,20 @@ async function FaIconServerInternal({
 export function FaIconServer(
     props: {
         icon: string;
+        forceClientRender?: boolean;
     } & React.SVGProps<SVGSVGElement>
 ) {
+    const { forceClientRender, ...svgProps } = props;
+
+    // If explicitly rendering on client (e.g., in SidebarClientRootNode), use the client icon
+    if (forceClientRender) {
+        return <FaIcon {...svgProps} />;
+    }
+
+    // Otherwise, use the async server component with Suspense
     return (
-        <React.Suspense fallback={<FaIcon {...props} />}>
-            <FaIconServerInternal {...props} />
+        <React.Suspense fallback={<FaIcon {...svgProps} />}>
+            <FaIconServerInternal {...svgProps} />
         </React.Suspense>
     );
 }

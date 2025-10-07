@@ -1,10 +1,9 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useRef, useSyncExternalStore } from "react";
+import { type ReactNode, createContext, useContext, useEffect, useRef, useSyncExternalStore } from "react";
 
-import { type NavigationSnapshot, NavigationStore } from "./NavigationStore";
-
-export type { NavigationSnapshot };
+import { NavigationStore } from "./NavigationStore";
+import type { DeletionToastCallback, NavigationSnapshot } from "./types";
 
 interface NavigationStoreContextValue {
     navigationStore: NavigationStore;
@@ -17,9 +16,18 @@ export interface NavigationStoreProviderProps {
     branchName: string;
     orgName: string;
     docsUrl: string;
+    initialDocsYmlContent: string | null;
+    deletionToastCallback?: DeletionToastCallback;
 }
 
-export function NavigationStoreProvider({ children, branchName, orgName, docsUrl }: NavigationStoreProviderProps) {
+export function NavigationStoreProvider({
+    children,
+    branchName,
+    orgName,
+    docsUrl,
+    initialDocsYmlContent,
+    deletionToastCallback
+}: NavigationStoreProviderProps) {
     const storeRef = useRef<NavigationStore>(new NavigationStore(branchName, orgName, docsUrl));
 
     if (
@@ -30,6 +38,16 @@ export function NavigationStoreProvider({ children, branchName, orgName, docsUrl
     ) {
         storeRef.current = new NavigationStore(branchName, orgName, docsUrl);
     }
+
+    useEffect(() => {
+        storeRef.current.hydrate({ initialDocsYmlContent });
+    }, [initialDocsYmlContent]);
+
+    useEffect(() => {
+        if (deletionToastCallback) {
+            storeRef.current.setDeletionToastCallback(deletionToastCallback);
+        }
+    }, [deletionToastCallback]);
 
     return (
         <NavigationStoreContext.Provider value={{ navigationStore: storeRef.current }}>
@@ -46,10 +64,48 @@ function useNavigationStore(): NavigationStore {
     return context.navigationStore;
 }
 
-export function useNavigation(): NavigationSnapshot & {
+type NavigationSnapshotWithMethods = NavigationSnapshot & {
     _navigationStore: NavigationStore;
-    loadClientPageData: NavigationStore["loadClientPageData"];
-} {
+    hydrated: NavigationStore["hydrated"];
+    registeredPages: NavigationStore["registeredPages"];
+    files: NavigationStore["files"];
+    resolveInitialPageData: NavigationStore["resolveInitialPageData"];
+    registerPage: NavigationStore["registerPage"];
+    createClientPage: NavigationStore["createClientPage"];
+    updatePage: NavigationStore["updatePage"];
+    updatePageFrontmatter: NavigationStore["updatePageFrontmatter"];
+    updatePageHtml: NavigationStore["updatePageHtml"];
+    markPageForDeletion: NavigationStore["markPageForDeletion"];
+    unmarkPageForDeletion: NavigationStore["unmarkPageForDeletion"];
+    setDeletionToastCallback: NavigationStore["setDeletionToastCallback"];
+    emitPageSaveEvent: NavigationStore["emitPageSaveEvent"];
+    subscribePageSaveEvent: NavigationStore["subscribePageSaveEvent"];
+    handleCommitSuccess: NavigationStore["handleCommitSuccess"];
+};
+
+function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSnapshot): NavigationSnapshotWithMethods {
+    return {
+        ...snapshot,
+        _navigationStore: store,
+        hydrated: store.hydrated,
+        registeredPages: store.registeredPages,
+        files: store.files,
+        resolveInitialPageData: store.resolveInitialPageData.bind(store),
+        registerPage: store.registerPage.bind(store),
+        createClientPage: store.createClientPage.bind(store),
+        updatePage: store.updatePage.bind(store),
+        updatePageFrontmatter: store.updatePageFrontmatter.bind(store),
+        updatePageHtml: store.updatePageHtml.bind(store),
+        markPageForDeletion: store.markPageForDeletion.bind(store),
+        unmarkPageForDeletion: store.unmarkPageForDeletion.bind(store),
+        setDeletionToastCallback: store.setDeletionToastCallback.bind(store),
+        emitPageSaveEvent: store.emitPageSaveEvent.bind(store),
+        subscribePageSaveEvent: store.subscribePageSaveEvent.bind(store),
+        handleCommitSuccess: store.handleCommitSuccess.bind(store)
+    };
+}
+
+export function useNavigation(): NavigationSnapshotWithMethods {
     const store = useNavigationStore();
     const snapshot = useSyncExternalStore(
         store.subscribe.bind(store),
@@ -57,38 +113,20 @@ export function useNavigation(): NavigationSnapshot & {
         store.getServerSnapshot.bind(store)
     );
 
-    return {
-        ...snapshot,
-        _navigationStore: store,
-        loadClientPageData: store.loadClientPageData.bind(store)
-    };
+    return createNavigationSnapshot(store, snapshot);
 }
 
-function useSafeNavigationStore(): NavigationStore | null {
+function useMaybeNavigationStore(): NavigationStore | null {
     const context = useContext(NavigationStoreContext);
     return context?.navigationStore || null;
 }
 
-export function useSafeNavigation():
-    | (NavigationSnapshot & {
-          _navigationStore: NavigationStore | null;
-          loadClientPageData?: NavigationStore["loadClientPageData"];
-      })
-    | null {
-    const store = useSafeNavigationStore();
+export function useMaybeNavigation(): NavigationSnapshotWithMethods | null {
+    const store = useMaybeNavigationStore();
     const snapshot = useSyncExternalStore(
         store?.subscribe.bind(store) || (() => () => null),
         store?.getSnapshot.bind(store) || (() => null),
         store?.getServerSnapshot.bind(store) || (() => null)
     );
-
-    if (!store || !snapshot) {
-        return null;
-    }
-
-    return {
-        ...snapshot,
-        _navigationStore: store,
-        loadClientPageData: store.loadClientPageData.bind(store)
-    };
+    return store && snapshot ? createNavigationSnapshot(store, snapshot) : null;
 }

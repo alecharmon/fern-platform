@@ -1,11 +1,11 @@
 "use client";
 
-import { mdxToHtml } from "@fern-docs/mdx";
-import type { Monaco } from "@monaco-editor/react";
-import { Code2 } from "lucide-react";
-import type monaco from "monaco-editor";
-import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+
+import CodeEditor, { type Monaco } from "@monaco-editor/react";
+import { Code2 } from "lucide-react";
+
+import { useNavigation } from "@fern-docs/components/navigation";
 
 import { WarningValidationToast } from "@/components/editor/EditorToasts";
 import { defineAppTheme } from "@/components/editor/theme-utils";
@@ -13,26 +13,20 @@ import { Button } from "@/components/ui/button";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
-import { usePages } from "@/providers/PagesStoreContext";
 import { cn } from "@/utils/utils";
-
-const MonacoEditor = dynamic(() => import("./editor"), {
-    ssr: false
-});
 
 export default function DevPanel() {
     const { panelOpen } = useDevMode();
     const { currentFilename } = useCurrentPage();
-    const { allMdxFiles, updatePage, emitSaveEvent } = usePages();
+    const { registeredPages, updatePage, emitPageSaveEvent } = useNavigation();
     const isEditingDisabled = useEditingDisabled();
-    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const editorRef = useRef<any>(null);
     const monacoRef = useRef<Monaco | null>(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-    const LoadingIndicator = "// Loading content...";
-    // Get the current file's markdown content
-    const activeFilename = currentFilename || Object.keys(allMdxFiles)[0] || "";
-    const currentMarkdown = allMdxFiles[activeFilename] || LoadingIndicator;
+    const LoadingIndicator = "<!-- Loading content... -->";
+
+    const currentMarkdown = (currentFilename && registeredPages[currentFilename]?.pageData.mdx) || LoadingIndicator;
 
     useEffect(() => {
         // Update Monaco editor content when markdown changes
@@ -43,7 +37,7 @@ export default function DevPanel() {
         setHasUnsavedChanges(false);
     }, [currentMarkdown]);
 
-    function handleEditorDidMount(editorInstance: monaco.editor.IStandaloneCodeEditor, monacoInstance: Monaco) {
+    function handleEditorDidMount(editorInstance: any, monacoInstance: Monaco) {
         editorRef.current = editorInstance;
         monacoRef.current = monacoInstance;
 
@@ -66,25 +60,24 @@ export default function DevPanel() {
         }
     }
 
+    const saveDisabled = !currentFilename;
+
     function handleUpdate() {
+        if (saveDisabled) {
+            return;
+        }
+
         const content = editorRef.current?.getValue() || "";
 
         try {
-            // Convert markdown back to HTML using mdxToHtml
-            const { html, frontmatter } = mdxToHtml(content, {
-                treatAsUnsupported: ["math"]
-            });
-
-            updatePage(activeFilename, {
-                html,
-                frontmatter: Object.keys(frontmatter).length > 0 ? frontmatter : undefined,
-                changedNodes: {}
-            });
+            updatePage(currentFilename, { mdx: content });
+            const { html, frontmatter } = registeredPages[currentFilename]?.pageData ?? {};
 
             // Emit save event
-            emitSaveEvent({
-                fileName: activeFilename,
-                html
+            emitPageSaveEvent({
+                filename: currentFilename,
+                frontmatter: frontmatter ?? {},
+                html: html ?? ""
             });
 
             // Reset unsaved changes flag after successful save
@@ -107,10 +100,18 @@ export default function DevPanel() {
             </div>
 
             <div className="border-1 bg-background border-border relative flex flex-1 flex-col overflow-hidden rounded-2xl py-4 shadow-lg">
-                <MonacoEditor
-                    currentMarkdown={currentMarkdown}
-                    handleEditorDidMount={handleEditorDidMount}
-                    isEditingDisabled={isEditingDisabled}
+                <CodeEditor
+                    height="100%"
+                    language="markdown"
+                    value={currentMarkdown}
+                    onMount={handleEditorDidMount}
+                    theme="app-theme"
+                    options={{
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        wordWrap: "on",
+                        readOnly: isEditingDisabled
+                    }}
                 />
             </div>
 
@@ -122,7 +123,7 @@ export default function DevPanel() {
                             Reset
                         </Button>
                     )}
-                    <Button onClick={handleUpdate} variant="default">
+                    <Button onClick={handleUpdate} variant="default" disabled={saveDisabled}>
                         Update
                     </Button>
                 </div>

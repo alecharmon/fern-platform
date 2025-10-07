@@ -17,13 +17,19 @@ interface SidebarNavigationChildProps {
     node: FernNavigation.NavigationChild;
     depth: number;
     root?: boolean;
+    forceClientRender?: boolean;
 }
 
-export function SidebarNavigationChild({ node, depth, root }: SidebarNavigationChildProps): ReactNode {
+export function SidebarNavigationChild({
+    node,
+    depth,
+    root,
+    forceClientRender = false
+}: SidebarNavigationChildProps): ReactNode {
     switch (node.type) {
         case "apiReference":
             return (
-                <SidebarApiPackageNode node={node} depth={depth} icon={processIcon(node)}>
+                <SidebarApiPackageNode node={node} depth={depth} icon={processIcon(node, undefined, forceClientRender)}>
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
                         <SidebarApiPackageChild key={node.id} node={node} depth={depth + 1} shallow={false} />
                     ))}
@@ -33,23 +39,42 @@ export function SidebarNavigationChild({ node, depth, root }: SidebarNavigationC
             return (
                 <SidebarSectionNode
                     node={node}
-                    icon={processIcon(node)}
+                    icon={processIcon(node, undefined, forceClientRender)}
                     depth={depth}
                     className={cn({
                         "!text-body font-semibold": root
                     })}
+                    forceClientRender={forceClientRender}
                 >
                     {node.children.map((node: FernNavigation.NavigationChild) => (
-                        <SidebarNavigationChild key={node.id} node={node} depth={depth + 1} />
+                        <SidebarNavigationChild
+                            key={node.id}
+                            node={node}
+                            depth={depth + 1}
+                            forceClientRender={forceClientRender}
+                        />
                     ))}
                 </SidebarSectionNode>
             );
         case "page":
-            return <SidebarPageNode node={node} depth={depth} icon={processIcon(node)} />;
+            return (
+                <SidebarPageNode
+                    node={node}
+                    depth={depth}
+                    icon={processIcon(node, undefined, forceClientRender)}
+                    forceClientRender={forceClientRender}
+                />
+            );
         case "link":
-            return <SidebarLinkNode node={node} depth={depth} icon={processIcon(node)} />;
+            return <SidebarLinkNode node={node} depth={depth} icon={processIcon(node, undefined, forceClientRender)} />;
         case "changelog":
-            return <SidebarChangelogNode node={node} depth={depth} icon={processIcon(node)} />;
+            return (
+                <SidebarChangelogNode
+                    node={node}
+                    depth={depth}
+                    icon={processIcon(node, undefined, forceClientRender)}
+                />
+            );
         default:
             throw new UnreachableCaseError(node);
     }

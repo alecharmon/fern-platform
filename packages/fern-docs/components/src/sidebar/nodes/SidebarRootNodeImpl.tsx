@@ -14,12 +14,14 @@ export function SidebarRootNodeImpl({
     root,
     visibleNodeIds,
     authState,
-    edgeFlags
+    edgeFlags,
+    forceClientRender = false
 }: {
     root: FernNavigation.SidebarRootNode | undefined;
     visibleNodeIds: FernNavigation.NodeId[] | undefined;
     authState: AuthState;
     edgeFlags: EdgeFlags;
+    forceClientRender?: boolean;
 }) {
     const node = withPrunedNavigation(root, {
         visibleNodeIds: visibleNodeIds,
@@ -73,7 +75,7 @@ export function SidebarRootNodeImpl({
                 <ul className="fern-sidebar-group space-y-6 lg:px-1">
                     {children.map((child) => (
                         <li key={child.id}>
-                            <SidebarRootChild node={child} />
+                            <SidebarRootChild node={child} forceClientRender={forceClientRender} />
                         </li>
                     ))}
                 </ul>

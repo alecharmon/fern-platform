@@ -8,17 +8,25 @@ import { SidebarRootNodeImpl } from "./SidebarRootNodeImpl";
 export function SidebarClientRootNode({
     root,
     visibleNodeIds,
-    loaderData
+    loaderData,
+    forceClientRender
 }: {
     root: FernNavigation.SidebarRootNode | undefined;
     visibleNodeIds: FernNavigation.NodeId[] | undefined;
     loaderData: DangerousTransmittableDocsLoaderData;
+    forceClientRender?: boolean;
 }) {
     const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
     const authState = loader.getAuthState();
     const edgeFlags = loader.getEdgeFlags();
 
     return (
-        <SidebarRootNodeImpl root={root} visibleNodeIds={visibleNodeIds} authState={authState} edgeFlags={edgeFlags} />
+        <SidebarRootNodeImpl
+            root={root}
+            visibleNodeIds={visibleNodeIds}
+            authState={authState}
+            edgeFlags={edgeFlags}
+            forceClientRender={forceClientRender}
+        />
     );
 }

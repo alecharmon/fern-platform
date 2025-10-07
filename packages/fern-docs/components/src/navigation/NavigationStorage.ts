@@ -1,54 +1,82 @@
 import { getBranchNameFromStorageKey } from "./localStorageUtils";
-import type { StoredNavigationData } from "./types";
+import { runMigrations } from "./migrations";
+import { createEmptyNavigationSnapshot, NAVIGATION_SNAPSHOT_SCHEMA_VERSION, type NavigationSnapshot } from "./types";
 
 export const NAVIGATION_STORAGE_KEY = "fern-navigation-storage:";
 
 export class NavigationStorage {
     constructor(private readonly _storage: Storage) {}
 
-    getStore(branchName: string): StoredNavigationData {
-        const stored = this._storage.get(branchName);
+    getStore(branchName: string): NavigationSnapshot | null {
+        const serialized = this._storage.get(branchName);
 
-        if (!stored) {
-            return this._getEmptyStore();
+        if (!serialized) {
+            return null;
         }
 
-        const parsed = JSON.parse(stored) as Partial<StoredNavigationData>;
+        const parsed = JSON.parse(serialized) as NavigationSnapshot;
+        const currentSchemaVersion = parsed.schemaVersion ?? 0;
 
-        // Convert committedFiles Array back to Set after JSON parsing
-        const data: StoredNavigationData = {
-            ...this._getEmptyStore(),
+        // Run migrations if needed
+        if (currentSchemaVersion < NAVIGATION_SNAPSHOT_SCHEMA_VERSION) {
+            // Create backup before migrating
+            this._storage.set(`backup:v${currentSchemaVersion}:${branchName}`, serialized);
+            return runMigrations(branchName, parsed, currentSchemaVersion);
+        }
+
+        return {
             ...parsed,
             metadata: {
                 orgName: parsed.metadata?.orgName,
                 docsUrl: parsed.metadata?.docsUrl
             },
-            committedFiles: new Set(parsed.committedFiles || [])
+            // Convert docsYmlChanges array back to Map after JSON parsing
+            // The parsed.docsYmlChanges should be an array of [key, value] tuples
+            docsYmlChanges: new Map(Array.isArray(parsed.docsYmlChanges) ? parsed.docsYmlChanges : [])
         };
-
-        return data;
     }
 
-    setStore(branchName: string, orgName: string, docsUrl: string, data: StoredNavigationData): void {
-        // Convert Set to Array for JSON serialization
+    setStore(branchName: string, orgName: string, docsUrl: string, data: NavigationSnapshot): void {
         const serializable = {
             ...data,
             metadata: {
                 orgName,
                 docsUrl
             },
-            committedFiles: Array.from(data.committedFiles)
+            // Convert Map to Array for JSON serialization
+            docsYmlChanges: Array.from(data.docsYmlChanges || new Map())
         };
         this._storage.set(branchName, JSON.stringify(serializable));
     }
 
-    updateStore(branchName: string, orgName: string, docsUrl: string, update: Partial<StoredNavigationData>): void {
+    updateStore(branchName: string, orgName: string, docsUrl: string, update: Partial<NavigationSnapshot>): void {
         const prevData = this.getStore(branchName);
+
+        if (!prevData) {
+            throw new Error(`NavigationStorage could not update, branchName not found: ${branchName}`);
+        }
+
         this.setStore(branchName, orgName, docsUrl, {
             ...prevData,
-            ...update,
-            committedFiles: update.committedFiles ?? prevData.committedFiles
+            ...update
         });
+    }
+
+    getOrSetStore(branchName: string, orgName: string, docsUrl: string): NavigationSnapshot {
+        const stored = this.getStore(branchName);
+
+        if (stored) {
+            return stored;
+        }
+
+        this.setStore(branchName, orgName, docsUrl, createEmptyNavigationSnapshot(branchName, orgName, docsUrl));
+        const created = this.getStore(branchName);
+
+        if (!created) {
+            throw new Error(`NavigationStorage get/set mismatch, branchName not found: ${branchName}`);
+        }
+
+        return created;
     }
 
     removeStore(branchName: string): void {
@@ -57,24 +85,6 @@ export class NavigationStorage {
 
     clear(): void {
         this._storage.clear();
-    }
-
-    private _getEmptyStore(): StoredNavigationData {
-        return {
-            clientPages: {},
-            docsYmlState: {
-                baseContent: "",
-                pendingUpdates: {},
-                lastFetched: 0
-            },
-            committedFiles: new Set(),
-            pageContents: {},
-            lastCommittedHash: undefined,
-            metadata: {
-                docsUrl: undefined,
-                orgName: undefined
-            }
-        };
     }
 
     getAllStoredBranches(): string[] {
@@ -113,7 +123,7 @@ class LocalStorage implements Storage {
         try {
             return operation();
         } catch (error) {
-            console.error(error);
+            console.error("NavigationStorage operation failed:", error);
             return fallback;
         }
     }

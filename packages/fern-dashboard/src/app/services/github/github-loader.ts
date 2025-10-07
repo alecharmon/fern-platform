@@ -251,7 +251,13 @@ export class GitHubLoader implements GitLoader {
         }
     }
 
-    async getDocsYml(owner: string, repo: string, site: string, ref: string = "main"): Promise<GetDocsYmlResult> {
+    async getDocsYml(
+        owner: string,
+        repo: string,
+        site: string,
+        ref: string = "main",
+        preferDefaultBranch: boolean = false
+    ): Promise<GetDocsYmlResult> {
         const projectResult = await this.getFernProjectBySite(owner, repo, site);
         if (projectResult.type === "error") {
             return {
@@ -260,7 +266,10 @@ export class GitHubLoader implements GitLoader {
             };
         }
 
-        const content = await this.getFileContent(owner, repo, ref, projectResult.result.project.docsYmlPath);
+        // Use the default branch from the repository if requested
+        const targetRef = preferDefaultBranch ? projectResult.result.defaultBranch : ref;
+
+        const content = await this.getFileContent(owner, repo, targetRef, projectResult.result.project.docsYmlPath);
         if (!content) {
             return {
                 type: "error",

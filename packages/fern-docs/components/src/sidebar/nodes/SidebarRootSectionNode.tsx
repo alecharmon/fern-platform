@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
-
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { ReactNode } from "react";
 
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import { SidebarClientNavigationChildInjector } from "./SidebarClientNavigationChildInjector";
@@ -12,9 +11,15 @@ interface SidebarRootSectionNodeProps {
     node: FernNavigation.SectionNode;
     icon: React.ReactNode;
     className?: string;
+    forceClientRender?: boolean;
 }
 
-export function SidebarRootSectionNode({ node, icon, className }: SidebarRootSectionNodeProps): ReactNode {
+export function SidebarRootSectionNode({
+    node,
+    icon,
+    className,
+    forceClientRender
+}: SidebarRootSectionNodeProps): ReactNode {
     // If the node has no children, it is a page node.
     if (node.children.length === 0 && FernNavigation.hasMarkdown(node)) {
         return <SidebarPageNode node={node} depth={0} className={className} icon={icon} />;
@@ -30,10 +35,14 @@ export function SidebarRootSectionNode({ node, icon, className }: SidebarRootSec
 
             <ul className="fern-sidebar-group">
                 {/* Inject client nodes for this root section */}
-                <SidebarClientNavigationChildInjector parentNodeId={node.id} childDepth={1} />
+                <SidebarClientNavigationChildInjector
+                    parentNodeId={node.id}
+                    childDepth={1}
+                    forceClientRender={forceClientRender}
+                />
                 {node.children.map((child) => (
                     <li key={child.id}>
-                        <SidebarNavigationChild node={child} depth={1} />
+                        <SidebarNavigationChild node={child} depth={1} forceClientRender={forceClientRender} />
                     </li>
                 ))}
             </ul>

@@ -1,42 +1,56 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { ReactNode } from "react";
 
-import type { NodeId } from "@fern-api/fdr-sdk/navigation";
-
-import { useSafeNavigation } from "../../navigation";
+import { useMaybeNavigation } from "../../navigation";
+import { compareByFractionalIndex } from "../../navigation/indexingUtils";
 import { SidebarClientNavigationChild } from "./SidebarClientNavigationChild";
 
 interface SidebarClientNavigationChildInjectorProps {
     childDepth: number;
-    parentNodeId: NodeId;
+    parentNodeId: FernNavigation.NodeId;
+    forceClientRender?: boolean;
 }
 
 export function SidebarClientNavigationChildInjector({
     childDepth,
-    parentNodeId
+    parentNodeId,
+    forceClientRender
 }: SidebarClientNavigationChildInjectorProps): ReactNode {
-    const navigation = useSafeNavigation();
-    const clientNodes = navigation?.clientNodes;
-    const [isHydrated, setIsHydrated] = useState(false);
+    const navigation = useMaybeNavigation();
 
-    // Prevent hydration mismatch by only rendering client nodes after hydration
-    useEffect(() => {
-        setIsHydrated(true);
-    }, []);
-
-    // Don't render client pages during SSR to avoid hydration mismatch
-    if (!isHydrated) {
+    if (!navigation?.pageRegistry) {
         return null;
     }
 
-    const children = clientNodes?.[parentNodeId];
+    // Get client pages that belong to this parent node
+    const clientPages = Object.values(navigation.pageRegistry)
+        .filter((entry) => {
+            // Only include client-created pages
+            if (entry.pageData.source !== "client") return false;
+
+            // Only include pages that aren't marked for deletion
+            if (entry.isMarkedForDeletion) return false;
+
+            // Only include actual page nodes
+            if (entry.pageData.foundNode.node.type !== "page") return false;
+
+            // Check if this page belongs under the current parent node
+            return entry.parentSectionId === parentNodeId;
+        })
+        .sort((a, b) => compareByFractionalIndex(a.index, b.index))
+        .map((entry) => entry.pageData.foundNode.node as FernNavigation.PageNode);
 
     return (
         <>
-            {children?.map((child) => (
-                <li key={child.id}>
-                    <SidebarClientNavigationChild node={child} depth={childDepth} />
+            {clientPages.map((pageNode) => (
+                <li key={pageNode.id}>
+                    <SidebarClientNavigationChild
+                        node={pageNode}
+                        depth={childDepth}
+                        forceClientRender={forceClientRender}
+                    />
                 </li>
             ))}
         </>

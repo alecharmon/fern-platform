@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 
 import { NAVIGATION_STORAGE_KEY } from "./NavigationStorage";
 
+/** Generates unique branch name */
 export function generateBranchName(userId: string, name: string | undefined): string {
     const randomHexString = crypto.randomUUID().split("-")[0];
     return (
@@ -28,7 +29,7 @@ export const getBranchNameFromStorageKey = (storageKey: string | null): string |
 };
 
 /**
- * Check if a branch name matches the user
+ * Checks if a branch name matches the user
  * @param branchName - The branch name to check
  * @param userId - The user ID to check
  */
@@ -45,12 +46,16 @@ export function branchMatchesUser(branchName: string, userId: string): boolean {
     return parts[shortSubHashIndex] === expectedShortSubHash;
 }
 
-/******************
- * HELPER FUNCTIONS
- ******************/
+// HELPERS
+// ----------------------------------------------------------------------------
+
+/** Sanitizes name to lowercase alphanumeric with underscores/hyphens only */
+function _sanitizeName(name: string) {
+    return name.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+}
 
 /**
- * Generate a short 6-character hash from an Auth0 sub
+ * Generates a short 6-character hash from an Auth0 sub
  * Note: the crypto library may not be available on certain client browsers. Can use crypto.subtle if that is an issue.
  * @param sub - Auth0 sub, e.g. "github|002033e4"
  */
@@ -61,13 +66,4 @@ export function _generateShortSubHashForUserId(sub: string): string {
     // Use md5 hash since it's fast, we don't need to be secure here
     const hash = createHash("md5").update(idPart).digest("hex");
     return hash.substring(0, 6);
-}
-
-/**
- * Ensures user name is url encodable
- * @param name - The name to sanitize
- * @returns The sanitized name
- */
-function _sanitizeName(name: string) {
-    return name.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
 }

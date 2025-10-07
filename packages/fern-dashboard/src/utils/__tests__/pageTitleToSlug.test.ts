@@ -46,42 +46,42 @@ describe("pageTitleToSlug", () => {
         });
 
         it("should handle empty string", () => {
-            expect(pageTitleToSlug("")).toBe("untitled-page");
+            expect(pageTitleToSlug("")).toBe("");
         });
 
         it("should handle whitespace only", () => {
-            expect(pageTitleToSlug("   ")).toBe("untitled-page");
-            expect(pageTitleToSlug("\t\n")).toBe("untitled-page");
+            expect(pageTitleToSlug("   ")).toBe("");
+            expect(pageTitleToSlug("\t\n")).toBe("");
         });
     });
 
     describe("special characters that would produce empty slugs", () => {
         it("should handle titles with only special characters", () => {
-            expect(pageTitleToSlug("✨ 🎉 ✨")).toBe("untitled-page");
-            expect(pageTitleToSlug("🎊 🎈 🎊")).toBe("untitled-page");
-            expect(pageTitleToSlug("🚀 🎯 🚀")).toBe("untitled-page");
+            expect(pageTitleToSlug("✨ 🎉 ✨")).toBe("");
+            expect(pageTitleToSlug("🎊 🎈 🎊")).toBe("");
+            expect(pageTitleToSlug("🚀 🎯 🚀")).toBe("");
         });
 
         it("should handle titles with only punctuation", () => {
-            expect(pageTitleToSlug("!@#$%^&*()")).toBe("untitled-page");
-            expect(pageTitleToSlug("???")).toBe("untitled-page");
-            expect(pageTitleToSlug("...")).toBe("untitled-page");
+            expect(pageTitleToSlug("!@#$%^&*()")).toBe("");
+            expect(pageTitleToSlug("???")).toBe("");
+            expect(pageTitleToSlug("...")).toBe("");
         });
 
         it("should handle titles with only symbols", () => {
-            expect(pageTitleToSlug("§¶†‡")).toBe("untitled-page");
-            expect(pageTitleToSlug("©®™")).toBe("untitled-page");
+            expect(pageTitleToSlug("§¶†‡")).toBe("");
+            expect(pageTitleToSlug("©®™")).toBe("");
         });
 
         it("should handle titles with only non-English characters", () => {
-            expect(pageTitleToSlug("你好世界")).toBe("untitled-page");
-            expect(pageTitleToSlug("こんにちは")).toBe("untitled-page");
-            expect(pageTitleToSlug("안녕하세요")).toBe("untitled-page");
+            expect(pageTitleToSlug("你好世界")).toBe("");
+            expect(pageTitleToSlug("こんにちは")).toBe("");
+            expect(pageTitleToSlug("안녕하세요")).toBe("");
         });
 
         it("should handle titles with only hyphens", () => {
-            expect(pageTitleToSlug("---")).toBe("untitled-page");
-            expect(pageTitleToSlug("- - -")).toBe("untitled-page");
+            expect(pageTitleToSlug("---")).toBe("");
+            expect(pageTitleToSlug("- - -")).toBe("");
         });
     });
 
@@ -118,15 +118,10 @@ describe("pageTitleToSlug", () => {
             expect(pageTitleToSlug("1 2 3")).toBe("1-2-3");
         });
 
-        it("should handle titles with only hyphens and valid characters", () => {
-            expect(pageTitleToSlug("a-b-c")).toBe("a-b-c");
-            expect(pageTitleToSlug("-a-b-c-")).toBe("a-b-c");
-        });
-
         it("should handle titles that become empty after processing", () => {
-            expect(pageTitleToSlug("---")).toBe("untitled-page");
-            expect(pageTitleToSlug("   ---   ")).toBe("untitled-page");
-            expect(pageTitleToSlug("✨🎉✨")).toBe("untitled-page");
+            expect(pageTitleToSlug("---")).toBe("");
+            expect(pageTitleToSlug("   ---   ")).toBe("");
+            expect(pageTitleToSlug("✨🎉✨")).toBe("");
         });
     });
 });

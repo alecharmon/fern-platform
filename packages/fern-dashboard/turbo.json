@@ -26,6 +26,9 @@
     "dashboard:dev": {
       "dependsOn": ["^build", "^compile"]
     },
+    "dashboard:dev:turbopack": {
+      "dependsOn": ["^build", "^compile"]
+    },
     "dashboard:start": {
       "dependsOn": ["dashboard:build"]
     },

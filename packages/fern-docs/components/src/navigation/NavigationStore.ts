@@ -1,66 +1,73 @@
-import type { FernNavigation } from "@fern-api/fdr-sdk";
-import type { NodeId } from "@fern-api/fdr-sdk/navigation";
-import { createCommitFromChanges, generateSimpleHash, handleCommitSuccess } from "./commitUtils";
-import { loadAllPageData, loadPageData, savePageData } from "./mdxUtils";
-import { createNavigationLocalStorage, type NavigationStorage } from "./NavigationStorage";
-import {
-    buildClientFoundNodes,
-    buildClientNodesByParent,
-    buildPageDataFromSources,
-    createDocsYmlUpdate,
-    createMdxFilename,
-    createNavigationEntry,
-    extractPageTitle,
-    findSectionTitle,
-    loadClientPageData
-} from "./pageUtils";
-import type {
-    BuildPageDataProps,
-    BuildPageDataResult,
-    ConfigChange,
-    NavigationContext,
-    PageChange,
-    PageData,
-    SectionWithHierarchy,
-    StoredNavigationData
-} from "./types";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { type ChangedNodes, type Frontmatter, htmlToMdx, mdxToHtml } from "@fern-docs/mdx";
 
-export interface NavigationSnapshot {
-    clientNodes: Record<NodeId, FernNavigation.PageNode[]>;
-    clientFoundNodes: Record<NodeId, FernNavigation.utils.Node.Found>;
-    pageChanges: Map<string, PageChange>;
-    configChanges: Map<string, ConfigChange>;
-    hasChanges: boolean;
-    committedFiles: Set<string>;
-    branchName: string;
-    version: number;
-}
+import { type NavigationStorage, createNavigationLocalStorage } from "./NavigationStorage";
+import {
+    type FilenameToContent,
+    type GitCommitFile,
+    computeStateHash,
+    formatCommitFiles,
+    hasChangesToCommit
+} from "./commitUtils";
+import { generateFractionalIndex } from "./indexingUtils";
+import { resolvePageData } from "./pageUtils";
+import type {
+    ClientPageDataWriteDependencies,
+    DeletionToastCallback,
+    DocsYmlBaseContent,
+    DocsYmlChange,
+    DocsYmlChanges,
+    NavigationSnapshot,
+    PageData,
+    PageDataDependencies,
+    PageFilename,
+    PageRegistry,
+    PageRegistryEntry,
+    PageSaveEvent,
+    ResolvedPageData,
+    SectionAncestorMetadata,
+    SerializableFoundNode
+} from "./types";
+import { createEmptyNavigationSnapshot } from "./types";
+import { buildDocsYmlFromChanges } from "./ymlUtils";
 
 export class NavigationStore {
     private _branchName: string;
     private _orgName: string;
     private _docsUrl: string;
-    private _pageChanges = new Map<string, PageChange>();
-    private _configChanges = new Map<string, ConfigChange>();
+    private _latestSnapshot: NavigationSnapshot;
+    private _serverSnapshot: NavigationSnapshot | null = null;
+
+    private _pageRegistry: PageRegistry;
+    private _docsYmlBaseContent: DocsYmlBaseContent;
+    private _docsYmlChanges: DocsYmlChanges;
+    private _lastCommittedHash?: string;
+    private _version: number;
+
+    private _storage?: NavigationStorage;
+    private _hydrated = false;
+    private _deletionToastCallback?: DeletionToastCallback;
+
     private _listeners = new Set<() => void>();
-    private _data: StoredNavigationData;
-    private _lastSnapshot: NavigationSnapshot | null = null;
-    private _lastServerSnapshot: NavigationSnapshot | null = null;
-    private _version = 0;
+    private _pageSaveEventListeners = new Set<(event: PageSaveEvent) => void>();
 
-    private _cachedClientNodes: Record<NodeId, FernNavigation.PageNode[]> | null = null;
-    private _cachedClientFoundNodes: Record<NodeId, FernNavigation.utils.Node.Found> | null = null;
-    private _storage: NavigationStorage;
-
-    constructor(branchName: string, orgName: string, docsUrl: string, storage?: NavigationStorage) {
+    constructor(branchName: string, orgName: string, docsUrl: string) {
         this._branchName = branchName;
         this._orgName = orgName;
         this._docsUrl = docsUrl;
-        this._storage = storage || createNavigationLocalStorage();
-        this._data = this._storage.getStore(branchName);
+        this._latestSnapshot = createEmptyNavigationSnapshot(branchName, orgName, docsUrl);
+
+        this._pageRegistry = this._latestSnapshot.pageRegistry;
+        this._docsYmlBaseContent = this._latestSnapshot.docsYmlBaseContent;
+        this._docsYmlChanges = this._latestSnapshot.docsYmlChanges;
+        this._lastCommittedHash = this._latestSnapshot.lastCommittedHash;
+        this._version = this._latestSnapshot.version;
     }
 
-    /** Get the branch name */
+    // GETTERS
+    // --------------------------------------------------------------------------
+
+    /** Returns the branch name */
     get branchName(): string {
         return this._branchName;
     }
@@ -75,343 +82,467 @@ export class NavigationStore {
         return this._docsUrl;
     }
 
-    /** Get a copy of all page changes */
-    get pageChanges(): Map<string, PageChange> {
-        return new Map(this._pageChanges);
+    /** Returns pages from the registry */
+    get registeredPages(): PageRegistry {
+        return this._pageRegistry;
     }
 
-    /** Get a copy of all config changes */
-    get configChanges(): Map<string, ConfigChange> {
-        return new Map(this._configChanges);
+    /** Returns whether the store has been hydrated */
+    get hydrated(): boolean {
+        return this._hydrated;
     }
 
-    private _updateStorage(updates: Partial<StoredNavigationData>): void {
-        this._storage.updateStore(this._branchName, this._orgName, this._docsUrl, updates);
-        this._data = { ...this._data, ...updates };
-    }
+    /** Returns all changed, deleted, and commit-ready files */
+    get files(): {
+        changed: FilenameToContent;
+        deleted: string[];
+        forCommit: GitCommitFile[];
+        hasChangesToCommit: boolean;
+    } {
+        const changedFiles: FilenameToContent = {};
+        const deletedFiles: string[] = [];
 
-    private _clearCaches(): void {
-        this._cachedClientNodes = null;
-        this._cachedClientFoundNodes = null;
-    }
+        Object.entries(this._pageRegistry).forEach(([filename, entry]) => {
+            if (entry.status === "changed" && entry.pageData.mdx) {
+                changedFiles[filename] = entry.pageData.mdx;
+            }
+            if (entry.isMarkedForDeletion) {
+                deletedFiles.push(filename);
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+                delete changedFiles[filename];
+            }
+        });
 
-    /** Load page data for a specific file */
-    loadPageData(filename: string): PageData | undefined {
-        return loadPageData(this._data, filename);
-    }
+        this._docsYmlChanges.forEach((change, filename) => {
+            if (change.type === "remove_page" && !deletedFiles.includes(filename)) {
+                deletedFiles.push(filename);
+            }
+        });
 
-    /** Load all page data */
-    loadAllPageData(): Record<string, PageData> {
-        return loadAllPageData(this._data);
-    }
+        if (this._docsYmlChanges.size > 0) {
+            try {
+                changedFiles["docs.yml"] = buildDocsYmlFromChanges(this._latestSnapshot);
+            } catch (error) {
+                console.error("Failed to generate docs.yml:", error);
+            }
+        }
 
-    /** Save page data updates to storage */
-    savePageData(pageDataUpdates: Record<string, PageData>): void {
-        const updatedData = savePageData(this._data, pageDataUpdates);
-        this._updateStorage(updatedData);
-    }
-
-    /** Build page data from source files */
-    buildPageDataFromSources(props: BuildPageDataProps): BuildPageDataResult {
-        return buildPageDataFromSources(this._data, props);
-    }
-
-    /** Load client page data for a node */
-    loadClientPageData(nodeId: NodeId) {
         return {
-            ...loadClientPageData(this._data, nodeId),
-            removeClientNodeWithUpdate: (pagePath: string, nodeId: NodeId) =>
-                this.removeClientNodeWithUpdate(pagePath, nodeId)
+            changed: changedFiles,
+            deleted: deletedFiles,
+            forCommit: formatCommitFiles(changedFiles, deletedFiles),
+            hasChangesToCommit: hasChangesToCommit(changedFiles, this._lastCommittedHash)
         };
     }
 
-    /** Load client nodes grouped by parent */
-    loadClientNodes(): Record<NodeId, FernNavigation.PageNode[]> {
-        if (!this._cachedClientNodes) {
-            this._cachedClientNodes = buildClientNodesByParent(this._data);
-        }
-        return this._cachedClientNodes;
+    // METHODS
+    // --------------------------------------------------------------------------
+
+    /** Lazily initializes storage to prevent hydration errors */
+    hydrate(options?: { storage?: NavigationStorage; initialDocsYmlContent?: string | null }): void {
+        this._storage = options?.storage || createNavigationLocalStorage();
+        const storedSnapshot = this._storage.getOrSetStore(this._branchName, this._orgName, this._docsUrl);
+
+        this._latestSnapshot = storedSnapshot;
+        this._pageRegistry = storedSnapshot.pageRegistry;
+        this._docsYmlBaseContent = storedSnapshot.docsYmlBaseContent ?? options?.initialDocsYmlContent ?? null;
+        this._docsYmlChanges = storedSnapshot.docsYmlChanges;
+        this._lastCommittedHash = storedSnapshot.lastCommittedHash;
+        this._version = storedSnapshot.version;
+        this._hydrated = true;
+
+        this._setStorageAndNotify();
     }
 
-    /** Load client found nodes */
-    loadClientFoundNodes(): Record<NodeId, FernNavigation.utils.Node.Found> {
-        if (!this._cachedClientFoundNodes) {
-            this._cachedClientFoundNodes = buildClientFoundNodes(this._data);
-        }
-        return this._cachedClientFoundNodes;
+    /** Set the deletion toast callback */
+    setDeletionToastCallback(callback: DeletionToastCallback): void {
+        this._deletionToastCallback = callback;
     }
 
-    /** Subscribe to store changes (useSyncExternalStore) */
+    /** Resolves initial page data from dependencies */
+    resolveInitialPageData(deps: PageDataDependencies): ResolvedPageData {
+        return resolvePageData(this._latestSnapshot, deps);
+    }
+
+    /** Ensures page entry exists in registry (creates or updates it) */
+    registerPage(pageData: ResolvedPageData): void {
+        const existing = this._pageRegistry[pageData.filename];
+
+        // Extract parent section ID from foundNode parents
+        const parentSectionId = this._extractParentSectionId(pageData.foundNode);
+
+        if (existing) {
+            this._updatePageEntry(pageData.filename, {
+                pageData: pageData,
+                parentSectionId: existing.parentSectionId ?? parentSectionId
+            });
+        } else {
+            this._createPageEntry(pageData.filename, {
+                pageData: pageData,
+                status: "unchanged",
+                isMarkedForDeletion: false,
+                lastModified: Date.now(),
+                parentSectionId
+            });
+        }
+    }
+
+    /** Creates a new client page */
+    createClientPage(filename: PageFilename, deps: ClientPageDataWriteDependencies): void {
+        const { html, frontmatter } = mdxToHtml(deps.initialMdx);
+        const title = String(frontmatter?.title ?? "");
+        const slug = FernNavigation.Slug(String(frontmatter?.slug ?? ""));
+        const indices = Object.values(this._pageRegistry)
+            .map((entry) => entry.index)
+            .filter((index): index is string => index != null);
+        const newIndex = generateFractionalIndex(indices, "start");
+
+        const parentSectionId =
+            deps.targetSectionPath.length > 0
+                ? deps.targetSectionPath[deps.targetSectionPath.length - 1]?.id
+                : undefined;
+
+        this._createPageEntry(filename, {
+            pageData: {
+                source: "client",
+                filename: filename,
+                mdx: deps.initialMdx,
+                html: html,
+                frontmatter: frontmatter,
+                foundNode: {
+                    ...deps.baseFoundNode,
+                    node: {
+                        type: "page",
+                        id: FernNavigation.NodeId(`client-${Math.random().toString(36).substring(2, 15)}`),
+                        pageId: FernNavigation.PageId(filename),
+                        title: title,
+                        slug: slug,
+                        canonicalSlug: slug,
+                        icon: undefined,
+                        hidden: undefined,
+                        authed: undefined,
+                        viewers: undefined,
+                        orphaned: undefined,
+                        noindex: undefined,
+                        featureFlags: undefined,
+                        availability: undefined
+                    }
+                }
+            },
+            status: "changed",
+            isMarkedForDeletion: false,
+            lastModified: Date.now(),
+            index: newIndex,
+            parentSectionId
+        });
+
+        this._docsYmlChanges.set(filename, {
+            type: "add_page",
+            sectionTitle: this._extractSectionTitle(deps.targetSectionPath),
+            tabSlug: this._extractTabSlug(deps.baseFoundNode),
+            pageEntry: { page: title, path: filename },
+            createdAt: Date.now(),
+            index: newIndex
+        });
+
+        this._setStorageAndNotify();
+    }
+
+    /** Updates page data and marks as changed */
+    updatePage(filename: PageFilename, update: Partial<PageData>): void {
+        this._updatePageEntry(filename, {
+            pageData: { ...update },
+            status: "changed"
+        });
+    }
+
+    /** Updates page frontmatter by regenerating MDX */
+    updatePageFrontmatter(filename: string, frontmatter: Partial<Frontmatter>): void {
+        const { pageData } = this._getPageEntry(filename);
+        const { mdx } = htmlToMdx(pageData.html, {
+            frontmatter: { ...pageData.frontmatter, ...frontmatter }
+        });
+        this.updatePage(filename, { mdx });
+    }
+
+    /** Updates page HTML content by converting to MDX */
+    updatePageHtml(filename: string, html: string, changedNodes?: ChangedNodes): void {
+        const { pageData } = this._getPageEntry(filename);
+        const { mdx } = htmlToMdx(html, {
+            frontmatter: pageData.frontmatter,
+            changedNodes
+        });
+        this.updatePage(filename, { mdx });
+    }
+
+    /** Marks a page for deletion and tracks in docs.yml changes */
+    markPageForDeletion(filename: PageFilename, pageTitle?: string): void {
+        const entry = this._pageRegistry[filename];
+
+        if (entry) {
+            this._updatePageEntry(filename, { isMarkedForDeletion: true });
+            this._docsYmlChanges.set(filename, {
+                type: "remove_page",
+                pageEntry: {
+                    page: entry.pageData.foundNode.node.title,
+                    path: filename
+                },
+                createdAt: Date.now()
+            });
+
+            // Show deletion toast with undo functionality
+            if (this._deletionToastCallback) {
+                this._deletionToastCallback(entry.pageData.foundNode.node.title, () =>
+                    this.unmarkPageForDeletion(filename)
+                );
+            }
+        } else if (pageTitle) {
+            this._docsYmlChanges.set(filename, {
+                type: "remove_page",
+                pageEntry: { page: pageTitle, path: filename },
+                createdAt: Date.now()
+            });
+            this._setStorageAndNotify();
+
+            // Show deletion toast with undo functionality for server pages
+            if (this._deletionToastCallback) {
+                this._deletionToastCallback(pageTitle, () => this.unmarkPageForDeletion(filename));
+            }
+        } else {
+            console.warn(`Cannot mark page ${filename} for deletion: page not found in registry and no title provided`);
+        }
+    }
+
+    /** Unmarks a page for deletion and removes from docs.yml changes */
+    unmarkPageForDeletion(filename: PageFilename): void {
+        const entry = this._pageRegistry[filename];
+        if (entry) {
+            this._updatePageEntry(filename, { isMarkedForDeletion: false });
+
+            // For client pages, we need to restore them as "add_page" changes
+            // For server pages, we just remove the deletion change
+            if (entry.pageData.source === "client") {
+                // Restore client page as an "add_page" change
+                const title = entry.pageData.foundNode.node.title;
+                const targetSectionPath = this._reconstructTargetSectionPath(entry);
+
+                this._docsYmlChanges.set(filename, {
+                    type: "add_page",
+                    sectionTitle: this._extractSectionTitle(targetSectionPath),
+                    tabSlug: this._extractTabSlug(entry.pageData.foundNode),
+                    pageEntry: { page: title, path: filename },
+                    createdAt: Date.now(),
+                    index: entry.index
+                });
+            } else {
+                // For server pages, just remove the deletion change
+                this._docsYmlChanges.delete(filename);
+            }
+
+            this._setStorageAndNotify();
+        } else if (this._docsYmlChanges.has(filename)) {
+            // Handle server pages that are not in the registry but have deletion changes
+            // This occurs when markPageForDeletion was called with only pageTitle (server pages not in registry)
+            this._docsYmlChanges.delete(filename);
+            this._setStorageAndNotify();
+        }
+    }
+
+    /** Handles successful commit by cleaning up changed and deleted pages */
+    handleCommitSuccess(): void {
+        Object.keys(this._pageRegistry).forEach((filename) => {
+            const entry = this._pageRegistry[filename];
+            if (!entry) return;
+
+            if (entry.isMarkedForDeletion) {
+                const { [filename]: _, ...rest } = this._pageRegistry;
+                this._pageRegistry = rest;
+            } else if (entry.status === "changed") {
+                this._pageRegistry[filename] = { ...entry, status: "committed" };
+            }
+        });
+
+        if (this.files.changed["docs.yml"]) {
+            this._docsYmlBaseContent = this.files.changed["docs.yml"];
+        }
+
+        const deletionMarkers = new Map<string, DocsYmlChange>();
+        this._docsYmlChanges.forEach((change, filename) => {
+            if (change.type === "remove_page") {
+                deletionMarkers.set(filename, change);
+            }
+        });
+        this._docsYmlChanges.clear();
+        deletionMarkers.forEach((change, filename) => {
+            this._docsYmlChanges.set(filename, change);
+        });
+
+        // TODO: is this the right place to compute the hash?
+        this._lastCommittedHash = computeStateHash(this.files.changed);
+        this._setStorageAndNotify();
+    }
+
+    /** Emits a page save event to all listeners */
+    emitPageSaveEvent(event: PageSaveEvent): void {
+        this._pageSaveEventListeners.forEach((listener) => listener(event));
+    }
+
+    /** Subscribes to page save events */
+    subscribePageSaveEvent(listener: (event: PageSaveEvent) => void): () => void {
+        this._pageSaveEventListeners.add(listener);
+        return () => this._pageSaveEventListeners.delete(listener);
+    }
+
+    // useSyncExternalStore
+    // --------------------------------------------------------------------------
+
+    /** Subscribes to store changes for useSyncExternalStore */
     subscribe(listener: () => void): () => void {
         this._listeners.add(listener);
         return () => this._listeners.delete(listener);
     }
 
-    private _notify(): void {
-        this._version++;
-        this._lastSnapshot = null;
-        this._clearCaches();
-        this._listeners.forEach((listener) => listener());
-    }
-
-    private _persist(): void {
-        this._storage.setStore(this._branchName, this._orgName, this._docsUrl, this._data);
-    }
-
-    private _updatePageState(
-        operation: "create" | "update" | "delete",
-        nodeId: NodeId,
-        data?: {
-            parentNodeId?: NodeId;
-            node?: FernNavigation.PageNode;
-            sidebar?: FernNavigation.SidebarRootNode;
-            pageData?: PageData;
-            fullSlug?: string;
-            navigationContext?: NavigationContext;
-            originalSection?: SectionWithHierarchy;
-        }
-    ): void {
-        const existingPage = this._data.clientPages[nodeId];
-
-        if (operation !== "create" && !existingPage) {
-            console.warn(`Page with nodeId ${nodeId} not found for ${operation}`);
-            return;
-        }
-
-        const fullSlug =
-            operation === "create" ? data?.fullSlug || data?.node?.slug || "" : existingPage?.fullSlug || "";
-        const filename = createMdxFilename(fullSlug);
-        const pageData = operation === "delete" ? undefined : data?.pageData || existingPage?.pageData;
-
-        // Update client pages
-        if (operation === "create" && data?.node && data.parentNodeId != null) {
-            this._data.clientPages[nodeId] = {
-                node: data.node,
-                parentNodeId: data.parentNodeId,
-                sidebar: data.sidebar,
-                pageData,
-                fullSlug,
-                navigationContext: data.navigationContext,
-                createdAt: Date.now()
-            };
-        } else if (operation === "update" && existingPage && pageData) {
-            this._data.clientPages[nodeId] = { ...existingPage, pageData };
-        } else if (operation === "delete") {
-            const { [nodeId]: _, ...updatedClientPages } = this._data.clientPages;
-            this._data.clientPages = updatedClientPages;
-        }
-
-        // Track page changes
-        if (pageData || operation === "delete") {
-            this._pageChanges.set(filename, {
-                type: operation,
-                filename,
-                nodeId,
-                ...(pageData && { pageData })
-            });
-        }
-
-        // Handle docs.yml updates
-        if (operation === "create" && pageData && fullSlug && data?.node && data.parentNodeId != null) {
-            const pageTitle = extractPageTitle(pageData, data.node);
-            const pageEntry = createNavigationEntry(pageTitle, filename);
-
-            // Extract tab information if we're in a tabbed navigation
-            const tabSlug =
-                data.navigationContext?.currentTab?.type === "tab"
-                    ? (data.navigationContext.currentTab as any).slug
-                    : undefined;
-
-            // For unnamed sections, pages should be added directly to navigation root
-            // For named sections, they should be grouped under a section
-            const isUnnamedSection = data.originalSection?.isUnnamed === true;
-
-            const sectionTitle: string | null = isUnnamedSection
-                ? null
-                : data.originalSection?.title ||
-                  (data.sidebar?.children
-                      ? findSectionTitle(data.sidebar.children, data.parentNodeId) || "Pages"
-                      : "Pages");
-
-            this._data.docsYmlState.pendingUpdates[filename] = createDocsYmlUpdate(
-                sectionTitle,
-                pageEntry,
-                "add",
-                tabSlug
-            );
-            this._configChanges.set(filename, {
-                type: "add_page",
-                sectionTitle,
-                tabSlug,
-                pageEntry
-            });
-        } else if (operation === "delete" && existingPage) {
-            const pageTitle = existingPage.node.title || "";
-            this._data.docsYmlState.pendingUpdates[filename] = {
-                sectionTitle: "",
-                pageEntry: { page: pageTitle, path: filename },
-                createdAt: Date.now(),
-                operation: "remove"
-            };
-            this._configChanges.set(filename, {
-                type: "remove_page",
-                pageEntry: { page: pageTitle, path: filename }
-            });
-        }
-
-        this._persist();
-        this._notify();
-    }
-
-    /** Create a new page */
-    createPage(
-        parentNodeId: NodeId,
-        node: FernNavigation.PageNode,
-        sidebar?: FernNavigation.SidebarRootNode,
-        pageData?: PageData,
-        fullSlug?: string,
-        navigationContext?: NavigationContext,
-        originalSection?: SectionWithHierarchy
-    ): void {
-        this._updatePageState("create", node.id, {
-            parentNodeId,
-            node,
-            sidebar,
-            pageData,
-            fullSlug,
-            navigationContext,
-            originalSection
-        });
-    }
-
-    /** Update an existing page */
-    updatePage(nodeId: NodeId, pageData: PageData): void {
-        this._updatePageState("update", nodeId, { pageData });
-    }
-
-    /** Delete a page */
-    deletePage(nodeId: NodeId): void {
-        this._updatePageState("delete", nodeId);
-    }
-
-    /** Reset store to persisted state */
-    reset(): void {
-        this._data = this._storage.getStore(this._branchName); // Reload from storage
-        this._pageChanges.clear();
-        this._configChanges.clear();
-        this._notify();
-    }
-
-    /** Prepare commit data from changes */
-    prepareCommit(changedMdxFiles?: Record<string, string>): {
-        changedFiles: Record<string, string>;
-        deletedFiles: string[];
-        docsYmlContent?: string;
-    } {
-        return createCommitFromChanges(this._pageChanges, this._configChanges, this._data, changedMdxFiles);
-    }
-
-    /** Check if changes are already committed */
-    isCommitted(changedMdxFiles?: Record<string, string>): boolean {
-        const { changedFiles } = this.prepareCommit(changedMdxFiles);
-        const hasChanges = Object.keys(changedFiles).length > 0;
-
-        if (!hasChanges) return false;
-
-        const currentHash = generateSimpleHash(changedFiles);
-        const lastCommittedHash = this._data.lastCommittedHash;
-
-        return lastCommittedHash != null && currentHash === lastCommittedHash && currentHash !== "0";
-    }
-
-    /** Clear all tracked changes */
-    clearChanges(): void {
-        // Update committed files before clearing changes
-        this._pageChanges.forEach((change) => {
-            if (change.type === "delete") {
-                this._data.committedFiles.delete(change.filename);
-            } else {
-                this._data.committedFiles.add(change.filename);
-            }
-        });
-
-        this._pageChanges.clear();
-        this._configChanges.clear();
-        this._data.docsYmlState.pendingUpdates = {};
-
-        this._persist();
-        this._notify();
-    }
-
-    /** Get set of committed files */
-    getCommittedFiles(): Set<string> {
-        return new Set(this._data.committedFiles);
-    }
-
-    /** Set base docs.yml content */
-    setDocsYmlBaseContent(content: string): void {
-        this._data.docsYmlState.baseContent = content;
-        this._data.docsYmlState.lastFetched = Date.now();
-        this._persist();
-    }
-
-    /** Check if store has pending changes */
-    hasChanges(): boolean {
-        return this._pageChanges.size > 0 || this._configChanges.size > 0;
-    }
-
-    /** Get current snapshot of store state (useSyncExternalStore) */
+    /** Returns current snapshot for client-side rendering */
     getSnapshot(): NavigationSnapshot {
-        if (this._lastSnapshot?.version === this._version) {
-            return this._lastSnapshot;
-        }
-
-        this._lastSnapshot = {
-            clientNodes: this.loadClientNodes(),
-            clientFoundNodes: this.loadClientFoundNodes(),
-            pageChanges: this.pageChanges,
-            configChanges: this.configChanges,
-            hasChanges: this.hasChanges(),
-            committedFiles: this.getCommittedFiles(),
-            branchName: this.branchName,
-            version: this._version
-        };
-
-        return this._lastSnapshot;
+        return this._latestSnapshot;
     }
 
-    /** Get server-side snapshot (useSyncExternalStore) */
+    /** Returns server-side snapshot for SSR */
     getServerSnapshot(): NavigationSnapshot {
-        if (!this._lastServerSnapshot) {
-            this._lastServerSnapshot = {
-                clientNodes: {},
-                clientFoundNodes: {},
-                pageChanges: new Map<string, PageChange>(),
-                configChanges: new Map<string, ConfigChange>(),
-                hasChanges: false,
-                committedFiles: new Set<string>(),
+        if (!this._serverSnapshot) {
+            this._serverSnapshot = {
+                schemaVersion: 1,
                 branchName: this._branchName,
+                metadata: {
+                    orgName: this._orgName,
+                    docsUrl: this._docsUrl
+                },
+                pageRegistry: {},
+                docsYmlBaseContent: null,
+                docsYmlChanges: new Map(),
                 version: 0
             };
         }
-        return this._lastServerSnapshot;
+        return this._serverSnapshot;
     }
 
-    /** Remove client node and update docs.yml */
-    removeClientNodeWithUpdate(pagePath: string, nodeId: NodeId): void {
-        this._data.docsYmlState.pendingUpdates[pagePath] = {
-            sectionTitle: "",
-            pageEntry: { page: "", path: pagePath },
-            createdAt: Date.now(),
-            operation: "remove"
+    // HELPERS
+    // --------------------------------------------------------------------------
+
+    /** Require storage, used to prevent hydration errors */
+    private _requireStorage(): NavigationStorage {
+        if (!this._storage) {
+            throw new Error("NavigationStorage not available");
+        }
+        return this._storage;
+    }
+
+    /** Notifies all subscribers of store changes */
+    private _notify(): void {
+        this._listeners.forEach((listener) => listener());
+    }
+
+    /** Updates storage snapshot and notifies listeners */
+    private _setStorageAndNotify(): void {
+        this._version++;
+        const snapshot: NavigationSnapshot = {
+            schemaVersion: 1,
+            branchName: this._branchName,
+            metadata: {
+                orgName: this._orgName,
+                docsUrl: this._docsUrl
+            },
+            pageRegistry: this._pageRegistry,
+            docsYmlBaseContent: this._docsYmlBaseContent,
+            docsYmlChanges: this._docsYmlChanges,
+            lastCommittedHash: this._lastCommittedHash,
+            version: this._version
         };
-        this.deletePage(nodeId);
+        this._requireStorage().setStore(this._branchName, this._orgName, this._docsUrl, snapshot);
+        this._latestSnapshot = snapshot;
+        this._notify();
     }
 
-    /** Handle successful commit */
-    handleCommitSuccess(allFilesToCommit: Record<string, string>): void {
-        const updatedData = handleCommitSuccess(allFilesToCommit);
-        this._updateStorage(updatedData);
-        this.clearChanges();
+    /** Creates a new page entry in the registry */
+    private _createPageEntry(filename: PageFilename, entry: PageRegistryEntry): void {
+        if (this._pageRegistry[filename]) {
+            throw new Error(`Page entry already exists for file: ${filename}`);
+        }
+        this._pageRegistry[filename] = entry;
+        this._setStorageAndNotify();
+    }
+
+    /** Returns a page entry or throws if not found */
+    private _getPageEntry(filename: PageFilename): PageRegistryEntry {
+        const entry = this._pageRegistry[filename];
+        if (!entry) {
+            throw new Error(`Could not find page entry for file: ${filename}`);
+        }
+        return entry;
+    }
+
+    /** Updates an existing page entry in the registry */
+    private _updatePageEntry(
+        filename: PageFilename,
+        update: Partial<PageRegistryEntry> | { pageData?: Partial<ResolvedPageData> }
+    ): void {
+        const entry = this._getPageEntry(filename);
+        const shouldRecompute = update.pageData?.mdx !== entry.pageData.mdx;
+
+        // Force recomputation if HTML is missing to ensure data consistency
+        const forceRecompute = !entry.pageData.html || entry.pageData.html.length === 0;
+        const needsRecompute = shouldRecompute || forceRecompute;
+
+        const { html, frontmatter } = needsRecompute
+            ? mdxToHtml(update.pageData?.mdx ?? entry.pageData.mdx ?? "", {
+                  treatAsUnsupported: ["math"]
+              })
+            : { html: entry.pageData.html, frontmatter: entry.pageData.frontmatter };
+
+        this._pageRegistry[filename] = {
+            ...entry,
+            ...update,
+            pageData: { ...entry.pageData, ...update.pageData, html, frontmatter }
+        };
+        this._setStorageAndNotify();
+    }
+
+    /** Extracts the parent section ID from a found node's parents */
+    private _extractParentSectionId(foundNode: SerializableFoundNode): FernNavigation.NodeId | undefined {
+        // Find the closest section parent in the parents array
+        const sectionParent = foundNode.parents
+            .slice()
+            .reverse()
+            .find((parent) => parent.type === "section");
+        return sectionParent?.id;
+    }
+
+    /** Extracts the closest parent section title from section path */
+    private _extractSectionTitle(sectionPath: SectionAncestorMetadata[]): string | null {
+        const section = sectionPath
+            .slice()
+            .reverse()
+            .find((ancestor) => ancestor.type === "section");
+        return section?.title || null;
+    }
+
+    /** Reconstructs the target section path from a page entry's found node */
+    private _reconstructTargetSectionPath(entry: PageRegistryEntry): SectionAncestorMetadata[] {
+        const foundNode = entry.pageData.foundNode;
+        return foundNode.parents.map((parent) => ({
+            id: parent.id,
+            type:
+                parent.type === "section"
+                    ? ("section" as const)
+                    : parent.type === "sidebarRoot"
+                      ? ("sidebarRoot" as const)
+                      : ("sidebarGroup" as const),
+            title: "title" in parent ? parent.title : null
+        }));
+    }
+
+    /** Extracts the tab slug from found node */
+    private _extractTabSlug(foundNode: SerializableFoundNode): string | undefined {
+        return foundNode.currentTab?.slug;
     }
 }

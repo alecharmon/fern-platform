@@ -7,7 +7,15 @@ import { cn } from "../cn";
 import { FernLinkTab } from "../FernLinkTab";
 import { processIcon } from "../processIcon";
 
-export function SidebarTabsList({ tabs, children }: { tabs: readonly TabChild[]; children?: React.ReactNode }) {
+export function SidebarTabsList({
+    tabs,
+    children,
+    forceClientRender
+}: {
+    tabs: readonly TabChild[];
+    children?: React.ReactNode;
+    forceClientRender?: boolean;
+}) {
     return (
         <Tabs.TabsList className="-my-2">
             {tabs.map((tab) => (
@@ -29,7 +37,7 @@ export function SidebarTabsList({ tabs, children }: { tabs: readonly TabChild[];
                                 "group-data-[state=active]:bg-(color:--accent-10) group-data-[state=active]:text-background group-data-[state=active]:border-transparent group-data-[state=active]:shadow-none"
                             )}
                         >
-                            {tab.type !== "link" && tab.authed ? <Lock /> : processIcon(tab, "book")}
+                            {tab.type !== "link" && tab.authed ? <Lock /> : processIcon(tab, "book", forceClientRender)}
                         </span>
                         <span className="truncate font-medium group-data-[state=active]:font-semibold">
                             {tab.title}

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 
 import { cn } from "@fern-docs/components/cn";
+import { useNavigation } from "@fern-docs/components/navigation";
 
 import { AutoResizingInput } from "@/components/input/AutoResizingInput";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
-import { usePages } from "@/providers/PagesStoreContext";
 
 export declare namespace PageSubtitle {
     export interface Props {
@@ -20,38 +20,23 @@ export default function PageSubtitle({ className, filename, initialText }: PageS
     const [text, setText] = useState(initialText);
     const isEditingDisabled = useEditingDisabled();
 
-    const { updatePage, frontmatterData } = usePages();
+    const { updatePageFrontmatter, subscribePageSaveEvent } = useNavigation();
 
-    // Watch for frontmatter changes from dev panel and update text accordingly
+    // Subscribe to save events from @devPanel
     useEffect(() => {
-        const currentFrontmatter = frontmatterData[filename];
-        if (currentFrontmatter && "subtitle" in currentFrontmatter) {
-            // Subtitle field exists in frontmatter
-            const newSubtitle = currentFrontmatter.subtitle ? String(currentFrontmatter.subtitle) : "";
-            if (newSubtitle !== text) {
-                setText(newSubtitle);
-            }
-        } else if (text) {
-            // Subtitle field was deleted from frontmatter, clear the input
-            setText("");
-        }
-    }, [frontmatterData, filename, text]);
+        const unsubscribe = subscribePageSaveEvent((event) => {
+            setText(event.frontmatter.subtitle ? String(event.frontmatter.subtitle) : "");
+        });
+
+        return unsubscribe;
+    }, [filename, subscribePageSaveEvent]);
 
     function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         const nextText = e.target.value;
         setText(nextText);
-
-        // If the text is empty, we want to remove the subtitle field entirely
-        // We can do this by passing undefined, which will be filtered out when converting back to MDX
-        if (nextText.trim() === "") {
-            updatePage(filename, {
-                frontmatter: { subtitle: undefined }
-            });
-        } else {
-            updatePage(filename, {
-                frontmatter: { subtitle: nextText }
-            });
-        }
+        updatePageFrontmatter(filename, {
+            subtitle: nextText.trim() !== "" ? nextText : undefined
+        });
     }
 
     return (

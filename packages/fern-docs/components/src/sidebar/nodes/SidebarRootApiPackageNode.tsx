@@ -10,9 +10,15 @@ export interface SidebarRootApiPackageNodeProps {
     node: FernNavigation.ApiReferenceNode | FernNavigation.ApiPackageNode;
     icon: React.ReactNode;
     className?: string;
+    forceClientRender?: boolean;
 }
 
-export function SidebarRootApiPackageNode({ node, icon, className }: SidebarRootApiPackageNodeProps) {
+export function SidebarRootApiPackageNode({
+    node,
+    icon,
+    className,
+    forceClientRender
+}: SidebarRootApiPackageNodeProps) {
     const shallow = false;
 
     if (node.children.length === 0 && FernNavigation.hasMarkdown(node)) {
@@ -23,6 +29,7 @@ export function SidebarRootApiPackageNode({ node, icon, className }: SidebarRoot
                 className={cn(className, "!text-body font-semibold")}
                 shallow={shallow}
                 icon={icon}
+                forceClientRender={forceClientRender}
             />
         );
     }
@@ -38,12 +45,22 @@ export function SidebarRootApiPackageNode({ node, icon, className }: SidebarRoot
             <ul className="fern-sidebar-group">
                 {node.children.map((child) => (
                     <li key={child.id}>
-                        <SidebarApiPackageChild node={child} depth={1} shallow={shallow} />
+                        <SidebarApiPackageChild
+                            node={child}
+                            depth={1}
+                            shallow={shallow}
+                            forceClientRender={forceClientRender}
+                        />
                     </li>
                 ))}
                 {node.type === "apiReference" && node.changelog != null && (
                     <li>
-                        <SidebarApiPackageChild node={node.changelog} depth={1} shallow={shallow} />
+                        <SidebarApiPackageChild
+                            node={node.changelog}
+                            depth={1}
+                            shallow={shallow}
+                            forceClientRender={forceClientRender}
+                        />
                     </li>
                 )}
             </ul>

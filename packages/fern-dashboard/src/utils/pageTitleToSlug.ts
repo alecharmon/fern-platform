@@ -12,17 +12,14 @@ export function pageTitleToSlug(pageTitle: string): string {
 
     // Handle empty or whitespace-only strings
     const trimmedTitle = pageTitle.trim();
-    if (!trimmedTitle) {
-        return "untitled-page";
-    }
 
     const slug = trimmedTitle
         .toLowerCase()
         .replace(/\s+/g, "-") // Replace spaces with hyphens
-        .replace(/[^a-z0-9-]/g, "") // Remove non-alphanumeric characters except hyphens
+        .replace(/[^a-z0-9\-/]/g, "") // Remove non-alphanumeric characters except hyphens and slashes
         .replace(/-+/g, "-") // Collapse multiple hyphens
         .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 
     // Fallback if slug becomes empty after sanitization
-    return slug || "untitled-page";
+    return slug;
 }

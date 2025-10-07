@@ -4,10 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 
 import type { Editor, EditorEvents } from "@tiptap/react";
 
+import { useNavigation } from "@fern-docs/components/navigation";
 import { getChangedNodesFromHtml } from "@fern-docs/mdx";
 
 import TiptapEditor from "@/components/editor/TiptapEditor";
-import { usePages } from "@/providers/PagesStoreContext";
 
 export declare namespace PageEditor {
     export interface Props {
@@ -21,23 +21,29 @@ export declare namespace PageEditor {
 export default function PageEditor({ className, filename, initialHtml }: PageEditor.Props) {
     const editorRef = useRef<Editor | null>(null);
     const skipNormalUpdateBecauseUpdateIsFromDevPanel = useRef(false);
+    const skipFirstUpdateBecauseItIsInitialization = useRef(true);
     const latestTiptapHtml = useRef<string>(initialHtml || "");
     const [saveCounter, setSaveCounter] = useState(0);
 
-    const { updatePage, subscribeSaveEvent } = usePages();
+    const { updatePageHtml, subscribePageSaveEvent } = useNavigation();
 
     // Subscribe to save events
     useEffect(() => {
-        const unsubscribe = subscribeSaveEvent((event) => {
-            skipNormalUpdateBecauseUpdateIsFromDevPanel.current = true;
-            editorRef.current?.commands.setContent(event.html);
-            setSaveCounter((c) => {
-                return c + 1;
-            });
+        const unsubscribe = subscribePageSaveEvent((event) => {
+            if (event.filename === filename) {
+                skipNormalUpdateBecauseUpdateIsFromDevPanel.current = true;
+                editorRef.current?.commands.setContent(event.html);
+                setSaveCounter((c) => c + 1);
+            }
         });
 
         return unsubscribe;
-    }, [filename, subscribeSaveEvent, latestTiptapHtml, editorRef, setSaveCounter]);
+    }, [filename, subscribePageSaveEvent, latestTiptapHtml, editorRef, setSaveCounter]);
+
+    // Reset initialization flag when the editor is recreated (e.g., from dev panel updates)
+    useEffect(() => {
+        skipFirstUpdateBecauseItIsInitialization.current = true;
+    }, [saveCounter]);
 
     function onTiptapEditorCreate(props: EditorEvents["create"]) {
         latestTiptapHtml.current = props.editor.getHTML();
@@ -47,17 +53,19 @@ export default function PageEditor({ className, filename, initialHtml }: PageEdi
     function onTiptapEditorUpdate(props: EditorEvents["update"]) {
         const html = props.editor.getHTML();
 
+        // Skip the first update event as it's just TipTap processing the initial content
+        if (skipFirstUpdateBecauseItIsInitialization.current) {
+            skipFirstUpdateBecauseItIsInitialization.current = false;
+            latestTiptapHtml.current = html;
+            return;
+        }
+
         if (!skipNormalUpdateBecauseUpdateIsFromDevPanel.current) {
             const changedNodes = getChangedNodesFromHtml(latestTiptapHtml.current, html);
-
-            updatePage(filename, {
-                html,
-                changedNodes
-            });
+            updatePageHtml(filename, html, changedNodes);
         } else {
             skipNormalUpdateBecauseUpdateIsFromDevPanel.current = false;
         }
-
         latestTiptapHtml.current = html;
     }
 
@@ -67,7 +75,7 @@ export default function PageEditor({ className, filename, initialHtml }: PageEdi
             <TiptapEditor
                 autofocus={true}
                 className={className}
-                initialContent={initialHtml || ""}
+                initialContent={latestTiptapHtml.current}
                 onCreate={onTiptapEditorCreate}
                 onUpdate={onTiptapEditorUpdate}
             />

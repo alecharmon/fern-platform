@@ -1,25 +1,34 @@
 "use client";
 
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { ReactNode } from "react";
-
 import { UnreachableCaseError } from "ts-essentials";
 
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-
 import { processIcon } from "../../processIcon";
-import { SidebarClientPageNode } from "./SidebarClientPageNode";
+import { SidebarPageNode } from "./SidebarPageNode";
 
 interface SidebarClientNavigationChildProps {
     node: FernNavigation.NavigationChild;
     depth: number;
     root?: boolean;
+    forceClientRender?: boolean;
 }
 
-export function SidebarClientNavigationChild({ node, depth }: SidebarClientNavigationChildProps): ReactNode {
+export function SidebarClientNavigationChild({
+    node,
+    depth,
+    forceClientRender
+}: SidebarClientNavigationChildProps): ReactNode {
     switch (node.type) {
         case "page":
             return (
-                <SidebarClientPageNode className="cursor-pointer" node={node} depth={depth} icon={processIcon(node)} />
+                <SidebarPageNode
+                    className="cursor-pointer"
+                    node={node}
+                    depth={depth}
+                    icon={processIcon(node, undefined, forceClientRender)}
+                    forceClientRender={forceClientRender}
+                />
             );
         case "apiReference":
         case "section":

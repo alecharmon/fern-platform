@@ -55,7 +55,7 @@
     "./layouts/*": "./src/layouts/*.tsx",
     "./providers/*": "./src/providers/*.tsx",
     "./mdx/*": "./src/mdx/*.tsx",
-    "./navigation/local-storage": "./src/navigation/localStorageUtils.ts"
+    "./navigation": "./src/navigation/index.ts"
   },
   "files": ["src"],
   "scripts": {
@@ -96,6 +96,7 @@
     "@radix-ui/react-direction": "catalog:",
     "@radix-ui/react-dropdown-menu": "catalog:",
     "@radix-ui/react-id": "catalog:",
+    "@radix-ui/react-popover": "catalog:",
     "@radix-ui/react-portal": "catalog:",
     "@radix-ui/react-primitive": "catalog:",
     "@radix-ui/react-radio-group": "catalog:",
@@ -115,6 +116,7 @@
     "date-fns": "^4.1.0",
     "es-toolkit": "catalog:",
     "fastdom": "^1.0.12",
+    "fractional-indexing": "^3.2.0",
     "hast-util-to-jsx-runtime": "^2.3.0",
     "hastscript": "catalog:",
     "jotai": "catalog:",

@@ -25,19 +25,17 @@ const createTestNode = (): FernNavigation.PageNode => ({
 });
 
 const createTestData = () => ({
-    clientPages: {},
-    docsYmlState: {
-        baseContent: "",
-        pendingUpdates: {},
-        lastFetched: 0
-    },
-    committedFiles: new Set<string>(["test.mdx"]),
-    pageContents: {},
+    schemaVersion: 1,
+    branchName: "test-branch",
+    pageRegistry: {},
+    docsYmlBaseContent: "",
+    docsYmlChanges: new Map<string, any>(),
     lastCommittedHash: undefined,
     metadata: {
         orgName: MOCK_ORG_NAME,
         docsUrl: MOCK_DOCS_URL
-    }
+    },
+    version: 0
 });
 
 describe("NavigationStorage", () => {
@@ -47,50 +45,69 @@ describe("NavigationStorage", () => {
         storage = createNavigationMemoryStorage();
     });
 
-    it("should store, retrieve, and handle Set serialization", () => {
+    it("should store, retrieve, and handle Map serialization", () => {
         const testData = createTestData();
+        testData.docsYmlChanges.set("test.mdx", {
+            type: "add_page",
+            pageEntry: { page: "Test", path: "test.mdx" },
+            createdAt: Date.now()
+        });
 
         storage.setStore("test-branch", MOCK_ORG_NAME, MOCK_DOCS_URL, testData);
         const retrieved = storage.getStore("test-branch");
 
-        expect(retrieved.docsYmlState.baseContent).toBe("");
-        expect(retrieved.committedFiles).toEqual(new Set(["test.mdx"]));
-        expect(retrieved.committedFiles.has("test.mdx")).toBe(true);
+        expect(retrieved?.docsYmlBaseContent).toBe("");
+        expect(retrieved?.docsYmlChanges).toBeInstanceOf(Map);
+        expect(retrieved?.docsYmlChanges.has("test.mdx")).toBe(true);
     });
 
-    it("should return empty store for non-existent branch", () => {
+    it("should return null for non-existent branch", () => {
         const result = storage.getStore("non-existent-branch");
 
-        expect(result.clientPages).toEqual({});
-        expect(result.committedFiles).toEqual(new Set());
-        expect(result.pageContents).toEqual({});
+        expect(result).toBeNull();
     });
 
     it("should update existing store data", () => {
         storage.setStore("test-branch", MOCK_ORG_NAME, MOCK_DOCS_URL, createTestData());
 
         storage.updateStore("test-branch", MOCK_ORG_NAME, MOCK_DOCS_URL, {
-            docsYmlState: {
-                baseContent: "updated",
-                pendingUpdates: {},
-                lastFetched: 100
-            }
+            docsYmlBaseContent: "updated",
+            version: 1
         });
 
         const result = storage.getStore("test-branch");
-        expect(result.docsYmlState.baseContent).toBe("updated");
-        expect(result.docsYmlState.lastFetched).toBe(100);
+        expect(result?.docsYmlBaseContent).toBe("updated");
+        expect(result?.version).toBe(1);
     });
 
-    it("should handle client pages data", () => {
+    it("should handle page registry data", () => {
         const testData = {
             ...createTestData(),
-            clientPages: {
-                "test-page": {
-                    node: createTestNode(),
-                    parentNodeId: "parent-id" as FernNavigation.NodeId,
-                    createdAt: Date.now(),
-                    fullSlug: "test"
+            pageRegistry: {
+                "test.mdx": {
+                    pageData: {
+                        source: "client" as const,
+                        filename: "test.mdx",
+                        mdx: "# Test",
+                        html: "<h1>Test</h1>",
+                        frontmatter: { title: "Test" },
+                        foundNode: {
+                            type: "found" as const,
+                            node: createTestNode(),
+                            parents: [],
+                            sidebar: undefined,
+                            tabs: [],
+                            currentTab: undefined,
+                            currentVersion: undefined,
+                            currentProduct: undefined,
+                            isCurrentVersionDefault: true,
+                            isCurrentProductDefault: true
+                        }
+                    },
+                    status: "changed" as const,
+                    isMarkedForDeletion: false,
+                    lastModified: Date.now(),
+                    index: "a0"
                 }
             }
         };
@@ -98,7 +115,7 @@ describe("NavigationStorage", () => {
         storage.setStore("test-branch", MOCK_ORG_NAME, MOCK_DOCS_URL, testData);
         const result = storage.getStore("test-branch");
 
-        expect(Object.keys(result.clientPages)).toContain("test-page");
-        expect(result.clientPages["test-page" as FernNavigation.NodeId]?.fullSlug).toBe("test");
+        expect(Object.keys(result?.pageRegistry || {})).toContain("test.mdx");
+        expect(result?.pageRegistry["test.mdx"]?.pageData.filename).toBe("test.mdx");
     });
 });

@@ -1,385 +1,203 @@
-import { FernNavigation } from "@fern-api/fdr-sdk";
-import type { NodeId } from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { mdxToHtml } from "@fern-docs/mdx";
 
 import type {
-    BuildPageDataProps,
-    BuildPageDataResult,
-    NavigationNodeLike,
-    SectionWithHierarchy,
-    StoredNavigationData
+    ClientPageDataDependencies,
+    NavigationSnapshot,
+    PageDataDependencies,
+    ResolvedPageData,
+    SectionAncestorMetadata,
+    SectionNodeWithTraversalContext,
+    ServerPageDataDependencies
 } from "./types";
 
-// Display strings for unnamed sections
-export const UNNAMED_SECTION_DISPLAY_NAMES = {
-    ROOT: "Root",
-    UNNAMED: "Untitled Section"
-} as const;
+// SECTIONS
+// ----------------------------------------------------------------------------
 
-/**
- * Helper function to process nested sections/groups
- */
-function processNestedSections(
-    children: FernNavigation.NavigationNode[],
-    sections: SectionWithHierarchy[],
-    parentTitles: string[],
-    currentTitle: string,
-    nodeId: FernNavigation.NodeId
-): void {
-    // Check if children contain sections/groups (only recurse if they do)
-    const hasNestedSectionsOrGroups = children.some(
-        (child) => child.type === "section" || (child as any).type === "sidebarGroup"
-    );
+/** Gets a flat list of all sections from a section node */
+export function getAllSectionsFromSectionNode(
+    sectionNode: SectionNodeWithTraversalContext
+): SectionNodeWithTraversalContext[] {
+    const result: SectionNodeWithTraversalContext[] = [];
 
-    if (hasNestedSectionsOrGroups) {
-        sections.push(...getAllSections(children, [...parentTitles, currentTitle], nodeId));
-    }
-}
-
-/**
- * Recursively find all section nodes in the navigation tree with parent hierarchy.
- * Creates unnamed sections for direct page collections.
- */
-export function getAllSections(
-    nodes: FernNavigation.NavigationNode[],
-    parentTitles: string[] = [],
-    realParentId?: FernNavigation.NodeId
-): SectionWithHierarchy[] {
-    const sections: SectionWithHierarchy[] = [];
-
-    // Single pass to check for pages and section containers
-    let hasDirectPages = false;
-    let hasProperSectionContainer = false;
-
-    for (const node of nodes) {
-        if (node.type === "page") hasDirectPages = true;
-        else if (node.type === "section" || node.type === "sidebarGroup") hasProperSectionContainer = true;
-
-        // Early exit if both conditions are found
-        if (hasDirectPages && hasProperSectionContainer) break;
-    }
-
-    // Create unnamed section only at root level (parentTitles.length === 0) when pages exist without sections
-    // This prevents creating synthetic sections inside real sections
-    if (hasDirectPages && !hasProperSectionContainer && parentTitles.length === 0) {
-        // Create deterministic ID (always "root" at this point since parentTitles.length === 0)
-        const deterministicId = "unnamed-section-root";
-
-        // Note: This block is at root level only (parentTitles.length === 0), so no warning needed
-
-        const unnamedSection: SectionWithHierarchy = {
-            type: "section",
-            id: deterministicId as FernNavigation.NodeId,
-            title: UNNAMED_SECTION_DISPLAY_NAMES.ROOT, // Always root at this level
-            slug: "root" as FernNavigation.Slug,
-            children: nodes.filter((node) => node.type === "page"),
-            parentTitles,
-            realParentId, // Store the real parent node ID for client page creation
-            isUnnamed: true, // Mark as synthetic unnamed section
-            availability: undefined,
-            canonicalSlug: undefined,
-            icon: undefined,
-            hidden: undefined,
-            authed: undefined,
-            viewers: undefined,
-            orphaned: undefined,
-            featureFlags: undefined,
-            noindex: undefined,
-            collapsed: undefined,
-            overviewPageId: undefined,
-            pointsTo: undefined
-        };
-
-        sections.push(unnamedSection);
-    }
-
-    for (const node of nodes) {
-        if (node.type === "section") {
-            const sectionNode = node as FernNavigation.SectionNode;
-            const sectionWithHierarchy: SectionWithHierarchy = {
-                ...sectionNode,
-                parentTitles
+    for (const child of sectionNode.children) {
+        if (child.type === "section") {
+            const section = {
+                ...child,
+                sectionPath: [
+                    ...sectionNode.sectionPath,
+                    {
+                        id: sectionNode.id,
+                        type: sectionNode.type,
+                        title: sectionNode.title
+                    }
+                ]
             };
-            sections.push(sectionWithHierarchy);
-
-            // Process nested sections if they exist
-            if ("children" in node && node.children) {
-                processNestedSections(
-                    node.children,
-                    sections,
-                    parentTitles,
-                    sectionNode.title || sectionNode.slug || UNNAMED_SECTION_DISPLAY_NAMES.UNNAMED,
-                    sectionNode.id
-                );
-            }
-        } else if (node.type === "sidebarGroup") {
-            // Treat sidebarGroup as a section-like container
-            const sidebarGroupNode = node as any; // sidebarGroup type
-
-            // For root-level sidebarGroups without explicit titles, use "Root" and mark as unnamed
-            const hasExplicitTitle = Boolean(sidebarGroupNode.title || sidebarGroupNode.slug);
-            const isRootLevel = parentTitles.length === 0;
-            const title =
-                sidebarGroupNode.title ||
-                sidebarGroupNode.slug ||
-                (isRootLevel ? UNNAMED_SECTION_DISPLAY_NAMES.ROOT : UNNAMED_SECTION_DISPLAY_NAMES.UNNAMED);
-
-            const sectionWithHierarchy: SectionWithHierarchy = {
-                type: "section",
-                id: sidebarGroupNode.id,
-                title,
-                slug: sidebarGroupNode.slug,
-                children: sidebarGroupNode.children || [],
-                parentTitles,
-                availability: sidebarGroupNode.availability,
-                canonicalSlug: sidebarGroupNode.canonicalSlug,
-                icon: sidebarGroupNode.icon,
-                hidden: sidebarGroupNode.hidden,
-                authed: sidebarGroupNode.authed,
-                viewers: sidebarGroupNode.viewers,
-                orphaned: sidebarGroupNode.orphaned,
-                featureFlags: sidebarGroupNode.featureFlags,
-                noindex: sidebarGroupNode.noindex,
-                collapsed: sidebarGroupNode.collapsed,
-                overviewPageId: sidebarGroupNode.overviewPageId,
-                pointsTo: sidebarGroupNode.pointsTo,
-                // Mark root-level sidebarGroups without explicit titles as unnamed sections
-                isUnnamed: isRootLevel && !hasExplicitTitle
-            };
-            sections.push(sectionWithHierarchy);
-
-            // Process nested sections if they exist
-            if ("children" in node && node.children) {
-                processNestedSections(
-                    node.children,
-                    sections,
-                    parentTitles,
-                    sidebarGroupNode.title ||
-                        sidebarGroupNode.slug ||
-                        (isRootLevel ? UNNAMED_SECTION_DISPLAY_NAMES.ROOT : UNNAMED_SECTION_DISPLAY_NAMES.UNNAMED),
-                    sidebarGroupNode.id
-                );
-            }
-        } else if ("children" in node && node.children) {
-            // For other non-section nodes, determine the appropriate parent ID
-            const nodeTitle = "title" in node && node.title ? node.title : null;
-            const newParentTitles = nodeTitle ? [...parentTitles, nodeTitle] : parentTitles;
-
-            sections.push(...getAllSections(node.children, newParentTitles, realParentId));
+            result.push(section);
         }
     }
-
-    return sections;
+    return result;
 }
 
-export function findSectionTitle(nodes: NavigationNodeLike[], targetNodeId: NodeId): string | null {
-    for (const nodeItem of nodes) {
-        if (nodeItem?.type && nodeItem?.id) {
-            if ((nodeItem.type === "sidebarGroup" || nodeItem.type === "section") && nodeItem.id === targetNodeId) {
-                return nodeItem.title || UNNAMED_SECTION_DISPLAY_NAMES.UNNAMED;
-            }
-            if (nodeItem.children && Array.isArray(nodeItem.children)) {
-                const found = findSectionTitle(nodeItem.children, targetNodeId);
-                if (found) return found;
-            }
+/** Gets a flat list of all sections from a sidebar root node */
+export function getAllSectionsFromSidebarRootNode(
+    sidebarRootNode: FernNavigation.SidebarRootNode
+): SectionNodeWithTraversalContext[] {
+    const result: SectionNodeWithTraversalContext[] = [];
+
+    const rootSectionPath: SectionAncestorMetadata[] = [
+        {
+            id: sidebarRootNode.id,
+            type: sidebarRootNode.type,
+            title: null
+        }
+    ];
+    for (const child of sidebarRootNode.children) {
+        if (child.type === "section") {
+            // For a section in root...
+            const section = {
+                ...child,
+                sectionPath: [
+                    ...rootSectionPath,
+                    {
+                        id: child.id,
+                        type: child.type,
+                        title: child.title
+                    }
+                ]
+            };
+            // ... push section, and all descendant sections recursively
+            result.push(section, ...getAllSectionsFromSectionNode(section));
+        } else if (child.type === "sidebarGroup") {
+            const groupSectionPath: SectionAncestorMetadata[] = [
+                ...rootSectionPath,
+                {
+                    id: child.id,
+                    type: child.type,
+                    title: null
+                }
+            ];
+            // For a sidebar group in root, find children that are sections...
+            const sections = child.children
+                .filter((child) => child.type === "section")
+                .map((child) => ({
+                    ...child,
+                    sectionPath: [
+                        ...groupSectionPath,
+                        {
+                            id: child.id,
+                            type: child.type,
+                            title: child.title
+                        }
+                    ]
+                }));
+            // ... push those sections, and all descendant sections recursively
+            result.push(...sections, ...sections.flatMap((section) => getAllSectionsFromSectionNode(section)));
         }
     }
-    return null;
+    return result;
 }
 
-export function createMdxFilename(fullSlug?: string, nodeSlug?: string): string {
-    return `${fullSlug || nodeSlug || "untitled"}.mdx`;
-}
+// PAGES
+// ----------------------------------------------------------------------------
 
-export function extractPageTitle(pageData?: { frontmatter?: { title?: unknown } }, node?: { title?: unknown }): string {
-    return (
-        pageData?.frontmatter?.title?.toString() ||
-        (typeof node?.title === "string" ? node.title : undefined) ||
-        "Untitled"
-    );
-}
+/** Resolves server page data, hydrating from registry or regenerating from MDX */
+export function resolveServerPageData(
+    snapshot: NavigationSnapshot,
+    deps: ServerPageDataDependencies
+): ResolvedPageData {
+    const filename = deps.filename;
+    let resolvedMdx = deps.initialMdx;
 
-export function createNavigationEntry(pageTitle: string, filename: string) {
-    return { page: pageTitle, path: filename };
-}
-
-export function createDocsYmlUpdate(
-    sectionTitle: string | null,
-    pageEntry: { page: string; path: string },
-    operation: "add" | "remove" = "add",
-    tabSlug?: string
-) {
-    return {
-        sectionTitle,
-        tabSlug,
-        pageEntry,
-        createdAt: Date.now(),
-        operation
-    };
-}
-
-function createFoundNode(nodeId: NodeId, title: string, slug: string): FernNavigation.utils.Node.Found {
-    return {
-        type: "found",
-        node: {
-            type: "page",
-            id: nodeId,
-            title,
-            slug,
-            pageId: slug
-        } as FernNavigation.PageNode,
-        sidebar: undefined,
-        currentProduct: undefined,
-        currentVersion: undefined,
-        currentTab: undefined,
-        isCurrentVersionDefault: false,
-        isCurrentProductDefault: false
-    } as unknown as FernNavigation.utils.Node.Found;
-}
-
-export function buildPageDataFromSources(
-    navigationData: StoredNavigationData,
-    props: BuildPageDataProps
-): BuildPageDataResult {
-    const foundNode =
-        props.serializableFoundNode ||
-        (props.clientNodeId ? buildClientFoundNodes(navigationData)[props.clientNodeId] : undefined);
-
-    // Create fallback foundNode if needed
-    const workingFoundNode =
-        foundNode ||
-        createFoundNode(
-            props.clientNodeId || (props.initialFilename as NodeId) || ("untitled" as NodeId),
-            props.initialFrontmatter?.title?.toString() || "Untitled",
-            props.initialFilename || "untitled"
+    if (deps.initialFoundNode.node.type !== "page") {
+        throw new Error(
+            `Could not resolve server page data, node type is not "page": "${deps.initialFoundNode.node.type}"`
         );
+    }
 
-    const initialFilename =
-        props.initialFilename ??
-        ((workingFoundNode.node.type === "page" && workingFoundNode.node.pageId) || workingFoundNode.node.slug);
+    if (deps.initialFoundNode.node.pageId !== deps.filename) {
+        throw new Error(
+            `Could not resolve server page data, page IDs do not match: "${deps.filename}" !== "${deps.initialFoundNode.node.pageId}"`
+        );
+    }
 
-    let { initialHtml, initialFrontmatter } = props;
-    const { initialOriginalFrontmatter } = props;
+    // Hydrate server page data from registry if data is available
+    const serverEntry = Object.values(snapshot.pageRegistry).find(
+        (entry) => entry.pageData.source === "server" && entry.pageData.filename === deps.filename
+    );
+    resolvedMdx = serverEntry?.pageData.mdx ?? resolvedMdx;
+    let resolvedFrontmatter = serverEntry?.pageData.frontmatter ?? null;
+    let resolvedHtml = serverEntry?.pageData.html;
+    const resolvedFoundNode = serverEntry?.pageData.foundNode ?? deps.initialFoundNode;
 
-    // Use stored page data if available
-    if (props.clientNodeId) {
-        const storedPage = navigationData.clientPages[props.clientNodeId]?.pageData;
-        if (storedPage) {
-            ({ html: initialHtml, frontmatter: initialFrontmatter } = storedPage);
-        }
-    } else if (initialFilename) {
-        const storedPage = navigationData.pageContents[initialFilename];
-        if (storedPage?.pageType === "server") {
-            ({ html: initialHtml, frontmatter: initialFrontmatter } = storedPage);
-        }
+    // If html is not available, regenerate html and frontmatter from mdx
+    if (!resolvedHtml) {
+        const result = mdxToHtml(resolvedMdx);
+        resolvedFrontmatter = result.frontmatter;
+        resolvedHtml = result.html;
     }
 
     return {
-        initialFilename,
-        initialHtml,
-        initialFrontmatter,
-        initialOriginalFrontmatter,
-        foundNode: workingFoundNode
+        source: "server",
+        filename: filename,
+        mdx: resolvedMdx,
+        frontmatter: resolvedFrontmatter,
+        html: resolvedHtml,
+        foundNode: resolvedFoundNode
     };
 }
 
-export function loadClientPageData(navigationData: StoredNavigationData, nodeId: NodeId) {
-    const clientNode = navigationData.clientPages[nodeId];
-    if (!clientNode) {
-        throw new Error("No client node found");
+/** Resolves client page data from registry (must already exist) */
+export function resolveClientPageData(
+    snapshot: NavigationSnapshot,
+    deps: ClientPageDataDependencies
+): ResolvedPageData {
+    const filename = deps.filename;
+
+    // Hydrate client page data from registry
+    const clientEntry = Object.values(snapshot.pageRegistry).find(
+        (entry) => entry.pageData.source === "client" && entry.pageData.filename === deps.filename
+    );
+
+    // To resolve client page data, we need to already know about it (this is different from server pages)
+    if (!clientEntry) {
+        throw new Error(`Could not resolve client page data, entry not found: "${deps.filename}"`);
     }
+
+    // If mdx is not available, resolve empty defaults
+    const resolvedMdx = clientEntry?.pageData.mdx;
+    const resolvedFrontmatter = clientEntry?.pageData.frontmatter;
+    const resolvedHtml = clientEntry?.pageData.html;
+    const resolvedFoundNode = clientEntry?.pageData.foundNode;
 
     return {
-        clientNode,
-        loadClientPages: () => navigationData.clientPages
+        source: "client",
+        filename: filename,
+        mdx: resolvedMdx,
+        html: resolvedHtml,
+        frontmatter: resolvedFrontmatter,
+        foundNode: resolvedFoundNode
     };
 }
 
-export function buildClientFoundNodes(
-    navigationData: StoredNavigationData
-): Record<NodeId, FernNavigation.utils.Node.Found> {
-    const result: Record<NodeId, FernNavigation.utils.Node.Found> = {};
-
-    Object.entries(navigationData.clientPages).forEach(([nodeId, storedPage]) => {
-        if (!storedPage) return;
-
-        const { node, sidebar, navigationContext } = storedPage;
-        result[nodeId as NodeId] = {
-            type: "found",
-            node,
-            sidebar,
-            currentProduct: navigationContext?.currentProduct,
-            currentVersion: navigationContext?.currentVersion,
-            currentTab: navigationContext?.currentTab,
-            isCurrentVersionDefault: navigationContext?.isCurrentVersionDefault ?? false,
-            isCurrentProductDefault: navigationContext?.isCurrentProductDefault ?? false
-        } as FernNavigation.utils.Node.Found;
-    });
-
-    return result;
+/** Resolves page data based on the source of the page (server or client) */
+export function resolvePageData(snapshot: NavigationSnapshot, deps: PageDataDependencies): ResolvedPageData {
+    return deps.source === "server" ? resolveServerPageData(snapshot, deps) : resolveClientPageData(snapshot, deps);
 }
 
-export function buildClientNodesByParent(
-    navigationData: StoredNavigationData
-): Record<NodeId, FernNavigation.PageNode[]> {
-    const result: Record<NodeId, FernNavigation.PageNode[]> = {};
-
-    Object.entries(navigationData.clientPages)
-        .filter(([, storedPage]) => storedPage !== undefined)
-        .sort(([, a], [, b]) => b.createdAt - a.createdAt)
-        .forEach(([, storedPage]) => {
-            const { node, parentNodeId } = storedPage;
-            (result[parentNodeId] ??= []).push(node);
-        });
-
-    return result;
+/** Converts page slug to standard client page filename format */
+export function getClientPageDefaultFilename(slug: string): string {
+    return `docs/pages/${slug}.mdx`;
 }
 
-/**
- * Handles complex redirect logic for client pages that need tab context detection.
- * This utility is used by @sidebar/page.tsx for handling client pages that don't exist in server navigation.
- *
- * @param root - The root navigation node
- * @param slug - The original slug that was not found
- * @param initialRedirect - The initial redirect target from findNode
- * @returns The appropriate redirect target slug
- */
-export function getClientPageRedirectTarget(
-    root: FernNavigation.RootNode,
-    slug: string,
-    initialRedirect: string
-): string {
-    // First, try to understand what tab we should be in based on the original slug
-    const originalFound = FernNavigation.utils.findNode(root, FernNavigation.Slug(slug));
-    let targetTabSlug = initialRedirect;
+// MDX
+// ----------------------------------------------------------------------------
 
-    // If we can determine the tab context from the slug structure, find the default page for that specific tab
-    if (originalFound.type === "notFound") {
-        // Try to find which tab this slug would belong to by checking tab prefixes
-        const collector = FernNavigation.NodeCollector.collect(root);
-        const tabNodes = collector.getNodesInOrder().filter((node) => node.type === "tab") as FernNavigation.TabNode[];
-
-        const slugParts = slug.split("/");
-        for (const tab of tabNodes) {
-            // Check if this client page belongs to this tab
-            const tabSlugInPath = slugParts.includes(tab.slug);
-
-            if (tabSlugInPath) {
-                // Found the tab this client page should belong to
-                let tabChildFound = FernNavigation.utils.findNode(root, tab.slug);
-
-                // If the tab redirects (which is normal), follow the redirect
-                if (tabChildFound.type === "redirect" && tabChildFound.redirect) {
-                    tabChildFound = FernNavigation.utils.findNode(root, tabChildFound.redirect);
-                }
-
-                if (tabChildFound.type === "found" && tabChildFound.sidebar) {
-                    // Use the found node's slug as the target to get the correct sidebar context
-                    targetTabSlug = tabChildFound.node.slug;
-                    break;
-                }
-            }
-        }
-    }
-
-    return targetTabSlug;
+/** Generates MDX frontmatter block from configuration */
+export function createMdxFrontmatter(config: { title?: string; slug?: string; subtitle?: string }): string {
+    const lines = [];
+    if (config.title) lines.push(`title: ${config.title}`);
+    if (config.subtitle) lines.push(`subtitle: ${config.subtitle}`);
+    if (config.slug) lines.push(`slug: ${config.slug}`);
+    return `---\n${lines.join("\n")}\n---\n\n`;
 }

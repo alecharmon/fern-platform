@@ -2,7 +2,7 @@
 
 import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { type UnzippedEditorDocument, visualEditorStorage } from "@fern-api/visual-editor-server";
-import { branchMatchesUser } from "@fern-docs/components/navigation/local-storage";
+import { branchMatchesUser } from "@fern-docs/components/navigation";
 
 import type { DocsUrl } from "@/utils/types";
 
