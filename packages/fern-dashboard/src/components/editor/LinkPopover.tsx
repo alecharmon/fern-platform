@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
 import type { Editor } from "@tiptap/react";
-
-import { Button } from "@/components/ui/button";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/icon/Icon";
+import { Button } from "@/components/ui/button";
+import { Input } from "../ui/input";
 
 export declare namespace LinkPopover {
     export interface Props {
@@ -63,7 +62,7 @@ export function LinkPopover({ editor, onClose }: LinkPopover.Props) {
     return (
         <div className="flex min-w-[300px] flex-col gap-3 p-4">
             <div className="flex items-center gap-2">
-                <input
+                <Input
                     type="text"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
@@ -73,19 +72,20 @@ export function LinkPopover({ editor, onClose }: LinkPopover.Props) {
                     autoFocus
                 />
             </div>
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-between gap-2">
                 {isEditing && (
-                    <Button variant="ghost" size="sm" onClick={handleRemoveLink}>
+                    <Button variant="ghost" size="sm" onClick={handleRemoveLink} className="hover:text-red-500">
                         <Icon variant="Trash2" size={16} />
-                        Remove
                     </Button>
                 )}
-                <Button variant="ghost" size="sm" onClick={onClose}>
-                    Cancel
-                </Button>
-                <Button size="sm" onClick={handleSetLink}>
-                    {isEditing ? "Update" : "Add"} Link
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={onClose}>
+                        Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleSetLink}>
+                        {isEditing ? "Update" : "Add"} Link
+                    </Button>
+                </div>
             </div>
         </div>
     );
