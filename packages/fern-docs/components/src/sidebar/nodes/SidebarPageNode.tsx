@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
-
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { ReactNode } from "react";
 
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import { SidebarSlugLink } from "../SidebarLink";
@@ -42,16 +41,7 @@ export function SidebarPageNode({
     // Only wrap with deletable page node when explicitly in client render mode
     if (forceClientRender) {
         const DeletablePageNode = withDeletablePageNode(() => baseComponent);
-        return (
-            <DeletablePageNode
-                node={node}
-                icon={icon}
-                depth={depth}
-                className={className}
-                shallow={shallow}
-                forceClientRender={forceClientRender}
-            />
-        );
+        return <DeletablePageNode node={node} icon={icon} depth={depth} className={className} shallow={shallow} />;
     }
 
     return baseComponent;

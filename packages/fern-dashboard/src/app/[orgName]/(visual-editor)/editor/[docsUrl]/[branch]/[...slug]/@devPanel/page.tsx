@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-import CodeEditor, { type Monaco } from "@monaco-editor/react";
-import { Code2 } from "lucide-react";
-
 import { useNavigation } from "@fern-docs/components/navigation";
 
+import type { Monaco } from "@monaco-editor/react";
+import { Code2 } from "lucide-react";
+import type monaco from "monaco-editor";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import { WarningValidationToast } from "@/components/editor/EditorToasts";
 import { defineAppTheme } from "@/components/editor/theme-utils";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,16 @@ import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
 import { cn } from "@/utils/utils";
 
+const MonacoEditor = dynamic(() => import("./editor"), {
+    ssr: false
+});
+
 export default function DevPanel() {
     const { panelOpen } = useDevMode();
     const { currentFilename } = useCurrentPage();
     const { registeredPages, updatePage, emitPageSaveEvent } = useNavigation();
     const isEditingDisabled = useEditingDisabled();
-    const editorRef = useRef<any>(null);
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<Monaco | null>(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -37,7 +41,7 @@ export default function DevPanel() {
         setHasUnsavedChanges(false);
     }, [currentMarkdown]);
 
-    function handleEditorDidMount(editorInstance: any, monacoInstance: Monaco) {
+    function handleEditorDidMount(editorInstance: monaco.editor.IStandaloneCodeEditor, monacoInstance: Monaco) {
         editorRef.current = editorInstance;
         monacoRef.current = monacoInstance;
 
@@ -100,18 +104,10 @@ export default function DevPanel() {
             </div>
 
             <div className="border-1 bg-background border-border relative flex flex-1 flex-col overflow-hidden rounded-2xl py-4 shadow-lg">
-                <CodeEditor
-                    height="100%"
-                    language="markdown"
-                    value={currentMarkdown}
-                    onMount={handleEditorDidMount}
-                    theme="app-theme"
-                    options={{
-                        minimap: { enabled: false },
-                        scrollBeyondLastLine: false,
-                        wordWrap: "on",
-                        readOnly: isEditingDisabled
-                    }}
+                <MonacoEditor
+                    currentMarkdown={currentMarkdown}
+                    handleEditorDidMount={handleEditorDidMount}
+                    isEditingDisabled={isEditingDisabled}
                 />
             </div>
 

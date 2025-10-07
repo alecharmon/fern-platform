@@ -7,6 +7,7 @@ import yaml from "js-yaml";
 import type { Parents as MdastParents, Nodes, Root } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { frontmatterFromMarkdown, frontmatterToMarkdown } from "mdast-util-frontmatter";
+import { gfmFromMarkdown, gfmToMarkdown } from "mdast-util-gfm";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
 import { mdxFromMarkdown, mdxToMarkdown } from "mdast-util-mdx";
 import {
@@ -17,9 +18,9 @@ import {
 } from "mdast-util-to-hast";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { frontmatter as fm } from "micromark-extension-frontmatter";
+import { gfm } from "micromark-extension-gfm";
 import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
-
 import type { MdxJsxElement } from "./mdast";
 
 // Options for how yaml is written to the frontmatter
@@ -116,9 +117,9 @@ export type Frontmatter = Record<string, unknown> | null;
 
 // Re-export mdast types for external use
 export type {
+    Content as MdastContent,
     Node as MdastNode,
-    Nodes as MdastNodes,
-    Content as MdastContent
+    Nodes as MdastNodes
 } from "mdast";
 
 // Response from mdxToAST
@@ -151,8 +152,8 @@ interface MdxToHtmlOptions {
 export function mdxToAST(rootContent: string): MdxToASTResponse {
     // Get mdast from root mdx content
     const mdast = fromMarkdown(rootContent, {
-        extensions: [mdxjs(), fm(["yaml"]), math()],
-        mdastExtensions: [mdxFromMarkdown(), frontmatterFromMarkdown(["yaml"]), mathFromMarkdown()]
+        extensions: [mdxjs(), fm(["yaml"]), math(), gfm()],
+        mdastExtensions: [mdxFromMarkdown(), frontmatterFromMarkdown(["yaml"]), mathFromMarkdown(), gfmFromMarkdown()]
     });
 
     // Get frontmatter from mdast (expects only one frontmatter node)
@@ -177,7 +178,7 @@ export function astToMDX(mdast: Nodes, originalFrontmatter?: string): string {
 
     // Convert mdast back to MDX string
     const mdxBody = toMarkdown(mdast, {
-        extensions: [mdxToMarkdown(), frontmatterToMarkdown(["yaml"]), mathToMarkdown()]
+        extensions: [mdxToMarkdown(), frontmatterToMarkdown(["yaml"]), mathToMarkdown(), gfmToMarkdown()]
     });
 
     mdxContent += mdxBody;
@@ -543,7 +544,12 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
 
     // Get mdx from mdast
     const mdx = toMarkdown(mdast, {
-        extensions: [mdxToMarkdown(), frontmatterToMarkdown(["yaml"]), mathToMarkdown({ singleDollarTextMath: false })],
+        extensions: [
+            mdxToMarkdown(),
+            frontmatterToMarkdown(["yaml"]),
+            mathToMarkdown({ singleDollarTextMath: false }),
+            gfmToMarkdown()
+        ],
         // TODO: float configurations up to make them more discoverable
         // Use hyphen instead of asterisk for unordered lists
         bullet: "-"

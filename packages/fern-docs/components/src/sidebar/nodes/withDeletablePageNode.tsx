@@ -1,16 +1,14 @@
 "use client";
 
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import * as Popover from "@radix-ui/react-popover";
+import { MinusCircleIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactNode, useRef, useState } from "react";
 
-import * as Popover from "@radix-ui/react-popover";
-import { MinusCircleIcon } from "lucide-react";
-
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-
 import { Button } from "../../FernButtonV2";
 import { useScrollSidebarNodeIntoView } from "../../hooks/sidebar-scroll";
-import { ROOT_SLUG_ALIAS, constructEditorSlug, useMaybeNavigation } from "../../navigation";
+import { constructEditorSlug, ROOT_SLUG_ALIAS, useMaybeNavigation } from "../../navigation";
 import type { Auth0OrgNameIsh, EncodedDocsUrlIsh } from "../../navigation/routingUtils";
 import { useIsSelectedSidebarNode } from "../../state/navigation";
 import { SidebarLink } from "../SidebarLink";
@@ -21,7 +19,6 @@ export interface WithDeletablePageNodeProps {
     depth: number;
     className?: string;
     shallow?: boolean;
-    forceClientRender?: boolean;
 }
 
 export function withDeletablePageNode<P extends WithDeletablePageNodeProps>(WrappedComponent: React.ComponentType<P>) {
