@@ -10,8 +10,10 @@ layout:
 
 navigation:
   - page: Hello World
+    slug: /
     path: docs/pages/hello-world.mdx
   - section: Get Started
+    skip-slug: true
     contents:
       - page: QuickStart
         path: docs/pages/hello-world.mdx

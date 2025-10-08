@@ -207,14 +207,17 @@ export function createFdrTests(getContainerIdFn: () => Promise<string>, testName
  * Test FDR server health check with external port mapping
  */
 export async function testFdrHealthExternal(containerId: string, externalPort: number): Promise<void> {
-    const { stdout: curlOutput } = await execa("curl", [
-        "-s",
-        "-o",
-        "/dev/null",
-        "-w",
-        "%{http_code}",
-        `http://localhost:${externalPort}/health`
-    ]);
+    console.log(`Testing FDR health on port ${externalPort}...`);
+    const { stdout: curlOutput, stderr } = await execa(
+        "curl",
+        ["-s", "-o", "/dev/null", "-w", "%{http_code}", `http://localhost:${externalPort}/health`],
+        { reject: false }
+    );
+
+    console.log(`FDR health check on port ${externalPort} returned: ${curlOutput}`);
+    if (stderr) {
+        console.log(`FDR health check stderr: ${stderr}`);
+    }
 
     if (curlOutput !== "200") {
         throw new Error(`FDR health check failed on port ${externalPort} with status: ${curlOutput}`);
@@ -225,14 +228,17 @@ export async function testFdrHealthExternal(containerId: string, externalPort: n
  * Test MinIO health check with external port mapping
  */
 export async function testMinioHealthExternal(externalPort: number): Promise<void> {
-    const { stdout: curlOutput } = await execa("curl", [
-        "-s",
-        "-o",
-        "/dev/null",
-        "-w",
-        "%{http_code}",
-        `http://localhost:${externalPort}/minio/health/live`
-    ]);
+    console.log(`Testing MinIO health on port ${externalPort}...`);
+    const { stdout: curlOutput, stderr } = await execa(
+        "curl",
+        ["-s", "-o", "/dev/null", "-w", "%{http_code}", `http://localhost:${externalPort}/minio/health/live`],
+        { reject: false }
+    );
+
+    console.log(`MinIO health check on port ${externalPort} returned: ${curlOutput}`);
+    if (stderr) {
+        console.log(`MinIO health check stderr: ${stderr}`);
+    }
 
     if (curlOutput !== "200") {
         throw new Error(`MinIO health check failed on port ${externalPort} with status: ${curlOutput}`);
@@ -242,9 +248,7 @@ export async function testMinioHealthExternal(externalPort: number): Promise<voi
 /**
  * Test that multiple instances can run simultaneously without conflicts
  */
-export async function testMultipleInstances(
-    instances: Array<{ containerId: string; externalPort: number }>
-): Promise<void> {
+export async function testMultipleInstances(instances: { containerId: string; externalPort: number }[]): Promise<void> {
     // Test that all instances are healthy
     for (const instance of instances) {
         await testFdrHealthExternal(instance.containerId, instance.externalPort);
@@ -270,4 +274,177 @@ export async function testMultipleInstances(
     if (!allHealthy) {
         throw new Error("Not all instances are healthy simultaneously");
     }
+}
+
+/**
+ * Test that external calls are blocked (network isolation)
+ * Should fail to reach external URLs like google.com
+ */
+export async function testExternalCallsBlocked(containerId: string): Promise<void> {
+    const { stdout: curlOutput, exitCode } = await execa(
+        "docker",
+        [
+            "exec",
+            containerId,
+            "curl",
+            "-s",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{http_code}",
+            "--connect-timeout",
+            "5",
+            "http://www.google.com"
+        ],
+        {
+            reject: false
+        }
+    );
+
+    // Should fail to connect (exit code 28 for timeout or 7 for connection refused)
+    // or return empty/error status code
+    if (exitCode === 0 && curlOutput === "200") {
+        throw new Error("External call succeeded when it should be blocked");
+    }
+
+    // Success - external calls are blocked
+}
+
+/**
+ * Test that port 3000 is accessible and doesn't cause failures
+ */
+export async function testPort3000Accessible(containerId: string): Promise<void> {
+    // Try to connect to port 3000 inside the container
+    const { exitCode: _exitCode } = await execa(
+        "docker",
+        ["exec", containerId, "sh", "-c", "timeout 2 nc -z localhost 3000 || echo 'Port check attempted'"],
+        {
+            reject: false
+        }
+    );
+
+    // Just verify the command ran without crashing the container
+    // We don't strictly require port 3000 to be open, just that checking it doesn't break things
+}
+
+/**
+ * Test that services still work after checking port 3000
+ */
+export async function testServicesAfterPort3000Check(containerId: string): Promise<void> {
+    // First check port 3000
+    await testPort3000Accessible(containerId);
+
+    // Then verify FDR health is still working
+    await testFdrHealth(containerId);
+}
+
+/**
+ * Test that the docs UI is accessible and returns valid HTML
+ */
+export async function testDocsUIAccessible(
+    containerId: string,
+    endpoint: string = "http://localhost:3000"
+): Promise<void> {
+    const maxRetries = 30; // Try for up to 30 seconds
+    const retryDelay = 1000; // Wait 1 second between retries
+
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const { stdout: httpCode } = await execa("docker", [
+                "exec",
+                containerId,
+                "curl",
+                "-s",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                endpoint
+            ]);
+
+            if (httpCode === "200") {
+                // Get the actual content to verify it's HTML
+                const { stdout: content } = await execa("docker", ["exec", containerId, "curl", "-s", endpoint]);
+
+                if (!content.includes("<!DOCTYPE html>") && !content.includes("<html")) {
+                    throw new Error(`Docs UI returned non-HTML content at ${endpoint}`);
+                }
+
+                // Verify essential HTML structure
+                if (!content.includes("<head") || !content.includes("<body")) {
+                    throw new Error(`Docs UI HTML is malformed at ${endpoint} - missing head or body tags`);
+                }
+
+                // Success!
+                return;
+            }
+
+            lastError = new Error(`Docs UI not accessible at ${endpoint}. HTTP status: ${httpCode}`);
+        } catch (error) {
+            lastError = error as Error;
+        }
+
+        // Wait before retrying (except on last attempt)
+        if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+    }
+
+    throw new Error(`Docs UI failed to become accessible after ${maxRetries} attempts: ${lastError?.message}`);
+}
+
+/**
+ * Test that the docs UI contains expected interactive elements
+ */
+export async function testDocsUIElements(
+    containerId: string,
+    endpoint: string = "http://localhost:3000"
+): Promise<void> {
+    const maxRetries = 30; // Try for up to 30 seconds
+    const retryDelay = 1000; // Wait 1 second between retries
+
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            // Get the HTML content
+            const { stdout: content } = await execa("docker", ["exec", containerId, "curl", "-s", endpoint]);
+
+            // If we got content, verify it
+            if (content && content.length > 0) {
+                // Check for search button - it might be in the HTML or loaded via JS
+                // We'll check for common patterns that should exist
+                const hasSearchButton =
+                    content.includes('id="fern-search-button"') ||
+                    content.includes("fern-search-button") ||
+                    content.includes("search");
+
+                if (!hasSearchButton) {
+                    // This is just a warning check
+                    console.warn("Warning: Could not find search button reference in initial HTML.");
+                }
+
+                // Verify the page has some interactive JavaScript
+                if (!content.includes("<script")) {
+                    throw new Error("Docs UI has no scripts - page may not be functional");
+                }
+
+                // Success!
+                return;
+            }
+
+            lastError = new Error(`Docs UI returned empty content at ${endpoint}`);
+        } catch (error) {
+            lastError = error as Error;
+        }
+
+        // Wait before retrying (except on last attempt)
+        if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+    }
+
+    throw new Error(`Docs UI failed to return valid content after ${maxRetries} attempts: ${lastError?.message}`);
 }

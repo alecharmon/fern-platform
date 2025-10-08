@@ -2,7 +2,8 @@ import { execa } from "execa";
 import path from "path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { SELF_HOSTED_IMAGE_TAG_NAME } from "./setupSharedDocker";
+import { FERN_NETWORK_NAME, SELF_HOSTED_IMAGE_TAG_NAME } from "./setupSharedDocker";
+import { testDocsUIAccessible, testFdrHealth } from "./testHelpers";
 
 const NON_ROOT_CONTAINER_NAME = "fern-self-hosted-non-root";
 const RESTRICTED_CONTAINER_NAME = "fern-self-hosted-restricted";
@@ -41,6 +42,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "--name",
                         NON_ROOT_CONTAINER_NAME,
                         "-d", // Run in detached mode to check logs
+                        "--network",
+                        FERN_NETWORK_NAME,
                         "--user",
                         "65532:65532", // Anduril's specific UID/GID
                         "--security-opt",
@@ -95,6 +98,32 @@ describe("Self-hosted container with security restrictions", () => {
                 expect(psOutput).toContain("accepting connections");
 
                 console.log("✓ Container successfully started with PostgreSQL in /tmp");
+
+                // Test network isolation
+                console.log("Testing network isolation...");
+                const { exitCode: curlExitCode } = await execa(
+                    "docker",
+                    [
+                        "exec",
+                        containerId,
+                        "curl",
+                        "-s",
+                        "-o",
+                        "/dev/null",
+                        "-w",
+                        "%{http_code}",
+                        "--connect-timeout",
+                        "5",
+                        "http://www.google.com"
+                    ],
+                    {
+                        reject: false
+                    }
+                );
+
+                // Should fail to connect
+                expect(curlExitCode).not.toBe(0);
+                console.log("✓ External calls are blocked as expected");
             } finally {
                 // Clean up container
                 if (containerId) {
@@ -122,6 +151,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "--name",
                         RESTRICTED_CONTAINER_NAME,
                         "-d",
+                        "--network",
+                        FERN_NETWORK_NAME,
                         "--user",
                         "65532:65532", // Non-root user
                         "--security-opt",
@@ -162,6 +193,53 @@ describe("Self-hosted container with security restrictions", () => {
                 expect(logs).toContain("FDR server PID:");
 
                 console.log("✓ Container successfully started with full security restrictions");
+
+                // Test network isolation
+                console.log("Testing network isolation...");
+                const { exitCode: curlExitCode } = await execa(
+                    "docker",
+                    [
+                        "exec",
+                        containerId,
+                        "curl",
+                        "-s",
+                        "-o",
+                        "/dev/null",
+                        "-w",
+                        "%{http_code}",
+                        "--connect-timeout",
+                        "5",
+                        "http://www.google.com"
+                    ],
+                    {
+                        reject: false
+                    }
+                );
+
+                // Should fail to connect
+                expect(curlExitCode).not.toBe(0);
+                console.log("✓ External calls are blocked as expected");
+
+                // Test port 3000 doesn't cause failures
+                console.log("Testing port 3000 accessibility...");
+                await execa(
+                    "docker",
+                    ["exec", containerId, "sh", "-c", "timeout 2 nc -z localhost 3000 || echo 'Port check attempted'"],
+                    {
+                        reject: false
+                    }
+                );
+                console.log("✓ Port 3000 check completed without crashing");
+
+                // Test FDR health
+                console.log("Testing FDR health endpoint...");
+                await testFdrHealth(containerId);
+                console.log("✓ FDR health check passed");
+
+                // Test docs UI
+                console.log("Testing docs UI accessibility...");
+                await testDocsUIAccessible(containerId);
+                console.log("✓ Docs UI is accessible and functional");
             } finally {
                 // Clean up container
                 if (containerId) {
@@ -188,6 +266,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "--name",
                         `${RESTRICTED_CONTAINER_NAME}-diagnostic`,
                         "--rm",
+                        "--network",
+                        FERN_NETWORK_NAME,
                         "--user",
                         "65532:65532",
                         "--security-opt",

@@ -189,7 +189,7 @@
   },
   "overrides": [
     {
-      "includes": ["**/*.test.ts", "**/*.spec.ts"],
+      "includes": ["**/*.test.ts", "**/*.spec.ts", "**/__test__/testHelpers.ts"],
       "linter": {
         "rules": {
           "suspicious": {

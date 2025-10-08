@@ -3707,6 +3707,9 @@ importers:
 
   servers/self-hosted:
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.50.1
+        version: 1.55.1
       dotenv:
         specifier: ^16.4.5
         version: 16.4.7

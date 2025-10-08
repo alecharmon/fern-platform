@@ -3,8 +3,14 @@ import { execa } from "execa";
 import path from "path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { SELF_HOSTED_CONTAINER_NAME } from "./setupSelfHostedDocs";
-import { getContainerId } from "./testHelpers";
+import { SELF_HOSTED_CONTAINER_NAME, setup, teardown } from "./setupSelfHostedDocs";
+import {
+    getContainerId,
+    testDocsUIAccessible,
+    testDocsUIElements,
+    testExternalCallsBlocked,
+    testServicesAfterPort3000Check
+} from "./testHelpers";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -14,13 +20,11 @@ async function getSingleNodeContainerId() {
 
 // Setup single-node container before tests
 beforeAll(async () => {
-    const { setup } = await import("./setupSelfHostedDocs");
     await setup();
 }, 30000); // 30 second timeout for setup
 
 // Cleanup single-node container after tests
 afterAll(async () => {
-    const { teardown } = await import("./setupSelfHostedDocs");
     await teardown();
 }, 30000); // 30 second timeout for cleanup
 
@@ -125,5 +129,39 @@ describe("FDR server is running and api endpoints are available", () => {
             "http://localhost:8080/health"
         ]);
         expect(curlOutput).toBe("200");
+    });
+});
+
+describe("Network isolation is working", () => {
+    it("external calls are blocked", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testExternalCallsBlocked(containerId);
+    });
+});
+
+describe("Port 3000 does not cause failures", () => {
+    it("services continue to work after checking port 3000", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testServicesAfterPort3000Check(containerId);
+    });
+});
+
+describe("Docs UI is functional", () => {
+    it("docs UI is accessible and returns valid HTML", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testDocsUIAccessible(containerId);
+    });
+
+    it("docs UI contains expected interactive elements", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testDocsUIElements(containerId);
     });
 });

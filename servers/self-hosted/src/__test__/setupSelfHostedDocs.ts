@@ -1,7 +1,7 @@
 import { execa } from "execa";
 import path from "path";
 
-import { SELF_HOSTED_IMAGE_TAG_NAME } from "./setupSharedDocker";
+import { FERN_NETWORK_NAME, SELF_HOSTED_IMAGE_TAG_NAME } from "./setupSharedDocker";
 
 export const SELF_HOSTED_CONTAINER_NAME = "fern-self-hosted";
 const SELF_HOSTED_CONTAINER_PORT = 5433;
@@ -25,14 +25,22 @@ export async function setup() {
     // Remove any existing container
     await removeContainer(SELF_HOSTED_CONTAINER_NAME);
 
-    // Start the container using the shared image
+    // Start the container using the shared image with fern-network
     await execa("docker", [
         "run",
         "--name",
         SELF_HOSTED_CONTAINER_NAME,
         "-d",
+        "--network",
+        FERN_NETWORK_NAME,
         "-p",
         `${SELF_HOSTED_CONTAINER_PORT}:5432`,
+        "-p",
+        "8080:8080",
+        "-p",
+        "9000:9000",
+        "-p",
+        "3000:3000",
         "-v",
         `${FERN_DIR}:/fern`,
         SELF_HOSTED_IMAGE_TAG_NAME

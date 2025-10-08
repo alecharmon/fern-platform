@@ -16,8 +16,7 @@ export default defineConfig({
         include: [
             "./src/__test__/singleNode.test.ts",
             "./src/__test__/multiNode.test.ts",
-            "./src/__test__/nonRootUser.test.ts",
-            "./src/__test__/noNetworkNonRoot.test.ts"
+            "./src/__test__/nonRootUser.test.ts"
         ]
     }
 });
