@@ -115,7 +115,9 @@ function migrateV0ToV1(branchName: string, oldData: NavigationSnapshotV0): Navig
                 isMarkedForDeletion: false,
                 lastModified: content.lastModified,
                 // Try to recover parentSectionId from clientPages
-                parentSectionId: clientPageData?.parentNodeId as FernNavigation.NodeId
+                parentSectionId: clientPageData?.parentNodeId as FernNavigation.NodeId,
+                // Set initialMdx to the recovered MDX value for reset functionality
+                initialMdx: recoveredMdx
             };
         });
     }

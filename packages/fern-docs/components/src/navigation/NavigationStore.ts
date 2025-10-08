@@ -1,15 +1,14 @@
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type ChangedNodes, type Frontmatter, htmlToMdx, mdxToHtml } from "@fern-docs/mdx";
-
-import { type NavigationStorage, createNavigationLocalStorage } from "./NavigationStorage";
 import {
-    type FilenameToContent,
-    type GitCommitFile,
     computeStateHash,
+    type FilenameToContent,
     formatCommitFiles,
+    type GitCommitFile,
     hasChangesToCommit
 } from "./commitUtils";
 import { generateFractionalIndex } from "./indexingUtils";
+import { createNavigationLocalStorage, type NavigationStorage } from "./NavigationStorage";
 import { resolvePageData } from "./pageUtils";
 import type {
     ClientPageDataWriteDependencies,
@@ -177,12 +176,14 @@ export class NavigationStore {
                 parentSectionId: existing.parentSectionId ?? parentSectionId
             });
         } else {
+            // Store initial MDX when first registering the page
             this._createPageEntry(pageData.filename, {
                 pageData: pageData,
                 status: "unchanged",
                 isMarkedForDeletion: false,
                 lastModified: Date.now(),
-                parentSectionId
+                parentSectionId,
+                initialMdx: pageData.mdx
             });
         }
     }
@@ -233,7 +234,8 @@ export class NavigationStore {
             isMarkedForDeletion: false,
             lastModified: Date.now(),
             index: newIndex,
-            parentSectionId
+            parentSectionId,
+            initialMdx: deps.initialMdx
         });
 
         this._docsYmlChanges.set(filename, {
@@ -273,6 +275,47 @@ export class NavigationStore {
             changedNodes
         });
         this.updatePage(filename, { mdx });
+    }
+
+    /** Resets a page to its initial state */
+    resetPage(filename: PageFilename): void {
+        const entry = this._pageRegistry[filename];
+        if (!entry) {
+            console.warn(`Cannot reset page: ${filename} not found in registry`);
+            return;
+        }
+
+        // Check if we have initial MDX stored
+        if (!entry.initialMdx) {
+            console.warn(`Cannot reset page: ${filename} has no initial MDX stored`);
+            return;
+        }
+
+        // For client pages, mark for deletion instead of reset
+        if (entry.pageData.source === "client") {
+            this.markPageForDeletion(filename);
+            return;
+        }
+
+        // Remove from docs.yml changes if it was tracked there
+        this._docsYmlChanges.delete(filename);
+
+        // Restore the page to its initial state in a single update
+        // This will recompute HTML and frontmatter from the initial MDX
+        this._updatePageEntry(filename, {
+            pageData: { mdx: entry.initialMdx },
+            status: "unchanged"
+        });
+
+        // Emit page save event to notify editor components to update
+        const updatedEntry = this._pageRegistry[filename];
+        if (updatedEntry) {
+            this.emitPageSaveEvent({
+                filename: filename,
+                frontmatter: updatedEntry.pageData.frontmatter || {},
+                html: updatedEntry.pageData.html
+            });
+        }
     }
 
     /** Marks a page for deletion and tracks in docs.yml changes */

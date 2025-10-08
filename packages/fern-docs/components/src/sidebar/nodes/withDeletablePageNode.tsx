@@ -154,7 +154,7 @@ export function withDeletablePageNode<P extends WithDeletablePageNodeProps>(Wrap
                                         variant="outline"
                                         size="sm"
                                         onClick={() => setShowDeleteConfirm(false)}
-                                        className="border-gray-500 p-2 text-xs text-gray-700"
+                                        className="border-gray-500 p-2 text-xs text-foreground cursor-pointer hover:bg-gray-300"
                                     >
                                         Cancel
                                     </Button>
@@ -162,7 +162,7 @@ export function withDeletablePageNode<P extends WithDeletablePageNodeProps>(Wrap
                                         variant="destructive"
                                         size="sm"
                                         onClick={handleConfirmedDelete}
-                                        className="p-2 text-xs text-white"
+                                        className="p-2 text-xs text-white cursor-pointer"
                                     >
                                         Delete
                                     </Button>

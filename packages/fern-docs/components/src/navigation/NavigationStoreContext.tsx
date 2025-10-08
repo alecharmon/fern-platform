@@ -75,6 +75,7 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     updatePage: NavigationStore["updatePage"];
     updatePageFrontmatter: NavigationStore["updatePageFrontmatter"];
     updatePageHtml: NavigationStore["updatePageHtml"];
+    resetPage: NavigationStore["resetPage"];
     markPageForDeletion: NavigationStore["markPageForDeletion"];
     unmarkPageForDeletion: NavigationStore["unmarkPageForDeletion"];
     setDeletionToastCallback: NavigationStore["setDeletionToastCallback"];
@@ -96,6 +97,7 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         updatePage: store.updatePage.bind(store),
         updatePageFrontmatter: store.updatePageFrontmatter.bind(store),
         updatePageHtml: store.updatePageHtml.bind(store),
+        resetPage: store.resetPage.bind(store),
         markPageForDeletion: store.markPageForDeletion.bind(store),
         unmarkPageForDeletion: store.unmarkPageForDeletion.bind(store),
         setDeletionToastCallback: store.setDeletionToastCallback.bind(store),

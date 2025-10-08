@@ -1,9 +1,8 @@
 "use client";
 
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
-
-import { ArrowLeftIcon } from "lucide-react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -19,6 +18,7 @@ import { ClickablePrNumber } from "./ClickablePrNumber";
 import { CommitButton } from "./CommitButton";
 import { DashboardTooltip } from "./DashboardTooltip";
 import { DevModeSwitcher } from "./DevModeSwitcher";
+import { FilesDropdown } from "./FilesDropdown";
 import { PRStatusDropdown } from "./PRStatusDropdown";
 import { PRTitleEditor } from "./PRTitleEditor";
 
@@ -65,12 +65,13 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
                     />
                 </DashboardTooltip>
             </div>
-            <div className="flex items-center justify-end gap-1 sm:flex-1 sm:shrink-0">
+            <div className="flex items-center justify-end gap-2 sm:flex-1 sm:shrink-0">
                 <DashboardTooltip content="Enable dev mode to edit the source code" hideInnerSpan>
-                    <div className="pointer-events-auto mr-3 hidden items-center justify-center md:flex">
+                    <div className="pointer-events-auto hidden items-center justify-center md:flex">
                         <DevModeSwitcher />
                     </div>
                 </DashboardTooltip>
+                <FilesDropdown />
                 <CommitButton />
             </div>
         </div>

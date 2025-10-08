@@ -142,6 +142,8 @@ export interface PageRegistryEntry {
     lastModified?: number;
     /** ID of the parent section node this page belongs to */
     parentSectionId?: FernNavigation.NodeId;
+    /** Initial MDX content when page was first registered (for reset functionality) */
+    initialMdx?: string;
 }
 
 /** Page registry entries by filename */
