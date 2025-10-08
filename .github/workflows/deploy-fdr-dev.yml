@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - app
+      - '**fdr**'
     paths:
       - "fern/apis/fdr/**"
       - "fern/fern.config.json"
