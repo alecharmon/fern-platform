@@ -45,6 +45,7 @@
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
+    "@fern-api/venus-api-sdk": "^0.13.4-7-g5ff8ee8",
     "@fern-docs/edge-config": "workspace:*",
     "@fern-platform/fdr-utils": "workspace:*",
     "@radix-ui/colors": "catalog:",

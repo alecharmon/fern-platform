@@ -48,6 +48,8 @@ export * from "./hash";
 export * from "./headerKeyCase";
 export * from "./getBreadcrumbList";
 export * from "./FernNextResponse";
+export * from "./venus/getVenusClient";
+export * from "./venus/validateApiKeyBelongsToOrg";
 export * from "./analytics/posthog";
 export * from "./analytics/rewritePosthog";
 export * from "./withLogo";

@@ -607,6 +607,9 @@ importers:
       '@fern-api/ui-core-utils':
         specifier: workspace:*
         version: link:../core-utils
+      '@fern-api/venus-api-sdk':
+        specifier: ^0.13.4-7-g5ff8ee8
+        version: 0.13.4-7-g5ff8ee8
       '@fern-docs/edge-config':
         specifier: workspace:*
         version: link:../../fern-docs/edge-config
