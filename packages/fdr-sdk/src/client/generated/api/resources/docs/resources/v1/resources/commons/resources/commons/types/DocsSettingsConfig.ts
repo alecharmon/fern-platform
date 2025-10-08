@@ -7,9 +7,9 @@ import * as FernRegistry from "../../../../../../../../../index.js";
 export interface DocsSettingsConfig {
     searchText: string | undefined;
     disableSearch: boolean | undefined;
-    disableFeedback: boolean | undefined;
     darkModeCode: boolean | undefined;
     defaultSearchFilters: boolean | undefined;
     httpSnippets: FernRegistry.docs.v1.commons.HttpSnippetsConfig | undefined;
     hide404Page: boolean | undefined;
+    useJavascriptAsTypescript: boolean | undefined;
 }

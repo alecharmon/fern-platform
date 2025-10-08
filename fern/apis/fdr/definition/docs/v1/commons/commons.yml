@@ -194,11 +194,11 @@ types:
     properties:
       searchText: optional<string>
       disableSearch: optional<boolean>
-      disableFeedback: optional<boolean>
       darkModeCode: optional<boolean>
       defaultSearchFilters: optional<boolean>
       httpSnippets: optional<HttpSnippetsConfig>
       hide404Page: optional<boolean>
+      useJavascriptAsTypescript: optional<boolean>
       
   HttpSnippetsConfig:
     discriminated: false
@@ -273,6 +273,7 @@ types:
       "twitter:card": optional<TwitterCardSetting>
       "noindex": optional<boolean>
       "nofollow": optional<boolean>
+      "canonicalHost": optional<string>
 
   RedirectConfig:
     properties:

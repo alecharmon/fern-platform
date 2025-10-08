@@ -1,5 +1,5 @@
 import { toJson } from "../json.js";
-import type { APIResponse } from "./APIResponse.js";
+import { APIResponse } from "./APIResponse.js";
 import { abortRawResponse, toRawResponse, unknownRawResponse } from "./RawResponse.js";
 import { createRequestUrl } from "./createRequestUrl.js";
 import { getFetchFn } from "./getFetchFn.js";

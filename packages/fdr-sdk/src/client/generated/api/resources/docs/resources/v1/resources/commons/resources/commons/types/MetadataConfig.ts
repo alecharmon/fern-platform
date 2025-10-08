@@ -23,4 +23,5 @@ export interface MetadataConfig {
     "twitter:card": FernRegistry.docs.v1.commons.TwitterCardSetting | undefined;
     noindex: boolean | undefined;
     nofollow: boolean | undefined;
+    canonicalHost: string | undefined;
 }

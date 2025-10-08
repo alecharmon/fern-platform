@@ -27,7 +27,6 @@ export type HttpSnippetsConfig = boolean | HttpSnippetLanguage[];
 export interface FernSettingsConfig {
     searchText: string | undefined;
     disableSearch: boolean | undefined;
-    disableFeedback: boolean | undefined;
     darkModeCode: boolean | undefined;
     defaultSearchFilters: boolean | undefined;
     httpSnippets: HttpSnippetsConfig | undefined;

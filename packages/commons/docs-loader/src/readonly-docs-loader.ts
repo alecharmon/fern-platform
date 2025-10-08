@@ -737,7 +737,6 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
         return {
             darkModeCode: settings?.darkModeCode ?? false,
             defaultSearchFilters: settings?.defaultSearchFilters ?? false,
-            disableFeedback: settings?.disableFeedback ?? false,
             disableSearch: settings?.disableSearch ?? false,
             hide404Page: settings?.hide404Page ?? false,
             httpSnippets: settings?.httpSnippets ?? false,
