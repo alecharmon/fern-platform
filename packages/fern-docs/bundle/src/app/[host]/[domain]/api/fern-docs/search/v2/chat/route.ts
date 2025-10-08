@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
 
     const { getAuthState } = await createGetAuthStateEdge(req);
     const authState = await getAuthState(req.nextUrl.pathname);
-    if (!authState.ok) {
-        return NextResponse.json("Unauthorized", { status: 401 });
-    }
+    // if (!authState.ok) {
+    //     return NextResponse.json("Unauthorized", { status: 401 });
+    // }
 
     const roles = authState.authed ? (authState.user.roles ?? []) : [];
     const explodedRoles = createDelimitedRolesetCombinations({ roleset: roles });
