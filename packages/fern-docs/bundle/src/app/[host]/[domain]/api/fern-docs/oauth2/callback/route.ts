@@ -120,6 +120,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const data = await response.json();
         let fern_token = "";
 
+        console.log("Received data with keys:", Object.keys(data).join(" "));
+
         const parsedToken = OAuthTokenResponseSchema.safeParse(data);
         if (!parsedToken.success) {
             console.error("Failed to parse OAuth token response:", parsedToken.error);
@@ -214,8 +216,14 @@ function extractRolesFromJwt(accessToken: string): string[] | null {
     try {
         const decodedToken = decodeJwt(accessToken);
 
+        console.log("Decoded token with keys: ", Object.keys(decodedToken).join(" "));
+
         if (decodedToken.roles && Array.isArray(decodedToken.roles)) {
             return decodedToken.roles as string[];
+        } else if (decodedToken.roles && typeof decodedToken.roles === "string") {
+            return decodedToken.roles.split(" ");
+        } else if (decodedToken.roles) {
+            console.log("Found roles with unexpected type:", typeof decodedToken.roles);
         }
 
         console.log("No roles found in JWT payload");
