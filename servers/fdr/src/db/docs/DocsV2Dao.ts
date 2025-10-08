@@ -1,11 +1,11 @@
+import { APIV1Db, type DocsV1Db, type DocsV2Read, FdrAPI, migrateDocsDbDefinition } from "@fern-api/fdr-sdk";
 import type { AuthType, PrismaClient } from "@prisma/client";
 import urljoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
-
-import { APIV1Db, type DocsV1Db, type DocsV2Read, FdrAPI, migrateDocsDbDefinition } from "@fern-api/fdr-sdk";
-
+import type winston from "winston";
+import { LOGGER } from "../../app/FdrApplication";
 import type { DocsRegistrationInfo } from "../../controllers/docs/v2/getDocsWriteV2Service";
-import { type WithoutQuestionMarks, readBuffer, writeBuffer } from "../../util";
+import { readBuffer, type WithoutQuestionMarks, writeBuffer } from "../../util";
 import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 import { sort } from "../../util/sort";
 import type { IndexSegmentIds, PrismaTransaction, ReferencedAPIDefinitionIds } from "../types";
@@ -121,7 +121,11 @@ export interface DocsV2Dao {
 }
 
 export class DocsV2DaoImpl implements DocsV2Dao {
-    constructor(private readonly prisma: PrismaClient) {}
+    private logger: winston.Logger;
+
+    constructor(private readonly prisma: PrismaClient) {
+        this.logger = LOGGER;
+    }
 
     public async setDocsMetadata({
         url,
@@ -156,23 +160,74 @@ export class DocsV2DaoImpl implements DocsV2Dao {
         domains: string[],
         orgId: string
     ): Promise<CheckDomainOwnershipResponse> {
-        const matchedDomains = await this.prisma.docsV2.findMany({
-            select: {
-                orgID: true,
-                domain: true
-            },
-            where: {
-                domain: {
-                    in: domains
-                }
-            },
-            distinct: ["orgID", "domain"]
+        // Extract hostnames from domain strings that may include paths
+        const hostnames = domains.map((domain) => {
+            try {
+                const parsed = ParsedBaseUrl.parse(domain);
+                return parsed.hostname;
+            } catch (e) {
+                this.logger.error(`[checkDomainsDontBelongToAnotherOrg] Failed to parse domain: "${domain}"`, e);
+                throw new Error(`[checkDomainsDontBelongToAnotherOrg] Failed to parse domain: "${domain}"`);
+            }
         });
 
-        const allDomainsOwned = matchedDomains.every((matchedDomain) => matchedDomain.orgID === orgId);
+        let matchedDomains;
+        try {
+            matchedDomains = await this.prisma.docsV2.findMany({
+                select: {
+                    orgID: true,
+                    domain: true
+                },
+                where: {
+                    domain: {
+                        in: hostnames
+                    }
+                },
+                distinct: ["orgID", "domain"]
+            });
+        } catch (err) {
+            this.logger.error("[checkDomainsDontBelongToAnotherOrg] Error querying docsV2.findMany", err);
+            throw err;
+        }
+
+        // Group by domain to check for multiple orgs per domain
+        const domainToOrgs: Record<string, Set<string>> = {};
+        for (const { domain, orgID } of matchedDomains) {
+            if (!domainToOrgs[domain]) {
+                domainToOrgs[domain] = new Set();
+            }
+            domainToOrgs[domain].add(orgID);
+        }
+
+        // Warn if any domain is owned by more than one org
+        for (const [domain, orgs] of Object.entries(domainToOrgs)) {
+            if (orgs.size > 1) {
+                this.logger.warn(
+                    `[checkDomainsDontBelongToAnotherOrg] Domain "${domain}" is owned by multiple orgs: [${[...orgs].join(", ")}]`
+                );
+            }
+        }
+
+        // Find domains not owned by the given orgId
         const unownedDomains = matchedDomains
             .filter((matchedDomain) => matchedDomain.orgID !== orgId)
             .map((matchedDomain) => matchedDomain.domain);
+
+        const allDomainsOwned = unownedDomains.length === 0;
+
+        // Only log if there are domains not owned by the org
+        if (!allDomainsOwned) {
+            for (const { domain, orgID } of matchedDomains) {
+                if (orgID !== orgId) {
+                    this.logger.info(
+                        `[checkDomainsDontBelongToAnotherOrg] Domain "${domain}" is owned by "${orgID}", not "${orgId}"`
+                    );
+                }
+            }
+            this.logger.info("[checkDomainsDontBelongToAnotherOrg] allDomainsOwned:", allDomainsOwned);
+            this.logger.info("[checkDomainsDontBelongToAnotherOrg] unownedDomains:", unownedDomains);
+        }
+
         return {
             allDomainsOwned,
             unownedDomains
