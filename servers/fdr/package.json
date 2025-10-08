@@ -63,6 +63,7 @@
     "@types/node-cron": "^3.0.8",
     "@types/semver": "^7.5.8",
     "@types/uuid": "^9.0.1",
+    "@types/url-join": "^4.0.1",
     "@ungap/url-search-params": "0.2.2",
     "@yarnpkg/pnpify": "^4.0.1",
     "algoliasearch": "^4.24.0",
@@ -88,7 +89,7 @@
     "tsx": "^4.7.1",
     "typescript": "catalog:",
     "undici": "^6.20.1",
-    "url-join": "catalog:",
+    "url-join": "^4.0.1",
     "uuid": "catalog:",
     "vitest": "catalog:",
     "winston": "^3.10.0"
