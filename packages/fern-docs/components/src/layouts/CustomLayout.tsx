@@ -1,5 +1,4 @@
-import { SetLayout } from "../state/layout";
-import { HiddenSidebar } from "../theming/HiddenSidebar";
+import { HiddenSidebar, SetLayout } from "../state/layout";
 
 interface CustomLayoutProps {
     children?: React.ReactNode;

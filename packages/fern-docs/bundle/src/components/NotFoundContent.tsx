@@ -1,7 +1,8 @@
 import "server-only";
 
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
-import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
+import { HiddenSidebar } from "@fern-docs/components/state/layout";
+
 import { NotFound404Tracker } from "./analytics/NotFound404Tracker";
 import ReturnHomeButton from "./ReturnHomeButton";
 
