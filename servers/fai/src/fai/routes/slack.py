@@ -13,6 +13,7 @@ from urllib.parse import quote
 from uuid import uuid4
 
 from fastapi import (
+    BackgroundTasks,
     HTTPException,
     Request,
 )
@@ -56,6 +57,7 @@ from fai.utils.slack.message_handler import (
     handle_slack_message,
     process_message,
 )
+from fai.utils.slack.response_qa import log_message_for_qa
 
 MESSAGE_CACHE_TTL = 30
 
@@ -136,7 +138,7 @@ async def create_slack_integration(integration_request: CreateSlackIntegration) 
 
 
 @fai_app.post("/slack/events", openapi_extra={"x-fern-audiences": ["internal"]})
-async def handle_slack_events(request: Request) -> JSONResponse:
+async def handle_slack_events(request: Request, background_tasks: BackgroundTasks) -> JSONResponse:
     try:
         body = await request.json()
 
@@ -174,7 +176,7 @@ async def handle_slack_events(request: Request) -> JSONResponse:
 
                 if message_ts:
                     await mark_message_processed(team_id, message_ts)
-                await handle_app_mention(event, team_id)
+                await handle_app_mention(event, team_id, background_tasks)
             elif event_type == "message":
                 if event.get("bot_id"):
                     LOGGER.info(f"Skipping bot message: bot_id={event.get('bot_id')}")
@@ -192,7 +194,7 @@ async def handle_slack_events(request: Request) -> JSONResponse:
 
                 if message_ts:
                     await mark_message_processed(team_id, message_ts)
-                await handle_message(event, team_id)
+                await handle_message(event, team_id, background_tasks)
             else:
                 LOGGER.info(f"Unhandled event type: {event_type}")
 
@@ -640,7 +642,7 @@ async def check_message_exists(channel: str, message_ts: str, bot_token: str) ->
         return True
 
 
-async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
+async def handle_app_mention(event: dict[str, Any], team_id: str, background_tasks: BackgroundTasks) -> None:
     user = event.get("user")
     text = event.get("text", "")
     channel = event.get("channel")
@@ -673,6 +675,10 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
             unfurl_media=False,
         )
         success = msg_response["ok"]
+
+        if success:
+            background_tasks.add_task(log_message_for_qa, response, team_id, text)
+
         bot_message_ts = msg_response.get("ts") if success else None
 
         if success and response.user_id and bot_message_ts:
@@ -1143,7 +1149,7 @@ async def handle_configure_command(
         )
 
 
-async def handle_message(event: dict[str, Any], team_id: str) -> None:
+async def handle_message(event: dict[str, Any], team_id: str, background_tasks: BackgroundTasks) -> None:
     user = event.get("user")
     text = event.get("text", "")
     channel = event.get("channel")
@@ -1174,7 +1180,12 @@ async def handle_message(event: dict[str, Any], team_id: str) -> None:
             unfurl_links=False,
             unfurl_media=False,
         )
+
         success = msg_response["ok"]
+
+        if success:
+            background_tasks.add_task(log_message_for_qa, response, team_id, text)
+
         bot_message_ts = msg_response.get("ts") if success else None
 
         if success and response.user_id and bot_message_ts:

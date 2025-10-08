@@ -26,6 +26,7 @@ export interface FernAiEnvVariables {
     SLACK_CLIENT_ID: string;
     SLACK_CLIENT_SECRET: string;
     SLACK_SIGNING_SECRET: string;
+    ASK_FERN_SLACK_BOT_TOKEN: string;
     DISCORD_BOT_TOKEN: string;
     DISCORD_OAUTH_URL: string;
     KV_REST_API_TOKEN: string;

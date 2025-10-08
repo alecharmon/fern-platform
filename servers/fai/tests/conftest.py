@@ -33,6 +33,7 @@ TEST_SLACK_CLIENT_SECRET = "test-slack-client-secret"
 TEST_SLACK_SIGNING_SECRET = "test-slack-signing-secret"
 TEST_DISCORD_BOT_TOKEN = "test-discord-bot-token"
 TEST_DISCORD_OAUTH_URL = "test-discord-oauth-url"
+TEST_ASK_FERN_SLACK_BOT_TOKEN = "test-ask-fern-slack-bot-token"
 ROUTES_PACKAGE_NAME = "fai.routes"
 
 
@@ -90,7 +91,7 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["SLACK_CLIENT_ID"] = TEST_SLACK_CLIENT_ID
     os.environ["SLACK_CLIENT_SECRET"] = TEST_SLACK_CLIENT_SECRET
     os.environ["SLACK_SIGNING_SECRET"] = TEST_SLACK_SIGNING_SECRET
-
+    os.environ["ASK_FERN_SLACK_BOT_TOKEN"] = TEST_ASK_FERN_SLACK_BOT_TOKEN
     yield
 
     if original_url:
