@@ -72,6 +72,7 @@ RUN apk add --no-cache curl bash strace && \
 
 # ----------- Start FDR setup -----------
 ENV LOCAL_MODE_OVERRIDE=true
+ENV S3_FORCE_PATH_STYLE=true
 COPY servers/fdr/cjs /fdr
 COPY servers/fdr/prisma /fdr/prisma
 
