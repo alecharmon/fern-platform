@@ -4,11 +4,11 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { GithubCommitableFile } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";
 
-import postGitCommit from "../api/post-git-commit/handler";
 import postCreatePr from "../api/post-git-create-pr/handler";
 import type { Auth0OrgName } from "../services/auth0/types";
 import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExists";
 import { withGithubAuth } from "../services/dal/github/middleware";
+import postGitCommit from "../services/dal/github/postGitCommit";
 import { getUpgradePrBranchName } from "../services/dal/github/request-utils";
 import { GitHubLoader } from "../services/github/github-loader";
 
@@ -114,7 +114,9 @@ export async function upgradeFernVersionAction(
                         repo,
                         branch: branchName,
                         message: commitMessage,
-                        files
+                        files,
+                        orgName,
+                        site: docsUrl
                     });
 
                     if (!commitResult.success) {

@@ -8,7 +8,6 @@ import type { getPrForBranch } from "@/app/api/get-pr-for-branch/route";
 import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
 import type { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
 import type { postDocsGithubSource } from "@/app/api/post-docs-github-source/route";
-import type { postGitCommit } from "@/app/api/post-git-commit/route";
 import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import type { preloadEditorData } from "@/app/api/preload-editor-data/route";
 import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
@@ -26,8 +25,6 @@ export const DashboardApiClient = {
         typedFetch<getHomepageImageUrl.Response>("/api/homepage-images/get", request),
     getDocsUrlOwner: (request: getDocsUrlOwner.Request) =>
         typedFetch<getDocsUrlOwner.Response>("/api/get-docs-url-owner", request),
-    postGitCommit: (request: postGitCommit.Request) =>
-        typedFetch<postGitCommit.Response>("/api/post-git-commit", request),
     postCreatePr: (request: postCreatePr.Request) =>
         typedFetch<postCreatePr.Response>("/api/post-git-create-pr", request),
     generatePrDescription: (request: generatePrDescription.Request) =>

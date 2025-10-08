@@ -6,18 +6,17 @@ import * as Sentry from "@sentry/nextjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import { DashboardApiClient } from "@/app/services/dashboard-api/client";
+import postGitCommit from "@/app/services/dal/github/postGitCommit";
 import { DEFAULT_COMMIT_MESSAGE, handleCreatePr } from "@/app/services/github/github";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
-
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { DashboardTooltip } from "./DashboardTooltip";
 import {
-    ErrorFullCommitToast,
+    ErrorCommitToast,
     ErrorNoBaseBranchToast,
     ErrorNoBranchToast,
     ErrorNoGithubSourceToast,
@@ -61,7 +60,7 @@ export function CommitButton() {
 
         setIsCommitting(true);
         try {
-            const response = await DashboardApiClient.postGitCommit({
+            const response = await postGitCommit({
                 orgName,
                 owner,
                 repo,
@@ -74,7 +73,9 @@ export function CommitButton() {
                 SuccessfulCommitToast();
                 handleCommitSuccess();
             } else {
-                throw new Error(response.error);
+                ErrorCommitToast(response.error);
+                Sentry.captureException(response.error);
+                return;
             }
 
             if (!gitPrUrl) {
@@ -89,7 +90,7 @@ export function CommitButton() {
                     site,
                     repo,
                     baseBranch,
-                    title: prTitle,
+                    title: prTitle == null ? undefined : prTitle,
                     onAiGenerationComplete: refetchPrData
                 });
                 if (newPrUrl) {
@@ -98,8 +99,8 @@ export function CommitButton() {
                 }
             }
         } catch (error) {
-            ErrorFullCommitToast();
-            console.error("Failed to commit changes:", error);
+            ErrorCommitToast();
+            console.error("Error committing changes:", error);
             // TODO: Move error reporting into toasts handlers
             Sentry.captureException(error);
         } finally {

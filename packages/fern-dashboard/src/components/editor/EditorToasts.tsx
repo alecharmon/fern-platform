@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import type { PostGitCommitErrors } from "@/app/services/dal/github/postGitCommit";
 
 /**
  * This file contains reusable toasts that are used in the editor.
@@ -36,8 +37,45 @@ export function ErrorEditSourceToast() {
     return toast.error("Failed to link your repository. Please try again.");
 }
 
-export function ErrorFullCommitToast() {
-    toast.error("Failed to commit changes. Please try again.");
+export function ErrorCommitToast(error?: PostGitCommitErrors) {
+    if (!error) {
+        return toast.error("Failed to commit changes due to unexpected error. Please try again.");
+    }
+
+    switch (error.type) {
+        case "SESSION_ERROR":
+        case "ORG_ACCESS_ERROR":
+            return toast.error("Authentication failed. Please log in again.");
+        case "NOT_LOGGED_IN":
+            return toast.error("You must be logged in to commit changes.");
+        case "GITHUB_URL_ERROR":
+            return toast.error("Invalid GitHub repository URL.");
+        case "GITHUB_ACCESS_ERROR":
+            return toast.error("Access denied to GitHub repository. Check your permissions.");
+        case "MISSING_APP_ID":
+            return toast.error("GitHub App configuration error. Please contact support.");
+        case "MISSING_PRIVATE_KEY":
+            return toast.error("GitHub App authentication error. Please contact support.");
+        case "NOT_INSTALLED":
+            return toast.error("Fern GitHub App is not installed. Please install it to commit changes.");
+        case "FAILED_TO_GET_GITHUB_CLIENT":
+            return toast.error("Failed to connect to GitHub. Please try again.");
+        case "FAILED_TO_GET_BRANCH_SHA":
+            return toast.error("Branch not found. Please ensure the branch exists in order to commit changes.");
+        case "FAILED_TO_GET_LATEST_COMMIT_SHA":
+            return toast.error("Failed to read commit history. Please ensure the branch exists.");
+        case "FAILED_TO_CREATE_TREE":
+            return toast.error("Failed to stage changes. Please try again.");
+        case "FAILED_TO_CREATE_COMMIT":
+        case "FAILED_TO_POST_COMMIT":
+            return toast.error("Failed to create new commit. Please try again.");
+        case "FAILED_TO_UPDATE_BRANCH_REF":
+            return toast.error("Failed to update branch: the branch may have been updated by someone else.");
+        case "UNKNOWN_ERROR":
+            return toast.error("Unexpected error. Please try again and contact support if the problem persists.");
+        default:
+            return toast.error("Failed to commit changes. Please try again.");
+    }
 }
 
 export function ErrorNoGithubSourceToast() {
