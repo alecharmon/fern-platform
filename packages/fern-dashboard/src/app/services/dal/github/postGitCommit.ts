@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { type FernBotOctokitError, getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { GITHUB_FILE_MODE, GithubCommitableFile } from "@/app/services/github/types";
@@ -113,32 +114,37 @@ export default async function postGitCommit(request: {
                     };
                 }
 
-                // Get the base tree to check which files actually exist
-                let baseTreeResponse;
-                try {
-                    baseTreeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
-                        owner: request.owner,
-                        repo: request.repo,
-                        tree_sha: baseTreeSha,
-                        recursive: "true" // Get all files recursively
-                    });
-                    if (!baseTreeResponse.data.tree) {
-                        throw new Error("Retrieved file tree is null");
-                    }
-                } catch (error) {
-                    return {
-                        success: false,
-                        error: {
-                            type: "FAILED_TO_GET_FILE_TREE",
-                            message: error instanceof Error ? error.message : "Unknown error occurred"
-                        }
-                    };
-                }
+                // If there are files to delete, we need to get the existing files in the base tree so we can validate deletions
+                const hasFilesToDelete = request.files.some((file) => file.delete);
+                let existingFiles: Set<string> = new Set();
 
-                // Create a set of existing file paths for quick lookup
-                const existingFiles = new Set(
-                    baseTreeResponse.data.tree.filter((item) => item.type === "blob").map((item) => item.path) || []
-                );
+                if (hasFilesToDelete) {
+                    // Get the base tree to check which files actually exist
+                    let baseTreeResponse;
+                    try {
+                        baseTreeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
+                            owner: request.owner,
+                            repo: request.repo,
+                            tree_sha: baseTreeSha,
+                            recursive: "true" // Get all files recursively
+                        });
+                        if (!baseTreeResponse.data.tree) {
+                            throw new Error("Retrieved file tree is null");
+                        }
+                    } catch (error) {
+                        return {
+                            success: false,
+                            error: {
+                                type: "FAILED_TO_GET_FILE_TREE",
+                                message: error instanceof Error ? error.message : "Unknown error occurred"
+                            }
+                        };
+                    }
+                    // Create a set of existing file paths for quick lookup
+                    existingFiles = new Set(
+                        baseTreeResponse.data.tree.filter((item) => item.type === "blob").map((item) => item.path) || []
+                    );
+                }
 
                 // Create a new tree with the files
                 const tree = request.files
@@ -146,6 +152,18 @@ export default async function postGitCommit(request: {
                         if (file.delete) {
                             // Only include deletion entries for files that actually exist in the base tree
                             if (!existingFiles.has(file.path)) {
+                                Sentry.captureException(
+                                    new Error(
+                                        `File ${file.path} does not exist in the base tree, but was requested to be deleted.`
+                                    ),
+                                    {
+                                        extra: {
+                                            owner: request.owner,
+                                            repo: request.repo,
+                                            branch: request.branch
+                                        }
+                                    }
+                                );
                                 return null;
                             }
                             // For deletions of existing files, GitHub still requires mode and type
