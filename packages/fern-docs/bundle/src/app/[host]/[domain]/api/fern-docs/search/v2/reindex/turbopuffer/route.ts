@@ -3,7 +3,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createOpenAI } from "@ai-sdk/openai";
 import { kv } from "@vercel/kv";
 
-import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server/analytics/posthog";
 import { fdrEnvironment, fernToken_admin, openaiApiKey, turbopufferApiKey } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
@@ -21,6 +20,7 @@ import {
 } from "@fern-docs/search-ask-fern";
 
 import { getFaiClient } from "@/getFaiClient";
+import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 
 export const maxDuration = 800; // 13 minutes
 
@@ -32,7 +32,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const openai = createOpenAI({ apiKey: openaiApiKey() });
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
-    const host = req.nextUrl.host;
     const domain = getDocsDomainEdge(req);
     const deleteExisting = req.nextUrl.searchParams.get("deleteExisting") === "true";
 
@@ -40,12 +39,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
 
     try {
-        const loader = await createCachedDocsLoader(host, domain);
-        const metadata = await loader.getMetadata();
+        const metadata = await getDocsUrlMetadata(domain);
         if (metadata == null) {
             return NextResponse.json("Not found", { status: 404 });
         }
-        if (metadata.isPreview) {
+        if (metadata.isPreview && !metadata.enableAlgoliaOnPreview) {
             return NextResponse.json(
                 {
                     added: 0,

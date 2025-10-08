@@ -4,6 +4,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import type { UIMessage } from "ai";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
 import { fernToken_admin, openaiApiKey } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
@@ -45,11 +46,13 @@ export async function POST(req: NextRequest) {
     const explodedRoles = createDelimitedRolesetCombinations({ roleset: roles });
 
     const loader = await createCachedDocsLoader(host, domain);
-    const metadata = await loader.getMetadata();
+    const metadata = await getDocsUrlMetadata(domain);
+
     if (metadata == null) {
         return NextResponse.json("Not found", { status: 404 });
     }
-    if (metadata.isPreview) {
+
+    if (metadata.isPreview && !metadata.enableAlgoliaOnPreview) {
         return NextResponse.json("Chat is not enabled for preview environments", {
             status: 404
         });

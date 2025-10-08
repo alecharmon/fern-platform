@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { postToSlack } from "@fern-api/docs-server";
+import { getDocsUrlMetadata, postToSlack } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server";
 import { track } from "@fern-api/docs-server/analytics/posthog";
 import { algoliaAppId, algoliaWriteApiKey, fdrEnvironment, fernToken_admin } from "@fern-api/docs-server/env-variables";
@@ -18,18 +17,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json("algolia indexing is not accessible in local preview mode", { status: 400 });
     }
 
-    const host = req.nextUrl.host;
     const domain = getDocsDomainEdge(req);
 
     try {
-        const loader = await createCachedDocsLoader(host, domain);
-        const metadata = await loader.getMetadata();
+        const metadata = await getDocsUrlMetadata(domain);
         if (metadata == null) {
             return NextResponse.json("Not found", { status: 404 });
         }
 
         // If the domain is a preview URL, we don't want to reindex
-        if (metadata.isPreview) {
+        if (metadata.isPreview && !metadata.enableAlgoliaOnPreview) {
             return NextResponse.json({
                 added: 0,
                 updated: 0,
