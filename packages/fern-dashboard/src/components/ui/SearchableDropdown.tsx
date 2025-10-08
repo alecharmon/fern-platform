@@ -1,6 +1,5 @@
-import { type ReactNode, useState } from "react";
-
 import { SearchIcon } from "lucide-react";
+import { type KeyboardEvent, type ReactNode, useEffect, useState } from "react";
 
 import { Input } from "./input";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
@@ -15,7 +14,7 @@ export interface SearchableDropdownProps<T> {
     emptyMessage?: string;
     loadingMessage?: string;
     isLoading?: boolean;
-    renderItem: (item: T, onSelect: () => void) => ReactNode;
+    renderItem: (item: T, onSelect: () => void, isHighlighted: boolean) => ReactNode;
     getItemKey: (item: T) => string;
     shouldShowSearch?: boolean;
 }
@@ -35,6 +34,39 @@ export function SearchableDropdown<T>({
     shouldShowSearch = true
 }: SearchableDropdownProps<T>) {
     const [isOpen, setIsOpen] = useState(false);
+    const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
+
+    // Reset highlighted index when items change
+    useEffect(() => {
+        setHighlightedIndex(0);
+    }, [items]);
+
+    // Handle keyboard navigation
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (items.length === 0) return;
+
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                setHighlightedIndex((prev) => Math.min(prev + 1, items.length - 1));
+                break;
+            case "ArrowUp":
+                e.preventDefault();
+                setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+                break;
+            case "Enter":
+                e.preventDefault();
+                if (items[highlightedIndex] != null) {
+                    onSelect(items[highlightedIndex]);
+                    setIsOpen(false);
+                }
+                break;
+            case "Escape":
+                e.preventDefault();
+                setIsOpen(false);
+                break;
+        }
+    };
 
     return (
         <Popover
@@ -59,23 +91,28 @@ export function SearchableDropdown<T>({
                                     onChange={(e) => {
                                         onSearchChange(e.target.value);
                                     }}
+                                    onKeyDown={handleKeyDown}
                                     className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
                                 />
                             </div>
                         </div>
                     )}
-                    <div className="max-h-60 overflow-y-auto p-1">
+                    <div className="flex flex-col max-h-60 overflow-y-auto p-1 gap-px">
                         {items.length === 0 ? (
                             <div className="p-4 text-center text-sm text-gray-500">
                                 {isLoading ? loadingMessage : searchTerm ? emptyMessage : emptyMessage}
                             </div>
                         ) : (
-                            items.map((item) => (
-                                <div key={getItemKey(item)}>
-                                    {renderItem(item, () => {
-                                        onSelect(item);
-                                        setIsOpen(false);
-                                    })}
+                            items.map((item, index) => (
+                                <div key={getItemKey(item)} onMouseEnter={() => setHighlightedIndex(index)}>
+                                    {renderItem(
+                                        item,
+                                        () => {
+                                            onSelect(item);
+                                            setIsOpen(false);
+                                        },
+                                        index === highlightedIndex
+                                    )}
                                 </div>
                             ))
                         )}

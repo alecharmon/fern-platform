@@ -1,18 +1,18 @@
 "use client";
 
+import { useRouter } from "@bprogress/next/app";
+import { ChevronDown, Clock } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { useRouter } from "@bprogress/next/app";
-import { ChevronDown } from "lucide-react";
-
-import type { Auth0OrgName, Auth0Organization } from "@/app/services/auth0/types";
-import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
+import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
+import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
 import { getOrgDisplayName } from "@/utils/getOrgDisplayName";
+import { addRecentOrg, getRecentOrgs } from "@/utils/recentOrgs";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
-
+import { cn } from "@/utils/utils";
 import { OrgLogo } from "./org-logo/OrgLogo";
 
 export const OrgSwitcherClient = ({
@@ -25,21 +25,40 @@ export const OrgSwitcherClient = ({
     const orgName = useOrgNameFromPathname();
     const [localOrgName, setLocalOrgName] = useState(currentOrgName);
     const [searchTerm, setSearchTerm] = useState("");
+    const [recentOrgNames, setRecentOrgNames] = useState<Auth0OrgName[]>([]);
 
     useEffect(() => {
         setLocalOrgName(orgName);
     }, [orgName]);
 
+    // Load recent orgs from localStorage on mount
+    useEffect(() => {
+        setRecentOrgNames(getRecentOrgs());
+    }, []);
+
     const pathname = usePathnameWithoutOrgName();
     const router = useRouter();
 
+    // Organize organizations: recent first, then the rest
+    const organizedOrganizations = useMemo(() => {
+        const recentOrgs = organizations.filter((org) => recentOrgNames.includes(org.name));
+        const otherOrgs = organizations.filter((org) => !recentOrgNames.includes(org.name));
+
+        // Sort recent orgs by their order in recentOrgNames
+        const sortedRecentOrgs = recentOrgs.sort((a, b) => {
+            return recentOrgNames.indexOf(a.name) - recentOrgNames.indexOf(b.name);
+        });
+
+        return [...sortedRecentOrgs, ...otherOrgs];
+    }, [organizations, recentOrgNames]);
+
     // Filter organizations by search term
     const filteredOrganizations = useMemo(() => {
-        return organizations.filter((org) => {
+        return organizedOrganizations.filter((org) => {
             const displayName = getOrgDisplayName(org) ?? "";
             return displayName.toLowerCase().includes(searchTerm.toLowerCase());
         });
-    }, [organizations, searchTerm]);
+    }, [organizedOrganizations, searchTerm]);
 
     const getPathnameForOrg = (newOrgName: Auth0OrgName) => {
         return `/${newOrgName}${getRedirectPathname(pathname)}`;
@@ -49,6 +68,14 @@ export const OrgSwitcherClient = ({
         if (newOrgName !== orgName) {
             setLocalOrgName(newOrgName);
         }
+        // Save to recent orgs
+        addRecentOrg(newOrgName);
+        setRecentOrgNames(getRecentOrgs());
+    };
+
+    const onSelectOrg = (newOrgName: Auth0OrgName) => {
+        onClickOrg(newOrgName);
+        router.push(getPathnameForOrg(newOrgName));
     };
 
     const onHoverOrg = (hoveredOrgName: Auth0OrgName) => {
@@ -62,28 +89,40 @@ export const OrgSwitcherClient = ({
             items={filteredOrganizations}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
-            onSelect={(org) => onClickOrg(org.name)}
+            onSelect={(org) => onSelectOrg(org.name)}
             searchPlaceholder="Search organizations..."
             emptyMessage="No organizations found"
             getItemKey={(org) => org.id}
             shouldShowSearch={organizations.length > 10}
-            renderItem={(organization) => (
-                <Link
-                    className="flex w-full cursor-pointer justify-between px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                    href={getPathnameForOrg(organization.name)}
-                    onMouseOver={() => {
-                        onHoverOrg(organization.name);
-                    }}
-                    onClick={() => {
-                        onClickOrg(organization.name);
-                    }}
-                >
-                    <div className="flex items-center gap-2">
-                        <OrgLogo organization={organization} />
-                        {getOrgDisplayName(organization)}
-                    </div>
-                </Link>
-            )}
+            renderItem={(organization, onSelectFromDropdown, isHighlighted) => {
+                const isRecent = recentOrgNames.includes(organization.name);
+                const isCurrent = organization.name === localOrgName;
+                return (
+                    <Link
+                        className={cn(
+                            "flex w-full cursor-pointer items-center justify-between px-3 rounded py-1.5 text-left text-sm focus:outline-none",
+                            searchTerm.length > 0 && isHighlighted ? "bg-gray-300" : "hover:bg-gray-300"
+                        )}
+                        href={getPathnameForOrg(organization.name)}
+                        onMouseOver={() => {
+                            onHoverOrg(organization.name);
+                        }}
+                        onClick={() => {
+                            if (isCurrent) {
+                                return;
+                            }
+                            onClickOrg(organization.name);
+                            onSelectFromDropdown();
+                        }}
+                    >
+                        <div className="flex items-center gap-2">
+                            <OrgLogo organization={organization} />
+                            {getOrgDisplayName(organization)}
+                        </div>
+                        {isRecent && <Clock className="h-4 w-4 text-gray-600" />}
+                    </Link>
+                );
+            }}
         >
             <Button
                 variant="outline"

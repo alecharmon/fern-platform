@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { RecentOrgRedirect } from "@/components/auth/RecentOrgRedirect";
 import { applyOrgMappings } from "@/orgMappings";
 
 import { type Auth0SessionData, getCurrentSession } from "./services/auth0/getCurrentSession";
@@ -27,7 +28,8 @@ export default async function Page() {
         if (response.empty) {
             redirect(`/get-started`);
         } else {
-            redirect(`/${response.orgName}/docs`);
+            // Use client-side component to check for recent org and redirect
+            return <RecentOrgRedirect defaultOrgName={response.orgName} />;
         }
     }
 }
