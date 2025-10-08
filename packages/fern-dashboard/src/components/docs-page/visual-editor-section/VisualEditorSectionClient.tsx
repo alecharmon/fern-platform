@@ -1,8 +1,7 @@
 "use client";
 
+import { createNavigationBufferedIndexedDBStorage } from "@fern-docs/components/navigation";
 import { useEffect, useState } from "react";
-
-import { createNavigationLocalStorage } from "@fern-docs/components/navigation";
 
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -37,10 +36,12 @@ export function VisualEditorSectionClient({
     useEffect(() => {
         setLoadingBranches(true);
         const getBranches = async () => {
+            const storage = createNavigationBufferedIndexedDBStorage();
+            await storage.init();
             const relevantBranches = await getRelevantUserBranchesForSite(
                 orgName,
                 docsUrl,
-                createNavigationLocalStorage().getAllStoredBranches()
+                storage.getAllStoredBranches()
             );
             setRelevantBranches(relevantBranches);
             setLoadingBranches(false);

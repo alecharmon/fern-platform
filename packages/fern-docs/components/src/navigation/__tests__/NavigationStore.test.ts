@@ -1,8 +1,7 @@
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { FernNavigation } from "@fern-api/fdr-sdk";
-
-import { createNavigationMemoryStorage } from "../NavigationStorage";
+import { _createNavigationMemoryStorage } from "../NavigationStorage";
 import { NavigationStore } from "../NavigationStore";
 
 const createTestNode = (id = "test-id", title = "Test Page"): FernNavigation.PageNode => ({
@@ -25,9 +24,9 @@ const createTestNode = (id = "test-id", title = "Test Page"): FernNavigation.Pag
 describe("NavigationStore", () => {
     let store: NavigationStore;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         store = new NavigationStore("test-branch", "test-org", "https://test.com");
-        store.hydrate({ storage: createNavigationMemoryStorage() });
+        await store.hydrate({ storage: _createNavigationMemoryStorage() });
     });
 
     describe("page data persistence", () => {

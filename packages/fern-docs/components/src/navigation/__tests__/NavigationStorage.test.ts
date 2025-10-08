@@ -1,8 +1,7 @@
+import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { FernNavigation } from "@fern-api/fdr-sdk";
-
-import { type NavigationStorage, createNavigationMemoryStorage } from "../NavigationStorage";
+import { _createNavigationMemoryStorage, type NavigationStorage } from "../NavigationStorage";
 
 const MOCK_ORG_NAME = "test-org";
 const MOCK_DOCS_URL = "https://test.com";
@@ -41,8 +40,9 @@ const createTestData = () => ({
 describe("NavigationStorage", () => {
     let storage: NavigationStorage;
 
-    beforeEach(() => {
-        storage = createNavigationMemoryStorage();
+    beforeEach(async () => {
+        storage = _createNavigationMemoryStorage();
+        await storage.init();
     });
 
     it("should store, retrieve, and handle Map serialization", () => {

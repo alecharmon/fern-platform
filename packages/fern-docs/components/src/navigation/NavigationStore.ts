@@ -8,7 +8,7 @@ import {
     hasChangesToCommit
 } from "./commitUtils";
 import { generateFractionalIndex } from "./indexingUtils";
-import { createNavigationLocalStorage, type NavigationStorage } from "./NavigationStorage";
+import { createNavigationBufferedIndexedDBStorage, type NavigationStorage } from "./NavigationStorage";
 import { resolvePageData } from "./pageUtils";
 import type {
     ClientPageDataWriteDependencies,
@@ -138,8 +138,9 @@ export class NavigationStore {
     // --------------------------------------------------------------------------
 
     /** Lazily initializes storage to prevent hydration errors */
-    hydrate(options?: { storage?: NavigationStorage; initialDocsYmlContent?: string | null }): void {
-        this._storage = options?.storage || createNavigationLocalStorage();
+    async hydrate(options?: { storage?: NavigationStorage; initialDocsYmlContent?: string | null }): Promise<void> {
+        this._storage = options?.storage || createNavigationBufferedIndexedDBStorage();
+        await this._storage.init();
         const storedSnapshot = this._storage.getOrSetStore(this._branchName, this._orgName, this._docsUrl);
 
         this._latestSnapshot = storedSnapshot;

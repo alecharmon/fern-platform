@@ -8,7 +8,7 @@ describe("cloneRepository", () => {
         });
         const readme = await repository.getReadme();
         expect(readme).contains("Fern");
-    });
+    }, 10000);
     it("invalid installation token", async () => {
         await expect(async () => {
             await cloneRepository({
@@ -16,7 +16,7 @@ describe("cloneRepository", () => {
                 installationToken: "ghp_xyz"
             });
         }).rejects.toThrow();
-    });
+    }, 10000);
     it("repository does not exist", async () => {
         await expect(async () => {
             await cloneRepository({
@@ -24,5 +24,5 @@ describe("cloneRepository", () => {
                 installationToken: undefined
             });
         }).rejects.toThrow();
-    });
+    }, 10000);
 });

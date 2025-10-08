@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, createContext, useContext, useEffect, useRef, useSyncExternalStore } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useRef, useSyncExternalStore } from "react";
 
 import { NavigationStore } from "./NavigationStore";
 import type { DeletionToastCallback, NavigationSnapshot } from "./types";
@@ -40,7 +40,7 @@ export function NavigationStoreProvider({
     }
 
     useEffect(() => {
-        storeRef.current.hydrate({ initialDocsYmlContent });
+        void storeRef.current.hydrate({ initialDocsYmlContent });
     }, [initialDocsYmlContent]);
 
     useEffect(() => {

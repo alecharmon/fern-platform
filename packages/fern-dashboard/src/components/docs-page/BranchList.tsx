@@ -1,13 +1,17 @@
 "use client";
 
 import { useRouter } from "@bprogress/next/app";
+import {
+    constructEditorSlug,
+    createNavigationBufferedIndexedDBStorage,
+    ROOT_SLUG_ALIAS
+} from "@fern-docs/components/navigation";
 import { useState } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
-import { constructEditorSlug, ROOT_SLUG_ALIAS, createNavigationLocalStorage } from "@fern-docs/components/navigation";
 import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 import { BranchListItem } from "./BranchListItem";
 import { GoToEditorButton } from "./GoToEditorButton";
@@ -45,12 +49,17 @@ export function BranchList({
     };
 
     const handleBranchDelete = (branchName: string) => {
-        createNavigationLocalStorage().removeStore(branchName);
-        setDeletedBranches((prev) => new Set(prev).add(branchName));
-        const remainingBranches = branches.filter((branch) => !deletedBranches.has(branch));
-        if (visibleCount > remainingBranches.length) {
-            setVisibleCount(remainingBranches.length);
-        }
+        const deleteBranch = async () => {
+            const storage = createNavigationBufferedIndexedDBStorage();
+            await storage.init();
+            storage.removeStore(branchName);
+            setDeletedBranches((prev) => new Set(prev).add(branchName));
+            const remainingBranches = branches.filter((branch) => !deletedBranches.has(branch));
+            if (visibleCount > remainingBranches.length) {
+                setVisibleCount(remainingBranches.length);
+            }
+        };
+        void deleteBranch();
     };
 
     const handleLoadMore = () => {
