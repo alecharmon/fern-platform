@@ -6,7 +6,13 @@ import type { LogoConfiguration } from "@fern-api/docs-utils/types/logo-configur
 import { FernImage } from "../FernImage";
 import { cn } from "../cn";
 
-export function AbstractLogo({ logo, alt }: { logo: LogoConfiguration; alt?: string }) {
+export interface AbstractLogoProps {
+    logo: LogoConfiguration;
+    alt?: string;
+    onError?: (theme: "light" | "dark", src: string) => void;
+}
+
+export function AbstractLogo({ logo, alt, onError }: AbstractLogoProps) {
     const { light, dark, height } = logo;
 
     const style = {
@@ -30,6 +36,7 @@ export function AbstractLogo({ logo, alt }: { logo: LogoConfiguration; alt?: str
                     loading="eager"
                     quality={100}
                     style={style}
+                    onError={onError ? () => onError("light", light.src) : undefined}
                 />
             )}
             {dark && (
@@ -46,6 +53,7 @@ export function AbstractLogo({ logo, alt }: { logo: LogoConfiguration; alt?: str
                     loading="eager"
                     quality={100}
                     style={style}
+                    onError={onError ? () => onError("dark", dark.src) : undefined}
                 />
             )}
         </>
