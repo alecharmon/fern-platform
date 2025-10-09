@@ -109,18 +109,6 @@ export function resolveServerPageData(
     const filename = deps.filename;
     let resolvedMdx = deps.initialMdx;
 
-    if (deps.initialFoundNode.node.type !== "page") {
-        throw new Error(
-            `Could not resolve server page data, node type is not "page": "${deps.initialFoundNode.node.type}"`
-        );
-    }
-
-    if (deps.initialFoundNode.node.pageId !== deps.filename) {
-        throw new Error(
-            `Could not resolve server page data, page IDs do not match: "${deps.filename}" !== "${deps.initialFoundNode.node.pageId}"`
-        );
-    }
-
     // Hydrate server page data from registry if data is available
     const serverEntry = Object.values(snapshot.pageRegistry).find(
         (entry) => entry.pageData.source === "server" && entry.pageData.filename === deps.filename
