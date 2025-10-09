@@ -103,14 +103,42 @@ export default async function Page({
         serializableFoundNode = getSerializableFoundNode(navigationNode);
 
         // This is a server page, get the page id and fetch data from the loader
-        const pageId = getPageId(serializableFoundNode.node);
-        const page = pageId ? await loader.getPage(pageId) : undefined;
+        let pageId = getPageId(serializableFoundNode.node);
 
-        if (!page) {
-            throw new Error(`Node is not of type "page": "${serializableFoundNode.node.type}"`);
+        // If the found node doesn't have a pageId (e.g., section without overviewPageId),
+        // find the first page within it
+        if (!pageId && navigationNode.node.type === "section") {
+            // Helper function to recursively find the first page node
+            function findFirstPageNode(node: FernNavigation.NavigationNodePage | FernNavigation.NavigationChild): FernNavigation.NavigationNodePage | undefined {
+                if (FernNavigation.isPage(node)) {
+                    return node;
+                }
+                if (node.type === "section" && node.children && node.children.length > 0) {
+                    for (const child of node.children) {
+                        const pageId = findFirstPageNode(child);
+                        if (pageId) {
+                            return pageId;
+                        }
+                    }
+                }
+                return undefined;
+            }
+            const firstPageNode = findFirstPageNode(navigationNode.node);
+            if (firstPageNode) {
+                pageId = getPageId(firstPageNode);
+                const foundNode = FernNavigation.utils.findNode(root, firstPageNode.slug);
+                if (foundNode.type === "found") {
+                    serializableFoundNode = getSerializableFoundNode(foundNode);
+                }
+            }
         }
 
-        // TODO: if rawMarkdown is not available, show a warning to the user that they need to upgrade their CLI version
+        const page = pageId ? await loader.getPage(pageId) : undefined;
+
+        if (page == null) {
+            throw new Error(`Could not find page with ID ${pageId}`);
+        }
+
         const rawMarkdown = page.rawMarkdown ?? page.markdown;
 
         pageDataDeps = {
@@ -120,16 +148,16 @@ export default async function Page({
             initialFoundNode: serializableFoundNode
         };
         cssConfig = page.css;
+        
+        return (
+            // TODO: Currently, we are force-hiding the table of contents is within Fern Editor.
+            // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
+            // on the tiptap editor's content.
+            <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={undefined}>
+                <div className="flex w-full flex-col gap-2 py-12">
+                    <PageNode pageDataDeps={pageDataDeps} fallbackFoundNode={serializableFoundNode} cssConfig={cssConfig} />
+                </div>
+            </AbstractLayoutEvaluatorContent>
+        );                  
     }
-
-    return (
-        // TODO: Currently, we are force-hiding the table of contents is within Fern Editor.
-        // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
-        // on the tiptap editor's content.
-        <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={undefined}>
-            <div className="flex w-full flex-col gap-2 py-12">
-                <PageNode pageDataDeps={pageDataDeps} fallbackFoundNode={serializableFoundNode} cssConfig={cssConfig} />
-            </div>
-        </AbstractLayoutEvaluatorContent>
-    );
 }
