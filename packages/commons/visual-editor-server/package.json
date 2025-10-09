@@ -11,18 +11,24 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "default": "./dist/js/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.js"
     }
   },
   "main": "src/index.ts",
   "module": "src/index.ts",
+  "source": "src/index.ts",
+  "types": "src/index.ts",
   "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
-    "compile": "pnpm compile:js && pnpm compile:types",
-    "compile:js": "swc ./src --out-dir ./dist/js --copy-files --strip-leading-paths",
-    "compile:types": "tsc -p . --emitDeclarationOnly --declaration --outDir ./dist/types",
+    "compile": "tsc --build",
     "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -37,8 +43,6 @@
   "devDependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-platform/configs": "workspace:*",
-    "@swc/cli": "catalog:",
-    "@swc/core": "catalog:",
     "@types/node": "^22.0.0",
     "depcheck": "^1.4.7",
     "typescript": "catalog:",
