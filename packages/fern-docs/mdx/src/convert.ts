@@ -21,6 +21,8 @@ import { frontmatter as fm } from "micromark-extension-frontmatter";
 import { gfm } from "micromark-extension-gfm";
 import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
+import { visit } from "unist-util-visit";
+
 import type { MdxJsxElement } from "./mdast";
 
 // Options for how yaml is written to the frontmatter
@@ -362,7 +364,14 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
             return { type: "html", value: `<div data-type="image-upload" />` } as any;
         }
 
+        // Never use encoded mdx attribute for list elements (ul, ol, li) - always regenerate from structure
+        // This prevents issues with bullet markers being duplicated or mismatched
+        if (element.tagName === "ul" || element.tagName === "ol" || element.tagName === "li") {
+            return getToMdastDefaultHandler(element.tagName as any)(state, element);
+        }
+
         // If a node has not been changed, we use the original MDX content
+        // BUT only if it doesn't have children with their own encoded mdx attribute (to avoid duplication)
         if (
             changedNodes != null &&
             typeof element.properties?.["fve-mdx-b64"] === "string" &&
@@ -538,8 +547,19 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
 
             // Custom elements
             ["custom-element-v2"]: customElementv2Handler
-        } as any,
-        newlines: true
+        } as any
+    });
+
+    // Post-process mdast to compact lists (remove blank lines)
+    visit(mdast, "list", (node: any) => {
+        node.spread = false;
+        if (node.children) {
+            node.children.forEach((child: any) => {
+                if (child.type === "listItem") {
+                    child.spread = false;
+                }
+            });
+        }
     });
 
     // Get mdx from mdast
@@ -551,8 +571,10 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
             gfmToMarkdown()
         ],
         // TODO: float configurations up to make them more discoverable
-        // Use hyphen instead of asterisk for unordered lists
-        bullet: "-"
+        // Use hyphen for unordered lists (more common in user content)
+        bullet: "-",
+        // Compact list formatting - don't add blank lines between items
+        listItemIndent: "one"
     });
 
     // Reinject frontmatter if it exists

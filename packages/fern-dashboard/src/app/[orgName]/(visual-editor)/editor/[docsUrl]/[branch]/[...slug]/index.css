@@ -118,4 +118,23 @@
   .table-node:hover th:last-child {
     border-right-color: transparent;
   }
+
+  .fern-card {
+    ul li {
+      list-style: initial;
+      list-style-position: unset;
+    }
+    ol {
+      list-style: decimal;
+      list-style-position: outside; /* Change from inside to outside */
+      padding-left: 1.25rem; /* Add proper left padding for indentation */
+    }
+    ol li {
+      list-style: decimal;
+      list-style-position: outside; /* Change from inside to outside */
+      p {
+        display: inline;
+      }
+    }
+  }
 }

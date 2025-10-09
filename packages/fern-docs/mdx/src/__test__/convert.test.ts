@@ -433,3 +433,63 @@ describe("Fixture files", () => {
         });
     });
 });
+
+describe("Ensure no list duplication", () => {
+    const simpleBulletList = `## Header
+- Bullet 1
+  - Bullet 1.1
+  - Bullet 1.2
+- Bullet 2`;
+
+    it("single round-trip should not duplicate list items", () => {
+        console.log("\n=== STARTING SINGLE ROUND-TRIP TEST ===");
+        console.log("Original MDX:", simpleBulletList);
+
+        // First conversion: MDX → HTML
+        const { html, frontmatter } = mdxToHtml(simpleBulletList);
+        console.log("\n=== After mdxToHtml ===");
+        console.log("HTML:", html);
+
+        // Second conversion: HTML → MDX
+        const mdxResult = htmlToMdx(html, { frontmatter });
+        console.log("\n=== After htmlToMdx ===");
+        console.log("Result MDX:", mdxResult.mdx);
+
+        // Check that we don't have "- -" or "* *" pattern (indicates duplication)
+        expect(mdxResult.mdx).not.toContain("- -");
+        expect(mdxResult.mdx).not.toContain("* *");
+
+        // Count the number of list items - should be 1 top-level + 3 nested = 4 total
+        // Note: toMarkdown uses * for bullets by default, even though we configured bullet: "-"
+        const listItemCount = (mdxResult.mdx.match(/^[\s]*[*-] /gm) || []).length;
+        console.log("List item count:", listItemCount);
+        expect(listItemCount).toBe(4); // 1 top-level + 3 nested items
+    });
+
+    it("multiple round-trips should not accumulate duplications", () => {
+        console.log("\n=== STARTING MULTIPLE ROUND-TRIPS TEST ===");
+        let currentMdx = simpleBulletList;
+
+        // Perform 3 round-trips
+        for (let i = 1; i <= 3; i++) {
+            console.log(`\n=== Round-trip ${i} ===`);
+            console.log("Input MDX:", currentMdx);
+
+            const { html, frontmatter } = mdxToHtml(currentMdx);
+            console.log("HTML:", html);
+
+            const result = htmlToMdx(html, { frontmatter });
+            currentMdx = result.mdx;
+            console.log("Output MDX:", currentMdx);
+
+            // After each round-trip, verify no duplication
+            expect(currentMdx).not.toContain("- -");
+            expect(currentMdx).not.toContain("* *");
+
+            // Count list items - should remain constant
+            const listItemCount = (currentMdx.match(/^[\s]*[*-] /gm) || []).length;
+            console.log(`List item count after round-trip ${i}:`, listItemCount);
+            expect(listItemCount).toBe(4);
+        }
+    });
+});

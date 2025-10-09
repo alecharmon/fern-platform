@@ -1,20 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-
-import { useMDXComponents } from "@mdx-js/react";
-import { getMDXComponent } from "mdx-bundler/client";
-
 import {
+    astToMDX,
+    htmlToMdx,
     type MdastNodes,
     type MdxJsxAttribute,
     type MdxJsxExpressionAttribute,
-    astToMDX,
-    htmlToMdx,
     mdxToHtml
 } from "@fern-docs/mdx";
 
-import TiptapEditor from "@/components/editor/TiptapEditor";
+import { useMDXComponents } from "@mdx-js/react";
+import { getMDXComponent } from "mdx-bundler/client";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { EditorComponentChildrenProvider } from "@/components/editor/editor-component/EditorComponentChildrenContext";
 import { EditorComponentProvider } from "@/components/editor/editor-component/EditorComponentContext";
+import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
