@@ -48,8 +48,8 @@ export default async function RootLayout({
                 <AnimatedNoiseProvider>
                     <NoiseOverlay />
 
-                    <Analytics />
-                    <SpeedInsights />
+                    <Analytics debug={false} />
+                    <SpeedInsights debug={false} />
 
                     <ReactQueryProvider>
                         <PostHogProvider session={session}>

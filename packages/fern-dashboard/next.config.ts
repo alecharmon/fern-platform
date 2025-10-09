@@ -58,7 +58,8 @@ let nextConfig: NextConfig = {
                 port: "",
                 pathname: "/**"
             }
-        ]
+        ],
+        qualities: [75, 100]
     },
     webpack: (config, { isServer }) => {
         config.externals.push(

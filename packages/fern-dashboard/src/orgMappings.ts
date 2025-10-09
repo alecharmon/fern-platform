@@ -4,6 +4,7 @@ import * as auth0Management from "@/app/services/auth0/management";
 
 import { getCurrentSession } from "./app/services/auth0/getCurrentSession";
 import { Auth0OrgName, type Auth0UserID } from "./app/services/auth0/types";
+import { isProduction } from "./utils/environment";
 
 const inFlightPromises: Record<string, Promise<void>> = {};
 
@@ -18,7 +19,7 @@ function parseEmailOrgMappings(): Record<string, string> | null {
     const emailOrgMappingsEnv = process.env.EMAIL_ORG_MAPPINGS;
 
     if (!emailOrgMappingsEnv) {
-        console.warn("EMAIL_ORG_MAPPINGS environment variable is not set");
+        console[isProduction() ? "warn" : "debug"]("EMAIL_ORG_MAPPINGS environment variable is not set");
         return {};
     }
 

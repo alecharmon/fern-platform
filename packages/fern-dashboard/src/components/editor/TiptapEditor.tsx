@@ -64,7 +64,8 @@ const extensions = [
         },
         gapcursor: false,
         codeBlock: false,
-        paragraph: false
+        paragraph: false,
+        link: false
     }),
     Paragraph.extend({
         addKeyboardShortcuts() {
