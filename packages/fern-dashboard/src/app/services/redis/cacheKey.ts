@@ -21,6 +21,21 @@ export interface GithubPrInfo {
     nodeId?: string;
 }
 
+export interface WebAnalyticsData {
+    metrics?: {
+        visitors: number;
+        pageViews: number;
+        sessions: number;
+    };
+    timeSeries?: { date: string; value: number }[];
+    topPages?: { path: string; visitors: number; views: number }[];
+    topCountries?: { country: string; visitors: number; views: number }[];
+    llmFileViews?: { path: string; agentViews: number; humanViews: number }[];
+    channels?: { channel: string; visitors: number; views: number }[];
+    deviceTypes?: { deviceType: string; visitors: number; views: number }[];
+    referringDomains?: { domain: string; visitors: number; views: number }[];
+}
+
 export type RedisCacheKey<T extends RedisCacheKeyType> = string & {
     __type: T;
 };
@@ -32,7 +47,8 @@ export const RedisCacheKeyType = {
     ORGANIZATION_NAME_TO_ID: "ORGANIZATION_NAME_TO_ID",
     INVITE_TOKEN: "INVITE_TOKEN",
     GITHUB_INSTALLATION_ID: "GITHUB_INSTALLATION_ID",
-    GITHUB_PR_FOR_BRANCH: "GITHUB_PR_FOR_BRANCH"
+    GITHUB_PR_FOR_BRANCH: "GITHUB_PR_FOR_BRANCH",
+    WEB_ANALYTICS: "WEB_ANALYTICS"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -45,6 +61,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.INVITE_TOKEN]: InviteToken;
     [RedisCacheKeyType.GITHUB_INSTALLATION_ID]: number;
     [RedisCacheKeyType.GITHUB_PR_FOR_BRANCH]: GithubPrInfo;
+    [RedisCacheKeyType.WEB_ANALYTICS]: WebAnalyticsData;
 };
 
 export const RedisCacheKey = {
@@ -61,7 +78,9 @@ export const RedisCacheKey = {
     githubPrForBranch: (owner: string, repo: string, branch: string, baseBranch?: string) =>
         cacheKey(RedisCacheKeyType.GITHUB_PR_FOR_BRANCH)(
             `github-pr-${owner}-${repo}-${branch}${baseBranch ? `-base-${baseBranch}` : ""}`
-        )
+        ),
+    webAnalytics: (endpoint: string, domain: string, params: string) =>
+        cacheKey(RedisCacheKeyType.WEB_ANALYTICS)(`web-analytics-${endpoint}-${domain}-${params}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {

@@ -11,11 +11,22 @@ import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import getDocsSitesForOrg from "../services/dal/fdr/getDocsSitesForOrg";
 import { getAnalyticsService } from "../services/posthog";
 import type { DateRangeOptions } from "../services/posthog/types";
+import { AsyncRedisCache } from "../services/redis/AsyncRedisCache";
+import { RedisCacheKey, RedisCacheKeyType } from "../services/redis/cacheKey";
 
 const DEFAULT_DATE_RANGE = {
     type: "last_n_days" as const,
     days: 7
 };
+
+// Cache web analytics for 1 hour (3600 seconds)
+const WEB_ANALYTICS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, { ttlInSeconds: 3600 });
+
+// Helper to generate a deterministic cache key from request parameters
+function getCacheKey(endpoint: string, domain: string, params: Record<string, unknown>): string {
+    const sortedParams = JSON.stringify(params, Object.keys(params).sort());
+    return RedisCacheKey.webAnalytics(endpoint, domain, sortedParams);
+}
 
 // Schema for web analytics request
 const GetWebAnalyticsSchema = z.object({
@@ -152,24 +163,34 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
+    // Generate cache key
+    const cacheKey = getCacheKey("metrics", baseDomain, { dateRange, includeInternal: validated.includeInternal });
 
-    // Fetch metrics from PostHog
-    const metrics = await analytics.getMetrics({
-        dateRange,
-        includeInternal: validated.includeInternal
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch metrics from PostHog
+        const metrics = await analytics.getMetrics({
+            dateRange,
+            includeInternal: validated.includeInternal
+        });
+
+        return {
+            metrics: {
+                visitors: metrics.visitors,
+                pageViews: metrics.pageViews,
+                sessions: metrics.sessions
+            }
+        };
     });
 
     return {
-        metrics: {
-            visitors: metrics.visitors,
-            pageViews: metrics.pageViews,
-            sessions: metrics.sessions
-        },
+        metrics: cachedData.metrics!,
         baseSiteUrl: baseDomain,
         dateRange
     };
@@ -198,20 +219,32 @@ export async function getPageViewsByDay(
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch page views time series from PostHog
-    const timeSeries = await analytics.getPageViewsTimeSeries({
+    // Generate cache key
+    const cacheKey = getCacheKey("pageViewsByDay", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy
     });
 
-    return { timeSeries };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch page views time series from PostHog
+        const timeSeries = await analytics.getPageViewsTimeSeries({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy
+        });
+
+        return { timeSeries };
+    });
+
+    return { timeSeries: cachedData.timeSeries! };
 }
 
 /**
@@ -238,20 +271,32 @@ export async function getVisitorsByDay(
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch visitors time series from PostHog
-    const timeSeries = await analytics.getVisitorsTimeSeries({
+    // Generate cache key
+    const cacheKey = getCacheKey("visitorsByDay", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy
     });
 
-    return { timeSeries };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch visitors time series from PostHog
+        const timeSeries = await analytics.getVisitorsTimeSeries({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy
+        });
+
+        return { timeSeries };
+    });
+
+    return { timeSeries: cachedData.timeSeries! };
 }
 
 /**
@@ -278,23 +323,38 @@ export async function getTopPages(
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch top pages from PostHog
-    const topPages = await analytics.getTopPages({
+    // Generate cache key
+    const cacheKey = getCacheKey("topPages", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
-        limit: validated.limit || 10,
-        orderBy: validated.orderBy || "views",
-        order: validated.order || "desc"
+        limit: validated.limit,
+        orderBy: validated.orderBy,
+        order: validated.order
     });
 
-    return { topPages };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch top pages from PostHog
+        const topPages = await analytics.getTopPages({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 10,
+            orderBy: validated.orderBy || "views",
+            order: validated.order || "desc"
+        });
+
+        return { topPages };
+    });
+
+    return { topPages: cachedData.topPages! };
 }
 
 /**
@@ -320,23 +380,38 @@ export async function getTopCountries(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch top countries from PostHog
-    const topCountries = await analytics.getTopCountries({
+    // Generate cache key
+    const cacheKey = getCacheKey("topCountries", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
-        limit: validated.limit || 10,
-        orderBy: validated.orderBy || "visitors",
-        order: validated.order || "desc"
+        limit: validated.limit,
+        orderBy: validated.orderBy,
+        order: validated.order
     });
 
-    return { topCountries };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch top countries from PostHog
+        const topCountries = await analytics.getTopCountries({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 10,
+            orderBy: validated.orderBy || "visitors",
+            order: validated.order || "desc"
+        });
+
+        return { topCountries };
+    });
+
+    return { topCountries: cachedData.topCountries! };
 }
 
 /**
@@ -363,23 +438,38 @@ export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch LLM file views from PostHog
-    const llmFileViews = await analytics.getLLMFileViews({
+    // Generate cache key
+    const cacheKey = getCacheKey("llmFileViews", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
-        limit: validated.limit || 20,
-        orderBy: validated.orderBy || "humanViews",
-        order: validated.order || "desc"
+        limit: validated.limit,
+        orderBy: validated.orderBy,
+        order: validated.order
     });
 
-    return { llmFileViews };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch LLM file views from PostHog
+        const llmFileViews = await analytics.getLLMFileViews({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 20,
+            orderBy: validated.orderBy || "humanViews",
+            order: validated.order || "desc"
+        });
+
+        return { llmFileViews };
+    });
+
+    return { llmFileViews: cachedData.llmFileViews! };
 }
 
 /**
@@ -406,23 +496,38 @@ export async function getChannels(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch channels from PostHog
-    const channels = await analytics.getChannels({
+    // Generate cache key
+    const cacheKey = getCacheKey("channels", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
-        limit: validated.limit || 20,
-        orderBy: validated.orderBy || "visitors",
-        order: validated.order || "desc"
+        limit: validated.limit,
+        orderBy: validated.orderBy,
+        order: validated.order
     });
 
-    return { channels };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch channels from PostHog
+        const channels = await analytics.getChannels({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 20,
+            orderBy: validated.orderBy || "visitors",
+            order: validated.order || "desc"
+        });
+
+        return { channels };
+    });
+
+    return { channels: cachedData.channels! };
 }
 
 /**
@@ -449,23 +554,38 @@ export async function getDeviceTypes(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch device types from PostHog
-    const deviceTypes = await analytics.getDeviceTypes({
+    // Generate cache key
+    const cacheKey = getCacheKey("deviceTypes", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
-        limit: validated.limit || 10,
-        orderBy: validated.orderBy || "visitors",
-        order: validated.order || "desc"
+        limit: validated.limit,
+        orderBy: validated.orderBy,
+        order: validated.order
     });
 
-    return { deviceTypes };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch device types from PostHog
+        const deviceTypes = await analytics.getDeviceTypes({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 10,
+            orderBy: validated.orderBy || "visitors",
+            order: validated.order || "desc"
+        });
+
+        return { deviceTypes };
+    });
+
+    return { deviceTypes: cachedData.deviceTypes! };
 }
 
 /**
@@ -492,21 +612,36 @@ export async function getReferringDomains(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Initialize PostHog analytics service
-    const analytics = getAnalyticsService({
-        userId,
-        baseSiteUrl: baseDomain
-    });
-
-    // Fetch referring domains from PostHog
-    const referringDomains = await analytics.getReferringDomains({
+    // Generate cache key
+    const cacheKey = getCacheKey("referringDomains", baseDomain, {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
-        limit: validated.limit || 10,
-        orderBy: validated.orderBy || "visitors",
-        order: validated.order || "desc"
+        limit: validated.limit,
+        orderBy: validated.orderBy,
+        order: validated.order
     });
 
-    return { referringDomains };
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch referring domains from PostHog
+        const referringDomains = await analytics.getReferringDomains({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 10,
+            orderBy: validated.orderBy || "visitors",
+            order: validated.order || "desc"
+        });
+
+        return { referringDomains };
+    });
+
+    return { referringDomains: cachedData.referringDomains! };
 }
