@@ -8,6 +8,7 @@ import withRspack from "next-rspack";
 import webpack from "webpack";
 
 const isRspackEnabled = process.env.NODE_ENV === "development";
+const isSentryEnabled = process.env.NODE_ENV === "production";
 
 const CSP_HEADER = `
   default-src 'self';
@@ -193,7 +194,8 @@ if (isRspackEnabled) {
     nextConfig = withRspack(nextConfig);
 }
 
-if (process.env.NODE_ENV === "production") {
+// only use sentry in production
+if (isSentryEnabled) {
     nextConfig = withSentryConfig(nextConfig, {
         // For all available options, see:
         // https://www.npmjs.com/package/@sentry/webpack-plugin#options

@@ -1,22 +1,13 @@
-import { unstable_cache, unstable_cacheTag } from "next/cache";
-import { notFound } from "next/navigation";
-import { after } from "next/server";
-import { cache } from "react";
-
-import { kv } from "@vercel/kv";
-import { createHash } from "crypto";
-import { Semaphore, mapValues } from "es-toolkit";
-import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
-
 import type { AuthEdgeConfig } from "@fern-api/docs-auth";
 // import { track } from "@fern-api/docs-server";
 import {
     type AuthState,
-    type DynamicIRsByLanguage,
-    type FernFonts,
+    loadWithUrl as cachedLoadWithUrl,
     cacheSeed,
     cleanBasePath,
     createGetAuthState,
+    type DynamicIRsByLanguage,
+    type FernFonts,
     findEndpoint,
     generateFernColorPalette,
     generateFonts,
@@ -24,14 +15,12 @@ import {
     isLocal,
     isSelfHosted,
     provideRegistryService,
-    pruneWithAuthState
-} from "@fern-api/docs-server";
-import {
-    loadWithUrl as cachedLoadWithUrl,
+    pruneWithAuthState,
     loadDynamicIRWithUrl as uncachedLoadDynamicIRWithUrl,
     uncachedLoadWithUrl
 } from "@fern-api/docs-server";
 import { type DocsLoader, type DocsMetadata, DocsMetadataSchema } from "@fern-api/docs-server/docs-loader";
+import type { HttpMethod } from "@fern-api/docs-utils";
 import {
     DEFAULT_CONTENT_WIDTH,
     DEFAULT_GUTTER_WIDTH,
@@ -46,25 +35,32 @@ import {
     type FernColorTheme,
     withoutStaging
 } from "@fern-api/docs-utils";
-import type { HttpMethod } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernAIClient } from "@fern-api/fai-sdk";
 import { type ApiDefinition, type DocsV1Read, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
 import {
     ApiDefinitionV1ToLatest,
     type AuthScheme,
+    backfillSnippets,
     type EnvironmentId,
     type ObjectProperty,
     type PruningNodeType,
-    type TypeDefinition,
-    backfillSnippets,
-    prune
+    prune,
+    type TypeDefinition
 } from "@fern-api/fdr-sdk/api-definition";
 import { ApiDefinitionId, EndpointId, type PageId, type Slug, type TypeId } from "@fern-api/fdr-sdk/navigation";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
 import { visualEditorStorage } from "@fern-api/visual-editor-server";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
+import { kv } from "@vercel/kv";
+import { createHash } from "crypto";
+import { mapValues, Semaphore } from "es-toolkit";
+import { unstable_cache, unstable_cacheTag } from "next/cache";
+import { notFound } from "next/navigation";
+import { after } from "next/server";
+import { cache } from "react";
+import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
 const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrlResponse> => {
     const { domain, branchName } = decodeDocsLoaderDomainKey(domainKey);
@@ -139,7 +135,7 @@ function kvSet(domainKey: string, key: string, value: unknown, ttl?: number, cac
 
     const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
 
-    console.log(`[Upstash] SET operation - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
+    console.debug(`[Upstash] SET operation - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
 
     after(async () => {
         await setMonitor.acquire();
@@ -154,7 +150,7 @@ function kvSet(domainKey: string, key: string, value: unknown, ttl?: number, cac
                 await kv.hset(domainKey, { [finalKey]: value });
             }
             const duration = Date.now() - start;
-            console.log(`[Upstash] SET completed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`);
+            console.debug(`[Upstash] SET completed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`);
 
             // Disabled PostHog tracking for performance reasons
             // track("upstash_cache_set", {
@@ -193,11 +189,11 @@ async function kvGet<T>(domainKey: string, key: string, cacheKeySuffix?: string)
 
     // If there's already an in-flight request, wait for it
     if (inFlightRequests.has(requestKey)) {
-        console.log(`[Upstash] Waiting for in-flight request - domain: ${domainKey}, key: ${finalKey}`);
+        console.debug(`[Upstash] Waiting for in-flight request - domain: ${domainKey}, key: ${finalKey}`);
         return inFlightRequests.get(requestKey) as Promise<T | null>;
     }
 
-    console.log(`[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`);
+    console.debug(`[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`);
 
     // Create the request promise
     const requestPromise = (async () => {
@@ -213,7 +209,9 @@ async function kvGet<T>(domainKey: string, key: string, cacheKeySuffix?: string)
                 await kv.hdel(domainKey, finalKey);
                 await kv.del(ttlKey);
                 const duration = Date.now() - start;
-                console.log(`[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`);
+                console.debug(
+                    `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
+                );
 
                 // Disabled PostHog tracking for performance reasons
                 // track("upstash_cache_get", {
@@ -230,7 +228,7 @@ async function kvGet<T>(domainKey: string, key: string, cacheKeySuffix?: string)
             const duration = Date.now() - start;
             const isHit = result != null;
 
-            console.log(
+            console.debug(
                 `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
             );
 
@@ -321,7 +319,7 @@ async function clearKvCache(domainKey: string) {
         IN_MEMORY_CONFIG_CACHE.delete(key);
     }
     if (keysToDelete.length > 0) {
-        console.log(`In-memory cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
+        console.debug(`In-memory cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
     }
 
     if (isLocal() || isSelfHosted()) {
@@ -341,7 +339,7 @@ async function clearKvCache(domainKey: string) {
             await kv.del(...ttlKeys);
         }
 
-        console.log(`KV cache cleared for domainKey: ${domainKey}`);
+        console.debug(`KV cache cleared for domainKey: ${domainKey}`);
     } catch (error) {
         console.error(`Failed to clear KV cache for domainKey ${domainKey}:`, error);
     }
@@ -386,7 +384,7 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
                 await kvGet<DocsMetadata>(domainKey, "metadata", cacheConfig.cacheKeySuffix)
             );
             if (cached.success) {
-                console.log("[getMetadata] cache hit:", cached.data);
+                console.debug("[getMetadata] cache hit:", cached.data);
                 return cached.data;
             }
         } catch (error) {
@@ -395,7 +393,7 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
 
         const metadata = await getMetadataFromResponse(domainKey, loadWithUrl(domainKey));
         kvSet(domainKey, "metadata", metadata, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
-        console.log("[getMetadata] cache miss:", metadata);
+        console.debug("[getMetadata] cache miss:", metadata);
         return metadata;
     });
 
@@ -753,7 +751,7 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
         const inMemoryCached =
             getFromInMemoryCache<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(cacheKey);
         if (inMemoryCached != null) {
-            console.log(`[getConfig] in-memory cache hit for ${domainKey}`);
+            console.debug(`[getConfig] in-memory cache hit for ${domainKey}`);
             return inMemoryCached;
         }
 
@@ -1000,7 +998,7 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
                 cacheConfig.cacheKeySuffix
             );
             if (cached) {
-                console.log(`Using cached dynamic IR for ${orgId}:${apiName}`);
+                console.debug(`Using cached dynamic IR for ${orgId}:${apiName}`);
                 return cached;
             }
         } catch (error) {
@@ -1014,7 +1012,7 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
         });
 
         if (response) {
-            console.log(`Caching dynamic IR for ${orgId}:${apiName}`);
+            console.debug(`Caching dynamic IR for ${orgId}:${apiName}`);
             kvSet(
                 domain,
                 `dynamicIr:${orgId}:${apiName}:${configHash}`,
@@ -1076,7 +1074,7 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
         try {
             const cached = await kvGet<boolean>(domain, "askAiEnabled", cacheConfig.cacheKeySuffix);
             if (cached != null) {
-                console.log("[getAskAiEnabled] cache hit:", cached);
+                console.debug("[getAskAiEnabled] cache hit:", cached);
                 return cached;
             }
         } catch (error) {
