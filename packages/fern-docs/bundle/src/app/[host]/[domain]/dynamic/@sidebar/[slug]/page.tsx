@@ -14,7 +14,7 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SidebarTabsRoot } from "@fern-docs/components/sidebar/SidebarTabsRoot";
-import { HiddenSidebar } from "@fern-docs/components/state/layout";
+import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import { permanentRedirect, redirect } from "next/navigation";
 
 import { getFernToken } from "@/app/fern-token";

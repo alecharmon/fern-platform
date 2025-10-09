@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { HiddenSidebar } from "../state/layout";
+import { HiddenSidebar } from "../theming/HiddenSidebar";
 
 // data-aside-state styling is only used in the changelog overview
 // this should be deterministic
