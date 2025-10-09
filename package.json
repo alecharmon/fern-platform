@@ -202,7 +202,8 @@
       "workerd"
     ],
     "overrides": {
-      "webpack-bundle-analyzer>ws": "^7.5.10"
+      "webpack-bundle-analyzer>ws": "^7.5.10",
+      "vite": "^6.1.6"
     }
   },
   "nextBundleAnalysis": {
