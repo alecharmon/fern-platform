@@ -23,6 +23,7 @@ const CSP_HEADER = `
 `.replace(/\n/g, "");
 
 let nextConfig: NextConfig = {
+    productionBrowserSourceMaps: true,
     outputFileTracingExcludes: {
         "./": ["**/*.map"]
     },
