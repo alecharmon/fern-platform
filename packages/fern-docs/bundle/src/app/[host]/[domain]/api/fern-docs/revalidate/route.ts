@@ -23,18 +23,8 @@ import { escapeRegExp } from "es-toolkit/string";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
-import { Agent, setGlobalDispatcher } from "undici";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex, queueTurbopufferReindex } from "@/server/queue-reindex";
-
-// Set connection timeout for all fetch requests in this route
-setGlobalDispatcher(
-    new Agent({
-        connect: { timeout: 20_000 },
-        bodyTimeout: 120_000,
-        headersTimeout: 20_000
-    })
-);
 
 // Custom error type for intentional revalidation failures
 class RevalidationError extends Error {
