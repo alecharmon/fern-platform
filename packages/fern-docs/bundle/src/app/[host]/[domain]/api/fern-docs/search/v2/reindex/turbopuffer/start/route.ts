@@ -24,7 +24,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     let faiCallbackURL: string | undefined = undefined;
     const metadata = await getDocsUrlMetadata(domain);
-    if (metadata != null && metadata.isPreview && metadata.enableAlgoliaOnPreview) {
+    // TODO(Sahil): Change the enableAlgoliaOnPreview name to be more descriptive.
+    // Right now it's not clear that this can be either a preview domain or a regular domain (set in publishDocs.ts)
+    if (metadata != null && metadata.enableAlgoliaOnPreview) {
         faiCallbackURL = process.env.FAI_SERVER_URL
             ? `${process.env.FAI_SERVER_URL}/settings/reindex-preview-callback`
             : `https://fai.buildwithfern.com/settings/reindex-preview-callback`;
