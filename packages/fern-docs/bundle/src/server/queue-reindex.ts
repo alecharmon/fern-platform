@@ -26,13 +26,21 @@ export const queueTurbopufferReindex = async (
     });
 };
 
-export const queueTurbopufferStartReindex = async (
-    host: string,
-    domain: string,
-    basepath?: string,
-    deleteExisting?: boolean,
-    timeoutSeconds?: number
-): Promise<string | undefined> => {
+export const queueTurbopufferStartReindex = async ({
+    host,
+    domain,
+    basepath,
+    deleteExisting,
+    timeoutSeconds,
+    callback
+}: {
+    host: string;
+    domain: string;
+    basepath?: string;
+    deleteExisting?: boolean;
+    timeoutSeconds?: number;
+    callback?: string;
+}): Promise<string | undefined> => {
     let endpoint = "/api/fern-docs/search/v2/reindex/turbopuffer";
 
     if (deleteExisting) {
@@ -45,7 +53,8 @@ export const queueTurbopufferStartReindex = async (
         basepath,
         endpoint: endpoint as `/api/fern-docs/${string}`,
         method: "GET",
-        timeoutSeconds
+        timeoutSeconds,
+        callback
     });
 
     return messageId;

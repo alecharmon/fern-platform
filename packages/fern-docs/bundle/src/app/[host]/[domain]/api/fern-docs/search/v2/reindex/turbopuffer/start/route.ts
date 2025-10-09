@@ -10,6 +10,7 @@ import { withoutStaging } from "@fern-api/docs-utils";
 
 import { createJobResponse } from "@/jobs";
 import { queueTurbopufferStartReindex } from "@/server/queue-reindex";
+import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 
 export const maxDuration = 800; // 13 minutes
 
@@ -20,18 +21,28 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const host = req.nextUrl.host;
     const domain = getDocsDomainEdge(req);
+
+    let faiCallbackURL: string | undefined = undefined;
+    const metadata = await getDocsUrlMetadata(domain);
+    if (metadata != null && metadata.isPreview && metadata.enableAlgoliaOnPreview) {
+        faiCallbackURL = process.env.FAI_SERVER_URL
+            ? `${process.env.FAI_SERVER_URL}/settings/reindex-preview-callback`
+            : `https://fai.buildwithfern.com/settings/reindex-preview-callback`;
+    }
+
     const deleteExisting = req.nextUrl.searchParams.get("deleteExisting") === "true";
 
     const docs = await loadWithUrl(domain);
     const { basePath } = docs.baseUrl;
 
-    const messageId = await queueTurbopufferStartReindex(
+    const messageId = await queueTurbopufferStartReindex({
         host,
-        withoutStaging(domain),
-        basePath,
+        domain: withoutStaging(domain),
+        basepath: basePath,
         deleteExisting,
-        maxDuration
-    );
+        timeoutSeconds: maxDuration,
+        callback: faiCallbackURL
+    });
 
     if (!messageId) {
         return NextResponse.json("Failed to queue turbopuffer reindex", {
