@@ -101,6 +101,7 @@
     "@vercel/otel": "^1.10.1",
     "@vercel/speed-insights": "^1.2.0",
     "ai": "5.0.0-beta.2",
+    "undici": "^6.21.2",
     "algoliasearch": "^5.20.3",
     "crypto-browserify": "^3.12.1",
     "cssnano": "^6.0.3",
