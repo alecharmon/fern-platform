@@ -41,7 +41,7 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/github": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
-    "@fern-api/venus-api-sdk": "^0.10.1-5-ged06d22",
+    "@fern-api/venus-api-sdk": "^0.19.5",
     "@fern-docs/search-ask-fern": "workspace:*",
     "@fern-docs/search-keyword": "workspace:*",
     "@fern-docs/search-utils": "workspace:*",

@@ -1,0 +1,54 @@
+name: Test Containers
+
+on:
+  push:
+    branches:
+      - app
+    paths:
+      - "servers/fdr/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/app' }}
+
+jobs:
+  fdr:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Build container
+        run: docker build -f servers/fdr/Dockerfile -t fern-definition-registry:local --build-arg DATABASE_URL='postgres://fdr:fdr1!@postgres:5432/postgres' .
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: "us-east-1"
+
+      - name: push to ECR for scanning
+        run: |-
+          aws sts get-caller-identity
+          docker tag fern-definition-registry:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:${{ github.sha }}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
+          docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:${{ github.sha }}
+
+      - name: Standup test cluster
+        run: docker compose -f servers/fdr/docker-compose.ete.yml up -d --wait
+
+      - name: Run tests
+        run: pnpm --filter=@fern-platform/fdr test:ete --run
+
+    # Cleanup needed locally but not in CI
+    # - name: cleanup
+    #   run: docker compose -f servers/fdr/docker-compose.ete.yml down -v

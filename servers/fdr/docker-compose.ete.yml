@@ -12,18 +12,38 @@ services:
       PUBLIC_S3_BUCKET_REGION: dummy
       PRIVATE_S3_BUCKET_NAME: dummy
       PRIVATE_S3_BUCKET_REGION: dummy
+      DB_DOCS_DEFINITION_BUCKET_NAME: dummy
+      DB_DOCS_DEFINITION_BUCKET_REGION: dummy
+      PUBLIC_DOCS_CDN_URL: dummy
       API_DEFINITION_SOURCE_BUCKET_NAME: dummy
       API_DEFINITION_SOURCE_BUCKET_REGION: dummy
       DOMAIN_SUFFIX: dummy
       SLACK_TOKEN: dummy
-      DOCS_CACHE_ENDPOINT: redis_0:6379
+      DOCS_CACHE_ENDPOINT: redis-0:6379
       ENABLE_CUSTOMER_NOTIFICATIONS: "false"
       REDIS_ENABLED: "true"
       REDIS_CLUSTERING_ENABLED: "true"
+      LOCAL_MODE_OVERRIDE: "true"
+      MINIO_USERNAME: dummy
+      MINIO_PASSWORD: dummy
+      MINIO_BUCKET_NAME: dummy
+      MINIO_URL: dummy
       APPLICATION_ENVIRONMENT: ete
     depends_on:
       postgres:
         condition: service_healthy
+      redis-cluster-creator:
+        condition: service_completed_successfully
+    networks:
+      - redis-cluster
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health | grep -q OK"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+      start_period: 5s
+
   postgres:
     image: postgres:10.3
     restart: always
@@ -37,6 +57,8 @@ services:
       retries: 5
     ports:
       - "5434:5432"
+    networks:
+      - app-network
   s3-mock:
     image: adobe/s3mock
     ports:
@@ -44,55 +66,156 @@ services:
       - 9191:9191
     environment:
       initialBuckets: fdr
+    networks:
+      - app-network
 
-  redis_0:
-    image: bitnami/redis-cluster:latest
-    restart: unless-stopped
+  redis-0:
+    image: redis:7.4
+    command:
+      [
+        "redis-server",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
     ports:
-      - 6379:6379
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_CLUSTER_CREATOR: "yes"
-      REDIS_CLUSTER_REPLICAS: 1
-      REDIS_NODES: redis_0 redis_1 redis_2 redis_3 redis_4 redis_5
+      - "6379:6379"
+    volumes:
+      - redis-data-0:/data
+    networks:
+      - redis-cluster
+
+  redis-1:
+    image: redis:7.4
+    command:
+      [
+        "redis-server",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
+    volumes:
+      - redis-data-1:/data
+    networks:
+      - redis-cluster
+
+  redis-2:
+    image: redis:7.4
+    command:
+      [
+        "redis-server",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
+    volumes:
+      - redis-data-2:/data
+    networks:
+      - redis-cluster
+
+  redis-3:
+    image: redis:7.4
+    command:
+      [
+        "redis-server",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
+    volumes:
+      - redis-data-3:/data
+    networks:
+      - redis-cluster
+
+  redis-4:
+    image: redis:7.4
+    command:
+      [
+        "redis-server",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
+    volumes:
+      - redis-data-4:/data
+    networks:
+      - redis-cluster
+
+  redis-5:
+    image: redis:7.4
+    command:
+      [
+        "redis-server",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
+    volumes:
+      - redis-data-5:/data
+    networks:
+      - redis-cluster
+
+  redis-cluster-creator:
+    image: redis:7.4
     depends_on:
-      - redis_1
-      - redis_2
-      - redis_3
-      - redis_4
-      - redis_5
+      - redis-0
+      - redis-1
+      - redis-2
+      - redis-3
+      - redis-4
+      - redis-5
+    networks:
+      - redis-cluster
+    entrypoint: [
+        "sh",
+        "-c",
+        "sleep 5 && \
+        echo yes | redis-cli --cluster create \
+        redis-0:6379 redis-1:6379 redis-2:6379 \
+        redis-3:6379 redis-4:6379 redis-5:6379 \
+        --cluster-replicas 1",
+      ]
 
-  redis_1:
-    image: bitnami/redis-cluster:latest
-    restart: unless-stopped
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_NODES: redis_0 redis_1 redis_2 redis_3 redis_4 redis_5
+volumes:
+  redis-data-0:
+  redis-data-1:
+  redis-data-2:
+  redis-data-3:
+  redis-data-4:
+  redis-data-5:
 
-  redis_2:
-    image: bitnami/redis-cluster:latest
-    restart: unless-stopped
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_NODES: redis_0 redis_1 redis_2 redis_3 redis_4 redis_5
-
-  redis_3:
-    image: bitnami/redis-cluster:latest
-    restart: unless-stopped
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_NODES: redis_0 redis_1 redis_2 redis_3 redis_4 redis_5
-
-  redis_4:
-    image: bitnami/redis-cluster:latest
-    restart: unless-stopped
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_NODES: redis_0 redis_1 redis_2 redis_3 redis_4 redis_5
-
-  redis_5:
-    image: bitnami/redis-cluster:latest
-    restart: unless-stopped
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-      REDIS_NODES: redis_0 redis_1 redis_2 redis_3 redis_4 redis_5
+networks:
+  redis-cluster:
+    driver: bridge
+  app-network:
+    driver: bridge
