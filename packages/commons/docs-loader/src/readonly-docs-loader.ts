@@ -62,28 +62,113 @@ import { after } from "next/server";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
+// Deduplicate simultaneous loadWithUrl requests for the same domain
+// This ensures that concurrent calls to getConfig(), getFiles(), etc. share the same FDR response
+const inFlightLoads = new Map<string, Promise<DocsV2Read.LoadDocsForUrlResponse>>();
+
 const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrlResponse> => {
-    const { domain, branchName } = decodeDocsLoaderDomainKey(domainKey);
-    if (branchName) {
-        try {
-            const associatedBranchFdr = await visualEditorStorage.getFdrSnapshot(domain, branchName);
-            if (associatedBranchFdr) {
-                return associatedBranchFdr;
+    // Check if there's already an in-flight request for this domain
+    if (inFlightLoads.has(domainKey)) {
+        console.log(`[loadWithUrl] Waiting for in-flight load - domainKey: ${domainKey}`);
+        return inFlightLoads.get(domainKey)!;
+    }
+
+    console.log(`[loadWithUrl] Starting new load - domainKey: ${domainKey}`);
+
+    // Create the load promise
+    const loadPromise = (async () => {
+        const { domain, branchName } = decodeDocsLoaderDomainKey(domainKey);
+        if (branchName) {
+            try {
+                const associatedBranchFdr = await visualEditorStorage.getFdrSnapshot(domain, branchName);
+                if (associatedBranchFdr) {
+                    return associatedBranchFdr;
+                }
+            } catch (error) {
+                console.warn(`Failed to get FDR snapshot for ${domain}:${branchName}, fallback to uncached`, error);
             }
-        } catch (error) {
-            console.warn(`Failed to get FDR snapshot for ${domain}:${branchName}, fallback to uncached`, error);
         }
-    }
-    if (branchName) {
-        const response = await uncachedLoadWithUrl(domain);
-        await visualEditorStorage.storeFdrSnapshot(domain, branchName, response);
-        return response;
-    } else {
-        const response = await cachedLoadWithUrl(domain);
-        return response;
-    }
+        if (branchName) {
+            const response = await uncachedLoadWithUrl(domain);
+            await visualEditorStorage.storeFdrSnapshot(domain, branchName, response);
+            return response;
+        } else {
+            const response = await cachedLoadWithUrl(domain);
+            return response;
+        }
+    })();
+
+    // Store the promise and clean up when done
+    inFlightLoads.set(domainKey, loadPromise);
+    loadPromise
+        .finally(() => {
+            inFlightLoads.delete(domainKey);
+            console.log(`[loadWithUrl] Completed load - domainKey: ${domainKey}`);
+        })
+        .catch(() => {
+            // Errors are already handled in the main promise, this is just for cleanup
+        });
+
+    return loadPromise;
 };
 const loadDynamicIRWithUrl = uncachedLoadDynamicIRWithUrl;
+
+/**
+ * Helper function to populate all relevant caches from a LoadDocsForUrlResponse.
+ * This ensures that when any cache miss occurs, all related caches are populated atomically
+ * to prevent race conditions where config and files can become out of sync.
+ */
+async function populateAllCachesFromResponse(
+    domainKey: string,
+    response: DocsV2Read.LoadDocsForUrlResponse,
+    cacheConfig: Required<CacheConfig>
+) {
+    const { navigation, root, ...config } = response.definition.config;
+
+    // Populate config cache
+    kvSet(domainKey, "config", config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+
+    // Populate in-memory cache for config
+    const cacheKey = cacheConfig.cacheKeySuffix
+        ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+        : `${domainKey}:config`;
+    setInMemoryCache(cacheKey, config);
+
+    // Populate files cache
+    const files = mapValues(response.definition.filesV2, (file) => {
+        if (file.type === "url") {
+            return {
+                src:
+                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                        ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                        : file.url
+            };
+        } else if (file.type === "image") {
+            return {
+                src:
+                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                        ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                        : file.url,
+                width: file.width,
+                height: file.height,
+                blurDataURL: file.blurDataUrl,
+                alt: file.alt
+            };
+        }
+        throw new UnreachableCaseError(file);
+    });
+    kvSet(domainKey, "files", files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+
+    // Populate mdx-bundler-files cache
+    const jsFiles = response.definition.jsFiles ?? {};
+    kvSet(domainKey, "mdx-bundler-files", jsFiles, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+
+    // Populate fonts cache
+    const fonts = generateFonts(response.definition.config.typographyV2, files);
+    kvSet(domainKey, "fonts", fonts, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+
+    console.log(`[populateAllCachesFromResponse] Populated all caches for ${domainKey}`);
+}
 
 /*
  * Domain key decoder/encoder functions
@@ -410,7 +495,12 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
         } catch (error) {
             console.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
         }
+
+        // Cache miss - load full response and populate all related caches
         const response = await loadWithUrl(domain);
+        await populateAllCachesFromResponse(domain, response, cacheConfig);
+
+        // Return the files that were just cached
         const files = mapValues(response.definition.filesV2, (file) => {
             if (file.type === "url") {
                 return {
@@ -434,7 +524,6 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
             throw new UnreachableCaseError(file);
         });
 
-        kvSet(domain, "files", files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return files;
     });
 
@@ -770,13 +859,11 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
             console.warn(`Failed to get config for ${domainKey}, fallback to uncached`, error);
         }
 
+        // Cache miss - load full response and populate all related caches
         const response = await loadWithUrl(domainKey);
+        await populateAllCachesFromResponse(domainKey, response, cacheConfig);
+
         const { navigation, root, ...config } = response.definition.config;
-
-        // Store in both Upstash and in-memory cache
-        kvSet(domainKey, "config", config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
-        setInMemoryCache(cacheKey, config);
-
         return config;
     });
 
@@ -833,9 +920,11 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
             console.warn(`Failed to get mdx bundler files for ${domainKey}, fallback to uncached`, error);
         }
 
+        // Cache miss - load full response and populate all related caches
         const response = await loadWithUrl(domainKey);
+        await populateAllCachesFromResponse(domainKey, response, cacheConfig);
+
         const files = response.definition.jsFiles ?? {};
-        kvSet(domainKey, "mdx-bundler-files", files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return files;
     });
 
@@ -936,9 +1025,34 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
             console.warn(`Failed to get fonts for ${domainKey}, fallback to uncached`, error);
         }
 
+        // Cache miss - load full response and populate all related caches
         const response = await loadWithUrl(domainKey);
-        const fonts = generateFonts(response.definition.config.typographyV2, await getFiles(cacheConfig)(domainKey));
-        kvSet(domainKey, "fonts", fonts, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        await populateAllCachesFromResponse(domainKey, response, cacheConfig);
+
+        // Return the fonts that were just cached
+        const files = mapValues(response.definition.filesV2, (file) => {
+            if (file.type === "url") {
+                return {
+                    src:
+                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                            : file.url
+                };
+            } else if (file.type === "image") {
+                return {
+                    src:
+                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                            : file.url,
+                    width: file.width,
+                    height: file.height,
+                    blurDataURL: file.blurDataUrl,
+                    alt: file.alt
+                };
+            }
+            throw new UnreachableCaseError(file);
+        });
+        const fonts = generateFonts(response.definition.config.typographyV2, files);
         return fonts;
     });
 
