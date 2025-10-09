@@ -45,6 +45,7 @@ export class NavigationStore {
 
     private _storage?: NavigationStorage;
     private _hydrated = false;
+    private _hydrationPromise?: Promise<void>;
     private _deletionToastCallback?: DeletionToastCallback;
 
     private _listeners = new Set<() => void>();
@@ -137,10 +138,38 @@ export class NavigationStore {
     // METHODS
     // --------------------------------------------------------------------------
 
-    /** Lazily initializes storage to prevent hydration errors */
+    /** Lazily initializes storage, accounting for multiple concurrent hydration attempts */
     async hydrate(options?: { storage?: NavigationStorage; initialDocsYmlContent?: string | null }): Promise<void> {
+        // If already hydrated, return immediately
+        if (this._hydrated) {
+            return;
+        }
+
+        // If hydration is in progress, wait for it to complete
+        if (this._hydrationPromise) {
+            return this._hydrationPromise;
+        }
+
+        // Start hydration
+        this._hydrationPromise = this._doHydrate(options);
+        try {
+            await this._hydrationPromise;
+        } finally {
+            this._hydrationPromise = undefined;
+        }
+    }
+
+    /** Initialize the store from storage */
+    private async _doHydrate(options?: {
+        storage?: NavigationStorage;
+        initialDocsYmlContent?: string | null;
+    }): Promise<void> {
         this._storage = options?.storage || createNavigationBufferedIndexedDBStorage();
+
+        // Initialize storage and wait for it to complete
         await this._storage.init();
+
+        // Only access storage after init is complete
         const storedSnapshot = this._storage.getOrSetStore(this._branchName, this._orgName, this._docsUrl);
 
         this._latestSnapshot = storedSnapshot;
@@ -473,12 +502,14 @@ export class NavigationStore {
     // HELPERS
     // --------------------------------------------------------------------------
 
-    /** Require storage, used to prevent hydration errors */
-    private _requireStorage(): NavigationStorage {
+    /** Require hydration from storage, prevents hydration errors and data loss from operations before data is loaded */
+    private _requireHydratedFromStorage(): void {
         if (!this._storage) {
-            throw new Error("NavigationStorage not available");
+            throw new Error("NavigationStorage not available in NavigationStore");
         }
-        return this._storage;
+        if (!this._hydrated) {
+            throw new Error("Cannot perform this operation before NavigationStore hydration completes");
+        }
     }
 
     /** Notifies all subscribers of store changes */
@@ -488,6 +519,8 @@ export class NavigationStore {
 
     /** Updates storage snapshot and notifies listeners */
     private _setStorageAndNotify(): void {
+        this._requireHydratedFromStorage();
+
         this._version++;
         const snapshot: NavigationSnapshot = {
             schemaVersion: 1,
@@ -502,7 +535,10 @@ export class NavigationStore {
             lastCommittedHash: this._lastCommittedHash,
             version: this._version
         };
-        this._requireStorage().setStore(this._branchName, this._orgName, this._docsUrl, snapshot);
+
+        // Persist to storage (guaranteed to exist after hydration)
+        this._storage?.setStore(this._branchName, this._orgName, this._docsUrl, snapshot);
+
         this._latestSnapshot = snapshot;
         this._notify();
     }
