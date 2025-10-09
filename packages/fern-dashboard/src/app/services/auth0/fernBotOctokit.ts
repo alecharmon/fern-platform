@@ -1,6 +1,9 @@
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
 
+import { RedisCacheKey } from "@/app/services/redis/cacheKey";
+import { redisGet, redisSet } from "@/app/services/redis/redis";
+
 export type FernBotOctokitError =
     | { type: "MISSING_APP_ID" }
     | { type: "MISSING_PRIVATE_KEY" }
@@ -64,6 +67,18 @@ export async function getFernBotOctokitForRepo(owner: string, repo: string): Pro
  * @returns A discriminated union result with the installation id or an error
  */
 export async function getFernBotInstallationId(owner: string, repo: string): Promise<GetFernBotInstallationIdResult> {
+    // Try to get from cache first
+    const cacheKey = RedisCacheKey.githubInstallationId(owner, repo);
+    try {
+        const cachedInstallationId = await redisGet(cacheKey);
+        if (cachedInstallationId != null) {
+            return { ok: true, installationId: cachedInstallationId };
+        }
+    } catch (error) {
+        // If cache fails, continue to fetch from GitHub
+        console.warn("Failed to read from Redis cache for installation ID", error);
+    }
+
     const appId = process.env.FERN_BOT_APP_ID;
     const privateKeyEnv = process.env.FERN_BOT_PRIVATE_KEY;
 
@@ -90,6 +105,15 @@ export async function getFernBotInstallationId(owner: string, repo: string): Pro
             repo
         });
         const installation = response.data;
+
+        // Cache the installation ID for 10 days
+        try {
+            await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 * 10 });
+        } catch (error) {
+            // If cache fails, continue - we still have the installation ID
+            console.warn("Failed to write to Redis cache for installation ID", error);
+        }
+
         return { ok: true, installationId: installation.id };
     } catch (error: any) {
         if (error?.status === 404) {

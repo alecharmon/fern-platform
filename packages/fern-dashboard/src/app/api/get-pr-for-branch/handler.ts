@@ -1,5 +1,7 @@
 import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { RedisCacheKey } from "@/app/services/redis/cacheKey";
+import { redisGet, redisSet } from "@/app/services/redis/redis";
 
 export default async function getPrForBranch(request: {
     owner: string;
@@ -20,6 +22,18 @@ export default async function getPrForBranch(request: {
     const session = await getCurrentSession();
     if (session == null) {
         return { success: false, error: "No session found" };
+    }
+
+    // Check cache first
+    const cacheKey = RedisCacheKey.githubPrForBranch(request.owner, request.repo, request.branch, request.baseBranch);
+    try {
+        const cachedPrInfo = await redisGet(cacheKey);
+        if (cachedPrInfo != null) {
+            return cachedPrInfo;
+        }
+    } catch (error) {
+        // If cache fails, continue to fetch from GitHub
+        console.warn("Failed to read PR info from Redis cache", error);
     }
 
     const octokitResult = await getFernBotOctokitForRepo(request.owner, request.repo);
@@ -60,7 +74,7 @@ export default async function getPrForBranch(request: {
         // The UI will handle the case where the PR is closed/merged, but we should error (above)
         // if there are multiple open PRs.
         const pr = openPrs[0] || response.data[0];
-        return {
+        const result = {
             success: true,
             title: pr?.title,
             prNumber: pr?.number,
@@ -70,6 +84,16 @@ export default async function getPrForBranch(request: {
             merged: pr?.merged_at != null,
             nodeId: pr?.node_id
         };
+
+        // Cache the result for 5 minutes
+        try {
+            await redisSet(cacheKey, result, { ttlInSeconds: 60 * 5 });
+        } catch (error) {
+            // If cache fails, continue - we still have the result
+            console.warn("Failed to write PR info to Redis cache", error);
+        }
+
+        return result;
     } catch (error) {
         console.error("Failed to fetch PR for branch", error);
         return {
