@@ -20,7 +20,7 @@ class SettingsDb(Base):
 
     domain = Column(String, primary_key=True)
     org_name = Column(String, primary_key=False)
-    created_time = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    created_time = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     last_reindex_time = Column(DateTime, nullable=True)
     job_id = Column(String, nullable=True)
 

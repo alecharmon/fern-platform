@@ -19,9 +19,7 @@ class ChannelSettings(BaseModel):
     domain_override: str | None = Field(
         None, description="Override domain for queries in this channel (hidden setting)"
     )
-    help_role_id: str | None = Field(
-        None, description="Role ID that can be tagged for help"
-    )
+    help_role_id: str | None = Field(None, description="Role ID that can be tagged for help")
 
 
 class UpdateChannelSettings(BaseModel):
