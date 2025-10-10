@@ -49,6 +49,10 @@
     thead tr th {
       @apply bg-(color:--grayscale-2);
     }
+    
+    td, th {
+      max-width: 0;
+    }
   }
 
   .fern-table-root.fullscreen .fern-table thead th {
