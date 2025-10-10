@@ -1,4 +1,4 @@
-import { type MdastNodes, type MdxJsxExpressionAttribute, astToMDX, mdxToAST } from "@fern-docs/mdx";
+import { astToMDX, type MdastNodes, type MdxJsxExpressionAttribute, mdxToAST } from "@fern-docs/mdx";
 
 import type { AttributeValue, JSXElement, JSXElementChildren, ParsedMarkdownElement } from "./types";
 
@@ -40,7 +40,29 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     const result: ParsedMarkdownElement[] = [];
 
     // Function to traverse the AST and extract parent-child relationships
-    function traverse(node: MdastNodes): ParsedMarkdownElement {
+    function traverse(node: MdastNodes): ParsedMarkdownElement | ParsedMarkdownElement[] {
+        if (node.type === "paragraph" && node.children && Array.isArray(node.children)) {
+            const hasOnlyImages = node.children.every(
+                (child) => child.type === "image" || child.type === "imageReference"
+            );
+            if (hasOnlyImages && node.children.length > 0) {
+                // Return each image as a separate jsxElement
+                return node.children.map((child) => ({
+                    type: "jsxElement" as const,
+                    value: {
+                        contentDraggingDisabled: true,
+                        name: "img",
+                        keyedAttributes: {
+                            src: { type: "string" as const, value: (child as any).url || "" },
+                            alt: { type: "string" as const, value: (child as any).alt || "" }
+                        },
+                        expressionAttributes: [],
+                        children: { type: "DISALLOWED" as const }
+                    }
+                })) as any;
+            }
+        }
+
         const isEditableComponent =
             node.type === "mdxJsxFlowElement" && node.name != null && editableComponents.includes(node.name);
 
@@ -135,7 +157,12 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     const rootNode = mdast;
     for (const child of rootNode.children) {
         const element = traverse(child);
-        result.push(element);
+        // Handle case where traverse returns multiple elements (e.g., paragraph with only images)
+        if (Array.isArray(element)) {
+            result.push(...element);
+        } else {
+            result.push(element);
+        }
     }
 
     return result;

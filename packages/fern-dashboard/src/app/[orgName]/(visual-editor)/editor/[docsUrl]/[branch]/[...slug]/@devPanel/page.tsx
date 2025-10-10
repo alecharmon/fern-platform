@@ -101,7 +101,7 @@ export default function DevPanel() {
                 <h3 className="text-sm font-medium">Dev Mode</h3>
             </div>
 
-            <div className="border-1 bg-background border-border relative flex flex-1 flex-col overflow-hidden rounded-2xl py-4 shadow-lg">
+            <div className="border-1 rounded-b-none border-b-0 bg-background border-border relative flex flex-1 flex-col overflow-hidden rounded-2xl py-4 shadow-lg">
                 <MonacoEditor
                     currentMarkdown={currentMarkdown}
                     handleEditorDidMount={handleEditorDidMount}

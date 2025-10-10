@@ -1,5 +1,6 @@
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import path from "path";
 
 export class DashboardFileResolver {
     private filePathToFileIdMap: Record<string, FernNavigation.FileId> = {};
@@ -16,7 +17,7 @@ export class DashboardFileResolver {
         }
     }
 
-    getResolvedFileData(src: string | undefined) {
+    getResolvedFileData(src: string | undefined, currentFilePath?: string) {
         if (src == null) {
             return undefined;
         }
@@ -29,11 +30,23 @@ export class DashboardFileResolver {
         // Fallback logic for edge cases
         let fileId: FernNavigation.FileId | undefined;
 
-        const trimmedSrc = src.trim().startsWith(".") ? src.replace(".", "") : src;
+        // Resolve relative paths using the current file path
+        let resolvedSrc = src.trim();
+        if (currentFilePath && (src.startsWith("./") || src.startsWith("../"))) {
+            // Get the directory of the current file
+            const currentDir = path.dirname(currentFilePath);
+            resolvedSrc = path.join(currentDir, src);
+            // Normalize to remove any remaining .. or . segments
+            resolvedSrc = path.normalize(resolvedSrc);
+        }
+
+        const trimmedSrc = resolvedSrc.replace(/^[./]+/g, "").replace(/\.\.\//g, "");
 
         // if the src is a file path, we use the file id from the map
         if (this.filePathToFileIdMap[src]) {
             fileId = this.filePathToFileIdMap[src];
+        } else if (this.filePathToFileIdMap[resolvedSrc]) {
+            fileId = this.filePathToFileIdMap[resolvedSrc];
         } else if (this.filePathToFileIdMap[trimmedSrc]) {
             fileId = this.filePathToFileIdMap[trimmedSrc];
         } else {

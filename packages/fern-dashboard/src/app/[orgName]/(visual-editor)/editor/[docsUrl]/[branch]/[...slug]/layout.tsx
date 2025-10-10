@@ -110,7 +110,7 @@ export default async function VisualEditorPreviewLayout({
                         <RootNodeProvider sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}>
                             <ResizablePanelsWrapper
                                 left={
-                                    <div className="border-1 flex h-full flex-col overflow-hidden rounded-2xl border-gray-500 shadow-lg">
+                                    <div className="border-1 flex h-full flex-col overflow-hidden rounded-2xl border-gray-500 border-b-0 rounded-b-none shadow-lg">
                                         {/* BOUNDARY NOTE: All items within the #preview-container will be themed with domain-specific styles. */}
                                         <EditorRoutingProvider
                                             value={{
@@ -185,10 +185,10 @@ export default async function VisualEditorPreviewLayout({
                                                             loginButton={
                                                                 <React.Suspense fallback={null}>
                                                                     {/* <LoginButton
-                                  loader={loader}
-                                  className="my-6 flex w-full justify-between lg:hidden"
-                                  showIcon
-                                /> */}
+                                                                        loader={loader}
+                                                                        className="my-6 flex w-full justify-between lg:hidden"
+                                                                        showIcon
+                                                                        /> */}
                                                                 </React.Suspense>
                                                             }
                                                             searchBar={<DesktopSearchButton />}

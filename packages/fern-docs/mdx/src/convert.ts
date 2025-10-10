@@ -236,7 +236,7 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
     }
 
     // Default handler for custom elements
-    function customElementHandler(state: ToHastState, node: any, __?: MdastParents) {
+    function customElementHandler(_state: ToHastState, node: any, __?: MdastParents) {
         const { type, name, positionStart, positionEnd } = getNodeInfo(node);
 
         const nodeType = type as CustomElementsType;
@@ -258,17 +258,7 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
             }
         }
 
-        // For MDX JSX elements, use hash based only on name and props
-        // For other custom elements, use the original content-based hash
-        let content: string;
-
-        if (isMdxJsxElement(node)) {
-            const nodeContent = getNodeContent(node, rootContent);
-            content = nodeContent.content;
-        } else {
-            const nodeContent = getNodeContent(node, rootContent);
-            content = nodeContent.content;
-        }
+        const { content } = getNodeContent(node, rootContent);
 
         return mdxUnsupportedCustomElementNodev2(generateContentHash(positionStart, positionEnd, content), content);
     }
