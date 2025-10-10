@@ -12,4 +12,5 @@
 export interface ToggleAskAiRequest {
     domain: string;
     org_name: string;
+    preview?: boolean;
 }

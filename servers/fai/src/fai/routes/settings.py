@@ -90,6 +90,7 @@ async def toggle_ask_ai(
     org_name: str,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    preview: bool = False,
 ) -> JSONResponse:
     """Toggle Ask AI setting and return job_id for tracking."""
     LOGGER.info(f"Toggling Ask AI for domain {domain} and org_name {org_name}")
@@ -137,6 +138,7 @@ async def toggle_ask_ai(
                     org_name=org_name,
                     job_id=job_id,
                     last_reindex_time=None,
+                    is_preview=preview,
                 )
                 db.add(new_record)
                 await db.commit()
