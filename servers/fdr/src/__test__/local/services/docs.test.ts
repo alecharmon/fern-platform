@@ -309,7 +309,8 @@ it("no snippets generated when dynamicIR is present", async () => {
                     javaSdk: undefined,
                     csharpSdk: undefined,
                     phpSdk: undefined,
-                    swiftSdk: undefined
+                    swiftSdk: undefined,
+                    rustSdk: undefined
                 }
             }),
             dynamicIRs: {

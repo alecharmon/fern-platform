@@ -46,6 +46,7 @@ types:
       - Ruby
       - Php
       - Swift
+      - Rust
 
   VersionBump:
     enum:

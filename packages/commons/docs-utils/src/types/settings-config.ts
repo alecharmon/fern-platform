@@ -8,6 +8,7 @@ export type HttpSnippetLanguage =
     | "python"
     | "ruby"
     | "swift"
+    | "rust"
     | "typescript";
 export const HttpSnippetLanguage = {
     Curl: "curl",
@@ -19,6 +20,7 @@ export const HttpSnippetLanguage = {
     Python: "python",
     Ruby: "ruby",
     Swift: "swift",
+    Rust: "rust",
     Typescript: "typescript"
 } as const;
 

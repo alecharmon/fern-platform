@@ -67,6 +67,7 @@ types:
       - csharp
       - php
       - swift
+      - rust
       - nodets
       - nodejs
       - dotnet
@@ -217,6 +218,7 @@ types:
       - python
       - ruby
       - swift
+      - rust
       - typescript
 
   SearchbarPlacement:

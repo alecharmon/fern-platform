@@ -10,4 +10,5 @@ export const Language = {
     Ruby: "Ruby",
     Php: "Php",
     Swift: "Swift",
+    Rust: "Rust",
 };

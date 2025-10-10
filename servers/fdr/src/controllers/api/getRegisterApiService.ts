@@ -62,7 +62,8 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 rubySdk: undefined,
                 csharpSdk: undefined,
                 phpSdk: undefined,
-                swiftSdk: undefined
+                swiftSdk: undefined,
+                rustSdk: undefined
             };
 
             const snippetsConfigurationWithSdkIds = await app.dao.sdks().getSdkIdsForPackages(snippetsConfiguration);
@@ -86,6 +87,9 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
             }
             if (snippetsConfigurationWithSdkIds.csharpSdk != null) {
                 sdkIds.push(snippetsConfigurationWithSdkIds.csharpSdk.sdkId);
+            }
+            if (snippetsConfigurationWithSdkIds.rustSdk != null) {
+                sdkIds.push(snippetsConfigurationWithSdkIds.rustSdk.sdkId);
             }
 
             let snippetsBySdkId = {};

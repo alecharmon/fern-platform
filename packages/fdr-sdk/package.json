@@ -62,6 +62,7 @@
   },
   "dependencies": {
     "@fern-api/ui-core-utils": "workspace:*",
+    "@types/readable-stream": "^4.0.21",
     "@ungap/structured-clone": "^1.2.0",
     "dayjs": "^1.11.11",
     "es-toolkit": "catalog:",
@@ -72,6 +73,7 @@
     "js-base64": "3.7.7",
     "node-fetch": "2.7.0",
     "qs": "catalog:",
+    "readable-stream": "^4.7.0",
     "tinycolor2": "^1.6.0",
     "ts-essentials": "catalog:",
     "url-join": "catalog:"

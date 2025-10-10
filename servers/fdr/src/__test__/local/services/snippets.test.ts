@@ -80,7 +80,8 @@ it("get snippets", async () => {
                     javaSdk: undefined,
                     csharpSdk: undefined,
                     phpSdk: undefined,
-                    swiftSdk: undefined
+                    swiftSdk: undefined,
+                    rustSdk: undefined
                 }
             })
         })
@@ -247,7 +248,8 @@ it("get Go snippets", async () => {
                     rubySdk: undefined,
                     csharpSdk: undefined,
                     phpSdk: undefined,
-                    swiftSdk: undefined
+                    swiftSdk: undefined,
+                    rustSdk: undefined
                 }
             })
         })
@@ -411,7 +413,8 @@ it("get Ruby snippets", async () => {
                     goSdk: undefined,
                     csharpSdk: undefined,
                     phpSdk: undefined,
-                    swiftSdk: undefined
+                    swiftSdk: undefined,
+                    rustSdk: undefined
                 }
             })
         })
@@ -825,7 +828,8 @@ it("no snippets generated when dynamicIR is present", async () => {
                     javaSdk: undefined,
                     csharpSdk: undefined,
                     phpSdk: undefined,
-                    swiftSdk: undefined
+                    swiftSdk: undefined,
+                    rustSdk: undefined
                 }
             }),
             dynamicIRs: {
@@ -998,7 +1002,8 @@ it("no snippets generated when dynamicIR is present with regular definition", as
                     rubySdk: undefined,
                     csharpSdk: undefined,
                     phpSdk: undefined,
-                    swiftSdk: undefined
+                    swiftSdk: undefined,
+                    rustSdk: undefined
                 }
             }),
             dynamicIRs: {

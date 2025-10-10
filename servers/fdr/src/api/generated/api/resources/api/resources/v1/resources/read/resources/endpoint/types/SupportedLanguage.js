@@ -14,4 +14,5 @@ export const SupportedLanguage = {
     Csharp: "csharp",
     Php: "php",
     Swift: "swift",
+    Rust: "rust",
 };

@@ -11,6 +11,7 @@ export const ProgrammingLanguage = {
     Csharp: "csharp",
     Php: "php",
     Swift: "swift",
+    Rust: "rust",
     Nodets: "nodets",
     Nodejs: "nodejs",
     Dotnet: "dotnet",

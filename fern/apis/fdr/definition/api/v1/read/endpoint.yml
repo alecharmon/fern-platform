@@ -241,6 +241,7 @@ types:
       - csharp
       - php
       - swift
+      - rust
 
   ExampleEndpointRequest:
     union:

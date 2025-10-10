@@ -17,6 +17,7 @@ export * from "./RubyGem.js";
 export * from "./NugetPackage.js";
 export * from "./ComposerPackage.js";
 export * from "./SwiftPackage.js";
+export * from "./CratesPackage.js";
 export * from "./ApiDefinitionPackage.js";
 export * from "./ApiDefinitionSubpackage.js";
 export * from "./ApiAuth.js";

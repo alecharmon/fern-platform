@@ -111,6 +111,7 @@ types:
       csharpSdk: optional<NugetPackage>
       phpSdk: optional<ComposerPackage>
       swiftSdk: optional<SwiftPackage>
+      rustSdk: optional<CratesPackage>
 
   TypescriptPackage:
     properties:
@@ -148,6 +149,11 @@ types:
       version: optional<string>
       
   SwiftPackage: 
+    properties:
+      package: string
+      version: optional<string>
+
+  CratesPackage: 
     properties:
       package: string
       version: optional<string>

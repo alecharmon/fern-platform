@@ -14,7 +14,7 @@ groups:
           noOptionalProperties: true
           useBrandedStringAliases: true
       - name: fernapi/fern-typescript-node-sdk
-        version: 0.51.0
+        version: 3.7.1
         output:
           location: local-file-system
           path: ../../../packages/fdr-sdk/src/client/generated

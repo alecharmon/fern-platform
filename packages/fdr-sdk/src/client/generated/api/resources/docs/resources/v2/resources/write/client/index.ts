@@ -1,4 +1,3 @@
-export * from "./requests/index.js";
 export * as startDocsRegister from "./startDocsRegister.js";
 export * as startDocsPreviewRegister from "./startDocsPreviewRegister.js";
 export * as finishDocsRegister from "./finishDocsRegister.js";
@@ -8,3 +7,4 @@ export * as setDocsUrlMetadata from "./setDocsUrlMetadata.js";
 export * as addAlgoliaPreviewWhitelistEntry from "./addAlgoliaPreviewWhitelistEntry.js";
 export * as removeAlgoliaPreviewWhitelistEntry from "./removeAlgoliaPreviewWhitelistEntry.js";
 export * as listAlgoliaPreviewWhitelist from "./listAlgoliaPreviewWhitelist.js";
+export * from "./requests/index.js";

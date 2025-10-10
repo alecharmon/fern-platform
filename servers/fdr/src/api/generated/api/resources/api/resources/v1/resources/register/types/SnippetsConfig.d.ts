@@ -11,4 +11,5 @@ export interface SnippetsConfig {
     csharpSdk: FernRegistry.api.v1.register.NugetPackage | undefined;
     phpSdk: FernRegistry.api.v1.register.ComposerPackage | undefined;
     swiftSdk: FernRegistry.api.v1.register.SwiftPackage | undefined;
+    rustSdk: FernRegistry.api.v1.register.CratesPackage | undefined;
 }
