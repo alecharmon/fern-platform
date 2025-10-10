@@ -98,7 +98,7 @@ import com.catcatcat.tree.resources.users.requests.CreateUserRequest;
 import com.catcatcat.tree.resources.users.types.CreateUserRequestRole;
 
 public class Example {
-    public static void run() {
+    public static void main(String[] args) {
         Cat client = Cat
             .builder()
             .url("https://api.example.com/v1")

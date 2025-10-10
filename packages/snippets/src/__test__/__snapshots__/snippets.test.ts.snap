@@ -87,7 +87,7 @@ import com.catcatcat.tree.Cat;
 import com.catcatcat.tree.resources.users.requests.GetUsersRequest;
 
 public class Example {
-    public static void run() {
+    public static void main(String[] args) {
         Cat client = Cat
             .builder()
             .token("123")
