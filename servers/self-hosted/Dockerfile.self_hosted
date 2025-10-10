@@ -1,26 +1,40 @@
 FROM cgr.dev/chainguard/wolfi-base:latest
 
-# Install Node.js and npm
-RUN apk add --no-cache nodejs npm
+# Create timestamp logging utilities for build process
+RUN mkdir -p /usr/local/bin && \
+    printf '#!/bin/sh\necho "[$(date +%%Y-%%m-%%d\ %%H:%%M:%%S)] $*"\n' > /usr/local/bin/log && \
+    chmod +x /usr/local/bin/log && \
+    printf '#!/bin/sh\nwhile IFS= read -r line; do echo "[$(date +%%Y-%%m-%%d\ %%H:%%M:%%S)] $line"; done\n' > /usr/local/bin/add-timestamps && \
+    chmod +x /usr/local/bin/add-timestamps
 
-RUN npm install -g turbo@2.0.1
+# Install Node.js and npm
+RUN log "Installing Node.js and npm..." && \
+    apk add --no-cache nodejs npm 2>&1 | add-timestamps
+
+RUN log "Installing turbo..." && \
+    npm install -g turbo@2.0.1 2>&1 | add-timestamps
 
 COPY . .
-RUN npm install -g pnpm@9.15.9
-RUN rm -rf fern/
+RUN log "Installing pnpm..." && \
+    npm install -g pnpm@9.15.9 2>&1 | add-timestamps
+RUN log "Cleaning up fern directory..." && \
+    rm -rf fern/
 
-RUN turbo prune @fern-docs/bundle --docker
+RUN log "Running turbo prune..." && \
+    turbo prune @fern-docs/bundle --docker 2>&1 | add-timestamps
 
 COPY servers/self-hosted/scripts /scripts
 
 # -----------  Start Postgres setup  -----------
 
 # Create postgres user first
-RUN addgroup -g 70 -S postgres && \
+RUN log "Creating postgres user..." && \
+    addgroup -g 70 -S postgres && \
     adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres
 
 # Install PostgreSQL packages
-RUN apk add --no-cache postgresql postgresql-contrib postgresql-dev && \
+RUN log "Installing PostgreSQL..." && \
+    apk add --no-cache postgresql postgresql-contrib postgresql-dev 2>&1 | add-timestamps && \
     mkdir -p /run/postgresql /var/lib/postgresql/data && \
     chown -R postgres:postgres /run/postgresql /var/lib/postgresql
 
@@ -34,7 +48,8 @@ ENV DATABASE_NAME=fdr
 
 ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fdr
 
-RUN npm install -g prisma@5.13.0
+RUN log "Installing Prisma..." && \
+    npm install -g prisma@5.13.0 2>&1 | add-timestamps
 
 COPY servers/fdr/prisma /prisma
 
@@ -42,15 +57,17 @@ COPY servers/fdr/prisma /prisma
 
 # ----------- Start MINIO setup  -----------
 
-RUN apk add --no-cache wget && \
-    wget https://dl.min.io/server/minio/release/linux-amd64/minio && \
+RUN log "Installing MinIO..." && \
+    apk add --no-cache wget 2>&1 | add-timestamps && \
+    wget https://dl.min.io/server/minio/release/linux-amd64/minio 2>&1 | add-timestamps && \
     chmod +x minio && \
     mv minio /usr/local/bin/ && \
     adduser -D -s /bin/sh minio-user || true && \
     mkdir -p /data && \
     # Make data directory accessible to all users
     chmod 777 /data && \
-    wget https://dl.min.io/client/mc/release/linux-amd64/mc && \
+    log "Installing MinIO client..." && \
+    wget https://dl.min.io/client/mc/release/linux-amd64/mc 2>&1 | add-timestamps && \
     chmod +x mc && \
     mv mc /usr/local/bin/
 
@@ -64,8 +81,9 @@ ENV MINIO_VOLUMES="/data" \
 # ----------- End MINIO setup  -----------
 
 # ----------- Start MeiliSearch setup -----------
-RUN apk add --no-cache curl bash strace && \
-    bash -c 'for i in {1..5}; do curl -L https://install.meilisearch.com | sh && break || { echo "MeiliSearch install failed, retrying ($i/5)..."; sleep 5; }; done' && \
+RUN log "Installing MeiliSearch..." && \
+    apk add --no-cache curl bash strace 2>&1 | add-timestamps && \
+    bash -c 'for i in {1..5}; do curl -L https://install.meilisearch.com 2>&1 | sh | add-timestamps && break || { log "MeiliSearch install failed, retrying ($i/5)..."; sleep 5; }; done' && \
     chmod 755 /meilisearch
 
 # ----------- End MeiliSearch setup -----------
@@ -77,12 +95,16 @@ COPY servers/fdr/cjs /fdr
 COPY servers/fdr/prisma /fdr/prisma
 
 WORKDIR /fdr
-RUN echo '{"name":"temp","version":"1.0.0","dependencies":{"@prisma/client":"5.13.0"},"devDependencies":{"prisma":"5.13.0"}}' > package.json
-RUN npm install
-RUN npx prisma generate
+RUN log "Setting up FDR..." && \
+    echo '{"name":"temp","version":"1.0.0","dependencies":{"@prisma/client":"5.13.0"},"devDependencies":{"prisma":"5.13.0"}}' > package.json
+RUN log "Installing FDR dependencies..." && \
+    npm install 2>&1 | add-timestamps
+RUN log "Generating Prisma client..." && \
+    npx prisma generate 2>&1 | add-timestamps
 
 # Pre-generate Prisma engines and make them accessible
-RUN mkdir -p /opt/prisma-engines && \
+RUN log "Pre-generating Prisma engines..." && \
+    mkdir -p /opt/prisma-engines && \
     find /fdr/node_modules/.prisma/client -type f -name "*engine*" -exec cp {} /opt/prisma-engines/ \; 2>/dev/null || true && \
     find /usr/local/lib/node_modules/prisma -type f -name "*engine*" -exec cp {} /opt/prisma-engines/ \; 2>/dev/null || true && \
     chmod -R 755 /opt/prisma-engines
@@ -95,40 +117,50 @@ WORKDIR /
 ENV NPM_CONFIG_PREFIX=/tmp/npm-global
 ENV NPM_CONFIG_CACHE=/tmp/npm-cache
 ENV PATH=$PATH:/tmp/npm-global/bin
-RUN mkdir -p /tmp/npm-global /tmp/npm-cache && \
-    npm install -g fern-api && \
+RUN log "Installing Fern CLI..." && \
+    mkdir -p /tmp/npm-global /tmp/npm-cache && \
+    npm install -g fern-api 2>&1 | add-timestamps && \
     chmod -R 777 /tmp/npm-global /tmp/npm-cache
 # ----------- End fern cli installation -----------
 
 # ----------- Start nextapp setup -----------
 COPY docs_bundle.tar.gz .
 
-RUN mkdir -p /nextapp && \
+RUN log "Setting up Next.js app..." && \
+    mkdir -p /nextapp && \
     tar -xzf docs_bundle.tar.gz -C /nextapp && \
     cd /nextapp && \
     node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
-    pnpm add esbuild && \
+    log "Installing esbuild..." && \
+    pnpm add esbuild 2>&1 | add-timestamps && \
+    # Install esbuild globally to ensure it's available everywhere
+    cd /nextapp && \
+    pnpm add -g esbuild 2>&1 | add-timestamps && \
     # Ensure Next.js cache directory exists and is writable for restricted mode
     mkdir -p /nextapp/packages/fern-docs/bundle/.next/cache && \
     chmod -R 777 /nextapp/packages/fern-docs/bundle/.next
 
 # ----------- End nextapp setup -------------
 
-RUN apk add --no-cache jq yq
+RUN log "Installing jq and yq..." && \
+    apk add --no-cache jq yq 2>&1 | add-timestamps
 
 # ----------- Start Buf CLI setup -----------
-RUN wget https://github.com/bufbuild/buf/releases/download/v1.57.2/buf-Linux-x86_64 -O /usr/local/bin/buf && \
+RUN log "Installing Buf CLI..." && \
+    wget https://github.com/bufbuild/buf/releases/download/v1.57.2/buf-Linux-x86_64 -O /usr/local/bin/buf 2>&1 | add-timestamps && \
     chmod +x /usr/local/bin/buf
 
 # Pre-install buf's npm dependencies into a reusable location
-RUN mkdir -p /opt/buf-modules && \
+RUN log "Pre-installing Buf npm dependencies..." && \
+    mkdir -p /opt/buf-modules && \
     cd /opt/buf-modules && \
     echo '{"dependencies":{"@bufbuild/protobuf":"^2.2.5","@bufbuild/protoplugin":"2.2.5"}}' > package.json && \
-    NPM_CONFIG_USERCONFIG=/dev/null npm install --no-audit --no-fund && \
+    NPM_CONFIG_USERCONFIG=/dev/null npm install --no-audit --no-fund 2>&1 | add-timestamps && \
     chmod -R 777 /opt/buf-modules
 
 # Replace npm with a wrapper that provides pre-installed modules for buf
-RUN mv /usr/bin/npm /usr/bin/npm-real && \
+RUN log "Creating npm wrapper for Buf..." && \
+    mv /usr/bin/npm /usr/bin/npm-real && \
     printf '#!/bin/sh\n' > /usr/bin/npm && \
     printf 'if [ "$1" = "install" ] && [ -f "package.json" ] && grep -q "@bufbuild/protobuf" package.json 2>/dev/null; then\n' >> /usr/bin/npm && \
     printf '  if [ -d "/opt/buf-modules/node_modules" ]; then\n' >> /usr/bin/npm && \
@@ -139,17 +171,19 @@ RUN mv /usr/bin/npm /usr/bin/npm-real && \
     chmod +x /usr/bin/npm
 
 # Verify buf can export with the wrapper
-RUN mkdir -p /tmp/buf-test && \
+RUN log "Verifying Buf CLI installation..." && \
+    mkdir -p /tmp/buf-test && \
     cd /tmp/buf-test && \
     echo 'syntax = "proto3"; package test; message TestMessage { string field = 1; }' > test.proto && \
     echo 'version: v2' > buf.yaml && \
-    buf export . --output /tmp/buf-output && \
+    buf export . --output /tmp/buf-output 2>&1 | add-timestamps && \
     cd / && rm -rf /tmp/buf-test /tmp/buf-output
 # ----------- End Buf CLI setup -----------
 
 # ----------- Setup for non-root execution -----------
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)
-RUN chmod 1777 /tmp && \
+RUN log "Configuring permissions for non-root execution..." && \
+    chmod 1777 /tmp && \
     # Create directories that may need write access at runtime
     mkdir -p /tmp/postgresql /tmp/minio-data /tmp/prisma && \
     chmod 777 /tmp/postgresql /tmp/minio-data /tmp/prisma && \

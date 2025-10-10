@@ -3,6 +3,8 @@
 
 export NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700"
 export NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!"
+export NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0="
+export NEXT_TELEMETRY_DISABLED=1
 
 ENV_LOCAL_PATH="packages/fern-docs/bundle/.env.local"
 ENV_LOCAL_BACKUP="packages/fern-docs/bundle/.env.local.bak"
