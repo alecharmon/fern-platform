@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - app
+  pull_request:
     paths:
       - "servers/fdr/**"
       - ".github/workflows/container-testing.yml"
+
   workflow_dispatch:
 
 concurrency:
@@ -20,6 +22,8 @@ jobs:
       id-token: write
       contents: read
     timeout-minutes: 10
+    env:
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,9 +50,9 @@ jobs:
       - name: Push to ECR for scanning
         run: |-
           aws sts get-caller-identity
-          docker tag fern-definition-registry:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:${{ github.ref_name }}-${{ github.sha }}
+          docker tag fern-definition-registry:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:$BRANCH_NAME-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
-          docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:${{ github.ref_name }}-${{ github.sha }}
+          docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:$BRANCH_NAME-${{ github.sha }}
 
     # Cleanup needed locally but not in CI
     # - name: cleanup
