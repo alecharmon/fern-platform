@@ -11,10 +11,10 @@ async def channel_not_configured(
 ) -> None:
     if channel_settings is None:
         if is_in_thread:
-            await message.channel.send(NOT_CONFIGURED_MESSAGE)
+            await message.channel.send(NOT_CONFIGURED_MESSAGE, suppress_embeds=True)
         elif message.thread:
-            await message.thread.send(NOT_CONFIGURED_MESSAGE)
+            await message.thread.send(NOT_CONFIGURED_MESSAGE, suppress_embeds=True)
         else:
             thread = await message.create_thread(name="Ask Fern - Configuration Required")
-            await thread.send(NOT_CONFIGURED_MESSAGE)
+            await thread.send(NOT_CONFIGURED_MESSAGE, suppress_embeds=True)
     return None

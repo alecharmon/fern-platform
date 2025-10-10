@@ -27,6 +27,51 @@ from src.message.channel_not_configured import channel_not_configured
 MESSAGE_CACHE_TTL = 30
 
 
+class FeedbackView(discord.ui.View):
+    def __init__(self, help_role_id: str | None = None) -> None:
+        super().__init__(timeout=None)
+        self.help_role_id = help_role_id
+
+    @discord.ui.button(label="Mark as resolved ✅", style=discord.ButtonStyle.secondary, custom_id="mark_resolved")
+    async def mark_resolved(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        await interaction.response.send_message("✅ Marked as resolved!", ephemeral=True)
+        button.disabled = True
+        await interaction.message.edit(view=self)
+
+    @discord.ui.button(label="Ask for help 👋", style=discord.ButtonStyle.secondary, custom_id="ask_help")
+    async def ask_help(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        if self.help_role_id:
+            try:
+                role = interaction.guild.get_role(int(self.help_role_id))
+                if role:
+                    await interaction.response.send_message(
+                        f"Looping in {role.mention} for additional help.", suppress_embeds=True
+                    )
+                    return
+
+                member = interaction.guild.get_member(int(self.help_role_id))
+                if member:
+                    await interaction.response.send_message(
+                        f"Looping in {member.mention} for additional help.", suppress_embeds=True
+                    )
+                    return
+
+                LOGGER.warning(f"Could not find role or member with ID: {self.help_role_id}")
+                await interaction.response.send_message(
+                    "Feel free to tag @Ask AI with additional questions.", ephemeral=True
+                )
+            except Exception as e:
+                LOGGER.error(f"Error in ask_help: {e}")
+                await interaction.response.send_message(
+                    "Feel free to tag @Ask AI with additional questions.", ephemeral=True
+                )
+        else:
+            LOGGER.info("No help_role_id configured")
+            await interaction.response.send_message(
+                "Feel free to tag @Ask AI with additional questions.", ephemeral=True
+            )
+
+
 @dataclass
 class DiscordMessageResponse:
     response_text: str
@@ -170,20 +215,37 @@ async def handle_discord_message(message: discord.Message) -> None:
         if response_text and len(response_text) > 0:
             try:
                 chunks = [response_text[i : i + 2000] for i in range(0, len(response_text), 2000)]
+                help_role_id = channel_settings.help_role_id if channel_settings else None
+                view = FeedbackView(help_role_id=help_role_id)
 
                 if isinstance(message.channel, discord.Thread):
-                    for chunk in chunks:
-                        await message.channel.send(chunk, mention_author=True)
+                    for i, chunk in enumerate(chunks):
+                        if i == len(chunks) - 1:
+                            await message.channel.send(
+                                chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
+                            )
+                        else:
+                            await message.channel.send(chunk, mention_author=True, suppress_embeds=True)
                 else:
                     if hasattr(message, "thread") and message.thread:
-                        for chunk in chunks:
-                            await message.thread.send(chunk, mention_author=True)
+                        for i, chunk in enumerate(chunks):
+                            if i == len(chunks) - 1:
+                                await message.thread.send(
+                                    chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
+                                )
+                            else:
+                                await message.thread.send(chunk, mention_author=True, suppress_embeds=True)
                     else:
                         thread = await message.create_thread(
                             name=f"Discussion: {message.content.replace(f'<@{message.guild.me.id}>', '').strip()[:100]}"
                         )
-                        for chunk in chunks:
-                            await thread.send(chunk, mention_author=True)
+                        for i, chunk in enumerate(chunks):
+                            if i == len(chunks) - 1:
+                                await thread.send(
+                                    chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
+                                )
+                            else:
+                                await thread.send(chunk, mention_author=True, suppress_embeds=True)
 
             except discord.HTTPException as e:
                 LOGGER.error(f"Failed to send message: {e}")

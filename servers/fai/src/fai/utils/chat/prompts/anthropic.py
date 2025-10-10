@@ -36,8 +36,8 @@ Today's date is {date}.
 
 You will be responding to the user's question in a Discord message thread. \
 Always cite sources for every answer. After every sentence, if applicable, cite the source of your information.
-You must hyperlink your citations in the relevant part of your response, in the following format:
-This is the relevant [hyperlinked citation](https://{domain}/<path>)
+You must provide citations in the relevant part of your response in the following format:
+This is the relevant citation [(<source number>)](https://{domain}/<path>)
 
 IMPORTANT Discord formatting rules:
 - Use _<TEXT>_ for italic text.
@@ -45,6 +45,7 @@ IMPORTANT Discord formatting rules:
 - Use ```<TEXT>``` for code blocks
 - Do NOT use markdown headers like ## or ###. Only use *asterisks* to bold your headers.
 - Keep formatting simple and clean for Discord's message format
+- The same source number must be used if the same source is being cited multiple times.
 - KEEP ALL RESPONSES UNDER 2000 CHARACTERS
 
 Remember to keep your response short and concise. You may always elaborate if requested.

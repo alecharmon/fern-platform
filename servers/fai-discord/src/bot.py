@@ -21,6 +21,7 @@ class AskFernDiscordClient(discord.Client):
         intents.message_content = True
         intents.messages = True
         intents.guilds = True
+        intents.members = True
         super().__init__(intents=intents)
         self.tree = discord.app_commands.CommandTree(self)
 
@@ -58,10 +59,7 @@ client = AskFernDiscordClient()
 async def configure(interaction: discord.Interaction) -> None:
     view = ConfigureView(channel_id=str(interaction.channel.id))
     await interaction.response.send_message(
-        "**Configure Ask Fern:**\n\n"
-        "**Respond to:**\n"
-        "• **Channels:** Select how the bot responds in channels\n"
-        "• **Threads:** Select how the bot responds in threads",
+        "**Configure Ask Fern:**",
         view=view,
         ephemeral=True,
     )
