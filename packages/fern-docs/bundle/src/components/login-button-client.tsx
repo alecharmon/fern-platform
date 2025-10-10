@@ -19,7 +19,7 @@ export function LoginButtonClient({
 } & ComponentProps<typeof ButtonLink>) {
     return (
         <WithReturnTo queryParam={returnToQueryParam}>
-            <ButtonLink variant="outline" {...props}>
+            <ButtonLink variant="outline" {...props} target="_self">
                 {authed ? "Logout" : "Login"}
                 {showIcon && (authed ? <LogOutIcon /> : <LogInIcon />)}
             </ButtonLink>
