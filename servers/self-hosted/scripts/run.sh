@@ -234,7 +234,7 @@ echo "FDR is up and running at localhost:8080/health"
 
 echo "running fern generate --docs"
 
-FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080  FERN_NO_VERSION_REDIRECTION=true fern generate --docs
+FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080  FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level debug
 
 echo " docs generated successfully"
 
