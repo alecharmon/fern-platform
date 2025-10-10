@@ -10,7 +10,7 @@ import { withoutStaging } from "@fern-api/docs-utils";
 
 import { createJobResponse } from "@/jobs";
 import { queueTurbopufferStartReindex } from "@/server/queue-reindex";
-import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
+import { uncachedGetDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 
 export const maxDuration = 800; // 13 minutes
 
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const domain = getDocsDomainEdge(req);
 
     let faiCallbackURL: string | undefined = undefined;
-    const metadata = await getDocsUrlMetadata(domain);
+    const metadata = await uncachedGetDocsUrlMetadata(domain);
     // TODO(Sahil): Change the enableAlgoliaOnPreview name to be more descriptive.
     // Right now it's not clear that this can be either a preview domain or a regular domain (set in publishDocs.ts)
     if (metadata != null && metadata.enableAlgoliaOnPreview) {
