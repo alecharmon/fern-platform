@@ -15,7 +15,8 @@ import {
     getQueryIndexName,
     getTurbopufferNamespace,
     runRouteForAnthropic,
-    runRouteForCohere
+    runRouteForCohere,
+    type TurbopufferAuthError
 } from "@fern-docs/search-ask-fern";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "@fern-docs/search-ui";
@@ -122,8 +123,10 @@ export async function POST(req: NextRequest) {
     }
 
     const queryIndexName = getQueryIndexName();
+    let result: Response | TurbopufferAuthError;
+
     if (modelProvider === "anthropic" || modelProvider === "bedrock") {
-        return runRouteForAnthropic({
+        result = await runRouteForAnthropic({
             domain,
             chatSource,
             promptTemplate: config.aiChatConfig?.systemPrompt,
@@ -135,10 +138,11 @@ export async function POST(req: NextRequest) {
             embeddingModel,
             turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
             languageModel,
-            documentUrls
+            documentUrls,
+            userIsAuthed: authState.authed
         });
     } else if (modelProvider === "cohere") {
-        return runRouteForCohere({
+        result = await runRouteForCohere({
             domain,
             chatSource,
             promptTemplate: config.aiChatConfig?.systemPrompt,
@@ -149,13 +153,56 @@ export async function POST(req: NextRequest) {
             explodedRoles,
             embeddingModel,
             turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
-            languageModel
+            languageModel,
+            userIsAuthed: authState.authed
         });
     } else {
         return NextResponse.json(`Invalid model provider: ${modelProvider}`, {
             status: 400
         });
     }
+
+    // Unauthorized error
+    if (result && typeof result === "object" && "error" in result && result.error === "unauthorized") {
+        return createAuthErrorStreamResponse(result.message);
+    }
+
+    return result;
+}
+
+function createAuthErrorStreamResponse(errorMessage: string): Response {
+    const assistantQueryId = crypto.randomUUID();
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+        start(controller) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "data-sources", data: [] })}\n\n`));
+            controller.enqueue(
+                encoder.encode(
+                    `data: ${JSON.stringify({ type: "data-assistant-query-id", data: assistantQueryId })}\n\n`
+                )
+            );
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "start" })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "start-step" })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "text-start", id: "0" })}\n\n`));
+            controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "text-delta", id: "0", delta: errorMessage })}\n\n`)
+            );
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "text-end", id: "0" })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "finish-step" })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "finish" })}\n\n`));
+            controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+            controller.close();
+        }
+    });
+
+    return new Response(stream, {
+        headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive"
+        }
+    });
 }
 
 function getLastUserMessage(messages: UIMessage[]): string {

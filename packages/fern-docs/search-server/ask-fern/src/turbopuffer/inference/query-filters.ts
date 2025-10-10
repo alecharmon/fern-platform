@@ -16,13 +16,15 @@ export const buildQueryFilters = ({
     explodedRoles,
     documentIdsToIgnore,
     urlsToIgnore,
-    documentUrls
+    documentUrls,
+    userIsAuthed
 }: {
     filters: FacetFilter[];
     explodedRoles: string[];
     documentIdsToIgnore: string[];
     urlsToIgnore: string[];
     documentUrls?: string[];
+    userIsAuthed: boolean;
 }): Filters | undefined => {
     const versionFacetFilters = filters.filter((f) => f.facet === "version.title");
     const productFacetFilters = filters.filter((f) => f.facet === "product.title");
@@ -71,9 +73,16 @@ export const buildQueryFilters = ({
         ] as Filters[]
     ];
 
+    const authFilters: FilterCondition[] = userIsAuthed
+        ? [] // If user is authenticated, no auth filter needed
+        : [["authed", "Eq", false]]; // If user is not authenticated, only show content where authed == false
+
     const queryFilters: Filters | undefined =
         hasDocumentConstraints && urlInclusionFilters.length > 0
-            ? ["And", [["Or", [...urlInclusionFilters]], ...versionFilters, ...productFilters, roleFilters]]
+            ? [
+                  "And",
+                  [["Or", [...urlInclusionFilters]], ...versionFilters, ...productFilters, roleFilters, ...authFilters]
+              ]
             : [
                   "And",
                   [
@@ -81,7 +90,8 @@ export const buildQueryFilters = ({
                       ...productFilters,
                       roleFilters,
                       ...documentIdNegationFilters,
-                      ...urlNegationFilters
+                      ...urlNegationFilters,
+                      ...authFilters
                   ]
               ];
 

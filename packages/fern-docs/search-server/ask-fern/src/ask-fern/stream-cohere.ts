@@ -18,7 +18,7 @@ import { FernAIClient } from "@fern-api/fai-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 
-import { convertTpufRecordToCitation, createChatSystemPrompt } from "../index";
+import { convertTpufRecordToCitation, createChatSystemPrompt, isAuthError, type TurbopufferAuthError } from "../index";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";
 
 export async function runRouteForCohere({
@@ -32,7 +32,8 @@ export async function runRouteForCohere({
     explodedRoles,
     embeddingModel,
     turbopufferNamespace,
-    languageModel
+    languageModel,
+    userIsAuthed
 }: {
     domain: string;
     chatSource: string;
@@ -45,7 +46,8 @@ export async function runRouteForCohere({
     embeddingModel: EmbeddingModel<string>;
     turbopufferNamespace: string;
     languageModel: LanguageModel;
-}) {
+    userIsAuthed: boolean;
+}): Promise<Response | TurbopufferAuthError> {
     const start = Date.now();
 
     const searchResults = await runQueryTurbopuffer(lastUserMessage, {
@@ -53,8 +55,15 @@ export async function runRouteForCohere({
         namespace: turbopufferNamespace,
         topK: 3,
         filters,
-        explodedRoles
+        explodedRoles,
+        userIsAuthed
     });
+
+    // If auth error, return it immediately instead of passing through the LLM
+    if (isAuthError(searchResults)) {
+        return searchResults;
+    }
+
     const searchResultSources = searchResults.map((hit) => {
         return {
             title: hit.attributes.title,

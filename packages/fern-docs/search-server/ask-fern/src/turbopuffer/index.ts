@@ -1,4 +1,9 @@
-export { queryTurbopuffer } from "./inference/query-turbopuffer";
+export {
+    isAuthError,
+    queryTurbopuffer,
+    type TurbopufferAuthError,
+    type TurbopufferQueryResult
+} from "./inference/query-turbopuffer";
 export { createTurbopufferRecords } from "./records/create-turbopuffer-records";
 export { turbopufferUpsertTask } from "./tasks/turbopuffer-indexer-task";
 export {

@@ -23,10 +23,12 @@ import { FernAIClient } from "@fern-api/fai-sdk";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 
 import {
+    type TurbopufferAuthError,
     type TurbopufferRecord,
     convertTpufRecordsToDocuments,
     createChatSystemPrompt,
-    getTurbopufferNamespace
+    getTurbopufferNamespace,
+    isAuthError
 } from "../index";
 import { getCodeIndexName } from "../turbopuffer/utils/get-turbopuffer-namespace";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";
@@ -44,7 +46,8 @@ export async function runRouteForAnthropic({
     embeddingModel,
     turbopufferNamespace,
     languageModel,
-    documentUrls
+    documentUrls,
+    userIsAuthed
 }: {
     domain: string;
     chatSource: string;
@@ -58,7 +61,8 @@ export async function runRouteForAnthropic({
     turbopufferNamespace: string;
     languageModel: LanguageModel;
     documentUrls?: string[];
-}) {
+    userIsAuthed: boolean;
+}): Promise<Response | TurbopufferAuthError> {
     const faiClient = new FernAIClient({
         baseUrl: getFaiOrigin(),
         token: fernToken_admin()
@@ -92,8 +96,14 @@ export async function runRouteForAnthropic({
         topK: 3,
         filters,
         documentUrls,
-        explodedRoles
+        explodedRoles,
+        userIsAuthed
     });
+
+    // If there's an auth error, return it immediately instead of passing through the LLM
+    if (isAuthError(turbopufferResults)) {
+        return turbopufferResults;
+    }
 
     for (const result of turbopufferResults) {
         if (result.attributes.url) {
@@ -182,8 +192,20 @@ export async function runRouteForAnthropic({
                                     documentIdsToIgnore: documentIdsToIgnore,
                                     urlsToIgnore: urlsToIgnore,
                                     filters,
-                                    explodedRoles
+                                    explodedRoles,
+                                    userIsAuthed
                                 });
+
+                                if (isAuthError(result)) {
+                                    return [
+                                        {
+                                            error: "unauthorized",
+                                            message: result.message,
+                                            requiresAuth: true
+                                        }
+                                    ];
+                                }
+
                                 for (const hit of result) {
                                     const url = hit.attributes.url;
                                     documentIdsToIgnore.push(hit.id);
@@ -227,8 +249,19 @@ export async function runRouteForAnthropic({
                                 topK: TOP_K_CODE,
                                 documentIdsToIgnore: documentIdsToIgnore,
                                 filters,
-                                explodedRoles
+                                explodedRoles,
+                                userIsAuthed
                             });
+
+                            if (isAuthError(result)) {
+                                return [
+                                    {
+                                        error: "unauthorized",
+                                        message: result.message,
+                                        requiresAuth: true
+                                    }
+                                ];
+                            }
 
                             return result.map((hit) => ({
                                 ...hit.attributes,
