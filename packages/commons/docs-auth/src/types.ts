@@ -148,20 +148,13 @@ export const OAuth2ClientCredentialsSchema = OAuth2SharedSchema.extend({
     auth_endpoint: z.string(),
     token_endpoint: z.string(),
     scope: z.optional(z.union([z.string(), z.array(z.string())])),
-    issuer: z.optional(z.string())
+    issuer: z.optional(z.string()),
+    roles_claim: z.optional(z.string()).describe("The access token claim to parse for roles. Defaults to 'roles'")
 });
 
 // TODO: remove ory
 // TODO: migrate webflow to generalized authorization_code
 export const OAuth2Schema = z.union([OAuth2ClientCredentialsSchema, OAuth2OrySchema, OAuth2WebflowSchema]);
-
-export const OAuth2TokenSchema = z.object({
-    access_token: z.string(),
-    refresh_token: z.string(),
-    issuer: z.string(),
-    expires_in: z.number(),
-    roles: z.optional(z.union([z.string(), z.array(z.string())]))
-});
 
 export const BasicTokenVerificationSchema = z
     .object({
@@ -246,7 +239,6 @@ export type SSOWorkOS = z.infer<typeof SSOWorkOSSchema>;
 export type OAuth2Ory = z.infer<typeof OAuth2OrySchema>;
 export type OAuth2Webflow = z.infer<typeof OAuth2WebflowSchema>;
 export type OAuth2ClientCredentials = z.infer<typeof OAuth2ClientCredentialsSchema>;
-export type OAuth2TokenWithRolesResponse = z.infer<typeof OAuth2TokenSchema>;
 export type BasicTokenVerification = z.infer<typeof BasicTokenVerificationSchema>;
 export type OAuth2 = z.infer<typeof OAuth2Schema>;
 export type OAuthTokenResponse = z.infer<typeof OAuthTokenResponseSchema>;

@@ -147,7 +147,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         // if all pages are allowlisted, we do not need to parse for roles
         if (!config.allowlist?.includes("/(.*)")) {
-            const roles = extractRolesFromJwt(parsedToken.data.access_token);
+            const accessToken = parsedToken.data.access_token;
+            const roles_claim = config.roles_claim ?? "roles";
+
+            console.log("Parsing access token for claim: ", roles_claim);
+            const roles = extractRolesFromJwt({ accessToken, roles_claim });
             if (roles) {
                 payload.roles = roles;
             }
@@ -212,18 +216,24 @@ async function mintJwtToken({
 /**
  * extracts roles from JWT access token
  */
-function extractRolesFromJwt(accessToken: string): string[] | null {
+function extractRolesFromJwt({
+    accessToken,
+    roles_claim
+}: {
+    accessToken: string;
+    roles_claim: string;
+}): string[] | null {
     try {
         const decodedToken = decodeJwt(accessToken);
 
         console.log("Decoded token with keys: ", Object.keys(decodedToken).join(" "));
 
-        if (decodedToken.roles && Array.isArray(decodedToken.roles)) {
-            return decodedToken.roles as string[];
-        } else if (decodedToken.roles && typeof decodedToken.roles === "string") {
-            return decodedToken.roles.split(" ");
-        } else if (decodedToken.roles) {
-            console.log("Found roles with unexpected type:", typeof decodedToken.roles);
+        if (decodedToken[roles_claim] && Array.isArray(decodedToken[roles_claim])) {
+            return decodedToken[roles_claim] as string[];
+        } else if (decodedToken[roles_claim] && typeof decodedToken[roles_claim] === "string") {
+            return decodedToken[roles_claim].split(" ");
+        } else if (decodedToken[roles_claim]) {
+            console.log("Found roles with unexpected type:", typeof decodedToken[roles_claim]);
         }
 
         console.log("No roles found in JWT payload");
