@@ -7,6 +7,9 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { HEADER_HOST, HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getCanonicalUrl, getSeoDisabled } from "@fern-docs/edge-config";
+import { getFernToken } from "./fern-token";
+import { getDocsDomainApp, getDocsHostApp } from "@fern-api/docs-server/xfernhost/app";
+import { createCachedDocsLoader } from "@fern-api/docs-loader";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
     if (isLocal()) {
@@ -19,7 +22,9 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     }
 
     const headersList = await headers();
-    const domain = headersList.get(HEADER_X_FERN_HOST) ?? headersList.get(HEADER_HOST);
+    const domain = headersList.get(HEADER_X_FERN_HOST) ?? headersList.get(HEADER_HOST) ?? (await getDocsDomainApp());
+    const host = await getDocsHostApp();
+    const loader = await createCachedDocsLoader(host, domain, await getFernToken());
 
     if (!domain) {
         return {
@@ -29,7 +34,9 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
             }
         };
     }
-    const canonicalUrl = await getCanonicalUrl(domain);
+
+    const config = await loader.getConfig();
+    const canonicalUrl = config.metadata?.canonicalHost ?? (await getCanonicalUrl(domain));
     const basepath = headersList.get("x-fern-basepath")?.replace(/\/$/, "") ?? "";
     const baseUrl = withDefaultProtocol(canonicalUrl ?? domain);
     const sitemap = urlJoin(baseUrl, basepath, "sitemap.xml");

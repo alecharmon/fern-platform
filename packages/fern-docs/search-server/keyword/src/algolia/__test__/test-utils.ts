@@ -26,13 +26,7 @@ export function readFixtureToRootNode(fixture: DocsV2Read.LoadDocsForUrlResponse
     const apis = {
         ...Object.fromEntries(
             Object.values(fixture.definition.apis).map((api) => {
-                return [
-                    api.id,
-                    ApiDefinition.ApiDefinitionV1ToLatest.from(api, {
-                        useJavaScriptAsTypeScript: false,
-                        alwaysEnableJavaScriptFetch: false
-                    }).migrate()
-                ];
+                return [api.id, ApiDefinition.ApiDefinitionV1ToLatest.from(api).migrate()];
             })
         ),
         ...fixture.definition.apisV2

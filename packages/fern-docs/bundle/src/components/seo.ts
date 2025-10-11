@@ -60,7 +60,7 @@ export async function generateMetadataFromPage({
         false;
     const nofollow = node?.hidden || isSeoDisabled || frontmatter?.nofollow || false;
 
-    const canonicalHost = await getCanonicalUrl(loader.domain);
+    const canonicalHost = config.metadata?.canonicalHost ?? (await getCanonicalUrl(loader.domain));
     const baseUrl = withDefaultProtocol(canonicalHost ?? loader.domain);
 
     let canonicalUrl: string | undefined;

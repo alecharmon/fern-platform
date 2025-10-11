@@ -19,9 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const host = await getDocsHostApp();
     const domain = await getDocsDomainApp();
-    const canonicalUrl = await getCanonicalUrl(domain);
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
     const root = await loader.getRoot();
+    const config = await loader.getConfig();
+    const canonicalUrl = config.metadata?.canonicalHost ?? (await getCanonicalUrl(domain));
 
     // collect all indexable page slugs
     const slugs = NodeCollector.collect(root).indexablePageSlugs;

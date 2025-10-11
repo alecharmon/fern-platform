@@ -162,7 +162,7 @@ export async function GET(
                     });
 
                     Object.values(docs.definition.apis).forEach((api) => {
-                        const prunedApi = createPrunedApi(ApiDefinitionV1ToLatest.from(api, edgeFlags).migrate());
+                        const prunedApi = createPrunedApi(ApiDefinitionV1ToLatest.from(api).migrate());
                         prunedApi.forEach((value, key) => {
                             keys[`api:${key}`] = value;
                         });
@@ -272,8 +272,8 @@ export async function GET(
                                     // Check if this is an intentional revalidation error or an unexpected error
                                     if (!(e instanceof RevalidationError)) {
                                         // This is an unexpected error
-                                        let errorMessage = String(e);
-                                        let errorDetails: any = {};
+                                        const errorMessage = String(e);
+                                        const errorDetails: any = {};
 
                                         if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
                                             errorDetails.cause = e.cause;

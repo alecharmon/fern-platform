@@ -20,9 +20,6 @@ export interface LoadDocsWithUrlPayload {
     domain: string;
 
     isBatchStreamToggleDisabled?: boolean;
-    isApiScrollingDisabled?: boolean;
-    useJavaScriptAsTypeScript?: boolean;
-    alwaysEnableJavaScriptFetch?: boolean;
 }
 
 interface LoadDocsWithUrlResponse {
@@ -57,21 +54,12 @@ export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<
 
     const domain = new URL(withDefaultProtocol(payload.domain)).host;
 
-    const root = FernNavigation.utils.toRootNode(
-        docs.body,
-        payload.isBatchStreamToggleDisabled ?? false,
-        payload.isApiScrollingDisabled ?? false
-    );
+    const root = FernNavigation.utils.toRootNode(docs.body, payload.isBatchStreamToggleDisabled ?? false);
 
     const pages = retrieveMarkdownFromPages(docs.body.definition.pages);
 
     const apis = {
-        ...mapValues(docs.body.definition.apis, (api) =>
-            ApiDefinition.ApiDefinitionV1ToLatest.from(api, {
-                useJavaScriptAsTypeScript: payload.useJavaScriptAsTypeScript ?? false,
-                alwaysEnableJavaScriptFetch: payload.alwaysEnableJavaScriptFetch ?? false
-            }).migrate()
-        ),
+        ...mapValues(docs.body.definition.apis, (api) => ApiDefinition.ApiDefinitionV1ToLatest.from(api).migrate()),
         ...docs.body.definition.apisV2
     };
 

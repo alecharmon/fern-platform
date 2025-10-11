@@ -4,10 +4,9 @@ import { mutableUpdatePointsTo } from "./updatePointsTo";
 
 export function toRootNode(
     docs: DocsV2Read.LoadDocsForUrlResponse,
-    disableEndpointPairs: boolean = false,
-    paginated?: boolean
+    disableEndpointPairs: boolean = false
 ): FernNavigation.RootNode {
-    const v1 = FernNavigation.V1.toRootNode(docs, disableEndpointPairs, paginated);
+    const v1 = FernNavigation.V1.toRootNode(docs, disableEndpointPairs);
     const latest = FernNavigationV1ToLatest.create().root(v1);
     // update all `pointsTo`
     mutableUpdatePointsTo(latest);

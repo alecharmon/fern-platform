@@ -457,8 +457,7 @@ const getApi = async (domainKey: string, id: string) => {
             notFound();
         }
     }
-    const flags = await cachedGetEdgeFlags(domainKey);
-    return ApiDefinitionV1ToLatest.from(v1, flags).migrate();
+    return ApiDefinitionV1ToLatest.from(v1).migrate();
 };
 
 const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
@@ -473,7 +472,13 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                     if (cached != null) {
                         const metadata = await getMetadata(cacheConfig)(domainKey);
                         const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
-                        return await backfillSnippets(cached, dynamicIr, await flagsPromise);
+                        const settings = await getSettings(cacheConfig)(domainKey);
+                        const edgeFlags = await flagsPromise;
+                        const flags = {
+                            isHttpSnippetsEnabled: settings.httpSnippets !== false || edgeFlags.isHttpSnippetsEnabled,
+                            alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
+                        };
+                        return await backfillSnippets(cached, dynamicIr, flags);
                     }
                 }
             } catch (error) {
@@ -498,7 +503,14 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
             }
             const metadata = await getMetadata(cacheConfig)(domainKey);
             const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
-            return backfillSnippets(pruned, dynamicIr, await flagsPromise);
+            const settings = await getSettings(cacheConfig)(domainKey);
+            const edgeFlags = await flagsPromise;
+            // todo: deprecate these flags
+            const flags = {
+                isHttpSnippetsEnabled: settings.httpSnippets !== false || edgeFlags.isHttpSnippetsEnabled,
+                alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
+            };
+            return backfillSnippets(pruned, dynamicIr, flags);
         },
         [domainKey, cacheSeed(), cacheConfig.cacheKeySuffix],
         { tags: [domainKey, "api"] }
@@ -524,8 +536,7 @@ const getAllApisForDomain = async (domainKey: string): Promise<ApiDefinition.Api
     if (response.definition.apisV2 && Object.keys(response.definition.apisV2).length > 0) {
         return Object.values(response.definition.apisV2);
     }
-    const flags = await cachedGetEdgeFlags(domainKey);
-    return Object.values(response.definition.apis).map((v1) => ApiDefinitionV1ToLatest.from(v1, flags).migrate());
+    return Object.values(response.definition.apis).map((v1) => ApiDefinitionV1ToLatest.from(v1).migrate());
 };
 
 const getEndpointById = async ({
@@ -619,14 +630,10 @@ export function convertResponseToRootNode(response: DocsV2Read.LoadDocsForUrlRes
     if (response.definition.config.root) {
         root = FernNavigation.migrate.FernNavigationV1ToLatest.create().root(response.definition.config.root);
     } else if (response.definition.config.navigation) {
-        root = FernNavigation.utils.toRootNode(
-            response,
-            edgeFlags.isBatchStreamToggleDisabled,
-            edgeFlags.isApiScrollingDisabled
-        );
+        root = FernNavigation.utils.toRootNode(response, edgeFlags.isBatchStreamToggleDisabled);
     }
 
-    if (root && edgeFlags.isApiScrollingDisabled) {
+    if (root) {
         FernNavigation.traverseBF(root, (node) => {
             if (node.type === "apiReference") {
                 node.paginated = true;
@@ -738,7 +745,8 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
             disableSearch: settings?.disableSearch ?? false,
             hide404Page: settings?.hide404Page ?? false,
             httpSnippets: settings?.httpSnippets ?? false,
-            searchText: settings?.searchText ?? "Search"
+            searchText: settings?.searchText ?? "Search",
+            useJavascriptAsTypescript: settings?.useJavascriptAsTypescript ?? false
         };
     });
 

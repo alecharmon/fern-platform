@@ -46,9 +46,6 @@ interface AlgoliaIndexerPayload {
 
     // feature flags for v1 -> v2 migration
     isBatchStreamToggleDisabled?: boolean;
-    isApiScrollingDisabled?: boolean;
-    useJavaScriptAsTypeScript?: boolean;
-    alwaysEnableJavaScriptFetch?: boolean;
 }
 
 export interface AlgoliaIndexerTaskResponse {

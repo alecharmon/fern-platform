@@ -15,21 +15,6 @@ import { convertToCurl } from "../snippets/curl";
 import { sortKeysByShape } from "../sort-keys";
 import { getMessageForStatus } from "../status-message";
 
-interface Flags {
-    /**
-     * If true, rename the language "typescript" to "javascript" in the code snippets.
-     * This works for now because the TypeScript SDK snippets don't use TypeScript-specific features.
-     * But if they do in the future, we'll need to generate separate TypeScript and JavaScript snippets.
-     */
-    useJavaScriptAsTypeScript: boolean;
-
-    /**
-     * If true, avoid generating Typescript SDK snippets.
-     * In @fern-ui/ui's resolver, we generate http-snippets for JavaScript.
-     */
-    alwaysEnableJavaScriptFetch: boolean;
-}
-
 function isSubpackage(package_: APIV1Read.ApiDefinitionPackage): package_ is APIV1Read.ApiDefinitionSubpackage {
     return typeof (package_ as APIV1Read.ApiDefinitionSubpackage).subpackageId === "string";
 }
@@ -37,15 +22,12 @@ function isSubpackage(package_: APIV1Read.ApiDefinitionPackage): package_ is API
 const AUTH_SCHEME_ID = V2.AuthSchemeId("default");
 
 export class ApiDefinitionV1ToLatest {
-    static from(v1: APIV1Read.ApiDefinition, flags: Flags): ApiDefinitionV1ToLatest {
-        return new ApiDefinitionV1ToLatest(v1, flags);
+    static from(v1: APIV1Read.ApiDefinition): ApiDefinitionV1ToLatest {
+        return new ApiDefinitionV1ToLatest(v1);
     }
 
     private auth: APIV1Read.ApiAuth | undefined;
-    private constructor(
-        private readonly v1: APIV1Read.ApiDefinition,
-        private readonly flags: Flags
-    ) {
+    private constructor(private readonly v1: APIV1Read.ApiDefinition) {
         this.auth = v1.auth;
     }
 
@@ -510,13 +492,7 @@ export class ApiDefinitionV1ToLatest {
                 );
             }
 
-            toRet.snippets = this.migrateEndpointSnippets(
-                endpoint,
-                toRet,
-                example.codeSamples,
-                example.codeExamples,
-                this.flags
-            );
+            toRet.snippets = this.migrateEndpointSnippets(endpoint, toRet, example.codeSamples, example.codeExamples);
 
             return toRet;
         });
@@ -669,8 +645,7 @@ export class ApiDefinitionV1ToLatest {
         endpoint: V2.EndpointDefinition,
         example: V2.ExampleEndpointCall,
         codeSamples: APIV1Read.CustomCodeSample[],
-        codeExamples: APIV1Read.CodeExamples,
-        flags: Flags
+        codeExamples: APIV1Read.CodeExamples
     ): Record<string, V2.CodeSnippet[]> {
         const toRet: Record<string, V2.CodeSnippet[]> = {};
         function push(language: string, snippet: V2.CodeSnippet) {
@@ -717,18 +692,10 @@ export class ApiDefinitionV1ToLatest {
             });
         }
 
-        const jsLang = flags.useJavaScriptAsTypeScript ? SupportedLanguage.Javascript : SupportedLanguage.Typescript;
-        // const jsLangName = flags.useJavaScriptAsTypeScript
-        //   ? "JavaScript"
-        //   : "TypeScript";
-        if (
-            !flags.alwaysEnableJavaScriptFetch &&
-            !userProvidedLanguages.has(jsLang) &&
-            codeExamples.typescriptSdk != null
-        ) {
-            push(jsLang, {
+        if (!userProvidedLanguages.has(SupportedLanguage.Typescript) && codeExamples.typescriptSdk != null) {
+            push(SupportedLanguage.Typescript, {
                 name: undefined,
-                language: jsLang,
+                language: SupportedLanguage.Typescript,
                 install: codeExamples.typescriptSdk.install,
                 code: codeExamples.typescriptSdk.client,
                 generated: true,

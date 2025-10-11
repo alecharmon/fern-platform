@@ -1,5 +1,4 @@
 export interface EdgeFlags {
-    isApiScrollingDisabled: boolean;
     isWhitelabeled: boolean;
     isSeoDisabled: boolean;
     isTocDefaultEnabled: boolean;
@@ -8,8 +7,6 @@ export interface EdgeFlags {
     isDarkCodeEnabled: boolean;
     isProxyDisabled: boolean;
     isImageZoomDisabled: boolean;
-    useJavaScriptAsTypeScript: boolean;
-    alwaysEnableJavaScriptFetch: boolean;
     isBatchStreamToggleDisabled: boolean;
     isAudioFileDownloadSpanSummary: boolean;
     isAudioExampleInternal: boolean;
@@ -25,7 +22,6 @@ export interface EdgeFlags {
 }
 
 export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
-    isApiScrollingDisabled: false,
     isWhitelabeled: false,
     isSeoDisabled: false,
     isTocDefaultEnabled: false,
@@ -34,8 +30,6 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isDarkCodeEnabled: false,
     isProxyDisabled: false,
     isImageZoomDisabled: false,
-    useJavaScriptAsTypeScript: false,
-    alwaysEnableJavaScriptFetch: false,
     isBatchStreamToggleDisabled: false,
     isAudioFileDownloadSpanSummary: false,
     isAudioExampleInternal: false,

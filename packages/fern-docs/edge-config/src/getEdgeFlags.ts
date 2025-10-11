@@ -12,7 +12,6 @@ import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
 const EDGE_FLAGS = [
-    "api-scrolling-disabled" as const,
     "whitelabeled" as const,
     "seo-disabled" as const,
     "seo-enabled" as const,
@@ -22,8 +21,6 @@ const EDGE_FLAGS = [
     "dark-code-enabled" as const,
     "disable-proxy" as const,
     "image-zoom-disabled" as const,
-    "use-javascript-as-typescript" as const,
-    "always-enable-javascript-fetch" as const,
     "batch-stream-toggle-disabled" as const,
     "audio-file-download-span-summary" as const,
     "audio-example-internal" as const,
@@ -57,7 +54,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             throw new Error("Failed to fetch edge config");
         }
 
-        const isApiScrollingDisabled = checkDomainMatchesCustomers(domain, config["api-scrolling-disabled"]);
         const isWhitelabeled = checkDomainMatchesCustomers(domain, config.whitelabeled);
         const isSeoDisabled = checkDomainMatchesCustomers(domain, config["seo-disabled"]);
         const isSeoEnabled = checkDomainMatchesCustomers(domain, config["seo-enabled"]);
@@ -67,11 +63,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isDarkCodeEnabled = checkDomainMatchesCustomers(domain, config["dark-code-enabled"]);
         const isProxyDisabled = checkDomainMatchesCustomers(domain, config["disable-proxy"]);
         const isImageZoomDisabled = checkDomainMatchesCustomers(domain, config["image-zoom-disabled"]);
-        const useJavaScriptAsTypeScript = checkDomainMatchesCustomers(domain, config["use-javascript-as-typescript"]);
-        const alwaysEnableJavaScriptFetch = checkDomainMatchesCustomers(
-            domain,
-            config["always-enable-javascript-fetch"]
-        );
         const isBatchStreamToggleDisabled = checkDomainMatchesCustomers(domain, config["batch-stream-toggle-disabled"]);
         const isAudioFileDownloadSpanSummary = checkDomainMatchesCustomers(
             domain,
@@ -94,7 +85,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isNextMdxRef = checkDomainMatchesCustomers(domain, config["next-mdx-ref"]);
         const isLlmsTxtDisabled = checkDomainMatchesCustomers(domain, config["llms-txt-disabled"]);
         return {
-            isApiScrollingDisabled,
             isWhitelabeled,
             isSeoDisabled: (!isCustomDomain(domain) && !isSeoEnabled) || isSeoDisabled,
             isTocDefaultEnabled,
@@ -103,8 +93,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isDarkCodeEnabled,
             isProxyDisabled,
             isImageZoomDisabled,
-            useJavaScriptAsTypeScript,
-            alwaysEnableJavaScriptFetch,
             isBatchStreamToggleDisabled,
             isAudioFileDownloadSpanSummary,
             isAudioExampleInternal,
@@ -121,7 +109,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
     } catch (e) {
         console.error(`[get-edge-flags] ${JSON.stringify(e)}`);
         return {
-            isApiScrollingDisabled: false,
             isWhitelabeled: false,
             isSeoDisabled: !isCustomDomain(domain),
             isTocDefaultEnabled: false,
@@ -130,8 +117,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isDarkCodeEnabled: false,
             isProxyDisabled: false,
             isImageZoomDisabled: false,
-            useJavaScriptAsTypeScript: false,
-            alwaysEnableJavaScriptFetch: false,
             isBatchStreamToggleDisabled: false,
             isAudioFileDownloadSpanSummary: false,
             isAudioExampleInternal: false,

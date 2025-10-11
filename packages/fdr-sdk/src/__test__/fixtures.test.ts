@@ -18,12 +18,7 @@ function testNavigationConfigConverter(fixtureName: string): void {
     const v1 = FernNavigation.V1.toRootNode(fixture);
     const latest = FernNavigationV1ToLatest.create().root(v1);
 
-    const v2Apis = Object.values(fixture.definition.apis).map((api) =>
-        ApiDefinitionV1ToLatest.from(api, {
-            useJavaScriptAsTypeScript: false,
-            alwaysEnableJavaScriptFetch: false
-        }).migrate()
-    );
+    const v2Apis = Object.values(fixture.definition.apis).map((api) => ApiDefinitionV1ToLatest.from(api).migrate());
 
     // eslint-disable-next-line vitest/valid-title
     describe(fixtureName, () => {

@@ -22,12 +22,7 @@ test("Check generated turbopuffer indices", { timeout: 60000 }, async () => {
         const pages = retrieveMarkdownFromPages(payload.definition.pages);
 
         const apis = {
-            ...mapValues(payload.definition.apis, (api) =>
-                ApiDefinition.ApiDefinitionV1ToLatest.from(api, {
-                    useJavaScriptAsTypeScript: payload.useJavaScriptAsTypeScript ?? false,
-                    alwaysEnableJavaScriptFetch: payload.alwaysEnableJavaScriptFetch ?? false
-                }).migrate()
-            ),
+            ...mapValues(payload.definition.apis, (api) => ApiDefinition.ApiDefinitionV1ToLatest.from(api).migrate()),
             ...payload.definition.apisV2
         };
 
