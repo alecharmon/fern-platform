@@ -5,12 +5,10 @@ export interface EdgeFlags {
     isHttpSnippetsEnabled: boolean;
     isInlineFeedbackEnabled: boolean;
     isDarkCodeEnabled: boolean;
-    isProxyDisabled: boolean;
     isImageZoomDisabled: boolean;
     isBatchStreamToggleDisabled: boolean;
     isAudioFileDownloadSpanSummary: boolean;
     isAudioExampleInternal: boolean;
-    isBinaryOctetStreamAudioPlayer: boolean;
     isCohereTheme: boolean;
     is404PageHidden: boolean;
     isAuthenticatedPagesDiscoverable: boolean;
@@ -28,12 +26,10 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isHttpSnippetsEnabled: false,
     isInlineFeedbackEnabled: false,
     isDarkCodeEnabled: false,
-    isProxyDisabled: false,
     isImageZoomDisabled: false,
     isBatchStreamToggleDisabled: false,
     isAudioFileDownloadSpanSummary: false,
     isAudioExampleInternal: false,
-    isBinaryOctetStreamAudioPlayer: false,
     isCohereTheme: false,
     is404PageHidden: false,
     isAuthenticatedPagesDiscoverable: false,

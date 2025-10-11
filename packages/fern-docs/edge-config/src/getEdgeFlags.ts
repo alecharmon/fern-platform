@@ -24,7 +24,6 @@ const EDGE_FLAGS = [
     "batch-stream-toggle-disabled" as const,
     "audio-file-download-span-summary" as const,
     "audio-example-internal" as const,
-    "binary-octet-stream-audio-player" as const,
     "cohere-theme" as const,
     "hide-404-page" as const,
     "grpc-endpoints" as const,
@@ -61,7 +60,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isHttpSnippetsEnabled = checkDomainMatchesCustomers(domain, config["http-snippets-enabled"]);
         const isInlineFeedbackEnabled = checkDomainMatchesCustomers(domain, config["inline-feedback-enabled"]);
         const isDarkCodeEnabled = checkDomainMatchesCustomers(domain, config["dark-code-enabled"]);
-        const isProxyDisabled = checkDomainMatchesCustomers(domain, config["disable-proxy"]);
         const isImageZoomDisabled = checkDomainMatchesCustomers(domain, config["image-zoom-disabled"]);
         const isBatchStreamToggleDisabled = checkDomainMatchesCustomers(domain, config["batch-stream-toggle-disabled"]);
         const isAudioFileDownloadSpanSummary = checkDomainMatchesCustomers(
@@ -69,10 +67,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             config["audio-file-download-span-summary"]
         );
         const isAudioExampleInternal = checkDomainMatchesCustomers(domain, config["audio-example-internal"]);
-        const isBinaryOctetStreamAudioPlayer = checkDomainMatchesCustomers(
-            domain,
-            config["binary-octet-stream-audio-player"]
-        );
         const isCohereTheme = checkDomainMatchesCustomers(domain, config["cohere-theme"]);
         const is404PageHidden = checkDomainMatchesCustomers(domain, config["hide-404-page"]);
         const isAuthenticatedPagesDiscoverable = checkDomainMatchesCustomers(
@@ -91,12 +85,10 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isHttpSnippetsEnabled,
             isInlineFeedbackEnabled,
             isDarkCodeEnabled,
-            isProxyDisabled,
             isImageZoomDisabled,
             isBatchStreamToggleDisabled,
             isAudioFileDownloadSpanSummary,
             isAudioExampleInternal,
-            isBinaryOctetStreamAudioPlayer,
             isCohereTheme,
             is404PageHidden,
             isAuthenticatedPagesDiscoverable,
@@ -115,12 +107,10 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isHttpSnippetsEnabled: false,
             isInlineFeedbackEnabled: isFern(domain),
             isDarkCodeEnabled: false,
-            isProxyDisabled: false,
             isImageZoomDisabled: false,
             isBatchStreamToggleDisabled: false,
             isAudioFileDownloadSpanSummary: false,
             isAudioExampleInternal: false,
-            isBinaryOctetStreamAudioPlayer: false,
             isCohereTheme: false,
             is404PageHidden: false,
             isAuthenticatedPagesDiscoverable: false,

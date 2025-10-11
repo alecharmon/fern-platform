@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { mapValues } from "es-toolkit/object";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import { SendHorizonal } from "lucide-react";
 
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
@@ -15,7 +15,6 @@ import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { type Loadable, failed, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { useEventCallback } from "@fern-ui/react-commons";
 
-import { isProxyDisabledAtom } from "@/state/api-explorer-flags";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
@@ -64,7 +63,6 @@ export const PlaygroundEndpoint = ({
         setFormState(getInitialEndpointRequestFormStateWithExample(context, undefined, resolvedPlaygroundState));
     });
 
-    const isProxyDisabled = useAtomValue(isProxyDisabledAtom);
     const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);
@@ -129,7 +127,7 @@ export const PlaygroundEndpoint = ({
                 })
             };
             if (endpoint.responses?.[0]?.body.type === "stream") {
-                const [res, stream] = await executeProxyStream(req, isProxyDisabled || isLocal());
+                const [res, stream] = await executeProxyStream(req, isLocal());
 
                 const time = Date.now();
 
@@ -192,7 +190,7 @@ export const PlaygroundEndpoint = ({
                     );
                 }
             } else {
-                const res = await executeProxyRest(req, isProxyDisabled || isLocal());
+                const res = await executeProxyRest(req, isLocal());
                 setResponse(loaded(res));
                 if (res.type !== "stream") {
                     track("api_playground_request_received", {
@@ -218,7 +216,7 @@ export const PlaygroundEndpoint = ({
             );
             setResponse(failed(e));
         }
-    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue, isProxyDisabled]);
+    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue]);
 
     const settings = usePlaygroundSettings();
 

@@ -6,11 +6,9 @@ import { FernCard } from "@fern-docs/components/FernCard";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { type Loadable, visitLoadable } from "@fern-ui/loadable";
 import { round } from "es-toolkit/math";
-import { useAtomValue } from "jotai";
 import { Download } from "lucide-react";
 import type { ReactElement } from "react";
 import { ErrorBoundaryFallback } from "@/components/error-boundary";
-import { isBinaryOctetStreamAudioPlayerAtom } from "@/state/api-explorer-flags";
 import { PlaygroundResponsePreview } from "../PlaygroundResponsePreview";
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import type { PlaygroundResponse } from "../types/playgroundResponse";
@@ -27,8 +25,6 @@ export function PlaygroundResponseCard({
     sendRequest,
     requestDisabled
 }: PlaygroundResponseCard): ReactElement<any> {
-    const isBinaryOctetStreamAudioPlayer = useAtomValue(isBinaryOctetStreamAudioPlayerAtom);
-
     return (
         <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
             <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
@@ -124,10 +120,7 @@ export function PlaygroundResponseCard({
                     }
 
                     // Handle audio content
-                    if (
-                        response.contentType.startsWith("audio/") ||
-                        (isBinaryOctetStreamAudioPlayer && response.contentType === "binary/octet-stream")
-                    ) {
+                    if (response.contentType.startsWith("audio/")) {
                         return (
                             <FernAudioPlayer
                                 src={response.response.body}
