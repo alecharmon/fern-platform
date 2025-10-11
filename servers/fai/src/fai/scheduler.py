@@ -7,6 +7,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from fai.db import async_session_maker
 from fai.settings import LOGGER
+from fai.utils.cleanup_job import cleanup_preview_settings
 from fai.utils.insights_job import generate_insights_for_all_domains
 
 _scheduler: AsyncIOScheduler | None = None
@@ -54,12 +55,38 @@ async def generate_weekly_insights_job() -> None:
         LOGGER.exception(f"Error in scheduled insights generation: {e}")
 
 
+async def cleanup_preview_settings_job() -> None:
+    LOGGER.info("Starting scheduled preview settings cleanup")
+
+    try:
+        async with async_session_maker() as db:
+            results = await cleanup_preview_settings(db)
+
+            LOGGER.info(
+                f"Scheduled preview settings cleanup completed: " f"{results['deleted_count']} preview settings deleted"
+            )
+
+            if results["deleted_domains"]:
+                LOGGER.info(f"Deleted domains: {', '.join(results['deleted_domains'])}")
+
+    except Exception as e:
+        LOGGER.exception(f"Error in scheduled preview settings cleanup: {e}")
+
+
 def configure_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(
         func=generate_weekly_insights_job,
         trigger=CronTrigger(day_of_week="sun", hour=2, minute=0, timezone="UTC"),
         id="weekly_insights_generation",
         name="Generate weekly insights for all domains",
+        replace_existing=True,
+    )
+
+    scheduler.add_job(
+        func=cleanup_preview_settings_job,
+        trigger=CronTrigger(day_of_week="mon,wed,fri", hour=2, minute=0, timezone="UTC"),
+        id="preview_settings_cleanup",
+        name="Clean up preview settings older than 1 day",
         replace_existing=True,
     )
 
