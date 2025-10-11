@@ -16,7 +16,6 @@ import { createLowlight } from "lowlight";
 import { useEffect } from "react";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
-import Paragraph from "@tiptap/extension-paragraph";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useEditor } from "@/providers/EditorContext";
 import { cn } from "@/utils/utils";
@@ -62,37 +61,12 @@ const extensions = [
         dropcursor: {
             color: "var(--grayscale-a11)"
         },
+        heading: {
+            levels: [1, 2, 3, 4, 5, 6]
+        },
         gapcursor: false,
         codeBlock: false,
-        paragraph: false,
         link: false
-    }),
-    Paragraph.extend({
-        addKeyboardShortcuts() {
-            return {
-                Enter: ({ editor }) => {
-                    const { state } = editor;
-                    const { selection } = state;
-                    const { $from } = selection;
-
-                    // Check if we're in a paragraph and at the beginning
-                    if ($from.parent.type.name === "paragraph" && $from.parentOffset === 0) {
-                        // Insert a fresh paragraph before the current one
-                        return editor.commands.command(({ tr }) => {
-                            const pos = $from.before($from.depth);
-                            const paragraph = state.schema.nodes.paragraph?.create();
-                            if (paragraph) {
-                                tr.insert(pos, paragraph);
-                            }
-                            return true;
-                        });
-                    }
-
-                    // Use default splitBlock behavior but don't keep attributes
-                    return editor.commands.splitBlock({ keepMarks: false });
-                }
-            };
-        }
     }),
     Link.configure({
         openOnClick: false,

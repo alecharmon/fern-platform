@@ -626,10 +626,6 @@ function getNodeInfo(node: any) {
     };
 }
 
-function isMdxJsxElement(node: any): node is MdxJsxElement {
-    return node && typeof node === "object" && (node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement");
-}
-
 // Get node content in a type-safe way
 // TODO: consider writing type guards for the node, since toHast does not type it by default
 function getNodeContent(node: any, rootContent: string) {
@@ -677,7 +673,7 @@ export function getChangedNodesFromHtml(originalHtml: string, latestHtml: string
     const latestHast = fromHtml(latestHtml);
 
     const originalMap = getNodeMapFromHast(originalHast);
-    const latestMap = getNodeMapFromHast(latestHast);
+    const latestMap = getNodeMapFromHast(latestHast, true); // Remove duplicates for latestMap to ensure content that was split is treated as new and unique
 
     // Default to all nodes being changed until we can compare them
     const changedNodes: ChangedNodes = {
@@ -714,7 +710,7 @@ export function getChangedNodesFromHtml(originalHtml: string, latestHtml: string
 }
 
 // TODO: consider writing type guards for the hast nodes, since toHast does not type it by default
-function getNodeMapFromHast(hast: HastRoot) {
+function getNodeMapFromHast(hast: HastRoot, removeDuplicates: boolean = false) {
     const map: Record<NodeId, ElementContent> = {};
     let bodyChildren: ElementContent[] | undefined;
     if (hast && Array.isArray(hast.children)) {
@@ -728,6 +724,53 @@ function getNodeMapFromHast(hast: HastRoot) {
             }
         }
     }
+    if (removeDuplicates) {
+        const idArray =
+            bodyChildren
+                ?.map((node) => (node.type === "element" ? node.properties?.["fve-data-id"] : null))
+                .filter(Boolean) ?? [];
+        const numUniqueIds = new Set(idArray);
+
+        // If we have any duplicate IDs, we need to regenerate them
+        if (numUniqueIds.size !== idArray.length) {
+            // Find which IDs are duplicated
+            const duplicateIds = new Set<string>();
+            const seenIds = new Set<string>();
+            for (const id of idArray) {
+                if (typeof id === "string") {
+                    if (seenIds.has(id)) {
+                        duplicateIds.add(id);
+                    }
+                    seenIds.add(id);
+                }
+            }
+
+            const regeneratedBodyChildren = bodyChildren?.map((node) => {
+                if (
+                    node.type === "element" &&
+                    node.properties?.["fve-data-id"] &&
+                    typeof node.properties["fve-data-id"] === "string" &&
+                    duplicateIds.has(node.properties["fve-data-id"])
+                ) {
+                    // If its a paragraph node, then it will have a text child
+                    if (node.children[0]?.type === "text") {
+                        // Generate new data-id and fve-mdx-b64 properties
+                        return {
+                            ...node,
+                            properties: {
+                                ...node.properties,
+                                "fve-data-id": Math.random().toString().slice(2, 14),
+                                "fve-mdx-b64": Buffer.from(node.children[0].value, "utf-8").toString("base64")
+                            }
+                        };
+                    }
+                }
+                return node;
+            });
+            bodyChildren = regeneratedBodyChildren;
+        }
+    }
+
     if (bodyChildren) {
         for (const node of bodyChildren) {
             if (

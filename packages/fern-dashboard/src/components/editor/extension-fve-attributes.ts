@@ -9,6 +9,9 @@ export const FVEAttributesExtension = Node.create({
                     "fve-data-id": {
                         default: null,
                         keepOnSplit: false,
+                        keepOnCopy: false,
+                        keepOnPaste: false,
+                        keepOnDrop: false,
                         renderHTML: (attributes) => {
                             return attributes;
                         }
@@ -16,6 +19,9 @@ export const FVEAttributesExtension = Node.create({
                     "fve-mdx-b64": {
                         default: null,
                         keepOnSplit: false,
+                        keepOnCopy: false,
+                        keepOnPaste: false,
+                        keepOnDrop: false,
                         renderHTML: (attributes) => {
                             return attributes;
                         }

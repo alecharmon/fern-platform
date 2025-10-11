@@ -1202,9 +1202,6 @@ importers:
       '@tiptap/extension-link':
         specifier: ^3.6.5
         version: 3.6.5(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))(@tiptap/pm@3.4.4)
-      '@tiptap/extension-paragraph':
-        specifier: ^3.6.5
-        version: 3.6.5(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))
       '@tiptap/extension-placeholder':
         specifier: ^3.0.5
         version: 3.0.5(@tiptap/extensions@3.0.5(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))(@tiptap/pm@3.4.4))
