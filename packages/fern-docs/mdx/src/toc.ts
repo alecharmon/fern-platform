@@ -53,7 +53,7 @@ type HastNode = Hast.RootContent | Hast.Root | Hast.Doctype;
 
 // TODO: a lot of this logic is duplicated in split-into-sections.ts, consider merging
 // TODO: add tests for this function
-export function makeToc(tree: Root, isTocDefaultEnabled = false, maxDepth?: number): TableOfContentsItem[] {
+export function makeToc(tree: Root, maxDepth?: number): TableOfContentsItem[] {
     const headings: FoundHeading[] = [];
 
     const visitor = (node: HastNode, parents: HastNode[]) => {
@@ -63,10 +63,9 @@ export function makeToc(tree: Root, isTocDefaultEnabled = false, maxDepth?: numb
 
         // if the node is a <Steps toc={false}>, skip traversing its children
         if (isMdxJsxElementHast(node) && node.name === "StepGroup") {
-            const isTocEnabled =
-                hastGetBooleanValue(
-                    node.attributes.find((attr) => isMdxJsxAttribute(attr) && attr.name === "toc")?.value
-                ) ?? isTocDefaultEnabled;
+            const isTocEnabled = hastGetBooleanValue(
+                node.attributes.find((attr) => isMdxJsxAttribute(attr) && attr.name === "toc")?.value
+            );
 
             if (isTocEnabled) {
                 node.children.forEach((child) => {
@@ -158,7 +157,7 @@ export function makeToc(tree: Root, isTocDefaultEnabled = false, maxDepth?: numb
             const attributes = node.attributes.filter(isMdxJsxAttribute);
             const itemsAttr = attributes.find((attr) => attr.name === "tabs");
             const tocAttr = attributes.find((attr) => attr.name === "toc");
-            const isParentTocEnabled = hastGetBooleanValue(tocAttr?.value) ?? isTocDefaultEnabled;
+            const isParentTocEnabled = hastGetBooleanValue(tocAttr?.value);
 
             if (itemsAttr?.value == null || typeof itemsAttr.value === "string") {
                 return;
@@ -188,7 +187,7 @@ export function makeToc(tree: Root, isTocDefaultEnabled = false, maxDepth?: numb
             const attributes = node.attributes.filter(isMdxJsxAttribute);
             const itemsAttr = attributes.find((attr) => attr.name === "items");
             const tocAttr = attributes.find((attr) => attr.name === "toc");
-            const isParentTocEnabled = hastGetBooleanValue(tocAttr?.value) ?? isTocDefaultEnabled;
+            const isParentTocEnabled = hastGetBooleanValue(tocAttr?.value);
 
             if (itemsAttr?.value == null || typeof itemsAttr.value === "string") {
                 return;
@@ -217,7 +216,7 @@ export function makeToc(tree: Root, isTocDefaultEnabled = false, maxDepth?: numb
         if (isMdxJsxElementHast(node) && node.name === "ParamField") {
             const attributes = node.attributes.filter(isMdxJsxAttribute);
             const tocAttr = attributes.find((attr) => attr.name === "toc");
-            const isTocEnabled = hastGetBooleanValue(tocAttr?.value) ?? isTocDefaultEnabled;
+            const isTocEnabled = hastGetBooleanValue(tocAttr?.value);
 
             if (!isTocEnabled) {
                 return;

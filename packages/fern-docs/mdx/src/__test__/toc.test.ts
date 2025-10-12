@@ -31,7 +31,7 @@ describe("toc", () => {
     });
 
     it("should respect maxDepth of 2", () => {
-        const toc = makeToc(toTree(`# Hello world\n\n## Nested heading\n\n### Deep heading`).hast, false, 2);
+        const toc = makeToc(toTree(`# Hello world\n\n## Nested heading\n\n### Deep heading`).hast, 2);
         expect(toc).toEqual([
             {
                 simpleString: "Hello world",
@@ -52,7 +52,6 @@ describe("toc", () => {
             toTree(
                 `# Hello world\n\n## Nested heading\n\n### Deep heading\n\n### Another Deep heading\n\n## Nested heading 2\n\n### Deep heading 2\n\n### Another Deep heading 2`
             ).hast,
-            false,
             2
         );
         expect(toc).toEqual([
@@ -189,7 +188,6 @@ describe("toc", () => {
             toTree(
                 `#### Skip Level 4\n\n## Include Level 2\n\n### Include Level 3\n\n##### Skip Nested 5\n\n#### Skip Nested 4\n\n### Regular 3\n\n## Regular 2\n\n### Last 3\n\n#### Skip Last 4`
             ).hast,
-            false,
             3
         );
         expect(toc).toEqual([

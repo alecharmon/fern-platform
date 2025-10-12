@@ -15,7 +15,6 @@ const EDGE_FLAGS = [
     "whitelabeled" as const,
     "seo-disabled" as const,
     "seo-enabled" as const,
-    "toc-default-enabled" as const,
     "http-snippets-enabled" as const,
     "inline-feedback-enabled" as const,
     "dark-code-enabled" as const,
@@ -56,7 +55,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isWhitelabeled = checkDomainMatchesCustomers(domain, config.whitelabeled);
         const isSeoDisabled = checkDomainMatchesCustomers(domain, config["seo-disabled"]);
         const isSeoEnabled = checkDomainMatchesCustomers(domain, config["seo-enabled"]);
-        const isTocDefaultEnabled = checkDomainMatchesCustomers(domain, config["toc-default-enabled"]);
         const isHttpSnippetsEnabled = checkDomainMatchesCustomers(domain, config["http-snippets-enabled"]);
         const isInlineFeedbackEnabled = checkDomainMatchesCustomers(domain, config["inline-feedback-enabled"]);
         const isDarkCodeEnabled = checkDomainMatchesCustomers(domain, config["dark-code-enabled"]);
@@ -81,7 +79,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         return {
             isWhitelabeled,
             isSeoDisabled: (!isCustomDomain(domain) && !isSeoEnabled) || isSeoDisabled,
-            isTocDefaultEnabled,
             isHttpSnippetsEnabled,
             isInlineFeedbackEnabled,
             isDarkCodeEnabled,
@@ -103,7 +100,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         return {
             isWhitelabeled: false,
             isSeoDisabled: !isCustomDomain(domain),
-            isTocDefaultEnabled: false,
             isHttpSnippetsEnabled: false,
             isInlineFeedbackEnabled: isFern(domain),
             isDarkCodeEnabled: false,

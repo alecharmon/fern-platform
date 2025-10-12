@@ -1,7 +1,6 @@
 export interface EdgeFlags {
     isWhitelabeled: boolean;
     isSeoDisabled: boolean;
-    isTocDefaultEnabled: boolean;
     isHttpSnippetsEnabled: boolean;
     isInlineFeedbackEnabled: boolean;
     isDarkCodeEnabled: boolean;
@@ -22,7 +21,6 @@ export interface EdgeFlags {
 export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isWhitelabeled: false,
     isSeoDisabled: false,
-    isTocDefaultEnabled: false,
     isHttpSnippetsEnabled: false,
     isInlineFeedbackEnabled: false,
     isDarkCodeEnabled: false,

@@ -41,7 +41,7 @@ export const rehypeToc: Plugin<[], Root> = () => {
             (prop) => prop.key?.value === "max-toc-depth"
         )?.value?.value;
 
-        const toc = makeToc(ast, false, maxTocDepth);
+        const toc = makeToc(ast, maxTocDepth);
 
         ast.children.unshift({
             type: "mdxjsEsm",
