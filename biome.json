@@ -189,7 +189,12 @@
   },
   "overrides": [
     {
-      "includes": ["**/*.test.ts", "**/*.spec.ts", "**/__test__/testHelpers.ts"],
+      "includes": [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/__test__/testHelpers.ts",
+        "servers/self-hosted/scripts/perf-test.ts"
+      ],
       "linter": {
         "rules": {
           "suspicious": {
@@ -473,6 +478,7 @@
     {
       "includes": [
         "servers/mdx-bundler/src/plugins/*.ts",
+        "servers/self-hosted/scripts/perf-test.ts",
         "packages/fern-dashboard/src/**/*.ts",
         "packages/fern-dashboard/src/**/*.tsx",
         "packages/fern-docs/**/*.tsx",
