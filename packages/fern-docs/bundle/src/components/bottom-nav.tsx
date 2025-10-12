@@ -1,8 +1,7 @@
 import "server-only";
 
-import React from "react";
-
 import { Separator } from "@fern-docs/components/Separator";
+import React from "react";
 
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";

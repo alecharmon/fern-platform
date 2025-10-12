@@ -1,11 +1,10 @@
-import { type ComponentPropsWithoutRef, type PropsWithChildren, type ReactNode, memo } from "react";
+import { Button } from "@fern-docs/components/button";
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { X } from "lucide-react";
-
-import { Button } from "@fern-docs/components/button";
+import { type ComponentPropsWithoutRef, memo, type PropsWithChildren, type ReactNode } from "react";
 
 import { FERN_SEARCH_DIALOG_ID, FERN_SEARCH_DIALOG_OVERLAY_ID } from "../../constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";

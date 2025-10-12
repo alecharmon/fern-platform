@@ -1,19 +1,18 @@
-import { AuthType, type IndexSegment } from "@prisma/client";
-import { keyBy } from "es-toolkit/array";
-import { mapValues } from "es-toolkit/object";
-
 import {
     type APIV1Db,
     type APIV1Read,
+    convertDbAPIDefinitionToRead,
+    convertDocsDefinitionToRead,
     DocsV1Db,
     type DocsV1Read,
     FdrAPI,
     FernNavigation,
-    convertDbAPIDefinitionToRead,
-    convertDocsDefinitionToRead,
     migrateDocsDbDefinition,
     visitDbNavigationConfig
 } from "@fern-api/fdr-sdk";
+import { AuthType, type IndexSegment } from "@prisma/client";
+import { keyBy } from "es-toolkit/array";
+import { mapValues } from "es-toolkit/object";
 
 import { DocsV1ReadService } from "../../../api";
 import { UnauthorizedError } from "../../../api/generated/api";

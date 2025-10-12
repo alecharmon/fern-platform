@@ -1,8 +1,5 @@
 import "server-only";
 
-import type React from "react";
-import type { ReactElement } from "react";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
@@ -10,6 +7,8 @@ import { Badge } from "@fern-docs/components/badges";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { AsideAwareDiv } from "@fern-docs/components/layouts/AsideAwareDiv";
 import { SetLayout } from "@fern-docs/components/state/layout";
+import type React from "react";
+import type { ReactElement } from "react";
 
 import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";

@@ -1,34 +1,33 @@
-import {
-    type EmbeddingModel,
-    type LanguageModel,
-    type ModelMessage,
-    NoSuchToolError,
-    type UIDataTypes,
-    type UIMessage,
-    type UIMessagePart,
-    type UITools,
-    convertToModelMessages,
-    createUIMessageStream,
-    createUIMessageStreamResponse,
-    stepCountIs,
-    streamText,
-    tool
-} from "ai";
-import { FallbackModel } from "ai-fallback";
-import z from "zod";
-
 import { postToSlack, track } from "@fern-api/docs-server";
 import { fernToken_admin, getFaiOrigin } from "@fern-api/docs-server/env-variables";
 import { FernAIClient } from "@fern-api/fai-sdk";
 import type { FacetFilter } from "@fern-docs/search-keyword";
+import {
+    convertToModelMessages,
+    createUIMessageStream,
+    createUIMessageStreamResponse,
+    type EmbeddingModel,
+    type LanguageModel,
+    type ModelMessage,
+    NoSuchToolError,
+    stepCountIs,
+    streamText,
+    tool,
+    type UIDataTypes,
+    type UIMessage,
+    type UIMessagePart,
+    type UITools
+} from "ai";
+import { FallbackModel } from "ai-fallback";
+import z from "zod";
 
 import {
-    type TurbopufferAuthError,
-    type TurbopufferRecord,
     convertTpufRecordsToDocuments,
     createChatSystemPrompt,
     getTurbopufferNamespace,
-    isAuthError
+    isAuthError,
+    type TurbopufferAuthError,
+    type TurbopufferRecord
 } from "../index";
 import { getCodeIndexName } from "../turbopuffer/utils/get-turbopuffer-namespace";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";

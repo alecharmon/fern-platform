@@ -1,9 +1,8 @@
+import { sanitizeUrl } from "@fern-api/ui-core-utils";
+import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { compact } from "es-toolkit/array";
 import { noop } from "ts-essentials";
 import urljoin from "url-join";
-
-import { sanitizeUrl } from "@fern-api/ui-core-utils";
-import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 
 import type * as Latest from "../latest";
 

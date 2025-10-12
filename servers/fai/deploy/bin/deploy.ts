@@ -2,7 +2,7 @@
 import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
 
-import { EnvironmentType, type Environments } from "@fern-fern/fern-cloud-sdk/api/resources/environments";
+import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/resources/environments";
 
 import { FernAiDeployStack } from "../src/deploy-stack";
 

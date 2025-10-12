@@ -1,10 +1,5 @@
 import "server-only";
 
-import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
-import React from "react";
-
-import { compact } from "es-toolkit/array";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { withPrunedNavigationLoader } from "@fern-api/docs-server/withPrunedNavigation";
 import {
@@ -19,6 +14,9 @@ import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
+import { compact } from "es-toolkit/array";
+import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
+import React from "react";
 
 import FeedbackPopover from "@/components/feedback/FeedbackPopover";
 import { withLaunchDarkly } from "@/server/ld-adapter";

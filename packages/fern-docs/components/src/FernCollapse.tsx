@@ -1,10 +1,8 @@
-import type { FC, PropsWithChildren, ReactNode } from "react";
-import React from "react";
-
+import { isomorphicRequestAnimationFrame } from "@fern-ui/react-commons";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { noop } from "es-toolkit/function";
-
-import { isomorphicRequestAnimationFrame } from "@fern-ui/react-commons";
+import type { FC, PropsWithChildren, ReactNode } from "react";
+import React from "react";
 
 interface FernCollapseProps extends Collapsible.CollapsibleProps {
     open?: boolean;

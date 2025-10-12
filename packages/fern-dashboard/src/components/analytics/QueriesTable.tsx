@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
 import type { FernAI } from "@fern-api/fai-sdk";
+import { useState } from "react";
 
 import { getAllQueries } from "@/app/actions/getAllQueries";
 import { cn } from "@/utils/utils";

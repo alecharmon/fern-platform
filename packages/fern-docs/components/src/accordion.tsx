@@ -1,12 +1,10 @@
-import * as React from "react";
-
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { ChevronRight } from "lucide-react";
-
-import { useFernCollapseOverflow } from "./FernCollapse";
+import * as React from "react";
 import * as AccordionPrimitive from "./accordion-primitive";
 import { cn } from "./cn";
+import { useFernCollapseOverflow } from "./FernCollapse";
 
 const Accordion = React.forwardRef<
     React.ComponentRef<typeof AccordionPrimitive.Root>,

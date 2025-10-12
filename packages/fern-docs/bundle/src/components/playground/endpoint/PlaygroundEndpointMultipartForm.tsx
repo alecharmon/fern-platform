@@ -1,11 +1,9 @@
-import { type ReactElement, useCallback } from "react";
-
-import { PlusCircle } from "lucide-react";
-
 import type { EndpointDefinition, HttpRequestBodyShape, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { PlusCircle } from "lucide-react";
+import { type ReactElement, useCallback } from "react";
 
 import { Markdown } from "@/mdx/components/Markdown";
 

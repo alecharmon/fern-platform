@@ -1,35 +1,33 @@
-import rehypeKatex from "rehype-katex";
-import remarkGemoji from "remark-gemoji";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import remarkSmartypants from "remark-smartypants";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import { serialize } from "@fern-api/next-mdx-remote/serialize";
 import {
-    type PluggableList,
     customHeadingHandler,
     getFrontmatter,
+    type PluggableList,
     sanitizeBreaks,
     sanitizeMdxExpression,
     toTree
 } from "@fern-docs/mdx";
 import {
     rehypeAcornErrorBoundary,
+    rehypeCodeBlock,
     rehypeExpressionToMd,
     rehypeMdxClassStyle,
     rehypeSlug,
     rehypeSqueezeParagraphs,
     remarkSanitizeAcorn
 } from "@fern-docs/mdx/plugins";
-
+import rehypeKatex from "rehype-katex";
+import remarkGemoji from "remark-gemoji";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import remarkSmartypants from "remark-smartypants";
 import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested-headers";
 import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
-import { rehypeCodeBlock } from "@fern-docs/mdx/plugins";
 import { rehypeFiles } from "../plugins/rehype-files";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";

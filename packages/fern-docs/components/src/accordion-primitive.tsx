@@ -1,22 +1,21 @@
 "use client";
 
-// copied from @radix-ui/react-accordion: https://github.com/radix-ui/primitives/blob/main/packages/react/accordion/src/Accordion.tsx
-// with some changes to support cmd+f accessibility via the html5 <details> component
-import React from "react";
-
 import { composeEventHandlers } from "@radix-ui/primitive";
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
 import { createCollapsibleScope } from "@radix-ui/react-collapsible";
 import { createCollection } from "@radix-ui/react-collection";
 import { useComposedRefs } from "@radix-ui/react-compose-refs";
-import { createContextScope } from "@radix-ui/react-context";
 import type { Scope } from "@radix-ui/react-context";
+import { createContextScope } from "@radix-ui/react-context";
 import { useDirection } from "@radix-ui/react-direction";
 import { useId } from "@radix-ui/react-id";
 import { Primitive } from "@radix-ui/react-primitive";
 import { Slot } from "@radix-ui/react-slot";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { noop } from "es-toolkit/function";
+// copied from @radix-ui/react-accordion: https://github.com/radix-ui/primitives/blob/main/packages/react/accordion/src/Accordion.tsx
+// with some changes to support cmd+f accessibility via the html5 <details> component
+import React from "react";
 
 type Direction = "ltr" | "rtl";
 

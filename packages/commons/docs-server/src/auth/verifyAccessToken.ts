@@ -1,4 +1,4 @@
-import { type JWTPayload, createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
+import { createRemoteJWKSet, decodeJwt, type JWTPayload, jwtVerify } from "jose";
 
 export async function decodeAccessToken(accessToken: string, jwksUrl?: string): Promise<JWTPayload> {
     if (jwksUrl == null) {

@@ -1,6 +1,5 @@
-import type { PropsWithChildren, ReactElement, ReactNode } from "react";
-
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import type { PropsWithChildren, ReactElement, ReactNode } from "react";
 
 interface TooltipProps {
     tip: string | ReactNode;

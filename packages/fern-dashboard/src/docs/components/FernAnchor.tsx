@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import React from "react";
+import { FernLink } from "@fern-docs/components/FernLink";
+import { useCopyToClipboard } from "@fern-ui/react-commons";
 
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Check, Link2 } from "lucide-react";
-import { AnimatePresence, LazyMotion, domAnimation } from "motion/react";
+import { AnimatePresence, domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
-
-import { FernLink } from "@fern-docs/components/FernLink";
-import { useCopyToClipboard } from "@fern-ui/react-commons";
+import React, { useEffect, useState } from "react";
 
 interface FernAnchorProps {
     href: string;

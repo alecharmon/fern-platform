@@ -1,9 +1,7 @@
 "use client";
 
 import { AbstractHeaderTabsRoot } from "@fern-docs/components/abstract/AbstractHeaderTabsRoot";
-
-import { SearchV2Trigger } from "@/state/search";
-import { useIsAskAiEnabled } from "@/state/search";
+import { SearchV2Trigger, useIsAskAiEnabled } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 
 export function HeaderTabsRoot({

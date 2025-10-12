@@ -1,6 +1,5 @@
-import type { ReactElement } from "react";
-
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
+import type { ReactElement } from "react";
 
 import { capturePosthogEventCustomer, capturePosthogEventInternal, useInitializePosthog } from "./posthog";
 import { useSafeListenTrackEvents } from "./use-track";

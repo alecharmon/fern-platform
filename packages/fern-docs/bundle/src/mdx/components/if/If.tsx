@@ -1,9 +1,7 @@
-import type { PropsWithChildren, ReactNode } from "react";
-
-import type { Atom } from "jotai";
-
 import type { FernUser } from "@fern-api/docs-auth";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
+import type { Atom } from "jotai";
+import type { PropsWithChildren, ReactNode } from "react";
 
 export interface IfProps {
     /**

@@ -1,12 +1,10 @@
-import { NextResponse } from "next/server";
-
 import { FernVenusApi } from "@fern-api/venus-api-sdk";
+import { NextResponse } from "next/server";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
-
-import type { MaybeErrorResponse } from "../utils/MaybeErrorResponse";
 import { getDocsUrlOwner } from "../utils/getDocsUrlMetadata";
+import type { MaybeErrorResponse } from "../utils/MaybeErrorResponse";
 
 export async function ensureUserOwnsUrl({ token, url }: { token: string; url: string }): Promise<MaybeErrorResponse> {
     const owner = await getDocsUrlOwner({ url, token });

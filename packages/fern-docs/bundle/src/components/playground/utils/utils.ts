@@ -1,5 +1,3 @@
-import { uniqBy } from "es-toolkit/array";
-
 import {
     type HttpRequestBodyShape,
     type TypeDefinition,
@@ -9,6 +7,7 @@ import {
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { isPlainObject, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { uniqBy } from "es-toolkit/array";
 
 export function castToArray(value: unknown): unknown[] {
     if (Array.isArray(value)) {

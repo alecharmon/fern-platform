@@ -1,9 +1,8 @@
-import { type ComponentPropsWithoutRef, forwardRef, useCallback, useEffect, useRef } from "react";
+import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { Slot } from "@radix-ui/react-slot";
-
-import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { type ComponentPropsWithoutRef, forwardRef, useCallback, useEffect, useRef } from "react";
 
 import * as Command from "../cmdk";
 

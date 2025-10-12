@@ -1,8 +1,7 @@
-import { kebabCase } from "es-toolkit/string";
-import isEqual from "fast-deep-equal";
-
 import assertNever from "@fern-api/ui-core-utils/assertNever";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
+import { kebabCase } from "es-toolkit/string";
+import isEqual from "fast-deep-equal";
 
 import { type APIV1Db, type APIV1Read, type APIV1Write, FdrAPI } from "../../client";
 import {

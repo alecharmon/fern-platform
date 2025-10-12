@@ -1,6 +1,5 @@
-import type { PrismaClient, SnippetApi } from "@prisma/client";
-
 import type { FdrAPI } from "@fern-api/fdr-sdk";
+import type { PrismaClient, SnippetApi } from "@prisma/client";
 
 export interface LoadSnippetAPIRequest {
     orgId: FdrAPI.OrgId;

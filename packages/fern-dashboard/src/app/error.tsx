@@ -1,9 +1,8 @@
 "use client";
 
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
-
-import ReturnHomeButton from "@/components/ReturnHomeButton";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import ReturnHomeButton from "@/components/ReturnHomeButton";
 
 export default function Error({ error: _error }: { error: Error & { digest?: string } }) {
     return (

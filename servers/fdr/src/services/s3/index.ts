@@ -1,5 +1,5 @@
 export {
-    S3ServiceImpl,
     type S3DocsFileInfo,
-    type S3Service
+    type S3Service,
+    S3ServiceImpl
 } from "./S3Service";

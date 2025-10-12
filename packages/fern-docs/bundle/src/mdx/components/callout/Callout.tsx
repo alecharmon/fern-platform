@@ -1,10 +1,8 @@
-import { type FC, type PropsWithChildren, type ReactElement, isValidElement } from "react";
-
-import { Bell, Check, CheckCircle, Info, Pin, Rocket, Star, TriangleAlert } from "lucide-react";
-
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-import { FaIcon } from "@fern-docs/components/fa-icon";
 import { cn } from "@fern-docs/components/cn";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { Bell, Check, CheckCircle, Info, Pin, Rocket, Star, TriangleAlert } from "lucide-react";
+import { type FC, isValidElement, type PropsWithChildren, type ReactElement } from "react";
 
 type Intent = "info" | "warning" | "success" | "error" | "note" | "launch" | "tip" | "check";
 

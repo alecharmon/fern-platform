@@ -1,10 +1,9 @@
-import type { GetServerSideProps } from "next";
-import Error from "next/error";
-
-import { isEmpty } from "es-toolkit/compat";
-
 import { getHostNode } from "@fern-api/docs-server/xfernhost/node";
 import { parseServerSidePathname } from "@fern-docs/components/hooks/use-current-pathname";
+
+import { isEmpty } from "es-toolkit/compat";
+import type { GetServerSideProps } from "next";
+import Error from "next/error";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
     if (isEmpty(context.query.error) && context.req.url) {

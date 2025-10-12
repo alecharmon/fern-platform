@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
-import ReactDOM from "react-dom";
-import _jsx_runtime from "react/jsx-runtime";
-
 import { MDXProvider, useMDXComponents } from "@mdx-js/react";
 import { getMDXExport } from "mdx-bundler/client";
+import React from "react";
+import _jsx_runtime from "react/jsx-runtime";
+import ReactDOM from "react-dom";
 
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 

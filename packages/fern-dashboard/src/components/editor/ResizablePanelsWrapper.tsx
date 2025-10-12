@@ -1,8 +1,8 @@
 "use client";
 
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import type React from "react";
 import { GripVertical } from "lucide-react";
+import type React from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useDevMode } from "@/providers/DevModeProvider";
 
 interface ResizablePanelsWrapperProps {

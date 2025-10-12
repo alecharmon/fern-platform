@@ -1,5 +1,5 @@
-import type { APIV1Read } from "../client/types";
 import type { FernNavigation } from "./..";
+import type { APIV1Read } from "../client/types";
 import { ApiDefinitionHolder } from "./ApiDefinitionHolder";
 import { ApiTypeIdVisitor } from "./ApiTypeIdVisitor";
 

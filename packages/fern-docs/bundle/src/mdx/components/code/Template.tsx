@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import { template } from "es-toolkit/compat";
+import React from "react";
 
 const TemplateCtx = React.createContext<{
     template: Record<string, string>;

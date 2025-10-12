@@ -12,8 +12,7 @@ import type {
     SuggestionMenuProps,
     SuggestionMenuRenderProps
 } from "@/components/tiptap-ui-utils/suggestion-menu";
-import { filterSuggestionItems } from "@/components/tiptap-ui-utils/suggestion-menu";
-import { SuggestionMenu } from "@/components/tiptap-ui-utils/suggestion-menu";
+import { filterSuggestionItems, SuggestionMenu } from "@/components/tiptap-ui-utils/suggestion-menu";
 import "@/components/tiptap-ui/slash-dropdown-menu/slash-dropdown-menu.scss";
 // --- Hooks ---
 import type { SlashMenuConfig } from "@/components/tiptap-ui/slash-dropdown-menu/use-slash-dropdown-menu";

@@ -1,14 +1,12 @@
 "use client";
 
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { useSetAtom } from "jotai";
+import { Check, ChevronDown, Copy } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-
-import { useSetAtom } from "jotai";
-import { Check, ChevronDown, Copy } from "lucide-react";
-
-import { FernButton } from "@fern-docs/components/FernButton";
-import { FernDropdown } from "@fern-docs/components/FernDropdown";
 
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { useIsAskAiEnabled } from "@/state/search";

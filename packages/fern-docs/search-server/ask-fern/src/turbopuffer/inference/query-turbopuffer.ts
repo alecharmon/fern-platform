@@ -1,6 +1,5 @@
-import { Turbopuffer } from "@turbopuffer/turbopuffer";
-
 import type { FacetFilter } from "@fern-docs/search-keyword";
+import { Turbopuffer } from "@turbopuffer/turbopuffer";
 
 import type { TurbopufferRecord } from "../types";
 import { buildQueryFilters } from "./query-filters";

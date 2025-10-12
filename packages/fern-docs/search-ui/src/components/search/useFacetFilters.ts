@@ -1,10 +1,8 @@
+import type { FacetFilter, FacetsResponse } from "@fern-docs/search-keyword";
+import { useAtom } from "jotai";
+import { type atomWithDefault, RESET } from "jotai/utils";
 import type React from "react";
 import { createContext, useContext, useEffect, useMemo } from "react";
-
-import { useAtom } from "jotai";
-import { RESET, type atomWithDefault } from "jotai/utils";
-
-import type { FacetFilter, FacetsResponse } from "@fern-docs/search-keyword";
 
 import { filtersAtom } from "./FilterProvider";
 

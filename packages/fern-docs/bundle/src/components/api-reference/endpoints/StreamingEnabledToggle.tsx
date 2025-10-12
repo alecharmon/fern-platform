@@ -1,9 +1,7 @@
-import { type FC, type PropsWithChildren, useCallback } from "react";
-
-import { Layers2, Radio } from "lucide-react";
-
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
+import { Layers2, Radio } from "lucide-react";
+import { type FC, type PropsWithChildren, useCallback } from "react";
 
 export declare namespace StreamingEnabledToggle {
     export interface Props {

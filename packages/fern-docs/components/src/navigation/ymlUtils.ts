@@ -3,14 +3,14 @@ import yaml from "js-yaml";
 import { compareByFractionalIndex } from "./indexingUtils";
 import {
     type DocsYmlConfig,
-    type NavigationSnapshot,
-    type YmlNavigationItem,
-    type YmlSectionItem,
-    type YmlTabItem,
     isDocsYmlConfig,
     isYmlPageItem,
     isYmlSectionItem,
-    isYmlTabItem
+    isYmlTabItem,
+    type NavigationSnapshot,
+    type YmlNavigationItem,
+    type YmlSectionItem,
+    type YmlTabItem
 } from "./types";
 
 /** Applies pending page additions/removals to docs.yml */

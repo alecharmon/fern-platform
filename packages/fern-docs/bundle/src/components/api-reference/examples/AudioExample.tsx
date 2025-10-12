@@ -1,6 +1,5 @@
-import type { FC } from "react";
-
 import { FernAudioPlayer } from "@fern-docs/components/FernAudioPlayer";
+import type { FC } from "react";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 

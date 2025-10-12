@@ -1,11 +1,9 @@
 "use client";
 
-import { type ReactElement, createRef, useEffect, useState } from "react";
-
 import { Forward, Pause, Play, Rewind, RotateCcw, Volume2, VolumeOff } from "lucide-react";
-
-import { FernButton, FernButtonGroup } from "./FernButton";
+import { createRef, type ReactElement, useEffect, useState } from "react";
 import { cn } from "./cn";
+import { FernButton, FernButtonGroup } from "./FernButton";
 
 export interface FernAudioPlayerProps {
     /** The URL of the audio file to play */

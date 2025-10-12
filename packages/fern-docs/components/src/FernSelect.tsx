@@ -1,9 +1,8 @@
 "use client";
 
-import { type FC, forwardRef } from "react";
-
 import * as Select from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { type FC, forwardRef } from "react";
 
 import { cn } from "./cn";
 

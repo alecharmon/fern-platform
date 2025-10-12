@@ -1,7 +1,6 @@
+import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { usePathname, useSearchParams } from "next/navigation";
 import React from "react";
-
-import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 
 export function useCurrentAnchor() {
     const [anchor, setAnchor] = React.useState<string>("");

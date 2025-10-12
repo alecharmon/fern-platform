@@ -1,21 +1,18 @@
 "use client";
 
-import React, { type ComponentProps, type ReactElement, useEffect, useRef, useState } from "react";
-
-import { Check, Link2 } from "lucide-react";
-import { AnimatePresence, LazyMotion, domAnimation } from "motion/react";
-import * as m from "motion/react-m";
-
 import { cn } from "@fern-docs/components/cn";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
-
+import { Check, Link2 } from "lucide-react";
+import { AnimatePresence, domAnimation, LazyMotion } from "motion/react";
+import * as m from "motion/react-m";
+import React, { type ComponentProps, type ReactElement, useEffect, useRef, useState } from "react";
+import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useIsFernAnchorDisabled } from "@/docs/components/FernAnchor";
 
 import { useStepsContext } from "./Steps";

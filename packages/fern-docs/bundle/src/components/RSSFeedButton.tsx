@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
+import { FernButton } from "@fern-docs/components/FernButton";
 
 import { Rss } from "lucide-react";
-
-import { FernButton } from "@fern-docs/components/FernButton";
+import React from "react";
 
 export function RSSFeedButton() {
     const getRssUrl = () => {

@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useCallback } from "react";
-
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
+import React, { useCallback } from "react";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
 import { useEndpointContext } from "./EndpointContext";
-import { EndpointRequestSection, createEndpointRequestDescriptionFallback } from "./EndpointRequestSection";
+import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "./EndpointRequestSection";
 import { EndpointSection } from "./EndpointSection";
 
 export interface EndpointMultipleRequestSectionProps {

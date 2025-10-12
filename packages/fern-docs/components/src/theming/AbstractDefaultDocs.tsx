@@ -2,10 +2,9 @@
 
 import { useTheme } from "next-themes";
 import React, { Fragment } from "react";
-
-import { Separator } from "../Separator";
 import { cn } from "../cn";
 import { FERN_FOOTER_ID } from "../constants";
+import { Separator } from "../Separator";
 import { FernHeader } from "./fern-header";
 import { MainCtx } from "./mobile-menu";
 import { SidebarNav } from "./side-nav";

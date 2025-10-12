@@ -1,6 +1,5 @@
-import type { ReactElement } from "react";
-
 import { Edit } from "lucide-react";
+import type { ReactElement } from "react";
 
 import { ButtonLink } from "./FernLinkButton";
 

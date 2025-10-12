@@ -1,11 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
-
-import { History } from "lucide-react";
-
 import { Changelog } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { History } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import { SidebarSlugLink } from "../SidebarLink";

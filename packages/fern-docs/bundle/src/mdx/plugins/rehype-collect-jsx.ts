@@ -1,4 +1,4 @@
-import { type Hast, type Unified, extractJsx } from "@fern-docs/mdx";
+import { extractJsx, type Hast, type Unified } from "@fern-docs/mdx";
 
 export const rehypeCollectJsx: Unified.Plugin<[{ collect?: (jsxElements: string[]) => void }?], Hast.Root> = ({
     collect

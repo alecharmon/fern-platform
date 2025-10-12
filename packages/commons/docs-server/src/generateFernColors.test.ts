@@ -1,7 +1,6 @@
+import { FERN_COLOR_ACCENT, FERN_COLOR_AIR, FERN_COLOR_GROUND } from "@fern-api/docs-utils";
 import * as RadixColors from "@radix-ui/colors";
 import { describe, expect, it, vi } from "vitest";
-
-import { FERN_COLOR_ACCENT, FERN_COLOR_AIR, FERN_COLOR_GROUND } from "@fern-api/docs-utils";
 
 import {
     generateFernColorPalette,

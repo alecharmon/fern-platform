@@ -1,6 +1,5 @@
-import qs from "qs";
-
 import type { OAuth2Webflow } from "@fern-api/docs-auth";
+import qs from "qs";
 
 export function getWebflowAuthorizationUrl(
     authConfig: OAuth2Webflow,

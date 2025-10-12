@@ -1,13 +1,10 @@
 "use client";
 
-import type { CSSProperties } from "react";
-import type React from "react";
-
 import { AbstractHeaderContent } from "@fern-docs/components/abstract/AbstractHeaderContent";
 import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";
-
-import { SearchV2Trigger } from "@/state/search";
-import { useIsAskAiEnabled } from "@/state/search";
+import type React from "react";
+import type { CSSProperties } from "react";
+import { SearchV2Trigger, useIsAskAiEnabled } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 
 export function HeaderContent({

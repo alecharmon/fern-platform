@@ -1,8 +1,7 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import { Badge } from "@fern-docs/components/badges";
 
 import { ListFilter } from "lucide-react";
-
-import { Badge } from "@fern-docs/components/badges";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 import { FACET_DISPLAY_NAME_MAP, getFacetDisplay, toFilterOptions } from "../../utils/facet-display";
 import * as Command from "../cmdk";

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { removeUserFromOrg } from "@/app/actions/removeUserFromOrg";
 import { Auth0UserID } from "@/app/services/auth0/types";
-import { ReactQueryKey, type inferQueryData } from "@/state/queryKeys";
+import { type inferQueryData, ReactQueryKey } from "@/state/queryKeys";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { DropdownMenuItem } from "../ui/dropdown-menu";

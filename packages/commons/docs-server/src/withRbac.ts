@@ -4,11 +4,11 @@ import type { PathnameViewerRules } from "@fern-api/docs-auth";
 import { EVERYONE_ROLE, matchPath, slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import {
+    hasMetadata,
     type NavigationNode,
     type NavigationNodeParent,
     Pruner,
-    type RootNode,
-    hasMetadata
+    type RootNode
 } from "@fern-api/fdr-sdk/navigation";
 import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
 

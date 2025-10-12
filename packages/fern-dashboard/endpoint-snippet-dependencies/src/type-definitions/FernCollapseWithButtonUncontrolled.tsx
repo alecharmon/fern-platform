@@ -1,10 +1,9 @@
 "use client";
 
-import type React from "react";
-
 import type { FernButtonProps } from "@fern-docs/components/FernButton";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import { useBooleanState, useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
+import type React from "react";
 
 import { FernCollapseWithButton } from "./FernCollapseWithButton";
 import { useTypeDefinitionContext } from "./TypeDefinitionContext";

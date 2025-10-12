@@ -1,9 +1,8 @@
 "use client";
 
+import GradientExclamation from "@fern-docs/components/GradientExclamation";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-
-import GradientExclamation from "@fern-docs/components/GradientExclamation";
 
 import { Button } from "@/components/ui/button";
 import type { ERROR_DIGEST_KEYS } from "@/utils/errors";

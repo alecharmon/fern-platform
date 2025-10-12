@@ -1,7 +1,6 @@
+import { type APIV1Write, convertAPIDefinitionToDb, FdrAPI, SDKSnippetHolder } from "@fern-api/fdr-sdk";
 import { resolve } from "path";
 import { describe, expect, it } from "vitest";
-
-import { type APIV1Write, FdrAPI, SDKSnippetHolder, convertAPIDefinitionToDb } from "@fern-api/fdr-sdk";
 
 const EMPTY_SNIPPET_HOLDER = new SDKSnippetHolder({
     snippetsBySdkId: {},

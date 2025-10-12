@@ -1,15 +1,13 @@
 import "server-only";
 
-import type React from "react";
-
 import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
+import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
-
-import { PageHeader } from "@/components/PageHeader";
+import type React from "react";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
+import { PageHeader } from "@/components/PageHeader";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 

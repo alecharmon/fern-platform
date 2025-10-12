@@ -2,8 +2,8 @@ import type React from "react";
 import type { PropsWithChildren } from "react";
 
 import { CopyToClipboardButton } from "../CopyToClipboardButton";
-import { ExpandCodeButton } from "../ExpandCodeButton";
 import { cn } from "../cn";
+import { ExpandCodeButton } from "../ExpandCodeButton";
 
 type CodeBlockWithClipboardButtonProps = {
     code: string | (() => string | Promise<string>);

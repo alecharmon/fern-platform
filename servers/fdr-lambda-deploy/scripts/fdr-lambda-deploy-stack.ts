@@ -1,3 +1,4 @@
+import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 import { CfnOutput, Duration, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
@@ -8,8 +9,6 @@ import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import type { Construct } from "constructs";
 import * as path from "path";
-
-import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 
 interface FdrLambdaDeployOptions {
     isPreview?: boolean;

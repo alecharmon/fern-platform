@@ -1,6 +1,5 @@
-import { type KnownBlock, type SectionBlock, WebClient } from "@slack/web-api";
-
 import type { PullRequest } from "@fern-fern/paged-generators-sdk/api";
+import { type KnownBlock, type SectionBlock, WebClient } from "@slack/web-api";
 
 export interface GeneratorMessageMetadata {
     group: string;

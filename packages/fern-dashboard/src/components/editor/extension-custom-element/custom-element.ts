@@ -1,6 +1,5 @@
-import { Node, mergeAttributes } from "@tiptap/core";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { NodeSelection } from "@tiptap/pm/state";
+import { mergeAttributes, Node } from "@tiptap/core";
+import { NodeSelection, Plugin, PluginKey } from "@tiptap/pm/state";
 import { ReplaceStep } from "@tiptap/pm/transform";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 

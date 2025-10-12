@@ -1,6 +1,5 @@
-import { cache } from "react";
-
 import type { APIV1Write } from "@fern-api/fdr-sdk";
+import { cache } from "react";
 
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";

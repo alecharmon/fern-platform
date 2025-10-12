@@ -1,15 +1,13 @@
 "use client";
 
-import * as React from "react";
-
 import { offset, shift, size } from "@floating-ui/react";
 import { PluginKey } from "@tiptap/pm/state";
 // --- Tiptap Editor ---
 import type { Range } from "@tiptap/react";
 // --- Tiptap UI ---
-import { Suggestion } from "@tiptap/suggestion";
 // --- UI Primitives ---
-import { type SuggestionKeyDownProps, SuggestionPluginKey, type SuggestionProps } from "@tiptap/suggestion";
+import { Suggestion, type SuggestionKeyDownProps, SuggestionPluginKey, type SuggestionProps } from "@tiptap/suggestion";
+import * as React from "react";
 
 // --- Hooks ---
 import { useFloatingElement } from "@/hooks/use-floating-element";

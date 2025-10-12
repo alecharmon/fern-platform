@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
-
 import { CalendarIcon, MinusIcon, PlusIcon } from "lucide-react";
+import React, { useCallback, useState } from "react";
 
 import type { DateRangeOptions } from "@/app/services/posthog/types";
 import { Button } from "@/components/ui/button";

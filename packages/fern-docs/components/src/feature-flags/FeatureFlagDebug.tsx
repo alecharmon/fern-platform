@@ -1,6 +1,5 @@
-import type { PropsWithChildren } from "react";
-
 import type { FernNavigation } from "@fern-api/fdr-sdk";
+import type { PropsWithChildren } from "react";
 
 import { Badge } from "../badges";
 import { useIsLocalPreview } from "../contexts/local-preview";

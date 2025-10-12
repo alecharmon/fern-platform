@@ -1,7 +1,6 @@
+import { type APIV1Db, type APIV1Write, convertAPIDefinitionToDb, FdrAPI, SDKSnippetHolder } from "@fern-api/fdr-sdk";
 import urlJoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
-
-import { type APIV1Db, type APIV1Write, FdrAPI, SDKSnippetHolder, convertAPIDefinitionToDb } from "@fern-api/fdr-sdk";
 
 import { APIV1WriteService } from "../../api";
 import type { SdkRequest } from "../../api/generated/api";

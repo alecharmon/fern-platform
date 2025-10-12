@@ -1,6 +1,5 @@
-import React, { type ReactNode } from "react";
-
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import React, { type ReactNode } from "react";
 
 import { SidebarCollapseGroup } from "./SidebarCollapseGroup";
 import { SidebarGroupApiReferenceNode } from "./SidebarGroupApiReferenceNode";

@@ -1,8 +1,7 @@
-import type { Env } from "@libs/env";
-import { SlackService } from "@libs/slack/SlackService";
-
 import { FernRegistryClient } from "@fern-fern/paged-generators-sdk";
 import { type PullRequest, PullRequestState } from "@fern-fern/paged-generators-sdk/api";
+import type { Env } from "@libs/env";
+import { SlackService } from "@libs/slack/SlackService";
 
 const STALE_IN_DAYS = 7;
 const STALE_IN_MS = STALE_IN_DAYS * 24 * 60 * 60 * 1000;

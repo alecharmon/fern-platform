@@ -1,9 +1,5 @@
 "use client";
 
-import React from "react";
-
-import { noop } from "ts-essentials";
-
 import type {
     EndpointDefinition,
     ErrorResponse,
@@ -12,6 +8,8 @@ import type {
     Protocol
 } from "@fern-api/fdr-sdk/api-definition";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
+import React from "react";
+import { noop } from "ts-essentials";
 
 import { useExampleSelection } from "./useExampleSelection";
 import { convertNameToAnchorPart } from "./utils";

@@ -1,9 +1,8 @@
-import { decodeJwt } from "jose";
-import { noop } from "ts-essentials";
-
 import { obfuscateSecret } from "@fern-api/fdr-sdk";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
+import { decodeJwt } from "jose";
+import { noop } from "ts-essentials";
 
 import type { PlaygroundAuthState } from "../types";
 import {

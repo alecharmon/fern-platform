@@ -1,9 +1,9 @@
 import {
     CONTINUE,
     type Hast,
-    type Unified,
     isMdxJsxAttribute,
     isMdxJsxElementHast,
+    type Unified,
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";

@@ -1,9 +1,7 @@
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
+import { useMDXComponents } from "@mdx-js/react";
 import React, { useMemo, useRef } from "react";
 import * as jsxRuntime from "react/jsx-runtime";
-
-import { useMDXComponents } from "@mdx-js/react";
-
-import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 
 interface TwoSlashProps {
     content: {

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@fern-docs/components/cn";
 import {
     Children,
     type ComponentProps,
@@ -9,8 +10,6 @@ import {
     useRef,
     useState
 } from "react";
-
-import { cn } from "@fern-docs/components/cn";
 
 import { useResizeX, useResizeY } from "./useSplitPlane";
 

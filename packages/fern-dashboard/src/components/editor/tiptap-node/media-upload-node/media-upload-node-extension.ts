@@ -1,6 +1,5 @@
 import type { NodeType } from "@tiptap/pm/model";
-import { Node, mergeAttributes } from "@tiptap/react";
-import { ReactNodeViewRenderer } from "@tiptap/react";
+import { mergeAttributes, Node, ReactNodeViewRenderer } from "@tiptap/react";
 
 import { MediaUploadNode as MediaUploadNodeComponent } from "@/components/editor/tiptap-node/media-upload-node/media-upload-node";
 

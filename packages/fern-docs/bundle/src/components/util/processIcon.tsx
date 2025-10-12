@@ -1,8 +1,7 @@
-import type { ReactNode } from "react";
-
 import type { NavigationNode } from "@fern-api/fdr-sdk/navigation";
 import { hasMetadata } from "@fern-api/fdr-sdk/navigation";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
+import type { ReactNode } from "react";
 
 import { FaIconServer } from "../fa-icon-server";
 

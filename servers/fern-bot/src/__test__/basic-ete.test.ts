@@ -2,7 +2,7 @@ import { cleanStdout } from "@functions/generator-updates/shared/updateGenerator
 import { updateGeneratorVersions } from "@functions/generator-updates/updateGeneratorVersions";
 import { evaluateEnv } from "@libs/env";
 import { execFernCli } from "@libs/fern";
-import { DEFAULT_REMOTE_NAME, cloneRepo, configureGit } from "@libs/github";
+import { cloneRepo, configureGit, DEFAULT_REMOTE_NAME } from "@libs/github";
 import { setupGithubApp } from "@libs/github/octokit";
 import type { App } from "octokit";
 import type { SimpleGit } from "simple-git";

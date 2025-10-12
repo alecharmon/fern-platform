@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import type { Auth0OrgName, Auth0Organization } from "@/app/services/auth0/types";
+import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
 import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
 
 import { OrgSwitcherClient } from "./OrgSwitcherClient";

@@ -1,13 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React from "react";
-
-import { X } from "lucide-react";
-
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { tunnel } from "@fern-ui/react-commons";
+import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 import { useUrlParams } from "@/hooks/use-url-params";
 

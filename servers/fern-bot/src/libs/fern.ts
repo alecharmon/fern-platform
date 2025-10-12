@@ -1,5 +1,5 @@
-import { type Result, execa } from "execa";
-import { readFile, readdir } from "fs/promises";
+import { execa, type Result } from "execa";
+import { readdir, readFile } from "fs/promises";
 import yaml from "js-yaml";
 import path from "path";
 import tmp from "tmp-promise";

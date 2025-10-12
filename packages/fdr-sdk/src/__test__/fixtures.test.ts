@@ -1,13 +1,12 @@
+import isPlainObject from "@fern-api/ui-core-utils/isPlainObject";
 import fs from "fs";
 import path from "path";
-
-import isPlainObject from "@fern-api/ui-core-utils/isPlainObject";
 
 import { FernNavigation } from "..";
 import * as ApiDefinition from "../api-definition";
 import { ApiDefinitionV1ToLatest } from "../api-definition/migrators/v1ToV2";
-import { NodeCollector } from "../navigation/NodeCollector";
 import { FernNavigationV1ToLatest } from "../navigation/migrators/v1ToV2";
+import { NodeCollector } from "../navigation/NodeCollector";
 import { collectPageIds } from "../navigation/utils/collectPageIds";
 import { readFixture } from "./readFixtures";
 

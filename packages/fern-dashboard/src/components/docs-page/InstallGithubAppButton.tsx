@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-
 import { useRouter } from "@bprogress/next/app";
 import { Loader2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { validateGithubRepoAction } from "@/app/actions/validate-github-repo";
 

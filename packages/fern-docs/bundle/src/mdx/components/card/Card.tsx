@@ -1,9 +1,8 @@
-import { isValidElement } from "react";
-
-import { FaIcon } from "@fern-docs/components/fa-icon";
-import { FernCard } from "@fern-docs/components/FernCard";
 import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
+import { FernCard } from "@fern-docs/components/FernCard";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { isValidElement } from "react";
 
 import { DisableFernAnchor } from "@/components/FernAnchor";
 import { FernLinkCard } from "@/components/FernLinkCard";

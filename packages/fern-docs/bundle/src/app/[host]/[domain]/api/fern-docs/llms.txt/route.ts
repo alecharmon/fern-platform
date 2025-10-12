@@ -1,17 +1,14 @@
+import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { track } from "@fern-api/docs-server/analytics/posthog";
+import { addLeadingSlash, COOKIE_FERN_TOKEN, isLikelyBrowser, slugToHref } from "@fern-api/docs-utils";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
+import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { unstable_cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
-
-import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { track } from "@fern-api/docs-server/analytics/posthog";
-import { COOKIE_FERN_TOKEN, addLeadingSlash, slugToHref } from "@fern-api/docs-utils";
-import { isLikelyBrowser } from "@fern-api/docs-utils";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
-import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getAuthEdgeConfig } from "@fern-docs/edge-config";
-import { getEdgeFlags } from "@fern-docs/edge-config";
 
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";

@@ -1,12 +1,11 @@
 "use client";
 
-import { ChevronUp, SquareTerminal } from "lucide-react";
-
 import { conformExplorerRoute } from "@fern-api/docs-utils";
-import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
-import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 import { FERN_PLAYGROUND_FLOATING_BUTTON_ID } from "@fern-docs/components/constants";
+import { ButtonLink } from "@fern-docs/components/FernLinkButton";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { useCurrentVersionSlug } from "@fern-docs/components/state/navigation";
+import { ChevronUp, SquareTerminal } from "lucide-react";
 
 // TODO(catherine): add this to the endpoint content
 export const PlaygroundFloatingButton = () => {

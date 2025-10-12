@@ -1,11 +1,10 @@
 "use client";
 
-import { type ComponentProps, type ReactElement, forwardRef, useContext } from "react";
-import Zoom from "react-medium-image-zoom";
-
 import { cn } from "@fern-docs/components/cn";
-import { FernImage } from "@fern-docs/components/FernImage";
 import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
+import { FernImage } from "@fern-docs/components/FernImage";
+import { type ComponentProps, forwardRef, type ReactElement, useContext } from "react";
+import Zoom from "react-medium-image-zoom";
 
 import { useFrontmatter } from "@/components/contexts/frontmatter";
 import { toPixelValue } from "@/components/util/to-pixel-value";

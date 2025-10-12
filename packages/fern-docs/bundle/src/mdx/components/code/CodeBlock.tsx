@@ -1,14 +1,13 @@
-import { type ComponentProps, type ReactNode, type RefObject, useEffect, useRef } from "react";
-
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
-import { ExpandCodeButton } from "@fern-docs/components/ExpandCodeButton";
 import { cn } from "@fern-docs/components/cn";
+import { ExpandCodeButton } from "@fern-docs/components/ExpandCodeButton";
 import {
     CodeBlockWithClipboardButton,
     FernSyntaxHighlighter,
     type ScrollToHandle
 } from "@fern-docs/components/syntax-highlighter";
+import { type ComponentProps, type ReactNode, type RefObject, useEffect, useRef } from "react";
 
 import { useIsDarkCode } from "@/state/dark-code";
 

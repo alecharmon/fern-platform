@@ -3,8 +3,8 @@
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import {
     type ExampleWebSocketSession,
-    type WebSocketChannel,
-    toColonEndpointPathLiteral
+    toColonEndpointPathLiteral,
+    type WebSocketChannel
 } from "@fern-api/fdr-sdk/api-definition";
 
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";

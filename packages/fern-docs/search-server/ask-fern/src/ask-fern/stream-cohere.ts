@@ -1,22 +1,21 @@
-import {
-    type EmbeddingModel,
-    type LanguageModel,
-    type ModelMessage,
-    NoSuchToolError,
-    type UIMessage,
-    convertToModelMessages,
-    createUIMessageStream,
-    createUIMessageStreamResponse,
-    stepCountIs,
-    streamText
-} from "ai";
-import z from "zod";
-
 import { postToSlack, track } from "@fern-api/docs-server";
 import { fernToken_admin, getFaiOrigin } from "@fern-api/docs-server/env-variables";
 import { FernAIClient } from "@fern-api/fai-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import type { FacetFilter } from "@fern-docs/search-keyword";
+import {
+    convertToModelMessages,
+    createUIMessageStream,
+    createUIMessageStreamResponse,
+    type EmbeddingModel,
+    type LanguageModel,
+    type ModelMessage,
+    NoSuchToolError,
+    stepCountIs,
+    streamText,
+    type UIMessage
+} from "ai";
+import z from "zod";
 
 import { convertTpufRecordToCitation, createChatSystemPrompt, isAuthError, type TurbopufferAuthError } from "../index";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";

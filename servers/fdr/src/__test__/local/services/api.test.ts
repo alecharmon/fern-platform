@@ -1,7 +1,6 @@
+import { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 import { v4 } from "uuid";
 import { expect, inject, it } from "vitest";
-
-import { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 
 import type { DynamicIr } from "../../../api/generated/api/resources/api/resources/v1/resources/register";
 import { createApiDefinition, createApiDefinitionLatest, getAPIResponse, getClient } from "../util";

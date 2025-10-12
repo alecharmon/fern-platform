@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import { Empty } from "@fern-docs/components/Empty";
+import React from "react";
 
 export interface EnumDefinitionDetailsProps {
     elements: {

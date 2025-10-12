@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { describe, expect, it } from "vitest";
 
 import { type ApiDefinition, ApiDefinitionId, EndpointId, EnvironmentId, PropertyKey } from "../latest";
 import { backfillSnippets } from "./backfill";

@@ -1,6 +1,5 @@
-import Script from "next/script";
-
 import * as snippet from "@segment/snippet";
+import Script from "next/script";
 
 export function renderSegmentSnippet(apiKey: string): string {
     const opts = {

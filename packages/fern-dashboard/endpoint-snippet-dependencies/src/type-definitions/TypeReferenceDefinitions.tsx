@@ -1,9 +1,7 @@
-import React from "react";
-
-import { UnreachableCaseError } from "ts-essentials";
-
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import React from "react";
+import { UnreachableCaseError } from "ts-essentials";
 
 import { InternalTypeDefinition } from "./InternalTypeDefinition";
 import { TypeDefinitionPathPart } from "./TypeDefinitionContext";

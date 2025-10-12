@@ -1,11 +1,10 @@
-import type { Metadata, Viewport } from "next/types";
-import { experimental_taintUniqueValue } from "react";
-
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { FERN_DOCS_ID } from "@fern-docs/components/constants";
 import { ScrollToTop } from "@fern-docs/components/layouts/ScrollToTop";
 import { Providers } from "@fern-docs/components/providers/providers";
+import type { Metadata, Viewport } from "next/types";
+import { experimental_taintUniqueValue } from "react";
 
 import { ConsoleMessage } from "@/components/console-message";
 import { WebSocketRefresh } from "@/components/websocket-refresh";

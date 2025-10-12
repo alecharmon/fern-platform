@@ -1,9 +1,9 @@
-import type { NextConfig } from "next";
-import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
-
-import NextBundleAnalyzer from "@next/bundle-analyzer";
 import path from "node:path";
 import process from "node:process";
+
+import NextBundleAnalyzer from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 import webpack from "webpack";
 
 const cdnUri = process.env.NEXT_PUBLIC_CDN_URI != null ? new URL("/", process.env.NEXT_PUBLIC_CDN_URI) : undefined;

@@ -1,10 +1,9 @@
 import "server-only";
 
-import type { ReactElement } from "react";
-import React from "react";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
+import type { ReactElement } from "react";
+import React from "react";
 
 import { PlaygroundAuthorizationForm } from "./PlaygroundAuthorizationForm";
 import {

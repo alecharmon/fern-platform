@@ -1,10 +1,8 @@
 "use client";
 
-import type { ReactElement } from "react";
-
-import { noop } from "ts-essentials";
-
 import { Badge } from "@fern-docs/components/badges";
+import type { ReactElement } from "react";
+import { noop } from "ts-essentials";
 
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import { PlaygroundCardSkeleton } from "./PlaygroundCardSkeleton";

@@ -1,21 +1,19 @@
 "use client";
 
-import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
-
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
+import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
-import { cn } from "@fern-docs/components/cn";
+import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
 
 import { WebSocketMessagesVirtualized } from "@/components/api-reference/websockets/WebSocketMessagesVirtualized";
-
-import { HorizontalSplitPane } from "../VerticalSplitPane";
 import { PlaygroundTypeReferenceForm } from "../form/PlaygroundTypeReferenceForm";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
 import type { PlaygroundWebSocketRequestFormState } from "../types";
+import { HorizontalSplitPane } from "../VerticalSplitPane";
 import { PlaygroundWebSocketHandshakeForm } from "./PlaygroundWebSocketHandshakeForm";
 
 interface PlaygroundWebSocketSessionFormProps {

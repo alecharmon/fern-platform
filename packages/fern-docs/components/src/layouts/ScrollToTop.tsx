@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
-
 import { isExplorerRoute } from "@fern-api/docs-utils";
 import { usePrevious } from "@fern-ui/react-commons";
+import React from "react";
 
 import { useCurrentPathname } from "../hooks/use-current-pathname";
 import { scrollToRoute } from "../util/anchor";

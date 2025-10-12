@@ -1,14 +1,13 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { ApiDefinition } from "@fern-api/fdr-sdk";
 
 import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
+import { useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-
-import { ApiDefinition } from "@fern-api/fdr-sdk";
 
 const defaultLanguageAtom = atom("curl");
 

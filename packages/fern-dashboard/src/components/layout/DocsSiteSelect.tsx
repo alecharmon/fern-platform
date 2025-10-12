@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { useRouter } from "@bprogress/next/app";
-
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import { useEffect, useState } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";

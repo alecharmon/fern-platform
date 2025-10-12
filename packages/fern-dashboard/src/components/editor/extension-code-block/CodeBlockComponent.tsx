@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import type { ReactNodeViewProps } from "@tiptap/react";
 
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
-import type { ReactNodeViewProps } from "@tiptap/react";
 import { ChevronDown } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
 

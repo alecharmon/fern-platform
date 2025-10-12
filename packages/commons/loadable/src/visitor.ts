@@ -1,6 +1,6 @@
 import { assertNever } from "@fern-api/ui-core-utils";
 
-import { type Loadable, isFailed, isLoaded, isLoading, isNotStartedLoading } from "./Loadable";
+import { isFailed, isLoaded, isLoading, isNotStartedLoading, type Loadable } from "./Loadable";
 
 export function visitLoadable<V, U, E = unknown>(
     loadable: Loadable<V, E> | undefined,

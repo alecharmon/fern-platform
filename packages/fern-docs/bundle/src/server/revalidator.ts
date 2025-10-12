@@ -1,9 +1,7 @@
-import type { NextApiResponse } from "next";
-
-import urljoin from "url-join";
-
 import { conformTrailingSlash } from "@fern-api/docs-utils";
 import type { FernDocs } from "@fern-fern/fern-docs-sdk";
+import type { NextApiResponse } from "next";
+import urljoin from "url-join";
 
 export class Revalidator implements Revalidator {
     constructor(

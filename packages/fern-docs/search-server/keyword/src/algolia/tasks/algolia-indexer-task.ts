@@ -1,8 +1,7 @@
-import { algoliasearch } from "algoliasearch";
-import { assert } from "ts-essentials";
-
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { loadDocsWithUrl } from "@fern-docs/search-utils";
+import { algoliasearch } from "algoliasearch";
+import { assert } from "ts-essentials";
 
 import { browseAllObjectsForDomain } from "../browse-all-objects";
 import { createAlgoliaRecords } from "../records/create-algolia-records";

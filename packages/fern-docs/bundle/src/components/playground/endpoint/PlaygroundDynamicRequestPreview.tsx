@@ -1,13 +1,11 @@
 "use client";
 
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
-
-import { useAtomValue } from "jotai";
-
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { SnippetResolver } from "@fern-api/snippets";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
+import { useAtomValue } from "jotai";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 

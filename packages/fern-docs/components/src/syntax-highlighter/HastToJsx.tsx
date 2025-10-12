@@ -1,16 +1,12 @@
 "use client";
 
-import { type FC, isValidElement, memo, useContext, useMemo } from "react";
-import React from "react";
-import { Fragment, jsx, jsxs } from "react/jsx-runtime";
-
+import { useCopyToClipboard } from "@fern-ui/react-commons";
 import type { Root, RootContent } from "hast";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
-
-import { useCopyToClipboard } from "@fern-ui/react-commons";
-
-import { FernTooltip } from "../FernTooltip";
+import React, { type FC, isValidElement, memo, useContext, useMemo } from "react";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { cn } from "../cn";
+import { FernTooltip } from "../FernTooltip";
 import { TemplateTooltip } from "./template-tooltip";
 
 interface HastToJSXProps {

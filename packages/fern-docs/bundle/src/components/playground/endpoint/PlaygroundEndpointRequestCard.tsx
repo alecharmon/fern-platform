@@ -1,20 +1,17 @@
-import { type ReactElement, useRef } from "react";
-
-import { useSetAtom } from "jotai";
-
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
+import { useSetAtom } from "jotai";
+import { type ReactElement, useRef } from "react";
 
 import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
 import { useProgrammingLanguage } from "@/state/language";
 import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/state/playground";
-
-import { PlaygroundRequestPreview } from "../PlaygroundRequestPreview";
 import { PlaygroundCodeSnippetResolverBuilder } from "../code-snippets/resolver";
+import { PlaygroundRequestPreview } from "../PlaygroundRequestPreview";
 import type { PlaygroundEndpointRequestFormState } from "../types";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import {

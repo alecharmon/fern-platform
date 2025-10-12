@@ -1,10 +1,9 @@
-import type { ParamValue } from "next/dist/server/request/params";
-import type { ReactNode } from "react";
-
-import { Copy, ExternalLink } from "lucide-react";
-
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
+
+import { Copy, ExternalLink } from "lucide-react";
+import type { ParamValue } from "next/dist/server/request/params";
+import type { ReactNode } from "react";
 
 import { isSelfHosted } from "@/server/isSelfHosted";
 

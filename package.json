@@ -7,6 +7,8 @@
   "scripts": {
     "aws:up": "pnpm up -r \"@aws-sdk/*\"",
     "build": "turbo build",
+    "check": "pnpm exec biome check",
+    "check:fix": "pnpm exec biome check --fix",
     "check-docs-release-blockers": "pnpm tsx packages/scripts/src/cli.ts -- fern-scripts check-docs-release-blockers",
     "clean": "turbo clean",
     "codegen": "turbo codegen",
@@ -30,9 +32,6 @@
     "fai:dev": "bash scripts/run-local-fai.sh",
     "fai:generate": "pnpm fern generate --api fai && pnpm turbo --filter=@fern-api/fai-sdk compile",
     "fdr:generate": "pnpm fern generate --api fdr --local && pnpm turbo --filter=@fern-api/fdr-sdk compile",
-    "format": "biome format --fix",
-    "format:check": "biome format",
-    "format:fix": "biome format --fix",
     "format:package-json": "sort-package-json \"generators/**/package.json\" \"packages/**/package.json\" --ignore \"**/dist\" --ignore \"**lib\" --ignore \"**/node_modules\"",
     "format:yaml:check": "prettier --check \"**/*.{yml,yaml}\"",
     "format:yaml:fix": "prettier --write \"**/*.{yml,yaml}\"",

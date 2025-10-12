@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
-
-import { ChevronDown } from "lucide-react";
-
-import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { cn } from "@fern-docs/components/cn";
+import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface NullableDropdownProps {
     options: string[];

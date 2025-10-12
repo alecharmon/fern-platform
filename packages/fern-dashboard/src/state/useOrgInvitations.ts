@@ -6,7 +6,7 @@ import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { convertQueryResultToLoadable } from "./convertQueryResultToLoadable";
-import { ReactQueryKey, type inferQueryData } from "./queryKeys";
+import { type inferQueryData, ReactQueryKey } from "./queryKeys";
 import type { OrgInvitation } from "./types";
 
 export function useOrgInvitations() {

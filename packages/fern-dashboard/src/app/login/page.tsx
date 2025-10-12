@@ -1,5 +1,5 @@
-import { ThemeProvider } from "next-themes";
 import { redirect } from "next/navigation";
+import { ThemeProvider } from "next-themes";
 
 import { EnableNoiseAnimation } from "@/components/EnableNoiseAnimation";
 import { LoginPage } from "@/components/login-page/LoginPage";

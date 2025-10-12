@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import path from "path";
 
 import { getFrontmatter } from "../frontmatter";

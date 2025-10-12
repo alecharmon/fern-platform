@@ -1,9 +1,3 @@
-import { type FC, Fragment, type ReactNode } from "react";
-
-import { omitBy } from "es-toolkit/object";
-import { isUndefined } from "es-toolkit/predicate";
-import qs from "qs";
-
 import type {
     Environment,
     EnvironmentId,
@@ -16,10 +10,14 @@ import type {
 import { buildRequestUrl, unwrapReference } from "@fern-api/fdr-sdk/api-definition";
 import unknownToString from "@fern-api/ui-core-utils/unknownToString";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
+import { HttpMethodBadge } from "@fern-docs/components/badges";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
-import { HttpMethodBadge } from "@fern-docs/components/badges";
 import { useBooleanState } from "@fern-ui/react-commons";
+import { omitBy } from "es-toolkit/object";
+import { isUndefined } from "es-toolkit/predicate";
+import qs from "qs";
+import { type FC, Fragment, type ReactNode } from "react";
 
 import { MaybeEnvironmentDropdown } from "@/components/MaybeEnvironmentDropdown";
 import { useAllEnvironmentIds } from "@/state/environment";

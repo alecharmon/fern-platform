@@ -1,17 +1,15 @@
 "use client";
 
-import { useRef } from "react";
-
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
-
+import { useRef } from "react";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { TextInputControl } from "@/components/editor/editor-component/controls";
 
 import { EditorPreviewBanner } from "./EditorPreviewBanner";
 import { EndpointNotFoundState } from "./EndpointNotFoundState";

@@ -1,8 +1,3 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
-import { SignJWT, decodeJwt } from "jose";
-
 import { type FernUser, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
 import {
     getAllowedRedirectUrls,
@@ -18,6 +13,9 @@ import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { withoutStaging } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { decodeJwt, SignJWT } from "jose";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { FernNextResponse } from "@/server/FernNextResponse";
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";

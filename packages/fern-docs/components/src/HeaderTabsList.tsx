@@ -1,11 +1,9 @@
+import { slugToHref } from "@fern-api/docs-utils";
+import { hasRedirect, type TabChild } from "@fern-api/fdr-sdk/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Lock } from "lucide-react";
-
-import { slugToHref } from "@fern-api/docs-utils";
-import { type TabChild, hasRedirect } from "@fern-api/fdr-sdk/navigation";
-
-import { FernLinkTab } from "./FernLinkTab";
 import { cn } from "./cn";
+import { FernLinkTab } from "./FernLinkTab";
 import { processIcon } from "./processIcon";
 
 export function HeaderTabsList({ tabs, children }: { tabs: readonly TabChild[]; children?: React.ReactNode }) {

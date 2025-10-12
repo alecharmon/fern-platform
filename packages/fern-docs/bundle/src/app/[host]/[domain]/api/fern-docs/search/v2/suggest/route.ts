@@ -1,19 +1,17 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
 import { searchClient } from "@algolia/client-search";
-import { getEnv } from "@vercel/functions";
-import { kv } from "@vercel/kv";
-import { generateObject } from "ai";
-import { z } from "zod";
-
 import { algoliaAppId } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
-import { SuggestionsSchema, getLanguageModel } from "@fern-docs/search-ask-fern";
+import { getLanguageModel, SuggestionsSchema } from "@fern-docs/search-ask-fern";
 import { type AlgoliaRecord, SEARCH_INDEX } from "@fern-docs/search-keyword";
+import { getEnv } from "@vercel/functions";
+import { kv } from "@vercel/kv";
+import { generateObject } from "ai";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { getFaiClient } from "@/getFaiClient";
 

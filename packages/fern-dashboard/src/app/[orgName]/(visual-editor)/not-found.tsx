@@ -1,9 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
-
-import ReturnHomeButton from "@/components/ReturnHomeButton";
 import NotFoundContent from "@/components/docs-page/NotFoundContent";
+import ReturnHomeButton from "@/components/ReturnHomeButton";
 
 export default function OrgNotFound() {
     const { orgName } = useParams();

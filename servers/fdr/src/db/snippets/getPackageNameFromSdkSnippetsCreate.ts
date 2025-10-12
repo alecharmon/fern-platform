@@ -1,6 +1,5 @@
-import { Language, type PrismaClient } from "@prisma/client";
-
 import type { FdrAPI } from "@fern-api/fdr-sdk";
+import { Language, type PrismaClient } from "@prisma/client";
 
 import { BadRequestError, type Sdk, type SdkRequest } from "../../api/generated/api";
 import { assertNever } from "../../util";

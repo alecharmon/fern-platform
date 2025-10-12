@@ -1,6 +1,5 @@
-import { useAtomValue } from "jotai";
-
 import { useLazyRef } from "@fern-ui/react-commons";
+import { useAtomValue } from "jotai";
 
 import { atomWithStorageString } from "@/state/utils/atomWithStorageString";
 

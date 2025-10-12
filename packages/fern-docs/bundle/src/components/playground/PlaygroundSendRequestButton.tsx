@@ -1,8 +1,8 @@
-import type { FC, ReactNode } from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
-import { cn } from "@fern-docs/components/cn";
+import type { FC, ReactNode } from "react";
 
 interface PlaygroundSendRequestButtonProps {
     sendRequest?: () => void;

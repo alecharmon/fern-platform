@@ -1,11 +1,10 @@
-import { revalidateTag } from "next/cache";
-import { type NextRequest, NextResponse } from "next/server";
+import { isLocal } from "@fern-api/docs-server/isLocal";
+import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 
 import { kv } from "@vercel/kv";
 import { escapeRegExp } from "es-toolkit/string";
-
-import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { revalidateTag } from "next/cache";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(
     _req: NextRequest,

@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
 import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 import { ExternalLink, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { upgradeFernVersionAction } from "@/app/actions/upgradeFernVersion";
 import type { Auth0OrgName } from "@/app/services/auth0/types";

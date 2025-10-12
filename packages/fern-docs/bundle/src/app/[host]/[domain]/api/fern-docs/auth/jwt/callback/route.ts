@@ -1,12 +1,9 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
-import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
-import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { getAllowedRedirectUrls } from "@fern-api/docs-server/auth/allowed-redirects";
+import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
+import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { safeUrl } from "@fern-api/docs-server/safeUrl";
@@ -14,6 +11,8 @@ import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 

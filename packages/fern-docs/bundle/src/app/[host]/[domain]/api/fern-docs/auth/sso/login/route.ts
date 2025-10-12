@@ -1,10 +1,10 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { getWorkOSClientId, workos } from "@fern-api/docs-server/auth/workos";
 
 import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
-import { getWorkOSClientId, workos } from "@fern-api/docs-server/auth/workos";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getWorkOSOrganizationDomains } from "@fern-docs/edge-config";
+import { type NextRequest, NextResponse } from "next/server";
 
 const INVITE_TOKEN_QUERY = "invitation_token";
 

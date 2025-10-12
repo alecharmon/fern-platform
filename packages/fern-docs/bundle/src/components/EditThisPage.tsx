@@ -1,8 +1,7 @@
-import type { ReactElement } from "react";
+import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 
 import { Edit } from "lucide-react";
-
-import { ButtonLink } from "@fern-docs/components/FernLinkButton";
+import type { ReactElement } from "react";
 
 const EDIT_THIS_PAGE_TEXT = "Edit this page";
 

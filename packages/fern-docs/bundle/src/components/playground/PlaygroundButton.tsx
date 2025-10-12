@@ -1,14 +1,12 @@
 "use client";
 
-import type { FC } from "react";
-
-import { Play } from "lucide-react";
-
 import { conformExplorerRoute } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { cn } from "@fern-docs/components/cn";
 import { ButtonLink } from "@fern-docs/components/FernLinkButton";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { Play } from "lucide-react";
+import type { FC } from "react";
 
 import { usePlaygroundSettings } from "../hooks/usePlaygroundSettings";
 

@@ -1,12 +1,10 @@
 "use client";
 
-import type { CSSProperties } from "react";
-import type React from "react";
-
 import { useIsDesktop } from "@fern-ui/react-commons";
-
-import { FernButtonGroup } from "../FernButton";
+import type React from "react";
+import type { CSSProperties } from "react";
 import { cn } from "../cn";
+import { FernButtonGroup } from "../FernButton";
 import { MobileMenuButton } from "../header/MobileButtons";
 
 export function AbstractHeaderContent({

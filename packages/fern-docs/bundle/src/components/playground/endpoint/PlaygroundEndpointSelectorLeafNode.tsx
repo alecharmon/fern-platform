@@ -1,15 +1,13 @@
 "use client";
 
-import { type ReactElement, forwardRef } from "react";
-
-import { escapeRegExp } from "es-toolkit/string";
-
 import { conformExplorerRoute } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { HttpMethodBadge } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
-import { HttpMethodBadge } from "@fern-docs/components/badges";
+import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { escapeRegExp } from "es-toolkit/string";
+import { forwardRef, type ReactElement } from "react";
 
 interface PlaygroundEndpointSelectorLeafNodeProps {
     node: FernNavigation.EndpointNode | FernNavigation.WebSocketNode;

@@ -1,12 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React from "react";
-
-import { isEqual } from "es-toolkit/predicate";
-import { atom, useAtom, useSetAtom } from "jotai";
-import { z } from "zod";
-
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { useCurrentVersionId } from "@fern-docs/components/state/navigation";
@@ -25,6 +18,11 @@ import {
     SEARCH_INDEX
 } from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";
+import { isEqual } from "es-toolkit/predicate";
+import { atom, useAtom, useSetAtom } from "jotai";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { z } from "zod";
 
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
@@ -36,8 +34,7 @@ import {
     useIsAskAiEnabled,
     useIsDefaultSearchFilterOn
 } from "@/state/search";
-import { useOpenSearchPanel } from "@/state/search-panel";
-import { searchPanelInitialInputAtom } from "@/state/search-panel";
+import { searchPanelInitialInputAtom, useOpenSearchPanel } from "@/state/search-panel";
 
 import { Feedback } from "./feedback/Feedback";
 import { generateConversationId } from "./generate-conversation-id";

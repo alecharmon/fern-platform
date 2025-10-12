@@ -1,12 +1,10 @@
 "use client";
 
-import React from "react";
-
-import { composeRefs } from "@radix-ui/react-compose-refs";
-import { Slot } from "@radix-ui/react-slot";
-
 import { slugToHref } from "@fern-api/docs-utils";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
+import { composeRefs } from "@radix-ui/react-compose-refs";
+import { Slot } from "@radix-ui/react-slot";
+import React from "react";
 
 import { useApiPageCenterElement } from "./useApiPageCenterElement";
 

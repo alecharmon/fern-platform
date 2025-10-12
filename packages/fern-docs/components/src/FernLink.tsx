@@ -1,12 +1,10 @@
 "use client";
 
+import { conformTrailingSlash } from "@fern-api/docs-utils";
+import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-
-import { ExternalLinkIcon } from "lucide-react";
-import { type UrlObject, format, resolve } from "url";
-
-import { conformTrailingSlash } from "@fern-api/docs-utils";
+import { format, resolve, type UrlObject } from "url";
 
 import { useCurrentPathname } from "./hooks/use-current-pathname";
 import { useDomain } from "./state/domain";

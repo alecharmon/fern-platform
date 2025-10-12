@@ -1,20 +1,18 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import type React from "react";
-import { useEffect, useRef } from "react";
-
-import { useSetAtom } from "jotai";
-
-import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { cn } from "@fern-docs/components/cn";
 import { FERN_COHERE_CONTENT_ID, FERN_FOOTER_ID } from "@fern-docs/components/constants";
+import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useDomain } from "@fern-docs/components/state/domain";
 import { SCROLL_BODY_ATOM } from "@fern-docs/components/state/viewport";
 import { FernHeader } from "@fern-docs/components/theming/fern-header";
 import { MainCtx } from "@fern-docs/components/theming/mobile-menu";
 import { SidebarNav } from "@fern-docs/components/theming/side-nav";
+import { useSetAtom } from "jotai";
+import { useTheme } from "next-themes";
+import type React from "react";
+import { useEffect, useRef } from "react";
 
 import { HeaderTabsRoot } from "@/components/header/HeaderTabsRoot";
 import { SearchPanel } from "@/components/search-panel";

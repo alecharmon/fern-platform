@@ -1,6 +1,5 @@
-import { describe, expect, it } from "vitest";
-
 import type { FernUser } from "@fern-api/docs-auth";
+import { describe, expect, it } from "vitest";
 
 import { hasRequiredRole } from "./TableOfContents";
 

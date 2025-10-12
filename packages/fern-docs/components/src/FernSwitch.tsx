@@ -1,8 +1,7 @@
 "use client";
 
-import type { ReactElement } from "react";
-
 import * as Switch from "@radix-ui/react-switch";
+import type { ReactElement } from "react";
 
 import { cn } from "./cn";
 

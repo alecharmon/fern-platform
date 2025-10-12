@@ -1,13 +1,11 @@
 "use client";
 
-import React from "react";
-
-import { atom, useAtomValue, useSetAtom } from "jotai";
-
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { FernButton } from "@fern-docs/components/FernButton";
 import { cn } from "@fern-docs/components/cn";
 import { FERN_ASK_AI_BUTTON_ICON_ID, FERN_ASK_AI_BUTTON_ID } from "@fern-docs/components/constants";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import React from "react";
 
 import { SparklesIcon } from "@/components/PageActionsDropdownAssets";
 

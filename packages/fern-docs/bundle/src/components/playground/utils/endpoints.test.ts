@@ -1,6 +1,5 @@
-import { describe, expect, it } from "vitest";
-
 import type { PlaygroundState } from "@fern-api/docs-auth";
+import { describe, expect, it } from "vitest";
 
 import { resolveEndpointEnvironmentState } from "./endpoints";
 

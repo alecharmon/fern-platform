@@ -1,9 +1,7 @@
-import type { NextApiRequest } from "next";
-
-import type { IncomingHttpHeaders } from "http";
-
 import { COOKIE_FERN_DOCS_PREVIEW, HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import type { IncomingHttpHeaders } from "http";
+import type { NextApiRequest } from "next";
 
 import { getNextPublicDocsDomain } from "./dev";
 import { cleanHost } from "./util";

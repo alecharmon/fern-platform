@@ -1,1 +1,1 @@
-export { DatabaseServiceImpl, type DatabaseService } from "./DatabaseService";
+export { type DatabaseService, DatabaseServiceImpl } from "./DatabaseService";

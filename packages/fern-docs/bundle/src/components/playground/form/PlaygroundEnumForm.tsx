@@ -1,14 +1,12 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { memo, useMemo } from "react";
-
-import { sortBy } from "es-toolkit/array";
-import { ChevronDown } from "lucide-react";
-
 import type { EnumValue } from "@fern-api/fdr-sdk/api-definition";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { sortBy } from "es-toolkit/array";
+import { ChevronDown } from "lucide-react";
+import dynamic from "next/dynamic";
+import { memo, useMemo } from "react";
 
 const Markdown = dynamic(() => import("@/mdx/components/Markdown").then(({ Markdown }) => Markdown));
 

@@ -1,8 +1,7 @@
 "use client";
 
-import { Fragment } from "react";
-
 import { useIsMobile } from "@fern-ui/react-commons";
+import { Fragment } from "react";
 
 import { cn } from "../cn";
 

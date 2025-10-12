@@ -1,7 +1,6 @@
 import type { TableOfContentsItem } from "@fern-docs/mdx";
-
-import { FernScrollArea } from "../FernScrollArea";
 import { FERN_TOC_ID } from "../constants";
+import { FernScrollArea } from "../FernScrollArea";
 import { TableOfContents } from "../table-of-contents/TableOfContents";
 
 interface TableOfContentsLayoutProps {

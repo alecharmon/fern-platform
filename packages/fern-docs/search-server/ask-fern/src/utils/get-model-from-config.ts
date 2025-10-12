@@ -1,10 +1,9 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createCohere } from "@ai-sdk/cohere";
+import { anthropicApiKey, cohereApiKey } from "@fern-api/docs-server/env-variables";
 import type { LanguageModel } from "ai";
 import { createFallback } from "ai-fallback";
-
-import { anthropicApiKey, cohereApiKey } from "@fern-api/docs-server/env-variables";
 
 type ModelId = "claude-3.5" | "claude-3.7" | "claude-4" | "claude-4.5";
 export type ModelProvider = "cohere" | "bedrock";

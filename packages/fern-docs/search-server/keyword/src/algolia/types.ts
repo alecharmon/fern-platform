@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { AvailabilitySchema } from "@fern-docs/search-utils";
+import { z } from "zod";
 
 // in order of priority:
 export const SEARCHABLE_ATTRIBUTES = [

@@ -1,6 +1,5 @@
-import React from "react";
-
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import React from "react";
 
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 

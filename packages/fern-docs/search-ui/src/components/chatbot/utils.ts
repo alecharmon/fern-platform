@@ -1,8 +1,7 @@
 import type { UIMessage } from "@ai-sdk/react";
+import { isNonNullish } from "@fern-api/ui-core-utils";
 import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from "ai";
 import { z } from "zod";
-
-import { isNonNullish } from "@fern-api/ui-core-utils";
 
 import type { AskFernRecordHit } from "../../types";
 

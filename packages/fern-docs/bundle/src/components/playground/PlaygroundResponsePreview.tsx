@@ -1,8 +1,7 @@
 "use client";
 
-import { type FC, useEffect, useMemo, useRef } from "react";
-
 import { FernSyntaxHighlighter, type ScrollToHandle } from "@fern-docs/components/syntax-highlighter";
+import { type FC, useEffect, useMemo, useRef } from "react";
 
 import type { PlaygroundResponse } from "./types/playgroundResponse";
 

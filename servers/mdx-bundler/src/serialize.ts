@@ -1,3 +1,5 @@
+import { isNonNullish } from "@fern-api/ui-core-utils";
+import { type PluggableList, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
 import type { RehypeShikiOptions } from "@shikijs/rehype";
 import { transformerNotationDiff, transformerNotationFocus, transformerNotationHighlight } from "@shikijs/transformers";
 import { transformerTwoslash } from "@shikijs/twoslash";
@@ -5,13 +7,10 @@ import { bundleMDX } from "mdx-bundler";
 import path from "path";
 import ts from "typescript";
 
-import { isNonNullish } from "@fern-api/ui-core-utils";
-import { type PluggableList, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
-
 import { rehypeShikiDisplayNotation } from "./plugins/display-shiki-notation.js";
 import { conditionalRehypeShiki } from "./plugins/rehype-shiki-twoslash.js";
-import { twoslashRenderer } from "./plugins/twoslashRenderer.js";
 import { twoslasher } from "./plugins/twoslasher.js";
+import { twoslashRenderer } from "./plugins/twoslashRenderer.js";
 
 export interface SerializeMdxResponse {
     code: string;

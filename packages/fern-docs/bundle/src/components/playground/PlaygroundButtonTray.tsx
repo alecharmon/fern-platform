@@ -1,8 +1,7 @@
 "use client";
 
-import type { FC } from "react";
-
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { FC } from "react";
 
 import { PlaygroundButton } from "./PlaygroundButton";
 

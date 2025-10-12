@@ -1,7 +1,3 @@
-import type { MetadataRoute } from "next";
-
-import urljoin from "url-join";
-
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { getDocsDomainApp, getDocsHostApp } from "@fern-api/docs-server/xfernhost/app";
@@ -9,6 +5,8 @@ import { conformTrailingSlash } from "@fern-api/docs-utils";
 import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getCanonicalUrl } from "@fern-docs/edge-config";
+import type { MetadataRoute } from "next";
+import urljoin from "url-join";
 
 import { getFernToken } from "./fern-token";
 

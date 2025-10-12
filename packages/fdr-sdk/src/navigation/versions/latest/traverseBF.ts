@@ -1,8 +1,8 @@
 import { bfs } from "../../../utils/traversers/bfs";
 import type { TraverserVisit } from "../../../utils/traversers/types";
+import { getChildren } from "./getChildren";
 import type { NavigationNode } from "./NavigationNode";
 import type { NavigationNodeParent } from "./NavigationNodeParent";
-import { getChildren } from "./getChildren";
 
 const SKIP = "skip" as const;
 

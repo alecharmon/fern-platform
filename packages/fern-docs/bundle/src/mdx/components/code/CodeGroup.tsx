@@ -1,21 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import type React from "react";
-
-import * as Tabs from "@radix-ui/react-tabs";
-
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
-
-import { HorizontalOverflowMask } from "@/components/HorizontalOverflowMask";
+import * as Tabs from "@radix-ui/react-tabs";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { getLanguageDisplayName } from "@/components/api-reference/examples/code-example";
+import { HorizontalOverflowMask } from "@/components/HorizontalOverflowMask";
 import { useIsDarkCode } from "@/state/dark-code";
 import { useProgrammingLanguage } from "@/state/language";
 
 import { unwrapChildren } from "../../common/unwrap-children";
 import { CodeBlock, toSyntaxHighlighterProps } from "./CodeBlock";
-import { Template, applyTemplates, useTemplate } from "./Template";
+import { applyTemplates, Template, useTemplate } from "./Template";
 
 export function CodeGroup({
     children,

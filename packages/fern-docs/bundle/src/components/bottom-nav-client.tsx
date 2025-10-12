@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React from "react";
-
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
 import { MaybeFernLink } from "@fern-docs/components/FernLink";
 import { Separator } from "@fern-docs/components/Separator";
+
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 export function BottomNavigationClient({
     prev,

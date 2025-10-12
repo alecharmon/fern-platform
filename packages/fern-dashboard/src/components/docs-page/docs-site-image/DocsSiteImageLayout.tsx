@@ -1,8 +1,7 @@
 "use client";
 
-import type React from "react";
-
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type React from "react";
 
 import { HOMEPAGE_SCREENSHOT_HEIGHT, HOMEPAGE_SCREENSHOT_WIDTH } from "@/app/api/homepage-images/constants";
 

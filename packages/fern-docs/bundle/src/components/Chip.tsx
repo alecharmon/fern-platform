@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-
 import { Badge } from "@fern-docs/components/badges";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
+import React from "react";
 
 type ChipProps = {
     name: string;

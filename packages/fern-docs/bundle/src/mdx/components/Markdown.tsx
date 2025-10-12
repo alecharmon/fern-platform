@@ -1,8 +1,7 @@
 "use client";
 
-import { type ReactNode, memo } from "react";
-
 import { Prose } from "@fern-docs/components/mdx/prose";
+import { memo, type ReactNode } from "react";
 
 import { MdxContent } from "./MdxContent";
 

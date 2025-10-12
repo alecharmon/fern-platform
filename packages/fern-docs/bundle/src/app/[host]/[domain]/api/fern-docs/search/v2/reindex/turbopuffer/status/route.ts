@@ -1,7 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
-
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { createJobStatusResponse } from "@/jobs";
 import { getMessageStatus } from "@/server/queue";

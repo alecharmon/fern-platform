@@ -1,6 +1,5 @@
-import * as prisma from "@prisma/client";
-
 import { type APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
+import * as prisma from "@prisma/client";
 
 import type {
     ChangelogEntry,

@@ -6,12 +6,11 @@ import { DynamicSnippetsGenerator as PHP } from "@fern-api/php-dynamic-snippets"
 import { DynamicSnippetsGenerator as Python } from "@fern-api/python-dynamic-snippets";
 import { DynamicSnippetsGenerator as Ruby } from "@fern-api/ruby-dynamic-snippets";
 import { DynamicSnippetsGenerator as TypeScript } from "@fern-api/typescript-dynamic-snippets";
-
+import type { AbstractDynamicSnippetsGenerator } from "./core/AbstractDynamicSnippetsGenerator";
+import { HttpEndpointReferenceParser } from "./core/HttpEndpointReferenceParser";
 import { EndpointSnippetGenerator } from "./EndpointSnippetGenerator";
 import type { Language } from "./Language";
 import type { Options } from "./Options";
-import type { AbstractDynamicSnippetsGenerator } from "./core/AbstractDynamicSnippetsGenerator";
-import { HttpEndpointReferenceParser } from "./core/HttpEndpointReferenceParser";
 
 export class EndpointProvider {
     private config: generatorExec.config.GeneratorConfig;

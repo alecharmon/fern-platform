@@ -1,14 +1,12 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-import { getDocsUrlMetadata, postToSlack } from "@fern-api/docs-server";
-import { isLocal } from "@fern-api/docs-server";
+import { getDocsUrlMetadata, isLocal, postToSlack } from "@fern-api/docs-server";
 import { track } from "@fern-api/docs-server/analytics/posthog";
 import { algoliaAppId, algoliaWriteApiKey, fdrEnvironment, fernToken_admin } from "@fern-api/docs-server/env-variables";
 import { Gate, withBasicTokenAnonymous } from "@fern-api/docs-server/withRbac";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { slugToHref, withoutStaging } from "@fern-api/docs-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
-import { SEARCH_INDEX, algoliaIndexSettingsTask, algoliaIndexerTask } from "@fern-docs/search-keyword";
+import { algoliaIndexerTask, algoliaIndexSettingsTask, SEARCH_INDEX } from "@fern-docs/search-keyword";
+import { type NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 800; // 13 minutes
 

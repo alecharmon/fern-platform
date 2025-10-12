@@ -1,22 +1,20 @@
 "use client";
 
+import { useEventCallback } from "@fern-ui/react-commons";
+
+import { composeRefs } from "@radix-ui/react-compose-refs";
+import { Minus, Plus } from "lucide-react";
 import {
     type ComponentProps,
-    type MouseEventHandler,
     forwardRef,
+    type MouseEventHandler,
     useCallback,
     useEffect,
     useRef,
     useState
 } from "react";
-
-import { composeRefs } from "@radix-ui/react-compose-refs";
-import { Minus, Plus } from "lucide-react";
-
-import { useEventCallback } from "@fern-ui/react-commons";
-
-import { FernButton } from "./FernButton";
 import { cn } from "./cn";
+import { FernButton } from "./FernButton";
 
 export interface FernNumericInputProps extends ComponentProps<"input"> {
     inputClassName?: string;

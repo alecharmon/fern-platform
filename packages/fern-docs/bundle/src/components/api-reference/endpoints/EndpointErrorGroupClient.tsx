@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
-
 import type { ErrorResponse } from "@fern-api/fdr-sdk/api-definition";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
+import React from "react";
 
 import { useEndpointContext } from "./EndpointContext";
 import { EndpointErrorClient } from "./EndpointErrorClient";

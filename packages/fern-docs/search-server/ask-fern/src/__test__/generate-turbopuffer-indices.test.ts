@@ -1,11 +1,9 @@
+import { ApiDefinition, type DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
 import { mapValues } from "es-toolkit/object";
-import { readdir } from "fs/promises";
-import { writeFile } from "fs/promises";
+import { readdir, writeFile } from "fs/promises";
 import { join } from "path";
 import tmp from "tmp-promise";
 import { expect, test } from "vitest";
-
-import { ApiDefinition, type DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
 
 import { createTurbopufferRecords } from "../turbopuffer/records/create-turbopuffer-records";
 

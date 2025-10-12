@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useMemo } from "react";
-
-import type { SetStateAction } from "jotai";
-import { RESET } from "jotai/utils";
-
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { useDeepCompareMemoize } from "@fern-ui/react-commons";
+import type { SetStateAction } from "jotai";
+import { RESET } from "jotai/utils";
+import React, { useMemo } from "react";
 
 import { getProgrammingLanguage, useDefaultProgrammingLanguage, useProgrammingLanguage } from "@/state/language";
 

@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
+import { useEffect, useState } from "react";
 
 export function useViewportSize(): { width: number; height: number } {
     const [width, setViewportWidth] = useState<number>(0);

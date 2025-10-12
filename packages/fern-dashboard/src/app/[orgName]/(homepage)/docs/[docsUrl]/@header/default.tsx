@@ -1,8 +1,8 @@
 import { GlobeIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
 

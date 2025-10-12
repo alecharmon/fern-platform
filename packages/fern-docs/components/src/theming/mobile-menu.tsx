@@ -1,8 +1,6 @@
 "use client";
 
-import React from "react";
-import { RemoveScroll } from "react-remove-scroll";
-
+import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { Portal } from "@radix-ui/react-portal";
 import { compact } from "es-toolkit/array";
 import {
@@ -13,8 +11,8 @@ import {
     useMotionValueEvent,
     useTransform
 } from "motion/react";
-
-import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
+import React from "react";
+import { RemoveScroll } from "react-remove-scroll";
 
 import { cn } from "../cn";
 import { FERN_HEADER_ID, FERN_SIDEBAR_ID, FERN_SIDEBAR_OVERLAY_ID } from "../constants";

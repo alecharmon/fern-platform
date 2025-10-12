@@ -1,7 +1,7 @@
 import type { ChangelogMonthNode, ChangelogNode, ChangelogYearNode } from ".";
 import type { NavigationNode } from "./NavigationNode";
-import { type NavigationNodeApiLeaf, isApiLeaf } from "./NavigationNodeApiLeaf";
-import { type NavigationNodeWithMarkdown, hasMarkdown } from "./NavigationNodeMarkdown";
+import { isApiLeaf, type NavigationNodeApiLeaf } from "./NavigationNodeApiLeaf";
+import { hasMarkdown, type NavigationNodeWithMarkdown } from "./NavigationNodeMarkdown";
 
 /**
  * A navigation node that represents a visitable page in the documentation

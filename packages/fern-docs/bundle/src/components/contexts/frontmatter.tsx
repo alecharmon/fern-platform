@@ -1,8 +1,7 @@
 "use client";
 
-import { createContext, useContext } from "react";
-
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
+import { createContext, useContext } from "react";
 
 const FrontmatterContext = createContext<FernDocs.Frontmatter>({} as FernDocs.Frontmatter);
 

@@ -1,15 +1,13 @@
 "use client";
 
-import { ChevronDown, ChevronsUpDown, Lock, Tag } from "lucide-react";
-
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { useIsDesktop } from "@fern-ui/react-commons";
-
-import { FernLinkDropdown } from "../FernLinkDropdown";
-import { FernSelectionItem } from "../FernSelectionItem";
+import { ChevronDown, ChevronsUpDown, Lock, Tag } from "lucide-react";
 import { type Availability, AvailabilityBadge, AvailabilityFullyQualifiedDisplayNames } from "../badges";
 import { cn } from "../cn";
+import { FernLinkDropdown } from "../FernLinkDropdown";
+import { FernSelectionItem } from "../FernSelectionItem";
 import { useCurrentVersionId, useCurrentVersionSlug } from "../state/navigation";
 
 export interface VersionDropdownItem {

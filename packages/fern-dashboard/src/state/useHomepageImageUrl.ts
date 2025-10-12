@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import { useQuery } from "@tanstack/react-query";
 
 import type { Theme } from "@/app/api/homepage-images/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
@@ -8,7 +7,7 @@ import { convertFdrDocsSiteUrlToDocsUrl } from "@/utils/getDocsSiteUrl";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { convertQueryResultToLoadable } from "./convertQueryResultToLoadable";
-import { ReactQueryKey, type inferQueryData } from "./queryKeys";
+import { type inferQueryData, ReactQueryKey } from "./queryKeys";
 
 export function useHomepageImageUrl({ docsSite, theme }: { docsSite: FdrAPI.dashboard.DocsSite; theme: Theme }) {
     const orgName = useOrgNameFromPathname();

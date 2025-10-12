@@ -1,9 +1,7 @@
+import { isSelfHosted } from "@fern-api/docs-server";
+import { atom, useAtom } from "jotai";
 import { useCallback } from "react";
 import { useSearchBox as useAlgoliaSearchBox } from "react-instantsearch";
-
-import { atom, useAtom } from "jotai";
-
-import { isSelfHosted } from "@fern-api/docs-server";
 
 /**
  * Global atom to persist the Meilisearch query across the app.

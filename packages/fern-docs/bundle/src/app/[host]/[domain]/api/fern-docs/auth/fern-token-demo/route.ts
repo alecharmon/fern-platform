@@ -1,13 +1,17 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
-import { SignJWT } from "jose";
-
-import { getDocsDomainEdge, getJwtSecretKey, isLocal, isSelfHosted, withSecureCookie } from "@fern-api/docs-server";
-import { safeUrl } from "@fern-api/docs-server";
-import { preferPreview } from "@fern-api/docs-server";
+import {
+    getDocsDomainEdge,
+    getJwtSecretKey,
+    isLocal,
+    isSelfHosted,
+    preferPreview,
+    safeUrl,
+    withSecureCookie
+} from "@fern-api/docs-server";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getApiKeyInjectionDemoConfig } from "@fern-docs/edge-config";
+import { SignJWT } from "jose";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { FernNextResponse } from "@/server/FernNextResponse";
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";

@@ -1,15 +1,14 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { useCallback, useEffect, useState } from "react";
+import { type FacetsResponse, SEARCH_INDEX } from "@fern-docs/search-keyword";
+import { useIsMobile } from "@fern-ui/react-commons";
 
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useState } from "react";
 import useSWR from "swr";
 import { z } from "zod";
-
-import { type FacetsResponse, SEARCH_INDEX } from "@fern-docs/search-keyword";
-import { useIsMobile } from "@fern-ui/react-commons";
 
 import {
     AlgoliaSearchClientRoot,

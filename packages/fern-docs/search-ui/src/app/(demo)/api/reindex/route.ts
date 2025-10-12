@@ -1,9 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-import { z } from "zod";
-
 import { runReindexAlgolia } from "@fern-api/docs-server/run-reindex-algolia";
 import { runReindexTurbopuffer } from "@fern-api/docs-server/run-reindex-turbopuffer";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 const BodySchema = z.object({
     domain: z.string()

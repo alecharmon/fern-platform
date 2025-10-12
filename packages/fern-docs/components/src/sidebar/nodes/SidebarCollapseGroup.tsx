@@ -1,9 +1,8 @@
 "use client";
 
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type React from "react";
 import type { ReactNode } from "react";
-
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import { useIsChildSelected, useIsExpanded, useToggleSidebarNode } from "../../state/navigation";

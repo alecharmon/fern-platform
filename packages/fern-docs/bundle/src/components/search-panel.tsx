@@ -1,16 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React from "react";
-
-import { isEqual } from "es-toolkit/predicate";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { z } from "zod";
-
 import { cn } from "@fern-docs/components/cn";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { AlgoliaSearchClientRoot, DesktopAskAiPanel, SEARCH_INDEX } from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";
+import { isEqual } from "es-toolkit/predicate";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { z } from "zod";
 
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
@@ -20,12 +18,12 @@ import {
     pageContextAtom,
     searchPanelInitialInputAtom,
     searchPanelInitializedAtom,
+    searchPanelOpenAtom,
     useIsSearchPanelOpen,
     useIsSearchPanelResizing,
     usePageContext,
     useSetSearchPanelResizing
 } from "@/state/search-panel";
-import { searchPanelOpenAtom } from "@/state/search-panel";
 
 import { Feedback } from "./feedback/Feedback";
 import { generateConversationId } from "./generate-conversation-id";

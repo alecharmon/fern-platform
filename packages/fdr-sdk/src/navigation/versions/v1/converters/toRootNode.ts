@@ -4,8 +4,8 @@ import { FernNavigation } from "../../../..";
 import { APIV1Read, type DocsV2Read } from "../../../../client/types";
 import { getFrontmatter } from "../../../utils/getFrontmatter";
 import { getNoIndexFromFrontmatter } from "../../../utils/getNoIndexFromFrontmatter";
-import { NavigationConfigConverter } from "./NavigationConfigConverter";
 import { getFullSlugFromFrontmatter } from "./getFullSlugFromFrontmatter";
+import { NavigationConfigConverter } from "./NavigationConfigConverter";
 
 export function toRootNode(
     response: DocsV2Read.LoadDocsForUrlResponse,

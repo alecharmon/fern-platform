@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
-
 import { atom, useAtom } from "jotai";
+import { useCallback } from "react";
 
 import type { WebSocketMessage } from "@/components/api-reference/websockets/WebSocketMessages";
 

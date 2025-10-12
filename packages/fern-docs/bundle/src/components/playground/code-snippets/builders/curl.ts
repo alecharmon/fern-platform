@@ -1,7 +1,7 @@
 import {
+    convertToCurl,
     type SnippetHttpRequest,
-    type SnippetHttpRequestBodyFormValue,
-    convertToCurl
+    type SnippetHttpRequestBodyFormValue
 } from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 

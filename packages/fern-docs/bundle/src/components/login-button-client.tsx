@@ -1,11 +1,9 @@
 "use client";
 
-import type { ComponentProps } from "react";
-
-import { LogInIcon, LogOutIcon } from "lucide-react";
-
 import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 import { WithReturnTo } from "@fern-docs/components/header/WithReturnTo";
+import { LogInIcon, LogOutIcon } from "lucide-react";
+import type { ComponentProps } from "react";
 
 export function LoginButtonClient({
     authed,

@@ -1,8 +1,7 @@
 "use client";
 
-import { type FC, type PropsWithChildren, type ReactNode, useEffect } from "react";
-
 import { type LDContext, LDProvider, useLDClient } from "launchdarkly-react-client-sdk";
+import { type FC, type PropsWithChildren, type ReactNode, useEffect } from "react";
 import useSWR from "swr";
 
 import { useFernUser } from "../state/fern-user";

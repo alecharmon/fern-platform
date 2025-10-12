@@ -1,14 +1,12 @@
 "use client";
 
-import { ChevronDown, ChevronsUpDown } from "lucide-react";
-
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { useIsDesktop } from "@fern-ui/react-commons";
-
+import { ChevronDown, ChevronsUpDown } from "lucide-react";
+import { cn } from "../cn";
 import { FernDropdown } from "../FernDropdown";
 import { FernSelectionItem } from "../FernSelectionItem";
-import { cn } from "../cn";
 import { useCurrentProductId, useCurrentProductSlug } from "../state/navigation";
 
 export interface ProductDropdownItem {

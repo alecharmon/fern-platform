@@ -1,18 +1,16 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
-import { WebflowClient } from "webflow-api";
-
-import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { getAllowedRedirectUrls } from "@fern-api/docs-server/auth/allowed-redirects";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
+import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { withoutStaging } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
+import { WebflowClient } from "webflow-api";
 
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 

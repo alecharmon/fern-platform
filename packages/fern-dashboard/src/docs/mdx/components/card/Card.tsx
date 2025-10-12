@@ -1,16 +1,14 @@
-import { isValidElement, useEffect, useRef } from "react";
-
-import { FaIcon } from "@fern-docs/components/fa-icon";
-import { FernCard } from "@fern-docs/components/FernCard";
 import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
-
+import { FernCard } from "@fern-docs/components/FernCard";
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { isValidElement, useEffect, useRef } from "react";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { DisableFernAnchor } from "@/docs/components/FernAnchor";
 import { FernLinkCard } from "@/docs/components/FernLinkCard";
 

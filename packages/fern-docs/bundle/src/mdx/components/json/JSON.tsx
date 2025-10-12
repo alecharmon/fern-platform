@@ -1,9 +1,8 @@
-import dynamic from "next/dynamic";
-import type React from "react";
-
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { useIsMobile } from "@fern-ui/react-commons";
+import dynamic from "next/dynamic";
+import type React from "react";
 
 import { useResolvedTheme } from "@/hooks/use-theme";
 

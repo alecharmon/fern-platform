@@ -1,20 +1,18 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import type React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
 import { useRouter } from "@bprogress/next/app";
-
 import {
-    type SectionNodeWithTraversalContext,
-    type SerializableFoundNode,
     constructEditorSlug,
     createMdxFrontmatter,
     getAllSectionsFromSidebarRootNode,
     getClientPageDefaultFilename,
+    type SectionNodeWithTraversalContext,
+    type SerializableFoundNode,
     useNavigation
 } from "@fern-docs/components/navigation";
+import { useParams } from "next/navigation";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";

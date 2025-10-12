@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-
+// --- Tiptap UI ---
+import type { UseMentionTriggerConfig } from "@/components/tiptap-ui/mention-trigger-button";
+import { MENTION_TRIGGER_SHORTCUT_KEY, useMentionTrigger } from "@/components/tiptap-ui/mention-trigger-button";
 import { Badge } from "@/components/tiptap-ui-primitive/badge";
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
 import { Button } from "@/components/tiptap-ui-primitive/button";
-// --- Tiptap UI ---
-import type { UseMentionTriggerConfig } from "@/components/tiptap-ui/mention-trigger-button";
-import { MENTION_TRIGGER_SHORTCUT_KEY, useMentionTrigger } from "@/components/tiptap-ui/mention-trigger-button";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 // --- Lib ---

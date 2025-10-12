@@ -1,14 +1,12 @@
-import type { Metadata } from "next";
-
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getCanonicalUrl } from "@fern-docs/edge-config";
-import { getSeoDisabled } from "@fern-docs/edge-config";
+import { getCanonicalUrl, getSeoDisabled } from "@fern-docs/edge-config";
 import { getFrontmatter, markdownToString } from "@fern-docs/mdx";
+import type { Metadata } from "next";
 
 import { toImageDescriptor } from "@/app/seo";
 import { createFindNode } from "@/server/find-node";

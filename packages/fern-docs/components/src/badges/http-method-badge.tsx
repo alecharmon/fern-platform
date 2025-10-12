@@ -1,8 +1,7 @@
-import { forwardRef } from "react";
+import { GrpcMethod, type HttpOrWssOrGrpc } from "@fern-api/docs-utils";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-import { GrpcMethod, type HttpOrWssOrGrpc } from "@fern-api/docs-utils";
+import { forwardRef } from "react";
 
 import type { UIColor } from "../colors";
 import { FaIcon } from "../fa-icon";

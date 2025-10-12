@@ -4,10 +4,10 @@
 import React from "react";
 
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
 
 import type { PathPart } from "@fern-api/fdr-sdk/api-definition";
 import { EnvironmentId, PropertyKey } from "@fern-api/fdr-sdk/navigation";
+import { render, screen } from "@testing-library/react";
 
 import { EndpointUrl } from "./EndpointUrl";
 

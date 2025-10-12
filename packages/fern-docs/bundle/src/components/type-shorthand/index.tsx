@@ -1,7 +1,3 @@
-import type { ReactNode } from "react";
-
-import { uniq } from "es-toolkit/array";
-
 import {
     type PrimitiveType,
     type TypeDefinition,
@@ -9,6 +5,8 @@ import {
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { uniq } from "es-toolkit/array";
+import type { ReactNode } from "react";
 
 import { NullableDropdown } from "./NullableDropdown";
 

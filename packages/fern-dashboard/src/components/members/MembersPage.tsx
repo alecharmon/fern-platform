@@ -1,9 +1,9 @@
 "use client";
 
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import { useCurrentOrganization } from "@/state/useOrganizations";
 import { useOrgInvitations } from "@/state/useOrgInvitations";
 import { useOrgMembers } from "@/state/useOrgMembers";
-import { useCurrentOrganization } from "@/state/useOrganizations";
 
 import { PageHeader } from "../layout/PageHeader";
 import { InviteUserDialog } from "./InviteUserDialog";

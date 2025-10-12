@@ -1,11 +1,9 @@
+import { isPreviewDomain, withoutStaging } from "@fern-api/docs-utils";
+import { type APIResponse, FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-
 import { Agent, setGlobalDispatcher } from "undici";
-
-import { isPreviewDomain, withoutStaging } from "@fern-api/docs-utils";
-import { type APIResponse, FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";

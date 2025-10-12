@@ -1,6 +1,5 @@
-import type { PrismaClient } from "@prisma/client";
-
 import type { APIV1Db, FdrAPI } from "@fern-api/fdr-sdk";
+import type { PrismaClient } from "@prisma/client";
 
 import { readBuffer } from "../../util";
 

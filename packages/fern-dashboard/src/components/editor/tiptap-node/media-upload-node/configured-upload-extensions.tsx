@@ -1,6 +1,5 @@
-import { useParams } from "next/navigation";
-
 import FileHandler from "@tiptap/extension-file-handler";
+import { useParams } from "next/navigation";
 
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";

@@ -1,11 +1,10 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, createContext, useContext, useMemo } from "react";
+import { useEventCallback } from "@fern-ui/react-commons";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import { createContext, type Dispatch, type SetStateAction, useContext, useMemo } from "react";
 import { noop } from "ts-essentials";
-
-import { useEventCallback } from "@fern-ui/react-commons";
 
 const CommandUxContext = createContext<{
     // focus: (opts?: { scrollToTop?: boolean }) => void;

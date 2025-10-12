@@ -1,15 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { memo, useCallback, useMemo } from "react";
-
-import { ChevronDown } from "lucide-react";
-
 import { type DiscriminatedUnionType, type TypeDefinition, unwrapObjectType } from "@fern-api/fdr-sdk/api-definition";
 import { titleCase } from "@fern-api/ui-core-utils";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
+import { ChevronDown } from "lucide-react";
+import dynamic from "next/dynamic";
+import { memo, useCallback, useMemo } from "react";
 
 import { castToRecord, getEmptyValueForObjectProperties } from "../utils";
 import { PlaygroundObjectPropertiesForm } from "./PlaygroundObjectPropertyForm";

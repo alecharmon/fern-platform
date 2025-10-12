@@ -2,9 +2,9 @@ import "server-only";
 
 import {
     type AlgoliaIndexerTaskResponse,
-    SEARCH_INDEX,
+    algoliaIndexerTask,
     algoliaIndexSettingsTask,
-    algoliaIndexerTask
+    SEARCH_INDEX
 } from "@fern-docs/search-keyword";
 
 import { algoliaAppId, algoliaWriteApiKey, fdrEnvironment, fernToken_admin } from "./env-variables";

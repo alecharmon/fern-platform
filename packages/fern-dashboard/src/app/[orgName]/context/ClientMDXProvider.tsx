@@ -1,8 +1,7 @@
 "use client";
 
-import type React from "react";
-
 import { MDXProvider } from "@mdx-js/react";
+import type React from "react";
 
 import { InterceptedChildren } from "@/components/editor/editor-component/EditorComponentChildrenContext";
 import { MDX_COMPONENTS } from "@/docs/mdx/components";

@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
-
 import { HttpMethodOrder } from "@fern-api/docs-utils";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 
 import { HttpMethodBadge } from "./http-method-badge";
 

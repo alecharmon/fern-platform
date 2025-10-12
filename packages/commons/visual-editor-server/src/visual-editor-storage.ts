@@ -1,6 +1,6 @@
 import type { DocsV2Read } from "@fern-api/fdr-sdk";
 
-import { type UnzippedEditorDocument, mongoClient } from "./mongodb-client";
+import { mongoClient, type UnzippedEditorDocument } from "./mongodb-client";
 
 export class VisualEditorStorage {
     async storeFdrSnapshot(

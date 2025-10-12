@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import { isomorphicRequestIdleCallback, useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
+import React from "react";
 
 import { FERN_SIDEBAR_SCROLL_AREA_ID } from "../constants";
 import { useIsSelectedSidebarNode } from "../state/navigation";

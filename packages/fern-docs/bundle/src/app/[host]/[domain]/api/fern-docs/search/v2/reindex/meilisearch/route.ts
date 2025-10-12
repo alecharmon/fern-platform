@@ -1,12 +1,10 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-import { MeiliSearch } from "meilisearch";
-
 import { fdrEnvironment, meilisearchApiKey, meilisearchOrigin } from "@fern-api/docs-server/env-variables";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { withoutStaging } from "@fern-api/docs-utils";
 import { createAlgoliaRecords } from "@fern-docs/search-keyword";
 import { loadDocsWithUrl } from "@fern-docs/search-utils";
+import { MeiliSearch } from "meilisearch";
+import { type NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 800; // 13 minutes
 

@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import { isEqual } from "es-toolkit/predicate";
+import React from "react";
 import useSWRImmutable from "swr/immutable";
 
 import { getIconUrl, parseSvg } from "./util/fa";

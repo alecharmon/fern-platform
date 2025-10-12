@@ -1,9 +1,7 @@
-import React from "react";
-
 import * as Collapsible from "@radix-ui/react-collapsible";
-
-import { useFernCollapseOverflow } from "../FernCollapse";
+import React from "react";
 import { cn } from "../cn";
+import { useFernCollapseOverflow } from "../FernCollapse";
 
 export function CollapsibleSidebarGroup({
     open,

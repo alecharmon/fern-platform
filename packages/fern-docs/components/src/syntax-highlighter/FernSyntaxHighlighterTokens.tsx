@@ -1,17 +1,15 @@
 "use client";
 
-import { forwardRef, memo, useImperativeHandle, useMemo, useRef } from "react";
+import { parseStringStyle, visit } from "@fern-docs/mdx";
 
 import { isEqual } from "es-toolkit/predicate";
 import type { Element } from "hast";
-
-import { parseStringStyle, visit } from "@fern-docs/mdx";
-
-import { FernScrollArea } from "../FernScrollArea";
+import { forwardRef, memo, useImperativeHandle, useMemo, useRef } from "react";
 import { cn } from "../cn";
-import { HastToJSX } from "./HastToJsx";
+import { FernScrollArea } from "../FernScrollArea";
 import type { HighlightedTokens } from "./fernShiki";
-import { type HighlightLine, flattenHighlightLines, getMaxHeight } from "./utils";
+import { HastToJSX } from "./HastToJsx";
+import { flattenHighlightLines, getMaxHeight, type HighlightLine } from "./utils";
 
 export interface ScrollToHandle {
     scrollTo: (options: ScrollToOptions) => void;

@@ -9,10 +9,10 @@ import { isProduction } from "@/utils/environment";
 
 import type { MaybeErrorResponse } from "../../utils/MaybeErrorResponse";
 import {
+    getHomepageImagesS3BucketName,
     HOMEPAGE_SCREENSHOT_HEIGHT,
     HOMEPAGE_SCREENSHOT_WIDTH,
-    IMAGE_FILETYPE,
-    getHomepageImagesS3BucketName
+    IMAGE_FILETYPE
 } from "../constants";
 import { getS3KeyForHomepageScreenshot } from "../getS3KeyForHomepageScreenshot";
 import type { Theme } from "../types";

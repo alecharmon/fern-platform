@@ -1,15 +1,13 @@
 "use client";
 
-import React from "react";
-
-import { composeEventHandlers } from "@radix-ui/primitive";
-import { atom, useAtomValue, useSetAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
-
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { FERN_SEARCH_BUTTON_ID } from "@fern-docs/components/constants";
 import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/desktop-search-button";
+import { composeEventHandlers } from "@radix-ui/primitive";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
+import React from "react";
 
 export const searchDialogOpenAtom = atom(false);
 export const searchInitializedAtom = atom(false);

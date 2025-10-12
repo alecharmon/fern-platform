@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { isomorphicRequestAnimationFrame } from "@fern-ui/react-commons";
 
 import { noop } from "es-toolkit/function";
+import { useCallback, useEffect, useRef, useState } from "react";
 import fixWebmDuration from "webm-duration-fix";
-
-import { isomorphicRequestAnimationFrame } from "@fern-ui/react-commons";
 
 interface AudioRecorderState {
     isRecording: boolean;

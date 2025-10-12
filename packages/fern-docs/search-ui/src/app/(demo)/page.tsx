@@ -1,8 +1,7 @@
 import "server-only";
 
-import { Suspense } from "react";
-
 import { algoliaAppId } from "@fern-api/docs-server/env-variables";
+import { Suspense } from "react";
 
 import { DesktopInstantSearchWrapper } from "./wrapper";
 

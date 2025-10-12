@@ -1,10 +1,9 @@
 "use client";
 
-import { type PropsWithChildren, type ReactNode, createContext, useContext, useMemo } from "react";
+import type { FacetsResponse } from "@fern-docs/search-keyword";
 
 import { MeiliSearch } from "meilisearch";
-
-import type { FacetsResponse } from "@fern-docs/search-keyword";
+import { createContext, type PropsWithChildren, type ReactNode, useContext, useMemo } from "react";
 
 import { FacetFiltersProvider } from "./FacetFiltersProvider";
 

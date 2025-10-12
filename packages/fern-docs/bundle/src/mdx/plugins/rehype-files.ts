@@ -1,5 +1,3 @@
-import { walk } from "estree-walker";
-
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { Hast, MdxJsxAttribute, MdxJsxExpressionAttribute, Unified } from "@fern-docs/mdx";
 import {
@@ -9,6 +7,7 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { walk } from "estree-walker";
 
 export interface RehypeFilesOptions {
     files?: Record<string, FileData>;

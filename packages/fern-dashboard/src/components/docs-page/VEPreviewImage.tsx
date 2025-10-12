@@ -1,12 +1,11 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 
 import { useIsFirstClientSideRender } from "@/utils/useIsFirstClientSideRender";
-
-import veDark from "../../../public/ve-empty-dark.avif";
 import veLight from "../../../public/ve_empty.avif";
+import veDark from "../../../public/ve-empty-dark.avif";
 
 export function VEPreviewImage({ className }: { className?: string }) {
     const { resolvedTheme = "light" } = useTheme();

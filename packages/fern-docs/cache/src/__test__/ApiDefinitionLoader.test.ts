@@ -1,11 +1,11 @@
 import { APIV1Read } from "@fern-api/fdr-sdk";
 import {
     ApiDefinitionId,
+    convertToCurl,
     type EndpointDefinition,
     EndpointId,
     type ExampleEndpointCall,
     PropertyKey,
-    convertToCurl,
     toSnippetHttpRequest
 } from "@fern-api/fdr-sdk/api-definition";
 

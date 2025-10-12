@@ -1,13 +1,36 @@
 import "server-only";
 
-import { after } from "next/server";
-
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { isLocal } from "@fern-api/docs-server/isLocal";
+import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { postToSlack } from "@fern-api/docs-server/slack";
+import { isDevelopment, isPreviewDomain } from "@fern-api/docs-utils";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
+import type * as FernDocs from "@fern-api/fdr-sdk/docs";
+import {
+    customHeadingHandler,
+    type Hast,
+    type PluggableList,
+    sanitizeBreaks,
+    sanitizeMdxExpression
+} from "@fern-docs/mdx";
+import {
+    rehypeAcornErrorBoundary,
+    rehypeCodeBlock,
+    rehypeExpressionToMd,
+    rehypeMdxClassStyle,
+    rehypeSlug,
+    rehypeToc,
+    remarkInjectEsm,
+    remarkSanitizeAcorn
+} from "@fern-docs/mdx/plugins";
 import { kv } from "@vercel/kv";
 import { createHash } from "crypto";
 import { mapKeys } from "es-toolkit/object";
 import fs from "fs";
 import { gracefulify } from "graceful-fs";
 import { bundleMDX } from "mdx-bundler";
+import { after } from "next/server";
 import path from "path";
 import rehypeKatex from "rehype-katex";
 import remarkFrontmatter from "remark-frontmatter";
@@ -18,37 +41,11 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import remarkSmartypants from "remark-smartypants";
 import remarkSqueezeParagraphs from "remark-squeeze-paragraphs";
 import { noop } from "ts-essentials";
-
-import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
-import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-import { postToSlack } from "@fern-api/docs-server/slack";
-import { isDevelopment, isPreviewDomain } from "@fern-api/docs-utils";
-import type { FileData } from "@fern-api/docs-utils/types/file-data";
-import type * as FernDocs from "@fern-api/fdr-sdk/docs";
-import {
-    type Hast,
-    type PluggableList,
-    customHeadingHandler,
-    sanitizeBreaks,
-    sanitizeMdxExpression
-} from "@fern-docs/mdx";
-import {
-    rehypeAcornErrorBoundary,
-    rehypeExpressionToMd,
-    rehypeMdxClassStyle,
-    rehypeSlug,
-    rehypeToc,
-    remarkInjectEsm,
-    remarkSanitizeAcorn
-} from "@fern-docs/mdx/plugins";
-
 import { getMDXExport } from "../get-mdx-export";
 import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested-headers";
 import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
-import { rehypeCodeBlock } from "@fern-docs/mdx/plugins";
 import { rehypeCollectJsx } from "../plugins/rehype-collect-jsx";
 import { rehypeEndpointExampleSnippets } from "../plugins/rehype-endpoint-example-snippets";
 import { rehypeEndpointSchemaSnippets } from "../plugins/rehype-endpoint-schema-snippet";

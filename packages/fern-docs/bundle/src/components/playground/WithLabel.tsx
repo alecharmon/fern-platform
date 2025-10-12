@@ -1,18 +1,16 @@
-import type { FC, PropsWithChildren, ReactNode } from "react";
-
-import { HelpCircle, X } from "lucide-react";
-
 import {
     type ObjectProperty,
     type TypeDefinition,
+    unwrapReference,
     type WithAvailability,
-    type WithDescription,
-    unwrapReference
+    type WithDescription
 } from "@fern-api/fdr-sdk/api-definition";
+import { AvailabilityBadge } from "@fern-docs/components/badges";
+import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
-import { cn } from "@fern-docs/components/cn";
-import { AvailabilityBadge } from "@fern-docs/components/badges";
+import { HelpCircle, X } from "lucide-react";
+import type { FC, PropsWithChildren, ReactNode } from "react";
 
 import { Markdown } from "@/mdx/components/Markdown";
 

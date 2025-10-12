@@ -1,10 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { type FC, memo, useCallback, useEffect, useMemo, useState } from "react";
-
-import { PlusCircle } from "lucide-react";
-
 import {
     type ObjectProperty,
     type TypeDefinition,
@@ -12,10 +7,13 @@ import {
     type TypeReference,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
+import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
-import { cn } from "@fern-docs/components/cn";
 import { useBooleanState } from "@fern-ui/react-commons";
+import { PlusCircle } from "lucide-react";
+import dynamic from "next/dynamic";
+import { type FC, memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { withErrorBoundary } from "@/components/error-boundary";
 

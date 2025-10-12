@@ -1,10 +1,3 @@
-import { notFound } from "next/navigation";
-import type { NextRequest } from "next/server";
-
-import { getEnv } from "@vercel/functions";
-import { kv } from "@vercel/kv";
-import { uniq } from "es-toolkit/array";
-
 import { getMetadata } from "@fern-api/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
@@ -15,6 +8,11 @@ import {
     FERN_DOCS_STAGING_BUILDWITHFERN_COM,
     withoutStaging
 } from "@fern-api/docs-utils";
+import { getEnv } from "@vercel/functions";
+import { kv } from "@vercel/kv";
+import { uniq } from "es-toolkit/array";
+import { notFound } from "next/navigation";
+import type { NextRequest } from "next/server";
 
 import { batchQueue } from "@/server/queue";
 

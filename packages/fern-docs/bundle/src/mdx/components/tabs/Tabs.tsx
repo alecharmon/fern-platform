@@ -1,11 +1,8 @@
-import { type ReactNode, useEffect, useState } from "react";
-import React from "react";
-
-import * as RadixTabs from "@radix-ui/react-tabs";
-
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import { cn } from "@fern-docs/components/cn";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
+import * as RadixTabs from "@radix-ui/react-tabs";
+import React, { type ReactNode, useEffect, useState } from "react";
 
 import { useProgrammingLanguage } from "@/state/language";
 

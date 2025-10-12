@@ -1,6 +1,5 @@
+import { isMdxExpression, isMdxJsxElement, mdastToString, SKIP, toTree, visit } from "@fern-docs/mdx";
 import { decode } from "html-entities";
-
-import { SKIP, isMdxExpression, isMdxJsxElement, mdastToString, toTree, visit } from "@fern-docs/mdx";
 
 interface PreparedMdxContent {
     content: string | undefined;

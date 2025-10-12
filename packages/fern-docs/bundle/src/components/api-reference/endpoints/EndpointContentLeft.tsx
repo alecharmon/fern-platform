@@ -11,7 +11,7 @@ import { EndpointAuthSection } from "./EndpointAuthSection";
 import { EndpointErrorGroup } from "./EndpointErrorGroup";
 import { EndpointMultipleRequestSection } from "./EndpointMultipleRequestSection";
 import { EndpointMultipleResponseSection } from "./EndpointMultipleResponseSection";
-import { EndpointRequestSection, createEndpointRequestDescriptionFallback } from "./EndpointRequestSection";
+import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "./EndpointRequestSection";
 import { EndpointResponseSection } from "./EndpointResponseSection";
 import { EndpointSection } from "./EndpointSection";
 import { ResponseSummaryFallback } from "./response-summary-fallback";

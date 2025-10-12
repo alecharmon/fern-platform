@@ -1,6 +1,5 @@
-import React from "react";
-
 import { Primitive } from "@radix-ui/react-primitive";
+import React from "react";
 
 import { cn } from "../cn";
 

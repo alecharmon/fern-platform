@@ -1,17 +1,16 @@
 "use client";
 
+import type { FernAI } from "@fern-api/fai-sdk";
 import {
     type Cell,
     type ColumnDef,
-    type Row,
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
+    type Row,
     useReactTable
 } from "@tanstack/react-table";
-
-import type { FernAI } from "@fern-api/fai-sdk";
 
 import { getConversation } from "@/app/actions/getConversation";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";

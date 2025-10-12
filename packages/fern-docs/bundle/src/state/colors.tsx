@@ -1,9 +1,8 @@
 "use client";
 
+import type { FernColorTheme } from "@fern-api/docs-utils";
 import { atom, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-
-import type { FernColorTheme } from "@fern-api/docs-utils";
 
 export const colorsAtom = atom<{
     light?: FernColorTheme;

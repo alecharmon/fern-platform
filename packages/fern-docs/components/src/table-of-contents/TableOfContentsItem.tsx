@@ -1,9 +1,8 @@
 "use client";
 
-import { type ReactElement, memo, useEffect, useRef } from "react";
-
-import { FernLink } from "../FernLink";
+import { memo, type ReactElement, useEffect, useRef } from "react";
 import { cn } from "../cn";
+import { FernLink } from "../FernLink";
 
 export interface TableOfContentsItemProps {
     text: string;

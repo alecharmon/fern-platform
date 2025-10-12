@@ -1,4 +1,4 @@
-import type { EndpointNode, GrpcNode, TypeId, WebSocketNode, WebhookNode } from "../navigation";
+import type { EndpointNode, GrpcNode, TypeId, WebhookNode, WebSocketNode } from "../navigation";
 import type {
     ApiDefinition,
     AuthScheme,
@@ -6,8 +6,8 @@ import type {
     EndpointId,
     ObjectProperty,
     TypeDefinition,
-    WebSocketChannel,
-    WebhookDefinition
+    WebhookDefinition,
+    WebSocketChannel
 } from "./latest";
 import { prune } from "./prune";
 

@@ -1,7 +1,6 @@
+import { FernVenusApi } from "@fern-api/venus-api-sdk";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
-
-import { FernVenusApi } from "@fern-api/venus-api-sdk";
 
 import * as auth0Management from "@/app/services/auth0/management";
 import { throwDigestibleError } from "@/utils/errors";

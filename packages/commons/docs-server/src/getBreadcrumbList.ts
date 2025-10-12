@@ -1,8 +1,7 @@
-import urljoin from "url-join";
-
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import urljoin from "url-join";
 
 function toUrl(domain: string, slug: FernNavigation.Slug): string {
     return urljoin(withDefaultProtocol(domain), slug);

@@ -1,16 +1,14 @@
 "use client";
 
-import * as React from "react";
-
 import {
+    autoUpdate,
     FloatingDelayGroup,
     FloatingPortal,
-    type Placement,
-    type UseFloatingReturn,
-    autoUpdate,
     flip,
     offset,
+    type Placement,
     shift,
+    type UseFloatingReturn,
     useDismiss,
     useFloating,
     useFocus,
@@ -19,6 +17,7 @@ import {
     useMergeRefs,
     useRole
 } from "@floating-ui/react";
+import * as React from "react";
 
 import "@/components/tiptap-ui-primitive/tooltip/tooltip.scss";
 

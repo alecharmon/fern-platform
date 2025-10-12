@@ -1,6 +1,5 @@
-import { inject } from "vitest";
-
 import { FdrAPI } from "@fern-api/fdr-sdk";
+import { inject } from "vitest";
 
 import type { FernRegistry } from "../../../api/generated";
 import { CHAT_COMPLETION_PAYLOAD, CHAT_COMPLETION_SNIPPET } from "../../octo";

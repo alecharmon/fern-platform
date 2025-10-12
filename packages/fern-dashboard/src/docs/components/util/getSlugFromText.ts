@@ -1,6 +1,5 @@
-import React from "react";
-
 import { slug } from "github-slugger";
+import React from "react";
 
 export function getSlugFromChildren(children: React.ReactNode): string {
     const text = React.Children.toArray(children).reduce(flatten, "");

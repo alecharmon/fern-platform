@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
-
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { getTopCountries, getTopPages } from "@/app/actions/getWebAnalytics";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
-
-import { ANALYTICS_FIELDS, type AnalyticsSortState } from "../constants";
-import { ANALYTICS_SORT_DIR } from "../constants";
+import { ANALYTICS_FIELDS, ANALYTICS_SORT_DIR, type AnalyticsSortState } from "../constants";
 import { getCountryFlag, getCountryName } from "../constants/countries";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
 import ChannelsTable from "./ChannelsTable";

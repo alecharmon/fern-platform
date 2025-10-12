@@ -1,22 +1,19 @@
 "use client";
 
-import { useRef } from "react";
-
-import { ChevronDown } from "lucide-react";
-
 import { EndpointUrlWithOverflow } from "@fern-api/endpoint-snippet-dependencies";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { FaIcon } from "@fern-docs/components/fa-icon";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FaIcon } from "@fern-docs/components/fa-icon";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
-
+import { ChevronDown } from "lucide-react";
+import { useRef } from "react";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useDefaultProgrammingLanguage, useProgrammingLanguage } from "@/docs/state/language";
 
 import { EditorPreviewBanner } from "./EditorPreviewBanner";

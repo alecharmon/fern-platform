@@ -1,7 +1,6 @@
-import { isString } from "es-toolkit/predicate";
-
 import type { FernDocs } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { isString } from "es-toolkit/predicate";
 
 export function toDescription(
     descriptions: string | FernDocs.ResolvedMdx | (string | FernDocs.ResolvedMdx | undefined)[] | undefined

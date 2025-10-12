@@ -1,4 +1,4 @@
-import { type Hast, extractElementsFromRootContentHast, visit } from "@fern-docs/mdx";
+import { extractElementsFromRootContentHast, type Hast, visit } from "@fern-docs/mdx";
 
 interface Options {
     mainElementName?: string;

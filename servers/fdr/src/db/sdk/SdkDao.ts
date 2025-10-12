@@ -1,6 +1,5 @@
-import { Language, type Prisma, type PrismaClient } from "@prisma/client";
-
 import type { APIV1Write } from "@fern-api/fdr-sdk";
+import { Language, type Prisma, type PrismaClient } from "@prisma/client";
 
 import { LOGGER } from "../../app/FdrApplication";
 import { SdkIdFactory } from "../snippets/SdkIdFactory";

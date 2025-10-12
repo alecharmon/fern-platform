@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { useNavigation } from "@fern-docs/components/navigation";
+import { useEffect, useState } from "react";
 
 import { AutoResizingInput } from "@/components/input/AutoResizingInput";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";

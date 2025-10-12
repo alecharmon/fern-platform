@@ -1,8 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
-
 import { GlobeIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 
 import NotFoundContent from "@/components/docs-page/NotFoundContent";
 

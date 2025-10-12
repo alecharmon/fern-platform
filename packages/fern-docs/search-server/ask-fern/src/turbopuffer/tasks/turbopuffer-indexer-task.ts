@@ -1,7 +1,6 @@
-import { Turbopuffer } from "@turbopuffer/turbopuffer";
-
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { type LoadDocsWithUrlPayload, loadDocsWithUrl } from "@fern-docs/search-utils";
+import { Turbopuffer } from "@turbopuffer/turbopuffer";
 
 import { createTurbopufferRecords } from "../records/create-turbopuffer-records";
 import { vectorizeTurbopufferRecords } from "../records/vectorize-turbopuffer-records";

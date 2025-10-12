@@ -1,6 +1,5 @@
-import { type ReactElement, type ReactNode, useState } from "react";
-
 import { FernTabs } from "@fern-docs/components/FernTabs";
+import { type ReactElement, type ReactNode, useState } from "react";
 
 interface PlaygroundEndpointMobileLayoutProps {
     form: ReactNode;

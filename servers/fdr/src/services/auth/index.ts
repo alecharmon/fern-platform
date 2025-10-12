@@ -1,1 +1,1 @@
-export { AuthServiceImpl, type AuthService } from "./AuthService";
+export { type AuthService, AuthServiceImpl } from "./AuthService";

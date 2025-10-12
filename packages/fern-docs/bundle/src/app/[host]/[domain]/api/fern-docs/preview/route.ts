@@ -1,11 +1,9 @@
+import { withDeleteCookie, withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
+import { COOKIE_FERN_DOCS_PREVIEW, FERN_DOCS_ORIGINS, HEADER_X_FORWARDED_HOST } from "@fern-api/docs-utils";
+import { getEnv } from "@vercel/functions";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import type { NextRequest, NextResponse } from "next/server";
-
-import { getEnv } from "@vercel/functions";
-
-import { withDeleteCookie, withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
-import { COOKIE_FERN_DOCS_PREVIEW, FERN_DOCS_ORIGINS, HEADER_X_FORWARDED_HOST } from "@fern-api/docs-utils";
 
 import { redirectResponse } from "@/server/serverResponse";
 

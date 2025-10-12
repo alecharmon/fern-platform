@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { type ReactNode, createContext, useContext } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 
 import type { KeyedAttributes } from "../editor-mdx-renderer/types";
 

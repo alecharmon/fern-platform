@@ -1,11 +1,10 @@
 import { useRef } from "react";
-
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useFileResolver } from "@/providers/FileResolverContext";
 
 export const EMPTY_EMBED_CONTENT = `

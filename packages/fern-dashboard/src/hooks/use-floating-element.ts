@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
-
 import type { UseDismissProps, UseFloatingOptions } from "@floating-ui/react";
 import { useDismiss, useFloating, useInteractions, useTransitionStyles } from "@floating-ui/react";
+import * as React from "react";
 
 interface FloatingElementReturn {
     /**

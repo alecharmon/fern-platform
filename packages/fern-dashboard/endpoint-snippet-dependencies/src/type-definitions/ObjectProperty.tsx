@@ -1,9 +1,7 @@
-import React from "react";
-
-import { compact } from "es-toolkit/array";
-
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
+import { compact } from "es-toolkit/array";
+import React from "react";
 
 import { PropertyKey } from "./PropertyKey";
 import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible } from "./TypeDefinitionContext";

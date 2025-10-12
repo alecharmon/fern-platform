@@ -1,9 +1,8 @@
 "use client";
 
+import type { MDXComponents } from "@fern-docs/mdx";
 import dynamic from "next/dynamic";
 import React, { type ComponentProps, type ReactElement } from "react";
-
-import type { MDXComponents } from "@fern-docs/mdx";
 
 import { ErrorBoundary, ErrorBoundaryFallback } from "@/components/error-boundary";
 import { SearchV2Trigger } from "@/state/search";

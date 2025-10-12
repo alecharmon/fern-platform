@@ -1,14 +1,12 @@
 "use client";
 
-import React, { type ComponentProps, type ReactElement, useContext, useState } from "react";
-
-import { Check, Link2 } from "lucide-react";
-import { AnimatePresence, LazyMotion, domAnimation } from "motion/react";
-import * as m from "motion/react-m";
-
 import { cn } from "@fern-docs/components/cn";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
+import { Check, Link2 } from "lucide-react";
+import { AnimatePresence, domAnimation, LazyMotion } from "motion/react";
+import * as m from "motion/react-m";
+import React, { type ComponentProps, type ReactElement, useContext, useState } from "react";
 
 import { useIsFernAnchorDisabled } from "@/components/FernAnchor";
 

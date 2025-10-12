@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { isPlainObject } from "@fern-api/ui-core-utils";
 
 import { JSONPath } from "jsonpath-plus";
-
-import { isPlainObject } from "@fern-api/ui-core-utils";
+import { useMemo } from "react";
 
 import type { JsonPropertyPath, JsonPropertyPathPart } from "./JsonPropertyPath";
 import { lineNumberOf } from "./utils";

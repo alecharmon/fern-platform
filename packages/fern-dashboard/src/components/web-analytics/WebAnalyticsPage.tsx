@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { getWebAnalytics } from "@/app/actions/getWebAnalytics";
 import type { DateRangeOptions } from "@/app/services/posthog/types";

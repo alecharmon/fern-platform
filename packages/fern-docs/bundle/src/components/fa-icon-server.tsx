@@ -1,9 +1,8 @@
 import "server-only";
 
-import React from "react";
-
 import { FaIcon } from "@fern-docs/components/fa-icon";
 import { getIconUrl, parseSvg } from "@fern-docs/components/util/fa";
+import React from "react";
 
 async function FaIconServerInternal({
     icon,

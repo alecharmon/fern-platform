@@ -1,17 +1,15 @@
 "use client";
 
-import { useServerInsertedHTML } from "next/navigation";
-import React from "react";
-
-import { X } from "lucide-react";
-import { AnimatePresence, LazyMotion, domAnimation } from "motion/react";
-import * as m from "motion/react-m";
-import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
-
-import { FernButton } from "@fern-docs/components/FernButton";
 import { cn } from "@fern-docs/components/cn";
 import { FERN_ANNOUNCEMENT_ID } from "@fern-docs/components/constants";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { X } from "lucide-react";
+import { AnimatePresence, domAnimation, LazyMotion } from "motion/react";
+import * as m from "motion/react-m";
+import { useServerInsertedHTML } from "next/navigation";
+import React from "react";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import { ErrorBoundary } from "../error-boundary";
 

@@ -1,9 +1,8 @@
-import { type ComponentPropsWithoutRef, forwardRef, useEffect, useRef } from "react";
-
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { Slot } from "@radix-ui/react-slot";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { type ComponentPropsWithoutRef, forwardRef, useEffect, useRef } from "react";
 import { useIsomorphicLayoutEffect } from "swr/_internal";
 
 import * as Command from "../cmdk";

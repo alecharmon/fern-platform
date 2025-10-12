@@ -1,9 +1,8 @@
-import { useMemo } from "react";
+import type { FacetFilter } from "@fern-docs/search-keyword";
 
 import { atom, useAtom } from "jotai";
 import { atomWithDefault } from "jotai/utils";
-
-import type { FacetFilter } from "@fern-docs/search-keyword";
+import { useMemo } from "react";
 
 export const filtersAtom = atomWithDefault<readonly FacetFilter[]>(() => []);
 

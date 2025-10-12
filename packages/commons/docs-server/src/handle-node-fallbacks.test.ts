@@ -1,7 +1,6 @@
-import { describe, expect, it } from "vitest";
-
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { NodeId } from "@fern-api/fdr-sdk/navigation";
+import { describe, expect, it } from "vitest";
 
 import { getFallbackProduct, getFallbackVersion, getProducts, getTabs } from "./handle-node-fallbacks";
 import {

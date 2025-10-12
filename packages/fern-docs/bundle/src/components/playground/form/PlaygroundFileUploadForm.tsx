@@ -1,17 +1,14 @@
 "use client";
 
-import { type ChangeEvent, type DragEventHandler, memo, useEffect, useRef, useState } from "react";
-
-import { File, FilePlus, Mic, X } from "lucide-react";
-import prettyBytes from "pretty-bytes";
-
+import { cn } from "@fern-docs/components/cn";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
-import { cn } from "@fern-docs/components/cn";
-
-import { WithLabelInternal } from "../WithLabel";
+import { File, FilePlus, Mic, X } from "lucide-react";
+import prettyBytes from "pretty-bytes";
+import { type ChangeEvent, type DragEventHandler, memo, useEffect, useRef, useState } from "react";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { isValidFile, uniqueFiles } from "../utils/utils";
+import { WithLabelInternal } from "../WithLabel";
 import { PlaygroundAudioControls } from "./PlaygroundAudioControls";
 import { WaveformAnimation } from "./PlaygroundWaveformAnimation";
 

@@ -1,6 +1,5 @@
-import type { MouseEventHandler, PropsWithChildren } from "react";
-
 import { cn } from "@fern-docs/components/cn";
+import type { MouseEventHandler, PropsWithChildren } from "react";
 
 export declare namespace ApiPageMargins {
     export interface Props {

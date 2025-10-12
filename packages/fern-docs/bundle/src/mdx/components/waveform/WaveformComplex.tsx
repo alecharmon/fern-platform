@@ -1,19 +1,17 @@
 "use client";
 
-import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import { OrthographicCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { LazyMotion, domAnimation, useMotionValueEvent, useSpring } from "motion/react";
+import { domAnimation, LazyMotion, useMotionValueEvent, useSpring } from "motion/react";
 import * as m from "motion/react-m";
+import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-
-import { cn } from "@fern-docs/components/cn";
-
-import fragmentShader from "./WaveformComplexShader.frag";
-import vertexShader from "./WaveformComplexShader.vert";
 import type { GradientStop, WaveformColor } from "./types";
 import { gradientColors } from "./types";
+import fragmentShader from "./WaveformComplexShader.frag";
+import vertexShader from "./WaveformComplexShader.vert";
 
 const DEFAULT_SPEED = 1;
 const INITIAL_ZOOM = 95;

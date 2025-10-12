@@ -1,12 +1,10 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
-
 import { experimental_useObject } from "@ai-sdk/react";
-import { debounce } from "es-toolkit/function";
-
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { SuggestionsSchema } from "@fern-docs/search-ask-fern";
+import { debounce } from "es-toolkit/function";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import * as Command from "../cmdk";
 import { Skeleton } from "../ui/skeleton";

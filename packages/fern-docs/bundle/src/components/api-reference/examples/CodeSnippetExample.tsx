@@ -1,11 +1,9 @@
 "use client";
 
-import React, { type FC, createRef, useCallback, useEffect, useMemo } from "react";
-
-import { isEqual } from "es-toolkit/predicate";
-
 import { FernSyntaxHighlighter, type ScrollToHandle } from "@fern-docs/components/syntax-highlighter";
 import { useResizeObserver } from "@fern-ui/react-commons";
+import { isEqual } from "es-toolkit/predicate";
+import React, { createRef, type FC, useCallback, useEffect, useMemo } from "react";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 

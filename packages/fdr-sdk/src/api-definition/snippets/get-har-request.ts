@@ -1,15 +1,13 @@
-import type { HarRequest } from "httpsnippet-lite";
-
 import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-
+import type { HarRequest } from "httpsnippet-lite";
+import type { ApiAuth } from "../../client/APIV1Read";
 import {
     type AuthSchemeId,
+    buildEndpointUrl,
     type EndpointDefinition,
     type ExampleEndpointCall,
-    type ExampleEndpointRequest,
-    buildEndpointUrl
+    type ExampleEndpointRequest
 } from "../";
-import type { ApiAuth } from "../../client/APIV1Read";
 
 export function getHarRequest(
     endpoint: EndpointDefinition,

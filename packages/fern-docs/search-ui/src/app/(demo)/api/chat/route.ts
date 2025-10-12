@@ -1,8 +1,6 @@
+import { convertTpufRecordsToDocuments, createDefaultSystemPrompt } from "@fern-docs/search-ask-fern";
 import { streamText, tool } from "ai";
 import { z } from "zod";
-
-import { createDefaultSystemPrompt } from "@fern-docs/search-ask-fern";
-import { convertTpufRecordsToDocuments } from "@fern-docs/search-ask-fern";
 
 import { models } from "@/server/models";
 import { runSemanticSearchTurbopuffer } from "@/server/run-reindex-turbopuffer";

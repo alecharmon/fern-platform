@@ -1,12 +1,10 @@
 import "server-only";
 
-import { notFound } from "next/navigation";
-
-import { last } from "es-toolkit/array";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { getIsSidebarFixed } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { last } from "es-toolkit/array";
+import { notFound } from "next/navigation";
 
 import ApiEndpointPage from "@/components/api-reference/ApiEndpointPage";
 import { EndpointStreamingEnabledToggle } from "@/components/api-reference/endpoints/EndpointStreamingEnabledToggle";

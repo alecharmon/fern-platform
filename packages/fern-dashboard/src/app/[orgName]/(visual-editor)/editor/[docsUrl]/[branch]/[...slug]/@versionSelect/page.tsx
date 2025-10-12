@@ -1,12 +1,11 @@
 import "server-only";
 
-import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getFallbackProduct, getFallbackVersion } from "@fern-api/docs-server/handle-node-fallbacks";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { VersionDropdown } from "@fern-docs/components/header/VersionDropdown";
-
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import type { EncodedDocsUrl } from "@/utils/types";
 

@@ -1,9 +1,8 @@
 #!/usr/bin/env bun
-import { parseArgs } from "util";
 import readline from "readline/promises";
-
-import { getAnalyticsService } from ".";
+import { parseArgs } from "util";
 import { COUNTRY_DATA } from "../../../components/web-analytics/constants/countries";
+import { getAnalyticsService } from ".";
 
 // ANSI color codes for pretty output
 const colors = {

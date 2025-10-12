@@ -1,5 +1,5 @@
-import { EditThisPageButton } from "../EditThisPage";
 import { cn } from "../cn";
+import { EditThisPageButton } from "../EditThisPage";
 
 export function AbstractFooterLayout({
     feedback,

@@ -1,8 +1,7 @@
 "use client";
 
-import { type ComponentProps, forwardRef, useEffect, useRef } from "react";
-
 import { composeRefs } from "@radix-ui/react-compose-refs";
+import { type ComponentProps, forwardRef, useEffect, useRef } from "react";
 
 import { cn } from "./cn";
 

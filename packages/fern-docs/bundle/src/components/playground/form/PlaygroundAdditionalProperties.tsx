@@ -1,15 +1,12 @@
 "use client";
 
-// import { Property, TypeIdKey, TypeId } from "@fern-api/fdr-sdk/navigation";
-import { type ReactElement, useCallback, useMemo } from "react";
-
-import { noop } from "ts-essentials";
-
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
-
-import { WithLabel } from "../WithLabel";
+// import { Property, TypeIdKey, TypeId } from "@fern-api/fdr-sdk/navigation";
+import { type ReactElement, useCallback, useMemo } from "react";
+import { noop } from "ts-essentials";
 import { castToRecord } from "../utils";
+import { WithLabel } from "../WithLabel";
 import { PlaygroundMapForm } from "./PlaygroundMapForm";
 
 const ADDITIONAL_PROPERTIES_KEY_SHAPE = {

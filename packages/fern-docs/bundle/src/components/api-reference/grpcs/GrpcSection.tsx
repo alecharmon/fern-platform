@@ -1,7 +1,6 @@
-import type React from "react";
-
 import { cn } from "@fern-docs/components/cn";
 import { Separator } from "@fern-docs/components/Separator";
+import type React from "react";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 

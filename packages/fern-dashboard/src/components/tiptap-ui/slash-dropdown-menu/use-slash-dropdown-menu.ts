@@ -1,7 +1,5 @@
 "use client";
 
-import * as React from "react";
-
 import type { Editor } from "@tiptap/react";
 import {
     AtSign,
@@ -19,13 +17,14 @@ import {
     Sparkles,
     Type
 } from "lucide-react";
+import * as React from "react";
 
 // --- Icons ---
 
-// --- Tiptap UI ---
-import type { SuggestionItem } from "@/components/tiptap-ui-utils/suggestion-menu";
 import { addEmojiTrigger } from "@/components/tiptap-ui/emoji-trigger-button";
 import { addMentionTrigger } from "@/components/tiptap-ui/mention-trigger-button";
+// --- Tiptap UI ---
+import type { SuggestionItem } from "@/components/tiptap-ui-utils/suggestion-menu";
 import { findSelectionPosition, hasContentAbove } from "@/utils/tiptap-advanced-utils";
 // --- Lib ---
 import { isExtensionAvailable, isNodeInSchema } from "@/utils/tiptap-utils";

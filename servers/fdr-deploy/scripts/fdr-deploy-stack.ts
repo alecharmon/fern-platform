@@ -1,5 +1,6 @@
-import { CfnOutput, Duration, type Environment, RemovalPolicy, Stack, type StackProps, Token } from "aws-cdk-lib";
+import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 import * as cdk from "aws-cdk-lib";
+import { CfnOutput, Duration, type Environment, RemovalPolicy, Stack, type StackProps, Token } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
@@ -11,8 +12,8 @@ import { Cluster, ContainerImage, LogDriver, type Volume } from "aws-cdk-lib/aws
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { CfnReplicationGroup, CfnSubnetGroup } from "aws-cdk-lib/aws-elasticache";
 import { ApplicationProtocol, HttpCodeElb } from "aws-cdk-lib/aws-elasticloadbalancingv2";
-import { ArnPrincipal, Effect, PolicyStatement, ServicePrincipal, User } from "aws-cdk-lib/aws-iam";
 import * as iam from "aws-cdk-lib/aws-iam";
+import { ArnPrincipal, Effect, PolicyStatement, ServicePrincipal, User } from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import * as route53 from "aws-cdk-lib/aws-route53";
@@ -25,8 +26,6 @@ import * as sns from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 import type { Construct } from "constructs";
 import * as path from "path";
-
-import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 
 const CONTAINER_NAME = "fern-definition-registry";
 const SERVICE_NAME = "fdr";

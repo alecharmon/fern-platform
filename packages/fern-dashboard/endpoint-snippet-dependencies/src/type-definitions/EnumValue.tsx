@@ -1,6 +1,5 @@
-import type React from "react";
-
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type React from "react";
 
 export interface EnumValueProps {
     enumValue: ApiDefinition.EnumValue;

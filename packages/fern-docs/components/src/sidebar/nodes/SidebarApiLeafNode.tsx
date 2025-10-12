@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
-
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { ReactNode } from "react";
 
 import { cn } from "../../cn";
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";

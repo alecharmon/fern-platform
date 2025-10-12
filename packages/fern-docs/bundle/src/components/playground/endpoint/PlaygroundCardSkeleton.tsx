@@ -1,6 +1,5 @@
-import type { PropsWithChildren, ReactElement } from "react";
-
 import { cn } from "@fern-docs/components/cn";
+import type { PropsWithChildren, ReactElement } from "react";
 
 export function PlaygroundCardSkeleton({
     className,

@@ -1,10 +1,9 @@
 "use client";
 
-import { type FC, memo, useCallback, useEffect, useState } from "react";
-
 import type { ObjectProperty, TypeDefinition, TypeId, TypeReference } from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
 import { useBooleanState } from "@fern-ui/react-commons";
+import { type FC, memo, useCallback, useEffect, useState } from "react";
 
 import { withErrorBoundary } from "@/components/error-boundary";
 

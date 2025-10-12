@@ -1,6 +1,5 @@
-import React, { type ComponentProps, type ReactElement } from "react";
-
 import { cn } from "@fern-docs/components/cn";
+import React, { type ComponentProps, type ReactElement } from "react";
 
 import { StepCtx } from "./Step";
 

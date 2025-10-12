@@ -1,8 +1,7 @@
 "use server";
 
-import { Client } from "@upstash/qstash";
-
 import { qstashToken } from "@fern-api/docs-server/env-variables";
+import { Client } from "@upstash/qstash";
 
 import { runReindexAlgolia } from "@/server/run-reindex-algolia";
 import { runReindexTurbopuffer } from "@/server/run-reindex-turbopuffer";

@@ -1,12 +1,10 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
-
 import { useCopyToClipboard } from "@fern-ui/react-commons";
-
+import { Check, Copy } from "lucide-react";
+import { cn } from "./cn";
 import { Button } from "./FernButtonV2";
 import { FernTooltip, FernTooltipProvider } from "./FernTooltip";
-import { cn } from "./cn";
 
 export declare namespace CopyToClipboardButton {
     export interface Props {

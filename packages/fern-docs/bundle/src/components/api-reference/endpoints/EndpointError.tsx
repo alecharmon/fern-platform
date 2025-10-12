@@ -1,9 +1,8 @@
-import React from "react";
-
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { Separator } from "@fern-docs/components/Separator";
+import React from "react";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 

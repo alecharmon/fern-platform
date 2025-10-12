@@ -10,8 +10,8 @@ import { GitDaoImpl } from "./git/GitDao";
 import { DocsRegistrationDao } from "./registrations/DocsRegistrationDao";
 import { type SdkDao, SdkDaoImpl } from "./sdk/SdkDao";
 import { type SnippetAPIsDao, SnippetAPIsDaoImpl } from "./snippetApis/SnippetAPIsDao";
-import { type SnippetTemplateDao, SnippetTemplateDaoImpl } from "./snippets/SnippetTemplate";
 import { type SnippetsDao, SnippetsDaoImpl } from "./snippets/SnippetsDao";
+import { type SnippetTemplateDao, SnippetTemplateDaoImpl } from "./snippets/SnippetTemplate";
 
 export class FdrDao {
     private docsV2Dao;

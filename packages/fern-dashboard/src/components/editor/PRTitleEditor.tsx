@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
-
 import { GitPullRequest, Loader2 } from "lucide-react";
+import { useCallback, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { TeleprompterTextOnHover } from "@/components/ui/TeleprompterTextOnHover";
 import { Input } from "@/components/ui/input";
+import { TeleprompterTextOnHover } from "@/components/ui/TeleprompterTextOnHover";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { cn } from "@/utils/utils";

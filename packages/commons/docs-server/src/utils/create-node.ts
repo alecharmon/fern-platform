@@ -17,8 +17,8 @@ import {
     Slug,
     type TabNode,
     type UnversionedNode,
-    type VersionNode,
-    type VersionedNode
+    type VersionedNode,
+    type VersionNode
 } from "@fern-api/fdr-sdk/navigation";
 
 export function createEndpointNode(node: Partial<EndpointNode>): EndpointNode {

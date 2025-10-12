@@ -1,10 +1,9 @@
 "use client";
 
-import { type Atom, atom, useAtomValue } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
-
 import type { FernUser } from "@fern-api/docs-auth";
 import { useDeepCompareMemoize } from "@fern-ui/react-commons";
+import { type Atom, atom, useAtomValue } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
 
 interface UseFernUserOptions {
     /**

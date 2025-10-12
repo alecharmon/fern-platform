@@ -1,9 +1,8 @@
 "use client";
 
-import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
-
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import { FernCard } from "@fern-docs/components/FernCard";
+import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
 
 import { Callout } from "@/mdx/components/callout";
 

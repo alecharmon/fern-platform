@@ -1,8 +1,8 @@
 import { BookOpen } from "lucide-react";
 
 import { GithubLoginButton, GoogleLoginButton } from "../auth/LoginButton";
-import { ThemeToggle } from "../theme/ThemeToggle";
 import { ThemedFernLogo } from "../theme/ThemedFernLogo";
+import { ThemeToggle } from "../theme/ThemeToggle";
 import { Button } from "../ui/button";
 import { LoginImage } from "./LoginImage";
 import { Auth0Logo } from "./logos/Auth0Logo";

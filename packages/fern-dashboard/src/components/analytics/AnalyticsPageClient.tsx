@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-
 import type { FernAI } from "@fern-api/fai-sdk";
+import React, { useEffect, useState } from "react";
 
 import { getDomainAnalytics } from "@/app/actions/getAnalytics";
 import { getQueries } from "@/app/actions/getQueries";

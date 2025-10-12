@@ -1,5 +1,3 @@
-import { UnreachableCaseError } from "ts-essentials";
-
 import {
     type FormDataField,
     type HttpRequestBodyShape,
@@ -11,6 +9,7 @@ import {
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
+import { UnreachableCaseError } from "ts-essentials";
 
 import type { PlaygroundFormDataEntryValue, PlaygroundFormStateBody } from "../types";
 

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-
 import { X } from "lucide-react";
+import React, { useState } from "react";
 
 import { CopyToClipboardButton } from "./CopyToClipboardButton";
 import { Button } from "./FernButtonV2";

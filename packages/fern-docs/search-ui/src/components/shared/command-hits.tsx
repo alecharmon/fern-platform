@@ -1,7 +1,6 @@
-import { type PropsWithChildren, type ReactNode, memo, useEffect, useRef } from "react";
-import { Snippet } from "react-instantsearch";
-
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { memo, type PropsWithChildren, type ReactNode, useEffect, useRef } from "react";
+import { Snippet } from "react-instantsearch";
 
 import { useInfiniteSearchHits, useSendEvent } from "../../hooks/use-search-hits";
 import type { AlgoliaRecordHit } from "../../types";

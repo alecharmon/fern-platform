@@ -1,7 +1,6 @@
-import { Suspense } from "react";
-
 import { PopoverArrow } from "@radix-ui/react-popover";
 import { Book, RotateCcw } from "lucide-react";
+import { Suspense } from "react";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -11,8 +10,8 @@ import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
 import { MaybeDocsHeaderItems } from "@/components/layout/MaybeDocsHeaderItems";
 import { ProfileImage } from "@/components/layout/ProfileImage";
 import { SupportHeaderLink } from "@/components/layout/SupportHeaderLink";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { DocsUrl } from "@/utils/types";
 

@@ -1,7 +1,6 @@
-import React from "react";
-
 import { withThemeByClassName } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/nextjs";
+import React from "react";
 
 import { Toaster } from "../src/FernToast";
 import { FernTooltipProvider } from "../src/FernTooltip";

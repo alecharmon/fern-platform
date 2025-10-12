@@ -42,9 +42,6 @@ jobs:
       - name: Check dependency deduplication
         run: pnpm dedupe --check
 
-      - name: Check format
-        run: pnpm format:check
-
       - name: Format YAML
         run: pnpm format:yaml:check
 
@@ -62,7 +59,7 @@ jobs:
         run: pnpm lint:style
 
       - name: biome
-        run: pnpm lint:biome
+        run: pnpm check
 
   lint-fai:
     runs-on: CLI

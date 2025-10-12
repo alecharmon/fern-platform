@@ -1,8 +1,7 @@
+import type { DocsV2Read } from "@fern-api/fdr-sdk";
 import { attachDatabasePool } from "@vercel/functions";
 import { Binary, type Collection, type Db, MongoClient, type MongoClientOptions } from "mongodb";
 import { gunzip, gzip } from "zlib";
-
-import type { DocsV2Read } from "@fern-api/fdr-sdk";
 
 type EditorDocument = {
     _id: string;

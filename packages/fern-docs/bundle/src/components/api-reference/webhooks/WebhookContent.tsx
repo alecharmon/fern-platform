@@ -5,9 +5,8 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { Prose } from "@fern-docs/components/mdx/prose";
-
-import { PageHeader } from "@/components/PageHeader";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
+import { PageHeader } from "@/components/PageHeader";
 import { renderTypeShorthand } from "@/components/type-shorthand";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";

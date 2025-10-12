@@ -1,8 +1,7 @@
 "use client";
 
-import type { FC, ReactNode } from "react";
-
 import * as RadixTabs from "@radix-ui/react-tabs";
+import type { FC, ReactNode } from "react";
 
 export interface FernTabProps {
     title: string;

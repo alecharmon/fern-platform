@@ -1,15 +1,13 @@
 "use client";
 
-import { type FC, useCallback, useEffect, useRef, useState } from "react";
-
-import { Wifi, WifiOff } from "lucide-react";
-import urlJoin from "url-join";
-
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
-import { type WebSocketMessage, buildRequestUrl } from "@fern-api/fdr-sdk/api-definition";
+import { buildRequestUrl, type WebSocketMessage } from "@fern-api/fdr-sdk/api-definition";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { usePrevious } from "@fern-ui/react-commons";
+import { Wifi, WifiOff } from "lucide-react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import urlJoin from "url-join";
 
 import { PLAYGROUND_AUTH_STATE_ATOM, usePlaygroundWebsocketFormState } from "@/state/playground";
 

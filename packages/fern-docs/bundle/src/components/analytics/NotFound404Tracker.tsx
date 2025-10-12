@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
+import { useEffect } from "react";
 
 import { capturePosthogEventCustomer, capturePosthogEventInternal } from "./posthog";
 

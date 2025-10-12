@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-
 import { useRouter } from "@bprogress/next/app";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import Redirect from "@/components/Redirect";

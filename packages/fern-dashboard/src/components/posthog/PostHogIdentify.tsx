@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-
 import type { User } from "@auth0/nextjs-auth0/types";
 import { usePostHog } from "posthog-js/react";
+import { useEffect } from "react";
 
 export declare namespace PostHogIdentify {
     export interface Props {

@@ -1,7 +1,6 @@
+import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import Script from "next/script";
 import type { ReactElement } from "react";
-
-import type { DocsV1Read } from "@fern-api/fdr-sdk";
 
 function FullstoryScript(props: { config: DocsV1Read.FullStoryAnalyticsConfig }): ReactElement<any> {
     return <Script id="init-fullstory" defer dangerouslySetInnerHTML={{ __html: initFullstory(props.config) }} />;

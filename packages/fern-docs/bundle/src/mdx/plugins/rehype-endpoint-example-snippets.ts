@@ -2,11 +2,11 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import {
     CONTINUE,
     type Hast,
+    hastMdxJsxElementHastToProps,
+    isMdxJsxElementHast,
     type MdxJsxAttributeValueExpression,
     SKIP,
     type Unified,
-    hastMdxJsxElementHastToProps,
-    isMdxJsxElementHast,
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";

@@ -1,7 +1,7 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import { Badge as BadgeComponent, SemanticBadge } from "@fern-docs/components/badges";
 
 import type { SemanticColor } from "@fern-docs/components/colors";
-import { Badge as BadgeComponent, SemanticBadge } from "@fern-docs/components/badges";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 export const Badge = forwardRef<
     HTMLSpanElement & HTMLButtonElement,

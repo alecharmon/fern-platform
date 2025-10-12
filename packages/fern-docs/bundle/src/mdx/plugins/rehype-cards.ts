@@ -1,4 +1,4 @@
-import { CONTINUE, type Hast, SKIP, type Unified, isMdxJsxElementHast, visit } from "@fern-docs/mdx";
+import { CONTINUE, type Hast, isMdxJsxElementHast, SKIP, type Unified, visit } from "@fern-docs/mdx";
 
 export const rehypeCards: Unified.Plugin<[], Hast.Root> = () => {
     return (ast: Hast.Root) => {

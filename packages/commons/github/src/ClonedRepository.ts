@@ -1,8 +1,8 @@
-import { cp, lstat, readFile, readdir, rm } from "fs/promises";
+import { cp, lstat, readdir, readFile, rm } from "fs/promises";
 import path, { resolve } from "path";
 import type { SimpleGit } from "simple-git";
 
-import { FERNIGNORE, GITIGNORE, GIT_DIR, README_FILEPATH } from "./constants";
+import { FERNIGNORE, GIT_DIR, GITIGNORE, README_FILEPATH } from "./constants";
 
 const DEFAULT_IGNORED_FILES = [FERNIGNORE, GITIGNORE, GIT_DIR];
 

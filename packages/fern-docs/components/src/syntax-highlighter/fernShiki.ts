@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
-
 import { memoize } from "es-toolkit/function";
 import type { Root } from "hast";
 import { h } from "hastscript";
+import { useCallback, useEffect, useState } from "react";
 import {
     type BundledLanguage,
     type BundledTheme,
-    type Highlighter,
-    type SpecialLanguage,
     bundledLanguages,
-    getSingletonHighlighter
+    getSingletonHighlighter,
+    type Highlighter,
+    type SpecialLanguage
 } from "shiki";
 
 import { isLocal } from "../util/isLocal";

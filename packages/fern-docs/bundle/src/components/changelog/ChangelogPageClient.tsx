@@ -1,10 +1,5 @@
 "use client";
 
-import React, { Fragment, type ReactElement, useEffect, useMemo } from "react";
-
-import { chunk } from "es-toolkit/array";
-import { useAtomValue } from "jotai";
-
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
@@ -17,13 +12,15 @@ import { TableOfContentsLayout } from "@fern-docs/components/layouts/TableOfCont
 import { SetLayout } from "@fern-docs/components/state/layout";
 import { SCROLL_BODY_ATOM } from "@fern-docs/components/state/viewport";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
+import { chunk } from "es-toolkit/array";
+import { useAtomValue } from "jotai";
+import React, { Fragment, type ReactElement, useEffect, useMemo } from "react";
 
 import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { useSelectedFilters } from "@/state/search";
-
-import { PageFilters } from "../PageFilters";
 import { BottomNavigationClient } from "../bottom-nav-client";
+import { PageFilters } from "../PageFilters";
 import { ChangelogContentLayout } from "./ChangelogContentLayout";
 
 function flattenChangelogEntries({

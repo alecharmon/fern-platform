@@ -1,8 +1,7 @@
 "use client";
 
-import { type ReactElement, type ReactNode, useRef, useState } from "react";
-
 import { useIsMobile, useResizeObserver } from "@fern-ui/react-commons";
+import { type ReactElement, type ReactNode, useRef, useState } from "react";
 
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import { PlaygroundEndpointDesktopLayout } from "./PlaygroundEndpointDesktopLayout";

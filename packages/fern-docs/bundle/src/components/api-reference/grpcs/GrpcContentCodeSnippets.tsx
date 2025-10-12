@@ -1,9 +1,8 @@
 "use client";
 
-import { memo } from "react";
-
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components/cn";
+import { memo } from "react";
 
 import { JsonCodeSnippetExample } from "../examples/CodeSnippetExample";
 import { useGrpcContext } from "./GrpcContext";

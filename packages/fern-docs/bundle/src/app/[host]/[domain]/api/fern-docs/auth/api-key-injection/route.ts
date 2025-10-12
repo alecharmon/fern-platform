@@ -1,16 +1,8 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
-import { SignJWT, decodeJwt } from "jose";
-import urlJoin from "url-join";
-import { WebflowClient } from "webflow-api";
-import type { OauthScope } from "webflow-api/api/types/OAuthScope";
-
 import { type APIKeyInjectionConfig, OryAccessTokenSchema } from "@fern-api/docs-auth";
 import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { getOAuth2AuthorizationUrl } from "@fern-api/docs-server/auth/oauth2";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
-import { OryOAuth2Client, getOryAuthorizationUrl } from "@fern-api/docs-server/auth/ory";
+import { getOryAuthorizationUrl, OryOAuth2Client } from "@fern-api/docs-server/auth/ory";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { getJwtSecretKey } from "@fern-api/docs-server/auth/workos";
@@ -21,6 +13,12 @@ import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getApiKeyInjectionEdgeConfig, getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { decodeJwt, SignJWT } from "jose";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
+import urlJoin from "url-join";
+import { WebflowClient } from "webflow-api";
+import type { OauthScope } from "webflow-api/api/types/OAuthScope";
 
 export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectionConfig>> {
     if (isLocal() || isSelfHosted()) {

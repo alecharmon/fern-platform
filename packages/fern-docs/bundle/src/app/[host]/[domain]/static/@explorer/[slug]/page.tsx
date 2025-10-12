@@ -1,8 +1,5 @@
 import "server-only";
 
-import { permanentRedirect, RedirectType, redirect } from "next/navigation";
-import React from "react";
-
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import {
     conformExplorerRoute,
@@ -12,6 +9,8 @@ import {
     slugToHref
 } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { permanentRedirect, RedirectType, redirect } from "next/navigation";
+import React from "react";
 
 import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
 

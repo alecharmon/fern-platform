@@ -1,11 +1,10 @@
 import { searchClient } from "@algolia/client-search";
-import { kv } from "@vercel/kv";
-import { streamObject } from "ai";
-import { z } from "zod";
-
 import { algoliaAppId } from "@fern-api/docs-server/env-variables";
 import { SuggestionsSchema } from "@fern-docs/search-ask-fern";
 import { type AlgoliaRecord, SEARCH_INDEX } from "@fern-docs/search-keyword";
+import { kv } from "@vercel/kv";
+import { streamObject } from "ai";
+import { z } from "zod";
 
 import { models } from "@/server/models";
 

@@ -1,8 +1,7 @@
-import { noop } from "ts-essentials";
-import urljoin from "url-join";
-
 import titleCase from "@fern-api/ui-core-utils/titleCase";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
+import { noop } from "ts-essentials";
+import urljoin from "url-join";
 
 import { FernNavigation } from "../../../..";
 import { APIV1Read, type DocsV1Read } from "../../../../client/types";

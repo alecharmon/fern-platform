@@ -1,6 +1,5 @@
-import { headers } from "next/headers";
-
 import { HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
+import { headers } from "next/headers";
 
 import { getNextPublicDocsDomain } from "./dev";
 import { cleanHost } from "./util";

@@ -1,6 +1,5 @@
-import { noop } from "ts-essentials";
-
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
+import { noop } from "ts-essentials";
 
 import type * as Latest from "./latest";
 

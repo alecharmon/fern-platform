@@ -1,7 +1,6 @@
+import type { SendEventForHits } from "instantsearch.js/es/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { useInfiniteHits } from "react-instantsearch";
-
-import type { SendEventForHits } from "instantsearch.js/es/lib/utils";
 
 import { useMeiliSearchClient } from "../../components/search/meili-search-client";
 import { useFacetFilters } from "../../components/search/useFacetFilters";

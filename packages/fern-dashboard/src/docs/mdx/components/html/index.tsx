@@ -1,8 +1,7 @@
-import React from "react";
-
 import { cn } from "@fern-docs/components/cn";
-import { FernLink } from "@fern-docs/components/FernLink";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
+import { FernLink } from "@fern-docs/components/FernLink";
+import React from "react";
 
 import { DisableFernAnchor, FernAnchor } from "@/docs/components/FernAnchor";
 

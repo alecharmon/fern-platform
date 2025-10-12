@@ -1,9 +1,5 @@
 import "server-only";
 
-import type { Octokit } from "@octokit/core";
-import yaml from "js-yaml";
-import z from "zod";
-
 import type {
     FernProject,
     GetDocsYmlResult,
@@ -12,6 +8,9 @@ import type {
     GitLoader,
     UpdateDocsYmlResult
 } from "@fern-api/docs-loader";
+import type { Octokit } from "@octokit/core";
+import yaml from "js-yaml";
+import z from "zod";
 
 import { getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
 import { getOwnerAndRepoFromGithubUrl } from "./github";

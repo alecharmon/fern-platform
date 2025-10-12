@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HTTPSnippet, type TargetId } from "httpsnippet-lite";
 
 import { SnippetResolver } from "@fern-api/snippets";
+import { HTTPSnippet, type TargetId } from "httpsnippet-lite";
 
 import type { DynamicIr } from "../../client/APIV1Write";
 import type { ApiDefinition, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
-import { toSnippetHttpRequest } from "./SnippetHttpRequest";
 import { convertToCurl } from "./curl";
 import { getHarRequest } from "./get-har-request";
+import { toSnippetHttpRequest } from "./SnippetHttpRequest";
 
 export type DynamicIRsByLanguage = Record<string, DynamicIr>;
 interface HTTPSnippetClient {

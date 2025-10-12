@@ -1,11 +1,10 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-
 import { Badge } from "@fern-docs/components/badges";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { ChevronDown } from "lucide-react";
 
 import { useSelectedFilters, useSetSelectedFilters } from "@/state/search";
 

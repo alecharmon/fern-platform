@@ -3,8 +3,8 @@
 import { AlertCircle, CheckCircle, Info, Loader2, XCircle } from "lucide-react";
 import { Toaster as SonnerToaster } from "sonner";
 
-export { toast } from "sonner";
 export type { ToastT } from "sonner";
+export { toast } from "sonner";
 
 interface ToasterProps {
     // Sonner doesn't export this type or it's props, so we're manually copying them over

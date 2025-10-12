@@ -5,9 +5,9 @@ import { getTabs } from "@fern-api/docs-server/handle-node-fallbacks";
 import { getIsSidebarFixed, getIsSingleOverviewPage } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
+import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SidebarTabsRoot } from "@fern-docs/components/sidebar/SidebarTabsRoot";
-import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 
 export default async function SidebarPage({

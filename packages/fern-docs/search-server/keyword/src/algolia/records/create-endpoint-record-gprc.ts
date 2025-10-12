@@ -1,9 +1,8 @@
-import { compact, flatten } from "es-toolkit/array";
-
 import type { GrpcMethod } from "@fern-api/docs-utils";
 import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
 import { measureBytes, truncateToBytes, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { maybePrepareMdxContent, toDescription } from "@fern-docs/search-utils";
+import { compact, flatten } from "es-toolkit/array";
 
 import type { BaseRecord, EndpointBaseRecord } from "../types";
 

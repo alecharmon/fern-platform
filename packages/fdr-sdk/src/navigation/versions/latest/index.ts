@@ -3,12 +3,12 @@ export * from "../../../client/generated/api/resources/navigation/resources/late
 export * from "./getChildren";
 export * from "./getPageId";
 export * from "./isApiReferenceNode";
+export * from "./isProductGroupNode";
+export * from "./isProductNode";
 export * from "./isSidebarRootNode";
 export * from "./isTabbedNode";
 export * from "./isUnversionedNode";
 export * from "./isVersionNode";
-export * from "./isProductNode";
-export * from "./isProductGroupNode";
 export * from "./NavigationNode";
 export * from "./NavigationNodeApiLeaf";
 export * from "./NavigationNodeLeaf";

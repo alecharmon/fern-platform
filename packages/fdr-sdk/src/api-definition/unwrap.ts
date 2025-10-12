@@ -1,7 +1,6 @@
-import { compact, sortBy } from "es-toolkit/array";
-
 import { isPlainObject } from "@fern-api/ui-core-utils";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
+import { compact, sortBy } from "es-toolkit/array";
 
 import { AvailabilityOrder, coalesceAvailability } from "./availability";
 import { LOOP_TOLERANCE } from "./const";

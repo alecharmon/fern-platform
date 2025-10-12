@@ -1,9 +1,8 @@
-import { compact, flatten } from "es-toolkit/array";
-import { decode } from "html-entities";
-
 import { chunkToBytes, formatUtc, measureBytes } from "@fern-api/ui-core-utils";
 import { getFrontmatter, markdownToString } from "@fern-docs/mdx";
 import { maybePrepareMdxContent } from "@fern-docs/search-utils";
+import { compact, flatten } from "es-toolkit/array";
+import { decode } from "html-entities";
 
 import type { BaseRecord, ChangelogRecord } from "../types";
 

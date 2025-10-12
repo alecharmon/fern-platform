@@ -1,7 +1,6 @@
+import { type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
 import fs from "fs";
 import path from "path";
-
-import { type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
 
 import { createAlgoliaRecords } from "../records/create-algolia-records";
 

@@ -1,6 +1,5 @@
-import { useState } from "react";
-
 import { Trash2 } from "lucide-react";
+import { useState } from "react";
 
 import { useGitPrInfo } from "@/providers/GitPRContext";
 

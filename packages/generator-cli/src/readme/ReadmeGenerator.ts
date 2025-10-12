@@ -1,8 +1,7 @@
+import { cloneRepository } from "@fern-api/github";
 import { template } from "es-toolkit/compat";
 import { camelCase, upperFirst } from "es-toolkit/string";
 import type fs from "fs";
-
-import { cloneRepository } from "@fern-api/github";
 
 import { FernGeneratorCli } from "../configuration/generated";
 import type { ReadmeFeature } from "../configuration/generated/api";

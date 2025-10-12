@@ -1,3 +1,4 @@
+import type { EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 import archiver from "archiver";
 import { RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
 import { AnyPrincipal, PolicyStatement } from "aws-cdk-lib/aws-iam";
@@ -6,8 +7,6 @@ import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import type { Construct } from "constructs";
 import * as fs from "fs";
 import path from "path";
-
-import type { EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 
 export const LOCAL_PREVIEW_BUNDLE_OUT_DIR = path.resolve(__dirname, "../../fern-docs/bundle/.next");
 

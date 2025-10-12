@@ -16,11 +16,11 @@
  *   --help                  Show this help message
  */
 
-import path from "path";
-import fs from "fs";
-import { execa } from "execa";
-import { Command } from "commander";
 import chalk from "chalk";
+import { Command } from "commander";
+import { execa } from "execa";
+import fs from "fs";
+import path from "path";
 
 // Set up CLI with commander
 const program = new Command();

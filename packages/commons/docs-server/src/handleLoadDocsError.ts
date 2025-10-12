@@ -1,6 +1,5 @@
-import type { Redirect } from "next/types";
-
 import type { FdrAPI, FernNavigation } from "@fern-api/fdr-sdk";
+import type { Redirect } from "next/types";
 
 export async function handleLoadDocsError(
     xFernHost: string,

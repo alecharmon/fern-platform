@@ -1,14 +1,12 @@
 "use client";
 
-import { type ReactElement, useEffect, useState } from "react";
-
-import { useAtom, useAtomValue } from "jotai/react";
-import { RESET } from "jotai/utils";
-import { ChevronDown } from "lucide-react";
-
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { useAtom, useAtomValue } from "jotai/react";
+import { RESET } from "jotai/utils";
+import { ChevronDown } from "lucide-react";
+import { type ReactElement, useEffect, useState } from "react";
 
 import {
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,

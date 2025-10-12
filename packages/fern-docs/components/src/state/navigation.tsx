@@ -1,15 +1,13 @@
 "use client";
 
-import React from "react";
-
-import { atom, useAtomValue, useSetAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
-import { type StoreApi, type UseBoundStore, create } from "zustand";
-
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { useIsomorphicLayoutEffect, useLazyRef } from "@fern-ui/react-commons";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
+import React from "react";
+import { create, type StoreApi, type UseBoundStore } from "zustand";
 
-import { type ExpandedNodesState, createInitialExpandedNodes, invertParentChildMap } from "./navigation-server";
+import { createInitialExpandedNodes, type ExpandedNodesState, invertParentChildMap } from "./navigation-server";
 
 type SidebarAction =
     | { type: "toggle"; nodeId: FernNavigation.NodeId }

@@ -1,9 +1,8 @@
-import Image from "next/image";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { createFileResolver } from "@fern-api/docs-server/file-resolver";
 import { getProducts } from "@fern-api/docs-server/handle-node-fallbacks";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
+import Image from "next/image";
 
 import { processIcon } from "../processIcon";
 import { ProductDropdownClient, type ProductDropdownItem } from "./ProductDropdownClient";

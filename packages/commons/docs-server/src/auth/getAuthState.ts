@@ -1,16 +1,15 @@
 import "server-only";
 
-import type { AsyncOrSync } from "ts-essentials";
-
 import type { AuthEdgeConfig, FernUser } from "@fern-api/docs-auth";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { type PreviewUrlAuth, getAuthEdgeConfig, getPreviewUrlAuthConfig } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig, getPreviewUrlAuthConfig, type PreviewUrlAuth } from "@fern-docs/edge-config";
+import type { AsyncOrSync } from "ts-essentials";
 
 import { isLocal } from "../isLocal";
 import { isSelfHosted } from "../isSelfHosted";
-import { safeVerifyFernJWTConfig } from "./FernJWT";
 import { getAllowedRedirectUrls } from "./allowed-redirects";
+import { safeVerifyFernJWTConfig } from "./FernJWT";
 import { getOAuth2AuthorizationUrl } from "./oauth2";
 import { preferPreview } from "./origin";
 import { getOryAuthorizationUrl } from "./ory";

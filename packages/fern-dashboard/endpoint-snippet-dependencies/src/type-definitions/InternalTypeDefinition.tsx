@@ -1,8 +1,6 @@
-import { memo } from "react";
-
-import { UnreachableCaseError } from "ts-essentials";
-
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { memo } from "react";
+import { UnreachableCaseError } from "ts-essentials";
 
 import { DiscriminatedUnionVariant } from "./DiscriminatedUnionVariant";
 import { EnumTypeDefinition } from "./EnumTypeDefinition";

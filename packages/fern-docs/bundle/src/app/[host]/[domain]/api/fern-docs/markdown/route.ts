@@ -1,12 +1,11 @@
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
-import { type NextRequest, NextResponse } from "next/server";
-
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server/analytics/posthog";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { MARKDOWN_PATTERN } from "@fern-api/docs-server/patterns";
 import { COOKIE_FERN_TOKEN, isLikelyBrowser, removeLeadingSlash } from "@fern-api/docs-utils";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { getMarkdownForPath, getPageNodeForPath } from "@/server/getMarkdownForPath";
 

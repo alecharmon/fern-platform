@@ -1,12 +1,9 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
-import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { getAllowedRedirectUrls } from "@fern-api/docs-server/auth/allowed-redirects";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { normalizeDomainForCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { revokeSessionForToken } from "@fern-api/docs-server/auth/workos-session";
+import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { safeUrl } from "@fern-api/docs-server/safeUrl";
@@ -14,6 +11,8 @@ import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_ACCESS_TOKEN, COOKIE_FERN_TOKEN, COOKIE_REFRESH_TOKEN } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     if (isLocal() || isSelfHosted()) {

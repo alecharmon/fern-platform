@@ -1,7 +1,7 @@
 import type { LinkNode } from ".";
 import type { NavigationNode } from "./NavigationNode";
-import { type NavigationNodeApiLeaf, isApiLeaf } from "./NavigationNodeApiLeaf";
-import { type NavigationNodeMarkdownLeaf, isMarkdownLeaf } from "./NavigationNodePageLeaf";
+import { isApiLeaf, type NavigationNodeApiLeaf } from "./NavigationNodeApiLeaf";
+import { isMarkdownLeaf, type NavigationNodeMarkdownLeaf } from "./NavigationNodePageLeaf";
 
 /**
  * A navigation node that represents a leaf in the navigation tree (i.e. a node that does not have children)

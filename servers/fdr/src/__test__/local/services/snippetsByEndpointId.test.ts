@@ -1,6 +1,5 @@
-import { inject } from "vitest";
-
 import { DocsV1Write, FdrAPI } from "@fern-api/fdr-sdk";
+import { inject } from "vitest";
 
 import { createApiDefinition, getAPIResponse, getClient } from "../util";
 import { EMPTY_REGISTER_API_DEFINITION } from "./api.test";

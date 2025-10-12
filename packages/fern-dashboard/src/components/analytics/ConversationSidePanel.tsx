@@ -1,10 +1,9 @@
-import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
-import { Sparkles, X } from "lucide-react";
-
 import type { FernAI } from "@fern-api/fai-sdk";
 import { FootnoteSup } from "@fern-docs/search-ui/components/chatbot/footnote";
 import { ChatbotTurnContextProvider } from "@fern-docs/search-ui/components/chatbot/turn-context";
 import { MarkdownContent } from "@fern-docs/search-ui/components/md-content";
+import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
+import { Sparkles, X } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";

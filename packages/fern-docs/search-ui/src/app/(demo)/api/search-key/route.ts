@@ -1,8 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { algoliaSearchApikey } from "@fern-api/docs-server/env-variables";
 
 import { randomUUID } from "crypto";
-
-import { algoliaSearchApikey } from "@fern-api/docs-server/env-variables";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { withSearchApiKey } from "@/server/with-search-api-key";
 

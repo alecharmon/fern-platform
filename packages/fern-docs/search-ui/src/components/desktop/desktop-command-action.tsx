@@ -1,9 +1,8 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import { Button } from "@fern-docs/components/button";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { CircleStop, CornerDownLeft } from "lucide-react";
-
-import { Button } from "@fern-docs/components/button";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 interface DesktopCommandActionProps {
     onClose?: () => void;

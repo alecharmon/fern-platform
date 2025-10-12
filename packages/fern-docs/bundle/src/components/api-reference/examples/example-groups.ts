@@ -1,8 +1,7 @@
-import { sortBy } from "es-toolkit/array";
-import { isEqual } from "es-toolkit/predicate";
-
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { sortBy } from "es-toolkit/array";
+import { isEqual } from "es-toolkit/predicate";
 
 import type {
     ExamplesByKeyAndStatusCode,

@@ -1,7 +1,7 @@
 import type { ChangelogEntryNode, ChangelogNode, PageNode } from ".";
 import type { NavigationNode } from "./NavigationNode";
-import { type NavigationNodeApiLeaf, isApiLeaf } from "./NavigationNodeApiLeaf";
-import { type NavigationNodeSectionOverview, isSectionOverview } from "./NavigationNodeSectionOverview";
+import { isApiLeaf, type NavigationNodeApiLeaf } from "./NavigationNodeApiLeaf";
+import { isSectionOverview, type NavigationNodeSectionOverview } from "./NavigationNodeSectionOverview";
 
 export type NavigationNodeNeighbor =
     | NavigationNodeApiLeaf

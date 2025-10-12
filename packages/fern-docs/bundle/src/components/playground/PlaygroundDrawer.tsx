@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useCallback } from "react";
-
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Drawer } from "vaul";
-
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
+
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useRouter } from "next/navigation";
+import React, { useCallback } from "react";
+import { Drawer } from "vaul";
 
 import { useUrlParams } from "@/hooks/use-url-params";
 

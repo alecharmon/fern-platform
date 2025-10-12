@@ -1,4 +1,4 @@
-import type { RedisCacheKey, RedisCacheKeyType, inferCachedData } from "./cacheKey";
+import type { inferCachedData, RedisCacheKey, RedisCacheKeyType } from "./cacheKey";
 import { redisDel, redisGet, redisSet } from "./redis";
 
 export class AsyncRedisCache<T extends RedisCacheKeyType> {

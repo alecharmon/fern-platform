@@ -1,15 +1,14 @@
-import { type ReactElement, type ReactNode, useRef } from "react";
+import { cn } from "@fern-docs/components/cn";
 
 import { FernButton } from "@fern-docs/components/FernButton";
-import { cn } from "@fern-docs/components/cn";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
-
+import { type ReactElement, type ReactNode, useRef } from "react";
+import { CheckboxControl, SelectControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { CheckboxControl, SelectControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { DisableFernAnchor } from "@/docs/components/FernAnchor";
 
 export const EMPTY_BUTTON_CONTENT = `

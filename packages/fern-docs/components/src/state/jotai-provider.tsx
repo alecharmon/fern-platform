@@ -1,6 +1,6 @@
 "use client";
 
-import { Provider, createStore } from "jotai";
+import { createStore, Provider } from "jotai";
 
 export const jotaiStore: ReturnType<typeof createStore> = createStore();
 

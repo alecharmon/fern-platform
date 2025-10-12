@@ -1,11 +1,9 @@
+import { withoutStaging } from "@fern-api/docs-utils";
+import { FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-
 import { Agent, setGlobalDispatcher } from "undici";
-
-import { withoutStaging } from "@fern-api/docs-utils";
-import { FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
 
 import { cacheSeed } from "./cache-seed";
 import { fernToken_admin, getFdrLambdaOrigin } from "./env-variables";

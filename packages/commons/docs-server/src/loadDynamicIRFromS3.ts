@@ -1,9 +1,8 @@
 import "server-only";
 
-import { cache } from "react";
-
 import type { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 import { getS3KeyForDynamicIr } from "@fern-api/fdr-sdk/docs";
+import { cache } from "react";
 
 import { getSignedUrl } from "./loadDocsDefinitionFromS3";
 

@@ -1,6 +1,5 @@
-import { compact } from "es-toolkit/array";
-
 import type { FernUser } from "@fern-api/docs-auth";
+import { compact } from "es-toolkit/array";
 
 import type { NoWorkOSUserInfo, WorkOSUserInfo } from "./interfaces";
 

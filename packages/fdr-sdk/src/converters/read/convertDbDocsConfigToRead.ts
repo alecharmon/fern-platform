@@ -1,7 +1,6 @@
+import assertNever from "@fern-api/ui-core-utils/assertNever";
 import { kebabCase } from "es-toolkit/string";
 import tinycolor from "tinycolor2";
-
-import assertNever from "@fern-api/ui-core-utils/assertNever";
 
 import {
     type DocsV1Db,

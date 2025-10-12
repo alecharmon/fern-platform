@@ -6,15 +6,13 @@ import {
     S3Client
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { v4 as uuidv4 } from "uuid";
-
 import { type APIV1Db, APIV1Write, type DocsV1Write, type DocsV2Write, FdrAPI } from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
-
-import { Cache } from "../../Cache";
+import { v4 as uuidv4 } from "uuid";
 import type { FernRegistry } from "../../api/generated";
 import type { DynamicIr } from "../../api/generated/api/resources/api/resources/v1/resources/register";
 import type { FdrApplication, FdrConfig } from "../../app";
+import { Cache } from "../../Cache";
 
 const ONE_WEEK_IN_SECONDS = 604800;
 

@@ -1,5 +1,5 @@
-import type { RepositoryReference } from "./RepositoryReference";
 import { DEFAULT_REMOTE } from "./constants";
+import type { RepositoryReference } from "./RepositoryReference";
 
 /**
  * Parses the repository into a RepositoryReference.

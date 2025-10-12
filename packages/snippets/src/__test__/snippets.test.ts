@@ -1,6 +1,5 @@
-import { describe, expect, it } from "vitest";
-
 import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import { describe, expect, it } from "vitest";
 
 import { SnippetResolver } from "../SnippetResolver";
 import type { SnippetInput } from "../types";

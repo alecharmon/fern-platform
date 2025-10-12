@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
-
 import { cn } from "@fern-docs/components/cn";
+import type { ReactNode } from "react";
 
 export const CopyIcon = (): ReactNode => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">

@@ -1,4 +1,4 @@
-import { chromium, type Browser, type Page } from "@playwright/test";
+import { type Browser, chromium, type Page } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";

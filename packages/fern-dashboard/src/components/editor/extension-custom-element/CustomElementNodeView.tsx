@@ -1,7 +1,6 @@
+import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect } from "react";
-
-import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 
 import FernEditorMDXRenderer from "@/components/editor/editor-mdx-renderer/FernEditorMDXRenderer";
 import { ErrorBoundary } from "@/docs/components/error-boundary";

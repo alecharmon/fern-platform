@@ -1,14 +1,12 @@
 "use client";
 
-import type { ReactElement, SetStateAction } from "react";
-
+import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
+import { unknownToString } from "@fern-api/ui-core-utils";
 import { atom } from "jotai";
 import { useAtom, useAtomValue } from "jotai/react";
 import { RESET } from "jotai/utils";
+import type { ReactElement, SetStateAction } from "react";
 import { useMemoOne } from "use-memo-one";
-
-import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
-import { unknownToString } from "@fern-api/ui-core-utils";
 
 import { PLAYGROUND_AUTH_STATE_HEADER_ATOM, PLAYGROUND_RESOLVED_STATE_ATOM } from "@/state/playground";
 

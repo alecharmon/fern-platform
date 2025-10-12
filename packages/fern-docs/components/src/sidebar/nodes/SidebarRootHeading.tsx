@@ -1,6 +1,5 @@
-import type { ReactElement } from "react";
-
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { ReactElement } from "react";
 
 import { cn } from "../../cn";
 import { SidebarPageNode } from "./SidebarPageNode";

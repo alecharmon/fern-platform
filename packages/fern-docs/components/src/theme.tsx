@@ -1,7 +1,7 @@
 "use client";
 
-import { ThemeProvider as NextThemeProvider, useTheme } from "next-themes";
 import { useServerInsertedHTML } from "next/navigation";
+import { ThemeProvider as NextThemeProvider, useTheme } from "next-themes";
 import React from "react";
 
 /**

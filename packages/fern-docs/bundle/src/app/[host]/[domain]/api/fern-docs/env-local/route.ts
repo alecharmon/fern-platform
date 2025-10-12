@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-
 import { isLocal } from "@fern-api/docs-server/isLocal";
+import { NextResponse } from "next/server";
 
 export async function GET() {
     if (!isLocal()) {

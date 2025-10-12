@@ -1,5 +1,3 @@
-import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
-
 import { rewritePosthog } from "@fern-api/docs-server/analytics/rewritePosthog";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
@@ -10,15 +8,16 @@ import { withPathname } from "@fern-api/docs-server/withPathname";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import {
     COOKIE_FERN_TOKEN,
+    conformTrailingSlash,
     HEADER_X_FERN_BASEPATH,
     HEADER_X_FERN_HOST,
     HEADER_X_FORWARDED_HOST,
-    conformTrailingSlash,
     isTrailingSlashEnabled,
     removeLeadingSlash,
     removeTrailingSlash
 } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
 
 import { isSelfHosted } from "./server/isSelfHosted";
 

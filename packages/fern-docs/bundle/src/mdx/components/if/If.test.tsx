@@ -1,13 +1,13 @@
 /**
  * @vitest-environment jsdom
  */
-import React from "react";
+
+import type { FernUser } from "@fern-api/docs-auth";
 
 import { render } from "@testing-library/react";
 import { type Atom, atom } from "jotai";
 import { freezeAtom } from "jotai/utils";
-
-import type { FernUser } from "@fern-api/docs-auth";
+import React from "react";
 
 import { If } from "./If";
 

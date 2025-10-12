@@ -1,19 +1,18 @@
-import { jsx, toJs } from "estree-util-to-js";
-import { toEstree } from "hast-util-to-estree";
-
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import {
     CONTINUE,
     type Hast,
+    isHastElement,
+    isMdxJsxElementHast,
     type MdxJsxAttribute,
     type MdxJsxExpressionAttribute,
     SKIP,
     type Unified,
-    isHastElement,
-    isMdxJsxElementHast,
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { jsx, toJs } from "estree-util-to-js";
+import { toEstree } from "hast-util-to-estree";
 
 /**
  * The code below converts `<Steps>` and `<StepGroup>` components

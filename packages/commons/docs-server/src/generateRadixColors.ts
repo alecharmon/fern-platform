@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import "server-only";
 
+import { type ArrayOf12, arrayOf12, type ColorPalette, grayScaleNames, scaleNames } from "@fern-api/docs-utils";
 // @ts-nocheck https://github.com/radix-ui/website/blob/main/components/generateRadixColors.tsx
 import * as RadixColors from "@radix-ui/colors";
 import BezierEasing from "bezier-easing";
 import Color from "colorjs.io";
-
-import { type ArrayOf12, type ColorPalette, arrayOf12, grayScaleNames, scaleNames } from "@fern-api/docs-utils";
 
 const lightColors = Object.fromEntries(
     scaleNames.map((scaleName) => [

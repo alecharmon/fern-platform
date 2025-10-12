@@ -1,10 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
-
 import { createOpenAI } from "@ai-sdk/openai";
-import { kv } from "@vercel/kv";
-
 import { track } from "@fern-api/docs-server/analytics/posthog";
 import { fdrEnvironment, fernToken_admin, openaiApiKey, turbopufferApiKey } from "@fern-api/docs-server/env-variables";
+import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { postToSlack } from "@fern-api/docs-server/slack";
@@ -18,9 +15,9 @@ import {
     getTurbopufferVectorizer,
     turbopufferUpsertTask
 } from "@fern-docs/search-ask-fern";
-
+import { kv } from "@vercel/kv";
+import { type NextRequest, NextResponse } from "next/server";
 import { getFaiClient } from "@/getFaiClient";
-import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 
 export const maxDuration = 800; // 13 minutes
 

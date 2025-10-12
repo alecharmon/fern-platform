@@ -1,17 +1,16 @@
-import { flatten } from "es-toolkit/array";
-
 import { slugToHref } from "@fern-api/docs-utils";
 import type { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
 import {
     type ApiDefinitionId,
+    getPageId,
+    hasMarkdown,
+    isApiLeaf,
     type NavigationNodePage,
     NodeCollector,
     type PageId,
-    type RootNode,
-    getPageId,
-    hasMarkdown,
-    isApiLeaf
+    type RootNode
 } from "@fern-api/fdr-sdk/navigation";
+import { flatten } from "es-toolkit/array";
 
 import type { TurbopufferRecordWithoutVector } from "../types";
 import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";

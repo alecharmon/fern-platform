@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
-
 import { Expand } from "lucide-react";
-
+import { useState } from "react";
+import { cn } from "./cn";
 import { ExpandCodeModal } from "./ExpandCodeModal";
 import { Button } from "./FernButtonV2";
-import { cn } from "./cn";
 
 export declare namespace ExpandCodeButton {
     export interface Props {

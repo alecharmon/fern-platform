@@ -1,6 +1,6 @@
 "use client";
 
-import { LazyMotion, domAnimation } from "motion/react";
+import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
 
 export function WaveformAnimation({ volume }: { volume: number }) {

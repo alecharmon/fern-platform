@@ -1,21 +1,20 @@
 import "server-only";
 
-import type React from "react";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
+import type React from "react";
 
 import { MdxAside } from "@/mdx/bundler/component";
 import { MdxContent } from "@/mdx/components/MdxContent";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
+import { BuiltWithFern } from "../built-with-fern";
 import { constructPageOptions } from "../PageActionsDropdownOptions";
 import { PageHeader } from "../PageHeader";
-import { BuiltWithFern } from "../built-with-fern";
 import { FooterLayout } from "./FooterLayout";
 
 export async function LayoutEvaluator({

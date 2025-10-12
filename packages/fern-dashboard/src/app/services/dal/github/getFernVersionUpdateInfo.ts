@@ -1,6 +1,6 @@
 import "server-only";
 
-import { MIN_VE_CLI_VERSION, compareVersions, getLatestFernCliVersion } from "@/utils/fernCliVersion";
+import { compareVersions, getLatestFernCliVersion, MIN_VE_CLI_VERSION } from "@/utils/fernCliVersion";
 import type { DocsUrl } from "@/utils/types";
 
 import { checkUpgradePrStatus } from "./checkUpgradePrStatus";

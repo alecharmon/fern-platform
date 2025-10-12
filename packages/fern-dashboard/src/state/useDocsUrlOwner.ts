@@ -4,7 +4,7 @@ import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import type { DocsUrl } from "@/utils/types";
 
 import { convertQueryResultToLoadable } from "./convertQueryResultToLoadable";
-import { ReactQueryKey, type inferQueryData } from "./queryKeys";
+import { type inferQueryData, ReactQueryKey } from "./queryKeys";
 
 export function useDocsUrlOwner(docsUrl: DocsUrl) {
     const QUERY_KEY = ReactQueryKey.docsUrlOwner(docsUrl);

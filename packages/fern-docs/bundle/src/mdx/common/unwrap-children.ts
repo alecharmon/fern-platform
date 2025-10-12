@@ -1,6 +1,5 @@
-import React from "react";
-
 import { isPlainObject } from "@fern-api/ui-core-utils";
+import React from "react";
 
 export function unwrapChildren<T>(
     children: React.ReactNode,

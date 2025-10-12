@@ -1,9 +1,8 @@
 "use client";
 
-import type React from "react";
-
 import { useDomain } from "@fern-docs/components/state/domain";
 import AbstractDefaultDocs from "@fern-docs/components/theming/AbstractDefaultDocs";
+import type React from "react";
 
 import { HeaderTabsRoot } from "@/components/header/HeaderTabsRoot";
 import { SearchPanel } from "@/components/search-panel";

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
 import { Cog, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 import type { GithubRepoValidationResult } from "@/app/services/dal/github/validators";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";

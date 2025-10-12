@@ -5,7 +5,7 @@ import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
-import { EndpointRequestSection, createEndpointRequestDescriptionFallback } from "../endpoints/EndpointRequestSection";
+import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "../endpoints/EndpointRequestSection";
 import { EndpointResponseSection } from "../endpoints/EndpointResponseSection";
 import { ResponseSummaryFallback } from "../endpoints/response-summary-fallback";
 import { TypeDefinitionAnchorPart, TypeDefinitionResponse } from "../type-definitions/TypeDefinitionContext";

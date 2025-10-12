@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { useDomain } from "../state/domain";
 import { useCurrentPathname } from "./use-current-pathname";

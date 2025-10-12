@@ -1,28 +1,26 @@
 "use client";
 
+import { useResizeObserver } from "@fern-ui/react-commons";
+
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Check, Info } from "lucide-react";
 import {
     type ComponentProps,
+    cloneElement,
+    forwardRef,
     type MouseEventHandler,
     type PropsWithChildren,
     type ReactElement,
     type ReactNode,
-    cloneElement,
-    forwardRef,
     useCallback,
     useEffect,
     useRef,
     useState
 } from "react";
-
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Check, Info } from "lucide-react";
-
-import { useResizeObserver } from "@fern-ui/react-commons";
-
+import { cn } from "./cn";
 import { FernProductItem } from "./FernProductItem";
 import { FernScrollArea } from "./FernScrollArea";
 import { FernTooltip, FernTooltipProvider } from "./FernTooltip";
-import { cn } from "./cn";
 
 export declare namespace FernDropdown {
     export interface AuthOption {

@@ -1,8 +1,7 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import { Badge } from "@fern-docs/components/badges";
 
 import { Sparkles } from "lucide-react";
-
-import { Badge } from "@fern-docs/components/badges";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 import * as Command from "../cmdk";
 import { useSearchBox } from "../search/useSearchBox";

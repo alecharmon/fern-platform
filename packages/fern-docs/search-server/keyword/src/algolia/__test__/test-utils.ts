@@ -1,10 +1,9 @@
-import { mapValues } from "es-toolkit/object";
-import fs from "fs";
-import path from "path";
-
 import type { DocsV2Read } from "@fern-api/fdr-sdk";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { mapValues } from "es-toolkit/object";
+import fs from "fs";
+import path from "path";
 
 const fixturesDir = path.join(__dirname, "../../../../../../fdr-sdk/src/__test__/fixtures");
 

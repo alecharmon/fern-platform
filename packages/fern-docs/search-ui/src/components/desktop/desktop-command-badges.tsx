@@ -1,6 +1,5 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
-
 import { tunnel } from "@fern-ui/react-commons";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 import { useFacetFilters } from "../search/useFacetFilters";
 import { DesktopFilterDropdownMenu } from "./desktop-filter-dropdown-menu";

@@ -1,4 +1,4 @@
-import type { EndpointNode, GrpcNode, WebSocketNode, WebhookNode } from ".";
+import type { EndpointNode, GrpcNode, WebhookNode, WebSocketNode } from ".";
 import type { NavigationNode } from "./NavigationNode";
 
 /**

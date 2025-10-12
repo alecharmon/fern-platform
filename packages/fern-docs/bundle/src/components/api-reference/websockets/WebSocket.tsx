@@ -1,18 +1,16 @@
 import "server-only";
 
-import { ArrowDown, ArrowUp, Wifi } from "lucide-react";
-
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { AvailabilityBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
-import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
-
-import { PageHeader } from "@/components/PageHeader";
+import { ArrowDown, ArrowUp, Wifi } from "lucide-react";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
+import { PageHeader } from "@/components/PageHeader";
 import { PlaygroundButton } from "@/components/playground/PlaygroundButton";
 import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKeyboardTrigger";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";

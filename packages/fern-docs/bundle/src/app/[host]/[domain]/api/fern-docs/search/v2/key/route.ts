@@ -1,6 +1,3 @@
-import { cookies } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-
 import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { algoliaAppId, algoliaSearchApikey } from "@fern-api/docs-server/env-variables";
 import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
@@ -13,9 +10,11 @@ import { COOKIE_FERN_TOKEN, withoutStaging } from "@fern-api/docs-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import {
     DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS,
-    SEARCH_INDEX,
-    getSearchApiKey
+    getSearchApiKey,
+    SEARCH_INDEX
 } from "@fern-docs/search-keyword/edge";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 10;
 

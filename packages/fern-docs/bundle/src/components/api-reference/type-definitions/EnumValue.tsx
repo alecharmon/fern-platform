@@ -1,6 +1,5 @@
-import React from "react";
-
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import React from "react";
 
 import { Chip } from "@/components/Chip";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";

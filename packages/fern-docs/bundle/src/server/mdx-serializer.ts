@@ -1,13 +1,11 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-import { cache } from "react";
-
-import { Semaphore } from "es-toolkit";
-
 import type { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { cacheSeed } from "@fern-api/docs-server/cache-seed";
 import type { Frontmatter } from "@fern-api/fdr-sdk/docs";
+import { Semaphore } from "es-toolkit";
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
 
 import { serializeMdx as internalSerializeMdx } from "@/mdx/bundler/serialize";
 import { serializeMdxImpl as internalSerializeNextMdxRemote } from "@/mdx/bundler/serializeWithNextMdxRemote";

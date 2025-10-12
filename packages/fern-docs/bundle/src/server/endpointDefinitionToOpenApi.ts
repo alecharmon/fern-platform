@@ -1,9 +1,8 @@
-import { dump as yamlStringify } from "js-yaml";
-import type { OpenAPIV3, OpenAPIV3_1 } from "openapi-types";
-
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
 import { assertNever } from "@fern-api/ui-core-utils";
+import { dump as yamlStringify } from "js-yaml";
+import type { OpenAPIV3, OpenAPIV3_1 } from "openapi-types";
 
 type ApiShapeTypes = TypeShapeOrReference | ApiDefinition.HttpRequestBodyShape | ApiDefinition.HttpResponseBodyShape;
 

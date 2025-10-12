@@ -1,9 +1,8 @@
 "use client";
 
+import type { APIV1Read } from "@fern-api/fdr-sdk";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
-
-import type { APIV1Read } from "@fern-api/fdr-sdk";
 
 const CodeSnippetExample = dynamic(
     () => import("../examples/CodeSnippetExample").then(({ CodeSnippetExample }) => CodeSnippetExample),

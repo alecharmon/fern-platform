@@ -1,10 +1,9 @@
-import { useRouter } from "next/navigation";
-import { type RefObject, useEffect } from "react";
-
-import { useInView } from "motion/react";
-
 import { slugToHref } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+
+import { useInView } from "motion/react";
+import { useRouter } from "next/navigation";
+import { type RefObject, useEffect } from "react";
 
 export function useApiPageCenterElement(
     ref: RefObject<HTMLDivElement | null>,

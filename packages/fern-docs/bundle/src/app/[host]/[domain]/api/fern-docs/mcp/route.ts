@@ -1,10 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
-
-import { createMcpHandler } from "mcp-handler";
-import { z } from "zod";
-
 import { getMetadata } from "@fern-api/docs-loader";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
+import { createMcpHandler } from "mcp-handler";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 // Accepts host and domain, returns a handler
 async function createHandler(host: string, domain: string) {

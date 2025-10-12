@@ -1,6 +1,5 @@
-import { useState } from "react";
-
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
+import { useState } from "react";
 
 import type { Auth0Organization } from "@/app/services/auth0/types";
 

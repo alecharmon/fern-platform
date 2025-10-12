@@ -1,9 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-
-import { getLLMFileViews } from "@/app/actions/getWebAnalytics";
 import type { LLMFileViewsRequest } from "@/app/actions/getWebAnalytics";
+import { getLLMFileViews } from "@/app/actions/getWebAnalytics";
 
 import { ANALYTICS_COLUMNS } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";

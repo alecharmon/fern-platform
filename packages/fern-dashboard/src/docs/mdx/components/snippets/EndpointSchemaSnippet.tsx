@@ -1,17 +1,15 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useRef } from "react";
-
 import { WithSeparator } from "@fern-api/endpoint-snippet-dependencies";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-
+import { usePathname } from "next/navigation";
+import { useRef } from "react";
+import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { EndpointRequestSection } from "@/docs/components/api-reference/endpoints/EndpointRequestSection";
 import { EndpointResponseSection } from "@/docs/components/api-reference/endpoints/EndpointResponseSection";
 import { EndpointSection } from "@/docs/components/api-reference/endpoints/EndpointSection";

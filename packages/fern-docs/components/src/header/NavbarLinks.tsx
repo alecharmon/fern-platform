@@ -1,11 +1,9 @@
-import React from "react";
-
-import { ArrowRight } from "lucide-react";
-
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 
-import { FernLinkButton } from "../FernLinkButton";
+import { ArrowRight } from "lucide-react";
+import React from "react";
 import { cn } from "../cn";
+import { FernLinkButton } from "../FernLinkButton";
 import { FaIconServer } from "../fa-icon-server";
 import type { NavbarLink, NavbarLink as NavbarLinkType } from "../types/navbar-link";
 import { GitHubWidget } from "./GitHubWidget";

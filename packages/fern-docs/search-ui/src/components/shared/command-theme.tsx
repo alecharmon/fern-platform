@@ -1,6 +1,5 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
-
 import { Laptop, Moon, Sun } from "lucide-react";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 import * as Command from "../cmdk";
 

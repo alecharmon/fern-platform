@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import * as cdk from "aws-cdk-lib";
 
-import { EnvironmentType, type Environments } from "@fern-fern/fern-cloud-sdk/api/";
+import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/";
+import * as cdk from "aws-cdk-lib";
 
 import { FdrDeployStack } from "../scripts/fdr-deploy-stack";
 

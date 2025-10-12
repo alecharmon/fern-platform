@@ -1,18 +1,21 @@
 "use client";
 
-import { type HTMLAttributeAnchorTarget, type PropsWithChildren, type ReactNode, forwardRef, useRef } from "react";
-import React from "react";
+import { slugToHref } from "@fern-api/docs-utils";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { ChevronDown, Lock } from "lucide-react";
-
-import { slugToHref } from "@fern-api/docs-utils";
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-
+import React, {
+    forwardRef,
+    type HTMLAttributeAnchorTarget,
+    type PropsWithChildren,
+    type ReactNode,
+    useRef
+} from "react";
+import { cn } from "../cn";
 import { FernLink } from "../FernLink";
 import { FernTooltip } from "../FernTooltip";
-import { cn } from "../cn";
 import { useScrollSidebarNodeIntoView } from "../hooks/sidebar-scroll";
 import { useIsSelectedSidebarNode } from "../state/navigation";
 

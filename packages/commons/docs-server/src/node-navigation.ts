@@ -1,8 +1,8 @@
 export {
+    type BuildVisitor,
     CONTINUE,
     EXIT,
     SKIP,
-    visit,
-    type BuildVisitor,
-    type VisitorResult
+    type VisitorResult,
+    visit
 } from "unist-util-visit";

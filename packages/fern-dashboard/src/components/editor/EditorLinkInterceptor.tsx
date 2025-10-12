@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-
 import { useRouter } from "@bprogress/next/app";
+import { useCallback, useEffect } from "react";
 
 import { useEditorRouting } from "../../providers/EditorRoutingContext";
 import { getInterceptedLink } from "./link-interceptor";

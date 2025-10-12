@@ -1,17 +1,14 @@
+import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { track } from "@fern-api/docs-server/analytics/posthog";
+import { COOKIE_FERN_TOKEN, isLikelyBrowser, slugToHref } from "@fern-api/docs-utils";
+import { FernNavigation } from "@fern-api/fdr-sdk";
+import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
+import { isNonNullish } from "@fern-api/ui-core-utils";
+import { uniqBy } from "es-toolkit/array";
 import { unstable_cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
-
-import { uniqBy } from "es-toolkit/array";
-
-import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { track } from "@fern-api/docs-server/analytics/posthog";
-import { COOKIE_FERN_TOKEN, slugToHref } from "@fern-api/docs-utils";
-import { isLikelyBrowser } from "@fern-api/docs-utils";
-import { FernNavigation } from "@fern-api/fdr-sdk";
-import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
-import { isNonNullish } from "@fern-api/ui-core-utils";
 
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";

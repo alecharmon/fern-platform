@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "./cn";
 import type { FernDropdown } from "./FernDropdown";
 import { FernSelectionItem } from "./FernSelectionItem";
-import { cn } from "./cn";
 
 /**
  * This component is used to render a product option. Since this could be used within dropdowns

@@ -1,9 +1,8 @@
+import type { APIV1Read } from "@fern-api/fdr-sdk";
+import { buildEndpointUrl, type EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { mapValues } from "es-toolkit/object";
 import { JSONPath } from "jsonpath-plus";
-
-import type { APIV1Read } from "@fern-api/fdr-sdk";
-import { type EndpointDefinition, buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
-import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
 import { executeProxyRest } from "../fetch-utils/executeProxyRest";
 import type { PlaygroundEndpointRequestFormState, ProxyRequest } from "../types";

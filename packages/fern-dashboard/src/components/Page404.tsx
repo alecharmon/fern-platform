@@ -1,7 +1,6 @@
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
-
-import ReturnHomeButton from "./ReturnHomeButton";
 import { LogoutButton } from "./auth/LogoutButton";
+import ReturnHomeButton from "./ReturnHomeButton";
 
 export default function NotFoundContent() {
     return (

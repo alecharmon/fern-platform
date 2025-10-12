@@ -1,14 +1,12 @@
 "use client";
 
-import { type ComponentProps, useState } from "react";
-
+import { cn } from "@fern-docs/components/cn";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Expand } from "lucide-react";
-
-import { FernButton } from "@fern-docs/components/FernButton";
-import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
-import { cn } from "@fern-docs/components/cn";
+import { type ComponentProps, useState } from "react";
 
 interface TableProps extends ComponentProps<"table"> {
     sticky?: boolean;

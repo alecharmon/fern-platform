@@ -1,14 +1,12 @@
+import { Prose } from "@fern-docs/components/mdx/prose";
 import type React from "react";
 import { useRef } from "react";
-
-import { Prose } from "@fern-docs/components/mdx/prose";
-
+import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { FernAnchor } from "@/docs/components/FernAnchor";
 
 export const EMPTY_PARAM_FIELD_CONTENT = `

@@ -1,9 +1,8 @@
+import { FdrClient } from "@fern-api/fdr-sdk";
 import { PrismaClient } from "@prisma/client";
 import { execa } from "execa";
 import express from "express";
 import type http from "http";
-
-import { FdrClient } from "@fern-api/fdr-sdk";
 
 import { register } from "../../api";
 import type { FdrApplication, FdrConfig } from "../../app";
@@ -12,11 +11,11 @@ import { getReadApiService } from "../../controllers/api/getApiReadService";
 import { getRegisterApiService } from "../../controllers/api/getRegisterApiService";
 import { getDashboardController } from "../../controllers/dashboard/getDashboardController";
 import { getApiDiffService } from "../../controllers/diff/getApiDiffService";
-import { getDocsCacheService } from "../../controllers/docs-cache/getDocsCacheService";
 import { getDocsReadService } from "../../controllers/docs/v1/getDocsReadService";
 import { getDocsWriteService } from "../../controllers/docs/v1/getDocsWriteService";
 import { getDocsReadV2Service } from "../../controllers/docs/v2/getDocsReadV2Service";
 import { getDocsWriteV2Service } from "../../controllers/docs/v2/getDocsWriteV2Service";
+import { getDocsCacheService } from "../../controllers/docs-cache/getDocsCacheService";
 import { getGeneratorsCliController } from "../../controllers/generators/getGeneratorsCliController";
 import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
 import { getGeneratorsVersionsController } from "../../controllers/generators/getGeneratorsVersionsController";

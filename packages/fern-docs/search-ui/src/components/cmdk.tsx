@@ -1,17 +1,22 @@
 "use client";
 
+import { isomorphicRequestAnimationFrame, useDebouncedCallback } from "@fern-ui/react-commons";
+
+import * as RadixDialog from "@radix-ui/react-dialog";
+import { useId } from "@radix-ui/react-id";
+import { Primitive } from "@radix-ui/react-primitive";
 import {
     type ComponentPropsWithoutRef,
+    cloneElement,
+    createContext,
+    forwardRef,
+    isValidElement,
     type KeyboardEvent,
     type ReactElement,
     type ReactNode,
     type Ref,
     type RefCallback,
     type RefObject,
-    cloneElement,
-    createContext,
-    forwardRef,
-    isValidElement,
     useContext,
     useEffect,
     useMemo,
@@ -19,15 +24,9 @@ import {
     useState,
     useSyncExternalStore
 } from "react";
-
-import * as RadixDialog from "@radix-ui/react-dialog";
-import { useId } from "@radix-ui/react-id";
-import { Primitive } from "@radix-ui/react-primitive";
 import { useIsomorphicLayoutEffect } from "swr/_internal";
 import { noop } from "ts-essentials";
 import { z } from "zod";
-
-import { isomorphicRequestAnimationFrame, useDebouncedCallback } from "@fern-ui/react-commons";
 
 import { commandScore } from "./command-score";
 

@@ -1,9 +1,8 @@
-import type * as React from "react";
-
 import type { UseFloatingOptions } from "@floating-ui/react";
 import type { PluginKey } from "@tiptap/pm/state";
 import type { Editor, Range } from "@tiptap/react";
 import type { SuggestionOptions } from "@tiptap/suggestion";
+import type * as React from "react";
 
 type DefaultContext = any;
 

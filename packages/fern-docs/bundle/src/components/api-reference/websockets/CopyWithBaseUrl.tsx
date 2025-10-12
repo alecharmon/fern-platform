@@ -1,7 +1,7 @@
 "use client";
 
 import { removeTrailingSlash } from "@fern-api/docs-utils";
-import { type WebSocketChannel, toColonEndpointPathLiteral } from "@fern-api/fdr-sdk/api-definition";
+import { toColonEndpointPathLiteral, type WebSocketChannel } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";

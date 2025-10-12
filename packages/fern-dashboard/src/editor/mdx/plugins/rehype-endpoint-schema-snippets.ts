@@ -3,10 +3,10 @@ import { HttpMethod } from "@fern-api/docs-utils";
 import {
     CONTINUE,
     type Hast,
-    SKIP,
-    type Unified,
     hastMdxJsxElementHastToProps,
     isMdxJsxElementHast,
+    SKIP,
+    type Unified,
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";

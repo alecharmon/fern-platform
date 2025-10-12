@@ -1,7 +1,6 @@
-import { type ComponentProps, type RefObject, forwardRef, useEffect, useRef } from "react";
-
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
+import { type ComponentProps, forwardRef, type RefObject, useEffect, useRef } from "react";
 
 export const TextArea = forwardRef<
     HTMLTextAreaElement,

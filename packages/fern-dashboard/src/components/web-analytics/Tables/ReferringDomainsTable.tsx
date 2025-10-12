@@ -1,9 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-
-import { getReferringDomains } from "@/app/actions/getWebAnalytics";
 import type { TableRequest } from "@/app/actions/getWebAnalytics";
+import { getReferringDomains } from "@/app/actions/getWebAnalytics";
 
 import { ANALYTICS_COLUMNS } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";

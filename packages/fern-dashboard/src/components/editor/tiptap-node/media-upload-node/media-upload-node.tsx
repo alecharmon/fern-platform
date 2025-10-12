@@ -1,10 +1,9 @@
 "use client";
 
-import * as React from "react";
-
 import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
+import * as React from "react";
 
 import "@/components/editor/tiptap-node/media-upload-node/media-upload-node.scss";
 import { Button } from "@/components/ui/button";

@@ -1,16 +1,12 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
-import React from "react";
-
 import { slugToHref } from "@fern-api/docs-utils";
 import type { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useLazyRef } from "@fern-ui/react-commons";
-
-import type { JsonPropertyPath } from "../examples/JsonPropertyPath";
-import type { JsonPropertyPathPart } from "../examples/JsonPropertyPath";
+import React, { createContext, useContext, useMemo } from "react";
+import type { JsonPropertyPath, JsonPropertyPathPart } from "../examples/JsonPropertyPath";
 
 interface TypeDefinitionContextValue {
     types: Record<string, TypeDefinition>;

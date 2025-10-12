@@ -1,9 +1,7 @@
-import type { ReactNode } from "react";
-
-import { compact } from "es-toolkit/array";
-
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { compact } from "es-toolkit/array";
+import type { ReactNode } from "react";
 
 import { renderTypeShorthand } from "../../type-shorthand";
 import { PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";

@@ -1,6 +1,6 @@
 "use client";
 
-import { type SerializableFoundNode, getAllSectionsFromSidebarRootNode } from "@fern-docs/components/navigation";
+import { getAllSectionsFromSidebarRootNode, type SerializableFoundNode } from "@fern-docs/components/navigation";
 
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { Icon } from "@/components/icon/Icon";

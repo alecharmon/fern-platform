@@ -1,6 +1,5 @@
-import qs from "qs";
-
 import { sanitizeUrl, unknownToString } from "@fern-api/ui-core-utils";
+import qs from "qs";
 
 import type { EndpointDefinition, PathPart } from "./latest";
 

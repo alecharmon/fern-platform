@@ -1,6 +1,5 @@
-import { useState } from "react";
-
 import { ArrowRight, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";

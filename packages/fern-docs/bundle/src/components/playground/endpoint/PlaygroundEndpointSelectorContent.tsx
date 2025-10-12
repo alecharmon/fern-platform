@@ -1,18 +1,16 @@
 "use client";
 
-import { Fragment, forwardRef, useEffect, useRef, useState } from "react";
-
-import { Search, Slash, X } from "lucide-react";
-
 import { getExplorerBasePath, removeTrailingSlash } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
-import { cn } from "@fern-docs/components/cn";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
+import { Search, Slash, X } from "lucide-react";
+import { Fragment, forwardRef, useEffect, useRef, useState } from "react";
 
 import { BuiltWithFern } from "@/components/built-with-fern";
 

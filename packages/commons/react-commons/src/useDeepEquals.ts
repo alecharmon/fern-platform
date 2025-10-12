@@ -1,6 +1,5 @@
-import React from "react";
-
 import { isEqual } from "es-toolkit/predicate";
+import React from "react";
 
 type UseEffectParams = Parameters<typeof React.useEffect>;
 type EffectCallback = UseEffectParams[0];

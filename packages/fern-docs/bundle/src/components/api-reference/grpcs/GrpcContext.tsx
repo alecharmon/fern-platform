@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import React from "react";
 
 export const GrpcContext = React.createContext<{
     example:

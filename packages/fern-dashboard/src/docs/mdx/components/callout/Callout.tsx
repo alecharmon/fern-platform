@@ -1,17 +1,14 @@
-import { type FC, type PropsWithChildren, type ReactElement, isValidElement, useRef } from "react";
-
-import { Bell, Check, CheckCircle, Info, Pin, Rocket, Star, TriangleAlert } from "lucide-react";
-
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-import { FaIcon } from "@fern-docs/components/fa-icon";
 import { cn } from "@fern-docs/components/cn";
-
+import { FaIcon } from "@fern-docs/components/fa-icon";
+import { Bell, Check, CheckCircle, Info, Pin, Rocket, Star, TriangleAlert } from "lucide-react";
+import { type FC, isValidElement, type PropsWithChildren, type ReactElement, useRef } from "react";
+import { SelectControl, TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { SelectControl, TextInputControl } from "@/components/editor/editor-component/controls";
 
 export const EMPTY_CALLOUT_CONTENT = `
 <Callout intent="info">

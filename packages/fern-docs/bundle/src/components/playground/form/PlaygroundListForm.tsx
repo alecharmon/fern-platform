@@ -1,12 +1,10 @@
 "use client";
 
-import { memo, useCallback } from "react";
-
-import { Plus, X } from "lucide-react";
-
 import type { TypeDefinition, TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
-import { FernButton } from "@fern-docs/components/FernButton";
 import { cn } from "@fern-docs/components/cn";
+import { FernButton } from "@fern-docs/components/FernButton";
+import { Plus, X } from "lucide-react";
+import { memo, useCallback } from "react";
 
 import { getEmptyValueForType, shouldRenderInline } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";

@@ -1,11 +1,9 @@
 import "server-only";
 
-import type React from "react";
-
-import { UnreachableCaseError } from "ts-essentials";
-
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type { TableOfContentsItem } from "@fern-docs/mdx";
+import type React from "react";
+import { UnreachableCaseError } from "ts-essentials";
 
 import { CustomLayout } from "./CustomLayout";
 import { GuideLayout } from "./GuideLayout";

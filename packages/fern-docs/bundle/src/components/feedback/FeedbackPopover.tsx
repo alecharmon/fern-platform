@@ -1,14 +1,12 @@
 "use client";
 
-import { forwardRef, useCallback, useMemo, useState } from "react";
-
-import { Check, ThumbsDown, ThumbsUp } from "lucide-react";
-import { LazyMotion, domAnimation } from "motion/react";
-import * as m from "motion/react-m";
-import * as Selection from "selection-popover";
-
-import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { cn } from "@fern-docs/components/cn";
+import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
+import { Check, ThumbsDown, ThumbsUp } from "lucide-react";
+import { domAnimation, LazyMotion } from "motion/react";
+import * as m from "motion/react-m";
+import { forwardRef, useCallback, useMemo, useState } from "react";
+import * as Selection from "selection-popover";
 
 import { track } from "../analytics";
 import { useSelection } from "../hooks/useSelection";

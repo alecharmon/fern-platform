@@ -1,6 +1,3 @@
-import { createHash } from "crypto";
-import { flatten } from "es-toolkit/array";
-
 import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
 import { truncateToBytes, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import {
@@ -9,6 +6,8 @@ import {
     maybePrepareMdxContent,
     toDescription
 } from "@fern-docs/search-utils";
+import { createHash } from "crypto";
+import { flatten } from "es-toolkit/array";
 
 import type { TurbopufferRecord } from "../types";
 

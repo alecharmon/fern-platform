@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-import { ListFilter, Plus } from "lucide-react";
-
 import { Badge } from "@fern-docs/components/badges";
 import { Button } from "@fern-docs/components/button";
 import type { FacetFilter } from "@fern-docs/search-keyword";
+import { ListFilter, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { getFacetDisplay, toFilterOptions } from "../../utils/facet-display";
 import { Filter } from "../icons/filter";

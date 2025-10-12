@@ -1,9 +1,8 @@
 "use client";
 
+import { cn } from "@fern-docs/components/cn";
 import { atom, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-
-import { cn } from "@fern-docs/components/cn";
 
 const logoTextAtom = atom<string | undefined>(undefined);
 

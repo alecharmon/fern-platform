@@ -1,9 +1,8 @@
 import "server-only";
 
 import { createOpenAI } from "@ai-sdk/openai";
+import { queryTurbopuffer, type TurbopufferRecord, turbopufferUpsertTask } from "@fern-docs/search-ask-fern";
 import { embed, embedMany } from "ai";
-
-import { type TurbopufferRecord, queryTurbopuffer, turbopufferUpsertTask } from "@fern-docs/search-ask-fern";
 
 import { fdrEnvironment, fernToken_admin, turbopufferApiKey } from "./env-variables";
 

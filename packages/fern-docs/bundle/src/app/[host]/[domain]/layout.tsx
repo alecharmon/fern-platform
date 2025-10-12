@@ -1,13 +1,5 @@
 import "server-only";
 
-import Script from "next/script";
-import type { Metadata } from "next/types";
-import React from "react";
-import { preload } from "react-dom";
-
-import { getEnv } from "@vercel/functions";
-import { compact } from "es-toolkit/array";
-
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
@@ -28,10 +20,15 @@ import {
     getCustomerAnalytics as deprecated_getCustomerAnalytics,
     getLaunchDarklySettings
 } from "@fern-docs/edge-config";
-
-import { JavascriptProvider } from "@/components/JavascriptProvider";
+import { getEnv } from "@vercel/functions";
+import { compact } from "es-toolkit/array";
+import Script from "next/script";
+import type { Metadata } from "next/types";
+import React from "react";
+import { preload } from "react-dom";
 import { CustomerAnalytics } from "@/components/analytics/CustomerAnalytics";
 import { FernUser } from "@/components/fern-user";
+import { JavascriptProvider } from "@/components/JavascriptProvider";
 import SearchV2 from "@/components/search";
 import { generateMetadataFromConfig } from "@/components/seo";
 import { withJsConfig } from "@/components/with-js-config";
