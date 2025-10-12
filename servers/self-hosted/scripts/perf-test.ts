@@ -8,7 +8,8 @@
  *
  * Options:
  *   --fern-path <path>       Path to fern folder to mount (default: ../fern)
- *   --container-path <path>  Path to customer container image
+ *   --image-version <version> Version of fernapi/fern-self-hosted to pull from DockerHub (requires FERN_API_DOCKERHUB_PASSWORD env var)
+ *   --mount-folders <paths>  Paths to additional folders to mount (will be mounted at /folderName, comma-separated)
  *   --iterations <n>         Number of test iterations (default: 1)
  *   --output <path>         Output directory for reports (default: ../../.local/performance-reports)
  *   --collect-stats         Collect Docker stats during test
@@ -20,6 +21,7 @@ import chalk from "chalk";
 import { Command } from "commander";
 import { execa } from "execa";
 import fs from "fs";
+import os from "os";
 import path from "path";
 
 // Set up CLI with commander
@@ -29,7 +31,11 @@ program
     .name("perf-test")
     .description("Performance test script for Fern self-hosted container")
     .option("--fern-path <path>", "Path to fern folder to mount", path.resolve(__dirname, "../fern"))
-    .option("--container-path <path>", "Path to customer container image")
+    .option("--image-version <version>", "Version of fernapi/fern-self-hosted to pull from DockerHub")
+    .option(
+        "--mount-folders <paths>",
+        "Paths to additional folders to mount (will be mounted at /folderName, comma-separated)"
+    )
     .option("--iterations <n>", "Number of test iterations", "1")
     .option("--output <path>", "Output directory for reports", "../../.local/performance-reports")
     .option("--collect-stats", "Collect Docker stats during test", false)
@@ -40,7 +46,10 @@ const options = program.opts();
 
 const CONTAINER_NAME = "fern-self-hosted-perf-test";
 const FERN_PATH = path.resolve(options.fernPath);
-const CONTAINER_PATH = options.containerPath;
+const IMAGE_VERSION = options.imageVersion;
+const MOUNT_FOLDERS = options.mountFolders
+    ? options.mountFolders.split(",").map((p: string) => path.resolve(p.trim()))
+    : [];
 const ITERATIONS = parseInt(options.iterations);
 const OUTPUT_DIR = path.resolve(options.output);
 const COLLECT_STATS = options.collectStats;
@@ -71,6 +80,57 @@ if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
+function getDockerPlatform(): string {
+    const arch = os.arch();
+
+    // Map Node.js arch to Docker platform
+    if (arch === "arm64") {
+        return "linux/arm64";
+    } else if (arch === "x64") {
+        return "linux/amd64";
+    } else {
+        // Default to amd64 for other architectures
+        console.log(chalk.yellow(`  ⚠️  Unknown architecture ${arch}, defaulting to linux/amd64`));
+        return "linux/amd64";
+    }
+}
+
+async function authenticateDockerHub(): Promise<void> {
+    const dockerHubPassword = process.env.FERN_API_DOCKERHUB_PASSWORD;
+
+    if (!dockerHubPassword) {
+        throw new Error("FERN_API_DOCKERHUB_PASSWORD environment variable is required to pull images from DockerHub");
+    }
+
+    console.log(chalk.cyan("\n🔐 Authenticating with DockerHub..."));
+
+    try {
+        await execa("docker", ["login", "-u", "fernapi", "--password-stdin"], {
+            input: dockerHubPassword
+        });
+        console.log(chalk.green("  ✓ Successfully authenticated with DockerHub"));
+    } catch (error) {
+        throw new Error(`Failed to authenticate with DockerHub: ${error}`);
+    }
+}
+
+async function pullDockerImage(version: string): Promise<string> {
+    const imageName = `fernapi/fern-self-hosted:${version}`;
+    const platform = getDockerPlatform();
+
+    console.log(chalk.cyan(`\n📥 Pulling Docker image from DockerHub...`));
+    console.log(chalk.dim(`  Image: ${imageName}`));
+    console.log(chalk.dim(`  Platform: ${platform}`));
+
+    try {
+        await execa("docker", ["pull", "--platform", platform, imageName], { stdio: "inherit" });
+        console.log(chalk.green(`  ✓ Successfully pulled ${imageName}`));
+        return imageName;
+    } catch (error) {
+        throw new Error(`Failed to pull Docker image: ${error}`);
+    }
+}
+
 async function removeContainer(): Promise<void> {
     try {
         await execa("docker", ["rm", "-f", CONTAINER_NAME]);
@@ -85,7 +145,7 @@ async function startContainer(imageName: string): Promise<void> {
     console.log(chalk.dim(`  Image: ${imageName}`));
     console.log(chalk.dim(`  Fern path: ${FERN_PATH}`));
 
-    await execa("docker", [
+    const dockerArgs = [
         "run",
         "--name",
         CONTAINER_NAME,
@@ -101,9 +161,34 @@ async function startContainer(imageName: string): Promise<void> {
         "-p",
         "7702:7700",
         "-v",
-        `${FERN_PATH}:/fern`,
-        imageName
-    ]);
+        `${FERN_PATH}:/fern`
+    ];
+
+    // Add additional volume mounts if specified
+    const usedMountTargets = new Map<string, string>();
+    for (const mountFolder of MOUNT_FOLDERS) {
+        const folderName = path.basename(mountFolder);
+        const targetPath = `/${folderName}`;
+
+        // Check for basename collisions
+        if (usedMountTargets.has(targetPath)) {
+            const conflictingPath = usedMountTargets.get(targetPath)!;
+            throw new Error(
+                `Mount collision detected: Both "${conflictingPath}" and "${mountFolder}" ` +
+                    `would mount to the same container path "${targetPath}". ` +
+                    `Please rename folders or use different source paths to avoid conflicts.`
+            );
+        }
+
+        usedMountTargets.set(targetPath, mountFolder);
+        console.log(chalk.dim(`  Mount folder: ${mountFolder} -> ${targetPath}`));
+        dockerArgs.push("-v", `${mountFolder}:${targetPath}`);
+    }
+
+    dockerArgs.push(imageName);
+
+    console.log(chalk.dim(`Running docker command: docker ${dockerArgs.join(" ")}`));
+    await execa("docker", dockerArgs);
 
     console.log(chalk.green("  ✓ Container started"));
 }
@@ -236,6 +321,12 @@ async function collectDockerStats(): Promise<DockerStats | null> {
     }
 }
 
+function isSuccessfulStatusCode(statusCode: string): boolean {
+    const code = parseInt(statusCode);
+    // Accept 2xx (success) and 3xx (redirect) status codes as successful
+    return code >= 200 && code < 400;
+}
+
 async function waitForService(url: string, containerId: string, maxAttempts: number = 60): Promise<boolean> {
     for (let i = 0; i < maxAttempts; i++) {
         try {
@@ -245,7 +336,7 @@ async function waitForService(url: string, containerId: string, maxAttempts: num
                 { reject: false }
             );
 
-            if (stdout === "200") {
+            if (isSuccessfulStatusCode(stdout)) {
                 return true;
             }
         } catch {
@@ -457,78 +548,50 @@ function generateReport(metrics: PerformanceMetrics[], iteration?: number): stri
     return report;
 }
 
-async function loadCustomerContainer(containerPath: string): Promise<string> {
-    console.log(chalk.cyan("\n📦 Loading customer container..."));
-    console.log(chalk.dim(`  Path: ${containerPath}`));
-
-    const manifestPath = path.join(containerPath, "manifest.json");
-
-    if (fs.existsSync(manifestPath)) {
-        // It's an OCI directory
-        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
-        const repoTag = manifest[0]?.RepoTags?.[0];
-
-        if (!repoTag) {
-            throw new Error("Could not find repository tag in manifest.json");
-        }
-
-        console.log(chalk.dim(`  Found image tag: ${repoTag}`));
-
-        // Create tar from OCI directory
-        const tempTar = `/tmp/customer-container-${Date.now()}.tar`;
-        console.log(chalk.dim(`  Creating temporary tar file...`));
-
-        await execa("tar", ["-cf", tempTar, "-C", containerPath, "."]);
-
-        // Load the tar into Docker
-        console.log(chalk.dim(`  Loading container into Docker...`));
-        await execa("docker", ["load", "-i", tempTar]);
-
-        // Clean up
-        fs.unlinkSync(tempTar);
-        console.log(chalk.green("  ✓ Container loaded successfully"));
-
-        return repoTag;
-    } else {
-        // Assume it's a tar file
-        console.log(chalk.dim(`  Loading container tar file...`));
-        const { stdout } = await execa("docker", ["load", "-i", containerPath]);
-
-        const match = stdout.match(/Loaded image: (.+)/);
-        if (match) {
-            const imageName = match[1];
-            console.log(chalk.green(`  ✓ Container loaded: ${imageName}`));
-            return imageName;
-        } else {
-            throw new Error("Failed to extract image name from docker load output");
-        }
-    }
-}
-
 async function main() {
     console.log(chalk.bold.blue("🚀 Fern Self-Hosted Performance Test\n"));
     console.log(chalk.bold("Configuration:"));
     console.log(chalk.dim(`  Fern Path: ${FERN_PATH}`));
+    if (MOUNT_FOLDERS.length > 0) {
+        console.log(chalk.dim(`  Mount Folders:`));
+        for (const folder of MOUNT_FOLDERS) {
+            console.log(chalk.dim(`    - ${folder} -> /${path.basename(folder)}`));
+        }
+    }
     console.log(chalk.dim(`  Iterations: ${ITERATIONS}`));
     console.log(chalk.dim(`  Output Directory: ${OUTPUT_DIR}`));
     console.log(chalk.dim(`  Collect Stats: ${COLLECT_STATS}`));
     console.log(chalk.dim(`  Show Logs: ${SHOW_LOGS}`));
 
-    // Load customer container if specified
+    // Determine which image to use
     let imageName = "fern-self-hosted:latest";
-    if (CONTAINER_PATH) {
+    if (IMAGE_VERSION) {
+        console.log(chalk.dim(`  Image Version: ${IMAGE_VERSION}`));
+
         try {
-            imageName = await loadCustomerContainer(CONTAINER_PATH);
+            // Authenticate with DockerHub and pull the image
+            await authenticateDockerHub();
+            imageName = await pullDockerImage(IMAGE_VERSION);
         } catch (error) {
-            console.error(chalk.red(`\n❌ Failed to load customer container: ${error}`));
+            console.error(chalk.red(`\n❌ Failed to prepare Docker image: ${error}`));
             process.exit(1);
         }
+    } else {
+        console.log(chalk.dim(`  Image: Using local ${imageName}`));
     }
 
     // Verify fern path exists
     if (!fs.existsSync(FERN_PATH)) {
         console.error(chalk.red(`\n❌ Fern path does not exist: ${FERN_PATH}`));
         process.exit(1);
+    }
+
+    // Verify mount folders exist if specified
+    for (const folder of MOUNT_FOLDERS) {
+        if (!fs.existsSync(folder)) {
+            console.error(chalk.red(`\n❌ Mount folder does not exist: ${folder}`));
+            process.exit(1);
+        }
     }
 
     const metrics: PerformanceMetrics[] = [];
