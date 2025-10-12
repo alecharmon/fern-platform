@@ -8,12 +8,14 @@
  *
  * Options:
  *   --fern-path <path>       Path to fern folder to mount (default: ../fern)
- *   --image-version <version> Version of fernapi/fern-self-hosted to pull from DockerHub (requires FERN_API_DOCKERHUB_PASSWORD env var)
+ *   --image-version <version> Version of fernapi/fern-self-hosted to pull from DockerHub (requires DOCKERHUB_PASSWORD env var or --dockerhub-password)
  *   --mount-folders <paths>  Paths to additional folders to mount (will be mounted at /folderName, comma-separated)
  *   --iterations <n>         Number of test iterations (default: 1)
  *   --output <path>         Output directory for reports (default: ../../.local/performance-reports)
  *   --collect-stats         Collect Docker stats during test
  *   --logs                  Stream container logs to console
+ *   --docker-username <username> DockerHub username for authentication (default: fernapi)
+ *   --dockerhub-password <password> DockerHub password (takes precedence over DOCKERHUB_PASSWORD env var)
  *   --help                  Show this help message
  */
 
@@ -40,6 +42,8 @@ program
     .option("--output <path>", "Output directory for reports", "../../.local/performance-reports")
     .option("--collect-stats", "Collect Docker stats during test", false)
     .option("--logs", "Stream container logs to console", false)
+    .option("--docker-username <username>", "DockerHub username for authentication", "fernapi")
+    .option("--dockerhub-password <password>", "DockerHub password (takes precedence over DOCKERHUB_PASSWORD env var)")
     .parse(process.argv);
 
 const options = program.opts();
@@ -95,17 +99,11 @@ function getDockerPlatform(): string {
     }
 }
 
-async function authenticateDockerHub(): Promise<void> {
-    const dockerHubPassword = process.env.FERN_API_DOCKERHUB_PASSWORD;
-
-    if (!dockerHubPassword) {
-        throw new Error("FERN_API_DOCKERHUB_PASSWORD environment variable is required to pull images from DockerHub");
-    }
-
+async function authenticateDockerHub(dockerUsername: string, dockerHubPassword: string): Promise<void> {
     console.log(chalk.cyan("\n🔐 Authenticating with DockerHub..."));
 
     try {
-        await execa("docker", ["login", "-u", "fernapi", "--password-stdin"], {
+        await execa("docker", ["login", "-u", dockerUsername, "--password-stdin"], {
             input: dockerHubPassword
         });
         console.log(chalk.green("  ✓ Successfully authenticated with DockerHub"));
@@ -562,15 +560,30 @@ async function main() {
     console.log(chalk.dim(`  Output Directory: ${OUTPUT_DIR}`));
     console.log(chalk.dim(`  Collect Stats: ${COLLECT_STATS}`));
     console.log(chalk.dim(`  Show Logs: ${SHOW_LOGS}`));
+    if (IMAGE_VERSION) {
+        console.log(chalk.dim(`  Docker Username: ${options.dockerUsername}`));
+    }
 
     // Determine which image to use
     let imageName = "fern-self-hosted:latest";
     if (IMAGE_VERSION) {
         console.log(chalk.dim(`  Image Version: ${IMAGE_VERSION}`));
 
+        // Get Docker credentials
+        const dockerUsername = options.dockerUsername;
+        const dockerHubPassword = options.dockerhubPassword || process.env.DOCKERHUB_PASSWORD;
+
+        if (!dockerHubPassword) {
+            console.error(chalk.red(`\n❌ DockerHub password is required to pull images from DockerHub. `));
+            console.error(
+                chalk.red(`   Set DOCKERHUB_PASSWORD environment variable or use --dockerhub-password option.`)
+            );
+            process.exit(1);
+        }
+
         try {
             // Authenticate with DockerHub and pull the image
-            await authenticateDockerHub();
+            await authenticateDockerHub(dockerUsername, dockerHubPassword);
             imageName = await pullDockerImage(IMAGE_VERSION);
         } catch (error) {
             console.error(chalk.red(`\n❌ Failed to prepare Docker image: ${error}`));
