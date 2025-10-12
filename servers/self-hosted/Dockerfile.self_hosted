@@ -57,19 +57,19 @@ COPY servers/fdr/prisma /prisma
 
 # ----------- Start MINIO setup  -----------
 
+# Copy pre-downloaded MinIO binaries (minio is compressed to save space)
+COPY servers/self-hosted/binaries/minio.gz /tmp/minio.gz
+COPY servers/self-hosted/binaries/mc /usr/local/bin/mc
+
 RUN log "Installing MinIO..." && \
-    apk add --no-cache wget 2>&1 | add-timestamps && \
-    wget https://dl.min.io/server/minio/release/linux-amd64/minio 2>&1 | add-timestamps && \
-    chmod +x minio && \
-    mv minio /usr/local/bin/ && \
+    gunzip /tmp/minio.gz && \
+    mv /tmp/minio /usr/local/bin/minio && \
+    chmod +x /usr/local/bin/minio && \
+    chmod +x /usr/local/bin/mc && \
     adduser -D -s /bin/sh minio-user || true && \
     mkdir -p /data && \
     # Make data directory accessible to all users
-    chmod 777 /data && \
-    log "Installing MinIO client..." && \
-    wget https://dl.min.io/client/mc/release/linux-amd64/mc 2>&1 | add-timestamps && \
-    chmod +x mc && \
-    mv mc /usr/local/bin/
+    chmod 777 /data
 
 ENV MINIO_VOLUMES="/data" \
     MINIO_URL="http://localhost:9000" \
@@ -146,8 +146,10 @@ RUN log "Installing jq and yq..." && \
     apk add --no-cache jq yq 2>&1 | add-timestamps
 
 # ----------- Start Buf CLI setup -----------
+# Copy pre-downloaded Buf CLI binary
+COPY servers/self-hosted/binaries/buf-Linux-x86_64 /usr/local/bin/buf
+
 RUN log "Installing Buf CLI..." && \
-    wget https://github.com/bufbuild/buf/releases/download/v1.57.2/buf-Linux-x86_64 -O /usr/local/bin/buf 2>&1 | add-timestamps && \
     chmod +x /usr/local/bin/buf
 
 # Pre-install buf's npm dependencies into a reusable location
