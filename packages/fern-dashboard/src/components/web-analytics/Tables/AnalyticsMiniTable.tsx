@@ -21,6 +21,7 @@ interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     getItemKey: (item: T) => string;
     showGradient?: boolean;
     gradientKey?: string;
+    barVariant?: "green" | "red";
     onSort?: (field: string, direction: "asc" | "desc") => void;
     maxLength?: number;
 }
@@ -52,6 +53,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
     getItemKey,
     showGradient = false,
     gradientKey = "visitors",
+    barVariant = "green",
     onSort,
     maxLength = 45
 }: AnalyticsMiniTableProps<T>) {
@@ -173,12 +175,21 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                                         width: `${percentage}%`,
                                                         borderRadius: "4px",
                                                         pointerEvents: "none",
-                                                        background: `linear-gradient(to right, 
-                                                            transparent 0%, 
-                                                            rgb(34 197 94 / 0.1) 30%, 
-                                                            rgb(34 197 94 / 0.25) 50%, 
-                                                            rgb(34 197 94 / 0.35) 60%, 
-                                                            rgb(34 197 94 / 0.35) 70%, 
+                                                        background:
+                                                            barVariant === "red"
+                                                                ? `linear-gradient(to right,
+                                                            transparent 0%,
+                                                            rgb(239 68 68 / 0.1) 30%,
+                                                            rgb(239 68 68 / 0.25) 50%,
+                                                            rgb(239 68 68 / 0.35) 60%,
+                                                            rgb(239 68 68 / 0.35) 70%,
+                                                            rgb(239 68 68 / 0.5) 80%`
+                                                                : `linear-gradient(to right,
+                                                            transparent 0%,
+                                                            rgb(34 197 94 / 0.1) 30%,
+                                                            rgb(34 197 94 / 0.25) 50%,
+                                                            rgb(34 197 94 / 0.35) 60%,
+                                                            rgb(34 197 94 / 0.35) 70%,
                                                             rgb(34 197 94 / 0.5) 80%`
                                                     }}
                                                 />

@@ -34,6 +34,7 @@ export interface WebAnalyticsData {
     channels?: { channel: string; visitors: number; views: number }[];
     deviceTypes?: { deviceType: string; visitors: number; views: number }[];
     referringDomains?: { domain: string; visitors: number; views: number }[];
+    pages404?: { path: string; count: number }[];
 }
 
 export type RedisCacheKey<T extends RedisCacheKeyType> = string & {

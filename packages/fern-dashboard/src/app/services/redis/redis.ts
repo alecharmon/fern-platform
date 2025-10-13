@@ -34,3 +34,24 @@ export async function redisGet<T extends RedisCacheKeyType>(
 export async function redisDel<T extends RedisCacheKeyType>(key: RedisCacheKey<T>) {
     await getRedisClient().del(key);
 }
+
+export async function redisDelPattern(pattern: string) {
+    const redis = getRedisClient();
+    const keys: string[] = [];
+    let cursor: string | number = 0;
+
+    // Use SCAN to find all keys matching the pattern
+    do {
+        const result = await redis.scan(cursor, { match: pattern, count: 100 });
+        cursor = result[0];
+        keys.push(...result[1]);
+        // Redis scan returns cursor as string '0' when done
+    } while (cursor.toString() !== "0");
+
+    // Delete all matching keys
+    if (keys.length > 0) {
+        await redis.del(...keys);
+    }
+
+    return keys.length;
+}

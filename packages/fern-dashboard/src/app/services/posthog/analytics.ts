@@ -634,6 +634,44 @@ export class AnalyticsService {
     }
 
     /**
+     * Get most common 404 pages by analyzing not_found events
+     */
+    async get404Pages(
+        options: TimeSeriesOptions & {
+            limit?: number;
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ path: string; count: number }[]> {
+        const { limit = 20, order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        const query = `
+      SELECT
+        properties.pathname as path,
+        count(*) as count
+      FROM events
+      WHERE
+        event = 'not_found'
+        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND properties.pathname IS NOT NULL
+        AND properties.pathname != ''
+        ${whereClause}
+      GROUP BY properties.pathname
+      ORDER BY count ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, number]>(query, {
+            name: `404-pages-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            path: row[0] || "/",
+            count: row[1]
+        }));
+    }
+
+    /**
      * Get the configuration for this analytics service
      */
     getConfig(): Readonly<AnalyticsConfig> {

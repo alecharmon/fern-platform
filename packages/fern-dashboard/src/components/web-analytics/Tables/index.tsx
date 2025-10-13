@@ -11,6 +11,7 @@ import AnalyticsMiniTable from "./AnalyticsMiniTable";
 import ChannelsTable from "./ChannelsTable";
 import DeviceTypesTable from "./DeviceTypesTable";
 import LLMFileViewsTable from "./LLMFileViewsTable";
+import NotFoundPagesTable from "./NotFoundPagesTable";
 import ReferringDomainsTable from "./ReferringDomainsTable";
 
 interface AnalyticsTablesProps {
@@ -143,6 +144,11 @@ function AnalyticsTables({ docsUrl, dateRange }: AnalyticsTablesProps) {
             <div className="flex flex-col gap-4 lg:flex-row">
                 <ReferringDomainsTable docsUrl={docsUrl} dateRange={dateRange} />
                 <LLMFileViewsTable docsUrl={docsUrl} dateRange={dateRange} />
+            </div>
+
+            {/* Fourth row: 404 Pages */}
+            <div className="flex flex-col gap-4 lg:flex-row">
+                <NotFoundPagesTable docsUrl={docsUrl} dateRange={dateRange} />
             </div>
         </div>
     );

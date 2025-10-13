@@ -12,9 +12,20 @@ import { getAnalyticsService } from "../services/posthog";
 import type { DateRangeOptions } from "../services/posthog/types";
 import { AsyncRedisCache } from "../services/redis/AsyncRedisCache";
 import { RedisCacheKey, RedisCacheKeyType } from "../services/redis/cacheKey";
+import { redisDelPattern } from "../services/redis/redis";
 
-const DEFAULT_DATE_RANGE = {
-    type: "last_n_days" as const,
+// Interface for cache key generation - uses flattened structure
+interface CacheKeyParams {
+    dateRange?: DateRangeOptions;
+    includeInternal?: boolean;
+    groupBy?: number;
+    limit?: number;
+    orderBy?: string;
+    order?: string;
+}
+
+const DEFAULT_DATE_RANGE: DateRangeOptions = {
+    type: "last_n_days",
     days: 7
 };
 
@@ -22,8 +33,33 @@ const DEFAULT_DATE_RANGE = {
 const WEB_ANALYTICS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, { ttlInSeconds: 3600 });
 
 // Helper to generate a deterministic cache key from request parameters
-function getCacheKey(endpoint: string, domain: string, params: Record<string, unknown>): string {
-    const sortedParams = JSON.stringify(params, Object.keys(params).sort());
+function getCacheKey(endpoint: string, domain: string, params: CacheKeyParams): string {
+    const dateRange = params.dateRange;
+    const flatParams: Record<string, unknown> = {
+        includeInternal: params.includeInternal,
+        groupBy: params.groupBy,
+        limit: params.limit,
+        orderBy: params.orderBy,
+        order: params.order
+    };
+
+    // Flatten date range based on its discriminated type
+    if (dateRange) {
+        flatParams.dateRangeType = dateRange.type;
+
+        if (dateRange.type === "last_n_days") {
+            flatParams.dateRangeDays = dateRange.days;
+        } else if (dateRange.type === "last_n_weeks") {
+            flatParams.dateRangeWeeks = dateRange.weeks;
+        } else if (dateRange.type === "last_n_months") {
+            flatParams.dateRangeMonths = dateRange.months;
+        } else if (dateRange.type === "custom_range") {
+            flatParams.dateRangeStartDate = dateRange.startDate;
+            flatParams.dateRangeEndDate = dateRange.endDate;
+        }
+    }
+
+    const sortedParams = JSON.stringify(flatParams, Object.keys(flatParams).sort());
     return RedisCacheKey.webAnalytics(endpoint, domain, sortedParams);
 }
 
@@ -163,7 +199,11 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
     const baseDomain = getBaseDomain(validated.docsUrl);
 
     // Generate cache key
-    const cacheKey = getCacheKey("metrics", baseDomain, { dateRange, includeInternal: validated.includeInternal });
+    const cacheKey = getCacheKey("metrics", baseDomain, {
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy
+    });
 
     // Use cache
     const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
@@ -643,4 +683,78 @@ export async function getReferringDomains(request: TableRequest): Promise<{
     });
 
     return { referringDomains: cachedData.referringDomains! };
+}
+
+/**
+ * Server action to fetch 404 pages from PostHog
+ */
+export async function get404Pages(request: TableRequest): Promise<{ pages404: { path: string; count: number }[] }> {
+    // Validate input
+    const validated = TableRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Generate cache key
+    const cacheKey = getCacheKey("404Pages", baseDomain, {
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit,
+        order: validated.order
+    });
+
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch 404 pages from PostHog
+        const pages404 = await analytics.get404Pages({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 20,
+            order: validated.order || "desc"
+        });
+
+        return { pages404 };
+    });
+
+    return { pages404: cachedData.pages404! };
+}
+
+/**
+ * Server action to clear all web analytics cache for a specific domain
+ * This invalidates all cached analytics data, forcing fresh fetches from PostHog
+ */
+export async function clearWebAnalyticsCache(docsUrl: string): Promise<{ success: boolean }> {
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    const baseDomain = getBaseDomain(docsUrl);
+
+    // Clear all analytics cache keys for this domain by pattern
+    // Pattern matches: web-analytics-*-{domain}-*
+    await redisDelPattern(`web-analytics-*-${baseDomain}-*`);
+
+    return { success: true };
 }

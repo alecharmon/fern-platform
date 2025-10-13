@@ -1,11 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
-import { getWebAnalytics } from "@/app/actions/getWebAnalytics";
+import { clearWebAnalyticsCache, getWebAnalytics } from "@/app/actions/getWebAnalytics";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
 
+import { Button } from "../ui/button";
 import WebAnalyticsChart from "./Chart";
 import SelectDate from "./SelectDate";
 import AnalyticsTables from "./Tables";
@@ -21,6 +24,8 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
     });
     const [groupBy, setGroupBy] = useState<number>(1);
 
+    const queryClient = useQueryClient();
+
     const { data, isLoading, error } = useQuery({
         queryKey: ["web-analytics", docsUrl, dateRange, groupBy],
         queryFn: () =>
@@ -32,10 +37,37 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
         refetchInterval: 60000 // Refetch every minute
     });
 
+    const refreshMutation = useMutation({
+        mutationFn: async () => {
+            await clearWebAnalyticsCache(docsUrl);
+        },
+        onSuccess: async () => {
+            // Invalidate all web analytics queries to force refetch
+            await queryClient.invalidateQueries({ queryKey: ["web-analytics"] });
+            toast.success("Analytics refreshed");
+        },
+        onError: (error) => {
+            console.error("Failed to refresh analytics", error);
+            toast.error("Failed to refresh analytics");
+        }
+    });
+
     return (
         <div className="flex w-full flex-col gap-6">
-            {/* Date Range and GroupBy Selectors */}
-            <SelectDate value={dateRange} onChange={setDateRange} />
+            {/* Date Range and Refresh Button */}
+            <div className="flex items-center gap-2">
+                <SelectDate value={dateRange} onChange={setDateRange} />
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refreshMutation.mutate()}
+                    disabled={refreshMutation.isPending}
+                    className="gap-2"
+                >
+                    <RefreshCwIcon className={`size-4 ${refreshMutation.isPending ? "animate-spin" : ""}`} />
+                    Refresh
+                </Button>
+            </div>
 
             {/* Metrics Cards using CSS Grid for equal 1/2 spacing */}
             <div className="flex justify-between">

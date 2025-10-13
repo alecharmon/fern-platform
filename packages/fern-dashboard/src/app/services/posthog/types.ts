@@ -38,7 +38,6 @@ export interface TimeSeriesData {
     value: number;
 }
 
-// Date range options using discriminated union
 export type DateRangeOptions =
     | {
           type: "last_n_days";
@@ -54,8 +53,8 @@ export type DateRangeOptions =
       }
     | {
           type: "custom_range";
-          startDate: string; // ISO date string: "2024-01-01"
-          endDate: string; // ISO date string: "2024-01-31"
+          startDate: string;
+          endDate: string;
       };
 
 // Common analytics query options
