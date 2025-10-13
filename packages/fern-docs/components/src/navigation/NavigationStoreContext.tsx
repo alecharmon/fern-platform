@@ -81,6 +81,8 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     setDeletionToastCallback: NavigationStore["setDeletionToastCallback"];
     emitPageSaveEvent: NavigationStore["emitPageSaveEvent"];
     subscribePageSaveEvent: NavigationStore["subscribePageSaveEvent"];
+    emitNestedEditorUpdate: NavigationStore["emitNestedEditorUpdate"];
+    subscribeNestedEditorUpdate: NavigationStore["subscribeNestedEditorUpdate"];
     handleCommitSuccess: NavigationStore["handleCommitSuccess"];
 };
 
@@ -103,6 +105,8 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         setDeletionToastCallback: store.setDeletionToastCallback.bind(store),
         emitPageSaveEvent: store.emitPageSaveEvent.bind(store),
         subscribePageSaveEvent: store.subscribePageSaveEvent.bind(store),
+        emitNestedEditorUpdate: store.emitNestedEditorUpdate.bind(store),
+        subscribeNestedEditorUpdate: store.subscribeNestedEditorUpdate.bind(store),
         handleCommitSuccess: store.handleCommitSuccess.bind(store)
     };
 }

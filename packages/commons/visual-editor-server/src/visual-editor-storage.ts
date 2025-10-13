@@ -10,7 +10,7 @@ export class VisualEditorStorage {
     ): Promise<void> {
         const uniqueRunId = crypto.randomUUID();
         const startTimestamp = Date.now();
-        console.log(`[VisualEditorStorage] Storing FDR for ${domain}:${branchName}`, {
+        console.debug(`[VisualEditorStorage] Storing FDR for ${domain}:${branchName}`, {
             uniqueRunId,
             timestamp: startTimestamp
         });
@@ -19,7 +19,7 @@ export class VisualEditorStorage {
             await mongoClient.set(domain, branchName, fdrResponse);
             const endTimestamp = Date.now();
             const duration = endTimestamp - startTimestamp;
-            console.log(`[VisualEditorStorage] FDR successfully stored for ${domain}:${branchName}`, {
+            console.debug(`[VisualEditorStorage] FDR successfully stored for ${domain}:${branchName}`, {
                 uniqueRunId,
                 timestamp: endTimestamp,
                 duration
@@ -33,7 +33,7 @@ export class VisualEditorStorage {
     async getFdrSnapshot(domain: string, branchName: string): Promise<DocsV2Read.LoadDocsForUrlResponse | null> {
         const uniqueRunId = crypto.randomUUID();
         const startTimestamp = Date.now();
-        console.log(`[VisualEditorStorage] Retrieving FDR for ${domain}:${branchName}`, {
+        console.debug(`[VisualEditorStorage] Retrieving FDR for ${domain}:${branchName}`, {
             uniqueRunId
         });
 
@@ -41,7 +41,7 @@ export class VisualEditorStorage {
             const fdrResponse = await mongoClient.get(domain, branchName);
             const endTimestamp = Date.now();
             const duration = endTimestamp - startTimestamp;
-            console.log(`[VisualEditorStorage] FDR successfully retrieved for ${domain}:${branchName}`, {
+            console.debug(`[VisualEditorStorage] FDR successfully retrieved for ${domain}:${branchName}`, {
                 uniqueRunId,
                 duration
             });

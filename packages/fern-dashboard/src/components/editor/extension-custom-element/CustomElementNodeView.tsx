@@ -1,17 +1,21 @@
+import { useNavigation } from "@fern-docs/components/navigation";
+import type { Transaction } from "@tiptap/pm/state";
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect } from "react";
 
 import FernEditorMDXRenderer from "@/components/editor/editor-mdx-renderer/FernEditorMDXRenderer";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
+import { useCurrentPage } from "@/providers/CurrentPageContext";
 import type { EncodedDocsUrl } from "@/utils/types";
-
 import { UnsupportedContent } from "../UnsupportedContent";
 
 export const CustomElementNodeView = (props: NodeViewProps) => {
     const { node, updateAttributes, editor, getPos } = props;
     const { attrs } = node;
     const params = useParams();
+    const { currentFilename } = useCurrentPage();
+    const { emitNestedEditorUpdate } = useNavigation();
 
     // Get the MDX content from the node attributes
     const mdxb64 = attrs["fve-mdx-b64"];
@@ -43,11 +47,16 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
         }
     }, [mdxb64, handleDelete]);
 
-    const handleUpdate = (updatedMdx: string) => {
+    const handleUpdate = (updatedMdx: string, transaction?: Transaction) => {
         updateAttributes({
             "fve-mdx-b64": Buffer.from(updatedMdx).toString("base64"),
             "fve-newly-created": false
         });
+
+        // Emit nested editor update event to notify PageEditor
+        if (currentFilename) {
+            emitNestedEditorUpdate({ filename: currentFilename, transaction });
+        }
     };
 
     return (

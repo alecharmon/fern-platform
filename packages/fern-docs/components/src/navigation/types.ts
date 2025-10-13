@@ -345,3 +345,8 @@ export interface PageSaveEvent {
     frontmatter: Record<string, unknown>;
     html: string;
 }
+
+export interface NestedEditorUpdateEvent {
+    filename: string;
+    transaction?: unknown;
+}

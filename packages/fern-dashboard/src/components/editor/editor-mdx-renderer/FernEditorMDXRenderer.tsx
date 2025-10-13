@@ -8,6 +8,7 @@ import {
 } from "@fern-docs/mdx";
 
 import { useMDXComponents } from "@mdx-js/react";
+import type { Transaction } from "@tiptap/pm/state";
 import { getMDXComponent } from "mdx-bundler/client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { EditorComponentChildrenProvider } from "@/components/editor/editor-component/EditorComponentChildrenContext";
@@ -16,7 +17,6 @@ import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
-
 import { UnsupportedContent } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
 import { parseMDX } from "./parse";
@@ -102,7 +102,7 @@ function buildMdxElement(
 
 interface FernEditorMDXRendererProps {
     mdx: string;
-    onUpdate: (mdx: string) => unknown;
+    onUpdate: (mdx: string, transaction?: Transaction) => unknown;
     newlyCreated?: boolean;
     docsUrl?: EncodedDocsUrl;
     branch?: string;
@@ -215,7 +215,7 @@ MDXRenderer.displayName = "MDXRenderer";
 interface JSXElementRendererProps {
     element: JSXElement;
     index: number;
-    onUpdate: (mdx: string) => unknown;
+    onUpdate: (mdx: string, transaction?: Transaction) => unknown;
     newlyCreated?: boolean;
     docsUrl?: EncodedDocsUrl;
     branch?: string;
@@ -248,12 +248,12 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
                 initialContent={html.html}
                 disableDragging={element.value.contentDraggingDisabled}
                 className="px-4"
-                onUpdate={({ editor }) => {
+                onUpdate={({ editor, transaction }) => {
                     const html = editor.getHTML();
                     const mdx = htmlToMdx(html);
                     const indentedMdx = applyIndentation(mdx.mdx, 1);
                     const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
-                    debouncedOnUpdate(finalMdx);
+                    debouncedOnUpdate(finalMdx, transaction);
                 }}
             />
         );
@@ -263,10 +263,10 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
                 mdx={jsxChildren.childrenMdx}
                 docsUrl={docsUrl}
                 branch={branch}
-                onUpdate={(mdx) => {
+                onUpdate={(mdx, transaction) => {
                     const indentedMdx = applyIndentation(mdx, 1);
                     const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
-                    onUpdate(finalMdx);
+                    onUpdate(finalMdx, transaction);
                 }}
             />
         );
@@ -321,7 +321,7 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
 interface ParsedElementRendererProps {
     element: ParsedMarkdownElement;
     index: number;
-    onUpdate: (mdx: string) => unknown;
+    onUpdate: (mdx: string, transaction?: Transaction) => unknown;
     newlyCreated?: boolean;
     docsUrl?: EncodedDocsUrl;
     branch?: string;
@@ -381,7 +381,7 @@ const FernEditorMDXRendererInternal = ({
         return initialMap;
     }, [parsed]);
 
-    const handleChildUpdate = (index: number, updatedMdx: string) => {
+    const handleChildUpdate = (index: number, updatedMdx: string, transaction?: Transaction) => {
         const newMap = new Map(elementMdxMap);
 
         if (updatedMdx === "") {
@@ -396,7 +396,7 @@ const FernEditorMDXRendererInternal = ({
             .sort(([a], [b]) => a - b)
             .map(([_, elementMdx]) => elementMdx)
             .join("\n");
-        onUpdate(fullMdx);
+        onUpdate(fullMdx, transaction);
     };
 
     return parsed.map((element, index) => (
@@ -404,7 +404,7 @@ const FernEditorMDXRendererInternal = ({
             key={`${index}_${deleteCounter.current}`}
             index={index}
             element={element}
-            onUpdate={(updatedMdx) => handleChildUpdate(index, updatedMdx)}
+            onUpdate={(updatedMdx, transaction) => handleChildUpdate(index, updatedMdx, transaction)}
             newlyCreated={newlyCreated}
             docsUrl={docsUrl}
             branch={branch}

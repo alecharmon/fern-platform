@@ -2,8 +2,9 @@
 
 import { useRouter } from "@bprogress/next/app";
 import { constructEditorSlug, useNavigation } from "@fern-docs/components/navigation";
+import { diffLines } from "diff";
 import { ChevronDownIcon, CodeIcon, FileIcon, Undo2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
@@ -18,6 +19,33 @@ export function FilesDropdown() {
 
     const changedFilesList = Object.keys(files.changed).filter((filename) => filename !== "docs.yml");
     const changedFilesCount = changedFilesList.length;
+
+    // Calculate diff stats for each file
+    const fileDiffStats = useMemo(() => {
+        const stats: Record<string, { added: number; removed: number }> = {};
+
+        for (const filename of changedFilesList) {
+            const pageEntry = registeredPages[filename];
+            const initial = pageEntry?.initialMdx ?? "";
+            const changed = files.changed[filename] ?? "";
+
+            const diff = diffLines(initial, changed);
+            let added = 0;
+            let removed = 0;
+
+            for (const part of diff) {
+                if (part.added) {
+                    added += part.count ?? 0;
+                } else if (part.removed) {
+                    removed += part.count ?? 0;
+                }
+            }
+
+            stats[filename] = { added, removed };
+        }
+
+        return stats;
+    }, [registeredPages, files.changed, changedFilesList]);
 
     const handleResetClick = (filename: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -109,83 +137,96 @@ export function FilesDropdown() {
                         <div className="text-muted-foreground px-4 py-8 text-center text-sm">No changed files</div>
                     ) : (
                         <div className="max-h-[320px] overflow-y-auto">
-                            {changedFilesList.map((filename) => (
-                                <DropdownMenuItem
-                                    key={filename}
-                                    className="flex cursor-pointer items-center justify-between gap-3 p-1 mx-0 hover:bg-gray-300 text-muted-foreground hover:text-foreground"
-                                    onSelect={(e) => e.preventDefault()}
-                                >
-                                    <div
-                                        className="flex min-w-0 flex-1 items-center gap-2 ml-1"
-                                        onClick={() => handleFileClick(filename)}
+                            {changedFilesList.map((filename) => {
+                                const stats = fileDiffStats[filename] ?? { added: 0, removed: 0 };
+                                return (
+                                    <DropdownMenuItem
+                                        key={filename}
+                                        className="flex cursor-pointer items-center justify-between gap-3 p-1 mx-0 hover:bg-gray-300 text-muted-foreground hover:text-foreground"
+                                        onSelect={(e) => e.preventDefault()}
                                     >
-                                        <div className="shrink-0">{getFileIcon(filename)}</div>
-                                        <span className="truncate text-sm" title={filename}>
-                                            /{truncateFilename(filename)}
-                                        </span>
-                                    </div>
-                                    <Popover
-                                        open={resetPopoverOpen === filename}
-                                        onOpenChange={(open) => {
-                                            setResetPopoverOpen(open ? filename : null);
-                                        }}
-                                        modal={false}
-                                    >
-                                        <DashboardTooltip
-                                            content={resetPopoverOpen === filename ? undefined : "Reset changes"}
-                                            delayDuration={300}
+                                        <div
+                                            className="flex min-w-0 flex-1 items-center gap-2 ml-1"
+                                            onClick={() => handleFileClick(filename)}
                                         >
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="shrink-0 size-7 p-0 rounded-md border bg-white border-gray-500"
-                                                    onClick={(e) => handleResetClick(filename, e)}
-                                                >
-                                                    <Undo2 className="size-3 text-muted-foreground" />
-                                                </Button>
-                                            </PopoverTrigger>
-                                        </DashboardTooltip>
-                                        <PopoverContent
-                                            side="right"
-                                            align="center"
-                                            sideOffset={8}
-                                            className="w-60"
-                                            onOpenAutoFocus={(e) => e.preventDefault()}
-                                            onInteractOutside={(e) => {
-                                                // Prevent closing when clicking inside the dropdown
-                                                const target = e.target as HTMLElement;
-                                                if (target.closest('[data-slot="dropdown-menu-content"]')) {
-                                                    e.preventDefault();
-                                                }
+                                            <div className="shrink-0">{getFileIcon(filename)}</div>
+                                            <span className="truncate text-sm" title={filename}>
+                                                /{truncateFilename(filename)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            {stats.added > 0 && (
+                                                <span className="text-xs text-green-1100 font-mono">
+                                                    +{stats.added}
+                                                </span>
+                                            )}
+                                            {stats.removed > 0 && (
+                                                <span className="text-xs text-red-600 font-mono">-{stats.removed}</span>
+                                            )}
+                                        </div>
+                                        <Popover
+                                            open={resetPopoverOpen === filename}
+                                            onOpenChange={(open) => {
+                                                setResetPopoverOpen(open ? filename : null);
                                             }}
+                                            modal={false}
                                         >
-                                            <div className="flex flex-col gap-3">
-                                                <div className="text-sm font-semibold">
-                                                    Reset all changes on this page?
-                                                </div>
-
-                                                <div className="flex justify-end gap-2">
+                                            <DashboardTooltip
+                                                content={resetPopoverOpen === filename ? undefined : "Reset changes"}
+                                                delayDuration={300}
+                                            >
+                                                <PopoverTrigger asChild>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => setResetPopoverOpen(null)}
+                                                        className="shrink-0 size-7 p-0 rounded-md border bg-white border-gray-500"
+                                                        onClick={(e) => handleResetClick(filename, e)}
                                                     >
-                                                        Cancel
+                                                        <Undo2 className="size-3 text-muted-foreground" />
                                                     </Button>
-                                                    <Button
-                                                        variant="default"
-                                                        size="sm"
-                                                        onClick={() => handleConfirmReset(filename)}
-                                                    >
-                                                        Reset
-                                                    </Button>
+                                                </PopoverTrigger>
+                                            </DashboardTooltip>
+                                            <PopoverContent
+                                                side="right"
+                                                align="center"
+                                                sideOffset={8}
+                                                className="w-60"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onInteractOutside={(e) => {
+                                                    // Prevent closing when clicking inside the dropdown
+                                                    const target = e.target as HTMLElement;
+                                                    if (target.closest('[data-slot="dropdown-menu-content"]')) {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                            >
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="text-sm font-semibold">
+                                                        Reset all changes on this page?
+                                                    </div>
+
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setResetPopoverOpen(null)}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            variant="default"
+                                                            size="sm"
+                                                            onClick={() => handleConfirmReset(filename)}
+                                                        >
+                                                            Reset
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-                                </DropdownMenuItem>
-                            ))}
+                                            </PopoverContent>
+                                        </Popover>
+                                    </DropdownMenuItem>
+                                );
+                            })}
                         </div>
                     )}
                 </DropdownMenuContent>

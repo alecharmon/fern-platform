@@ -17,6 +17,7 @@ import type {
     DocsYmlChange,
     DocsYmlChanges,
     NavigationSnapshot,
+    NestedEditorUpdateEvent,
     PageData,
     PageDataDependencies,
     PageFilename,
@@ -50,6 +51,7 @@ export class NavigationStore {
 
     private _listeners = new Set<() => void>();
     private _pageSaveEventListeners = new Set<(event: PageSaveEvent) => void>();
+    private _nestedEditorUpdateListeners = new Set<(event: NestedEditorUpdateEvent) => void>();
 
     constructor(branchName: string, orgName: string, docsUrl: string) {
         this._branchName = branchName;
@@ -464,6 +466,17 @@ export class NavigationStore {
     subscribePageSaveEvent(listener: (event: PageSaveEvent) => void): () => void {
         this._pageSaveEventListeners.add(listener);
         return () => this._pageSaveEventListeners.delete(listener);
+    }
+
+    /** Emits a nested editor update event to all listeners */
+    emitNestedEditorUpdate(event: NestedEditorUpdateEvent): void {
+        this._nestedEditorUpdateListeners.forEach((listener) => listener(event));
+    }
+
+    /** Subscribes to nested editor update events */
+    subscribeNestedEditorUpdate(listener: (event: NestedEditorUpdateEvent) => void): () => void {
+        this._nestedEditorUpdateListeners.add(listener);
+        return () => this._nestedEditorUpdateListeners.delete(listener);
     }
 
     // useSyncExternalStore

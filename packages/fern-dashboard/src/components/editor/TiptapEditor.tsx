@@ -13,7 +13,7 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { createLowlight } from "lowlight";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
@@ -166,6 +166,17 @@ export default function TiptapEditor({
     disableDragging
 }: TiptapEditor.Props) {
     const isEditingDisabled = useEditingDisabled();
+    const skipFirstUpdateRef = useRef(true);
+
+    const handleUpdate: EditorProviderProps["onUpdate"] = (props) => {
+        // Skip the first update event as it's always just processing the initial content
+        if (skipFirstUpdateRef.current) {
+            skipFirstUpdateRef.current = false;
+            return;
+        }
+
+        onUpdate?.(props);
+    };
 
     return (
         <EditorProvider
@@ -186,7 +197,7 @@ export default function TiptapEditor({
             }}
             immediatelyRender={false}
             onCreate={onCreate}
-            onUpdate={onUpdate}
+            onUpdate={handleUpdate}
             onFocus={({ editor }) => {
                 // Clear selection from all other ProseMirror editors when this editor is focused
                 const allEditors = document.querySelectorAll(".ProseMirror");
