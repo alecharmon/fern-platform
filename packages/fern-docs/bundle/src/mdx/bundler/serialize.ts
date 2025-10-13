@@ -241,11 +241,9 @@ async function serializeMdxImpl(
             o.metafile = false;
             o.write = false;
 
-            const restrictedDefine = {
-                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
+            o.define = {
+                "process.env": "{}"
             };
-
-            o.define = restrictedDefine;
             o.inject = o.inject?.filter((path: string) => !path.includes("process"));
 
             return o;

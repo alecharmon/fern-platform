@@ -33,9 +33,16 @@ var Component = (() => {
   ));
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+  // <define:process.env>
+  var init_define_process_env = __esm({
+    "<define:process.env>"() {
+    }
+  });
+
   // global-externals:react/jsx-runtime
   var require_jsx_runtime = __commonJS({
     "global-externals:react/jsx-runtime"(exports, module) {
+      init_define_process_env();
       module.exports = _jsx_runtime;
     }
   });
@@ -48,6 +55,7 @@ var Component = (() => {
   var useMDXComponents;
   var init_react = __esm({
     "global-externals:@mdx-js/react"() {
+      init_define_process_env();
       ({ useMDXComponents } = MdxJsReact);
     }
   });
@@ -55,6 +63,7 @@ var Component = (() => {
   // global-externals:react
   var require_react = __commonJS({
     "global-externals:react"(exports, module) {
+      init_define_process_env();
       module.exports = React;
     }
   });
@@ -63,6 +72,7 @@ var Component = (() => {
   var require_JsonSchemaBlock = __commonJS({
     "../../../imports/JsonSchemaBlock.js"(exports, module) {
       "use strict";
+      init_define_process_env();
       var Re = Object.defineProperty;
       var Jt = Object.getOwnPropertyDescriptor;
       var Gt = Object.getOwnPropertyNames;
@@ -2256,6 +2266,7 @@ var Component = (() => {
   var require_TSFetchCodeBlock = __commonJS({
     "../../../imports/TSFetchCodeBlock.js"(exports, module) {
       "use strict";
+      init_define_process_env();
       var s = Object.defineProperty;
       var d = Object.getOwnPropertyDescriptor;
       var u = Object.getOwnPropertyNames;
@@ -2328,6 +2339,7 @@ ${o}
     default: () => MDXContent,
     frontmatter: () => frontmatter
   });
+  init_define_process_env();
   var import_jsx_runtime = __toESM(require_jsx_runtime());
   init_react();
   var import_JsonSchemaBlock = __toESM(require_JsonSchemaBlock());

@@ -224,3 +224,33 @@ it("should fallback on twoslash that doesn't work", async () => {
         join(__dirname, "__snapshots__", "broken-twoslash.js")
     );
 }, 50000);
+
+it("should ensure process.env is empty in bundled output", async () => {
+    // Set a test environment variable to ensure it doesn't leak
+    const originalEnv = process.env.TEST_SECRET_VAR;
+    process.env.TEST_SECRET_VAR = "this-should-not-appear";
+
+    try {
+        const mdxContent = `# Hello World
+
+This is a simple test.`;
+
+        const result = await serializeMdx(mdxContent);
+
+        // The bundled code should have init_define_process_env() which sets up the empty process.env
+        // This is how esbuild's define option replaces process.env with an empty object
+        expect(result?.code).toContain("init_define_process_env");
+        expect(result?.code).toContain("<define:process.env>");
+
+        // Ensure the actual secret value doesn't appear in the bundled code
+        expect(result?.code).not.toContain("this-should-not-appear");
+        expect(result?.code).not.toContain("TEST_SECRET_VAR");
+    } finally {
+        // Cleanup
+        if (originalEnv !== undefined) {
+            process.env.TEST_SECRET_VAR = originalEnv;
+        } else {
+            delete process.env.TEST_SECRET_VAR;
+        }
+    }
+});

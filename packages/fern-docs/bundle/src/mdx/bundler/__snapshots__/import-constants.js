@@ -5,6 +5,9 @@ var Component = (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
@@ -30,9 +33,16 @@ var Component = (() => {
   ));
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+  // <define:process.env>
+  var init_define_process_env = __esm({
+    "<define:process.env>"() {
+    }
+  });
+
   // global-externals:react/jsx-runtime
   var require_jsx_runtime = __commonJS({
     "global-externals:react/jsx-runtime"(exports, module) {
+      init_define_process_env();
       module.exports = _jsx_runtime;
     }
   });
@@ -43,12 +53,15 @@ var Component = (() => {
     default: () => MDXContent,
     frontmatter: () => frontmatter
   });
+  init_define_process_env();
   var import_jsx_runtime = __toESM(require_jsx_runtime());
 
   // global-externals:@mdx-js/react
+  init_define_process_env();
   var { useMDXComponents } = MdxJsReact;
 
   // ../../../imports/constants.js
+  init_define_process_env();
   var TEST = "hello world";
 
   // _mdx_bundler_entry_point-_random_uuid_.mdx
