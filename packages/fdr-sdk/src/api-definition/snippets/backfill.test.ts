@@ -15,6 +15,12 @@ const rubyFixture = JSON.parse(readFileSync(join(fixturesDir, "ruby.json"), "utf
 const phpFixture = JSON.parse(readFileSync(join(fixturesDir, "php.json"), "utf-8"));
 const csharpFixture = JSON.parse(readFileSync(join(fixturesDir, "csharp.json"), "utf-8"));
 
+// Load pinnacle fixtures
+const pinnacleFixturesDir = join(__dirname, "fixtures", "pinnacle");
+const pinnacleTypescriptFixture = JSON.parse(readFileSync(join(pinnacleFixturesDir, "typescript.json"), "utf-8"));
+const pinnaclePythonFixture = JSON.parse(readFileSync(join(pinnacleFixturesDir, "python.json"), "utf-8"));
+const pinnacleRubyFixture = JSON.parse(readFileSync(join(pinnacleFixturesDir, "ruby.json"), "utf-8"));
+
 describe("backfillSnippets", () => {
     it("should backfill snippets for a search endpoint example", async () => {
         const apiDefinition: ApiDefinition = {
@@ -1014,5 +1020,481 @@ describe("backfillSnippets", () => {
         expect(snippets?.csharp).toHaveLength(1);
 
         expect(example?.snippets).toMatchSnapshot();
+    });
+
+    it("should backfill dynamic snippets for all pinnacle endpoints and languages", async () => {
+        const apiDefinition: ApiDefinition = {
+            id: ApiDefinitionId("pinnacle-api"),
+            endpoints: {
+                // Contacts endpoints
+                [EndpointId("createContact")]: {
+                    id: EndpointId("createContact"),
+                    method: "POST",
+                    path: [{ type: "literal", value: "/contacts" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Create Contact",
+                            description: "",
+                            path: "/contacts",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: {
+                                type: "json",
+                                value: {
+                                    phoneNumber: "+15551234567",
+                                    description: "Customer contact"
+                                }
+                            },
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    id: "contact_123",
+                                    phoneNumber: "+15551234567",
+                                    description: "Customer contact"
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                },
+                [EndpointId("getContact")]: {
+                    id: EndpointId("getContact"),
+                    method: "GET",
+                    path: [{ type: "literal", value: "/contacts" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Get Contact",
+                            description: "",
+                            path: "/contacts",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    id: "contact_123",
+                                    phoneNumber: "+15551234567",
+                                    description: "Customer contact"
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                },
+                // Messages endpoints
+                [EndpointId("sendSms")]: {
+                    id: EndpointId("sendSms"),
+                    method: "POST",
+                    path: [{ type: "literal", value: "/messages/send/sms" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Send SMS",
+                            description: "",
+                            path: "/messages/send/sms",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: {
+                                type: "json",
+                                value: {
+                                    to: "+15551234567",
+                                    from: "+15559876543",
+                                    text: "Hello from Pinnacle!"
+                                }
+                            },
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    messageId: "msg_123",
+                                    status: "sent"
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                },
+                [EndpointId("sendMms")]: {
+                    id: EndpointId("sendMms"),
+                    method: "POST",
+                    path: [{ type: "literal", value: "/messages/send/mms" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Send MMS",
+                            description: "",
+                            path: "/messages/send/mms",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: {
+                                type: "json",
+                                value: {
+                                    to: "+15551234567",
+                                    from: "+15559876543",
+                                    text: "Check out this image!",
+                                    mediaUrls: ["https://example.com/image.jpg"]
+                                }
+                            },
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    messageId: "msg_456",
+                                    status: "sent"
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                },
+                // Phone Numbers endpoints
+                [EndpointId("buyPhoneNumber")]: {
+                    id: EndpointId("buyPhoneNumber"),
+                    method: "POST",
+                    path: [{ type: "literal", value: "/phone-numbers/buy" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Buy Phone Number",
+                            description: "",
+                            path: "/phone-numbers/buy",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: {
+                                type: "json",
+                                value: {
+                                    areaCode: "415",
+                                    type: "local"
+                                }
+                            },
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    phoneNumber: "+14155551234",
+                                    status: "active"
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                },
+                [EndpointId("searchPhoneNumbers")]: {
+                    id: EndpointId("searchPhoneNumbers"),
+                    method: "POST",
+                    path: [{ type: "literal", value: "/phone-numbers/search" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Search Phone Numbers",
+                            description: "",
+                            path: "/phone-numbers/search",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: {
+                                type: "json",
+                                value: {
+                                    areaCode: "415",
+                                    limit: 10
+                                }
+                            },
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    phoneNumbers: ["+14155551234", "+14155555678"]
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                },
+                // Brands endpoints
+                [EndpointId("getBrand")]: {
+                    id: EndpointId("getBrand"),
+                    method: "GET",
+                    path: [
+                        { type: "literal", value: "/brands" },
+                        { type: "literal", value: "/" },
+                        { type: "pathParameter", value: PropertyKey("id") }
+                    ],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Get Brand",
+                            description: "",
+                            path: "/brands/brand_123",
+                            pathParameters: {
+                                [PropertyKey("id")]: "brand_123"
+                            },
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    id: "brand_123",
+                                    name: "Acme Corp",
+                                    status: "approved"
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                },
+                // Conversations endpoints
+                [EndpointId("getConversation")]: {
+                    id: EndpointId("getConversation"),
+                    method: "POST",
+                    path: [{ type: "literal", value: "/conversations/get" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.pinnacle.us/v1"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    examples: [
+                        {
+                            name: "Get Conversation",
+                            description: "",
+                            path: "/conversations/get",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: {
+                                type: "json",
+                                value: {
+                                    conversationId: "conv_123"
+                                }
+                            },
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: {
+                                    id: "conv_123",
+                                    messages: [],
+                                    participants: ["+15551234567"]
+                                }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                }
+            },
+            auths: {},
+            websockets: {},
+            webhooks: {},
+            types: {},
+            globalHeaders: [],
+            subpackages: {},
+            snippetsConfiguration: undefined
+        };
+
+        const flags = {
+            isHttpSnippetsEnabled: true,
+            alwaysEnableJavaScriptFetch: true
+        };
+
+        const dynamicIr = {
+            typescript: pinnacleTypescriptFixture,
+            python: pinnaclePythonFixture,
+            ruby: pinnacleRubyFixture
+        };
+
+        const result = await backfillSnippets(apiDefinition, dynamicIr, flags);
+
+        // Verify all endpoints have snippets generated
+        expect(result.endpoints[EndpointId("createContact")]?.examples?.[0]?.snippets).toBeDefined();
+        expect(result.endpoints[EndpointId("getContact")]?.examples?.[0]?.snippets).toBeDefined();
+        expect(result.endpoints[EndpointId("sendSms")]?.examples?.[0]?.snippets).toBeDefined();
+        expect(result.endpoints[EndpointId("sendMms")]?.examples?.[0]?.snippets).toBeDefined();
+        expect(result.endpoints[EndpointId("buyPhoneNumber")]?.examples?.[0]?.snippets).toBeDefined();
+        expect(result.endpoints[EndpointId("searchPhoneNumbers")]?.examples?.[0]?.snippets).toBeDefined();
+        expect(result.endpoints[EndpointId("getBrand")]?.examples?.[0]?.snippets).toBeDefined();
+        expect(result.endpoints[EndpointId("getConversation")]?.examples?.[0]?.snippets).toBeDefined();
+
+        // Verify all languages are present for each endpoint
+        const contactSnippets = result.endpoints[EndpointId("createContact")]?.examples?.[0]?.snippets;
+        expect(contactSnippets?.typescript).toBeDefined();
+        expect(contactSnippets?.python).toBeDefined();
+        expect(contactSnippets?.ruby).toBeDefined();
+        expect(contactSnippets?.curl).toBeDefined();
+
+        // Snapshot the entire result to capture all endpoints with all languages
+        expect(result).toMatchSnapshot();
     });
 });

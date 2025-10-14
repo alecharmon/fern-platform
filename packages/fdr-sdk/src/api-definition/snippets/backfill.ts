@@ -98,51 +98,6 @@ async function backfillSnippetsForExample(
         });
     }
 
-    if (isHttpSnippetsEnabled) {
-        const snippet = new HTTPSnippet(getHarRequest(endpoint, example, apiDefinition.auths, example.requestBody));
-        for (const { clientId, targetId } of CLIENTS) {
-            /**
-             * If the snippet already exists, skip it
-             */
-            if (snippets[targetId]?.length) {
-                continue;
-            }
-
-            /**
-             * If dynamic snippets are available for this language, skip generating HTTP snippets
-             */
-            if (dynamicGenerators[targetId === "javascript" ? "typescript" : targetId]) {
-                continue;
-            }
-
-            /**
-             * If alwaysEnableJavaScriptFetch is disabled, skip generating JavaScript snippets if TypeScript snippets are available
-             */
-            if (targetId === "javascript" && snippets.typescript?.length && !alwaysEnableJavaScriptFetch) {
-                continue;
-            }
-
-            const convertedCode = await snippet.convert(targetId, clientId);
-            const code =
-                typeof convertedCode === "string"
-                    ? convertedCode
-                    : convertedCode != null
-                      ? convertedCode[0]
-                      : undefined;
-
-            if (code != null) {
-                pushSnippet({
-                    name: undefined,
-                    language: targetId,
-                    install: undefined,
-                    code,
-                    generated: true,
-                    description: undefined
-                });
-            }
-        }
-    }
-
     for (const [language, generator] of Object.entries(dynamicGenerators)) {
         if (!generator || endpoint.method === "HEAD") {
             continue;
@@ -195,7 +150,13 @@ async function backfillSnippetsForExample(
                 method: endpoint.method
             };
 
-            const result = generator.generateSync(request);
+            let result;
+            try {
+                result = generator.generateSync(request);
+            } catch (error) {
+                console.error("Failed to generate snippet:", error);
+                continue;
+            }
 
             if (result?.snippet) {
                 pushSnippet({
@@ -209,6 +170,51 @@ async function backfillSnippetsForExample(
             }
         } catch (error) {
             console.error(`Error generating ${language} snippet:`, error);
+        }
+    }
+
+    if (isHttpSnippetsEnabled) {
+        const snippet = new HTTPSnippet(getHarRequest(endpoint, example, apiDefinition.auths, example.requestBody));
+        for (const { clientId, targetId } of CLIENTS) {
+            /**
+             * If the snippet already exists, skip it
+             */
+            if (snippets[targetId]?.length) {
+                continue;
+            }
+
+            /**
+             * If dynamic snippets are available for this language, skip generating HTTP snippets
+             */
+            if (dynamicGenerators[targetId === "javascript" ? "typescript" : targetId]) {
+                continue;
+            }
+
+            /**
+             * If alwaysEnableJavaScriptFetch is disabled, skip generating JavaScript snippets if TypeScript snippets are available
+             */
+            if (targetId === "javascript" && snippets.typescript?.length && !alwaysEnableJavaScriptFetch) {
+                continue;
+            }
+
+            const convertedCode = await snippet.convert(targetId, clientId);
+            const code =
+                typeof convertedCode === "string"
+                    ? convertedCode
+                    : convertedCode != null
+                      ? convertedCode[0]
+                      : undefined;
+
+            if (code != null) {
+                pushSnippet({
+                    name: undefined,
+                    language: targetId,
+                    install: undefined,
+                    code,
+                    generated: true,
+                    description: undefined
+                });
+            }
         }
     }
 

@@ -260,6 +260,2019 @@ main();
 }
 `;
 
+exports[`backfillSnippets > should backfill dynamic snippets for all pinnacle endpoints and languages 1`] = `
+{
+  "auths": {},
+  "endpoints": {
+    "buyPhoneNumber": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Buy Phone Number",
+          "path": "/phone-numbers/buy",
+          "pathParameters": {},
+          "queryParameters": {},
+          "requestBody": {
+            "type": "json",
+            "value": {
+              "areaCode": "415",
+              "type": "local",
+            },
+          },
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "phoneNumber": "+14155551234",
+              "status": "active",
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/phone-numbers/buy");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"areaCode\\": \\"415\\",\\n  \\"type\\": \\"local\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl -X POST https://api.pinnacle.us/v1/phone-numbers/buy \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "areaCode": "415",
+  "type": "local"
+}'",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/phone-numbers/buy"
+
+	payload := strings.NewReader("{\\n  \\"areaCode\\": \\"415\\",\\n  \\"type\\": \\"local\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/phone-numbers/buy")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"areaCode\\": \\"415\\",\\n  \\"type\\": \\"local\\"\\n}")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.pinnacle.us/v1/phone-numbers/buy', [
+  'body' => '{
+  "areaCode": "415",
+  "type": "local"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.phone_numbers.buy()
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.phone_numbers.buy({});
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "areaCode": "415",
+  "type": "local"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/phone-numbers/buy")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.phoneNumbers.buy({});
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "buyPhoneNumber",
+      "method": "POST",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/phone-numbers/buy",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+    "createContact": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Create Contact",
+          "path": "/contacts",
+          "pathParameters": {},
+          "queryParameters": {},
+          "requestBody": {
+            "type": "json",
+            "value": {
+              "description": "Customer contact",
+              "phoneNumber": "+15551234567",
+            },
+          },
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "description": "Customer contact",
+              "id": "contact_123",
+              "phoneNumber": "+15551234567",
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/contacts");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"phoneNumber\\": \\"+15551234567\\",\\n  \\"description\\": \\"Customer contact\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl -X POST https://api.pinnacle.us/v1/contacts \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "phoneNumber": "+15551234567",
+  "description": "Customer contact"
+}'",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/contacts"
+
+	payload := strings.NewReader("{\\n  \\"phoneNumber\\": \\"+15551234567\\",\\n  \\"description\\": \\"Customer contact\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/contacts")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"phoneNumber\\": \\"+15551234567\\",\\n  \\"description\\": \\"Customer contact\\"\\n}")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.pinnacle.us/v1/contacts', [
+  'body' => '{
+  "phoneNumber": "+15551234567",
+  "description": "Customer contact"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.contacts.create(
+    phone_number="+15551234567",
+    description="Customer contact"
+)
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.contacts.create({
+    phoneNumber:'+15551234567',
+    description:'Customer contact'
+});
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "phoneNumber": "+15551234567",
+  "description": "Customer contact"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/contacts")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.contacts.create({
+        phoneNumber: "+15551234567",
+        description: "Customer contact",
+    });
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "createContact",
+      "method": "POST",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/contacts",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+    "getBrand": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Get Brand",
+          "path": "/brands/brand_123",
+          "pathParameters": {
+            "id": "brand_123",
+          },
+          "queryParameters": {},
+          "requestBody": undefined,
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "id": "brand_123",
+              "name": "Acme Corp",
+              "status": "approved",
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/brands/brand_123");
+var request = new RestRequest(Method.GET);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl https://api.pinnacle.us/v1/brands/brand_123",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/brands/brand_123"
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.get("https://api.pinnacle.us/v1/brands/brand_123")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('GET', 'https://api.pinnacle.us/v1/brands/brand_123');
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.brands.get(
+    id=
+)
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.brands.get({});
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/brands/brand_123")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "GET"
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.brands.get(, {});
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "getBrand",
+      "method": "GET",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/brands",
+        },
+        {
+          "type": "literal",
+          "value": "/",
+        },
+        {
+          "type": "pathParameter",
+          "value": "id",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+    "getContact": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Get Contact",
+          "path": "/contacts",
+          "pathParameters": {},
+          "queryParameters": {},
+          "requestBody": undefined,
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "description": "Customer contact",
+              "id": "contact_123",
+              "phoneNumber": "+15551234567",
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/contacts");
+var request = new RestRequest(Method.GET);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl https://api.pinnacle.us/v1/contacts",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/contacts"
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.get("https://api.pinnacle.us/v1/contacts")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('GET', 'https://api.pinnacle.us/v1/contacts');
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.contacts.get()
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.contacts.get({});
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/contacts")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "GET"
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.contacts.get({});
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "getContact",
+      "method": "GET",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/contacts",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+    "getConversation": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Get Conversation",
+          "path": "/conversations/get",
+          "pathParameters": {},
+          "queryParameters": {},
+          "requestBody": {
+            "type": "json",
+            "value": {
+              "conversationId": "conv_123",
+            },
+          },
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "id": "conv_123",
+              "messages": [],
+              "participants": [
+                "+15551234567",
+              ],
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/conversations/get");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"conversationId\\": \\"conv_123\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl -X POST https://api.pinnacle.us/v1/conversations/get \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "conversationId": "conv_123"
+}'",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/conversations/get"
+
+	payload := strings.NewReader("{\\n  \\"conversationId\\": \\"conv_123\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/conversations/get")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"conversationId\\": \\"conv_123\\"\\n}")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.pinnacle.us/v1/conversations/get', [
+  'body' => '{
+  "conversationId": "conv_123"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.conversations.get(
+    request={}
+)
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.conversations.get();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = ["conversationId": "conv_123"] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/conversations/get")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.conversations.get({});
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "getConversation",
+      "method": "POST",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/conversations/get",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+    "searchPhoneNumbers": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Search Phone Numbers",
+          "path": "/phone-numbers/search",
+          "pathParameters": {},
+          "queryParameters": {},
+          "requestBody": {
+            "type": "json",
+            "value": {
+              "areaCode": "415",
+              "limit": 10,
+            },
+          },
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "phoneNumbers": [
+                "+14155551234",
+                "+14155555678",
+              ],
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/phone-numbers/search");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"areaCode\\": \\"415\\",\\n  \\"limit\\": 10\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl -X POST https://api.pinnacle.us/v1/phone-numbers/search \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "areaCode": "415",
+  "limit": 10
+}'",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/phone-numbers/search"
+
+	payload := strings.NewReader("{\\n  \\"areaCode\\": \\"415\\",\\n  \\"limit\\": 10\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/phone-numbers/search")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"areaCode\\": \\"415\\",\\n  \\"limit\\": 10\\n}")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.pinnacle.us/v1/phone-numbers/search', [
+  'body' => '{
+  "areaCode": "415",
+  "limit": 10
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.phone_numbers.search()
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.phone_numbers.search({});
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "areaCode": "415",
+  "limit": 10
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/phone-numbers/search")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.phoneNumbers.search({});
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "searchPhoneNumbers",
+      "method": "POST",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/phone-numbers/search",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+    "sendMms": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Send MMS",
+          "path": "/messages/send/mms",
+          "pathParameters": {},
+          "queryParameters": {},
+          "requestBody": {
+            "type": "json",
+            "value": {
+              "from": "+15559876543",
+              "mediaUrls": [
+                "https://example.com/image.jpg",
+              ],
+              "text": "Check out this image!",
+              "to": "+15551234567",
+            },
+          },
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "messageId": "msg_456",
+              "status": "sent",
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/messages/send/mms");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Check out this image!\\",\\n  \\"mediaUrls\\": [\\n    \\"https://example.com/image.jpg\\"\\n  ]\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl -X POST https://api.pinnacle.us/v1/messages/send/mms \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "to": "+15551234567",
+  "from": "+15559876543",
+  "text": "Check out this image!",
+  "mediaUrls": [
+    "https://example.com/image.jpg"
+  ]
+}'",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/messages/send/mms"
+
+	payload := strings.NewReader("{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Check out this image!\\",\\n  \\"mediaUrls\\": [\\n    \\"https://example.com/image.jpg\\"\\n  ]\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/messages/send/mms")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Check out this image!\\",\\n  \\"mediaUrls\\": [\\n    \\"https://example.com/image.jpg\\"\\n  ]\\n}")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.pinnacle.us/v1/messages/send/mms', [
+  'body' => '{
+  "to": "+15551234567",
+  "from": "+15559876543",
+  "text": "Check out this image!",
+  "mediaUrls": [
+    "https://example.com/image.jpg"
+  ]
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.messages.mms.send(
+    to="+15551234567",
+    from_="+15559876543",
+    text="Check out this image!",
+    media_urls=[
+        "https://example.com/image.jpg"
+    ]
+)
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.messages.mms.send_({
+    to:'+15551234567',
+    from:'+15559876543',
+    text:'Check out this image!',
+    mediaUrls:['https://example.com/image.jpg']
+});
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "to": "+15551234567",
+  "from": "+15559876543",
+  "text": "Check out this image!",
+  "mediaUrls": ["https://example.com/image.jpg"]
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/messages/send/mms")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.messages.mms.send({
+        to: "+15551234567",
+        from: "+15559876543",
+        text: "Check out this image!",
+        mediaUrls: [
+            "https://example.com/image.jpg",
+        ],
+    });
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "sendMms",
+      "method": "POST",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/messages/send/mms",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+    "sendSms": {
+      "auth": undefined,
+      "availability": undefined,
+      "defaultEnvironment": undefined,
+      "description": undefined,
+      "displayName": undefined,
+      "environments": [
+        {
+          "baseUrl": "https://api.pinnacle.us/v1",
+          "id": "default",
+        },
+      ],
+      "errors": undefined,
+      "examples": [
+        {
+          "description": "",
+          "headers": {},
+          "name": "Send SMS",
+          "path": "/messages/send/sms",
+          "pathParameters": {},
+          "queryParameters": {},
+          "requestBody": {
+            "type": "json",
+            "value": {
+              "from": "+15559876543",
+              "text": "Hello from Pinnacle!",
+              "to": "+15551234567",
+            },
+          },
+          "responseBody": {
+            "type": "json",
+            "value": {
+              "messageId": "msg_123",
+              "status": "sent",
+            },
+          },
+          "responseStatusCode": 200,
+          "snippets": {
+            "csharp": [
+              {
+                "code": "var client = new RestClient("https://api.pinnacle.us/v1/messages/send/sms");
+var request = new RestRequest(Method.POST);
+request.AddHeader("Content-Type", "application/json");
+request.AddParameter("application/json", "{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Hello from Pinnacle!\\"\\n}", ParameterType.RequestBody);
+IRestResponse response = client.Execute(request);",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "csharp",
+                "name": undefined,
+              },
+            ],
+            "curl": [
+              {
+                "code": "curl -X POST https://api.pinnacle.us/v1/messages/send/sms \\
+     -H "Content-Type: application/json" \\
+     -d '{
+  "to": "+15551234567",
+  "from": "+15559876543",
+  "text": "Hello from Pinnacle!"
+}'",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "curl",
+                "name": undefined,
+              },
+            ],
+            "go": [
+              {
+                "code": "package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io"
+)
+
+func main() {
+
+	url := "https://api.pinnacle.us/v1/messages/send/sms"
+
+	payload := strings.NewReader("{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Hello from Pinnacle!\\"\\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "go",
+                "name": undefined,
+              },
+            ],
+            "java": [
+              {
+                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/messages/send/sms")
+  .header("Content-Type", "application/json")
+  .body("{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Hello from Pinnacle!\\"\\n}")
+  .asString();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "java",
+                "name": undefined,
+              },
+            ],
+            "php": [
+              {
+                "code": "<?php
+
+$client = new \\GuzzleHttp\\Client();
+
+$response = $client->request('POST', 'https://api.pinnacle.us/v1/messages/send/sms', [
+  'body' => '{
+  "to": "+15551234567",
+  "from": "+15559876543",
+  "text": "Hello from Pinnacle!"
+}',
+  'headers' => [
+    'Content-Type' => 'application/json',
+  ],
+]);
+
+echo $response->getBody();",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "php",
+                "name": undefined,
+              },
+            ],
+            "python": [
+              {
+                "code": "from rcs import Pinnacle
+
+client = Pinnacle(
+    base_url="https://api.pinnacle.us/v1"
+)
+
+client.messages.sms.send(
+    to="+15551234567",
+    from_="+15559876543",
+    text="Hello from Pinnacle!"
+)
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "python",
+                "name": undefined,
+              },
+            ],
+            "ruby": [
+              {
+                "code": "require "pinnacle"
+
+client = pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+
+client.messages.sms.send_({
+    to:'+15551234567',
+    from:'+15559876543',
+    text:'Hello from Pinnacle!'
+});
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "ruby",
+                "name": undefined,
+              },
+            ],
+            "swift": [
+              {
+                "code": "import Foundation
+
+let headers = ["Content-Type": "application/json"]
+let parameters = [
+  "to": "+15551234567",
+  "from": "+15559876543",
+  "text": "Hello from Pinnacle!"
+] as [String : Any]
+
+let postData = JSONSerialization.data(withJSONObject: parameters, options: [])
+
+let request = NSMutableURLRequest(url: NSURL(string: "https://api.pinnacle.us/v1/messages/send/sms")! as URL,
+                                        cachePolicy: .useProtocolCachePolicy,
+                                    timeoutInterval: 10.0)
+request.httpMethod = "POST"
+request.allHTTPHeaderFields = headers
+request.httpBody = postData as Data
+
+let session = URLSession.shared
+let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) -> Void in
+  if (error != nil) {
+    print(error as Any)
+  } else {
+    let httpResponse = response as? HTTPURLResponse
+    print(httpResponse)
+  }
+})
+
+dataTask.resume()",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "swift",
+                "name": undefined,
+              },
+            ],
+            "typescript": [
+              {
+                "code": "import { PinnacleClient } from "rcs-js";
+
+async function main() {
+    const client = new PinnacleClient({
+        environment: "https://api.pinnacle.us/v1",
+    });
+    await client.messages.sms.send({
+        to: "+15551234567",
+        from: "+15559876543",
+        text: "Hello from Pinnacle!",
+    });
+}
+main();
+",
+                "description": undefined,
+                "generated": true,
+                "install": undefined,
+                "language": "typescript",
+                "name": undefined,
+              },
+            ],
+          },
+        },
+      ],
+      "id": "sendSms",
+      "method": "POST",
+      "namespace": undefined,
+      "operationId": undefined,
+      "path": [
+        {
+          "type": "literal",
+          "value": "/messages/send/sms",
+        },
+      ],
+      "pathParameters": undefined,
+      "protocol": undefined,
+      "queryParameters": undefined,
+      "requestHeaders": undefined,
+      "requests": undefined,
+      "responseHeaders": undefined,
+      "responses": undefined,
+      "snippetTemplates": undefined,
+    },
+  },
+  "globalHeaders": [],
+  "id": "pinnacle-api",
+  "snippetsConfiguration": undefined,
+  "subpackages": {},
+  "types": {},
+  "webhooks": {},
+  "websockets": {},
+}
+`;
+
 exports[`backfillSnippets > should backfill dynamic snippets for typescript 1`] = `
 {
   "csharp": [
