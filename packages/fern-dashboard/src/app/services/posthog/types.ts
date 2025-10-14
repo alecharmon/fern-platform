@@ -73,3 +73,17 @@ export interface TimeSeriesOptions extends AnalyticsQueryOptions {
 export interface TopPagesOptions extends AnalyticsQueryOptions {
     limit?: number;
 }
+
+export interface APIExplorerEndpoint {
+    host: string;
+    method: string;
+    endpoint: string;
+    name: string;
+    count: number;
+}
+
+export interface APIExplorerOptions extends AnalyticsQueryOptions {
+    limit?: number;
+    host?: string;
+    order?: "asc" | "desc";
+}

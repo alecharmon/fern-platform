@@ -5,6 +5,13 @@ import { useMemo, useState } from "react";
 
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 
+const COLOR_MAP = {
+    red: "239 68 68", // #EF4444
+    green: "34 197 94", // #22C55E
+    yellow: "255 186 24", // #FFBA18
+    blue: "1 144 255" // #0190FF
+} as const;
+
 interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     title: string;
     data: T[] | undefined;
@@ -21,7 +28,7 @@ interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     getItemKey: (item: T) => string;
     showGradient?: boolean;
     gradientKey?: string;
-    barVariant?: "green" | "red";
+    barVariant?: "green" | "red" | "yellow" | "blue";
     onSort?: (field: string, direction: "asc" | "desc") => void;
     maxLength?: number;
     defaultSortField?: string | null;
@@ -61,7 +68,6 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
 }: AnalyticsMiniTableProps<T>) {
     const [sortField, setSortField] = useState<string | null>(defaultSortField);
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-
     const sortedData = useMemo(() => {
         if (!data || !sortField) {
             return data || [];
@@ -163,6 +169,12 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                     ? Math.max(7, (item[gradientKey] / maxGradientValue) * 100)
                                     : 0;
 
+                                // Support per-row barVariant if present in the data
+                                const rowBarVariant =
+                                    "barVariant" in item
+                                        ? (item.barVariant as "green" | "red" | "yellow" | "blue")
+                                        : barVariant;
+
                                 return (
                                     <div
                                         key={getItemKey(item)}
@@ -177,32 +189,23 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                                         width: `${percentage}%`,
                                                         borderRadius: "4px",
                                                         pointerEvents: "none",
-                                                        background:
-                                                            barVariant === "red"
-                                                                ? `linear-gradient(to right,
+                                                        background: `linear-gradient(to right,
                                                             transparent 0%,
-                                                            rgb(239 68 68 / 0.1) 30%,
-                                                            rgb(239 68 68 / 0.25) 50%,
-                                                            rgb(239 68 68 / 0.35) 60%,
-                                                            rgb(239 68 68 / 0.35) 70%,
-                                                            rgb(239 68 68 / 0.5) 80%`
-                                                                : `linear-gradient(to right,
-                                                            transparent 0%,
-                                                            rgb(34 197 94 / 0.1) 30%,
-                                                            rgb(34 197 94 / 0.25) 50%,
-                                                            rgb(34 197 94 / 0.35) 60%,
-                                                            rgb(34 197 94 / 0.35) 70%,
-                                                            rgb(34 197 94 / 0.5) 80%`
+                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.1) 30%,
+                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.25) 50%,
+                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.35) 60%,
+                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.35) 70%,
+                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.5) 80%)`
                                                     }}
                                                 />
                                             )}
-                                            <span className="z-10 flex px-2">
+                                            <span className="z-10 flex h-[30px] items-center px-2">
                                                 {columns[0]?.render ? (
                                                     columns[0].render(item, index)
                                                 ) : (
                                                     <TruncatedText
                                                         text={String(item[columns[0]?.key || ""])}
-                                                        className="truncate"
+                                                        className="flex items-center truncate"
                                                         maxLength={maxLength}
                                                     />
                                                 )}

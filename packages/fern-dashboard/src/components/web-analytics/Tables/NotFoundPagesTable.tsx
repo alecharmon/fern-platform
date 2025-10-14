@@ -64,6 +64,7 @@ export default function NotFoundPagesTable({ docsUrl, dateRange }: NotFoundPages
             barVariant="red"
             onSort={handleSort}
             maxLength={45}
+            defaultSortField={"count"}
         />
     );
 }

@@ -9,6 +9,8 @@ import { PostHogClient } from "./client";
 import type {
     AnalyticsConfig,
     AnalyticsMetrics,
+    APIExplorerEndpoint,
+    APIExplorerOptions,
     DateRangeOptions,
     MetricsOptions,
     TimeSeriesData,
@@ -516,6 +518,7 @@ export class AnalyticsService {
 
     /**
      * Get traffic by device type (Desktop, Mobile, Tablet, etc.)
+     * Filters out malicious SQL injection attempts and invalid device types
      */
     async getDeviceTypes(
         options: TimeSeriesOptions & {
@@ -527,17 +530,52 @@ export class AnalyticsService {
         const { limit = 10, orderBy = "visitors", order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
+        // Valid device types to filter for
+        const validDeviceTypes = [
+            "Desktop",
+            "Mobile",
+            "Tablet",
+            "Console",
+            "TV",
+            "Mobile Phone",
+            "Smart TV",
+            "Game Console"
+        ];
+
         const query = `
-      SELECT 
+      SELECT
         properties.$device_type as deviceType,
         uniq(distinct_id) as visitors,
         count(*) as views
-      FROM events 
-      WHERE 
-        event = '$pageview' 
+      FROM events
+      WHERE
+        event = '$pageview'
         AND properties.$host = '${this.config.baseSiteUrl}'
         AND properties.$device_type IS NOT NULL
         AND properties.$device_type != ''
+        -- Filter out malicious SQL injection attempts (case-insensitive)
+        AND lower(properties.$device_type) NOT LIKE '%sleep%'
+        AND lower(properties.$device_type) NOT LIKE '%delay%'
+        AND lower(properties.$device_type) NOT LIKE '%xor%'
+        AND lower(properties.$device_type) NOT LIKE '%select%'
+        AND lower(properties.$device_type) NOT LIKE '%waitfor%'
+        AND properties.$device_type NOT LIKE '%;%'
+        AND properties.$device_type NOT LIKE '%''%'
+        AND properties.$device_type NOT LIKE '%"%'
+        AND properties.$device_type NOT LIKE '%(%'
+        AND properties.$device_type NOT LIKE '%+%'
+        AND properties.$device_type NOT LIKE '%=%'
+        -- Only include known valid device types
+        AND (
+          lower(properties.$device_type) = 'desktop'
+          OR lower(properties.$device_type) = 'mobile'
+          OR lower(properties.$device_type) = 'mobile phone'
+          OR lower(properties.$device_type) = 'tablet'
+          OR lower(properties.$device_type) = 'console'
+          OR lower(properties.$device_type) = 'game console'
+          OR lower(properties.$device_type) = 'tv'
+          OR lower(properties.$device_type) = 'smart tv'
+        )
         ${whereClause}
       GROUP BY properties.$device_type
       ORDER BY ${orderBy} ${order.toUpperCase()}
@@ -549,7 +587,7 @@ export class AnalyticsService {
         });
 
         // Normalize device type names to match PostHog UI
-        const normalizeDeviceType = (type: string): string => {
+        const normalizeDeviceType = (type: string): string | null => {
             const normalized = type.toLowerCase();
             switch (normalized) {
                 case "desktop":
@@ -566,16 +604,24 @@ export class AnalyticsService {
                 case "smart tv":
                     return "TV";
                 default:
-                    // Capitalize first letter
-                    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+                    // Return null for unrecognized device types to filter them out
+                    return null;
             }
         };
 
-        return response.results.map((row) => ({
-            deviceType: normalizeDeviceType(row[0] || "Unknown"),
-            visitors: row[1],
-            views: row[2]
-        }));
+        return response.results
+            .map((row) => {
+                const normalized = normalizeDeviceType(row[0] || "");
+                if (!normalized) {
+                    return null;
+                }
+                return {
+                    deviceType: normalized,
+                    visitors: row[1],
+                    views: row[2]
+                };
+            })
+            .filter((item): item is { deviceType: string; visitors: number; views: number } => item !== null);
     }
 
     /**
@@ -668,6 +714,54 @@ export class AnalyticsService {
         return response.results.map((row) => ({
             path: row[0] || "/",
             count: row[1]
+        }));
+    }
+
+    /**
+     * Get most common API Explorer requests by endpoint and method
+     * Returns endpoints with their HTTP methods and call counts
+     */
+    async getAPIExplorerRequests(options: APIExplorerOptions = {}): Promise<APIExplorerEndpoint[]> {
+        const { limit = 100, host, order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        // Build host filter - if provided, filter by specific host, otherwise use baseSiteUrl
+        const hostFilter = host ? `properties.$host = '${host}'` : `properties.$host = '${this.config.baseSiteUrl}'`;
+
+        const query = `
+      SELECT
+        properties.$host as host,
+        properties.method as method,
+        properties.endpointRoute as endpoint,
+        properties.endpointName as name,
+        COUNT(*) as count
+      FROM events
+      WHERE
+        event = 'api_playground_request_sent'
+        AND ${hostFilter}
+        AND properties.method IS NOT NULL
+        AND properties.endpointRoute IS NOT NULL
+        ${whereClause}
+      GROUP BY
+        properties.$host,
+        properties.method,
+        properties.endpointRoute,
+        properties.endpointName
+      ORDER BY
+        count ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, string, string, string, number]>(query, {
+            name: `api-explorer-requests-${this.getQueryNameSuffix(options)}-${host || this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            host: row[0] || "",
+            method: row[1] || "",
+            endpoint: row[2] || "",
+            name: row[3] || "",
+            count: row[4]
         }));
     }
 

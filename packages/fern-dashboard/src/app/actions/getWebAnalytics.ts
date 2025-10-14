@@ -740,6 +740,60 @@ export async function get404Pages(request: TableRequest): Promise<{ pages404: { 
 }
 
 /**
+ * Server action to fetch API Explorer requests from PostHog
+ */
+export async function getAPIExplorerRequests(request: TableRequest): Promise<{
+    apiExplorerRequests: { host: string; method: string; endpoint: string; name: string; count: number }[];
+}> {
+    // Validate input
+    const validated = TableRequestSchema.parse(request);
+
+    // Verify access using the composable function
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    // Get current session
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    // Default date range if not provided
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    // Generate cache key
+    const cacheKey = getCacheKey("apiExplorerRequests", baseDomain, {
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit,
+        order: validated.order
+    });
+
+    // Use cache
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        // Initialize PostHog analytics service
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        // Fetch API Explorer requests from PostHog
+        const apiExplorerRequests = await analytics.getAPIExplorerRequests({
+            dateRange,
+            limit: validated.limit || 20,
+            order: validated.order || "desc"
+        });
+
+        return { apiExplorerRequests };
+    });
+
+    return { apiExplorerRequests: cachedData.apiExplorerRequests! };
+}
+
+/**
  * Server action to clear all web analytics cache for a specific domain
  * This invalidates all cached analytics data, forcing fresh fetches from PostHog
  */

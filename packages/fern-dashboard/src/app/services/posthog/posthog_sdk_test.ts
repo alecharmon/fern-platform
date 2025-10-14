@@ -121,6 +121,7 @@ ${colors.yellow}Data Options (at least one required with --site):${colors.reset}
   --channels           Show traffic by channel type (Direct, Referral, etc.)
   --device-types       Show traffic by device type (Desktop, Mobile, etc.)
   --referring-domains  Show top referring domains
+  --api-calls          Show API Explorer requests by endpoint and method
 
 ${colors.yellow}Time Options (optional):${colors.reset}
   --days <number>      Number of days to analyze (default: 7)
@@ -153,6 +154,9 @@ ${colors.yellow}Examples:${colors.reset}
 
   # Get referring domains
   bun run posthog_sdk_test.ts --site docs.buildwithfern.com --referring-domains
+
+  # Get API Explorer requests
+  bun run posthog_sdk_test.ts --site developers.webflow.com --api-calls
 
   # Get time series for last 2 weeks
   bun run posthog_sdk_test.ts --site docs.buildwithfern.com --time-series --weeks 2
@@ -404,6 +408,53 @@ async function displayReferringDomains(analytics: any, dateRange: any, limit: nu
     console.log(colors.bright + colors.blue + "━".repeat(80) + colors.reset);
 }
 
+async function displayAPIExplorerRequests(analytics: any, dateRange: any, limit: number = 20) {
+    console.log(colors.dim + "\n⏳ Fetching API Explorer requests data..." + colors.reset);
+
+    const apiCalls = await analytics.getAPIExplorerRequests({
+        dateRange,
+        limit
+    });
+
+    console.log("\n" + colors.bright + colors.blue + "━".repeat(100) + colors.reset);
+    console.log(colors.bright + "🔌 API Explorer Requests" + colors.reset);
+    console.log(colors.bright + colors.blue + "━".repeat(100) + colors.reset);
+
+    console.log(
+        colors.dim +
+            "   METHOD".padEnd(12) +
+            "ENDPOINT".padEnd(50) +
+            "NAME".padEnd(30) +
+            "COUNT".padStart(10) +
+            colors.reset
+    );
+    console.log(colors.dim + "   " + "─".repeat(96) + colors.reset);
+
+    apiCalls.forEach(({ method, endpoint, name, count }: any) => {
+        // Color code methods
+        const methodColors: Record<string, string> = {
+            GET: colors.green,
+            POST: colors.blue,
+            PUT: colors.yellow,
+            PATCH: colors.cyan,
+            DELETE: colors.red
+        };
+        const methodColor = methodColors[method] || colors.reset;
+
+        const truncatedEndpoint = endpoint.length > 47 ? endpoint.slice(0, 44) + "..." : endpoint;
+        const truncatedName = name.length > 27 ? name.slice(0, 24) + "..." : name;
+
+        console.log(
+            `   ${methodColor}${method.padEnd(10)}${colors.reset} ` +
+                `${truncatedEndpoint.padEnd(47)} ` +
+                `${colors.dim}${truncatedName.padEnd(27)}${colors.reset}  ` +
+                `${colors.yellow}${formatNumber(count).padStart(8)}${colors.reset}`
+        );
+    });
+
+    console.log(colors.bright + colors.blue + "━".repeat(100) + colors.reset);
+}
+
 async function runInteractive() {
     const rl = readline.createInterface({
         input: process.stdin,
@@ -460,9 +511,10 @@ async function runInteractive() {
             console.log("  6) Channels");
             console.log("  7) Device types");
             console.log("  8) Referring domains");
-            console.log("  9) Exit");
+            console.log("  9) API Explorer requests");
+            console.log("  0) Exit");
 
-            const choice = await rl.question(colors.yellow + "Enter choice (1-9): " + colors.reset);
+            const choice = await rl.question(colors.yellow + "Enter choice (0-9): " + colors.reset);
 
             switch (choice) {
                 case "1":
@@ -490,6 +542,9 @@ async function runInteractive() {
                     await displayReferringDomains(analytics, dateRange);
                     break;
                 case "9":
+                    await displayAPIExplorerRequests(analytics, dateRange, 20);
+                    break;
+                case "0":
                     continueLoop = false;
                     break;
                 default:
@@ -541,6 +596,9 @@ async function main() {
                 type: "boolean"
             },
             "referring-domains": {
+                type: "boolean"
+            },
+            "api-calls": {
                 type: "boolean"
             },
             site: {
@@ -602,12 +660,13 @@ async function main() {
         !values["llm-table"] &&
         !values.channels &&
         !values["device-types"] &&
-        !values["referring-domains"]
+        !values["referring-domains"] &&
+        !values["api-calls"]
     ) {
         console.error(colors.red + "\n❌ Error: You must specify at least one data option!" + colors.reset);
         console.error(
             colors.yellow +
-                "\nAvailable options: --metrics, --time-series, --pages, --countries, --llm-table, --channels, --device-types, --referring-domains" +
+                "\nAvailable options: --metrics, --time-series, --pages, --countries, --llm-table, --channels, --device-types, --referring-domains, --api-calls" +
                 colors.reset
         );
         console.error(
@@ -662,6 +721,9 @@ async function main() {
         }
         if (values["referring-domains"]) {
             await displayReferringDomains(analytics, dateRange, limit);
+        }
+        if (values["api-calls"]) {
+            await displayAPIExplorerRequests(analytics, dateRange, limit);
         }
     } catch (error) {
         console.error(

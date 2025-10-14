@@ -24,4 +24,4 @@ export function getAnalyticsService(config: {
 export { getAnalyticsService as createAnalyticsService };
 
 // Re-export types
-export type { DateRangeOptions, TimeSeriesData } from "./types";
+export type { APIExplorerEndpoint, APIExplorerOptions, DateRangeOptions, TimeSeriesData } from "./types";

@@ -9,6 +9,7 @@ import type { DateRangeOptions } from "@/app/services/posthog/types";
 import { ANALYTICS_FIELDS, ANALYTICS_SORT_DIR, type AnalyticsSortState } from "../constants";
 import { getCountryFlag, getCountryName } from "../constants/countries";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
+import APIExplorerRequestsTable from "./APIExplorerRequestsTable";
 import ChannelsTable from "./ChannelsTable";
 import DeviceTypesTable from "./DeviceTypesTable";
 import LLMFileViewsTable from "./LLMFileViewsTable";
@@ -149,9 +150,10 @@ function AnalyticsTables({ docsUrl, dateRange }: AnalyticsTablesProps) {
                 <LLMFileViewsTable docsUrl={docsUrl} dateRange={dateRange} />
             </div>
 
-            {/* Fourth row: 404 Pages */}
+            {/* Fourth row: 404 Pages and API Explorer Requests */}
             <div className="flex flex-col gap-4 lg:flex-row">
                 <NotFoundPagesTable docsUrl={docsUrl} dateRange={dateRange} />
+                <APIExplorerRequestsTable docsUrl={docsUrl} dateRange={dateRange} />
             </div>
         </div>
     );
