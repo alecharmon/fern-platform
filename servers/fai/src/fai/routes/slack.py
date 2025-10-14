@@ -222,7 +222,7 @@ async def handle_slack_slash_commands(request: Request) -> JSONResponse:
 
         LOGGER.info(f"Received Slack slash command: {command} from user {user_id}")
 
-        if command in ["/configure", "/configure-dev"]:
+        if command in ["/fern", "/fern-dev"]:
             if not team_id or not channel_id or not user_id:
                 return JSONResponse(
                     content={
