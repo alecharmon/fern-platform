@@ -32,6 +32,7 @@ from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.chat.roles import create_delimited_role_combinations
 from fai.utils.generate_model import generate_anthropic_generic_async
 from fai.utils.slack.client import add_reaction
+from fai.utils.slack.postprocessing import SlackifyMarkdown
 from fai.utils.turbopuffer.namespace import (
     get_query_index_name,
     get_slack_context_index_name,
@@ -334,9 +335,9 @@ async def process_message(
             rag_records,
             ChatMode.SLACK_CHAT,
         )
-
         if output_turns and len(output_turns) > 0:
             response = "\n\n".join([turn["text"] for turn in output_turns])
+            response = SlackifyMarkdown().serialize(response)
             if conversation_id:
                 await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="SLACK")
             return response, query_id
