@@ -99,7 +99,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "shiki": "3.2.1",
-    "tar-fs": "^3.0.9",
+    "tar-fs": "^3.1.1",
     "tmp": "^0.2.4",
     "typescript": "catalog:",
     "unified": "11.0.5",
