@@ -104,6 +104,7 @@
     "aws4": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "countup.js": "^2.9.0",
     "css-tree": "^3.1.0",
     "dayjs": "^1.11.18",
     "diff": "^8.0.2",

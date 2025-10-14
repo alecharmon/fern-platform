@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { getTopCountries, getTopPages } from "@/app/actions/getWebAnalytics";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
+
 import { ANALYTICS_FIELDS, ANALYTICS_SORT_DIR, type AnalyticsSortState } from "../constants";
 import { getCountryFlag, getCountryName } from "../constants/countries";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
@@ -66,6 +67,7 @@ function AnalyticsTables({ docsUrl, dateRange }: AnalyticsTablesProps) {
             {/* First row: Paths and Countries */}
             <div className="flex flex-col gap-4 lg:flex-row">
                 <AnalyticsMiniTable
+                    defaultSortField={ANALYTICS_FIELDS.VISITORS}
                     title="Paths"
                     data={pagesQuery.data?.topPages}
                     isLoading={pagesQuery.isLoading}
@@ -96,6 +98,7 @@ function AnalyticsTables({ docsUrl, dateRange }: AnalyticsTablesProps) {
                 />
 
                 <AnalyticsMiniTable
+                    defaultSortField={ANALYTICS_FIELDS.VISITORS}
                     title="Countries"
                     data={countriesQuery.data?.topCountries}
                     isLoading={countriesQuery.isLoading}

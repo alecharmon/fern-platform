@@ -24,6 +24,7 @@ interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     barVariant?: "green" | "red";
     onSort?: (field: string, direction: "asc" | "desc") => void;
     maxLength?: number;
+    defaultSortField?: string | null;
 }
 
 type SortDirection = "asc" | "desc";
@@ -55,9 +56,10 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
     gradientKey = "visitors",
     barVariant = "green",
     onSort,
-    maxLength = 45
+    maxLength = 45,
+    defaultSortField = null
 }: AnalyticsMiniTableProps<T>) {
-    const [sortField, setSortField] = useState<string | null>(null);
+    const [sortField, setSortField] = useState<string | null>(defaultSortField);
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
     const sortedData = useMemo(() => {
@@ -122,7 +124,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                 key={column.key}
                                 onClick={() => handleSort(column.key)}
                                 className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center justify-end gap-1 font-mono text-sm transition-colors"
-                                style={{ width: column.width || "100px" }}
+                                style={{ width: column.width || "90px" }}
                                 disabled={isLoading}
                             >
                                 {column.label}
@@ -132,7 +134,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                             <span
                                 key={column.key}
                                 className="text-muted-foreground flex items-center justify-end gap-1 font-mono text-sm"
-                                style={{ width: column.width || "100px" }}
+                                style={{ width: column.width || "90px" }}
                             >
                                 {column.label}
                             </span>
@@ -213,7 +215,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                                 key={column.key}
                                                 className="text-sm tabular-nums"
                                                 style={{
-                                                    width: column.width || "100px",
+                                                    width: column.width || "90px",
                                                     textAlign: "right"
                                                 }}
                                             >

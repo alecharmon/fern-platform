@@ -33,14 +33,14 @@ export const ANALYTICS_COLUMNS = {
     visitors: {
         key: "visitors",
         label: "Visitors",
-        width: "100px",
+        width: "90px",
         sortable: true,
         format: (value: number) => value.toLocaleString()
     },
     views: {
         key: "views",
         label: "Views",
-        width: "100px",
+        width: "90px",
         sortable: true,
         format: (value: number) => value.toLocaleString()
     },

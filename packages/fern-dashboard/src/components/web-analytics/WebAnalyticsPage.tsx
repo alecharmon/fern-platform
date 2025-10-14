@@ -10,6 +10,7 @@ import type { DateRangeOptions } from "@/app/services/posthog/types";
 
 import { Button } from "../ui/button";
 import WebAnalyticsChart from "./Chart";
+import { MetricsCard } from "./MetricsCard";
 import SelectDate from "./SelectDate";
 import AnalyticsTables from "./Tables";
 
@@ -71,8 +72,8 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
 
             {/* Metrics Cards using CSS Grid for equal 1/2 spacing */}
             <div className="flex justify-between">
-                <MetricCard title="Visitors" value={data?.metrics.visitors ?? 0} isLoading={isLoading} error={error} />
-                <MetricCard
+                <MetricsCard title="Visitors" value={data?.metrics.visitors ?? 0} isLoading={isLoading} error={error} />
+                <MetricsCard
                     title="Page views"
                     value={data?.metrics.pageViews ?? 0}
                     isLoading={isLoading}
@@ -85,30 +86,6 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
 
             {/* Analytics Tables - Top Pages, Countries, and LLM Files */}
             <AnalyticsTables docsUrl={docsUrl} dateRange={dateRange} />
-        </div>
-    );
-}
-
-interface MetricCardProps {
-    title: string;
-    value: number;
-    isLoading: boolean;
-    error: Error | null;
-}
-
-function MetricCard({ title, value, isLoading, error }: MetricCardProps) {
-    return (
-        <div className="border-border flex w-[48%] flex-col gap-3 rounded-lg border bg-white p-6 dark:bg-transparent">
-            <p className="text-muted-foreground text-sm">{title}</p>
-            <div className="text-3xl font-semibold">
-                {isLoading ? (
-                    <div className="h-9 w-32 animate-pulse rounded bg-gray-200 dark:bg-transparent" />
-                ) : error ? (
-                    <span className="text-destructive text-base">Error loading data</span>
-                ) : (
-                    new Intl.NumberFormat("en-US").format(value)
-                )}
-            </div>
         </div>
     );
 }

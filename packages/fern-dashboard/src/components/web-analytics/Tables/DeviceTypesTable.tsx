@@ -1,10 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import type { TableRequest } from "@/app/actions/getWebAnalytics";
 import { getDeviceTypes } from "@/app/actions/getWebAnalytics";
 
-import { ANALYTICS_COLUMNS } from "../constants";
+import { ANALYTICS_COLUMNS, ANALYTICS_FIELDS } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
 
@@ -66,6 +67,7 @@ export default function DeviceTypesTable({ docsUrl, dateRange, includeInternal }
             gradientKey={sortState.field}
             onSort={handleSort}
             maxLength={45}
+            defaultSortField={ANALYTICS_FIELDS.VISITORS}
         />
     );
 }

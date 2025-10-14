@@ -39,35 +39,3 @@ export function useAnalyticsTable(options: UseAnalyticsTableOptions = {}) {
 
     return { sortState, handleSort };
 }
-
-// Common column configurations
-export const ANALYTICS_COLUMNS = {
-    visitors: {
-        key: "visitors",
-        label: "Visitors",
-        width: "100px",
-        sortable: true,
-        format: (value: number) => value.toLocaleString()
-    },
-    views: {
-        key: "views",
-        label: "Views",
-        width: "100px",
-        sortable: true,
-        format: (value: number) => value.toLocaleString()
-    },
-    agentViews: {
-        key: "agentViews",
-        label: "Agent visitors",
-        width: "140px",
-        sortable: true,
-        format: (value: number) => value.toLocaleString()
-    },
-    humanViews: {
-        key: "humanViews",
-        label: "Human visitors",
-        width: "140px",
-        sortable: true,
-        format: (value: number) => value.toLocaleString()
-    }
-};

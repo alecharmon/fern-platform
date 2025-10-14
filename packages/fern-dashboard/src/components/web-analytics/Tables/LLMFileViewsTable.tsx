@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import type { LLMFileViewsRequest } from "@/app/actions/getWebAnalytics";
 import { getLLMFileViews } from "@/app/actions/getWebAnalytics";
 
@@ -16,7 +17,7 @@ interface LLMFileViewsTableProps {
 
 export default function LLMFileViewsTable({ docsUrl, dateRange, includeInternal }: LLMFileViewsTableProps) {
     const { sortState, handleSort } = useAnalyticsTable({
-        defaultSortField: "humanViews",
+        defaultSortField: "agentViews",
         validSortFields: ["agentViews", "humanViews"]
     });
 
@@ -57,6 +58,7 @@ export default function LLMFileViewsTable({ docsUrl, dateRange, includeInternal 
             gradientKey={sortState.field}
             onSort={handleSort}
             maxLength={28}
+            defaultSortField={"agentViews"}
         />
     );
 }
