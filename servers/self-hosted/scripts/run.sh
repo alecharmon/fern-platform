@@ -246,7 +246,7 @@ log "FDR is up and running at localhost:8080/health"
 
 log "running fern generate --docs"
 
-FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080  FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level debug 2>&1 | add_timestamps
+FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080  FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level debug --no-prompt 2>&1 | add_timestamps
 
 log " docs generated successfully"
 
