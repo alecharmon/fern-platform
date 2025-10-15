@@ -172,7 +172,7 @@
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "unist-util-visit": "^5.0.0",
-    "vite": "^6.1.0",
+    "vite": "^6.1.6",
     "vitest": "catalog:"
   },
   "peerDependencies": {
