@@ -31,7 +31,7 @@
     "docs:rewrite:local": "pnpm run docs:rewrite:local:copy && pnpm run docs:rewrite:local:clean && pnpm run docs:rewrite:local:esbuild",
     "docs:rewrite:local:clean": "find .next -depth -mindepth 1 -not -path \".next/standalone*\" -exec rm -rf {} \\;",
     "docs:rewrite:local:copy": "cp -r .next/static .next/standalone/packages/fern-docs/bundle/.next",
-    "docs:rewrite:local:esbuild": "rm -rf .next/standalone/node_modules/.pnpm/esbuild@0.25.2 && rm -rf .next/standalone/node_modules/.pnpm/@esbuild+linux-x64@0.25.2",
+    "docs:rewrite:local:esbuild": "rm -rf .next/standalone/node_modules/.pnpm/esbuild@0.25.9 && rm -rf .next/standalone/node_modules/.pnpm/@esbuild+linux-x64@0.25.9",
     "docs:show-env": "mv .env.local.hidden .env.local",
     "docs:start": "next start",
     "docs:start:local": "NODE_ENV=production node .next/standalone/packages/fern-docs/bundle/server.js",

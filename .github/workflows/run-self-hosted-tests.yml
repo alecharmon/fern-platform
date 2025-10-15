@@ -27,7 +27,7 @@ jobs:
              
       - name: Replace esbuild version
         run: |
-          sed -i 's/"esbuild": "0\.25\.[0-9]\+"/"esbuild": "0.25.2"/g' pnpm-workspace.yaml
+          sed -i 's/"esbuild": "0\.25\.[0-9]\+"/"esbuild": "0.25.9"/g' pnpm-workspace.yaml
           echo "Updated esbuild version in pnpm-workspace.yaml"
           grep -A1 'esbuild' pnpm-workspace.yaml | head -n 3
 
