@@ -41,11 +41,11 @@ async function copyModules(destPath) {
   try {
     if (isWindows) {
       await execAsync(
-        `copy node_modules/.pnpm/esbuild@0.25.0 ${destPath}\\ && copy node_modules/.pnpm/@esbuild+* ${destPath}\\`
+        `copy node_modules/.pnpm/esbuild@0.25.2 ${destPath}\\ && copy node_modules/.pnpm/@esbuild+* ${destPath}\\`
       );
     } else {
       await execAsync(
-        `cp -r node_modules/.pnpm/esbuild@0.25.0 node_modules/.pnpm/@esbuild+* ${destPath}/`
+        `cp -r node_modules/.pnpm/esbuild@0.25.2 node_modules/.pnpm/@esbuild+* ${destPath}/`
       );
     }
   } catch (error) {
@@ -64,7 +64,7 @@ async function checkImport() {
     );
     if (!esbuildPackage) return null;
 
-    const match = esbuildPackage.match(/@esbuild\+(.+)@0\.25\.0/);
+    const match = esbuildPackage.match(/@esbuild\+(.+)@0\.25\.2/);
     return match ? match[1] : null;
   } catch (error) {
     console.error("Error checking imports:", error.message);

@@ -26,4 +26,4 @@ runs:
     - name: 📥 Install dependencies
       if: ${{ inputs.run_install == 'true' }}
       shell: bash
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
