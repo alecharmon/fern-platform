@@ -54,6 +54,7 @@ import { rehypeFiles } from "../plugins/rehype-files";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
 import { rehypeParamField } from "../plugins/rehype-param-field";
+import { rehypeRunnableEndpoint } from "../plugins/rehype-runnable-endpoint";
 import { rehypeSteps } from "../plugins/rehype-steps";
 import { rehypeTable } from "../plugins/rehype-table";
 import { rehypeTabs } from "../plugins/rehype-tabs";
@@ -194,6 +195,7 @@ async function serializeMdxImpl(
                 rehypeButtons,
                 [rehypeEndpointSchemaSnippets, { loader }],
                 [rehypeEndpointExampleSnippets, { loader }],
+                [rehypeRunnableEndpoint, { loader }],
                 [
                     rehypeMigrateJsx,
                     {
