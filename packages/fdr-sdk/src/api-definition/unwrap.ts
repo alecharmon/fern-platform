@@ -164,11 +164,6 @@ function selectDefaultValue(
     shape: DereferencedNonOptionalTypeShapeOrReference | undefined,
     defaults: InternalDefaultValue[]
 ): unknown | undefined {
-    // If the shape is a literal, the default value will always be the literal value
-    if (shape?.type === "literal") {
-        return shape.value.value;
-    }
-
     const defaultValue = defaults.find((d) => {
         // If the shape is unknown, we can't validate the default value, so we assume it's always the first one
         if (shape == null) {
