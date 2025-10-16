@@ -25,31 +25,31 @@ describe("getRedirectForPath", () => {
         );
         expect(
             getRedirectForPath("/bar", MOCK_BASE_URL_0, [{ source: "/bar", destination: "/baz", permanent: undefined }])
-        ).toEqual({ destination: "/baz", permanent: false });
+        ).toEqual({ destination: "/baz", permanent: true });
     });
     it("should return redirect if source matches with trailing slash", () => {
         expect(
             getRedirectForPath("/bar/", MOCK_BASE_URL_0, [
                 { source: "/bar", destination: "/baz", permanent: undefined }
             ])
-        ).toEqual({ destination: "/baz", permanent: false });
+        ).toEqual({ destination: "/baz", permanent: true });
         expect(
             getRedirectForPath("/bar", MOCK_BASE_URL_0, [
                 { source: "/bar/", destination: "/baz/", permanent: undefined }
             ])
-        ).toEqual({ destination: "/baz/", permanent: false });
+        ).toEqual({ destination: "/baz/", permanent: true });
     });
     it("should return redirect if source matches omitting basepath", () => {
         expect(
             getRedirectForPath("/docs/bar", MOCK_BASE_URL_1, [
                 { source: "/bar", destination: "/baz", permanent: undefined }
             ])
-        ).toEqual({ destination: "/baz", permanent: false });
+        ).toEqual({ destination: "/baz", permanent: true });
         expect(
             getRedirectForPath("/docs/bar", MOCK_BASE_URL_1, [
                 { source: "/bar/", destination: "/baz/", permanent: undefined }
             ])
-        ).toEqual({ destination: "/baz/", permanent: false });
+        ).toEqual({ destination: "/baz/", permanent: true });
     });
     it("should return redirect if source matches with basepath", () => {
         expect(
@@ -60,7 +60,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz", permanent: false });
+        ).toEqual({ destination: "/baz", permanent: true });
         expect(
             getRedirectForPath("/docs/bar", MOCK_BASE_URL_1, [
                 {
@@ -69,7 +69,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/", permanent: false });
+        ).toEqual({ destination: "/baz/", permanent: true });
     });
     it("should return redirect if source matches params", () => {
         expect(
@@ -80,7 +80,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/123", permanent: false });
+        ).toEqual({ destination: "/baz/123", permanent: true });
         expect(
             getRedirectForPath("/bar/123", MOCK_BASE_URL_0, [
                 {
@@ -89,7 +89,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/123/", permanent: false });
+        ).toEqual({ destination: "/baz/123/", permanent: true });
     });
     it("should return redirect if source matches params with basepath", () => {
         expect(
@@ -100,7 +100,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/123", permanent: false });
+        ).toEqual({ destination: "/baz/123", permanent: true });
         expect(
             getRedirectForPath("/docs/bar/123", MOCK_BASE_URL_1, [
                 {
@@ -109,7 +109,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/123", permanent: false });
+        ).toEqual({ destination: "/baz/123", permanent: true });
     });
     it("should return redirect for wildcard", () => {
         expect(
@@ -120,7 +120,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/123/456", permanent: false });
+        ).toEqual({ destination: "/baz/123/456", permanent: true });
         expect(
             getRedirectForPath("/docs/bar/123/456/", MOCK_BASE_URL_1, [
                 {
@@ -129,7 +129,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/123/456/", permanent: false });
+        ).toEqual({ destination: "/baz/123/456/", permanent: true });
     });
     it("should respect regex", () => {
         expect(
@@ -140,7 +140,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/123", permanent: false });
+        ).toEqual({ destination: "/baz/123", permanent: true });
         expect(
             getRedirectForPath("/bar/abc", MOCK_BASE_URL_0, [
                 {
@@ -158,7 +158,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/abc", permanent: false });
+        ).toEqual({ destination: "/baz/abc", permanent: true });
         expect(
             getRedirectForPath("/bar/efg", MOCK_BASE_URL_0, [
                 {
@@ -167,7 +167,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz/efg", permanent: false });
+        ).toEqual({ destination: "/baz/efg", permanent: true });
     });
     it("should encode the destination", () => {
         expect(
@@ -178,10 +178,10 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "/baz?foo=bar", permanent: false });
+        ).toEqual({ destination: "/baz?foo=bar", permanent: true });
         expect(
             getRedirectForPath("/bar", MOCK_BASE_URL_0, [{ source: "/bar", destination: "/a%b", permanent: undefined }])
-        ).toEqual({ destination: "/a%25b", permanent: false });
+        ).toEqual({ destination: "/a%25b", permanent: true });
     });
     it("should not try to redirect to a bad destination", () => {
         expect(
@@ -192,7 +192,7 @@ describe("getRedirectForPath", () => {
                     permanent: undefined
                 }
             ])
-        ).toEqual({ destination: "https://n", permanent: false });
+        ).toEqual({ destination: "https://n", permanent: true });
         expect(
             getRedirectForPath("/bar", MOCK_BASE_URL_0, [
                 { source: "/bar", destination: "x/b/c", permanent: undefined }

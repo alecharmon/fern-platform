@@ -61,7 +61,7 @@ export function getRedirectForPath(
             // - Do encode the URI to prevent any potential issues with special characters
             return {
                 destination: encodeURI(destination),
-                permanent: redirect.permanent ?? false
+                permanent: redirect.permanent ?? true
             };
         }
     }
