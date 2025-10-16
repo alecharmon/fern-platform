@@ -46,14 +46,14 @@ export const ANALYTICS_COLUMNS = {
     },
     agentViews: {
         key: "agentViews",
-        label: "Agent visitors",
+        label: "Agents",
         width: "140px",
         sortable: true,
         format: (value: number) => value.toLocaleString()
     },
     humanViews: {
         key: "humanViews",
-        label: "Human visitors",
+        label: "Humans",
         width: "140px",
         sortable: true,
         format: (value: number) => value.toLocaleString()

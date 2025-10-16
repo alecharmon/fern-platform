@@ -48,7 +48,7 @@ export default function LLMFileViewsTable({ docsUrl, dateRange, includeInternal 
 
     return (
         <AnalyticsMiniTable
-            title=".md + llms.txt Visits"
+            title=".md + llms.txt Visitors"
             data={data?.llmFileViews}
             isLoading={isLoading}
             error={error}
