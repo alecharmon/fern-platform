@@ -1,9 +1,11 @@
-name: Deploy Local Preview (DEV)
+name: Deploy Local Preview (PROD)
 
 on:
-  push:
-    branches:
-      - app
+  release:
+    types: [created]
+    tags:
+      - "docs@*"
+  workflow_dispatch:
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -11,9 +13,9 @@ env:
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
 
-jobs:
-  dev:
-    if: github.event_name == 'push'
+jobs:        
+  prod:
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'docs@') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,4 +31,4 @@ jobs:
       - name: Build local preview bundle
         run: pnpm --filter=@fern-docs/bundle run docs:make:local
       - name: Synthesize local preview bundle
-        run: pnpm --filter=@fern-platform/cdk run deploy-app:dev2
+        run: pnpm --filter=@fern-platform/cdk run deploy-app:prod
