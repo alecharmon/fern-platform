@@ -3,6 +3,8 @@
 import type { FernAI } from "@fern-api/fai-sdk";
 import type { ColumnDef } from "@tanstack/react-table";
 
+import { getLocationDisplayText } from "./utils/get-location-display-text";
+
 export const columns: ColumnDef<FernAI.Query>[] = [
     {
         id: "query",
@@ -15,6 +17,15 @@ export const columns: ColumnDef<FernAI.Query>[] = [
                     {text}
                 </div>
             );
+        }
+    },
+    {
+        accessorKey: "source",
+        header: "Location",
+        cell: ({ row }) => {
+            const source = row.getValue("source") as string | undefined;
+            const displayText = getLocationDisplayText(source);
+            return <div className="text-left">{displayText}</div>;
         }
     },
     {

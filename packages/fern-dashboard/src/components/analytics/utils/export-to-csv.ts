@@ -1,5 +1,7 @@
 import type { FernAI } from "@fern-api/fai-sdk";
 
+import { getLocationDisplayText } from "./get-location-display-text";
+
 function escapeCSVField(value: string): string {
     const normalized = value.replace(/\r/g, "\\r").replace(/\n/g, "\\n");
 
@@ -16,11 +18,18 @@ function escapeCSVField(value: string): string {
 }
 
 export function exportToCSV(queries: FernAI.Query[], filename: string = "queries-export") {
-    const headers = ["Conversation ID", "Date", "Role", "Query"];
+    const headers = ["Conversation ID", "Date", "Role", "Location", "Query"];
 
     const rows = queries.map((query) => {
         const isoDate = new Date(query.created_at).toISOString();
-        return [escapeCSVField(query.conversation_id), isoDate, escapeCSVField(query.role), escapeCSVField(query.text)];
+        const location = getLocationDisplayText(query.source);
+        return [
+            escapeCSVField(query.conversation_id),
+            isoDate,
+            escapeCSVField(query.role),
+            escapeCSVField(location),
+            escapeCSVField(query.text)
+        ];
     });
 
     const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
