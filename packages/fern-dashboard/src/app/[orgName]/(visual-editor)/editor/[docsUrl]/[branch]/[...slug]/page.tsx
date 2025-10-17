@@ -10,6 +10,7 @@ import {
     ROOT_SLUG_ALIAS,
     type SerializableFoundNode
 } from "@fern-docs/components/navigation";
+import { getFrontmatter } from "@fern-docs/mdx";
 import { notFound, redirect } from "next/navigation";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -57,6 +58,7 @@ export default async function Page({
     let pageDataDeps: PageNodeNamespace.Props["pageDataDeps"];
     let serializableFoundNode: SerializableFoundNode | undefined;
     let cssConfig: PageNodeNamespace.Props["cssConfig"];
+    let frontmatter: ReturnType<typeof getFrontmatter>["data"] | undefined;
 
     if (resolvedSearchParams["client-page"]) {
         pageDataDeps = {
@@ -143,6 +145,9 @@ export default async function Page({
 
         const rawMarkdown = page.rawMarkdown ?? page.markdown;
 
+        // Extract frontmatter from the markdown
+        frontmatter = getFrontmatter(rawMarkdown).data;
+
         pageDataDeps = {
             source: "server",
             filename: page.filename,
@@ -156,7 +161,7 @@ export default async function Page({
         // TODO: Currently, we are force-hiding the table of contents is within Fern Editor.
         // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
         // on the tiptap editor's content.
-        <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={undefined}>
+        <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={frontmatter}>
             <div className="flex w-full flex-col gap-2 py-12">
                 <PageNode pageDataDeps={pageDataDeps} fallbackFoundNode={serializableFoundNode} cssConfig={cssConfig} />
             </div>
