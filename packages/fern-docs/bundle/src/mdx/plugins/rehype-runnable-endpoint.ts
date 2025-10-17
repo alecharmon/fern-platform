@@ -87,7 +87,8 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
                             node.attributes.push(
                                 unknownToMdxJsxAttribute("endpointDefinition", endpoint),
                                 unknownToMdxJsxAttribute("types", types ?? {}),
-                                unknownToMdxJsxAttribute("globalHeaders", globalHeaders ?? [])
+                                unknownToMdxJsxAttribute("globalHeaders", globalHeaders ?? []),
+                                unknownToMdxJsxAttribute("endpointSlugs", slugs)
                             );
 
                             console.log("[rehype-runnable-endpoint] Successfully injected endpoint data");
