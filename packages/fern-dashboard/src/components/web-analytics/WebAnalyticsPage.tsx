@@ -54,7 +54,7 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
     });
 
     return (
-        <div className="flex w-full flex-col gap-6">
+        <div className="flex w-full flex-col gap-4">
             {/* Date Range and Refresh Button */}
             <div className="flex items-center gap-2">
                 <SelectDate value={dateRange} onChange={setDateRange} />
@@ -71,7 +71,7 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
             </div>
 
             {/* Metrics Cards using CSS Grid for equal 1/2 spacing */}
-            <div className="flex justify-between">
+            <div className="flex gap-4">
                 <MetricsCard title="Visitors" value={data?.metrics.visitors ?? 0} isLoading={isLoading} error={error} />
                 <MetricsCard
                     title="Page views"

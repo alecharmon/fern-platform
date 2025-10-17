@@ -70,7 +70,7 @@ export function MetricsCard({ title, value, isLoading, error }: MetricsCardProps
     }
 
     return (
-        <div className="border-border flex w-[48%] flex-col gap-3 rounded-lg border bg-white p-6 dark:bg-transparent">
+        <div className="border-border flex flex-1 flex-col gap-3 rounded-lg border bg-white p-6 dark:bg-transparent">
             <p className="text-muted-foreground text-sm">{title}</p>
             <div className="text-3xl font-semibold">
                 {isLoading ? (
