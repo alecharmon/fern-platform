@@ -7,8 +7,8 @@ import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { getLanguageModel, SuggestionsSchema } from "@fern-docs/search-ask-fern";
 import { type AlgoliaRecord, SEARCH_INDEX } from "@fern-docs/search-keyword";
 import { getEnv } from "@vercel/functions";
-import { kv } from "@vercel/kv";
 import { generateObject } from "ai";
+import { unstable_cache } from "next/cache";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -16,7 +16,6 @@ import { z } from "zod";
 import { getFaiClient } from "@/getFaiClient";
 
 const DEPLOYMENT_ID = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
-const PREFIX = `docs:${DEPLOYMENT_ID}`;
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -25,40 +24,8 @@ const BodySchema = z.object({
     algoliaSearchKey: z.string()
 });
 
-export async function POST(req: NextRequest): Promise<Response> {
-    if (isLocal() || isSelfHosted()) {
-        return NextResponse.json("ai suggestions are not accessible in local preview mode", { status: 400 });
-    }
-
+async function generateSuggestions(domain: string, algoliaSearchKey: string) {
     const { model: languageModel, provider: _ } = getLanguageModel("claude-4");
-
-    const domain = getDocsDomainEdge(req);
-    const cookieJar = await cookies();
-
-    const isAskAiEnabled = (
-        await getFaiClient({
-            token: process.env.FERN_TOKEN ?? ""
-        }).settings.getSettings({ domain })
-    ).ask_ai_enabled;
-
-    if (!isAskAiEnabled) {
-        throw new Error(`Ask AI is not enabled for ${domain}`);
-    }
-
-    const cacheKey = `${PREFIX}:${domain}:suggestions`;
-    if (!cookieJar.has(COOKIE_FERN_TOKEN)) {
-        const cachedSuggestions = await kv.get(cacheKey);
-
-        if (cachedSuggestions) {
-            return NextResponse.json(cachedSuggestions, {
-                status: 200,
-                headers: { "Content-Type": "text/plain; charset=utf-8" }
-            });
-        }
-    }
-
-    const body = await req.json();
-    const { algoliaSearchKey } = BodySchema.parse(body);
 
     const client = searchClient(algoliaAppId(), algoliaSearchKey);
     const response = await client.searchSingleIndex<AlgoliaRecord>({
@@ -127,10 +94,50 @@ DO NOT include any explanatory text - only return the JSON object.`,
         };
     }
 
-    if (result.object && !cookieJar.has(COOKIE_FERN_TOKEN)) {
-        await kv.set(cacheKey, result.object);
-        await kv.expire(cacheKey, 2 * 86400);
+    return result.object;
+}
+
+function getCachedSuggestions(domain: string, algoliaSearchKey: string) {
+    const get = unstable_cache(
+        () => generateSuggestions(domain, algoliaSearchKey),
+        ["suggest", domain, algoliaSearchKey, DEPLOYMENT_ID],
+        {
+            tags: [domain],
+            revalidate: 2 * 86400
+        }
+    );
+    return get();
+}
+
+export async function POST(req: NextRequest): Promise<Response> {
+    if (isLocal() || isSelfHosted()) {
+        return NextResponse.json("ai suggestions are not accessible in local preview mode", { status: 400 });
     }
 
-    return NextResponse.json(result.object);
+    const domain = getDocsDomainEdge(req);
+    const cookieJar = await cookies();
+
+    const isAskAiEnabled = (
+        await getFaiClient({
+            token: process.env.FERN_TOKEN ?? ""
+        }).settings.getSettings({ domain })
+    ).ask_ai_enabled;
+
+    if (!isAskAiEnabled) {
+        throw new Error(`Ask AI is not enabled for ${domain}`);
+    }
+
+    const body = await req.json();
+    const { algoliaSearchKey } = BodySchema.parse(body);
+
+    const isAuthenticated = cookieJar.has(COOKIE_FERN_TOKEN);
+
+    if (isAuthenticated) {
+        const suggestions = await generateSuggestions(domain, algoliaSearchKey);
+        return NextResponse.json(suggestions);
+    }
+
+    const suggestions = await getCachedSuggestions(domain, algoliaSearchKey);
+
+    return NextResponse.json(suggestions);
 }

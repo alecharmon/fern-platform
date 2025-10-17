@@ -15,7 +15,7 @@ import {
 } from "@fern-api/fdr-sdk/api-definition";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
-import { waitUntil } from "@vercel/functions";
+import { getEnv, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
 import { chunk } from "es-toolkit/array";
 import { mapValues } from "es-toolkit/object";
@@ -64,6 +64,14 @@ export async function GET(
                     await kv.del(domain);
                 } catch (e) {
                     console.debug("Attempted to delete key", domain, "but failed with", e);
+                }
+
+                const deploymentId = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
+                const oldSuggestionsKey = `docs:${deploymentId}:${domain}:suggestions`;
+                try {
+                    await kv.del(oldSuggestionsKey);
+                } catch (e) {
+                    console.debug("Attempted to delete old suggestions key", oldSuggestionsKey, "but failed with", e);
                 }
 
                 // note: adds to "domain" for deployment-promoted webhook
