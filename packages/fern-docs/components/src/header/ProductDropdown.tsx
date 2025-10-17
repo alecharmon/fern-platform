@@ -45,7 +45,7 @@ export async function ProductDropdown({
     const productOptions = products?.map((product: FernNavigation.ProductNode): ProductDropdownItem => {
         let slug = product.slug ?? product.pointsTo;
         if (product.authed && !authState.authed && authConfig) {
-            const loginUrl = getLoginUrl({ authConfig, authState });
+            const loginUrl = authState.authorizationUrl;
             if (loginUrl) {
                 slug = loginUrl as Slug;
             }
@@ -80,19 +80,3 @@ export async function ProductDropdown({
         />
     );
 }
-
-const getLoginUrl = ({ authConfig, authState }: { authConfig: AuthEdgeConfig; authState: AuthState }) => {
-    if (!authState.authed) {
-        return authState.authorizationUrl;
-    }
-
-    if (authConfig.type === "basic_token_verification") {
-        return authConfig.redirect as Slug;
-    }
-
-    if (authConfig.type === "oauth2" && "auth_endpoint" in authConfig) {
-        return authConfig.auth_endpoint as Slug;
-    }
-
-    return undefined;
-};
