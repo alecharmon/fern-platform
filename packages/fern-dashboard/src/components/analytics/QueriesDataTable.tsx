@@ -13,9 +13,10 @@ import {
 } from "@tanstack/react-table";
 
 import { getConversation } from "@/app/actions/getConversation";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { QueriesDataTableHeader } from "./QueriesDataTableHeader";
+import type { ConversationRow } from "./types";
 import type { TimeRange } from "./utils/get-request-params";
 
 interface QueriesDataTableProps<TData, TValue> {
@@ -53,7 +54,7 @@ export function QueriesDataTable<TData, TValue>({
         return async () => {
             const conversation = await getConversation({
                 domain: baseDocsUrl,
-                conversationId: (row.original as FernAI.Query).conversation_id
+                conversationId: (row.original as ConversationRow).conversation_id
             });
             onSelectConversation(conversation);
         };
@@ -63,7 +64,15 @@ export function QueriesDataTable<TData, TValue>({
         return (
             <TableCell
                 key={cell.id}
-                className={cell.column.id === "created_at" ? "w-32" : cell.column.id === "actions" ? "w-16" : undefined}
+                className={
+                    cell.column.id === "conversation"
+                        ? "pl-0"
+                        : cell.column.id === "created_at"
+                          ? "w-32"
+                          : cell.column.id === "message_count" || cell.column.id === "source"
+                            ? "w-24"
+                            : undefined
+                }
             >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </TableCell>
@@ -82,6 +91,32 @@ export function QueriesDataTable<TData, TValue>({
                 />
                 <div className="max-h-[400px] min-h-[400px] overflow-y-auto">
                     <Table className="table-fixed">
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id} className="border-none">
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead
+                                            key={header.id}
+                                            style={{ fontFamily: "Berkeley Mono, monospace" }}
+                                            className={
+                                                header.column.id === "conversation"
+                                                    ? "pl-0"
+                                                    : header.column.id === "created_at"
+                                                      ? "w-32 text-right"
+                                                      : header.column.id === "message_count" ||
+                                                          header.column.id === "source"
+                                                        ? "w-24"
+                                                        : undefined
+                                            }
+                                        >
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(header.column.columnDef.header, header.getContext())}
+                                        </TableHead>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableHeader>
                         <TableBody>
                             {table.getRowModel().rows.length ? (
                                 table.getRowModel().rows.map((row) => (
@@ -89,7 +124,7 @@ export function QueriesDataTable<TData, TValue>({
                                         key={row.id}
                                         data-state={
                                             selectedConversation?.conversation_id ===
-                                                (row.original as FernAI.Query).conversation_id && "selected"
+                                                (row.original as ConversationRow).conversation_id && "selected"
                                         }
                                         className="data-[state=selected]:bg-accent cursor-pointer border-none"
                                         onClick={onClickRow(row)}

@@ -1,7 +1,7 @@
 "use client";
 
 import type { FernAI } from "@fern-api/fai-sdk";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { getAllQueries } from "@/app/actions/getAllQueries";
 import { cn } from "@/utils/utils";
@@ -10,6 +10,7 @@ import { Pagination } from "../ui/pagination";
 import { BORDER_STYLES } from "./AnalyticsPageClient";
 import { columns } from "./ConversationColumnDef";
 import { QueriesDataTable } from "./QueriesDataTable";
+import { groupQueriesByConversation } from "./types";
 import { exportToCSV } from "./utils/export-to-csv";
 import type { TimeRange } from "./utils/get-request-params";
 
@@ -40,6 +41,8 @@ export function QueriesTable({
 }) {
     const [isExporting, setIsExporting] = useState(false);
 
+    const conversationRows = useMemo(() => groupQueriesByConversation(queries), [queries]);
+
     const handleExport = () => {
         setIsExporting(true);
         getAllQueries({
@@ -48,7 +51,8 @@ export function QueriesTable({
             timeRange: queryTimeRange
         })
             .then((allData) => {
-                exportToCSV(allData.queries, `all-queries-${queryTimeRange.toLowerCase()}`);
+                const allConversationRows = groupQueriesByConversation(allData.queries);
+                exportToCSV(allConversationRows, `all-conversations-${queryTimeRange.toLowerCase()}`);
             })
             .catch((error) => {
                 console.error("Failed to export CSV:", error);
@@ -62,7 +66,7 @@ export function QueriesTable({
         <div className={cn(BORDER_STYLES, "border-gray-0 w-full overflow-hidden border")}>
             <QueriesDataTable
                 columns={columns}
-                data={queries}
+                data={conversationRows}
                 baseDocsUrl={baseDocsUrl}
                 onSelectConversation={onSelectConversation}
                 selectedConversation={selectedConversation}

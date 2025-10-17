@@ -1,5 +1,4 @@
-import type { FernAI } from "@fern-api/fai-sdk";
-
+import type { ConversationRow } from "../types";
 import { getLocationDisplayText } from "./get-location-display-text";
 
 function escapeCSVField(value: string): string {
@@ -17,18 +16,18 @@ function escapeCSVField(value: string): string {
     return normalized;
 }
 
-export function exportToCSV(queries: FernAI.Query[], filename: string = "queries-export") {
-    const headers = ["Conversation ID", "Date", "Role", "Location", "Query"];
+export function exportToCSV(conversations: ConversationRow[], filename: string = "conversations-export") {
+    const headers = ["Conversation ID", "First Query", "Channel", "Messages", "Date"];
 
-    const rows = queries.map((query) => {
-        const isoDate = new Date(query.created_at).toISOString();
-        const location = getLocationDisplayText(query.source);
+    const rows = conversations.map((conversation) => {
+        const isoDate = new Date(conversation.created_at).toISOString();
+        const channel = getLocationDisplayText(conversation.source);
         return [
-            escapeCSVField(query.conversation_id),
-            isoDate,
-            escapeCSVField(query.role),
-            escapeCSVField(location),
-            escapeCSVField(query.text)
+            escapeCSVField(conversation.conversation_id),
+            escapeCSVField(conversation.first_query),
+            escapeCSVField(channel),
+            conversation.message_count.toString(),
+            isoDate
         ];
     });
 

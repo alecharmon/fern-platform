@@ -102,6 +102,7 @@ export function AnalyticsPageClient({
 
     useEffect(() => {
         setPageCache({});
+        setCurrentPage(1);
     }, [queryTimeRange, cutoffTime]);
 
     const timeoutRef = React.useRef<number | null>(null);

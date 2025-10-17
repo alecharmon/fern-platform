@@ -1,19 +1,19 @@
 "use client";
 
-import type { FernAI } from "@fern-api/fai-sdk";
 import type { ColumnDef } from "@tanstack/react-table";
 
-import { getLocationDisplayText } from "./utils/get-location-display-text";
+import { ChannelIcon } from "./ChannelIcon";
+import type { ConversationRow } from "./types";
 
-export const columns: ColumnDef<FernAI.Query>[] = [
+export const columns: ColumnDef<ConversationRow>[] = [
     {
-        id: "query",
-        accessorFn: (query) => query.text,
-        header: "Query",
+        id: "conversation",
+        accessorFn: (row) => row.first_query,
+        header: "Conversation",
         cell: ({ row }) => {
-            const text = row.getValue("query") as string | undefined;
+            const text = row.getValue("conversation") as string | undefined;
             return (
-                <div className="truncate" title={text}>
+                <div className="truncate" title={text} style={{ fontFamily: "GT Planar, sans-serif" }}>
                     {text}
                 </div>
             );
@@ -21,21 +21,28 @@ export const columns: ColumnDef<FernAI.Query>[] = [
     },
     {
         accessorKey: "source",
-        header: "Location",
+        header: "Channel",
         cell: ({ row }) => {
             const source = row.getValue("source") as string | undefined;
-            const displayText = getLocationDisplayText(source);
-            return <div className="text-left">{displayText}</div>;
+            return <ChannelIcon source={source} />;
+        }
+    },
+    {
+        accessorKey: "message_count",
+        header: "Messages",
+        cell: ({ row }) => {
+            const count = row.getValue("message_count") as number;
+            return <div style={{ fontFamily: "Berkeley Mono, monospace" }}>{count}</div>;
         }
     },
     {
         accessorKey: "created_at",
-        header: "",
+        header: "Date",
         cell: ({ row }) => {
             const createdAt = row.getValue("created_at") as string | number | Date;
             const date = new Date(createdAt);
             return (
-                <div className="text-left md:text-right">
+                <div className="text-left md:text-right" style={{ fontFamily: "GT Planar, sans-serif" }}>
                     {date.toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",

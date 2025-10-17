@@ -41,9 +41,9 @@ export function QueriesDataTableHeader<TData>({
                     <MagnifyingGlassIcon className="text-radix-gray-9 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                     <Input
                         placeholder="Search..."
-                        value={(table.getColumn("query")?.getFilterValue() as string) ?? ""}
-                        onChange={(event) => table.getColumn("query")?.setFilterValue(event.target.value)}
-                        className="text-radix-gray-9 placeholder:text-radix-gray-9 h-9 max-w-sm rounded-full pl-9"
+                        value={(table.getColumn("conversation")?.getFilterValue() as string) ?? ""}
+                        onChange={(event) => table.getColumn("conversation")?.setFilterValue(event.target.value)}
+                        className="text-radix-gray-9 placeholder:text-radix-gray-9 h-9 max-w-sm rounded-md pl-9"
                         autoFocus
                     />
                 </div>
