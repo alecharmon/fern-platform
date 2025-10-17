@@ -72,12 +72,6 @@ jobs:
       - name: Update Engines
         run: |
           node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "9.15.9"; pkg.packageManager = "pnpm@9.15.9"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
-          
-      - name: Replace esbuild version
-        run: |
-          sed -i 's/"esbuild": "0\.25\.[0-9]\+"/"esbuild": "0.25.9"/g' pnpm-workspace.yaml
-          echo "Updated esbuild version in pnpm-workspace.yaml"
-          grep -A1 'esbuild' pnpm-workspace.yaml | head -n 3
 
       - name: Install
         uses: ./.github/actions/legacy-install
