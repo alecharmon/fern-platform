@@ -3,15 +3,15 @@
 import { useNavigation } from "@fern-docs/components/navigation";
 
 import * as Sentry from "@sentry/nextjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import postGitCommit from "@/app/services/dal/github/postGitCommit";
 import { DEFAULT_COMMIT_MESSAGE, handleCreatePr } from "@/app/services/github/github";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useCommitToGitHubMutation } from "@/state/useCommitToGitHubMutation";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { DashboardTooltip } from "./DashboardTooltip";
@@ -33,6 +33,8 @@ export function CommitButton() {
 
     const { files, handleCommitSuccess } = useNavigation();
 
+    const commitMutation = useCommitToGitHubMutation();
+
     useEffect(() => {
         // NOTE: This is a temporary solution to persist the PR URL across route changes/refreshes.
         const prUrl = localStorage.getItem(`gitPrUrl-${branch}`);
@@ -40,8 +42,6 @@ export function CommitButton() {
             setPrUrl(prUrl);
         }
     }, [branch, setPrUrl]);
-
-    const [isCommitting, setIsCommitting] = useState(false);
 
     const handleCommitPress = useCallback(async () => {
         if (!owner || !repo) {
@@ -58,9 +58,8 @@ export function CommitButton() {
             return;
         }
 
-        setIsCommitting(true);
         try {
-            const response = await postGitCommit({
+            const response = await commitMutation.mutateAsync({
                 orgName,
                 owner,
                 repo,
@@ -69,6 +68,7 @@ export function CommitButton() {
                 message: DEFAULT_COMMIT_MESSAGE,
                 files: files.forCommit
             });
+
             if (response.success) {
                 SuccessfulCommitToast();
                 handleCommitSuccess();
@@ -103,8 +103,6 @@ export function CommitButton() {
             console.error("Error committing changes:", error);
             // TODO: Move error reporting into toasts handlers
             Sentry.captureException(error);
-        } finally {
-            setIsCommitting(false);
         }
     }, [
         branch,
@@ -119,7 +117,8 @@ export function CommitButton() {
         orgName,
         files.forCommit,
         files.hasChangesToCommit,
-        handleCommitSuccess
+        handleCommitSuccess,
+        commitMutation
     ]);
 
     const commitDisabledReason = useMemo(() => {
@@ -127,7 +126,7 @@ export function CommitButton() {
             return "Cannot commit when PR is closed or merged";
         }
 
-        if (isCommitting) {
+        if (commitMutation.isPending) {
             return "Disabled while committing";
         }
 
@@ -136,11 +135,15 @@ export function CommitButton() {
         }
 
         return null;
-    }, [isEditingDisabled, isCommitting, files.hasChangesToCommit]);
+    }, [isEditingDisabled, commitMutation.isPending, files.hasChangesToCommit]);
 
     return (
         <DashboardTooltip content={commitDisabledReason}>
-            <Button loading={isCommitting} disabled={!!commitDisabledReason} onClick={() => void handleCommitPress()}>
+            <Button
+                loading={commitMutation.isPending}
+                disabled={!!commitDisabledReason}
+                onClick={() => void handleCommitPress()}
+            >
                 <GithubLogo />
                 Commit
             </Button>

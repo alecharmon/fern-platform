@@ -8,9 +8,9 @@ import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import getGithubSourceMetadata from "@/app/api/get-github-source-metadata/handler";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
-import createBranchIfNotExists from "@/app/services/dal/github/createBranchIfNotExists";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { GitHubLoader } from "@/app/services/github/github-loader";
+import { BranchInitializer } from "@/components/editor/BranchInitializer";
 import { ClientNavigationProvider } from "@/components/editor/ClientNavigationProvider";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { PreviewOnlyNotification } from "@/components/editor/PreviewOnlyNotification";
@@ -58,35 +58,6 @@ export default async function EditorLayout({
         throw throwDigestibleError(new Error("Source repo is not set"), "REPO_NOT_CONNECTED");
     }
 
-    let branchFailed = false;
-
-    // On first load, create the branch if it doesn't exist. We don't want to await this
-    // since it will block the first render.
-    createBranchIfNotExists({
-        orgName,
-        site: docsUrl,
-        owner: sourceRepo.owner,
-        repo: sourceRepo.repo,
-        branch,
-        baseBranch: sourceRepo.baseBranch
-    })
-        .then((result) => {
-            if (!result.success) {
-                branchFailed = true;
-            }
-        })
-        .catch((e) => {
-            console.error("Error creating branch:", {
-                error: e,
-                orgName,
-                owner: sourceRepo?.owner,
-                repo: sourceRepo?.repo,
-                branch,
-                baseBranch: sourceRepo?.baseBranch
-            });
-            branchFailed = true;
-        });
-
     // TODO: lazy load this so we don't block the initial server render?
     const githubLoader = new GitHubLoader(githubUrl);
 
@@ -108,8 +79,16 @@ export default async function EditorLayout({
         <EditorShell>
             <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false} disableTransitionOnChange>
                 <OrgNameProvider orgName={orgName}>
-                    <BranchProvider branch={branch} branchFailed={branchFailed}>
+                    <BranchProvider branch={branch}>
                         <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl}>
+                            <BranchInitializer
+                                orgName={orgName}
+                                site={docsUrl}
+                                owner={sourceRepo.owner}
+                                repo={sourceRepo.repo}
+                                branch={branch}
+                                baseBranch={sourceRepo.baseBranch}
+                            />
                             <ClientNavigationProvider
                                 branchName={branch}
                                 orgName={orgName}
