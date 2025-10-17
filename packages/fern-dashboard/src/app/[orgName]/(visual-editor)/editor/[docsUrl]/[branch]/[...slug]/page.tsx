@@ -11,7 +11,7 @@ import {
     type SerializableFoundNode
 } from "@fern-docs/components/navigation";
 import { getFrontmatter } from "@fern-docs/mdx";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
@@ -21,8 +21,6 @@ import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
-
-export const experimental_ppr = true;
 
 export default async function Page({
     params,
@@ -79,7 +77,7 @@ export default async function Page({
             if (navigationSlug === root.slug) {
                 notFound();
             }
-            return redirect(
+            return permanentRedirect(
                 constructEditorSlug({
                     orgName,
                     docsUrl,

@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect, redirect } from "next/navigation";
 
 import { getCurrentSession } from "../../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../../services/auth0/types";
@@ -11,5 +11,5 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
 
     const { orgName } = await params;
 
-    redirect(`/${orgName}/docs`);
+    permanentRedirect(`/${orgName}/docs`);
 }
