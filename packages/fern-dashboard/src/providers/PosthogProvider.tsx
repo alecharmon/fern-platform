@@ -8,7 +8,6 @@ import { useEffect } from "react";
 
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { PostHogIdentify } from "@/components/posthog/PostHogIdentify";
 import { PostHogPageView } from "@/components/posthog/PostHogPageView";
 import { isProduction } from "@/utils/environment";
 
@@ -39,10 +38,17 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
             posthog.opt_out_capturing();
         }
 
-        posthog.setPersonPropertiesForFlags({
-            email: session?.user.email
-        });
-    }, [isPosthogTrackingEnabled, session?.user.email]);
+        // Identify user immediately after initialization to prevent anonymous UUID sessions
+        if (session?.user != null) {
+            posthog.identify(session.user.sub, {
+                email: session.user.email,
+                name: session.user.name
+            });
+            posthog.setPersonPropertiesForFlags({
+                email: session.user.email
+            });
+        }
+    }, [isPosthogTrackingEnabled, session?.user, session?.user.sub, session?.user.email, session?.user.name]);
 
     useEffect(() => {
         if (isPosthogTrackingEnabled && orgName) {
@@ -56,7 +62,6 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
             {isPosthogTrackingEnabled && (
                 <>
                     <PostHogPageView />
-                    <PostHogIdentify user={session?.user} />
                 </>
             )}
             {children}
