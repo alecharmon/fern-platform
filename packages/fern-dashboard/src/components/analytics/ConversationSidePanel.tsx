@@ -77,7 +77,7 @@ export function ConversationSidePanel({
                                         )}
                                         <div className="flex items-start justify-start gap-4">
                                             {turn.role !== "USER" && <Sparkles className="my-1 size-4 shrink-0" />}
-                                            <section className="prose min-w-0 flex-1 shrink cursor-text text-sm [&_a]:break-words">
+                                            <section className="prose min-w-0 flex-1 shrink cursor-text text-sm [&_a]:break-words [&_em]:not-italic [&_em]:font-semibold">
                                                 {turn.role !== "USER" && (
                                                     <MarkdownContent
                                                         components={{
