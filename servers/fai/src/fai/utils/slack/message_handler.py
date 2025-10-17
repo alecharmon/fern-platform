@@ -9,10 +9,6 @@ from typing import (
 )
 from uuid import uuid4
 
-from pydantic import (
-    BaseModel,
-    Field,
-)
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
@@ -30,6 +26,10 @@ from fai.utils.chat.response.anthropic import (
 )
 from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.chat.roles import create_delimited_role_combinations
+from fai.utils.generate.message_classification import (
+    CLASSIFICATION_PROMPT,
+    MessageClassification,
+)
 from fai.utils.generate_model import generate_anthropic_generic_async
 from fai.utils.slack.client import add_reaction
 from fai.utils.slack.postprocessing import SlackifyMarkdown
@@ -41,50 +41,6 @@ from fai.utils.turbopuffer.sync import (
     sync_index_to_target,
     sync_slack_context_db_to_tpuf,
 )
-
-
-class MessageClassification(BaseModel):
-    classification: Literal["question", "index", "ignore"] = Field(
-        description=(
-            "The classification of the message: 'question' for questions requiring a response, "
-            "'index' for messages that request the bot to index a thread to improve its responses, "
-            "'ignore' for casual chat/greetings"
-        )
-    )
-    reasoning: str = Field(description="Brief explanation of why this classification was chosen")
-
-
-CLASSIFICATION_PROMPT = """You are a message classifier for a documentation chatbot called AskFern. \
-Your job is to determine whether incoming Slack messages should be treated as:
-
-1. **question**: A genuine question or request for information that requires a detailed response \
-from the documentation bot. You should not classify questions that are not related to the API / service as questions.
-2. **index**: A message that requests the bot to index a thread to improve its responses. This should only be \
-returned if the conversation thread can improve the bot's responses.
-3. **ignore**: Casual chat, greetings, thanks, social messages, or off-topic conversations that \
-don't need bot engagement. This will be used to ignore messages that are not related to the API / service.
-
-{bot_info}
-
-Consider the following when classifying:
-
-- Questions often contain interrogative words (what, how, why, when, where) or request information/help
-- Questions may be phrased as statements that clearly need information (e.g., "I need help with...")
-- Feedback includes things like "this doesn't work", "great response", "the bot should...", "I found a bug"
-- Ignore casual messages like "hello", "thanks", "lol", "have a good day", or general conversation between humans
-- **IMPORTANT**: If a message is clearly addressed to a specific person (e.g., contains @username or "hey John"), \
-classify it as "ignore" since it's a conversation between humans, not intended for the bot
-- **IMPORTANT**: If a question is directed at a specific person (not the bot), classify it as "ignore"
-- **IMPORTANT**: Check Slack mentions carefully - if the message starts with mentions to other users (not the bot), \
-it's likely directed at them, not the bot
-- Context matters: in a thread, follow-up messages may be questions even without question marks
-
-Message to classify:
-{message_text}
-
-{history_context}
-
-Classify this message and provide your reasoning."""
 
 
 async def classify_message(

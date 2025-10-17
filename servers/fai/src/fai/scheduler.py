@@ -8,6 +8,7 @@ from apscheduler.triggers.cron import CronTrigger
 from fai.db import async_session_maker
 from fai.settings import LOGGER
 from fai.utils.cleanup_job import cleanup_preview_settings
+from fai.utils.conversation_reports_job import process_conversation_reports
 from fai.utils.insights_job import generate_insights_for_all_domains
 
 _scheduler: AsyncIOScheduler | None = None
@@ -73,6 +74,29 @@ async def cleanup_preview_settings_job() -> None:
         LOGGER.exception(f"Error in scheduled preview settings cleanup: {e}")
 
 
+async def process_conversation_reports_job() -> None:
+    LOGGER.info("Starting scheduled conversation reports processing")
+
+    try:
+        async with async_session_maker() as db:
+            results = await process_conversation_reports(db)
+
+            LOGGER.info(
+                f"Scheduled conversation reports processing completed: "
+                f"{results['successful']} successful, {results['failed']} failed "
+                f"out of {results['total_conversations']} conversations"
+            )
+
+            for result in results["results"]:
+                if not result["success"]:
+                    LOGGER.warning(
+                        f"Failed to process report for conversation {result['conversation_id']}: {result['message']}"
+                    )
+
+    except Exception as e:
+        LOGGER.exception(f"Error in scheduled conversation reports processing: {e}")
+
+
 def configure_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(
         func=generate_weekly_insights_job,
@@ -87,6 +111,14 @@ def configure_jobs(scheduler: AsyncIOScheduler) -> None:
         trigger=CronTrigger(day_of_week="mon,wed,fri", hour=2, minute=0, timezone="UTC"),
         id="preview_settings_cleanup",
         name="Clean up preview settings older than 1 day",
+        replace_existing=True,
+    )
+
+    scheduler.add_job(
+        func=process_conversation_reports_job,
+        trigger=CronTrigger(minute=0, timezone="UTC"),
+        id="conversation_reports_processing",
+        name="Process conversation reports hourly",
         replace_existing=True,
     )
 
