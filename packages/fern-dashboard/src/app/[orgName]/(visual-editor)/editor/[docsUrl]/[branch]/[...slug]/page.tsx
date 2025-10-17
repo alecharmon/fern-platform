@@ -11,7 +11,7 @@ import {
     type SerializableFoundNode
 } from "@fern-docs/components/navigation";
 import { getFrontmatter } from "@fern-docs/mdx";
-import { notFound, permanentRedirect, redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
@@ -77,7 +77,7 @@ export default async function Page({
             if (navigationSlug === root.slug) {
                 notFound();
             }
-            return permanentRedirect(
+            return redirect(
                 constructEditorSlug({
                     orgName,
                     docsUrl,

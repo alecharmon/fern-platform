@@ -1,4 +1,4 @@
-import { permanentRedirect, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
 
     const firstDocsSite = docsSites[0];
     if (firstDocsSite != null) {
-        permanentRedirect(`/${orgName}/docs/${constructDocsUrlParam(getDocsSiteUrl(firstDocsSite))}`);
+        redirect(`/${orgName}/docs/${constructDocsUrlParam(getDocsSiteUrl(firstDocsSite))}`);
     }
 
     return <DocsZeroState user={session.user} />;
