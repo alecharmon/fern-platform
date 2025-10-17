@@ -1,9 +1,11 @@
+import type { AuthEdgeConfig } from "@fern-api/docs-auth";
+import type { AuthState } from "@fern-api/docs-server/auth/getAuthState";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { createFileResolver } from "@fern-api/docs-server/file-resolver";
 import { getProducts } from "@fern-api/docs-server/handle-node-fallbacks";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
+import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import Image from "next/image";
-
 import { processIcon } from "../processIcon";
 import { ProductDropdownClient, type ProductDropdownItem } from "./ProductDropdownClient";
 
@@ -27,6 +29,7 @@ export async function ProductDropdown({
 
     const showHiddenNodes = (await loader.getEdgeFlags()).isAuthenticatedPagesDiscoverable;
     const authState = await loader.getAuthState();
+    const authConfig = await loader.getAuthConfig();
     const roles = authState.authed ? (authState.user.roles ?? []) : [];
 
     const products = getProducts(root, showHiddenNodes, roles);
@@ -40,7 +43,14 @@ export async function ProductDropdown({
     const resolveFileSrc = createFileResolver(files);
 
     const productOptions = products?.map((product: FernNavigation.ProductNode): ProductDropdownItem => {
-        const slug = product.slug ?? product.pointsTo;
+        let slug = product.slug ?? product.pointsTo;
+        if (product.authed && !authState.authed && authConfig) {
+            const loginUrl = getLoginUrl({ authConfig, authState });
+            if (loginUrl) {
+                slug = loginUrl as Slug;
+            }
+        }
+
         const image = resolveFileSrc(product.image);
         return {
             productId: product.productId,
@@ -70,3 +80,19 @@ export async function ProductDropdown({
         />
     );
 }
+
+const getLoginUrl = ({ authConfig, authState }: { authConfig: AuthEdgeConfig; authState: AuthState }) => {
+    if (!authState.authed) {
+        return authState.authorizationUrl;
+    }
+
+    if (authConfig.type === "basic_token_verification") {
+        return authConfig.redirect as Slug;
+    }
+
+    if (authConfig.type === "oauth2" && "auth_endpoint" in authConfig) {
+        return authConfig.auth_endpoint as Slug;
+    }
+
+    return undefined;
+};
