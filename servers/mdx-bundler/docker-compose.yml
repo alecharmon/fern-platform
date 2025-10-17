@@ -1,0 +1,12 @@
+version: "3.8" # optional since v1.27.0
+services:
+  mdx-bundler:
+    image: mdx-bundler:local
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health | grep -q OK"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+      start_period: 5s
