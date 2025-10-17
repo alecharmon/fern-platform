@@ -463,7 +463,6 @@ const getApi = async (domainKey: string, id: string) => {
 const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
     unstable_cache(
         async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
-            const flagsPromise = cachedGetEdgeFlags(domainKey);
             // if there is only one node, and it's an endpoint, try to load from cache
             try {
                 if (nodes.length === 1 && nodes[0]) {
@@ -473,12 +472,8 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                         const metadata = await getMetadata(cacheConfig)(domainKey);
                         const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
                         const settings = await getSettings(cacheConfig)(domainKey);
-                        const edgeFlags = await flagsPromise;
                         const flags = {
-                            httpSnippets:
-                                settings.httpSnippets !== false
-                                    ? settings.httpSnippets || edgeFlags.isHttpSnippetsEnabled
-                                    : false,
+                            httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
                             alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
                         };
                         return await backfillSnippets(cached, dynamicIr, flags);
@@ -507,10 +502,8 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
             const metadata = await getMetadata(cacheConfig)(domainKey);
             const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
             const settings = await getSettings(cacheConfig)(domainKey);
-            const edgeFlags = await flagsPromise;
             const flags = {
-                httpSnippets:
-                    settings.httpSnippets !== false ? settings.httpSnippets || edgeFlags.isHttpSnippetsEnabled : false,
+                httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
                 alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
             };
             return backfillSnippets(pruned, dynamicIr, flags);
@@ -747,7 +740,7 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
             defaultSearchFilters: settings?.defaultSearchFilters ?? false,
             disableSearch: settings?.disableSearch ?? false,
             hide404Page: settings?.hide404Page ?? false,
-            httpSnippets: settings?.httpSnippets ?? false,
+            httpSnippets: settings?.httpSnippets ?? true,
             searchText: settings?.searchText ?? "Search",
             useJavascriptAsTypescript: settings?.useJavascriptAsTypescript ?? false
         };
