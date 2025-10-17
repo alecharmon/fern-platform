@@ -118,12 +118,15 @@ class SlackifyMarkdown:
         Normalize all code block formats to standard ```\n{code}\n``` format.
         Handles (in order of specificity):
         1. ```{language} title="{title}"\n{code}\n```
-        2. ```{language}\n{code}\n```
-        3. ```\n{code}\n```
+        2. ```{language} {filename}\n{code}\n```
+        3. ```{language}\n{code}\n```
+        4. ```\n{code}\n```
         """
         markdown = re.sub(
             r'```\w+\s+title="[^"]*"\n(.*?)```', lambda m: f"```\n{m.group(1).rstrip()}\n```", markdown, flags=re.DOTALL
         )
+
+        markdown = re.sub(r"```\w+\s+\S+\n(.*?)```", lambda m: f"```\n{m.group(1).rstrip()}\n```", markdown, flags=re.DOTALL)
 
         markdown = re.sub(r"```\w+\n(.*?)```", lambda m: f"```\n{m.group(1).rstrip()}\n```", markdown, flags=re.DOTALL)
 
