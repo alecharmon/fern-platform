@@ -95,7 +95,7 @@ export default function DevPanel() {
     }
 
     return (
-        <div className="ml-2 flex h-full flex-col">
+        <div className="flex h-full flex-col">
             <div className="text-muted-foreground flex items-center justify-center gap-2 pb-3 pt-4">
                 <Code2 className="size-4" />
                 <h3 className="text-sm font-medium">Dev Mode</h3>
