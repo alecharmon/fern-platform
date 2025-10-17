@@ -1,10 +1,3 @@
-"""
-Slackify Markdown - Convert standard Markdown to Slack's mrkdwn format
-
-This module converts standard Markdown syntax to Slack's mrkdwn formatting.
-Based on the JavaScript library: https://github.com/jsarafajr/slackify-markdown
-"""
-
 import re
 
 

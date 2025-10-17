@@ -1,6 +1,5 @@
 """Tests for Slack markdown postprocessing."""
 
-
 from fai.utils.slack.postprocessing import (
     SlackifyMarkdown,
     slackify_markdown,
