@@ -60,10 +60,10 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
                 <SelectDate value={dateRange} onChange={setDateRange} />
                 <Button
                     variant="outline"
-                    size="sm"
+                    size="default"
                     onClick={() => refreshMutation.mutate()}
                     disabled={refreshMutation.isPending}
-                    className="gap-2"
+                    className="border-border shadow-xs gap-2 bg-white px-3 py-1.5 text-sm dark:border-border dark:bg-transparent dark:hover:bg-input/50"
                 >
                     <RefreshCwIcon className={`size-4 ${refreshMutation.isPending ? "animate-spin" : ""}`} />
                     Refresh
