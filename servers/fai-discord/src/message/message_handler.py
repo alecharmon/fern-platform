@@ -34,9 +34,32 @@ class FeedbackView(discord.ui.View):
 
     @discord.ui.button(label="Mark as resolved ✅", style=discord.ButtonStyle.secondary, custom_id="mark_resolved")
     async def mark_resolved(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        await interaction.response.send_message("✅ Marked as resolved!", ephemeral=True)
-        button.disabled = True
-        await interaction.message.edit(view=self)
+        try:
+            await interaction.response.send_message("Marked as resolved!", ephemeral=True)
+            button.label = "Marked as resolved"
+            button.disabled = True
+            await interaction.message.edit(view=self)
+
+            if isinstance(interaction.channel, discord.Thread):
+                current_name = interaction.channel.name
+                if not current_name.startswith("[RESOLVED]"):
+                    new_name = f"[RESOLVED] {current_name}"
+                    await interaction.channel.edit(name=new_name)
+                    LOGGER.info(f"Renamed thread to: {new_name}")
+
+                try:
+                    if isinstance(interaction.channel.parent, discord.TextChannel):
+                        starter_msg = await interaction.channel.parent.fetch_message(interaction.channel.id)
+                        await starter_msg.remove_reaction("💬", interaction.guild.me)
+                        await starter_msg.add_reaction("✅")
+                        LOGGER.info("Removed speech bubble and added checkmark reaction to starter message")
+                except Exception as e:
+                    LOGGER.warning(f"Could not update reactions on starter message: {e}")
+
+        except Exception as e:
+            LOGGER.error(f"Error in mark_resolved: {e}")
+            if not interaction.response.is_done():
+                await interaction.response.send_message("Marked as resolved!", ephemeral=True)
 
     @discord.ui.button(label="Ask for help 👋", style=discord.ButtonStyle.secondary, custom_id="ask_help")
     async def ask_help(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -214,44 +237,48 @@ async def handle_discord_message(message: discord.Message) -> None:
         )
         if response_text and len(response_text) > 0:
             try:
+                await message.remove_reaction("👀", message.guild.me)
+
                 chunks = [response_text[i : i + 2000] for i in range(0, len(response_text), 2000)]
                 help_role_id = channel_settings.help_role_id if channel_settings else None
                 view = FeedbackView(help_role_id=help_role_id)
 
+                target_channel = None
+                reaction_target = None
+
                 if isinstance(message.channel, discord.Thread):
-                    for i, chunk in enumerate(chunks):
-                        if i == len(chunks) - 1:
-                            await message.channel.send(
-                                chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
-                            )
-                        else:
-                            await message.channel.send(chunk, mention_author=True, suppress_embeds=True)
+                    target_channel = message.channel
+                    try:
+                        if isinstance(message.channel.parent, discord.TextChannel):
+                            reaction_target = await message.channel.parent.fetch_message(message.channel.id)
+                    except Exception as e:
+                        LOGGER.warning(f"Could not fetch starter message: {e}")
+                elif hasattr(message, "thread") and message.thread:
+                    target_channel = message.thread
+                    reaction_target = message
                 else:
-                    if hasattr(message, "thread") and message.thread:
-                        for i, chunk in enumerate(chunks):
-                            if i == len(chunks) - 1:
-                                await message.thread.send(
-                                    chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
-                                )
-                            else:
-                                await message.thread.send(chunk, mention_author=True, suppress_embeds=True)
-                    else:
-                        thread = await message.create_thread(
-                            name=f"Discussion: {message.content.replace(f'<@{message.guild.me.id}>', '').strip()[:100]}"
+                    target_channel = await message.create_thread(
+                        name=f"Discussion: {message.content.replace(f'<@{message.guild.me.id}>', '').strip()[:100]}"
+                    )
+                    reaction_target = message
+
+                for i, chunk in enumerate(chunks):
+                    if i == len(chunks) - 1:
+                        await target_channel.send(
+                            chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
                         )
-                        for i, chunk in enumerate(chunks):
-                            if i == len(chunks) - 1:
-                                await thread.send(
-                                    chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
-                                )
-                            else:
-                                await thread.send(chunk, mention_author=True, suppress_embeds=True)
+                    else:
+                        await target_channel.send(chunk, mention_author=True, suppress_embeds=True)
+
+                if reaction_target:
+                    try:
+                        await reaction_target.add_reaction("💬")
+                        LOGGER.info("Added speech bubble reaction")
+                    except Exception as e:
+                        LOGGER.warning(f"Could not add speech bubble reaction: {e}")
 
             except discord.HTTPException as e:
                 LOGGER.error(f"Failed to send message: {e}")
-
-        await message.remove_reaction("👀", message.guild.me)
-        await message.add_reaction("✅")
 
 
 async def should_respond_to_message(
