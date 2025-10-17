@@ -52,9 +52,6 @@ def upgrade() -> None:
         ["team_id", "message_ts"],
         unique=False,
     )
-    op.drop_column("code_snippets", "version")
-    op.drop_column("code_snippets", "product")
-    op.drop_column("code_snippets", "authed")
     op.add_column("settings", sa.Column("docs_enabled", sa.Boolean(), nullable=False, server_default="true"))
     op.add_column("settings", sa.Column("slack_enabled", sa.Boolean(), nullable=False, server_default="true"))
     op.add_column("settings", sa.Column("discord_enabled", sa.Boolean(), nullable=False, server_default="true"))
@@ -67,9 +64,6 @@ def downgrade() -> None:
     op.drop_column("settings", "discord_enabled")
     op.drop_column("settings", "slack_enabled")
     op.drop_column("settings", "docs_enabled")
-    op.add_column("code_snippets", sa.Column("authed", sa.BOOLEAN(), autoincrement=False, nullable=True))
-    op.add_column("code_snippets", sa.Column("product", sa.VARCHAR(), autoincrement=False, nullable=True))
-    op.add_column("code_snippets", sa.Column("version", sa.VARCHAR(), autoincrement=False, nullable=True))
     op.drop_index("idx_slack_message_classification_team_ts", table_name="slack_message_classification")
     op.drop_index("idx_slack_message_classification_classified_at", table_name="slack_message_classification")
     op.drop_index("idx_slack_message_classification_classification", table_name="slack_message_classification")

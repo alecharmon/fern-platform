@@ -60,7 +60,7 @@ async def create_document(
     try:
         created_document_ids = []
 
-        chunks = maybe_chunk_document(body.chunk or body.document)
+        chunks = await maybe_chunk_document(body.chunk or body.document)
 
         for chunk in chunks:
             document_id = str(uuid.uuid4())
@@ -109,7 +109,7 @@ async def batch_create_document(
         created_document_ids = []
 
         for document in body:
-            chunks = maybe_chunk_document(document.chunk or document.document)
+            chunks = await maybe_chunk_document(document.chunk or document.document)
 
             for chunk in chunks:
                 document_id = str(uuid.uuid4())

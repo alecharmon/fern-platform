@@ -9,7 +9,7 @@ from fastapi import (
 )
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from upstash_redis import Redis
+from upstash_redis.asyncio import Redis
 
 from fai.db import async_session_maker
 from fai.models.db.settings_db import SettingsDb
@@ -39,16 +39,16 @@ async def verify_token(request: Request, domain: str) -> str:
     venus_client = get_venus_client(token=token)
 
     try:
-        domain_metadata = redis.hget(domain, "metadata")
+        domain_metadata = await redis.hget(domain, "metadata")
         domain_metadata = json.loads(domain_metadata)
         org_name = domain_metadata.get("org", None)
-        if venus_client.organization.is_member(org_name):
+        if await venus_client.organization.is_member(org_name):
             return token
     except Exception:
         print(f"Domain metadata not found for {domain}")
         print("Falling back to Venus auth check")
 
-    orgs = venus_client.organization.get_org_ids_from_token()
+    orgs = await venus_client.organization.get_org_ids_from_token()
     is_fern_member = "fern" in orgs
 
     if not is_fern_member:

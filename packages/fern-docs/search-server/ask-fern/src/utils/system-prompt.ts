@@ -11,14 +11,10 @@ export const createDefaultSystemPrompt = (data: {
     if (!data.promptTemplate) {
         data.promptTemplate = "";
     }
-    const codeSearchToolInstruction = data.availableTools.includes("codeSearch")
-        ? "If the user asks you to write code, use the 'codeSearch' tool and the 'documentationSearch' tool to formulate your answer. Use the code snippets/SDK methods returned by the 'codeSearch' tool when possible.\n"
-        : "";
 
     const systemPrompt = template(
         `${constructPromptIntro(data.date)}
 If you don't have enough relevant information to answer the user's question, use the 'documentationSearch' tool at least once before responding with "I apologize" or "I don't know".
-${codeSearchToolInstruction}
 ${constructPromptOutro(data.domain)}
 
 {{promptTemplate}}
@@ -45,15 +41,10 @@ export const createSystemPromptForProvidedDocuments = (data: {
     if (!data.promptTemplate) {
         data.promptTemplate = "";
     }
-    const codeSearchToolInstruction = data.availableTools.includes("codeSearch")
-        ? "If the user asks you to write code, use the 'codeSearch' tool and the 'documentationSearch' tool to formulate your answer. Use the code snippets/SDK methods returned by the 'codeSearch' tool when possible.\n"
-        : "";
-
     const systemPrompt = template(
         `${constructPromptIntro(data.date)}
 You will be provided a list of documents that MIGHT be relevant to the user's question. You should attempt to answer the question using the documents provided, but it is possible that the document contents are irrelevant to the user's question.
 If you are unable to answer the question using the provided documents, disregard the provided documents and use the 'documentationSearch' tool to find the relevant information.
-${codeSearchToolInstruction}
 ${constructPromptOutro(data.domain)}
 
 {{promptTemplate}}

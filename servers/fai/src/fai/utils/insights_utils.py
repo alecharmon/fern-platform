@@ -1,14 +1,9 @@
-from concurrent.futures import (
-    ThreadPoolExecutor,
-    as_completed,
-)
+import asyncio
+from functools import partial
 
 import numpy as np
 import pandas as pd
-from openai import (
-    AsyncOpenAI,
-    OpenAI,
-)
+from openai import AsyncOpenAI
 from sklearn.cluster import KMeans
 
 from fai.models.api.analytics_api import GetInsightsResponse
@@ -28,10 +23,18 @@ from fai.settings import (
 async def get_insights_from_queries(domain: str, queries: list[Query]) -> GetInsightsResponse:
     df = pd.DataFrame([{"text": query.text, "conversation_id": query.conversation_id} for query in queries])
     df["embedding"] = await get_embeddings(df["text"].tolist())
-    df["cluster"], kmeans = cluster_embeddings(df["embedding"].tolist())
 
-    top_cluster_ids = select_top_clusters(df, kmeans)
-    summaries = summarize_clusters_parallel(domain, df, top_cluster_ids)
+    # Run CPU-intensive clustering in thread pool
+    loop = asyncio.get_event_loop()
+    df["cluster"], kmeans = await loop.run_in_executor(
+        None, partial(_cluster_embeddings_sync, df["embedding"].tolist())
+    )
+
+    # Run CPU-intensive cluster selection in thread pool
+    top_cluster_ids = await loop.run_in_executor(None, partial(_select_top_clusters_sync, df, kmeans))
+
+    # Run summarization in parallel using asyncio
+    summaries = await summarize_clusters_async(domain, df, top_cluster_ids)
 
     insights = []
     for cluster_id in top_cluster_ids:
@@ -72,14 +75,16 @@ async def get_embeddings(texts: list[str]) -> list[list[float]]:
         return embeddings
 
 
-def cluster_embeddings(embeddings: list[list[float]]) -> tuple[np.ndarray, KMeans]:
+def _cluster_embeddings_sync(embeddings: list[list[float]]) -> tuple[np.ndarray, KMeans]:
+    """Synchronous clustering operation. Run in thread pool to avoid blocking."""
     embedding_matrix = np.array(embeddings)
     kmeans = KMeans(n_clusters=CONFIG.INSIGHTS_NUM_CLUSTERS, random_state=42)
     clusters = kmeans.fit_predict(embedding_matrix)
     return clusters, kmeans
 
 
-def select_top_clusters(df: pd.DataFrame, kmeans: KMeans) -> list[int]:
+def _select_top_clusters_sync(df: pd.DataFrame, kmeans: KMeans) -> list[int]:
+    """Synchronous cluster selection. Run in thread pool to avoid blocking."""
     cluster_stddevs = {}
     embedding_matrix = np.array(df["embedding"].tolist())
 
@@ -93,9 +98,11 @@ def select_top_clusters(df: pd.DataFrame, kmeans: KMeans) -> list[int]:
     return [cluster_id for cluster_id, _ in sorted_clusters[: CONFIG.INSIGHTS_NUM_CLUSTERS]]
 
 
-def summarize_cluster(cluster_id: int, domain: str, filtered_df: pd.DataFrame) -> tuple[int, Insight]:
+async def summarize_cluster_async(
+    cluster_id: int, domain: str, filtered_df: pd.DataFrame, openai_client: AsyncOpenAI
+) -> tuple[int, Insight]:
+    """Async version of summarize_cluster using AsyncOpenAI."""
     LOGGER.info(f"Processing cluster {cluster_id}...")
-    openai_client = OpenAI(api_key=VARIABLES.OPENAI_API_KEY)
     try:
         inputs = filtered_df[filtered_df["cluster"] == cluster_id]["text"].head(CONFIG.INSIGHTS_MAX_EXAMPLES).tolist()
         cluster_text = "\n".join(f"{i+1}. {x}" for i, x in enumerate(inputs))
@@ -114,7 +121,7 @@ def summarize_cluster(cluster_id: int, domain: str, filtered_df: pd.DataFrame) -
             "  'examples' (list of strings): representative queries that motivated this suggestion"
         )
 
-        response = openai_client.responses.parse(
+        response = await openai_client.responses.parse(
             model="gpt-4.1-2025-04-14",
             input=[{"role": "user", "content": prompt}],
             text_format=Insight,
@@ -126,11 +133,13 @@ def summarize_cluster(cluster_id: int, domain: str, filtered_df: pd.DataFrame) -
         raise e
 
 
-def summarize_clusters_parallel(domain: str, df: pd.DataFrame, cluster_ids: list[int]) -> dict[int, Insight]:
-    results = {}
-    with ThreadPoolExecutor(max_workers=CONFIG.INSIGHTS_NUM_CLUSTERS) as executor:
-        futures = {executor.submit(summarize_cluster, cluster_id, domain, df): cluster_id for cluster_id in cluster_ids}
-        for future in as_completed(futures):
-            cluster_id, insight = future.result()
+async def summarize_clusters_async(domain: str, df: pd.DataFrame, cluster_ids: list[int]) -> dict[int, Insight]:
+    """Parallel async summarization using asyncio.gather with a shared OpenAI client."""
+    async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
+        tasks = [summarize_cluster_async(cluster_id, domain, df, openai_client) for cluster_id in cluster_ids]
+        results_list = await asyncio.gather(*tasks)
+
+        results = {}
+        for cluster_id, insight in results_list:
             results[cluster_id] = insight
-    return results
+        return results

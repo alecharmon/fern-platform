@@ -124,15 +124,13 @@ export async function runRouteForAnthropic({
 
     const systemPromptDocuments = convertTpufRecordsToDocuments(searchResults);
 
-    const codeIndexedResult = await faiClient.github.checkCodeIndexStatus(domain);
-
     const systemPrompt = createChatSystemPrompt({
         modelProvider: "anthropic",
         domain,
         date: new Date().toDateString(),
         documents: systemPromptDocuments.join("\n\n"),
         promptTemplate,
-        availableTools: codeIndexedResult.exists ? ["documentationSearch", "codeSearch"] : ["documentationSearch"]
+        availableTools: ["documentationSearch"]
     });
 
     const documentIdsToIgnore: string[] = [];
@@ -163,16 +161,9 @@ export async function runRouteForAnthropic({
                 maxRetries: 3,
                 stopWhen: stepCountIs(10),
                 prepareStep: async () => {
-                    const codeIndexed = await faiClient.github.checkCodeIndexStatus(domain);
-                    if (codeIndexed.exists) {
-                        return {
-                            activeTools: ["documentationSearch", "codeSearch"]
-                        };
-                    } else {
-                        return {
-                            activeTools: ["documentationSearch"]
-                        };
-                    }
+                    return {
+                        activeTools: ["documentationSearch"]
+                    };
                 },
                 tools: {
                     documentationSearch: tool({

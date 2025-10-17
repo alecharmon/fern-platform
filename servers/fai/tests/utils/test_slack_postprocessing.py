@@ -1,8 +1,10 @@
 """Tests for Slack markdown postprocessing."""
 
-import pytest
 
-from fai.utils.slack.postprocessing import SlackifyMarkdown, slackify_markdown
+from fai.utils.slack.postprocessing import (
+    SlackifyMarkdown,
+    slackify_markdown,
+)
 
 
 class TestSlackifyMarkdown:
@@ -46,12 +48,12 @@ def hello():
 
     def test_normalize_code_block_with_title(self) -> None:
         """Test that code blocks with title attribute are normalized."""
-        markdown = '''Example:
+        markdown = """Example:
 ```python title="hello.py"
 def hello():
     print("Hello")
 ```
-'''
+"""
         expected = """Example:
 ```
 def hello():

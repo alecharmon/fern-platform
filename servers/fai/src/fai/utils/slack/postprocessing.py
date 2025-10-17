@@ -126,7 +126,9 @@ class SlackifyMarkdown:
             r'```\w+\s+title="[^"]*"\n(.*?)```', lambda m: f"```\n{m.group(1).rstrip()}\n```", markdown, flags=re.DOTALL
         )
 
-        markdown = re.sub(r"```\w+\s+\S+\n(.*?)```", lambda m: f"```\n{m.group(1).rstrip()}\n```", markdown, flags=re.DOTALL)
+        markdown = re.sub(
+            r"```\w+\s+\S+\n(.*?)```", lambda m: f"```\n{m.group(1).rstrip()}\n```", markdown, flags=re.DOTALL
+        )
 
         markdown = re.sub(r"```\w+\n(.*?)```", lambda m: f"```\n{m.group(1).rstrip()}\n```", markdown, flags=re.DOTALL)
 
