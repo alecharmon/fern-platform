@@ -71,7 +71,7 @@
     "@tanstack/zod-form-adapter": "^0.42.1",
     "@tiptap/starter-kit": "^3.0.5",
     "@types/estree": "1.0.6",
-    "@types/node": "catalog:",
+    "@types/node": "^22.0.0",
     "@types/node-fetch": "^2.6.3",
     "@vercel/node": "^2.15.10",
     "browserify-sign": "^4.2.3",
