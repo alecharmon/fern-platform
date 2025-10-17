@@ -72,7 +72,13 @@ const Item = (props: { item: SuggestionItem; isSelected: boolean; onSelect: () =
     const BadgeIcon = item.badge;
 
     return (
-        <Button ref={itemRef} data-style="ghost" data-active-state={isSelected ? "on" : "off"} onClick={onSelect}>
+        <Button
+            ref={itemRef}
+            className="cursor-pointer"
+            data-style="ghost"
+            data-active-state={isSelected ? "on" : "off"}
+            onClick={onSelect}
+        >
             {BadgeIcon && <BadgeIcon className="tiptap-button-icon" />}
             <div className="tiptap-button-text">{item.title}</div>
         </Button>
@@ -130,7 +136,7 @@ const List = ({ items, selectedIndex, onSelect, config }: SuggestionMenuRenderPr
                 rendered.push(
                     <CardItemGroup key={`group-${groupIndex}-${groupLabel}`}>
                         <CardGroupLabel>{groupLabel}</CardGroupLabel>
-                        <ButtonGroup>{groupItems}</ButtonGroup>
+                        <ButtonGroup className="gap-px">{groupItems}</ButtonGroup>
                     </CardItemGroup>
                 );
             } else {

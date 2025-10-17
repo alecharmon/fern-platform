@@ -4,6 +4,7 @@ import {
     Heading1,
     Heading2,
     Heading3,
+    Heading4,
     Image,
     Italic,
     Link,
@@ -28,6 +29,7 @@ const ICONS = {
     Heading1,
     Heading2,
     Heading3,
+    Heading4,
     Image,
     Italic,
     Link,
@@ -61,6 +63,6 @@ export function Icon({ variant, ...props }: Icon.Props) {
 }
 
 function defaultIconProps(props: CommonIconProps) {
-    const { size = 24, color = "currentColor" } = props;
-    return { size, color };
+    const { size = 24, color = "currentColor", ...rest } = props;
+    return { size, color, ...rest };
 }

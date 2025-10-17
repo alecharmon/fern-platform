@@ -2,13 +2,14 @@ import { PopoverPortal } from "@radix-ui/react-popover";
 import { useCurrentEditor } from "@tiptap/react";
 import { BubbleMenu as EditorBubbleMenu } from "@tiptap/react/menus";
 import type { MouseEventHandler } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { IconName } from "@/components/icon/Icon";
 import { Icon } from "@/components/icon/Icon";
+import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { LinkPopover } from "./LinkPopover";
 
 type TextBubbleMenuAction =
-    | "setNodeType"
     | "toggleBold"
     | "toggleItalic"
     | "toggleUnderline"
@@ -17,9 +18,20 @@ type TextBubbleMenuAction =
     | "toggleBulletList"
     | "toggleOrderedList";
 
+type NodeType = "paragraph" | "heading1" | "heading2" | "heading3" | "heading4";
+
+const NODE_TYPE_CONFIG: Record<NodeType, { icon: IconName; label: string }> = {
+    paragraph: { icon: "Type", label: "Text" },
+    heading1: { icon: "Heading1", label: "Heading 1" },
+    heading2: { icon: "Heading2", label: "Heading 2" },
+    heading3: { icon: "Heading3", label: "Heading 3" },
+    heading4: { icon: "Heading4", label: "Heading 4" }
+};
+
 export default function TextBubbleMenu() {
     const { editor } = useCurrentEditor();
     const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
+    const [headingDropdownOpen, setHeadingDropdownOpen] = useState(false);
 
     // Close the link popover when the component unmounts
     useEffect(() => {
@@ -28,15 +40,32 @@ export default function TextBubbleMenu() {
         };
     }, []);
 
+    const currentNodeType = useMemo((): NodeType => {
+        if (!editor) return "paragraph";
+        if (editor.isActive("heading", { level: 1 })) return "heading1";
+        if (editor.isActive("heading", { level: 2 })) return "heading2";
+        if (editor.isActive("heading", { level: 3 })) return "heading3";
+        if (editor.isActive("heading", { level: 4 })) return "heading4";
+        return "paragraph";
+    }, [editor?.state.selection]);
+
+    function setNodeType(nodeType: NodeType) {
+        if (!editor) return;
+
+        if (nodeType === "paragraph") {
+            editor.chain().focus().setParagraph().run();
+        } else {
+            const level = parseInt(nodeType.replace("heading", "")) as 1 | 2 | 3 | 4;
+            editor.chain().focus().setHeading({ level }).run();
+        }
+        setHeadingDropdownOpen(false);
+    }
+
     function menuItemClickHandler(action: TextBubbleMenuAction) {
         return () => {
             if (!editor) return;
 
             switch (action) {
-                case "setNodeType":
-                    // TODO: This should open an additional popover to select the heading level
-                    editor.chain().focus().toggleHeading({ level: 1 }).run();
-                    break;
                 case "toggleBold":
                     editor.chain().focus().toggleBold().run();
                     break;
@@ -66,6 +95,8 @@ export default function TextBubbleMenu() {
         return null;
     }
 
+    const currentConfig = NODE_TYPE_CONFIG[currentNodeType];
+
     return (
         <EditorBubbleMenu
             options={{ placement: "top-start" }}
@@ -83,8 +114,49 @@ export default function TextBubbleMenu() {
                 return editor.isFocused && !selection.empty;
             }}
         >
-            <div className="border-1 rounded-2 text-gray-1100 flex items-center gap-px border-gray-500 bg-white p-1 shadow-sm">
-                <BubbleMenuItem iconProps={{ variant: "Heading1" }} onClick={menuItemClickHandler("setNodeType")} />
+            <div className="border-1 rounded-3 text-gray-1100 flex items-center gap-px border-gray-500 bg-white p-0.5 shadow-sm">
+                <Popover open={headingDropdownOpen} onOpenChange={setHeadingDropdownOpen}>
+                    <PopoverTrigger asChild>
+                        <button
+                            className="rounded-2 cursor-pointer p-1 transition-colors hover:bg-gray-300 hover:transition-none"
+                            onMouseDown={(e) => e.preventDefault()}
+                        >
+                            <div className="flex size-6 items-center justify-center">
+                                <Icon variant={currentConfig.icon} size={16} />
+                            </div>
+                        </button>
+                    </PopoverTrigger>
+                    <PopoverPortal>
+                        <PopoverContent
+                            className="w-48 p-1"
+                            side="bottom"
+                            sideOffset={8}
+                            onOpenAutoFocus={(e) => e.preventDefault()}
+                            onCloseAutoFocus={(e) => e.preventDefault()}
+                        >
+                            <ButtonGroup className="gap-px">
+                                {(Object.keys(NODE_TYPE_CONFIG) as NodeType[]).map((nodeType) => {
+                                    const config = NODE_TYPE_CONFIG[nodeType];
+                                    const isActive = currentNodeType === nodeType;
+
+                                    return (
+                                        <Button
+                                            key={nodeType}
+                                            className="cursor-pointer"
+                                            data-style="ghost"
+                                            data-active-state={isActive ? "on" : "off"}
+                                            onClick={() => setNodeType(nodeType)}
+                                            onMouseDown={(e) => e.preventDefault()}
+                                        >
+                                            <Icon variant={config.icon} className="tiptap-button-icon" size={16} />
+                                            <div className="tiptap-button-text">{config.label}</div>
+                                        </Button>
+                                    );
+                                })}
+                            </ButtonGroup>
+                        </PopoverContent>
+                    </PopoverPortal>
+                </Popover>
                 <BubbleMenuSeparator />
                 <BubbleMenuItem iconProps={{ variant: "Bold" }} onClick={menuItemClickHandler("toggleBold")} />
                 <BubbleMenuItem iconProps={{ variant: "Italic" }} onClick={menuItemClickHandler("toggleItalic")} />
@@ -95,11 +167,11 @@ export default function TextBubbleMenu() {
                 <Popover open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
                     <PopoverTrigger asChild>
                         <button
-                            className="rounded-1 cursor-pointer p-1 transition-colors hover:bg-gray-300 hover:transition-none"
+                            className="rounded-2 cursor-pointer p-1 transition-colors hover:bg-gray-300 hover:transition-none"
                             onMouseDown={(e) => e.preventDefault()}
                         >
                             <div className="flex size-6 items-center justify-center">
-                                <Icon variant="Link" size={20} />
+                                <Icon variant="Link" size={16} />
                             </div>
                         </button>
                     </PopoverTrigger>
@@ -135,11 +207,11 @@ declare namespace BubbleMenuItem {
 }
 
 function BubbleMenuItem({ iconProps, onClick }: BubbleMenuItem.Props) {
-    const { size = 20, ...restIconProps } = iconProps;
+    const { size = 16, ...restIconProps } = iconProps;
 
     return (
         <button
-            className="rounded-1 cursor-pointer p-1 transition-colors hover:bg-gray-300 hover:transition-none"
+            className="rounded-2 cursor-pointer p-1 transition-colors hover:bg-gray-300 hover:transition-none"
             onClick={onClick}
             onMouseDown={(e) => e.preventDefault()}
         >
