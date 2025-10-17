@@ -19,7 +19,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # This helps turbo resolve changes faster
+          fetch-depth: 0 # Fetch full history to detect changes
+
+      - name: Detect changed files
+        id: detect_changes
+        run: |
+          # For workflow_call (releases), always run all tests
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event_name }}" = "workflow_call" ]; then
+            echo "run_all_tests=true" >> $GITHUB_OUTPUT
+            echo "Release workflow detected - will run all tests"
+            exit 0
+          fi
+
+          # For pushes to app branch, compare with previous commit
+          if [ "${{ github.event_name }}" = "push" ]; then
+            BASE_REF="${{ github.event.before }}"
+            HEAD_REF="${{ github.sha }}"
+          # For pull requests, compare with base branch
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
+            HEAD_REF="${{ github.event.pull_request.head.sha }}"
+          else
+            # Default to running all tests for unknown event types
+            echo "run_all_tests=true" >> $GITHUB_OUTPUT
+            echo "Unknown event type - will run all tests"
+            exit 0
+          fi
+
+          # Check if servers/self-hosted has changes
+          CHANGED_FILES=$(git diff --name-only $BASE_REF $HEAD_REF)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -q "^servers/self-hosted/"; then
+            echo "run_all_tests=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in servers/self-hosted - will run all tests"
+          else
+            echo "run_all_tests=false" >> $GITHUB_OUTPUT
+            echo "No changes in servers/self-hosted - will run single test"
+          fi
 
       - name: Update Engines
         run: |
@@ -41,5 +79,10 @@ jobs:
       - name: Build docs bundle
         run: pnpm docs:self-hosted-bundle:build
 
-      - name: Run self-hosted tests
+      - name: Run all self-hosted tests
+        if: steps.detect_changes.outputs.run_all_tests == 'true'
         run: pnpm turbo build test:self-hosted --filter=@fern-platform/self-hosted
+
+      - name: Run single self-hosted test (singleNode only)
+        if: steps.detect_changes.outputs.run_all_tests == 'false'
+        run: pnpm --filter=@fern-platform/self-hosted vitest src/__test__/singleNode.test.ts --globals --config src/__test__/vitest.config.ts
