@@ -105,7 +105,7 @@
     "crypto-browserify": "^3.12.1",
     "cssnano": "^6.0.3",
     "es-toolkit": "catalog:",
-    "esbuild": "catalog:",
+    "esbuild": "0.25.9",
     "estree-util-to-js": "^2.0.0",
     "estree-walker": "^3.0.3",
     "fastdom": "^1.0.12",

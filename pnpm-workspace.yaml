@@ -53,10 +53,6 @@ catalog:
   "@types/react-dom": "19.0.4"
   "depcheck": "^1.4.7"
   "es-toolkit": "^1.39.7"
-  # this exact esbuild version is used in fern docs dev build process
-  # if you update the esbuild version, you **must** ensure that other references match
-  # including fern-docs/bundle/package.json + cdk/utilities/install-esbuild.js
-  "esbuild": "0.25.9"
   "eslint-config-next": "15.5.4"
   "hastscript": "^9.0.0"
   "jose": "^5.9.6"

@@ -15,7 +15,7 @@
     "run:tsup:cjs": "node cjs/server.cjs"
   },
   "dependencies": {
-    "esbuild": "catalog:"
+    "esbuild": "0.25.9"
   },
   "devDependencies": {
     "@aa-sdk/core": "^4.31.2",
