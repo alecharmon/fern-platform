@@ -79,7 +79,7 @@ export const GithubLoginButton = ({
             {children ?? (
                 <>
                     <GithubLogo />
-                    Continue with Github
+                    Continue with GitHub
                 </>
             )}
         </BaseLoginButton>
