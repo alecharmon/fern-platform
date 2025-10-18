@@ -40,7 +40,7 @@ export function BranchListItem({
                             handleBranchClick(branch);
                         }}
                         disabled={loading}
-                        className="text-green-1100 hover:text-green-1100"
+                        className="text-green-1100 hover:text-green-1100 min-w-[84px]"
                     >
                         {loading ? (
                             <Loader2 className="size-4 animate-spin" />
