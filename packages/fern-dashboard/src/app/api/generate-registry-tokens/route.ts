@@ -1,5 +1,4 @@
 import { FernVenusApi } from "@fern-api/venus-api-sdk";
-import type { RegistryTokens } from "@fern-api/venus-api-sdk/api";
 import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
@@ -12,7 +11,7 @@ export declare namespace generateRegistryTokens {
         organizationId: string;
     }
 
-    export type Response = RegistryTokens;
+    export type Response = FernVenusApi.RegistryTokens;
 }
 
 export async function POST(request: Request): Promise<NextResponse<generateRegistryTokens.Response>> {

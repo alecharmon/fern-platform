@@ -1,6 +1,5 @@
 "use client";
 
-import type { RegistryTokens } from "@fern-api/venus-api-sdk/api";
 import { useState } from "react";
 
 import { GenerateTokenButton } from "./GenerateTokenButton";
@@ -13,7 +12,7 @@ export declare namespace ApiKeysTable {
 }
 
 export function ApiKeysTable({ organizationId }: ApiKeysTable.Props) {
-    const [tokens, setTokens] = useState<RegistryTokens | null>(null);
+    const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +21,7 @@ export function ApiKeysTable({ organizationId }: ApiKeysTable.Props) {
         setError(null);
 
         try {
-            const response = await fetch("/api/generate-registry-tokens", {
+            const response = await fetch("/api/generate-api-token", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -32,11 +31,11 @@ export function ApiKeysTable({ organizationId }: ApiKeysTable.Props) {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(errorText || "Failed to generate tokens");
+                throw new Error(errorText || "Failed to generate token");
             }
 
             const data = await response.json();
-            setTokens(data);
+            setToken(data.token);
         } catch (err) {
             setError(err instanceof Error ? err.message : "An error occurred");
         } finally {
@@ -47,9 +46,7 @@ export function ApiKeysTable({ organizationId }: ApiKeysTable.Props) {
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600">
-                    Generate registry tokens for npm, Maven, and PyPI package access.
-                </p>
+                <p className="text-sm text-gray-600">Generate an API token for npm package access.</p>
                 <GenerateTokenButton onClick={handleGenerateTokens} isLoading={isLoading} />
             </div>
 
@@ -59,32 +56,18 @@ export function ApiKeysTable({ organizationId }: ApiKeysTable.Props) {
                 </div>
             )}
 
-            {tokens && (
-                <div className="flex flex-col gap-4">
-                    <TokenDisplay
-                        title="NPM Registry Token"
-                        token={tokens.npm.token}
-                        description="Use this token to authenticate with the npm registry"
-                    />
-                    <TokenDisplay
-                        title="Maven Registry"
-                        username={tokens.maven.username}
-                        password={tokens.maven.password}
-                        description="Use these credentials to authenticate with the Maven registry"
-                    />
-                    <TokenDisplay
-                        title="PyPI Registry"
-                        username={tokens.pypi.username}
-                        password={tokens.pypi.password}
-                        description="Use these credentials to authenticate with the PyPI registry"
-                    />
-                </div>
+            {token && (
+                <TokenDisplay
+                    title="NPM Registry Token"
+                    token={token}
+                    description="Use this token to authenticate with the npm registry"
+                />
             )}
 
-            {!tokens && !error && !isLoading && (
+            {!token && !error && !isLoading && (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
                     <p className="text-sm text-gray-600">
-                        No tokens generated yet. Click the button above to generate new tokens.
+                        No token generated yet. Click the button above to generate a new token.
                     </p>
                 </div>
             )}

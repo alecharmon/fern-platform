@@ -3,11 +3,13 @@
 import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { GetMembers200ResponseOneOfInner } from "auth0";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { removeUserFromOrg } from "@/app/actions/removeUserFromOrg";
 import { Auth0UserID } from "@/app/services/auth0/types";
 import { type inferQueryData, ReactQueryKey } from "@/state/queryKeys";
+import { useOrganizations } from "@/state/useOrganizations";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { DropdownMenuItem } from "../ui/dropdown-menu";
@@ -23,8 +25,12 @@ export declare namespace MemberRow {
 export function MemberRow({ member, currentUserId }: MemberRow.Props) {
     const orgName = useOrgNameFromPathname();
     const queryKey = ReactQueryKey.orgMembers(orgName);
+    const router = useRouter();
+    const organizations = useOrganizations();
 
     const queryClient = useQueryClient();
+    const isCurrentUser = currentUserId === member.user_id;
+
     const removeMember = useMutation({
         mutationFn: () =>
             removeUserFromOrg({
@@ -41,6 +47,24 @@ export function MemberRow({ member, currentUserId }: MemberRow.Props) {
             );
 
             return { previousMembers };
+        },
+        onSuccess: async () => {
+            // If user is removing themselves, redirect to another org
+            if (isCurrentUser) {
+                // Invalidate organizations cache to update the list
+                await queryClient.invalidateQueries({ queryKey: ReactQueryKey.myOrganizations() });
+
+                // Find another organization to redirect to
+                const remainingOrgs =
+                    organizations.type === "loaded" ? organizations.value.filter((org) => org.name !== orgName) : [];
+
+                // Redirect to another org if available, otherwise go to home
+                if (remainingOrgs.length > 0) {
+                    router.push(`/${remainingOrgs[0].name}/docs`);
+                } else {
+                    router.push("/");
+                }
+            }
         },
         onError: async (error, _variables, context) => {
             console.error(`Failed to remove ${member.name} (${member.email}, ${member.email})`, error);
@@ -61,16 +85,14 @@ export function MemberRow({ member, currentUserId }: MemberRow.Props) {
             subtitle={member.email}
             pictureUrl={member.picture}
             dropdownMenuItems={
-                currentUserId !== member.user_id ? (
-                    <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => {
-                            removeMember.mutate();
-                        }}
-                    >
-                        <UserMinusIcon /> Remove member
-                    </DropdownMenuItem>
-                ) : undefined
+                <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                        removeMember.mutate();
+                    }}
+                >
+                    <UserMinusIcon /> {isCurrentUser ? "Leave organization" : "Remove member"}
+                </DropdownMenuItem>
             }
         />
     );

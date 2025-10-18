@@ -22,10 +22,6 @@ export async function removeUserFromOrg({
         orgName
     });
 
-    if (userId === userIdToRemove) {
-        throw new Error("User cannot remove themself");
-    }
-
     const isFernEmployee = await auth0Management.createIsFernEmployee();
 
     if (!isFernEmployee(userId) && isFernEmployee(userIdToRemove)) {
