@@ -29,10 +29,10 @@ export const HastToJSX: FC<HastToJSXProps> = memo(({ hast, template }) => {
         () =>
             toJsxRuntime(hast, {
                 Fragment,
-                // @ts-expect-error: the automatic react runtime is untyped.
-                jsx,
-                // @ts-expect-error: the automatic react runtime is untyped.
-                jsxs
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                jsx: jsx as any,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                jsxs: jsxs as any
             }),
         [hast]
     );

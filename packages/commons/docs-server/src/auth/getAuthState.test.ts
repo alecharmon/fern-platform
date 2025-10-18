@@ -398,7 +398,8 @@ describe("getAuthState", () => {
             updatedAt: "test",
             lastSignInAt: "2025-09-16T00:00:00Z",
             externalId: "test",
-            metadata: {}
+            metadata: {},
+            locale: "en"
         };
 
         const authStateBadToken = await getAuthStateInternal({
@@ -427,7 +428,7 @@ describe("getAuthState", () => {
         const getSessionFromTokenMock = vi.spyOn(session, "getSessionFromToken");
         const toSessionUserInfoMock = vi.spyOn(session, "toSessionUserInfo").mockImplementation(() =>
             Promise.resolve({
-                user: WORKOS_USER,
+                user: { ...WORKOS_USER, locale: "en" },
                 sessionId: "test",
                 accessToken: "test"
             })

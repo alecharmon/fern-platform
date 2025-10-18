@@ -47,7 +47,7 @@
     "@fern-api/fai-sdk": "workspace:*",
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
-    "@fern-api/venus-api-sdk": "^0.13.4-7-g5ff8ee8",
+    "@fern-api/venus-api-sdk": "^0.19.8",
     "@fern-api/visual-editor-server": "workspace:*",
     "@fern-docs/components": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",

@@ -10,13 +10,14 @@ import { cn } from "@/utils/utils";
 import { CodeBracketIconAnimated } from "./CodeBracketIconAnimated";
 import { CreditCardIconAnimated } from "./CreditCardIconAnimated";
 import { KeyIconAnimated } from "./KeyIconAnimated";
+import { SettingsIconAnimated } from "./SettingsIconAnimated";
 import { UsersIconAnimated } from "./UsersIconAnimated";
 
 export declare namespace NavbarItem {
     export interface Props {
         title: string;
         icon?: React.JSX.Element;
-        iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks";
+        iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks" | "settings";
 
         /**
          * href is used to determine:
@@ -82,6 +83,7 @@ export const NavbarItem = ({ title, icon, iconType, href, hrefForActualLinking =
             {iconType === "api-keys" && <KeyIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "billing" && <CreditCardIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "sdks" && <CodeBracketIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
+            {iconType === "settings" && <SettingsIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
 
             <div>{title}</div>
         </>
