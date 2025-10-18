@@ -118,12 +118,13 @@ export default function TextBubbleMenu() {
                 <Popover open={headingDropdownOpen} onOpenChange={setHeadingDropdownOpen}>
                     <PopoverTrigger asChild>
                         <button
-                            className="rounded-2 cursor-pointer p-1 transition-colors hover:bg-gray-300 hover:transition-none"
+                            className="rounded-2 flex cursor-pointer items-center gap-1 p-1 transition-colors hover:bg-gray-300 hover:transition-none"
                             onMouseDown={(e) => e.preventDefault()}
                         >
                             <div className="flex size-6 items-center justify-center">
                                 <Icon variant={currentConfig.icon} size={16} />
                             </div>
+                            <Icon variant="ChevronDown" size={12} />
                         </button>
                     </PopoverTrigger>
                     <PopoverPortal>

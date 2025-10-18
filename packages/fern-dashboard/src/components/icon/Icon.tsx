@@ -1,5 +1,6 @@
 import {
     Bold,
+    ChevronDown,
     Code,
     Heading1,
     Heading2,
@@ -25,6 +26,7 @@ import type { CustomIconProps } from "./custom/types";
 // Map icon names to their corresponding components
 const ICONS = {
     Bold,
+    ChevronDown,
     Code,
     Heading1,
     Heading2,
