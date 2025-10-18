@@ -40,10 +40,27 @@ export default async function EndpointSelectorPage({
         return null;
     }
 
-    const productNode = foundNode.products.find((product) => product.productId === foundNode.currentProduct?.productId);
-    const versionNode = foundNode.versions.find((version) => version.versionId === foundNode.currentVersion?.versionId);
+    let scopedNode: FernNavigation.NavigationNode | undefined = filtered;
 
-    const apiGroups = flattenApiSection(versionNode ?? productNode ?? filtered);
+    if (foundNode.currentProduct) {
+        FernNavigation.traverseDF(filtered, (node) => {
+            if (node.type === "product" && node.productId === foundNode.currentProduct?.productId) {
+                scopedNode = node;
+                return false;
+            }
+        });
+    }
+
+    if (foundNode.currentVersion) {
+        FernNavigation.traverseDF(scopedNode, (node) => {
+            if (node.type === "version" && node.versionId === foundNode.currentVersion?.versionId) {
+                scopedNode = node;
+                return false;
+            }
+        });
+    }
+
+    const apiGroups = flattenApiSection(scopedNode);
 
     return <PlaygroundEndpointSelectorContent apiGroups={apiGroups} className="h-full" />;
 }
