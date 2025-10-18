@@ -716,3 +716,8 @@ code:not(.code-block) {
 
   font-weight: inherit;
 }
+
+/* Resizable panels cursor */
+[data-resize-handle-state] {
+  cursor: ew-resize !important;
+}
