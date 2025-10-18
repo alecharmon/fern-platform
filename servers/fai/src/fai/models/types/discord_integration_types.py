@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from fai.models.types.channel_settings_type import ChannelSettings
+from fai.models.types.channel_settings_type import DiscordChannelSettings
 
 
 class DiscordIntegration(BaseModel):
@@ -12,7 +12,7 @@ class DiscordIntegration(BaseModel):
     discord_guild_name: str | None = None
     created_at: datetime
     installed_at: datetime | None = None
-    settings: dict[str, ChannelSettings] | None = None
+    settings: dict[str, DiscordChannelSettings] | None = None
 
 
 class CreateDiscordIntegration(BaseModel):

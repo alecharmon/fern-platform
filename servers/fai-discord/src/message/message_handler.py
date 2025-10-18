@@ -16,13 +16,14 @@ from sqlalchemy.dialects.postgresql import insert
 from fai.db import async_session_maker
 from fai.models.db.discord_message_cache_db import DiscordMessageCacheDb
 from fai.models.db.query_db import QueryDb
-from fai.models.types.channel_settings_type import ChannelSettings
+from fai.models.types.channel_settings_type import DiscordChannelSettings
 from fai.models.utils.chat import ChatMode
 from fai.settings import LOGGER
 from fai.utils.chat.response.anthropic import get_anthropic_response
 from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.integration import get_discord_integration
 from src.message.channel_not_configured import channel_not_configured
+from src.message.classify import classify_message
 
 MESSAGE_CACHE_TTL = 30
 
@@ -204,7 +205,7 @@ async def handle_discord_message(message: discord.Message) -> None:
             str(message.channel.parent_id) if is_in_thread else str(message.channel.id), {}
         )
         if channel_config:
-            channel_settings = ChannelSettings(**channel_config)
+            channel_settings = DiscordChannelSettings(**channel_config)
             if channel_settings.domain_override:
                 domain_to_use = channel_settings.domain_override
                 LOGGER.info(f"Using domain override for channel {message.channel.id}: {domain_to_use}")
@@ -213,18 +214,18 @@ async def handle_discord_message(message: discord.Message) -> None:
         await channel_not_configured(channel_settings, message, is_in_thread)
         return
 
-    should_respond = await should_respond_to_message(channel_settings, message, is_in_thread)
+    message_history = None
+    if is_in_thread:
+        message_history = await get_thread_history(message.channel, str(message.guild.me.id))
+        LOGGER.info(f"Retrieved {len(message_history)} messages from thread history")
+
+    should_respond = await should_respond_to_message(channel_settings, message, is_in_thread, message_history)
     if not should_respond:
         return
 
     async with message.channel.typing():
         await message.add_reaction("👀")
         LOGGER.info(f"Processing message from {message.author} in {message.channel.id}...")
-
-        message_history = None
-        if is_in_thread:
-            message_history = await get_thread_history(message.channel, str(message.guild.me.id))
-            LOGGER.info(f"Retrieved {len(message_history)} messages from thread history")
 
         conversation_id = f"discord_{message.guild.id}_{message.channel.id}_{message.id}"
 
@@ -282,20 +283,25 @@ async def handle_discord_message(message: discord.Message) -> None:
 
 
 async def should_respond_to_message(
-    channel_settings: ChannelSettings, message: discord.Message, is_in_thread: bool
+    channel_settings: DiscordChannelSettings,
+    message: discord.Message,
+    is_in_thread: bool,
+    message_history: list[dict[str, str]] | None = None,
 ) -> bool:
-    if not is_in_thread:
-        if channel_settings.channel_response == "all_messages":
-            return True
-        elif channel_settings.channel_response == "mentions_only":
-            return message.guild.me in message.mentions
-        return False
-    else:
-        if channel_settings.thread_response == "all_messages":
-            try:
-                if message.guild.me in message.mentions:
-                    return True
+    bot_mentioned = is_bot_mentioned(message)
+    other_members_mentioned = has_other_member_mentions(message)
 
+    if other_members_mentioned and not bot_mentioned:
+        LOGGER.info("Other members mentioned, not responding")
+        return False
+
+    response_mode = channel_settings.channel_response
+
+    if response_mode == "mentions_only":
+        if is_in_thread:
+            if bot_mentioned:
+                return True
+            try:
                 thread_channel = message.channel
                 if hasattr(thread_channel, "starter_message") and thread_channel.starter_message:
                     starter_message = thread_channel.starter_message
@@ -305,11 +311,18 @@ async def should_respond_to_message(
                 return False
             except Exception:
                 return False
-        elif channel_settings.thread_response == "mentions_only":
-            if is_bot_mentioned(message):
-                return True
-            return False
-        return False
+        else:
+            return bot_mentioned
+    elif response_mode == "auto":
+        if bot_mentioned:
+            return True
+
+        classification = await classify_message(message.content, message_history, str(message.guild.me.id))
+
+        LOGGER.info(f"Auto mode classification: {classification}")
+        return classification == "question"
+
+    return False
 
 
 def is_bot_mentioned(message: discord.Message) -> bool:
@@ -317,6 +330,13 @@ def is_bot_mentioned(message: discord.Message) -> bool:
         return True
     for role in message.role_mentions:
         if role.name == "Ask Fern":
+            return True
+    return False
+
+
+def has_other_member_mentions(message: discord.Message) -> bool:
+    for mention in message.mentions:
+        if mention.id != message.guild.me.id:
             return True
     return False
 
