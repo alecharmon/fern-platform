@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
 import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
+import { useOrganizations } from "@/state/useOrganizations";
 import { getOrgDisplayName } from "@/utils/getOrgDisplayName";
 import { addRecentOrg, getRecentOrgs } from "@/utils/recentOrgs";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
@@ -16,12 +17,15 @@ import { cn } from "@/utils/utils";
 import { OrgLogo } from "./org-logo/OrgLogo";
 
 export const OrgSwitcherClient = ({
-    organizations,
+    organizations: initialOrganizations,
     currentOrgName
 }: {
     organizations: Auth0Organization[];
     currentOrgName?: Auth0OrgName;
 }) => {
+    // Use client-side organizations data if available, otherwise fall back to server-provided initial data
+    const organizationsResult = useOrganizations();
+    const organizations = organizationsResult.type === "loaded" ? organizationsResult.value : initialOrganizations;
     const orgName = useOrgNameFromPathname();
     const [localOrgName, setLocalOrgName] = useState(currentOrgName);
     const [searchTerm, setSearchTerm] = useState("");
@@ -130,7 +134,13 @@ export const OrgSwitcherClient = ({
                 disabled={organizations.length === 0}
             >
                 <div className="flex items-center gap-2">
-                    {currentOrg && <OrgLogo organization={currentOrg} />}
+                    {currentOrg ? (
+                        <OrgLogo organization={currentOrg} />
+                    ) : (
+                        <div className="flex size-6 items-center justify-center rounded border border-gray-300 bg-gray-100">
+                            <span className="text-xs text-gray-400">?</span>
+                        </div>
+                    )}
                     {currentOrg ? getOrgDisplayName(currentOrg) : "Select Organization"}
                 </div>
                 <ChevronDown className="h-4 w-4 opacity-50" />

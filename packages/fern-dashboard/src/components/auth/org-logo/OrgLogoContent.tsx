@@ -22,6 +22,10 @@ export function OrgLogoContent({ organization }: OrgLogoContent.Props) {
 
     return (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={organization.branding.logo_url} alt={`${organization.display_name} logo`} />
+        <img
+            src={organization.branding.logo_url}
+            alt={`${organization.display_name} logo`}
+            className="size-full rounded object-contain object-left"
+        />
     );
 }

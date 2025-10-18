@@ -6,6 +6,7 @@ import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { useCurrentOrganization } from "@/state/useOrganizations";
 import { Button } from "../ui/button";
 import { DeleteOrganizationModal } from "./DeleteOrganizationModal";
+import { OrganizationLogo } from "./OrganizationLogo";
 
 export declare namespace SettingsPage {
     export interface Props {
@@ -25,6 +26,9 @@ export function SettingsPage({ session }: SettingsPage.Props) {
         <>
             <div className="flex flex-1 flex-col items-center gap-4">
                 <h1 className="mx-auto mt-6 w-full max-w-[750px] text-2xl font-bold sm:mt-8 md:mt-10">Team Settings</h1>
+
+                <OrganizationLogo organization={org} />
+
                 <div className="border-border mx-auto flex w-full max-w-[750px] flex-col rounded-xl border bg-gray-100 p-4">
                     <div className="flex flex-col gap-1">
                         <div className="font-bold">Delete organization</div>

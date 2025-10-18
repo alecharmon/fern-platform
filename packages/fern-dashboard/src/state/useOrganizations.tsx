@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
@@ -31,4 +31,9 @@ export function useOrganization(orgName: Auth0OrgName) {
 export function useCurrentOrganization() {
     const orgName = useOrgNameFromPathname();
     return useOrganization(orgName);
+}
+
+export function useInvalidateOrganizations() {
+    const queryClient = useQueryClient();
+    return () => queryClient.invalidateQueries({ queryKey: QUERY_KEY });
 }

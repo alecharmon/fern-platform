@@ -85,6 +85,10 @@ export async function invalidateInviteToken(token: string) {
     await INVITE_TOKEN_CACHE.invalidate(RedisCacheKey.inviteToken(token));
 }
 
+export async function invalidateOrganizationCache(orgName: Auth0OrgName) {
+    await ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.organization(orgName));
+}
+
 /***********
  * helpers *
  ***********/
