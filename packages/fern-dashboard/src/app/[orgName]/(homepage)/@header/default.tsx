@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { CreateMenuItem } from "@/components/auth/CreateMenuItem";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { OrgSwitcher } from "@/components/auth/OrgSwitcher";
 import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
@@ -26,6 +27,7 @@ export default async function HeaderLayout({
         return null;
     }
     const { name, email, picture } = session.user;
+    const { accessToken } = session;
 
     return (
         <div className="flex justify-between gap-4 p-4">
@@ -46,6 +48,7 @@ export default async function HeaderLayout({
                         text="Changelog"
                         href="https://buildwithfern.com/learn/docs/getting-started/changelog"
                     />
+                    <CreateMenuItem accessToken={accessToken} />
                     <ThemeToggle />
                 </div>
                 <Popover>
@@ -60,6 +63,7 @@ export default async function HeaderLayout({
                                 <div className="text-xs text-gray-800">{email}</div>
                             </div>
                             <div className="flex flex-col md:hidden">
+                                <CreateMenuItem accessToken={accessToken} />
                                 <SupportHeaderLink
                                     className="justify-start px-0 text-left hover:px-2 has-[>svg]:px-0 hover:has-[>svg]:px-2"
                                     buttonProps={{ variant: "ghost" }}

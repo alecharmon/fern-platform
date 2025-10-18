@@ -1,0 +1,28 @@
+import { FernVenusApi } from "@fern-api/venus-api-sdk";
+
+import { getVenusClient } from "@/app/services/venus/getVenusClient";
+
+interface CreateOrganizationRequestBody {
+    organizationId: string;
+    displayName?: string;
+}
+
+export default async function createOrganization(accessToken: string, body: CreateOrganizationRequestBody) {
+    const venusClient = getVenusClient({ token: accessToken });
+
+    const result = await venusClient.organization.create({
+        organizationId: FernVenusApi.OrganizationId(body.organizationId),
+        displayName: body.displayName,
+        enableGithubConnection: true,
+        artifactReadRequiresToken: false
+    });
+
+    if (!result.ok) {
+        throw new Error(result.error?.toString() || "Failed to create organization");
+    }
+
+    return {
+        organizationId: body.organizationId,
+        success: true
+    };
+}
