@@ -83,6 +83,8 @@ jobs:
         run: pnpm --filter @fern-platform/fdr build:tsup:cjs
 
       - name: Build self-hosted bundle
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
         run: pnpm docs:self-hosted-bundle:build
 
       - name: Set up Docker Buildx

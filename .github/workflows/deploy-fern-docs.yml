@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: prj_XXWllSgR38im0A8e0cKXjOnMoo07
+      NODE_OPTIONS: --max-old-space-size=8192
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,6 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_PROJECT_ID: prj_TnhxLeFgHnzYBZV6XfKMZ8sfUd13
+      NODE_OPTIONS: --max-old-space-size=8192
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,6 +64,7 @@ jobs:
       runs-on: ubuntu-latest
       env:
         VERCEL_PROJECT_ID: prj_PScht6A7acGj2jELnQHXx3NLPVzw
+        NODE_OPTIONS: --max-old-space-size=8192
       steps:
         - uses: actions/checkout@v4
           with:
@@ -88,6 +91,7 @@ jobs:
       runs-on: ubuntu-latest
       env:
         VERCEL_PROJECT_ID: prj_z06epFqkoFgm4PjgtDfcKLmXbWrW
+        NODE_OPTIONS: --max-old-space-size=8192
       steps:
         - uses: actions/checkout@v4
           with:
