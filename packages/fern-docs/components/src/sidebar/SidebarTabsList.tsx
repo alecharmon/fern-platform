@@ -18,33 +18,43 @@ export function SidebarTabsList({
 }) {
     return (
         <Tabs.TabsList className="-my-2">
-            {tabs.map((tab) => (
-                <Tabs.TabsTrigger key={"sidebar-tab-" + tab.id} value={tab.id} asChild>
-                    <FernLinkTab
-                        className={cn(
-                            "min-h-8 lg:min-h-9",
-                            "hover:text-(color:--accent) rounded-2 group flex min-w-0 flex-1 select-none items-center justify-start py-2 text-base lg:px-3 lg:text-sm",
-                            "data-[state=inactive]:text-(color:--grayscale-a11) data-[state=active]:text-(color:--accent-a11) [&_svg]:size-4",
-                            { "opacity-50": tab.type !== "link" && tab.hidden }
-                        )}
-                        href={tab.type === "link" ? tab.url : slugToHref(hasRedirect(tab) ? tab.pointsTo : tab.slug)}
-                        scroll={true}
-                    >
-                        <span
+            {tabs.map((tab) => {
+                const hasCustomIcon = (tab.type !== "link" && tab.authed) || tab.icon != null;
+                return (
+                    <Tabs.TabsTrigger key={"sidebar-tab-" + tab.id} value={tab.id} asChild>
+                        <FernLinkTab
                             className={cn(
-                                "bg-card-background border-border-default rounded-3/2 shadow-card-grayscale mr-4 flex size-6 items-center justify-center border",
-                                "group-hover:group-data-[state=inactive]:bg-(color:--accent-a3) group-hover:group-data-[state=inactive]:border-(color:--accent-a8) group-hover:group-data-[state=inactive]:text-(color:--accent-a11)",
-                                "group-data-[state=active]:bg-(color:--accent-10) group-data-[state=active]:text-background group-data-[state=active]:border-transparent group-data-[state=active]:shadow-none"
+                                "min-h-8 lg:min-h-9",
+                                "hover:text-(color:--accent) rounded-2 group flex min-w-0 flex-1 select-none items-center justify-start py-2 text-base lg:px-3 lg:text-sm",
+                                "data-[state=inactive]:text-(color:--grayscale-a11) data-[state=active]:text-(color:--accent-a11) [&_svg]:size-4",
+                                { "opacity-50": tab.type !== "link" && tab.hidden }
                             )}
+                            href={
+                                tab.type === "link" ? tab.url : slugToHref(hasRedirect(tab) ? tab.pointsTo : tab.slug)
+                            }
+                            scroll={true}
                         >
-                            {tab.type !== "link" && tab.authed ? <Lock /> : processIcon(tab, "book", forceClientRender)}
-                        </span>
-                        <span className="truncate font-medium group-data-[state=active]:font-semibold">
-                            {tab.title}
-                        </span>
-                    </FernLinkTab>
-                </Tabs.TabsTrigger>
-            ))}
+                            <span
+                                className={cn(
+                                    "bg-card-background border-border-default rounded-3/2 shadow-card-grayscale mr-4 flex size-6 items-center justify-center border",
+                                    "group-hover:group-data-[state=inactive]:bg-(color:--accent-a3) group-hover:group-data-[state=inactive]:border-(color:--accent-a8) group-hover:group-data-[state=inactive]:text-(color:--accent-a11)",
+                                    "group-data-[state=active]:bg-(color:--accent-10) group-data-[state=active]:text-background group-data-[state=active]:border-transparent group-data-[state=active]:shadow-none",
+                                    { "max-lg:hidden": !hasCustomIcon }
+                                )}
+                            >
+                                {tab.type !== "link" && tab.authed ? (
+                                    <Lock />
+                                ) : (
+                                    processIcon(tab, "book", forceClientRender)
+                                )}
+                            </span>
+                            <span className="truncate font-medium group-data-[state=active]:font-semibold">
+                                {tab.title}
+                            </span>
+                        </FernLinkTab>
+                    </Tabs.TabsTrigger>
+                );
+            })}
             {children}
         </Tabs.TabsList>
     );
