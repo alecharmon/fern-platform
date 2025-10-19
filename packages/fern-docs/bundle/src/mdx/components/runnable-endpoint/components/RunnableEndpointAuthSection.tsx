@@ -1,0 +1,210 @@
+"use client";
+
+import type { AuthScheme } from "@fern-api/fdr-sdk/api-definition";
+import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { cn } from "@fern-docs/components/cn";
+import { FernCollapse } from "@fern-docs/components/FernCollapse";
+import { FernInput } from "@fern-docs/components/FernInput";
+import * as Select from "@radix-ui/react-select";
+import { useAtom } from "jotai";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { PasswordInputGroup } from "@/components/playground/PasswordInputGroup";
+import {
+    PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_ATOM,
+    PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_ATOM,
+    PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
+    PLAYGROUND_AUTH_STATE_HEADER_ATOM
+} from "@/state/playground";
+
+interface RunnableEndpointAuthSectionProps {
+    authSchemes: AuthScheme[];
+}
+
+function getAuthSchemeLabel(auth: AuthScheme): string {
+    return visitDiscriminatedUnion(auth)._visit({
+        bearerAuth: (bearer) => bearer.tokenName || "Bearer Token",
+        basicAuth: (basic) => basic.usernameName || "Basic Auth",
+        header: (header) => header.nameOverride || header.headerWireValue,
+        oAuth: () => "OAuth Token",
+        _other: () => "Authentication"
+    });
+}
+
+function getAuthSchemeValue(index: number): string {
+    return `auth-${index}`;
+}
+
+export function RunnableEndpointAuthSection({ authSchemes }: RunnableEndpointAuthSectionProps) {
+    const [selectedAuthIndex, setSelectedAuthIndex] = useState(0);
+    const [open, openState] = useState(true);
+
+    if (authSchemes.length === 0) {
+        return null;
+    }
+
+    const selectedAuth = authSchemes[selectedAuthIndex];
+
+    if (!selectedAuth) {
+        return null;
+    }
+
+    const hasMultipleSchemes = authSchemes.length > 1;
+
+    return (
+        <section>
+            <button
+                type="button"
+                onClick={() => openState(!open)}
+                className="text-(color:--grayscale-a11) mb-2 flex w-full items-center justify-between text-sm font-medium hover:text-(color:--grayscale-a12) transition-colors"
+            >
+                <h5 className="text-(color:--grayscale-a11) text-sm font-medium">Authentication</h5>
+                <ChevronDown
+                    className={cn("size-4 transition-transform duration-200", open ? "rotate-180" : "rotate-0")}
+                />
+            </button>
+            <FernCollapse open={open} onOpenChange={openState}>
+                <div className="bg-(color:--grayscale-a2) rounded-2 p-3">
+                    <div className="space-y-3">
+                        {hasMultipleSchemes && (
+                            <div className="space-y-2">
+                                <label className="text-text-secondary text-xs font-medium">Auth Type</label>
+                                <Select.Root
+                                    value={getAuthSchemeValue(selectedAuthIndex)}
+                                    onValueChange={(value) => {
+                                        const index = parseInt(value.replace("auth-", ""), 10);
+                                        if (!isNaN(index)) {
+                                            setSelectedAuthIndex(index);
+                                        }
+                                    }}
+                                >
+                                    <Select.Trigger
+                                        className={cn(
+                                            "flex h-9 w-full items-center justify-between rounded-lg border border-(color:--grayscale-a6) bg-(color:--grayscale-a1) px-3 py-2 text-sm",
+                                            "hover:bg-(color:--grayscale-a2) focus:outline-none focus:ring-2 focus:ring-(color:--grayscale-a8)"
+                                        )}
+                                    >
+                                        <Select.Value />
+                                        <Select.Icon>
+                                            <ChevronDown className="size-4" />
+                                        </Select.Icon>
+                                    </Select.Trigger>
+                                    <Select.Portal>
+                                        <Select.Content
+                                            className={cn(
+                                                "rounded-lg bg-(color:--grayscale-a1) shadow-lg border border-(color:--grayscale-a6)",
+                                                "overflow-hidden z-50"
+                                            )}
+                                        >
+                                            <Select.ScrollUpButton className="flex h-6 cursor-default items-center justify-center">
+                                                <ChevronUp className="size-4" />
+                                            </Select.ScrollUpButton>
+                                            <Select.Viewport className="p-1">
+                                                {authSchemes.map((auth, index) => (
+                                                    <Select.Item
+                                                        key={getAuthSchemeValue(index)}
+                                                        value={getAuthSchemeValue(index)}
+                                                        className={cn(
+                                                            "relative flex h-8 select-none items-center rounded-md pl-8 pr-2 text-sm outline-none",
+                                                            "cursor-pointer data-[highlighted]:bg-(color:--grayscale-a3)"
+                                                        )}
+                                                    >
+                                                        <Select.ItemText>{getAuthSchemeLabel(auth)}</Select.ItemText>
+                                                        <Select.ItemIndicator className="absolute left-2 inline-flex items-center justify-center">
+                                                            <Check className="size-4" />
+                                                        </Select.ItemIndicator>
+                                                    </Select.Item>
+                                                ))}
+                                            </Select.Viewport>
+                                            <Select.ScrollDownButton className="flex h-6 cursor-default items-center justify-center">
+                                                <ChevronDown className="size-4" />
+                                            </Select.ScrollDownButton>
+                                        </Select.Content>
+                                    </Select.Portal>
+                                </Select.Root>
+                            </div>
+                        )}
+                        {visitDiscriminatedUnion(selectedAuth)._visit({
+                            bearerAuth: () => <BearerAuthFields />,
+                            basicAuth: () => <BasicAuthFields />,
+                            header: (header) => <HeaderAuthFields header={header} />,
+                            oAuth: () => <BearerAuthFields label="OAuth Token" />,
+                            _other: () => null
+                        })}
+                    </div>
+                </div>
+            </FernCollapse>
+        </section>
+    );
+}
+
+function BearerAuthFields({ label = "Bearer Token" }: { label?: string }) {
+    const [bearerAuth, setBearerAuth] = useAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
+
+    return (
+        <div className="space-y-2">
+            <label className="text-text-secondary text-xs font-medium">{label}</label>
+            <PasswordInputGroup
+                value={bearerAuth.token}
+                onValueChange={(value) => setBearerAuth({ token: value })}
+                placeholder="Enter token..."
+                className="font-mono"
+            />
+        </div>
+    );
+}
+
+function BasicAuthFields() {
+    const [username, setUsername] = useAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_ATOM);
+    const [password, setPassword] = useAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_ATOM);
+
+    return (
+        <>
+            <div className="space-y-2">
+                <label className="text-text-secondary text-xs font-medium">Username</label>
+                <FernInput
+                    value={username}
+                    onValueChange={setUsername}
+                    placeholder="Enter username..."
+                    className="font-mono"
+                />
+            </div>
+            <div className="space-y-2">
+                <label className="text-text-secondary text-xs font-medium">Password</label>
+                <PasswordInputGroup
+                    value={password}
+                    onValueChange={setPassword}
+                    placeholder="Enter password..."
+                    className="font-mono"
+                />
+            </div>
+        </>
+    );
+}
+
+function HeaderAuthFields({ header }: { header: Extract<AuthScheme, { type: "header" }> }) {
+    const [headerAuth, setHeaderAuth] = useAtom(PLAYGROUND_AUTH_STATE_HEADER_ATOM);
+    const headerValue = headerAuth.headers[header.headerWireValue] ?? "";
+
+    return (
+        <div className="space-y-2">
+            <label className="text-text-secondary text-xs font-medium">
+                {header.headerWireValue}
+                {header.prefix && <span className="text-text-tertiary ml-1">(prefix: {header.prefix})</span>}
+            </label>
+            <PasswordInputGroup
+                value={headerValue}
+                onValueChange={(value) =>
+                    setHeaderAuth({
+                        headers: {
+                            ...headerAuth.headers,
+                            [header.headerWireValue]: value
+                        }
+                    })
+                }
+                placeholder="Enter value..."
+                className="font-mono"
+            />
+        </div>
+    );
+}

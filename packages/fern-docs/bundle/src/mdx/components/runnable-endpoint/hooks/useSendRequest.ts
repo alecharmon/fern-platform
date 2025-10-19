@@ -1,4 +1,4 @@
-import { buildEndpointUrl, type EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import { type AuthScheme, buildEndpointUrl, type EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { failed, type Loadable, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
@@ -15,6 +15,7 @@ interface UseSendRequestParams {
     endpoint: EndpointDefinition;
     formState: PlaygroundEndpointRequestFormState;
     baseUrl: string | undefined;
+    authSchemes: AuthScheme[];
 }
 
 interface UseSendRequestReturn {
@@ -23,14 +24,22 @@ interface UseSendRequestReturn {
     clearResponse: () => void;
 }
 
-export function useSendRequest({ endpoint, formState, baseUrl }: UseSendRequestParams): UseSendRequestReturn {
+export function useSendRequest({
+    endpoint,
+    formState,
+    baseUrl,
+    authSchemes
+}: UseSendRequestParams): UseSendRequestReturn {
     const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
 
     const sendRequest = useCallback(async () => {
         setResponse(loading());
         try {
+            // Get the first auth scheme (most common case)
+            const auth = authSchemes[0];
+
             const authHeaders = buildAuthHeaders(
-                undefined,
+                auth,
                 jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM),
                 { redacted: false },
                 {
@@ -73,7 +82,7 @@ export function useSendRequest({ endpoint, formState, baseUrl }: UseSendRequestP
         } catch (e) {
             setResponse(failed(e));
         }
-    }, [endpoint, formState, baseUrl]);
+    }, [endpoint, formState, baseUrl, authSchemes]);
 
     const clearResponse = useCallback(() => {
         setResponse(notStartedLoading());

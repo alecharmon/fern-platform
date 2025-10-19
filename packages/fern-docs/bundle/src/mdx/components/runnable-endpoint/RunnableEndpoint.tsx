@@ -1,6 +1,6 @@
 "use client";
 
-import type { EndpointDefinition, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { AuthScheme, EndpointDefinition, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { unwrapObjectType, unwrapReference } from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
 import { FernCard } from "@fern-docs/components/FernCard";
@@ -10,6 +10,7 @@ import { useCurrentVersionSlug } from "@fern-docs/components/state/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
 import { RunnableEndpointActions } from "./components/RunnableEndpointActions";
+import { RunnableEndpointAuthSection } from "./components/RunnableEndpointAuthSection";
 import { RunnableEndpointFormSection } from "./components/RunnableEndpointFormSection";
 import { RunnableEndpointHeader } from "./components/RunnableEndpointHeader";
 import { RunnableEndpointResponseSection } from "./components/RunnableEndpointResponseSection";
@@ -45,6 +46,11 @@ interface RunnableEndpointProps {
     /**
      * @internal the rehype-runnable-endpoint plugin will set this
      */
+    authSchemes?: AuthScheme[];
+
+    /**
+     * @internal the rehype-runnable-endpoint plugin will set this
+     */
     endpointSlugs?: string[];
 
     /**
@@ -63,6 +69,7 @@ export function RunnableEndpoint({
     endpointDefinition,
     types,
     globalHeaders,
+    authSchemes,
     example,
     endpointSlugs,
     className,
@@ -79,6 +86,7 @@ export function RunnableEndpoint({
             endpoint={endpointDefinition}
             types={types ?? {}}
             globalHeaders={globalHeaders ?? []}
+            authSchemes={authSchemes ?? []}
             example={example}
             endpointSlug={endpointSlug}
             className={className}
@@ -106,6 +114,7 @@ function RunnableEndpointInternal({
     endpoint,
     types,
     globalHeaders,
+    authSchemes,
     example,
     endpointSlug,
     className,
@@ -114,6 +123,7 @@ function RunnableEndpointInternal({
     endpoint: EndpointDefinition;
     types: Record<string, TypeDefinition>;
     globalHeaders: EndpointDefinition["requestHeaders"];
+    authSchemes: AuthScheme[];
     example?: string;
     endpointSlug?: string;
     className?: string;
@@ -148,7 +158,8 @@ function RunnableEndpointInternal({
     const { response, sendRequest, clearResponse } = useSendRequest({
         endpoint,
         formState,
-        baseUrl
+        baseUrl,
+        authSchemes
     });
 
     // Combine all headers (global + endpoint-specific)
@@ -184,6 +195,16 @@ function RunnableEndpointInternal({
         [setSelectedExampleIndex]
     );
 
+    const hasProperties = useMemo(() => {
+        return (
+            Object.keys(formState.headers).length > 0 ||
+            Object.keys(formState.pathParameters).length > 0 ||
+            Object.keys(formState.queryParameters).length > 0 ||
+            formState.body?.value != null ||
+            authSchemes.length > 0
+        );
+    }, [formState, authSchemes]);
+
     return (
         <FernTooltipProvider>
             <div className={cn("fern-runnable-endpoint my-6", className)}>
@@ -204,59 +225,66 @@ function RunnableEndpointInternal({
 
                     {/* Collapsible Form Section */}
                     <FernCollapse open={formExpanded}>
-                        <div className="bg-card-background border-border-default border-b p-4">
-                            <div className="space-y-4">
-                                {/* Headers */}
-                                <RunnableEndpointFormSection
-                                    id="header"
-                                    title="Headers"
-                                    properties={allHeaders}
-                                    extraProperties={undefined}
-                                    value={formState.headers}
-                                    onChange={setHeaders}
-                                    types={types}
-                                    readonly={readonly}
-                                />
+                        {hasProperties && (
+                            <div className="bg-card-background border-border-default border-b p-4">
+                                <div className="space-y-4">
+                                    {/* Authentication */}
+                                    {authSchemes.length > 0 && (
+                                        <RunnableEndpointAuthSection authSchemes={authSchemes} />
+                                    )}
 
-                                {/* Path Parameters */}
-                                <RunnableEndpointFormSection
-                                    id="path"
-                                    title="Path Parameters"
-                                    properties={endpoint.pathParameters ?? []}
-                                    extraProperties={undefined}
-                                    value={formState.pathParameters}
-                                    onChange={setPathParameters}
-                                    types={types}
-                                    readonly={readonly}
-                                />
-
-                                {/* Query Parameters */}
-                                <RunnableEndpointFormSection
-                                    id="query"
-                                    title="Query Parameters"
-                                    properties={endpoint.queryParameters ?? []}
-                                    extraProperties={undefined}
-                                    value={formState.queryParameters}
-                                    onChange={setQueryParameters}
-                                    types={types}
-                                    readonly={readonly}
-                                />
-
-                                {/* Body Parameters */}
-                                {unwrappedBodyObject && (
+                                    {/* Headers */}
                                     <RunnableEndpointFormSection
-                                        id="body"
-                                        title="Body"
-                                        properties={unwrappedBodyObject.properties}
-                                        extraProperties={unwrappedBodyObject.extraProperties}
-                                        value={formState.body?.type === "json" ? formState.body.value : undefined}
-                                        onChange={setBodyJson}
+                                        id="header"
+                                        title="Headers"
+                                        properties={allHeaders}
+                                        extraProperties={undefined}
+                                        value={formState.headers}
+                                        onChange={setHeaders}
                                         types={types}
                                         readonly={readonly}
                                     />
-                                )}
+
+                                    {/* Path Parameters */}
+                                    <RunnableEndpointFormSection
+                                        id="path"
+                                        title="Path Parameters"
+                                        properties={endpoint.pathParameters ?? []}
+                                        extraProperties={undefined}
+                                        value={formState.pathParameters}
+                                        onChange={setPathParameters}
+                                        types={types}
+                                        readonly={readonly}
+                                    />
+
+                                    {/* Query Parameters */}
+                                    <RunnableEndpointFormSection
+                                        id="query"
+                                        title="Query Parameters"
+                                        properties={endpoint.queryParameters ?? []}
+                                        extraProperties={undefined}
+                                        value={formState.queryParameters}
+                                        onChange={setQueryParameters}
+                                        types={types}
+                                        readonly={readonly}
+                                    />
+
+                                    {/* Body Parameters */}
+                                    {unwrappedBodyObject && (
+                                        <RunnableEndpointFormSection
+                                            id="body"
+                                            title="Body"
+                                            properties={unwrappedBodyObject.properties}
+                                            extraProperties={unwrappedBodyObject.extraProperties}
+                                            value={formState.body?.type === "json" ? formState.body.value : undefined}
+                                            onChange={setBodyJson}
+                                            types={types}
+                                            readonly={readonly}
+                                        />
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Action Buttons */}
                         <RunnableEndpointActions

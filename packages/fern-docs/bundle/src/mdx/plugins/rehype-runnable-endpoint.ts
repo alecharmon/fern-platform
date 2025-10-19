@@ -77,17 +77,22 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
                                 slugs
                             });
 
-                            const { types, globalHeaders } = await loader.getEndpointById(apiDefinitionId, endpoint.id);
+                            const { types, globalHeaders, authSchemes } = await loader.getEndpointById(
+                                apiDefinitionId,
+                                endpoint.id
+                            );
 
-                            console.log("[rehype-runnable-endpoint] Loaded types and global headers", {
+                            console.log("[rehype-runnable-endpoint] Loaded types, global headers, and auth schemes", {
                                 typesCount: Object.keys(types ?? {}).length,
-                                globalHeadersCount: globalHeaders?.length ?? 0
+                                globalHeadersCount: globalHeaders?.length ?? 0,
+                                authSchemesCount: authSchemes?.length ?? 0
                             });
 
                             node.attributes.push(
                                 unknownToMdxJsxAttribute("endpointDefinition", endpoint),
                                 unknownToMdxJsxAttribute("types", types ?? {}),
                                 unknownToMdxJsxAttribute("globalHeaders", globalHeaders ?? []),
+                                unknownToMdxJsxAttribute("authSchemes", authSchemes ?? []),
                                 unknownToMdxJsxAttribute("endpointSlugs", slugs)
                             );
 
