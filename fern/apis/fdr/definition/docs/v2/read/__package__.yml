@@ -40,6 +40,8 @@ service:
     getDocsForUrl:
       method: POST
       path: /load-with-url
+      audiences:
+        - fdr-lambda
       request:
         name: LoadDocsForUrlRequest
         body:

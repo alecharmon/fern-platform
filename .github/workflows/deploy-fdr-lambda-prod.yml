@@ -12,6 +12,14 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
   DATABASE_URL: ${{ secrets.PROD_RDS_PROXY_URL }}
+  VENUS_URL: ${{ secrets.VENUS_URL }}
+  PUBLIC_DOCS_CDN_URL: ${{ secrets.PUBLIC_DOCS_CDN_URL }}
+  PUBLIC_DOCS_S3_BUCKET_NAME: ${{ secrets.PUBLIC_DOCS_S3_BUCKET_NAME }}
+  PUBLIC_DOCS_S3_BUCKET_REGION: ${{ secrets.PUBLIC_DOCS_S3_BUCKET_REGION }}
+  PRIVATE_DOCS_S3_BUCKET_NAME: ${{ secrets.PRIVATE_DOCS_S3_BUCKET_NAME }}
+  PRIVATE_DOCS_S3_BUCKET_REGION: ${{ secrets.PRIVATE_DOCS_S3_BUCKET_REGION }}
+  DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_NAME }}
+  DB_DOCS_DEFINITION_BUCKET_REGION: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_REGION }}
 
 jobs:
   deploy_prod:
@@ -30,6 +38,11 @@ jobs:
 
       - name: 📥 Install
         uses: ./.github/actions/install
+
+      - name: 🔨 Build dependencies
+        run: |
+          # Build fdr-sdk first so tests can import it
+          pnpm --filter=@fern-api/fdr-sdk build
 
       - name: 🧪 Run Tests
         run: |

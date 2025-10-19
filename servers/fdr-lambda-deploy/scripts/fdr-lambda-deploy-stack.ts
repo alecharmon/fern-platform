@@ -3,6 +3,7 @@ import { CfnOutput, Duration, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
@@ -47,6 +48,17 @@ export class FdrLambdaDeployStack extends Stack {
         // Import existing VPC using environmentInfo like fdr-deploy does
         const vpc = ec2.Vpc.fromLookup(this, "vpc", {
             vpcId: environmentInfo.vpcId
+        });
+
+        // Add S3 VPC Gateway Endpoint to allow Lambda to access S3
+        // This is free and AWS best practice for VPC resources accessing S3
+        vpc.addGatewayEndpoint("S3Endpoint", {
+            service: ec2.GatewayVpcEndpointAwsService.S3,
+            subnets: [
+                {
+                    subnetType: ec2.SubnetType.PUBLIC
+                }
+            ]
         });
 
         // Create security group for Lambda
@@ -96,9 +108,55 @@ export class FdrLambdaDeployStack extends Stack {
                 NODE_ENV: "production",
                 ENVIRONMENT_TYPE: environmentType,
                 DATABASE_URL: getEnvironmentVariableOrThrow("DATABASE_URL"),
+                VENUS_URL: getEnvironmentVariableOrThrow("VENUS_URL"),
+                PUBLIC_DOCS_CDN_URL: getEnvironmentVariableOrThrow("PUBLIC_DOCS_CDN_URL"),
+                PUBLIC_DOCS_S3_BUCKET_NAME: getEnvironmentVariableOrThrow("PUBLIC_DOCS_S3_BUCKET_NAME"),
+                PUBLIC_DOCS_S3_BUCKET_REGION: getEnvironmentVariableOrDefault(
+                    "PUBLIC_DOCS_S3_BUCKET_REGION",
+                    "us-east-1"
+                ),
+                PRIVATE_DOCS_S3_BUCKET_NAME: getEnvironmentVariableOrThrow("PRIVATE_DOCS_S3_BUCKET_NAME"),
+                PRIVATE_DOCS_S3_BUCKET_REGION: getEnvironmentVariableOrDefault(
+                    "PRIVATE_DOCS_S3_BUCKET_REGION",
+                    "us-east-1"
+                ),
+                DB_DOCS_DEFINITION_BUCKET_NAME: getEnvironmentVariableOrThrow("DB_DOCS_DEFINITION_BUCKET_NAME"),
+                DB_DOCS_DEFINITION_BUCKET_REGION: getEnvironmentVariableOrDefault(
+                    "DB_DOCS_DEFINITION_BUCKET_REGION",
+                    "us-east-1"
+                ),
                 ...(isPreview && { IS_PREVIEW: "true", PR_NUMBER: prNumber! })
             }
         });
+
+        // Grant Lambda permissions to access S3 buckets
+        const publicBucketName = getEnvironmentVariableOrThrow("PUBLIC_DOCS_S3_BUCKET_NAME");
+        const privateBucketName = getEnvironmentVariableOrThrow("PRIVATE_DOCS_S3_BUCKET_NAME");
+        const dbDocsDefinitionBucketName = getEnvironmentVariableOrThrow("DB_DOCS_DEFINITION_BUCKET_NAME");
+
+        // Grant permission to read objects from S3 buckets
+        lambdaFunction.addToRolePolicy(
+            new iam.PolicyStatement({
+                actions: ["s3:GetObject"],
+                resources: [
+                    `arn:aws:s3:::${publicBucketName}/*`,
+                    `arn:aws:s3:::${privateBucketName}/*`,
+                    `arn:aws:s3:::${dbDocsDefinitionBucketName}/*`
+                ]
+            })
+        );
+
+        // Grant permission to list buckets (needed by S3 SDK for error handling)
+        lambdaFunction.addToRolePolicy(
+            new iam.PolicyStatement({
+                actions: ["s3:ListBucket"],
+                resources: [
+                    `arn:aws:s3:::${publicBucketName}`,
+                    `arn:aws:s3:::${privateBucketName}`,
+                    `arn:aws:s3:::${dbDocsDefinitionBucketName}`
+                ]
+            })
+        );
 
         // Create API Gateway with custom domain
         const apiName = isPreview ? `fdr-lambda-preview-${prNumber}` : `fdr-lambda-${environmentType.toLowerCase()}`;
@@ -191,4 +249,8 @@ function getEnvironmentVariableOrThrow(environmentVariable: string): string {
         throw new Error(`Environment variable ${environmentVariable} not found`);
     }
     return value;
+}
+
+function getEnvironmentVariableOrDefault(environmentVariable: string, defaultValue: string): string {
+    return process.env[environmentVariable] ?? defaultValue;
 }

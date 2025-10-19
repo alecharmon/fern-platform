@@ -15,6 +15,14 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
   DATABASE_URL: ${{ secrets.DEV2_RDS_PROXY_URL }}
+  VENUS_URL: ${{ secrets.DEV2_VENUS_URL }}
+  PUBLIC_DOCS_CDN_URL: ${{ secrets.DEV2_PUBLIC_DOCS_CDN_URL }}
+  PUBLIC_DOCS_S3_BUCKET_NAME: ${{ secrets.DEV2_PUBLIC_DOCS_S3_BUCKET_NAME }}
+  PUBLIC_DOCS_S3_BUCKET_REGION: ${{ secrets.DEV2_PUBLIC_DOCS_S3_BUCKET_REGION }}
+  PRIVATE_DOCS_S3_BUCKET_NAME: ${{ secrets.DEV2_PRIVATE_DOCS_S3_BUCKET_NAME }}
+  PRIVATE_DOCS_S3_BUCKET_REGION: ${{ secrets.DEV2_PRIVATE_DOCS_S3_BUCKET_REGION }}
+  DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME }}
+  DB_DOCS_DEFINITION_BUCKET_REGION: ${{ secrets.DEV2_DB_DOCS_DEFINITION_BUCKET_REGION }}
 
 jobs:
   preview_lambda:
@@ -34,6 +42,10 @@ jobs:
 
       - name: 📥 Install
         uses: ./.github/actions/install
+
+      - name: 🔨 Build dependencies
+        run: |
+          pnpm compile
 
       - name: 🧪 Run Tests
         run: |
@@ -104,16 +116,23 @@ jobs:
             **📝 Available Endpoints:**
             - Base: \`GET ${previewUrl}\`
             - Health: \`GET ${previewUrl}/health\`
-            - Metadata: \`POST ${previewUrl}/metadata-for-url\`
+            - Metadata (public): \`POST ${previewUrl}/metadata-for-url\`
+            - Load Docs (requires auth): \`POST ${previewUrl}/load-docs-for-url\`
 
             **📋 Example Usage:**
             \`\`\`bash
             # Test default endpoint
             curl "${previewUrl}"
 
-            # Test metadata endpoint
+            # Test metadata endpoint (public - no auth required)
             curl -X POST "${previewUrl}/metadata-for-url" \\
               -H "Content-Type: application/json" \\
+              -d '{"url":"https://docs.buildwithfern.com"}'
+
+            # Test load docs endpoint (requires Fern token)
+            curl -X POST "${previewUrl}/load-docs-for-url" \\
+              -H "Content-Type: application/json" \\
+              -H "Authorization: Bearer \$FERN_TOKEN" \\
               -d '{"url":"https://docs.buildwithfern.com"}'
             \`\`\`
 

@@ -122,6 +122,92 @@ export class Read {
         }
     }
 
+    /**
+     * @param {FdrLambda.docs.v2.read.LoadDocsForUrlRequest} request
+     * @param {Read.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FdrLambda.docs.v2.read.DomainNotRegisteredError}
+     * @throws {@link FdrLambda.UnauthorizedError}
+     *
+     * @example
+     *     await client.docs.v2.read.getDocsForUrl({
+     *         url: "url"
+     *     })
+     */
+    public getDocsForUrl(
+        request: FdrLambda.docs.v2.read.LoadDocsForUrlRequest,
+        requestOptions?: Read.RequestOptions
+    ): core.HttpResponsePromise<FdrLambda.docs.v2.read.LoadDocsForUrlResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getDocsForUrl(request, requestOptions));
+    }
+
+    private async __getDocsForUrl(
+        request: FdrLambda.docs.v2.read.LoadDocsForUrlRequest,
+        requestOptions?: Read.RequestOptions
+    ): Promise<core.WithRawResponse<FdrLambda.docs.v2.read.LoadDocsForUrlResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FdrLambdaEnvironment.Prod,
+                "/v2/registry/docs/load-with-url"
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as FdrLambda.docs.v2.read.LoadDocsForUrlResponse,
+                rawResponse: _response.rawResponse
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as any)?.["error"]) {
+                case "DomainNotRegisteredError":
+                    throw new FdrLambda.docs.v2.read.DomainNotRegisteredError(_response.rawResponse);
+                case "UnauthorizedError":
+                    throw new FdrLambda.UnauthorizedError(_response.error.body as string, _response.rawResponse);
+                default:
+                    throw new errors.FdrLambdaError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FdrLambdaError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse
+                });
+            case "timeout":
+                throw new errors.FdrLambdaTimeoutError(
+                    "Timeout exceeded when calling POST /v2/registry/docs/load-with-url."
+                );
+            case "unknown":
+                throw new errors.FdrLambdaError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse
+                });
+        }
+    }
+
     protected async _getAuthorizationHeader(): Promise<string> {
         return `Bearer ${await core.Supplier.get(this._options.token)}`;
     }
