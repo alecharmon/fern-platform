@@ -50,16 +50,9 @@ export class FdrLambdaDeployStack extends Stack {
             vpcId: environmentInfo.vpcId
         });
 
-        // Add S3 VPC Gateway Endpoint to allow Lambda to access S3
-        // This is free and AWS best practice for VPC resources accessing S3
-        vpc.addGatewayEndpoint("S3Endpoint", {
-            service: ec2.GatewayVpcEndpointAwsService.S3,
-            subnets: [
-                {
-                    subnetType: ec2.SubnetType.PUBLIC
-                }
-            ]
-        });
+        // Note: S3 VPC Gateway Endpoint should already exist in the VPC
+        // If needed, it can be looked up using ec2.GatewayVpcEndpoint.fromGatewayVpcEndpointId()
+        // We don't create it here to avoid conflicts with existing infrastructure
 
         // Create security group for Lambda
         const lambdaSecurityGroup = new ec2.SecurityGroup(this, "lambda-security-group", {

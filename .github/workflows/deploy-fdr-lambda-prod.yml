@@ -42,7 +42,7 @@ jobs:
       - name: 🔨 Build dependencies
         run: |
           # Build fdr-sdk first so tests can import it
-          pnpm --filter=@fern-api/fdr-sdk build
+          pnpm --filter=@fern-api/fdr-sdk compile
 
       - name: 🧪 Run Tests
         run: |

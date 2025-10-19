@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConsole: i am too lazy to install a real logger here right now */
 import {
     type APIV1Read,
     convertDbAPIDefinitionToRead,
@@ -29,7 +30,10 @@ export async function getDocsForUrl(
             orgId: s3Docs.orgId
         });
         return s3Docs;
+    } else {
+        console.log(`[getDocsForUrl] No docs found in S3, falling back to db for hostname: ${url.hostname}`);
     }
+
     const dbDocs = await loadDocsForURLFromDatabase(url, pool);
 
     if (dbDocs != null) {
