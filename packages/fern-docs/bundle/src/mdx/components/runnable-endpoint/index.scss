@@ -1,0 +1,25 @@
+@layer components {
+  .fern-runnable-endpoint {
+    ul {
+      @apply ps-0! mt-0!;
+    }
+
+    button {
+      @apply mt-0!;
+    }
+
+    // Disabled input styling
+    .fern-input:disabled,
+    .fern-textarea:disabled {
+      @apply cursor-not-allowed opacity-60;
+    }
+
+    .fern-input-group:has(.fern-input:disabled),
+    .fern-textarea-group:has(.fern-textarea:disabled),
+    .fern-numeric-input-group:has(.fern-input:disabled) {
+      @apply opacity-60 cursor-not-allowed;
+      @apply bg-(color:--grayscale-a2);
+      @apply pointer-events-none;
+    }
+  }
+}

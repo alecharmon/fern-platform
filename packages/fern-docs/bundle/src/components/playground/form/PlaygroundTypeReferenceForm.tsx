@@ -50,7 +50,7 @@ interface PlaygroundTypeReferenceFormProps {
 }
 
 const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProps>((props) => {
-    const { id, property, shape, onChange, value, types, indent = true, defaultValue } = props;
+    const { id, property, shape, onChange, value, types, indent = true, defaultValue, disabled = false } = props;
     const { isNullSelected } = usePlaygroundTypeReferenceFormContext();
     const onRemove = useCallback(() => {
         onChange(undefined);
@@ -190,6 +190,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     minLength={string.minLength}
                                     // TODO: add validation UX feedback
                                     pattern={string.regex}
+                                    disabled={disabled}
                                 />
                             )}
                         </span>
@@ -217,6 +218,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                         onCheckedChange={onChange}
                                         defaultChecked={typeof defaultValue === "boolean" ? defaultValue : undefined}
                                         id={id}
+                                        disabled={disabled}
                                     />
                                 </div>
                             </span>
@@ -243,6 +245,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 // resettable={typeof defaultValue === "number"}
                                 max={integer.maximum}
                                 min={integer.minimum}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -266,6 +269,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 // resettable={typeof defaultValue === "number"}
                                 max={double.maximum}
                                 min={double.minimum}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -290,6 +294,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 // resettable={typeof defaultValue === "number"}
                                 max={long.maximum}
                                 min={long.minimum}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -312,6 +317,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 // resettable={typeof defaultValue === "number"}
                                 onValueChange={onChange}
                                 disallowFloat={true}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -334,6 +340,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 // resettable={typeof defaultValue === "number"}
                                 onValueChange={onChange}
                                 disallowFloat={true}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -356,6 +363,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 value={typeof value === "string" ? value : undefined}
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -378,6 +386,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 resettable={typeof defaultValue === "string"}
                                 placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                                 onValueChange={onChange}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -398,6 +407,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 className="w-full"
                                 value={typeof value === "string" ? value : ""}
                                 onValueChange={onChange}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -421,6 +431,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 value={typeof value === "string" ? value : undefined}
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -442,6 +453,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 value={typeof value === "string" ? value : ""}
                                 // resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
+                                disabled={disabled}
                             />
                         </span>
                     </WithLabel>
@@ -565,6 +577,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         className="w-full"
                         value={typeof value === "string" ? value : ""}
                         onValueChange={onChange}
+                        disabled={disabled}
                         // TODO: add default value
                     />
                 </span>

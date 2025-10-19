@@ -1,6 +1,7 @@
 "use client";
 
 import type { EndpointDefinition, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import { unwrapObjectType, unwrapReference } from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
@@ -50,6 +51,12 @@ interface RunnableEndpointProps {
      * Optional className for styling
      */
     className?: string;
+
+    /**
+     * Field keys that should be read-only.
+     * These fields will display their example values but users cannot modify them.
+     */
+    readonly?: string[];
 }
 
 export function RunnableEndpoint({
@@ -58,7 +65,8 @@ export function RunnableEndpoint({
     globalHeaders,
     example,
     endpointSlugs,
-    className
+    className,
+    readonly
 }: RunnableEndpointProps) {
     const endpointSlug = useCurrentSlug(endpointSlugs);
 
@@ -74,8 +82,24 @@ export function RunnableEndpoint({
             example={example}
             endpointSlug={endpointSlug}
             className={className}
+            readonly={readonly}
         />
     );
+}
+
+function getUnwrappedBodyObject(
+    requestBody: NonNullable<EndpointDefinition["requests"]>[number]["body"],
+    types: Record<string, TypeDefinition>
+) {
+    if (requestBody.type === "alias") {
+        const unwrappedBody = unwrapReference(requestBody.value, types);
+        if (unwrappedBody?.shape.type === "object") {
+            return unwrapObjectType(unwrappedBody.shape, types);
+        }
+    } else if (requestBody.type === "object") {
+        return unwrapObjectType(requestBody, types);
+    }
+    return null;
 }
 
 function RunnableEndpointInternal({
@@ -84,7 +108,8 @@ function RunnableEndpointInternal({
     globalHeaders,
     example,
     endpointSlug,
-    className
+    className,
+    readonly
 }: {
     endpoint: EndpointDefinition;
     types: Record<string, TypeDefinition>;
@@ -92,6 +117,7 @@ function RunnableEndpointInternal({
     example?: string;
     endpointSlug?: string;
     className?: string;
+    readonly?: string[];
 }) {
     const [formExpanded, setFormExpanded] = useState(true);
     const [responseExpanded, setResponseExpanded] = useState(true);
@@ -130,6 +156,11 @@ function RunnableEndpointInternal({
         return [...(globalHeaders ?? []), ...(endpoint.requestHeaders ?? [])];
     }, [endpoint.requestHeaders, globalHeaders]);
 
+    const requestBody = endpoint.requests?.[0]?.body;
+    const unwrappedBodyObject = useMemo(() => {
+        return requestBody ? getUnwrappedBodyObject(requestBody, types) : null;
+    }, [requestBody, types]);
+
     // Handler for sending request
     const handleSendRequest = useCallback(() => {
         setResponseExpanded(true);
@@ -145,7 +176,6 @@ function RunnableEndpointInternal({
     // Handler for example change
     const handleExampleChange = useCallback(
         (value: string) => {
-            console.log("value", value);
             const index = parseInt(value, 10);
             if (!isNaN(index)) {
                 setSelectedExampleIndex(index);
@@ -156,7 +186,7 @@ function RunnableEndpointInternal({
 
     return (
         <FernTooltipProvider>
-            <div className={cn("my-6", className)}>
+            <div className={cn("fern-runnable-endpoint my-6", className)}>
                 <FernCard className="rounded-3 flex flex-col overflow-hidden">
                     {/* Header with endpoint URL and example selector */}
                     <RunnableEndpointHeader
@@ -185,6 +215,7 @@ function RunnableEndpointInternal({
                                     value={formState.headers}
                                     onChange={setHeaders}
                                     types={types}
+                                    readonly={readonly}
                                 />
 
                                 {/* Path Parameters */}
@@ -196,6 +227,7 @@ function RunnableEndpointInternal({
                                     value={formState.pathParameters}
                                     onChange={setPathParameters}
                                     types={types}
+                                    readonly={readonly}
                                 />
 
                                 {/* Query Parameters */}
@@ -207,21 +239,22 @@ function RunnableEndpointInternal({
                                     value={formState.queryParameters}
                                     onChange={setQueryParameters}
                                     types={types}
+                                    readonly={readonly}
                                 />
 
                                 {/* Body Parameters */}
-                                {endpoint.requests?.[0]?.body != null &&
-                                    endpoint.requests[0].body.type === "object" && (
-                                        <RunnableEndpointFormSection
-                                            id="body"
-                                            title="Body"
-                                            properties={endpoint.requests[0].body.properties ?? []}
-                                            extraProperties={endpoint.requests[0].body.extraProperties}
-                                            value={formState.body?.type === "json" ? formState.body.value : undefined}
-                                            onChange={setBodyJson}
-                                            types={types}
-                                        />
-                                    )}
+                                {unwrappedBodyObject && (
+                                    <RunnableEndpointFormSection
+                                        id="body"
+                                        title="Body"
+                                        properties={unwrappedBodyObject.properties}
+                                        extraProperties={unwrappedBodyObject.extraProperties}
+                                        value={formState.body?.type === "json" ? formState.body.value : undefined}
+                                        onChange={setBodyJson}
+                                        types={types}
+                                        readonly={readonly}
+                                    />
+                                )}
                             </div>
                         </div>
 

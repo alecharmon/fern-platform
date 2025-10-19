@@ -9,6 +9,7 @@ interface RunnableEndpointFormSectionProps {
     value: unknown;
     onChange: (value: ((old: unknown) => unknown) | unknown) => void;
     types: Record<string, TypeDefinition>;
+    readonly?: string[];
 }
 
 export function RunnableEndpointFormSection({
@@ -18,9 +19,10 @@ export function RunnableEndpointFormSection({
     extraProperties,
     value,
     onChange,
-    types
+    types,
+    readonly
 }: RunnableEndpointFormSectionProps) {
-    if (!properties || properties.length === 0) {
+    if ((!properties || properties.length === 0) && !extraProperties) {
         return null;
     }
 
@@ -35,6 +37,7 @@ export function RunnableEndpointFormSection({
                     onChange={onChange}
                     value={value}
                     types={types}
+                    readonly={readonly}
                 />
             </div>
         </section>

@@ -34,6 +34,7 @@ interface PlaygroundObjectPropertyFormProps {
     expandByDefault?: boolean;
     types: Record<TypeId, TypeDefinition>;
     defaultValue?: unknown;
+    isReadOnly?: boolean;
 }
 
 const PlaygroundObjectPropertyFormInternal: FC<PlaygroundObjectPropertyFormProps> = ({
@@ -42,7 +43,8 @@ const PlaygroundObjectPropertyFormInternal: FC<PlaygroundObjectPropertyFormProps
     onChange,
     value,
     expandByDefault = true,
-    types
+    types,
+    isReadOnly = false
 }) => {
     const handleChange = useCallback(
         (newValue: unknown) => {
@@ -79,6 +81,7 @@ const PlaygroundObjectPropertyFormInternal: FC<PlaygroundObjectPropertyFormProps
             onOpenStack={handleOpenStack}
             onCloseStack={handleCloseStack}
             types={types}
+            disabled={isReadOnly}
         />
     );
 };
@@ -94,10 +97,11 @@ interface PlaygroundObjectPropertiesFormProps {
     defaultValue?: unknown;
     indent?: boolean;
     types: Record<string, TypeDefinition>;
+    readonly?: string[];
 }
 
 export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPropertiesFormProps>((props) => {
-    const { id, properties, onChange, value, indent = false, types, extraProperties } = props;
+    const { id, properties, onChange, value, indent = false, types, extraProperties, readonly } = props;
 
     const onChangeObjectProperty = useCallback(
         (key: string, newValue: unknown) => {
@@ -205,6 +209,7 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                 <ul className="list-none space-y-8">
                     {shownProperties.map((property) => {
                         const childId = id.length > 0 ? `${id}.${property.key}` : property.key;
+                        const isReadOnly = readonly?.includes(property.key) ?? false;
                         return (
                             <li key={property.key} className="relative -mx-4 px-4" tabIndex={-1}>
                                 <PlaygroundObjectPropertyForm
@@ -213,6 +218,7 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                                     onChange={onChangeObjectProperty}
                                     value={castToRecord(value)[property.key]}
                                     types={types}
+                                    isReadOnly={isReadOnly}
                                 />
                             </li>
                         );

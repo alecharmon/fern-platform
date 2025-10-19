@@ -75,7 +75,6 @@ export function useRunnableEndpointForm({
     }, [endpoint.examples, initialExampleIndex, minimalContext, resolvedPlaygroundState]);
 
     const [formState, setFormState] = useState<PlaygroundEndpointRequestFormState>(initialFormState);
-
     // Persist form values to localStorage
     useFormStatePersistence(formState);
 
