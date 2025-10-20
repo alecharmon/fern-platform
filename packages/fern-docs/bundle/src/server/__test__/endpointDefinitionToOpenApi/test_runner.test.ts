@@ -1,7 +1,7 @@
+import { OpenApiYamlFormatter } from "@fern-docs/search-utils";
 import fs from "fs";
 import yaml from "js-yaml";
 import path from "path";
-import { OpenApiYamlFormatter } from "@fern-docs/search-utils";
 
 const TEST_CASES_DIR = path.join(__dirname, "test_cases");
 
