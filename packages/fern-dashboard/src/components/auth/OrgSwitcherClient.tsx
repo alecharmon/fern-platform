@@ -3,11 +3,13 @@
 import { useRouter } from "@bprogress/next/app";
 import { ChevronDown, Clock } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
+
 import { Button } from "@/components/ui/button";
-import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
+import { SearchableDropdown, type SearchableDropdownRef } from "@/components/ui/SearchableDropdown";
+import { WrapWithKeyboardShortcut } from "@/components/ui/WrapWithKeyboardShortcut";
 import { useOrganizations } from "@/state/useOrganizations";
 import { getOrgDisplayName } from "@/utils/getOrgDisplayName";
 import { addRecentOrg, getRecentOrgs } from "@/utils/recentOrgs";
@@ -16,16 +18,25 @@ import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
 import { OrgLogo } from "./org-logo/OrgLogo";
 
-export const OrgSwitcherClient = ({
-    organizations: initialOrganizations,
-    currentOrgName
-}: {
-    organizations: Auth0Organization[];
-    currentOrgName?: Auth0OrgName;
-}) => {
-    // Use client-side organizations data if available, otherwise fall back to server-provided initial data
-    const organizationsResult = useOrganizations();
-    const organizations = organizationsResult.type === "loaded" ? organizationsResult.value : initialOrganizations;
+interface OrgSwitcherClientRef {
+    openSwitcher: () => void;
+}
+
+const OrgSwitcherClientInternal = forwardRef<
+    OrgSwitcherClientRef,
+    {
+        organizations: Auth0Organization[];
+        currentOrgName?: Auth0OrgName;
+        isFernAdmin: boolean;
+    }
+>(({ organizations, currentOrgName, isFernAdmin }, ref) => {
+    const dropdownRef = useRef<SearchableDropdownRef>(null);
+
+    useImperativeHandle(ref, () => ({
+        openSwitcher: () => {
+            dropdownRef.current?.open();
+        }
+    }));
     const orgName = useOrgNameFromPathname();
     const [localOrgName, setLocalOrgName] = useState(currentOrgName);
     const [searchTerm, setSearchTerm] = useState("");
@@ -56,13 +67,33 @@ export const OrgSwitcherClient = ({
         return [...sortedRecentOrgs, ...otherOrgs];
     }, [organizations, recentOrgNames]);
 
-    // Filter organizations by search term
-    const filteredOrganizations = useMemo(() => {
-        return organizedOrganizations.filter((org) => {
+    // Filter organizations by search term and add admin option if applicable
+    const filteredOrganizationsWithAdmin = useMemo(() => {
+        const filtered = organizedOrganizations.filter((org) => {
             const displayName = getOrgDisplayName(org) ?? "";
             return displayName.toLowerCase().includes(searchTerm.toLowerCase());
         });
-    }, [organizedOrganizations, searchTerm]);
+
+        const trimmedSearch = searchTerm.trim();
+
+        // If user is Fern admin, has a search term, and the search doesn't match any org name exactly, add admin option
+        if (isFernAdmin && trimmedSearch.length > 0) {
+            const hasExactMatch = filtered.some((org) => org.name.toLowerCase() === trimmedSearch.toLowerCase());
+            if (!hasExactMatch) {
+                // Create a pseudo-organization for the admin option
+                const adminOption = {
+                    id: `__admin_${trimmedSearch}`,
+                    name: trimmedSearch as Auth0OrgName,
+                    display_name: `Go to '${trimmedSearch}' →`,
+                    __isAdminOption: true
+                } as Auth0Organization & { __isAdminOption: boolean };
+
+                return [...filtered, adminOption];
+            }
+        }
+
+        return filtered;
+    }, [organizedOrganizations, searchTerm, isFernAdmin]);
 
     const getPathnameForOrg = (newOrgName: Auth0OrgName) => {
         return `/${newOrgName}${getRedirectPathname(pathname)}`;
@@ -90,7 +121,8 @@ export const OrgSwitcherClient = ({
 
     return (
         <SearchableDropdown
-            items={filteredOrganizations}
+            ref={dropdownRef}
+            items={filteredOrganizationsWithAdmin}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             onSelect={(org) => onSelectOrg(org.name)}
@@ -99,6 +131,31 @@ export const OrgSwitcherClient = ({
             getItemKey={(org) => org.id}
             shouldShowSearch={organizations.length > 10}
             renderItem={(organization, onSelectFromDropdown, isHighlighted) => {
+                // Check if this is the admin option
+                const isAdminOption = "__isAdminOption" in organization && organization.__isAdminOption;
+
+                if (isAdminOption) {
+                    return (
+                        <button
+                            type="button"
+                            className={cn(
+                                "flex w-full cursor-pointer items-center justify-between px-3 rounded py-1.5 text-left text-sm focus:outline-none flex-wrap text-muted-foreground",
+                                isHighlighted ? "bg-gray-300" : "hover:bg-gray-300"
+                            )}
+                            onClick={() => {
+                                onSelectOrg(organization.name);
+                                onSelectFromDropdown();
+                            }}
+                        >
+                            <div className="flex flex-1 items-center gap-2">
+                                Go to <code className="text-wrap max-w-[170px]">{organization.name}</code>
+                            </div>
+                            <div className="flex-shrink-0 justify-end">→</div>
+                        </button>
+                    );
+                }
+
+                // Regular organization
                 const isRecent = recentOrgNames.includes(organization.name);
                 const isCurrent = organization.name === localOrgName;
                 return (
@@ -134,18 +191,45 @@ export const OrgSwitcherClient = ({
                 disabled={organizations.length === 0}
             >
                 <div className="flex items-center gap-2">
-                    {currentOrg ? (
-                        <OrgLogo organization={currentOrg} />
-                    ) : (
-                        <div className="flex size-6 items-center justify-center rounded border border-gray-300 bg-gray-100">
-                            <span className="text-xs text-gray-400">?</span>
-                        </div>
-                    )}
+                    {currentOrg && <OrgLogo organization={currentOrg} />}
                     {currentOrg ? getOrgDisplayName(currentOrg) : "Select Organization"}
                 </div>
                 <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
         </SearchableDropdown>
+    );
+});
+
+OrgSwitcherClientInternal.displayName = "OrgSwitcherClientInternal";
+
+export const OrgSwitcherClient = ({
+    organizations: initialOrganizations,
+    currentOrgName,
+    isFernAdmin
+}: {
+    organizations: Auth0Organization[];
+    currentOrgName?: Auth0OrgName;
+    isFernAdmin: boolean;
+}) => {
+    const orgSwitcherRef = useRef<OrgSwitcherClientRef>(null);
+
+    // Use client-side organizations data if available, otherwise fall back to server-provided initial data
+    const organizationsResult = useOrganizations();
+    const organizations = organizationsResult.type === "loaded" ? organizationsResult.value : initialOrganizations;
+
+    return (
+        <WrapWithKeyboardShortcut
+            shortcut="o"
+            onShortcut={() => orgSwitcherRef.current?.openSwitcher()}
+            disabled={organizations.length === 0}
+        >
+            <OrgSwitcherClientInternal
+                ref={orgSwitcherRef}
+                organizations={organizations}
+                currentOrgName={currentOrgName}
+                isFernAdmin={isFernAdmin}
+            />
+        </WrapWithKeyboardShortcut>
     );
 };
 

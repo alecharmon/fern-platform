@@ -1,5 +1,13 @@
 import { SearchIcon } from "lucide-react";
-import { type KeyboardEvent, type ReactNode, useEffect, useState } from "react";
+import {
+    forwardRef,
+    type KeyboardEvent,
+    type ReactNode,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+    useState
+} from "react";
 
 import { Input } from "./input";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
@@ -19,27 +27,50 @@ export interface SearchableDropdownProps<T> {
     shouldShowSearch?: boolean;
 }
 
-export function SearchableDropdown<T>({
-    children,
-    items,
-    searchTerm,
-    onSearchChange,
-    onSelect,
-    searchPlaceholder = "Search...",
-    emptyMessage = "No items found",
-    loadingMessage = "Loading...",
-    isLoading = false,
-    renderItem,
-    getItemKey,
-    shouldShowSearch = true
-}: SearchableDropdownProps<T>) {
+export interface SearchableDropdownRef {
+    open: () => void;
+}
+
+function SearchableDropdownInner<T>(
+    {
+        children,
+        items,
+        searchTerm,
+        onSearchChange,
+        onSelect,
+        searchPlaceholder = "Search...",
+        emptyMessage = "No items found",
+        loadingMessage = "Loading...",
+        isLoading = false,
+        renderItem,
+        getItemKey,
+        shouldShowSearch = true
+    }: SearchableDropdownProps<T>,
+    ref: React.Ref<SearchableDropdownRef>
+) {
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useImperativeHandle(ref, () => ({
+        open: () => {
+            setIsOpen(true);
+        }
+    }));
 
     // Reset highlighted index when items change
     useEffect(() => {
         setHighlightedIndex(0);
     }, [items]);
+
+    // Focus search input when dropdown opens
+    useEffect(() => {
+        if (isOpen && shouldShowSearch) {
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 0);
+        }
+    }, [isOpen, shouldShowSearch]);
 
     // Handle keyboard navigation
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -86,6 +117,7 @@ export function SearchableDropdown<T>({
                             <div className="flex flex-1 items-center rounded-md border border-[var(--border,var(--gray-500))] px-3">
                                 <SearchIcon className="h-4 w-4 shrink-0 opacity-50" />
                                 <Input
+                                    ref={inputRef}
                                     placeholder={searchPlaceholder}
                                     value={searchTerm}
                                     onChange={(e) => {
@@ -122,3 +154,7 @@ export function SearchableDropdown<T>({
         </Popover>
     );
 }
+
+export const SearchableDropdown = forwardRef(SearchableDropdownInner) as <T>(
+    props: SearchableDropdownProps<T> & { ref?: React.Ref<SearchableDropdownRef> }
+) => ReturnType<typeof SearchableDropdownInner>;

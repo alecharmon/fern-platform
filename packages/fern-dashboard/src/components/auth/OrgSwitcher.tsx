@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
 import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
 
@@ -23,5 +24,9 @@ export async function OrgSwitcher({ currentOrgName }: { currentOrgName?: Auth0Or
         return null;
     }
 
-    return <OrgSwitcherClient organizations={organizations} currentOrgName={currentOrgName} />;
+    const isFernAdmin = await isFernEmployee(session.user.sub);
+
+    return (
+        <OrgSwitcherClient organizations={organizations} currentOrgName={currentOrgName} isFernAdmin={isFernAdmin} />
+    );
 }
