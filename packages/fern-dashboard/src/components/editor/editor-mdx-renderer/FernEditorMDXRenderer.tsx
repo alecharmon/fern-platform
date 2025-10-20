@@ -17,7 +17,7 @@ import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
-import { UnsupportedContent } from "../UnsupportedContent";
+import { UnsupportedContent, UnsupportedContentDisplayOnly } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
 import { parseMDX } from "./parse";
 import type { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
@@ -186,31 +186,36 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
         };
     }, [mdx, docsUrl, branch]);
 
-    if (state.type === "BUNDLING") {
-        return <LoadingTerminalElement />;
-    }
+    // Compute content based on state - all hooks must be called before this point
+    // Use UnsupportedContentSimple (no hooks) instead of UnsupportedContent (has hooks)
+    const content = useMemo(() => {
+        if (state.type === "BUNDLING") {
+            return <LoadingTerminalElement />;
+        }
 
-    if (state.type === "ERROR") {
-        return (
-            <UnsupportedContent>
-                {!mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown"}
-            </UnsupportedContent>
-        );
-    }
-
-    return (
-        <ErrorBoundary
-            fallback={
+        if (state.type === "ERROR") {
+            return (
                 <UnsupportedContent>
                     {!mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown"}
                 </UnsupportedContent>
-            }
-        >
-            <TerminalMDXRenderer code={state.code} components={components} />
-        </ErrorBoundary>
-    );
+            );
+        }
+
+        return (
+            <ErrorBoundary
+                fallback={
+                    <UnsupportedContentDisplayOnly>
+                        {!mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown"}
+                    </UnsupportedContentDisplayOnly>
+                }
+            >
+                <TerminalMDXRenderer code={state.code} components={components} />
+            </ErrorBoundary>
+        );
+    }, [state.type]);
+
+    return content;
 });
-MDXRenderer.displayName = "MDXRenderer";
 
 interface JSXElementRendererProps {
     element: JSXElement;
@@ -238,44 +243,64 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
         );
     }, [name, keyedAttributes, expressionAttributes, jsxChildren]);
 
-    let children: React.ReactElement | undefined;
+    // Compute children content for RICH_TEXT type
+    const richTextHtml = useMemo(() => {
+        if (jsxChildren.type === "RICH_TEXT") {
+            return mdxToHtml(jsxChildren.childrenMdx).html;
+        }
+        return null;
+    }, [jsxChildren]);
 
-    if (jsxChildren.type === "RICH_TEXT") {
-        const html = mdxToHtml(jsxChildren.childrenMdx);
-        children = (
-            <TiptapEditor
-                autofocus={false}
-                initialContent={html.html}
-                disableDragging={element.value.contentDraggingDisabled}
-                className="px-4"
-                onUpdate={({ editor, transaction }) => {
-                    const html = editor.getHTML();
-                    const mdx = htmlToMdx(html);
-                    const indentedMdx = applyIndentation(mdx.mdx, 1);
-                    const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
-                    debouncedOnUpdate(finalMdx, transaction);
-                }}
-            />
-        );
-    } else if (jsxChildren.type === "ALLOWED") {
-        children = (
-            <FernEditorMDXRendererInternal
-                mdx={jsxChildren.childrenMdx}
-                docsUrl={docsUrl}
-                branch={branch}
-                onUpdate={(mdx, transaction) => {
-                    const indentedMdx = applyIndentation(mdx, 1);
-                    const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
-                    onUpdate(finalMdx, transaction);
-                }}
-            />
-        );
-    }
+    const children = useMemo(() => {
+        if (jsxChildren.type === "RICH_TEXT" && richTextHtml != null) {
+            return (
+                <TiptapEditor
+                    autofocus={false}
+                    initialContent={richTextHtml}
+                    disableDragging={element.value.contentDraggingDisabled}
+                    className="px-4"
+                    onUpdate={({ editor, transaction }) => {
+                        const html = editor.getHTML();
+                        const mdx = htmlToMdx(html);
+                        const indentedMdx = applyIndentation(mdx.mdx, 1);
+                        const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
+                        debouncedOnUpdate(finalMdx, transaction);
+                    }}
+                />
+            );
+        } else if (jsxChildren.type === "ALLOWED") {
+            return (
+                <FernEditorMDXRendererInternal
+                    mdx={jsxChildren.childrenMdx}
+                    docsUrl={docsUrl}
+                    branch={branch}
+                    onUpdate={(mdx, transaction) => {
+                        const indentedMdx = applyIndentation(mdx, 1);
+                        const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
+                        onUpdate(finalMdx, transaction);
+                    }}
+                />
+            );
+        }
+        return <></>;
+    }, [
+        jsxChildren,
+        richTextHtml,
+        element.value.contentDraggingDisabled,
+        name,
+        keyedAttributes,
+        expressionAttributes,
+        debouncedOnUpdate,
+        docsUrl,
+        branch
+    ]);
 
     // Outer provider: EditorComponentProvider (no providedChildren/appendChildrenMdx here)
     // Inner provider: EditorComponentChildrenProvider (only if childrenType !== "DISALLOWED")
+    // Add key to force remount when children type changes to prevent hook count mismatches
     return (
         <EditorComponentProvider
+            key={`${index}-${jsxChildren.type}`}
             isWithinEditor
             index={index}
             keyedAttributes={keyedAttributes}
@@ -307,7 +332,7 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
                         );
                         onUpdate(newElement);
                     }}
-                    providedChildren={children ?? <></>}
+                    providedChildren={children}
                 >
                     <MDXRenderer mdx={parentMdx} docsUrl={docsUrl} branch={branch} />
                 </EditorComponentChildrenProvider>
@@ -327,29 +352,26 @@ interface ParsedElementRendererProps {
     branch?: string;
 }
 
-const ParsedElementRenderer = ({
-    element,
-    index,
-    onUpdate,
-    newlyCreated,
-    docsUrl,
-    branch
-}: ParsedElementRendererProps) => {
-    if (element.type === "terminalElement") {
-        return <MDXRenderer mdx={element.originalMdx} docsUrl={docsUrl} branch={branch} />;
-    }
+// Separate the two rendering paths to avoid conditional hook calls
+const ParsedElementRenderer = React.memo(
+    ({ element, index, onUpdate, newlyCreated, docsUrl, branch }: ParsedElementRendererProps) => {
+        if (element.type === "terminalElement") {
+            return <MDXRenderer mdx={element.originalMdx} docsUrl={docsUrl} branch={branch} />;
+        }
 
-    return (
-        <JSXElementRenderer
-            index={index}
-            element={element}
-            onUpdate={onUpdate}
-            newlyCreated={newlyCreated}
-            docsUrl={docsUrl}
-            branch={branch}
-        />
-    );
-};
+        return (
+            <JSXElementRenderer
+                index={index}
+                element={element}
+                onUpdate={onUpdate}
+                newlyCreated={newlyCreated}
+                docsUrl={docsUrl}
+                branch={branch}
+            />
+        );
+    }
+);
+ParsedElementRenderer.displayName = "ParsedElementRenderer";
 
 const FernEditorMDXRendererInternal = ({
     mdx,
@@ -401,7 +423,7 @@ const FernEditorMDXRendererInternal = ({
 
     return parsed.map((element, index) => (
         <ParsedElementRenderer
-            key={`${index}_${deleteCounter.current}`}
+            key={`${element.type}_${index}_${deleteCounter.current}`}
             index={index}
             element={element}
             onUpdate={(updatedMdx, transaction) => handleChildUpdate(index, updatedMdx, transaction)}
