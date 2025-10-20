@@ -9,5 +9,12 @@ export function slugjoin(...parts: (string | string[] | null | undefined)[]): Sl
         .filter(isNonNullish)
         .flatMap((part) => (typeof part === "string" ? [part.trim()] : part.map((part) => part.trim())))
         .map((part) => decodeURIComponent(part));
-    return Slug(urljoin(slugArray).replaceAll("//*", "/").replace(/^\//, "").replace(/\/$/, ""));
+
+    const joined = urljoin(slugArray) ?? "";
+    const normalized = joined
+        .replaceAll("//*", "/") // Remove duplicate slashes
+        .replace(/^\//, "") // Remove leading slash
+        .replace(/\/$/, ""); // Remove trailing slash
+
+    return Slug(normalized);
 }
