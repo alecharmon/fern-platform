@@ -212,7 +212,7 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
                 <TerminalMDXRenderer code={state.code} components={components} />
             </ErrorBoundary>
         );
-    }, [state.type]);
+    }, [state, mdx, components]);
 
     return content;
 });
