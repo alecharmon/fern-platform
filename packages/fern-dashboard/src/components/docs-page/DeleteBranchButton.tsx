@@ -45,7 +45,7 @@ export function DeleteBranchButton({
         if (prStatus === "open" || prStatus === "draft") {
             return "This session has committed changes. Are you sure you want to remove this session?";
         }
-        return "Deleting this session will clear any unsaved changes. Are you sure you want to remove this session?";
+        return "Deleting this session will remove it and discard any unsaved changes. Proceed?";
     };
 
     return (
