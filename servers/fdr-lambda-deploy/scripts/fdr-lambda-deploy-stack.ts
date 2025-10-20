@@ -127,10 +127,10 @@ export class FdrLambdaDeployStack extends Stack {
         const privateBucketName = getEnvironmentVariableOrThrow("PRIVATE_DOCS_S3_BUCKET_NAME");
         const dbDocsDefinitionBucketName = getEnvironmentVariableOrThrow("DB_DOCS_DEFINITION_BUCKET_NAME");
 
-        // Grant permission to read objects from S3 buckets
+        // Grant permission to read and delete objects from S3 buckets
         lambdaFunction.addToRolePolicy(
             new iam.PolicyStatement({
-                actions: ["s3:GetObject"],
+                actions: ["s3:GetObject", "s3:DeleteObject"],
                 resources: [
                     `arn:aws:s3:::${publicBucketName}/*`,
                     `arn:aws:s3:::${privateBucketName}/*`,

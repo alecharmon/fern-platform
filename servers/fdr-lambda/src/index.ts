@@ -1,8 +1,10 @@
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Pool } from "pg";
 import { DomainNotRegisteredError, InvalidUrlError, UnauthorizedError, UserNotInOrgError } from "./errors";
 import { getDocsForUrl } from "./services/getDocsForUrl";
 import { getMetadataForUrl } from "./services/getMetadataForUrl";
+import { checkUserBelongsToOrg } from "./utils/auth";
 import { initializeS3 } from "./utils/s3";
 
 // Create connection pool outside handler for connection reuse
@@ -25,12 +27,69 @@ initializeS3({
     dbDocsDefinitionS3BucketRegion: process.env.DB_DOCS_DEFINITION_BUCKET_REGION || "us-east-1"
 });
 
+// Create S3 client for deleting fdr.json files
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || "us-east-1"
+});
+
 interface GetMetadataForUrlRequest {
     url: string;
 }
 
 interface LoadDocsForUrlRequest {
     url: string;
+}
+
+async function deleteDocsSite(url: string, authHeader: string | undefined): Promise<void> {
+    let parsedUrl: URL;
+    try {
+        let urlWithProtocol = url;
+        if (!/^https?:\/\//i.test(url)) {
+            urlWithProtocol = "https://" + url;
+        }
+        parsedUrl = new URL(urlWithProtocol);
+    } catch (error) {
+        throw new InvalidUrlError(url, error as Error);
+    }
+    const hostname = parsedUrl.hostname;
+
+    const result = await pool.query(`SELECT "domain", "orgID" FROM "DocsV2" WHERE "domain" = $1 LIMIT 1`, [hostname]);
+
+    if (result.rows.length === 0) {
+        throw new DomainNotRegisteredError();
+    }
+
+    const orgId = result.rows[0].orgID;
+
+    // Check authorization - user must belong to the org that owns this docs site
+    await checkUserBelongsToOrg({
+        authHeader,
+        orgId
+    });
+
+    const bucketName = process.env.DB_DOCS_DEFINITION_BUCKET_NAME;
+    if (!bucketName) {
+        throw new Error("DB_DOCS_DEFINITION_BUCKET_NAME environment variable is not set");
+    }
+
+    const isLocalMode = process.env.LOCAL_MODE_OVERRIDE === "true";
+    const s3Key = isLocalMode ? "v1/fdr.json" : `${hostname}/v1/fdr.json`;
+
+    try {
+        await s3Client.send(
+            new DeleteObjectCommand({
+                Bucket: bucketName,
+                Key: s3Key
+            })
+        );
+        console.log(`Successfully deleted S3 object: ${s3Key} from bucket: ${bucketName}`);
+    } catch (error) {
+        console.error(`Failed to delete S3 object: ${s3Key}`, error);
+        throw error;
+    }
+
+    await pool.query(`DELETE FROM "DocsV2" WHERE "domain" = $1`, [hostname]);
+    console.log(`Successfully deleted docs site for domain: ${hostname}`);
 }
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
@@ -129,6 +188,45 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                     "Access-Control-Allow-Origin": "*"
                 },
                 body: JSON.stringify(docsResponse)
+            };
+        }
+
+        // Route: POST /v2/registry/docs/delete or POST /delete
+        if ((path === "/v2/registry/docs/delete" || path === "/delete") && method === "POST") {
+            const body: { url: string } = JSON.parse(event.body || "{}");
+
+            if (!body.url) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Missing required field: url",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            const authHeader =
+                event.headers?.Authorization ||
+                event.headers?.authorization ||
+                event.headers?.["x-fern-token"] ||
+                event.headers?.["X-Fern-Token"];
+
+            await deleteDocsSite(body.url, authHeader);
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify({
+                    message: "Successfully deleted docs site",
+                    requestId: context.awsRequestId
+                })
             };
         }
 

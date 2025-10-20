@@ -154,6 +154,22 @@ service:
       errors:
         - rootCommons.UnauthorizedError 
 
+    deleteDocsSite:
+      auth: true
+      method: POST
+      path: /delete
+      audiences:
+        - fdr-lambda
+      docs: Delete a docs site and all associated data including S3 assets
+      request:
+        name: DeleteDocsSiteRequest
+        body:
+          properties:
+            url: rootCommons.Url
+      errors:
+        - DocsNotFoundError
+        - rootCommons.UnauthorizedError
+
 types:
   ImageFilePath:
     properties:

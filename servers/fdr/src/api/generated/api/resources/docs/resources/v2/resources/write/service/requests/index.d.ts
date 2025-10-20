@@ -6,3 +6,4 @@ export { SetIsArchivedRequest } from "./SetIsArchivedRequest";
 export { SetDocsUrlMetadataRequest } from "./SetDocsUrlMetadataRequest";
 export { AddAlgoliaPreviewWhitelistRequest } from "./AddAlgoliaPreviewWhitelistRequest";
 export { RemoveAlgoliaPreviewWhitelistRequest } from "./RemoveAlgoliaPreviewWhitelistRequest";
+export { DeleteDocsSiteRequest } from "./DeleteDocsSiteRequest";

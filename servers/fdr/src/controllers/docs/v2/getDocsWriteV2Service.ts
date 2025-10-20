@@ -491,6 +491,22 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
 
       return res.send({ domains });
     },
+    deleteDocsSite: async (req, res) => {
+      const url = ParsedBaseUrl.parse(req.body.url);
+      const orgId = await app.dao.docsV2().getOrgIdForDocsUrl(url.toURL());
+      if (orgId == null) {
+        throw new DomainNotRegisteredError();
+      }
+
+      await app.services.auth.checkUserBelongsToOrg({
+        authHeader: req.headers.authorization,
+        orgId,
+      });
+
+      app.logger.info(`Stub: Delete docs site called for ${url.getFullUrl()}`);
+
+      return res.send();
+    },
   });
 }
 
