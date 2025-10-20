@@ -17,7 +17,7 @@ const CSP_HEADER = `
   connect-src 'self' * ws:;
   style-src 'self' 'unsafe-inline' *;
   font-src 'self' *;
-  img-src 'self' *;
+  img-src 'self' * data: blob:;
   frame-src 'self' *;
   object-src 'self' *;
   media-src 'self' *;
