@@ -25,5 +25,5 @@ export const HttpSnippetLanguage = {
     Ruby: "ruby",
     Swift: "swift",
     Rust: "rust",
-    Typescript: "typescript"
+    Typescript: "typescript",
 } as const;

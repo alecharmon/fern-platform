@@ -6,7 +6,8 @@
     "rootDir": "./src",
     "target": "es2022",
     "lib": ["ESNext"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": false
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["node_modules"]

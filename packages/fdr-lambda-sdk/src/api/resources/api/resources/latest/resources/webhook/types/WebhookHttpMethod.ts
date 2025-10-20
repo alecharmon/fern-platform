@@ -5,5 +5,5 @@
 export type WebhookHttpMethod = "GET" | "POST";
 export const WebhookHttpMethod = {
     Get: "GET",
-    Post: "POST"
+    Post: "POST",
 } as const;

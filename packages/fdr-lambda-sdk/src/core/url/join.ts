@@ -68,19 +68,13 @@ function joinPathSegments(left: string, right: string): string {
 }
 
 function trimSlashes(str: string): string {
-    if (!str) {
-        return str;
-    }
+    if (!str) return str;
 
     let start = 0;
     let end = str.length;
 
-    if (str.startsWith("/")) {
-        start = 1;
-    }
-    if (str.endsWith("/")) {
-        end = str.length - 1;
-    }
+    if (str.startsWith("/")) start = 1;
+    if (str.endsWith("/")) end = str.length - 1;
 
     return start === 0 && end === str.length ? str : str.slice(start, end);
 }

@@ -7,5 +7,5 @@ export const GrpcMethod = {
     Unary: "UNARY",
     ClientStream: "CLIENT_STREAM",
     ServerStream: "SERVER_STREAM",
-    BidirectionalStream: "BIDIRECTIONAL_STREAM"
+    BidirectionalStream: "BIDIRECTIONAL_STREAM",
 } as const;

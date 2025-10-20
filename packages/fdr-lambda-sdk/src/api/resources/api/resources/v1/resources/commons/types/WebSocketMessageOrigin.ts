@@ -5,5 +5,5 @@
 export type WebSocketMessageOrigin = "client" | "server";
 export const WebSocketMessageOrigin = {
     Client: "client",
-    Server: "server"
+    Server: "server",
 } as const;

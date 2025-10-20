@@ -319,6 +319,7 @@
         "packages/fern-docs/icons-cdn/**/*.json",
         "packages/fern-docs/icons-cdn/**/*.ts",
         "packages/fai-sdk/**",
+        "packages/fdr-lambda-sdk/**",
         "fern/apis/fai/openapi.json"
       ],
       "linter": {

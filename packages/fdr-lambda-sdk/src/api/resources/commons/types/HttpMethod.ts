@@ -9,5 +9,5 @@ export const HttpMethod = {
     Put: "PUT",
     Patch: "PATCH",
     Delete: "DELETE",
-    Head: "HEAD"
+    Head: "HEAD",
 } as const;

@@ -9,5 +9,5 @@ export const Availability = {
     InDevelopment: "InDevelopment",
     PreRelease: "PreRelease",
     Deprecated: "Deprecated",
-    Beta: "Beta"
+    Beta: "Beta",
 } as const;

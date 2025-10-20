@@ -14,5 +14,5 @@ export const PayloadLocation = {
     Path: "PATH",
     Headers: "HEADERS",
     Relative: "RELATIVE",
-    Auth: "AUTH"
+    Auth: "AUTH",
 } as const;

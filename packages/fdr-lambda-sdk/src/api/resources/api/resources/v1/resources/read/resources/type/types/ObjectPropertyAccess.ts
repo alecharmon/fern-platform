@@ -5,5 +5,5 @@
 export type ObjectPropertyAccess = "READ_ONLY" | "WRITE_ONLY";
 export const ObjectPropertyAccess = {
     ReadOnly: "READ_ONLY",
-    WriteOnly: "WRITE_ONLY"
+    WriteOnly: "WRITE_ONLY",
 } as const;

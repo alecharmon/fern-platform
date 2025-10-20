@@ -6,5 +6,5 @@ export type SearchbarPlacement = "HEADER" | "HEADER_TABS" | "SIDEBAR";
 export const SearchbarPlacement = {
     Header: "HEADER",
     HeaderTabs: "HEADER_TABS",
-    Sidebar: "SIDEBAR"
+    Sidebar: "SIDEBAR",
 } as const;

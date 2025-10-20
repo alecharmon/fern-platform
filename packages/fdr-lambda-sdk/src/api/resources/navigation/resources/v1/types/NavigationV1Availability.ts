@@ -15,5 +15,5 @@ export const NavigationV1Availability = {
     InDevelopment: "in-development",
     PreRelease: "pre-release",
     Beta: "beta",
-    Deprecated: "deprecated"
+    Deprecated: "deprecated",
 } as const;

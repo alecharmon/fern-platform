@@ -10,5 +10,5 @@ export const PageActionOption = {
     OpenAi: "openAi",
     Claude: "claude",
     Cursor: "cursor",
-    Vscode: "vscode"
+    Vscode: "vscode",
 } as const;

@@ -6,5 +6,5 @@ export type AiChatLocation = "docs" | "slack" | "discord";
 export const AiChatLocation = {
     Docs: "docs",
     Slack: "slack",
-    Discord: "discord"
+    Discord: "discord",
 } as const;
