@@ -160,7 +160,7 @@ async def process_conversation_reports(
         end = datetime.now(UTC)
 
     if start is None:
-        start = end - timedelta(hours=1)
+        start = end - timedelta(hours=1, minutes=10)
 
     LOGGER.info(f"Processing conversation reports from {start} to {end}")
 
