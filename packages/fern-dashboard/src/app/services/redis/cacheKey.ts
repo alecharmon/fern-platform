@@ -37,6 +37,17 @@ export interface WebAnalyticsData {
     pages404?: { path: string; count: number }[];
 }
 
+export interface AlgoliaAnalyticsData {
+    searchCount?: number;
+    noResultsRate?: number;
+    clickThroughRate?: number;
+    conversionRate?: number;
+    searches?: { search: string; count: number; percentage?: number }[];
+    totalSearches?: number;
+    totalSearchesWithNoResults?: number;
+    timeSeries?: { date: string; value: number }[];
+}
+
 export type RedisCacheKey<T extends RedisCacheKeyType> = string & {
     __type: T;
 };
@@ -49,7 +60,8 @@ export const RedisCacheKeyType = {
     INVITE_TOKEN: "INVITE_TOKEN",
     GITHUB_INSTALLATION_ID: "GITHUB_INSTALLATION_ID",
     GITHUB_PR_FOR_BRANCH: "GITHUB_PR_FOR_BRANCH",
-    WEB_ANALYTICS: "WEB_ANALYTICS"
+    WEB_ANALYTICS: "WEB_ANALYTICS",
+    ALGOLIA_ANALYTICS: "ALGOLIA_ANALYTICS"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -63,6 +75,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.GITHUB_INSTALLATION_ID]: number;
     [RedisCacheKeyType.GITHUB_PR_FOR_BRANCH]: GithubPrInfo;
     [RedisCacheKeyType.WEB_ANALYTICS]: WebAnalyticsData;
+    [RedisCacheKeyType.ALGOLIA_ANALYTICS]: AlgoliaAnalyticsData;
 };
 
 export const RedisCacheKey = {
@@ -81,7 +94,9 @@ export const RedisCacheKey = {
             `github-pr-${owner}-${repo}-${branch}${baseBranch ? `-base-${baseBranch}` : ""}`
         ),
     webAnalytics: (endpoint: string, domain: string, params: string) =>
-        cacheKey(RedisCacheKeyType.WEB_ANALYTICS)(`web-analytics-${endpoint}-${domain}-${params}`)
+        cacheKey(RedisCacheKeyType.WEB_ANALYTICS)(`web-analytics-${endpoint}-${domain}-${params}`),
+    algoliaAnalytics: (endpoint: string, params: string) =>
+        cacheKey(RedisCacheKeyType.ALGOLIA_ANALYTICS)(`algolia-analytics-${endpoint}-${params}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {

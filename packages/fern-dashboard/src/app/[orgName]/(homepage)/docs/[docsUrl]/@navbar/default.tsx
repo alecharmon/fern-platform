@@ -20,6 +20,7 @@ export default async function DocsSiteNavbar({
         <div className="flex">
             <DocsSiteNavBarItem title="Overview" href="" />
             <DocsSiteNavBarItem title="Web Analytics" href="web-analytics" />
+            <DocsSiteNavBarItem title="Search" href="search" />
             <AskAiEnabledServerSide docsUrl={docsUrl}>
                 <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
             </AskAiEnabledServerSide>
