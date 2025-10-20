@@ -93,7 +93,7 @@ export default async function Page(props: {
                             type: "url",
                             githubUrl
                         },
-                        skipCache // Only skip cache when explicitly requested
+                        true // Skip cache for now, since this cache was causing issues with validating repos
                     ),
                     // Optimistically fetch metadata in parallel (will be used if validation succeeds)
                     getGithubSourceMetadataHandler({
