@@ -2,7 +2,11 @@ import { createHash } from "crypto";
 
 import { NAVIGATION_STORAGE_KEY } from "./NavigationStorage";
 
-/** Generates unique branch name */
+/**
+ * Generates unique branch name.
+ *
+ * NOTE: If you make changes to this function, ensure you update the isValidBranchNameFormat
+ * function below to stay in sync. */
 export function generateBranchName(userId: string, name: string | undefined): string {
     const randomHexString = crypto.randomUUID().split("-")[0];
     return (
@@ -14,6 +18,101 @@ export function generateBranchName(userId: string, name: string | undefined): st
         "-" +
         randomHexString
     );
+}
+
+/**
+ * Validates if a branch name follows the expected pattern from generateBranchName. The
+ * isValidBranchNameFormat.test.ts file asserts that these two functions stay in sync.
+ *
+ * @param branchName - The branch name to validate
+ * @returns true if valid format, false otherwise
+ */
+export function isValidBranchNameFormat(branchName: string): boolean {
+    // Basic validation: branch name must not be empty
+    if (!branchName || typeof branchName !== "string") {
+        return false;
+    }
+
+    const trimmedBranchName = branchName.trim();
+    if (trimmedBranchName.length === 0) {
+        return false;
+    }
+
+    // Split by hyphen - should have at least 6 parts
+    const parts = trimmedBranchName.split("-");
+    if (parts.length < 6) {
+        return false;
+    }
+
+    // Validate first 3 parts form a valid ISO date (YYYY-MM-DD)
+    const year = parts[0];
+    const month = parts[1];
+    const day = parts[2];
+
+    // Ensure all date parts exist
+    if (!year || !month || !day) {
+        return false;
+    }
+
+    // Year should be 4 digits
+    if (!/^\d{4}$/.test(year)) {
+        return false;
+    }
+
+    // Month should be 2 digits (01-12)
+    if (!/^\d{2}$/.test(month)) {
+        return false;
+    }
+    const monthNum = parseInt(month, 10);
+    if (monthNum < 1 || monthNum > 12) {
+        return false;
+    }
+
+    // Day should be 2 digits (01-31)
+    if (!/^\d{2}$/.test(day)) {
+        return false;
+    }
+    const dayNum = parseInt(day, 10);
+    if (dayNum < 1 || dayNum > 31) {
+        return false;
+    }
+
+    // Validate the date is actually valid (e.g., not Feb 30)
+    const dateStr = `${year}-${month}-${day}`;
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime()) || date.toISOString().split("T")[0] !== dateStr) {
+        return false;
+    }
+
+    // Validate middle parts (sanitized name)
+    // Must be between first 3 parts and last 2 parts
+    const nameParts = parts.slice(3, -2);
+
+    // Name cannot be empty
+    if (nameParts.length === 0) {
+        return false;
+    }
+
+    // Each name part should only contain lowercase alphanumeric, underscore, or hyphen
+    // (when joined back, it should be equal to its sanitized version)
+    const name = nameParts.join("-");
+    if (name !== _sanitizeName(name)) {
+        return false;
+    }
+
+    // Validate second to last part: 6-character hex string (shortSubHash)
+    const shortSubHash = parts[parts.length - 2];
+    if (!shortSubHash || !/^[a-f0-9]{6}$/.test(shortSubHash)) {
+        return false;
+    }
+
+    // Validate last part: 8-character hex string (random UUID fragment)
+    const randomHex = parts[parts.length - 1];
+    if (!randomHex || !/^[a-f0-9]{8}$/.test(randomHex)) {
+        return false;
+    }
+
+    return true;
 }
 
 /**

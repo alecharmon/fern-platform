@@ -1,6 +1,8 @@
 "use client";
 
+import { isValidBranchNameFormat } from "@fern-docs/components/navigation";
 import { useEffect, useRef } from "react";
+
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { useBranch } from "@/providers/BranchContext";
 import { useCreateBranchMutation } from "@/state/useCreateBranchMutation";
@@ -17,7 +19,7 @@ interface BranchInitializerProps {
 
 export function BranchInitializer({ orgName, site, owner, repo, branch, baseBranch }: BranchInitializerProps) {
     const createBranchMutation = useCreateBranchMutation();
-    const { setBranchFailed } = useBranch();
+    const { setBranchFailed, setBranchFailureReason } = useBranch();
     const hasInitialized = useRef(false);
 
     useEffect(() => {
@@ -27,6 +29,14 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
             return;
         }
         hasInitialized.current = true;
+
+        // Validate branch name format before initializing
+        if (!isValidBranchNameFormat(branch)) {
+            console.error("Invalid branch name format:", branch);
+            setBranchFailed(true);
+            setBranchFailureReason("Editor disabled due to invalid branch name");
+            return;
+        }
 
         createBranchMutation
             .mutateAsync({
@@ -41,6 +51,7 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
                 if (!result.success) {
                     console.error("Failed to create branch:", result.error);
                     setBranchFailed(true);
+                    setBranchFailureReason(result.error);
                 }
             })
             .catch((error) => {
@@ -53,6 +64,7 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
                     baseBranch
                 });
                 setBranchFailed(true);
+                setBranchFailureReason("An unexpected error occurred while creating the branch.");
             });
     }, [orgName, site, owner, repo, branch, baseBranch]);
 

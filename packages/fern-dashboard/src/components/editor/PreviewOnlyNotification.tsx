@@ -9,7 +9,7 @@ import { useGitPrInfo } from "@/providers/GitPRContext";
 export function PreviewOnlyNotification() {
     const isEditingDisabled = useEditingDisabled();
     const { loading, prStatus } = useGitPrInfo();
-    const { branchFailed } = useBranch();
+    const { branchFailed, branchFailureReason } = useBranch();
 
     if (!isEditingDisabled) {
         return null;
@@ -17,7 +17,7 @@ export function PreviewOnlyNotification() {
 
     const getNotificationText = () => {
         if (branchFailed) {
-            return "Editor disabled since branch was not created.";
+            return branchFailureReason ?? "Editor disabled since branch was unable to be created.";
         }
         if (loading || !prStatus) {
             return "Editor disabled while loading";
