@@ -766,6 +766,81 @@ export class AnalyticsService {
     }
 
     /**
+     * Get feedback submissions from PostHog
+     */
+    async getFeedback(
+        options: TimeSeriesOptions & {
+            limit?: number;
+        } = {}
+    ): Promise<
+        {
+            date: string;
+            location: string;
+            wasHelpful: boolean;
+            selection: string;
+            currentUrl: string;
+            device: string;
+            browser: string;
+            operatingSystem: string;
+            userFeedback: string;
+        }[]
+    > {
+        const { limit = 100 } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        const query = `
+      SELECT 
+        to_date(timestamp) as date,
+        CONCAT(
+          COALESCE(properties.$geoip_city_name, ''),
+          CASE 
+            WHEN properties.$geoip_city_name IS NOT NULL AND properties.$geoip_country_name IS NOT NULL 
+            THEN ' ' 
+            ELSE '' 
+          END,
+          COALESCE(properties.$geoip_country_name, 'Unknown')
+        ) as location,
+        properties.satisfied as was_helpful,
+        COALESCE(properties.feedback, 'N/A') as selection,
+        COALESCE(properties.$current_url, '') as current_url,
+        CASE
+          WHEN properties.$device_type = 'Mobile' THEN 'Mobile'
+          WHEN properties.$device_type = 'Tablet' THEN 'Tablet'
+          WHEN properties.$device_type = 'Desktop' THEN 'Desktop'
+          ELSE 'Unknown'
+        END as device,
+        COALESCE(properties.$browser, 'Unknown') as browser,
+        COALESCE(properties.$os, 'Unknown') as os,
+        COALESCE(properties.message, '') as user_feedback
+      FROM events 
+      WHERE 
+        event = 'feedback_submitted' 
+        AND properties.$host = '${this.config.baseSiteUrl}'
+        ${whereClause}
+      ORDER BY timestamp DESC
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<
+            [string, string, boolean, string, string, string, string, string, string]
+        >(query, {
+            name: `feedback-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            date: row[0],
+            location: row[1],
+            wasHelpful: row[2],
+            selection: row[3],
+            currentUrl: row[4],
+            device: row[5],
+            browser: row[6],
+            operatingSystem: row[7],
+            userFeedback: row[8]
+        }));
+    }
+
+    /**
      * Get the configuration for this analytics service
      */
     getConfig(): Readonly<AnalyticsConfig> {

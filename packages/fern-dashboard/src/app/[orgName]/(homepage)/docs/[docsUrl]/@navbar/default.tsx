@@ -23,6 +23,7 @@ export default async function DocsSiteNavbar({
             <AskAiEnabledServerSide docsUrl={docsUrl}>
                 <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
             </AskAiEnabledServerSide>
+            <DocsSiteNavBarItem title="Feedback" href="feedback" />
             {isEmployee && <DocsSiteNavBarItem title="Settings" href="settings" />}
         </div>
     );
