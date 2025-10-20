@@ -206,6 +206,172 @@ export class Settings {
     }
 
     /**
+     * Get settings for a domain and organization.
+     *
+     * @param {FernAI.GetSlackSettingsRequest} request
+     * @param {Settings.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.settings.getSlackSettings({
+     *         domain: "domain"
+     *     })
+     */
+    public getSlackSettings(
+        request: FernAI.GetSlackSettingsRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.GetSettingsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getSlackSettings(request, requestOptions));
+    }
+
+    private async __getSlackSettings(
+        request: FernAI.GetSlackSettingsRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.GetSettingsResponse>> {
+        const { domain } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["domain"] = domain;
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                "settings/ask-ai/slack",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.GetSettingsResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /settings/ask-ai/slack.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Get settings for a domain and organization.
+     *
+     * @param {FernAI.GetDiscordSettingsRequest} request
+     * @param {Settings.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.settings.getDiscordSettings({
+     *         domain: "domain"
+     *     })
+     */
+    public getDiscordSettings(
+        request: FernAI.GetDiscordSettingsRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.GetSettingsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getDiscordSettings(request, requestOptions));
+    }
+
+    private async __getDiscordSettings(
+        request: FernAI.GetDiscordSettingsRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.GetSettingsResponse>> {
+        const { domain } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["domain"] = domain;
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                "settings/ask-ai/discord",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.GetSettingsResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /settings/ask-ai/discord.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * Toggle Ask AI setting and return job_id for tracking.
      *
      * @param {FernAI.ToggleAskAiRequest} request

@@ -11,7 +11,6 @@ import { Conversation } from "./api/resources/conversation/client/Client.js";
 import { Discord } from "./api/resources/discord/client/Client.js";
 import { Document } from "./api/resources/document/client/Client.js";
 import { Feedback } from "./api/resources/feedback/client/Client.js";
-import { Github } from "./api/resources/github/client/Client.js";
 import { Guidance } from "./api/resources/guidance/client/Client.js";
 import { Health } from "./api/resources/health/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
@@ -52,7 +51,6 @@ export class FernAIClient {
     protected _discord: Discord | undefined;
     protected _document: Document | undefined;
     protected _feedback: Feedback | undefined;
-    protected _github: Github | undefined;
     protected _guidance: Guidance | undefined;
     protected _health: Health | undefined;
     protected _index: Index | undefined;
@@ -97,10 +95,6 @@ export class FernAIClient {
 
     public get feedback(): Feedback {
         return (this._feedback ??= new Feedback(this._options));
-    }
-
-    public get github(): Github {
-        return (this._github ??= new Github(this._options));
     }
 
     public get guidance(): Guidance {

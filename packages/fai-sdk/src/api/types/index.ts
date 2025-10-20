@@ -1,5 +1,4 @@
 export * from "./ChatMessage.js";
-export * from "./CodeIndexStatusResponse.js";
 export * from "./Conversation.js";
 export * from "./ConversationTurn.js";
 export * from "./ConversationTurnFeedback.js";
@@ -30,7 +29,6 @@ export * from "./GroupBy.js";
 export * from "./Guidance.js";
 export * from "./HttpValidationError.js";
 export * from "./HistogramAnalyticsBar.js";
-export * from "./IndexResponse.js";
 export * from "./InsightExample.js";
 export * from "./InsightWithMetadata.js";
 export * from "./JobStatusResponse.js";

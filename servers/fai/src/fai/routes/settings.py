@@ -42,8 +42,12 @@ async def get_settings(
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
-        # if it has been reindexed, ask ai is enabled
-        ask_ai_enabled = existing_record is not None and existing_record.last_reindex_time is not None
+        # TODO(sahil): remove this method after migrating + releasing fern-platform checks with get_docs_settings
+        ask_ai_enabled = (
+            existing_record is not None
+            and existing_record.last_reindex_time is not None
+            and existing_record.docs_enabled
+        )
         job_id = existing_record.job_id if existing_record else None
 
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
@@ -67,11 +71,66 @@ async def get_docs_settings(
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
-        # if it has been reindexed, ask ai is enabled
         ask_ai_enabled = (
             existing_record is not None
             and existing_record.last_reindex_time is not None
             and existing_record.docs_enabled
+        )
+        job_id = existing_record.job_id if existing_record else None
+
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
+    except Exception:
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
+
+
+@fai_app.get(
+    "/settings/ask-ai/slack",
+    response_model=GetSettingsResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def get_slack_settings(
+    domain: str,
+    db: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    """Get settings for a domain and organization."""
+    try:
+        stripped_domain = strip_domain(domain)
+
+        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        existing_record = existing.scalar_one_or_none()
+
+        ask_ai_enabled = (
+            existing_record is not None
+            and existing_record.last_reindex_time is not None
+            and existing_record.slack_enabled
+        )
+        job_id = existing_record.job_id if existing_record else None
+
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
+    except Exception:
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
+
+
+@fai_app.get(
+    "/settings/ask-ai/discord",
+    response_model=GetSettingsResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def get_discord_settings(
+    domain: str,
+    db: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    """Get settings for a domain and organization."""
+    try:
+        stripped_domain = strip_domain(domain)
+
+        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        existing_record = existing.scalar_one_or_none()
+
+        ask_ai_enabled = (
+            existing_record is not None
+            and existing_record.last_reindex_time is not None
+            and existing_record.discord_enabled
         )
         job_id = existing_record.job_id if existing_record else None
 
