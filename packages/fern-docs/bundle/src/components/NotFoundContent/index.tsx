@@ -43,10 +43,10 @@ export default function NotFoundContent() {
             <HiddenSidebar />
             <div className="flex h-[calc(100svh-var(--header-height)-6rem)] w-screen flex-col items-center justify-center gap-6">
                 <GradientExclamation />
-                <div className="flex flex-col text-center">
-                    <h1>Page not found!</h1>
+                <div className="flex flex-col text-center gap-2">
+                    <h1>Sorry, we couldn&apos;t find that page</h1>
                     <p className="text-(color:--grayscale-a9)">
-                        We&apos;re sorry, we couldn&apos;t find the page you were looking for.
+                        We&apos;ve been notified so we can fix this for next time.
                     </p>
                 </div>
 
@@ -56,7 +56,9 @@ export default function NotFoundContent() {
 
                 {!isLoading && suggestedRoutes.length > 0 && (
                     <div className="flex flex-col items-center gap-3 max-w-md w-full px-4">
-                        <p className="text-sm text-(color:--grayscale-a11) font-medium">You might be looking for:</p>
+                        <p className="text-sm text-(color:--grayscale-a11) font-medium">
+                            How about one of these pages?
+                        </p>
                         <div className="flex flex-col gap-2 w-full">
                             {suggestedRoutes.map((route) => (
                                 <Link
@@ -64,7 +66,10 @@ export default function NotFoundContent() {
                                     href={route.href}
                                     className="px-4 py-3 rounded-3/2 border border-(color:--grayscale-a6) bg-(color:--grayscale-a2) hover:bg-(color:--grayscale-a3) hover:border-(color:--grayscale-a7) transition-colors text-left"
                                 >
-                                    <span className="text-(color:--grayscale-a12) font-medium">{route.title}</span>
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-(color:--grayscale-a12) font-medium">{route.title}</span>
+                                        <span className="text-sm text-(color:--grayscale-a10)">{route.href}</span>
+                                    </div>
                                 </Link>
                             ))}
                         </div>
