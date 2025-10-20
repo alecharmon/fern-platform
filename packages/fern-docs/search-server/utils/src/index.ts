@@ -2,6 +2,7 @@ export {
     type LoadDocsWithUrlPayload,
     loadDocsWithUrl
 } from "./fdr/load-docs-with-url";
+export { endpointToMarkdown } from "./records/endpoint-to-markdown";
 export { maybePrepareMdxContent } from "./records/prepare-mdx-content";
 export { createRoleFacet } from "./roles/create-role-facet";
 export { createViewersForNodes } from "./roles/create-viewers-for-node";

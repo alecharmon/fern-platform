@@ -97,7 +97,8 @@ export async function createTurbopufferRecords({
                     authed: authed?.(node) ?? false,
                     endpoint,
                     url,
-                    types: apiDefinition.types
+                    types: apiDefinition.types,
+                    apiDefinition
                 })
             );
             return;
