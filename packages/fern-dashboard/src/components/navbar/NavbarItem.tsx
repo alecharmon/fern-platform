@@ -7,6 +7,7 @@ import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
 
+import { AlertIconAnimated } from "./AlertIconAnimated";
 import { CodeBracketIconAnimated } from "./CodeBracketIconAnimated";
 import { CreditCardIconAnimated } from "./CreditCardIconAnimated";
 import { KeyIconAnimated } from "./KeyIconAnimated";
@@ -17,7 +18,7 @@ export declare namespace NavbarItem {
     export interface Props {
         title: string;
         icon?: React.JSX.Element;
-        iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks" | "settings";
+        iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks" | "settings" | "incidents";
 
         /**
          * href is used to determine:
@@ -84,6 +85,7 @@ export const NavbarItem = ({ title, icon, iconType, href, hrefForActualLinking =
             {iconType === "billing" && <CreditCardIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "sdks" && <CodeBracketIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "settings" && <SettingsIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
+            {iconType === "incidents" && <AlertIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
 
             <div>{title}</div>
         </>
