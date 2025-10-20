@@ -20,26 +20,17 @@ from fai.models.api.analytics_api import (
     GetInsightsResponse,
 )
 from fai.models.db.insight_db import InsightDb
-from fai.models.db.query_db import QueryDb
 from fai.models.enums.analytics_enums import GroupBy
-from fai.models.types.query_types import Query
 from fai.scheduler import (
     generate_weekly_insights_job,
     get_scheduler,
 )
-from fai.settings import (
-    CONFIG,
-    LOGGER,
-)
+from fai.settings import LOGGER
 from fai.utils.histogram_utils import (
     fetch_grouped_data,
     fill_date_gaps,
 )
-from fai.utils.insights_job import (
-    generate_insight_id,
-    generate_insights_for_all_domains,
-)
-from fai.utils.insights_utils import get_insights_from_queries
+from fai.utils.insights_job import generate_insights_for_all_domains
 
 
 @fai_app.get(
@@ -82,86 +73,6 @@ async def get_analytics_histogram(
 
     except Exception as e:
         LOGGER.exception("Failed to get histogram analytics")
-        return JSONResponse(status_code=500, content={"detail": str(e)})
-
-
-@fai_app.get(
-    "/analytics/insights/{domain}",
-    response_model=GetInsightsResponse,
-    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
-)
-async def get_analytics_insights(
-    domain: str,
-    start_date: datetime | None = QueryParam(
-        default=None, description="The start date of the period to retrieve analytics for"
-    ),
-    end_date: datetime | None = QueryParam(
-        default=None, description="The end date of the period to retrieve analytics for"
-    ),
-    db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
-) -> JSONResponse:
-    try:
-        if end_date is None:
-            now = datetime.now()
-            days_since_sunday = (now.weekday() + 1) % 7
-            if days_since_sunday == 0:
-                days_since_sunday = 7
-            end = (now - timedelta(days=days_since_sunday)).replace(hour=0, minute=0, second=0, microsecond=0)
-        else:
-            end = end_date
-
-        if start_date is None:
-            start = end - timedelta(days=7)
-        else:
-            start = start_date
-
-        insight_id = generate_insight_id(domain, start)
-
-        cached_insight_query = select(InsightDb).where(InsightDb.insight_id == insight_id)
-        cached_result = await db.execute(cached_insight_query)
-        cached_insight = cached_result.scalar_one_or_none()
-
-        if cached_insight:
-            LOGGER.info(f"Found cached insights for domain: {domain}, period: {start} to {end}")
-            return JSONResponse(jsonable_encoder(cached_insight.to_api()))
-
-        query = select(QueryDb).where(QueryDb.domain == domain).where(QueryDb.role == "USER")
-        query = query.where(QueryDb.created_at >= start).where(QueryDb.created_at <= end)
-
-        result = await db.execute(query)
-        queries = result.scalars().all()
-
-        api_queries: list[Query] = [query.to_api() for query in queries]
-        api_queries = [q for q in api_queries if len(q.text.split()) >= 5]
-
-        if len(api_queries) < CONFIG.MIN_INSIGHTS_QUERIES:
-            return JSONResponse(status_code=400, content={"detail": "Not enough queries to generate insights"})
-
-        if len(api_queries) > CONFIG.MAX_INSIGHTS_QUERIES:
-            api_queries.sort(key=lambda q: q.created_at)
-            step = len(api_queries) / CONFIG.MAX_INSIGHTS_QUERIES
-            sampled_indices = [int(i * step) for i in range(CONFIG.MAX_INSIGHTS_QUERIES)]
-            api_queries = [api_queries[i] for i in sampled_indices]
-
-        insights = await get_insights_from_queries(domain, api_queries)
-
-        new_insight = InsightDb(
-            insight_id=insight_id,
-            domain=domain,
-            started_at=start,
-            ended_at=end,
-            insights_data=jsonable_encoder(insights),
-            created_at=datetime.utcnow(),
-        )
-        db.add(new_insight)
-        await db.commit()
-
-        LOGGER.info(f"Generated and cached new insights for domain: {domain}, period: {start} to {end}")
-        return JSONResponse(jsonable_encoder(insights))
-
-    except Exception as e:
-        LOGGER.exception("Failed to get insights analytics")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
@@ -208,6 +119,36 @@ async def trigger_scheduled_insights_generation() -> JSONResponse:
         )
     except Exception as e:
         LOGGER.exception("Failed to trigger scheduled insights generation")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.get(
+    "/analytics/insights/{domain}",
+    response_model=GetInsightsResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+    dependencies=[Depends(get_db), Depends(verify_token)],
+)
+async def get_query_insights(
+    domain: str,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
+) -> JSONResponse:
+    """Get the most recent insights for a domain."""
+    try:
+        stmt = select(InsightDb).where(InsightDb.domain == domain).order_by(InsightDb.created_at.desc()).limit(1)
+        result = await db.execute(stmt)
+        insight_record = result.scalar_one_or_none()
+
+        if insight_record is None:
+            empty_response = GetInsightsResponse(insights=[])
+            return JSONResponse(jsonable_encoder(empty_response))
+
+        insights_response = insight_record.to_api()
+        LOGGER.info(f"Retrieved insights for domain: {domain}")
+        return JSONResponse(jsonable_encoder(insights_response))
+
+    except Exception as e:
+        LOGGER.exception("Failed to get query insights")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 

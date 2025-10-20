@@ -318,7 +318,8 @@
         ".pnpm-cache",
         "packages/fern-docs/icons-cdn/**/*.json",
         "packages/fern-docs/icons-cdn/**/*.ts",
-        "packages/fai-sdk/**"
+        "packages/fai-sdk/**",
+        "fern/apis/fai/openapi.json"
       ],
       "linter": {
         "enabled": false
