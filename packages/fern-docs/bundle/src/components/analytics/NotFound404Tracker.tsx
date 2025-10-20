@@ -4,6 +4,7 @@ import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-path
 import { useEffect } from "react";
 
 import { capturePosthogEventCustomer, capturePosthogEventInternal } from "./posthog";
+import { track, trackInternal } from "./track";
 
 /**
  * Component to track 404 errors with PostHog.
@@ -19,8 +20,12 @@ export function NotFound404Tracker() {
             url: typeof window !== "undefined" ? window.location.href : undefined
         };
 
+        console.error(`[NotFound404Tracker] Capturing 404 event with properties: ${JSON.stringify(properties)}`);
+
         capturePosthogEventInternal("not_found", properties);
         capturePosthogEventCustomer("not_found", properties);
+        track("not_found", properties);
+        trackInternal("not_found", properties);
     }, [pathname]);
 
     // This component doesn't render anything

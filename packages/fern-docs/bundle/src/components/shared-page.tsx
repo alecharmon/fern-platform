@@ -64,6 +64,9 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
     const configuredRedirect = getRedirectForPath(slugToHref(slug), baseUrl, config.redirects);
 
     if (configuredRedirect != null) {
+        console.log(
+            `[REDIRECT RULE] domain: ${loader.domain}, from: ${slug} -> to: ${configuredRedirect.destination}, permanent: ${configuredRedirect.permanent}`
+        );
         const redirectFn = configuredRedirect.permanent ? permanentRedirect : redirect;
         redirectFn(prepareRedirect(configuredRedirect.destination));
     }
@@ -138,8 +141,17 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
 
         const settings = await settingsPromise;
 
+        // Log 404 detection details for debugging
+        console.log(`[404 DEBUG] domain: ${loader.domain}, slug: ${slug}`, {
+            is404PageHidden: edgeFlags.is404PageHidden,
+            settingsHide404Page: settings.hide404Page,
+            hasRedirect: found.redirect != null,
+            redirect: found.redirect
+        });
+
         // returning "notFound: true" here renders our custom 404 page (not-found.tsx)
         if ((edgeFlags.is404PageHidden || settings.hide404Page) && found.redirect != null) {
+            console.log(`[404 AVOIDED] Redirecting ${slug} -> ${found.redirect} instead of showing 404`);
             redirect(prepareRedirect(found.redirect));
         }
 
