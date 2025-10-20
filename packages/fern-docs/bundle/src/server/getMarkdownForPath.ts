@@ -5,8 +5,8 @@ import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { OpenApiYamlFormatter } from "@fern-docs/search-utils";
 
-import { OpenApiYamlFormatter } from "./endpointDefinitionToOpenApi";
 import { convertToLlmTxtMarkdown } from "./llm-txt-md";
 
 function generateEndpointSections(endpoint: EndpointDefinition, apiDefinition?: ApiDefinition.ApiDefinition): string[] {
