@@ -80,6 +80,13 @@ let nextConfig: NextConfig = {
             "mermaid"
         );
 
+        config.plugins ??= [];
+        config.plugins.push(
+            new (isRspackEnabled ? rspack : webpack).DefinePlugin({
+                "process.env.NEXT_PUBLIC_BUILD_TIMESTAMP": JSON.stringify(new Date().toISOString())
+            })
+        );
+
         // Suppress warning about dynamic import in mermaid loader
         config.ignoreWarnings = [
             ...(config.ignoreWarnings || []),
@@ -97,7 +104,6 @@ let nextConfig: NextConfig = {
 
         // ignore all test files
         // Use IgnorePlugin to ignore .test.ts and .test.tsx files
-        config.plugins ??= [];
         config.plugins.push(
             new (isRspackEnabled ? rspack : webpack).IgnorePlugin({
                 resourceRegExp: /\.test\.tsx?$/

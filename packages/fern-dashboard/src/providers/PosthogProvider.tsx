@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { PostHogPageView } from "@/components/posthog/PostHogPageView";
+import { getBuildTimestamp } from "@/utils/buildTimestamp";
 import { isProduction } from "@/utils/environment";
 
 export declare namespace PostHogProvider {
@@ -36,6 +37,11 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
 
         if (!isPosthogTrackingEnabled) {
             posthog.opt_out_capturing();
+        }
+
+        const buildTimestamp = getBuildTimestamp();
+        if (buildTimestamp) {
+            posthog.register({ buildTimestamp });
         }
 
         // Identify user immediately after initialization to prevent anonymous UUID sessions
