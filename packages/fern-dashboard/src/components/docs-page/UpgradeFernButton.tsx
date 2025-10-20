@@ -62,7 +62,7 @@ export function UpgradeFernButton({
 
         try {
             // The server action handles all the steps, so we update UI optimistically
-            smoothTransitionStep("Opening upgrade PR...", 1000);
+            smoothTransitionStep("Opening a pull request...", 1000);
             smoothTransitionStep("Finalizing...", 2000);
 
             const result = await upgradeFernVersionAction(
@@ -109,7 +109,7 @@ export function UpgradeFernButton({
             return loadingStep;
         }
         if (abbreviateText) {
-            return hasExistingPr ? "Finish upgrade" : "Upgrade";
+            return hasExistingPr ? "View pull request" : "Upgrade";
         }
 
         return hasExistingPr ? "Finish CLI upgrade" : `Upgrade to ${latestVersion}`;
