@@ -86,9 +86,14 @@ async function backfillSnippetsForExample(
     const httpSnippetLanguages = Array.isArray(httpSnippets) ? httpSnippets : null;
 
     // Check if a language should be included in HTTP snippets (important-comment)
-    // If httpSnippets is true (boolean), include all languages
-    // If httpSnippets is an array, only include languages in the array
+    // curl is ALWAYS included regardless of httpSnippets configuration
+    // If httpSnippets is true (boolean), include all languages (important-comment)
+    // If httpSnippets is an array, only include languages in the array (important-comment)
     const shouldIncludeLanguage = (language: string): boolean => {
+        // curl is always included, even when httpSnippets is false
+        if (language === "curl") {
+            return true;
+        }
         if (!isHttpSnippetsEnabled) {
             return false;
         }
