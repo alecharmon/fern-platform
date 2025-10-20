@@ -12,14 +12,14 @@ from unittest.mock import (
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fai.models.db.query_db import QueryDb
-from fai.utils.conversation_reports_job import (
+from fai.jobs.conversation_reports_job import (
     classify_conversation_with_retry,
     format_conversation,
     get_conversations_to_process,
     process_conversation_report_async,
     process_conversation_reports,
 )
+from fai.models.db.query_db import QueryDb
 from fai.utils.generate.conversation_classification import ConversationClassification
 
 
@@ -113,7 +113,7 @@ async def test_format_conversation() -> None:
 @pytest.mark.asyncio
 async def test_classify_conversation_with_retry_success() -> None:
     """Test conversation classification with successful first attempt."""
-    with patch("fai.utils.conversation_reports_job.generate_anthropic_generic_async") as mock_generate:
+    with patch("fai.jobs.conversation_reports_job.generate_anthropic_generic_async") as mock_generate:
         mock_classification = ConversationClassification(resolved=True)
         mock_generate.return_value = mock_classification
 
@@ -127,7 +127,7 @@ async def test_classify_conversation_with_retry_success() -> None:
 @pytest.mark.asyncio
 async def test_classify_conversation_with_retry_failure() -> None:
     """Test conversation classification that fails all retries."""
-    with patch("fai.utils.conversation_reports_job.generate_anthropic_generic_async") as mock_generate:
+    with patch("fai.jobs.conversation_reports_job.generate_anthropic_generic_async") as mock_generate:
         mock_generate.return_value = None
 
         result = await classify_conversation_with_retry("User: Test\nAssistant: Response", max_retries=2, retry_delay=0)
@@ -140,7 +140,7 @@ async def test_classify_conversation_with_retry_failure() -> None:
 @pytest.mark.asyncio
 async def test_classify_conversation_with_retry_second_attempt_success() -> None:
     """Test conversation classification that succeeds on second attempt."""
-    with patch("fai.utils.conversation_reports_job.generate_anthropic_generic_async") as mock_generate:
+    with patch("fai.jobs.conversation_reports_job.generate_anthropic_generic_async") as mock_generate:
         mock_classification = ConversationClassification(resolved=False)
         mock_generate.side_effect = [None, mock_classification]
 
@@ -154,9 +154,9 @@ async def test_classify_conversation_with_retry_second_attempt_success() -> None
 @pytest.mark.asyncio
 async def test_process_conversation_report_success() -> None:
     """Test successfully processing a conversation report."""
-    with patch("fai.utils.conversation_reports_job.format_conversation") as mock_format:
-        with patch("fai.utils.conversation_reports_job.classify_conversation_with_retry") as mock_classify:
-            with patch("fai.utils.conversation_reports_job.async_session_maker") as mock_session_maker:
+    with patch("fai.jobs.conversation_reports_job.format_conversation") as mock_format:
+        with patch("fai.jobs.conversation_reports_job.classify_conversation_with_retry") as mock_classify:
+            with patch("fai.jobs.conversation_reports_job.async_session_maker") as mock_session_maker:
                 mock_db = AsyncMock(spec=AsyncSession)
                 mock_session_maker.return_value.__aenter__.return_value = mock_db
 
@@ -178,9 +178,9 @@ async def test_process_conversation_report_success() -> None:
 @pytest.mark.asyncio
 async def test_process_conversation_report_classification_failure() -> None:
     """Test processing a conversation report when classification fails."""
-    with patch("fai.utils.conversation_reports_job.format_conversation") as mock_format:
-        with patch("fai.utils.conversation_reports_job.classify_conversation_with_retry") as mock_classify:
-            with patch("fai.utils.conversation_reports_job.async_session_maker") as mock_session_maker:
+    with patch("fai.jobs.conversation_reports_job.format_conversation") as mock_format:
+        with patch("fai.jobs.conversation_reports_job.classify_conversation_with_retry") as mock_classify:
+            with patch("fai.jobs.conversation_reports_job.async_session_maker") as mock_session_maker:
                 mock_db = AsyncMock(spec=AsyncSession)
                 mock_session_maker.return_value.__aenter__.return_value = mock_db
 
@@ -203,8 +203,8 @@ async def test_process_conversation_reports() -> None:
     """Test processing conversation reports for all conversations."""
     mock_db = AsyncMock(spec=AsyncSession)
 
-    with patch("fai.utils.conversation_reports_job.get_conversations_to_process") as mock_get_convs:
-        with patch("fai.utils.conversation_reports_job.process_conversation_report_async") as mock_process:
+    with patch("fai.jobs.conversation_reports_job.get_conversations_to_process") as mock_get_convs:
+        with patch("fai.jobs.conversation_reports_job.process_conversation_report_async") as mock_process:
             mock_get_convs.return_value = [
                 ("conv1", "domain1.com"),
                 ("conv2", "domain2.com"),
@@ -229,7 +229,7 @@ async def test_process_conversation_reports_no_conversations() -> None:
     """Test processing when no conversations found."""
     mock_db = AsyncMock(spec=AsyncSession)
 
-    with patch("fai.utils.conversation_reports_job.get_conversations_to_process") as mock_get_convs:
+    with patch("fai.jobs.conversation_reports_job.get_conversations_to_process") as mock_get_convs:
         mock_get_convs.return_value = []
 
         results = await process_conversation_reports(mock_db)
@@ -247,7 +247,7 @@ async def test_process_conversation_reports_with_custom_times() -> None:
     start = datetime.now() - timedelta(hours=2)
     end = datetime.now() - timedelta(hours=1)
 
-    with patch("fai.utils.conversation_reports_job.get_conversations_to_process") as mock_get_convs:
+    with patch("fai.jobs.conversation_reports_job.get_conversations_to_process") as mock_get_convs:
         mock_get_convs.return_value = []
 
         results = await process_conversation_reports(mock_db, start=start, end=end)

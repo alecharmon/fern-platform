@@ -7,6 +7,8 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
+from fai.jobs.insights_job import generate_insight_id
+from fai.models.db.insight_db import InsightDb
 from tests.conftest import TEST_FERN_TOKEN
 from tests.factories import create_test_domain
 
@@ -103,14 +105,6 @@ class TestAnalyticsHistogram:
 class TestAnalyticsInsights:
     def test_get_analytics_insights_success(self, test_client: TestClient, test_session: Any) -> None:
         """Test that the endpoint returns insights when they exist"""
-        from datetime import (
-            datetime,
-            timedelta,
-        )
-
-        from fai.models.db.insight_db import InsightDb
-        from fai.utils.insights_job import generate_insight_id
-
         domain = create_test_domain()
         started_at = datetime.now() - timedelta(days=7)
         ended_at = datetime.now()
@@ -170,14 +164,6 @@ class TestAnalyticsInsights:
 
     def test_get_analytics_insights_most_recent(self, test_client: TestClient, test_session: Any) -> None:
         """Test that the endpoint returns only the most recent insights"""
-        from datetime import (
-            datetime,
-            timedelta,
-        )
-
-        from fai.models.db.insight_db import InsightDb
-        from fai.utils.insights_job import generate_insight_id
-
         domain = create_test_domain()
 
         # Create two insight records - one older, one newer

@@ -15,6 +15,7 @@ from fai.dependencies import (
     get_db,
     verify_token,
 )
+from fai.jobs.insights_job import generate_insights_for_all_domains
 from fai.models.api.analytics_api import (
     GetHistogramAnalyticsResponse,
     GetInsightsResponse,
@@ -26,11 +27,10 @@ from fai.scheduler import (
     get_scheduler,
 )
 from fai.settings import LOGGER
-from fai.utils.histogram_utils import (
+from fai.utils.analytics.histogram_utils import (
     fetch_grouped_data,
     fill_date_gaps,
 )
-from fai.utils.insights_job import generate_insights_for_all_domains
 
 
 @fai_app.get(

@@ -6,10 +6,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from fai.db import async_session_maker
+from fai.jobs.cleanup_job import cleanup_preview_settings
+from fai.jobs.conversation_reports_job import process_conversation_reports
+from fai.jobs.insights_job import generate_insights_for_all_domains
 from fai.settings import LOGGER
-from fai.utils.cleanup_job import cleanup_preview_settings
-from fai.utils.conversation_reports_job import process_conversation_reports
-from fai.utils.insights_job import generate_insights_for_all_domains
 
 _scheduler: AsyncIOScheduler | None = None
 

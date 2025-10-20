@@ -19,7 +19,7 @@ from fai.settings import (
     CONFIG,
     LOGGER,
 )
-from fai.utils.insights_utils import get_insights_from_queries
+from fai.utils.analytics.insights_utils import get_insights_from_queries
 
 
 def generate_insight_id(domain: str, started_at: datetime) -> str:
