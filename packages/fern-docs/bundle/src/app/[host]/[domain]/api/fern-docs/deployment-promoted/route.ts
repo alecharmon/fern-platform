@@ -1,6 +1,7 @@
 import { getMetadata } from "@fern-api/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { MDX_PIPELINE_VERSION } from "@fern-api/docs-server/mdx-pipeline-version";
 import {
     FERN_DOCS_BUILDWITHFERN_COM,
     FERN_DOCS_DEV_BUILDWITHFERN_COM,
@@ -69,36 +70,33 @@ export async function POST(request: NextRequest) {
         .filter((result) => result.status === "fulfilled")
         .map((fulfilled) => fulfilled.value);
 
-    // // Generate a semantic version (currently hardcoded to 0)
-    // const semanticVersion = "1";
+    const semanticVersion = MDX_PIPELINE_VERSION;
 
-    // // Check if the semantic version has changed since last deployment
-    // const lastSemanticVersionKey = `deployment-promoted:${cdnUri}:last-semantic-version`;
-    // const lastSemanticVersion = await kv.get<string>(lastSemanticVersionKey);
+    // Check if the semantic version has changed since last deployment
+    const lastSemanticVersionKey = `deployment-promoted:${cdnUri}:last-semantic-version`;
+    const lastSemanticVersion = await kv.get<string>(lastSemanticVersionKey);
 
-    // // If no previous version exists, don't revalidate
-    // if (lastSemanticVersion == null) {
-    //   console.log(
-    //     `[deployment-promoted] No previous semantic version found, skipping revalidation`
-    //   );
-    //   await kv.set(lastSemanticVersionKey, semanticVersion);
-    //   return new Response("OK - No previous version", { status: 200 });
-    // }
+    // If no previous version exists, store it and skip revalidation
+    if (lastSemanticVersion == null) {
+        console.log(
+            `[deployment-promoted] No previous semantic version found, storing version ${semanticVersion} and skipping revalidation`
+        );
+        await kv.set(lastSemanticVersionKey, semanticVersion);
+        return new Response("OK - No previous version", { status: 200 });
+    }
 
-    // // If version hasn't changed, skip revalidation
-    // if (lastSemanticVersion === semanticVersion) {
-    //   console.log(
-    //     `[deployment-promoted] Semantic version unchanged (${semanticVersion}), skipping revalidation`
-    //   );
-    //   return new Response("OK - No changes detected", { status: 200 });
-    // }
+    // If version hasn't changed, skip revalidation
+    if (lastSemanticVersion === semanticVersion) {
+        console.log(`[deployment-promoted] Semantic version unchanged (${semanticVersion}), skipping revalidation`);
+        return new Response("OK - No changes detected", { status: 200 });
+    }
 
     // Store the new semantic version
-    // await kv.set(lastSemanticVersionKey, semanticVersion);
+    await kv.set(lastSemanticVersionKey, semanticVersion);
 
-    // console.log(
-    //   `[deployment-promoted] Semantic version changed from ${lastSemanticVersion} to ${semanticVersion}, revalidating ${metadatas.length} domains`
-    // );
+    console.log(
+        `[deployment-promoted] Semantic version changed from ${lastSemanticVersion} to ${semanticVersion}, revalidating ${metadatas.length} domains`
+    );
 
     await batchQueue({
         queueName: `domain-promoted.${VERCEL_DEPLOYMENT_ID}`,

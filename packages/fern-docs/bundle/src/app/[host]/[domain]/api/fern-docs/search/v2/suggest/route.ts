@@ -15,8 +15,6 @@ import { z } from "zod";
 
 import { getFaiClient } from "@/getFaiClient";
 
-const DEPLOYMENT_ID = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
-
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
@@ -98,14 +96,9 @@ DO NOT include any explanatory text - only return the JSON object.`,
 }
 
 function getCachedSuggestions(domain: string, algoliaSearchKey: string) {
-    const get = unstable_cache(
-        () => generateSuggestions(domain, algoliaSearchKey),
-        ["suggest", domain, algoliaSearchKey, DEPLOYMENT_ID],
-        {
-            tags: [domain],
-            revalidate: 2 * 86400
-        }
-    );
+    const get = unstable_cache(() => generateSuggestions(domain, algoliaSearchKey), [domain], {
+        tags: [domain]
+    });
     return get();
 }
 

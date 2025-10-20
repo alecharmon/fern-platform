@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Agent, setGlobalDispatcher } from "undici";
 
-import { cacheSeed } from "./cache-seed";
 import { fernToken_admin, getFdrLambdaOrigin } from "./env-variables";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
@@ -67,7 +66,7 @@ export const uncachedGetDocsUrlMetadata = async (
 };
 
 export const getDocsUrlMetadata = cache((domain: string) => {
-    const get = unstable_cache(() => uncachedGetDocsUrlMetadata(domain), [domain, cacheSeed()], {
+    const get = unstable_cache(() => uncachedGetDocsUrlMetadata(domain), [domain], {
         tags: [domain, "getDocsUrlMetadata"]
     });
     return get();

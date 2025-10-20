@@ -508,7 +508,7 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
             };
             return backfillSnippets(pruned, dynamicIr, flags);
         },
-        [domainKey, cacheSeed(), cacheConfig.cacheKeySuffix],
+        [domainKey, cacheConfig.cacheKeySuffix],
         { tags: [domainKey, "api"] }
     );
 
@@ -681,7 +681,7 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
 
                 return root;
             },
-            ["unsafe_getRoot", cacheSeed(), cacheConfig.cacheKeySuffix],
+            ["unsafe_getRoot", cacheConfig.cacheKeySuffix],
             { tags: [domainKey, "unsafe_getRoot"] }
         )(domainKey);
     });
@@ -705,7 +705,7 @@ const getRootCached = (cacheConfig: Required<CacheConfig>) =>
         return await unstable_cache(
             (domainKey: string, authState: AuthState, authConfig: AuthEdgeConfig | undefined) =>
                 getRoot(domainKey, authState, authConfig, cacheConfig),
-            [domainKey, cacheSeed(), cacheConfig.cacheKeySuffix],
+            [domainKey, cacheConfig.cacheKeySuffix],
             { tags: [domainKey, "getRoot"] }
         )(domainKey, authState, authConfig);
     });
@@ -1174,7 +1174,7 @@ export const createCachedDocsLoader = async (
             unstable_cache(
                 (method: HttpMethod, path: string, example?: string) =>
                     getEndpointByLocator(domainKey, method, path, example),
-                [domainKey, cacheSeed(), config.cacheKeySuffix],
+                [domainKey, config.cacheKeySuffix],
                 { tags: [domainKey, "endpointByLocator"] }
             )
         ),

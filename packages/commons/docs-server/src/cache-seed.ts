@@ -1,11 +1,13 @@
-import { getEnv } from "@vercel/functions";
-import crypto from "crypto";
+import { MDX_PIPELINE_VERSION } from "./mdx-pipeline-version";
 
-import { once } from "./once";
-
-const seed = once(() => crypto.randomUUID());
-
+/**
+ * Returns the semantic version for MDX pipeline caching.
+ *
+ * This version is used in cache keys for MDX serialization and docs loading.
+ * It only changes when the MDX processing pipeline is updated, not on every deployment.
+ *
+ * @returns The current MDX pipeline version
+ */
 export function cacheSeed() {
-    const { VERCEL_GIT_COMMIT_SHA } = getEnv();
-    return VERCEL_GIT_COMMIT_SHA ?? seed();
+    return MDX_PIPELINE_VERSION;
 }
