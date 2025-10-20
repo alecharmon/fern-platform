@@ -2,6 +2,7 @@ import { searchClient } from "@algolia/client-search";
 import { algoliaAppId } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { postToSlack } from "@fern-api/docs-server/slack";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { getLanguageModel, SuggestionsSchema } from "@fern-docs/search-ask-fern";
@@ -42,6 +43,7 @@ async function generateSuggestions(domain: string, algoliaSearchKey: string) {
         result = await generateObject({
             model: languageModel,
             mode: "json",
+            abortSignal: AbortSignal.timeout(8500),
             system: `You are a helpful assistant that makes suggestions of questions for the user to ask about the documentation.
 The prompt will be an array of separate search results that are JSON objects.
 Generate exactly 5 questions based on the search results provided.
@@ -79,6 +81,10 @@ DO NOT include any explanatory text - only return the JSON object.`,
         });
     } catch (error) {
         console.error("AI suggestions generation failed after retries, returning fallback suggestions:", error);
+        postToSlack(
+            "#search-notifs",
+            `:rotating_light: [${domain}] AI suggestions generation failed with error: ${String(error)}`
+        );
         result = {
             object: {
                 suggestions: [
