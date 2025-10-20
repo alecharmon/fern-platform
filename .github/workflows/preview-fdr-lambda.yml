@@ -6,6 +6,7 @@ on:
       - "servers/fdr-lambda/**"
       - "servers/fdr-lambda-deploy/**"
       - ".github/workflows/preview-fdr-lambda.yml"
+  workflow_dispatch:
 
 env:
   PACKAGE_NAME: "@fern-platform/fdr-lambda"
