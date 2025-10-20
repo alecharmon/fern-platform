@@ -8,6 +8,7 @@ import { ErrorBoundary, ErrorBoundaryFallback } from "@/components/error-boundar
 import { SearchV2Trigger } from "@/state/search";
 
 import { Accordion, AccordionGroup } from "./accordion";
+import { Anchor } from "./anchor";
 import { Availability } from "./availability";
 import { Badge } from "./badge";
 import { Bleed } from "./bleed";
@@ -57,6 +58,7 @@ const ElevenLabsWaveform = dynamic(
 const FERN_COMPONENTS = {
     Accordion,
     AccordionGroup,
+    Anchor,
     Availability,
     Badge,
     Bleed,
