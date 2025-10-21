@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface JsRemoteConfig {
     url: FdrLambda.Url;
-    strategy?: FdrLambda.docs.v1.commons.JsScriptStrategy;
+    strategy: FdrLambda.docs.v1.commons.JsScriptStrategy | undefined;
 }

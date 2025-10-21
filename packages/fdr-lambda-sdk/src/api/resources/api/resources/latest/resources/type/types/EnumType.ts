@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface EnumType {
-    default?: string;
+    default: string | undefined;
     values: FdrLambda.api.latest.EnumValue[];
 }

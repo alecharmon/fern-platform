@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface SubpackageMetadata {
     id: FdrLambda.api.latest.SubpackageId;
     name: string;
-    displayName?: string;
+    displayName: string | undefined;
 }

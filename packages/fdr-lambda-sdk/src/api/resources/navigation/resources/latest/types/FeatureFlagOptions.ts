@@ -4,6 +4,6 @@
 
 export interface FeatureFlagOptions {
     flag: string;
-    fallbackValue?: unknown;
-    match?: unknown;
+    fallbackValue: unknown | undefined;
+    match: unknown | undefined;
 }

@@ -5,7 +5,7 @@
 import * as FdrLambda from "../../../index.js";
 
 export interface DictTemplate {
-    imports?: string[];
+    imports: string[] | undefined;
     /**
      * We might not need this, but the idea here is to be able to omit if it's optional and undefined,
      * or default if omitted and required.
@@ -17,5 +17,5 @@ export interface DictTemplate {
     keyTemplate: FdrLambda.Template;
     valueTemplate: FdrLambda.Template;
     keyValueSeparator: string;
-    templateInput?: FdrLambda.PayloadInput;
+    templateInput: FdrLambda.PayloadInput | undefined;
 }

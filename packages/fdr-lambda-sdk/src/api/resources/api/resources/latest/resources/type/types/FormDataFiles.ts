@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface FormDataFiles extends FdrLambda.api.latest.WithDescription, FdrLambda.api.latest.WithAvailability {
     key: FdrLambda.PropertyKey;
     isOptional: boolean;
-    contentType?: FdrLambda.api.latest.ContentType;
+    contentType: FdrLambda.api.latest.ContentType | undefined;
 }

@@ -5,8 +5,7 @@
 import * as environments from "../../../../../../../../environments.js";
 import * as core from "../../../../../../../../core/index.js";
 import * as FdrLambda from "../../../../../../../index.js";
-import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../../../../../core/headers.js";
-import * as errors from "../../../../../../../../errors/index.js";
+import urlJoin from "url-join";
 
 export declare namespace Write {
     export interface Options {
@@ -14,8 +13,6 @@ export declare namespace Write {
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
         token: core.Supplier<core.BearerToken>;
-        /** Additional headers to include in requests. */
-        headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
 
     export interface RequestOptions {
@@ -25,19 +22,13 @@ export declare namespace Write {
         maxRetries?: number;
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
-        /** Additional query string parameters to include in the request. */
-        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
-        headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
+        headers?: Record<string, string>;
     }
 }
 
 export class Write {
-    protected readonly _options: Write.Options;
-
-    constructor(_options: Write.Options) {
-        this._options = _options;
-    }
+    constructor(protected readonly _options: Write.Options) {}
 
     /**
      * Delete a docs site and all associated data including S3 assets
@@ -45,81 +36,79 @@ export class Write {
      * @param {FdrLambda.docs.v2.write.DeleteDocsSiteRequest} request
      * @param {Write.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FdrLambda.docs.v2.write.DocsNotFoundError}
-     * @throws {@link FdrLambda.UnauthorizedError}
-     *
      * @example
      *     await client.docs.v2.write.deleteDocsSite({
-     *         url: "url"
+     *         url: FdrLambda.Url("url")
      *     })
      */
     public deleteDocsSite(
         request: FdrLambda.docs.v2.write.DeleteDocsSiteRequest,
         requestOptions?: Write.RequestOptions,
-    ): core.HttpResponsePromise<void> {
+    ): core.HttpResponsePromise<core.APIResponse<void, FdrLambda.docs.v2.write.deleteDocsSite.Error>> {
         return core.HttpResponsePromise.fromPromise(this.__deleteDocsSite(request, requestOptions));
     }
 
     private async __deleteDocsSite(
         request: FdrLambda.docs.v2.write.DeleteDocsSiteRequest,
         requestOptions?: Write.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
-        );
+    ): Promise<core.WithRawResponse<core.APIResponse<void, FdrLambda.docs.v2.write.deleteDocsSite.Error>>> {
         const _response = await core.fetcher({
-            url: core.url.join(
+            url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FdrLambdaEnvironment.Prod,
                 "/v2/registry/docs/delete",
             ),
             method: "POST",
-            headers: _headers,
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
             contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
             requestType: "json",
             body: request,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
+            return {
+                data: {
+                    ok: true,
+                    body: undefined,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
+            switch ((_response.error.body as FdrLambda.docs.v2.write.deleteDocsSite.Error)?.error) {
                 case "DocsNotFoundError":
-                    throw new FdrLambda.docs.v2.write.DocsNotFoundError(_response.rawResponse);
                 case "UnauthorizedError":
-                    throw new FdrLambda.UnauthorizedError(_response.error.body as string, _response.rawResponse);
-                default:
-                    throw new errors.FdrLambdaError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FdrLambda.docs.v2.write.deleteDocsSite.Error,
+                            rawResponse: _response.rawResponse,
+                        },
                         rawResponse: _response.rawResponse,
-                    });
+                    };
             }
         }
 
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FdrLambdaError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FdrLambdaTimeoutError("Timeout exceeded when calling POST /v2/registry/docs/delete.");
-            case "unknown":
-                throw new errors.FdrLambdaError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
+        return {
+            data: {
+                ok: false,
+                error: FdrLambda.docs.v2.write.deleteDocsSite.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
     }
 
     protected async _getAuthorizationHeader(): Promise<string> {

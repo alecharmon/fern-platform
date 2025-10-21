@@ -2,6 +2,7 @@ import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Pool } from "pg";
 import { DomainNotRegisteredError, InvalidUrlError, UnauthorizedError, UserNotInOrgError } from "./errors";
+import { ensureDocsInS3 } from "./services/ensureDocsInS3";
 import { getDocsForUrl } from "./services/getDocsForUrl";
 import { getMetadataForUrl } from "./services/getMetadataForUrl";
 import { checkUserBelongsToOrg } from "./utils/auth";
@@ -37,6 +38,10 @@ interface GetMetadataForUrlRequest {
 }
 
 interface LoadDocsForUrlRequest {
+    url: string;
+}
+
+interface EnsureDocsInS3Request {
     url: string;
 }
 
@@ -227,6 +232,63 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                     message: "Successfully deleted docs site",
                     requestId: context.awsRequestId
                 })
+            };
+        }
+
+        // Route: POST /v2/registry/docs/ensure-docs-in-s3 or POST /ensure-docs-in-s3
+        if ((path === "/v2/registry/docs/ensure-docs-in-s3" || path === "/ensure-docs-in-s3") && method === "POST") {
+            console.log(`[Handler] ensure-docs-in-s3 endpoint called, requestId: ${context.awsRequestId}`);
+
+            const body: EnsureDocsInS3Request = JSON.parse(event.body || "{}");
+            console.log(`[Handler] Parsed request body, url: ${body.url}`);
+
+            if (!body.url) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Missing required field: url",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            // Parse the URL
+            console.log(`[Handler] Parsing URL: ${body.url}`);
+            let parsedUrl: URL;
+            try {
+                let urlWithProtocol = body.url;
+                if (!/^https?:\/\//i.test(body.url)) {
+                    urlWithProtocol = "https://" + body.url;
+                }
+                parsedUrl = new URL(urlWithProtocol);
+                console.log(`[Handler] URL parsed successfully: ${parsedUrl.hostname}`);
+            } catch (error) {
+                throw new InvalidUrlError(body.url, error as Error);
+            }
+
+            // Extract Authorization header (case-insensitive)
+            const authHeader =
+                event.headers?.Authorization ||
+                event.headers?.authorization ||
+                event.headers?.["x-fern-token"] ||
+                event.headers?.["X-Fern-Token"];
+            console.log(`[Handler] Authorization header present: ${!!authHeader}`);
+
+            console.log(`[Handler] Calling ensureDocsInS3 for domain: ${parsedUrl.hostname}`);
+            const s3Response = await ensureDocsInS3(parsedUrl, pool, authHeader);
+            console.log(`[Handler] ensureDocsInS3 completed successfully, S3 URL: ${s3Response.s3Url}`);
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify(s3Response)
             };
         }
 

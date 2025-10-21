@@ -9,7 +9,7 @@ export interface PlaygroundSettings {
      * A list of environment IDs that are allowed to be used in the playground.
      * If not provided, all environments are allowed. And if the provided list is empty, the playground should be disabled.
      */
-    environments?: FdrLambda.EnvironmentId[];
-    button?: FdrLambda.navigation.v1.PlaygroundButtonSettings;
-    "limit-websocket-messages-per-connection"?: number;
+    environments: FdrLambda.EnvironmentId[] | undefined;
+    button: FdrLambda.navigation.v1.PlaygroundButtonSettings | undefined;
+    "limit-websocket-messages-per-connection": number | undefined;
 }

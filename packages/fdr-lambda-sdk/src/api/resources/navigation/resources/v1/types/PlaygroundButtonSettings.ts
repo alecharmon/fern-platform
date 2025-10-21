@@ -5,5 +5,5 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface PlaygroundButtonSettings {
-    href?: FdrLambda.Url;
+    href: FdrLambda.Url | undefined;
 }

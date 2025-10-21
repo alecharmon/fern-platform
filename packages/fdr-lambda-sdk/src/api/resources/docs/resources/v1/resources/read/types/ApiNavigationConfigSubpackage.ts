@@ -5,7 +5,7 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface ApiNavigationConfigSubpackage {
-    summaryPageId?: FdrLambda.PageId;
+    summaryPageId: FdrLambda.PageId | undefined;
     subpackageId: FdrLambda.api.v1.SubpackageId;
     items: FdrLambda.docs.v1.read.ApiNavigationConfigItem[];
 }

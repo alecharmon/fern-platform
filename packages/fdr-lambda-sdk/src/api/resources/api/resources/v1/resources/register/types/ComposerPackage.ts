@@ -4,5 +4,5 @@
 
 export interface ComposerPackage {
     package: string;
-    version?: string;
+    version: string | undefined;
 }

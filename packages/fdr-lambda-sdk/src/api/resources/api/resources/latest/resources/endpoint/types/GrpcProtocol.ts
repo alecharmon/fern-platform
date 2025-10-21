@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface GrpcProtocol {
     methodName: string;
-    methodType?: FdrLambda.GrpcMethod;
+    methodType: FdrLambda.GrpcMethod | undefined;
 }

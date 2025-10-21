@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface HttpResponse extends FdrLambda.api.v1.WithDescription {
     type: FdrLambda.api.v1.read.HttpResponseBodyShape;
     /** Defaults to 200 */
-    statusCode?: number;
+    statusCode: number | undefined;
 }

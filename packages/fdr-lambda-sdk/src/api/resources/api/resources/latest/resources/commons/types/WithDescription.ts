@@ -3,5 +3,5 @@
  */
 
 export interface WithDescription {
-    description?: string;
+    description: string | undefined;
 }

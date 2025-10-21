@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface BasicAuth extends FdrLambda.api.v1.WithDescription {
-    usernameName?: string;
-    passwordName?: string;
+    usernameName: string | undefined;
+    passwordName: string | undefined;
 }

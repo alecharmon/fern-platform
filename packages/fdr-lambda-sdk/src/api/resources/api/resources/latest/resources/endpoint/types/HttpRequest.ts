@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface HttpRequest extends FdrLambda.api.latest.WithDescription {
-    contentType?: string;
+    contentType: string | undefined;
     body: FdrLambda.api.latest.HttpRequestBodyShape;
 }

@@ -8,10 +8,10 @@ export interface ApiSection extends FdrLambda.docs.v1.read.NavigationNodeMetadat
     title: string;
     api: FdrLambda.ApiDefinitionId;
     skipUrlSlug: boolean;
-    artifacts?: FdrLambda.docs.v1.read.ApiArtifacts;
+    artifacts: FdrLambda.docs.v1.read.ApiArtifacts | undefined;
     showErrors: boolean;
-    changelog?: FdrLambda.docs.v1.read.ChangelogSection;
-    navigation?: FdrLambda.docs.v1.read.ApiNavigationConfigRoot;
-    longScrolling?: boolean;
-    flattened?: boolean;
+    changelog: FdrLambda.docs.v1.read.ChangelogSection | undefined;
+    navigation: FdrLambda.docs.v1.read.ApiNavigationConfigRoot | undefined;
+    longScrolling: boolean | undefined;
+    flattened: boolean | undefined;
 }

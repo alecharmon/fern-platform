@@ -7,6 +7,6 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface UndiscriminatedUnionVariant
     extends FdrLambda.api.latest.WithDescription,
         FdrLambda.api.latest.WithAvailability {
-    displayName?: string;
+    displayName: string | undefined;
     shape: FdrLambda.api.latest.TypeShape;
 }

@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface WithOverviewPage {
-    overviewPageId?: FdrLambda.PageId;
-    noindex?: boolean;
+    overviewPageId: FdrLambda.PageId | undefined;
+    noindex: boolean | undefined;
 }

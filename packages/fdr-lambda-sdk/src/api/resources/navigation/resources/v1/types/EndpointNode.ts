@@ -10,7 +10,7 @@ export interface EndpointNode
     type: "endpoint";
     method: FdrLambda.HttpMethod;
     endpointId: FdrLambda.EndpointId;
-    isResponseStream?: boolean;
+    isResponseStream: boolean | undefined;
     /** Settings for the api playground that affect this endpoint specifically. */
-    playground?: FdrLambda.navigation.v1.PlaygroundSettings;
+    playground: FdrLambda.navigation.v1.PlaygroundSettings | undefined;
 }

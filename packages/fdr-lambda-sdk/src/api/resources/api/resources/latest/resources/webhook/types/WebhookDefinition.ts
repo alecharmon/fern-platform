@@ -9,11 +9,11 @@ export interface WebhookDefinition
         FdrLambda.api.latest.WithAvailability,
         FdrLambda.api.latest.WithNamespace {
     id: FdrLambda.WebhookId;
-    displayName?: string;
-    operationId?: string;
+    displayName: string | undefined;
+    operationId: string | undefined;
     method: FdrLambda.api.latest.WebhookHttpMethod;
     path: string[];
-    headers?: FdrLambda.api.latest.ObjectProperty[];
-    payloads?: FdrLambda.api.latest.WebhookPayload[];
-    examples?: FdrLambda.api.v1.read.ExampleWebhookPayload[];
+    headers: FdrLambda.api.latest.ObjectProperty[] | undefined;
+    payloads: FdrLambda.api.latest.WebhookPayload[] | undefined;
+    examples: FdrLambda.api.v1.read.ExampleWebhookPayload[] | undefined;
 }

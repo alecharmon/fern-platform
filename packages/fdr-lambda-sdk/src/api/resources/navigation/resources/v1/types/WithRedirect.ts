@@ -5,5 +5,5 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface WithRedirect {
-    pointsTo?: FdrLambda.navigation.v1.Slug;
+    pointsTo: FdrLambda.navigation.v1.Slug | undefined;
 }

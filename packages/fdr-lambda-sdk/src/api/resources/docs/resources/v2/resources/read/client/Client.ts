@@ -5,8 +5,7 @@
 import * as environments from "../../../../../../../../environments.js";
 import * as core from "../../../../../../../../core/index.js";
 import * as FdrLambda from "../../../../../../../index.js";
-import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../../../../../core/headers.js";
-import * as errors from "../../../../../../../../errors/index.js";
+import urlJoin from "url-join";
 
 export declare namespace Read {
     export interface Options {
@@ -14,8 +13,6 @@ export declare namespace Read {
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
         token: core.Supplier<core.BearerToken>;
-        /** Additional headers to include in requests. */
-        headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
 
     export interface RequestOptions {
@@ -25,187 +22,270 @@ export declare namespace Read {
         maxRetries?: number;
         /** A hook to abort the request. */
         abortSignal?: AbortSignal;
-        /** Additional query string parameters to include in the request. */
-        queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
-        headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
+        headers?: Record<string, string>;
     }
 }
 
 export class Read {
-    protected readonly _options: Read.Options;
-
-    constructor(_options: Read.Options) {
-        this._options = _options;
-    }
+    constructor(protected readonly _options: Read.Options) {}
 
     /**
      * @param {FdrLambda.docs.v2.read.GetMetadataForUrlRequest} request
      * @param {Read.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FdrLambda.docs.v2.read.DomainNotRegisteredError}
-     *
      * @example
      *     await client.docs.v2.read.getDocsUrlMetadata({
-     *         url: "url"
+     *         url: FdrLambda.Url("url")
      *     })
      */
     public getDocsUrlMetadata(
         request: FdrLambda.docs.v2.read.GetMetadataForUrlRequest,
         requestOptions?: Read.RequestOptions,
-    ): core.HttpResponsePromise<FdrLambda.docs.v2.read.DocsUrlMetadata> {
+    ): core.HttpResponsePromise<
+        core.APIResponse<FdrLambda.docs.v2.read.DocsUrlMetadata, FdrLambda.docs.v2.read.getDocsUrlMetadata.Error>
+    > {
         return core.HttpResponsePromise.fromPromise(this.__getDocsUrlMetadata(request, requestOptions));
     }
 
     private async __getDocsUrlMetadata(
         request: FdrLambda.docs.v2.read.GetMetadataForUrlRequest,
         requestOptions?: Read.RequestOptions,
-    ): Promise<core.WithRawResponse<FdrLambda.docs.v2.read.DocsUrlMetadata>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
-        );
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<FdrLambda.docs.v2.read.DocsUrlMetadata, FdrLambda.docs.v2.read.getDocsUrlMetadata.Error>
+        >
+    > {
         const _response = await core.fetcher({
-            url: core.url.join(
+            url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FdrLambdaEnvironment.Prod,
                 "/v2/registry/docs/metadata-for-url",
             ),
             method: "POST",
-            headers: _headers,
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
             contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
             requestType: "json",
             body: request,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
             return {
-                data: _response.body as FdrLambda.docs.v2.read.DocsUrlMetadata,
+                data: {
+                    ok: true,
+                    body: _response.body as FdrLambda.docs.v2.read.DocsUrlMetadata,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
                 rawResponse: _response.rawResponse,
             };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
+            switch ((_response.error.body as FdrLambda.docs.v2.read.getDocsUrlMetadata.Error)?.error) {
                 case "DomainNotRegisteredError":
-                    throw new FdrLambda.docs.v2.read.DomainNotRegisteredError(_response.rawResponse);
-                default:
-                    throw new errors.FdrLambdaError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FdrLambda.docs.v2.read.getDocsUrlMetadata.Error,
+                            rawResponse: _response.rawResponse,
+                        },
                         rawResponse: _response.rawResponse,
-                    });
+                    };
             }
         }
 
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FdrLambdaError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FdrLambdaTimeoutError(
-                    "Timeout exceeded when calling POST /v2/registry/docs/metadata-for-url.",
-                );
-            case "unknown":
-                throw new errors.FdrLambdaError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
+        return {
+            data: {
+                ok: false,
+                error: FdrLambda.docs.v2.read.getDocsUrlMetadata.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
     }
 
     /**
      * @param {FdrLambda.docs.v2.read.LoadDocsForUrlRequest} request
      * @param {Read.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link FdrLambda.docs.v2.read.DomainNotRegisteredError}
-     * @throws {@link FdrLambda.UnauthorizedError}
-     *
      * @example
      *     await client.docs.v2.read.getDocsForUrl({
-     *         url: "url"
+     *         url: FdrLambda.Url("url")
      *     })
      */
     public getDocsForUrl(
         request: FdrLambda.docs.v2.read.LoadDocsForUrlRequest,
         requestOptions?: Read.RequestOptions,
-    ): core.HttpResponsePromise<FdrLambda.docs.v2.read.LoadDocsForUrlResponse> {
+    ): core.HttpResponsePromise<
+        core.APIResponse<FdrLambda.docs.v2.read.LoadDocsForUrlResponse, FdrLambda.docs.v2.read.getDocsForUrl.Error>
+    > {
         return core.HttpResponsePromise.fromPromise(this.__getDocsForUrl(request, requestOptions));
     }
 
     private async __getDocsForUrl(
         request: FdrLambda.docs.v2.read.LoadDocsForUrlRequest,
         requestOptions?: Read.RequestOptions,
-    ): Promise<core.WithRawResponse<FdrLambda.docs.v2.read.LoadDocsForUrlResponse>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
-        );
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<FdrLambda.docs.v2.read.LoadDocsForUrlResponse, FdrLambda.docs.v2.read.getDocsForUrl.Error>
+        >
+    > {
         const _response = await core.fetcher({
-            url: core.url.join(
+            url: urlJoin(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FdrLambdaEnvironment.Prod,
                 "/v2/registry/docs/load-with-url",
             ),
             method: "POST",
-            headers: _headers,
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
             contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
             requestType: "json",
             body: request,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
             return {
-                data: _response.body as FdrLambda.docs.v2.read.LoadDocsForUrlResponse,
+                data: {
+                    ok: true,
+                    body: _response.body as FdrLambda.docs.v2.read.LoadDocsForUrlResponse,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
                 rawResponse: _response.rawResponse,
             };
         }
 
         if (_response.error.reason === "status-code") {
-            switch ((_response.error.body as any)?.["error"]) {
+            switch ((_response.error.body as FdrLambda.docs.v2.read.getDocsForUrl.Error)?.error) {
                 case "DomainNotRegisteredError":
-                    throw new FdrLambda.docs.v2.read.DomainNotRegisteredError(_response.rawResponse);
                 case "UnauthorizedError":
-                    throw new FdrLambda.UnauthorizedError(_response.error.body as string, _response.rawResponse);
-                default:
-                    throw new errors.FdrLambdaError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FdrLambda.docs.v2.read.getDocsForUrl.Error,
+                            rawResponse: _response.rawResponse,
+                        },
                         rawResponse: _response.rawResponse,
-                    });
+                    };
             }
         }
 
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FdrLambdaError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
+        return {
+            data: {
+                ok: false,
+                error: FdrLambda.docs.v2.read.getDocsForUrl.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
+    /**
+     * Loads docs from the database and stores them in S3.
+     * Returns the S3 URL where the docs definition can be accessed.
+     * This endpoint always writes to S3 idempotently, regardless of whether the docs already exist in S3.
+     *
+     * @param {FdrLambda.docs.v2.read.EnsureDocsInS3Request} request
+     * @param {Read.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.read.ensureDocsInS3({
+     *         url: FdrLambda.Url("url")
+     *     })
+     */
+    public ensureDocsInS3(
+        request: FdrLambda.docs.v2.read.EnsureDocsInS3Request,
+        requestOptions?: Read.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<FdrLambda.docs.v2.read.EnsureDocsInS3Response, FdrLambda.docs.v2.read.ensureDocsInS3.Error>
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__ensureDocsInS3(request, requestOptions));
+    }
+
+    private async __ensureDocsInS3(
+        request: FdrLambda.docs.v2.read.EnsureDocsInS3Request,
+        requestOptions?: Read.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<FdrLambda.docs.v2.read.EnsureDocsInS3Response, FdrLambda.docs.v2.read.ensureDocsInS3.Error>
+        >
+    > {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FdrLambdaEnvironment.Prod,
+                "/v2/registry/docs/ensure-docs-in-s3",
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FdrLambda.docs.v2.read.EnsureDocsInS3Response,
+                    headers: _response.headers,
                     rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FdrLambdaTimeoutError(
-                    "Timeout exceeded when calling POST /v2/registry/docs/load-with-url.",
-                );
-            case "unknown":
-                throw new errors.FdrLambdaError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
+                },
+                rawResponse: _response.rawResponse,
+            };
         }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FdrLambda.docs.v2.read.ensureDocsInS3.Error)?.error) {
+                case "DomainNotRegisteredError":
+                case "UnauthorizedError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FdrLambda.docs.v2.read.ensureDocsInS3.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FdrLambda.docs.v2.read.ensureDocsInS3.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
     }
 
     protected async _getAuthorizationHeader(): Promise<string> {

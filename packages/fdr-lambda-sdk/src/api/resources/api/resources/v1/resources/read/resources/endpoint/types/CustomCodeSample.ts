@@ -10,6 +10,6 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface CustomCodeSample extends FdrLambda.api.v1.WithDescription {
     language: FdrLambda.api.v1.read.Language;
     code: string;
-    name?: string;
-    install?: string;
+    name: string | undefined;
+    install: string | undefined;
 }

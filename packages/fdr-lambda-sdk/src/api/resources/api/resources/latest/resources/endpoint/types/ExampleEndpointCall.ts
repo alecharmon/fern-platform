@@ -7,11 +7,11 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface ExampleEndpointCall extends FdrLambda.api.latest.WithDescription {
     path: string;
     responseStatusCode: number;
-    name?: string;
-    pathParameters?: Record<FdrLambda.PropertyKey, unknown>;
-    queryParameters?: Record<FdrLambda.PropertyKey, unknown>;
-    headers?: Record<FdrLambda.PropertyKey, unknown>;
-    requestBody?: FdrLambda.api.latest.ExampleEndpointRequest;
-    responseBody?: FdrLambda.api.latest.ExampleEndpointResponse;
-    snippets?: Record<FdrLambda.api.latest.Language, FdrLambda.api.latest.CodeSnippet[]>;
+    name: string | undefined;
+    pathParameters: Record<FdrLambda.PropertyKey, unknown> | undefined;
+    queryParameters: Record<FdrLambda.PropertyKey, unknown> | undefined;
+    headers: Record<FdrLambda.PropertyKey, unknown> | undefined;
+    requestBody: FdrLambda.api.latest.ExampleEndpointRequest | undefined;
+    responseBody: FdrLambda.api.latest.ExampleEndpointResponse | undefined;
+    snippets: Record<FdrLambda.api.latest.Language, FdrLambda.api.latest.CodeSnippet[]> | undefined;
 }

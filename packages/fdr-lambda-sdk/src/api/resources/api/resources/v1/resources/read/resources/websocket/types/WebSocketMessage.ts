@@ -6,7 +6,7 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface WebSocketMessage extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     type: FdrLambda.api.v1.WebSocketMessageId;
-    displayName?: string;
+    displayName: string | undefined;
     origin: FdrLambda.api.v1.WebSocketMessageOrigin;
     body: FdrLambda.api.v1.read.WebSocketMessageBodyShape;
 }

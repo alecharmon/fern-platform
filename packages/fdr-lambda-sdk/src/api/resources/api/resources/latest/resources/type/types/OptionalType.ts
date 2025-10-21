@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface OptionalType {
     shape: FdrLambda.api.latest.TypeShape;
-    default?: unknown;
+    default: unknown | undefined;
 }

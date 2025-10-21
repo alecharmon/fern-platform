@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface TypeReferenceId {
     id: FdrLambda.TypeId;
-    default?: FdrLambda.api.latest.TypeReferenceIdDefault;
+    default: FdrLambda.api.latest.TypeReferenceIdDefault | undefined;
 }

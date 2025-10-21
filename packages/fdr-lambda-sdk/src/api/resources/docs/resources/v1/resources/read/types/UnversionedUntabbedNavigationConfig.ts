@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface UnversionedUntabbedNavigationConfig {
     items: FdrLambda.docs.v1.read.NavigationItem[];
-    landingPage?: FdrLambda.docs.v1.read.PageMetadata;
+    landingPage: FdrLambda.docs.v1.read.PageMetadata | undefined;
 }

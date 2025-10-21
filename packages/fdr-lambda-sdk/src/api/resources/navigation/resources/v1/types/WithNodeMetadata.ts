@@ -10,7 +10,7 @@ export interface WithNodeMetadata
         FdrLambda.navigation.latest.WithFeatureFlags {
     title: string;
     slug: FdrLambda.navigation.v1.Slug;
-    icon?: string;
-    hidden?: boolean;
-    authed?: boolean;
+    icon: string | undefined;
+    hidden: boolean | undefined;
+    authed: boolean | undefined;
 }

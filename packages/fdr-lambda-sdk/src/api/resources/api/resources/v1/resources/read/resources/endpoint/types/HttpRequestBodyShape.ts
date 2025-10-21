@@ -33,6 +33,6 @@ export namespace HttpRequestBodyShape {
 
     export interface FileUpload {
         type: "fileUpload";
-        value?: FdrLambda.api.v1.read.FormDataRequest;
+        value: FdrLambda.api.v1.read.FormDataRequest | undefined;
     }
 }

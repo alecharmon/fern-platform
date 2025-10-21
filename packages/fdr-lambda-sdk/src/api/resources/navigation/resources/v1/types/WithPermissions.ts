@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface WithPermissions {
-    viewers?: FdrLambda.RoleId[];
-    orphaned?: boolean;
+    viewers: FdrLambda.RoleId[] | undefined;
+    orphaned: boolean | undefined;
 }

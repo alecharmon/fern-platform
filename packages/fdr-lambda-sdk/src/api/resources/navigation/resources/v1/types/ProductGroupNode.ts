@@ -6,7 +6,7 @@ import * as FdrLambda from "../../../../../index.js";
 
 export interface ProductGroupNode extends FdrLambda.navigation.v1.WithNodeId {
     type: "productgroup";
-    landingPage?: FdrLambda.navigation.v1.LandingPageNode;
+    landingPage: FdrLambda.navigation.v1.LandingPageNode | undefined;
     /** The individual products being documented */
     children: FdrLambda.navigation.v1.ProductNode[];
 }

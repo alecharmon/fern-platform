@@ -6,6 +6,6 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface PageContent {
     markdown: string;
-    editThisPageUrl?: FdrLambda.Url;
-    rawMarkdown?: string;
+    editThisPageUrl: FdrLambda.Url | undefined;
+    rawMarkdown: string | undefined;
 }

@@ -6,6 +6,6 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface CustomFontConfigVariant {
     fontFile: FdrLambda.FileId;
-    weight?: string[];
-    style?: FdrLambda.docs.v1.commons.FontStyle[];
+    weight: string[] | undefined;
+    style: FdrLambda.docs.v1.commons.FontStyle[] | undefined;
 }

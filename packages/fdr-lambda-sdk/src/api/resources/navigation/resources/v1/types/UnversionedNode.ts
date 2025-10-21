@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../index.js";
 export interface UnversionedNode extends FdrLambda.navigation.v1.WithNodeId {
     type: "unversioned";
     child: FdrLambda.navigation.v1.VersionChild;
-    landingPage?: FdrLambda.navigation.v1.LandingPageNode;
+    landingPage: FdrLambda.navigation.v1.LandingPageNode | undefined;
 }

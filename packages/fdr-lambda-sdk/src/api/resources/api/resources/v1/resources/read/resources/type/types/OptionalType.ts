@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface OptionalType {
     itemType: FdrLambda.api.v1.read.TypeReference;
-    defaultValue?: unknown;
+    defaultValue: unknown | undefined;
 }

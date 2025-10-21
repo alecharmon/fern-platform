@@ -5,20 +5,20 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface AnalyticsConfig {
-    segment?: FdrLambda.docs.v1.commons.SegmentConfig;
-    fullstory?: FdrLambda.docs.v1.commons.FullStoryAnalyticsConfig;
-    intercom?: FdrLambda.docs.v1.commons.IntercomConfig;
-    posthog?: FdrLambda.docs.v1.commons.PostHogConfig;
-    gtm?: FdrLambda.docs.v1.commons.GtmConfig;
-    ga4?: FdrLambda.docs.v1.commons.GoogleAnalytics4Config;
-    amplitude?: FdrLambda.docs.v1.commons.AmplitudeConfig;
-    mixpanel?: FdrLambda.docs.v1.commons.MixpanelConfig;
-    hotjar?: FdrLambda.docs.v1.commons.HotJarConfig;
-    koala?: FdrLambda.docs.v1.commons.KoalaConfig;
-    logrocket?: FdrLambda.docs.v1.commons.LogRocketConfig;
-    pirsch?: FdrLambda.docs.v1.commons.PirschConfig;
-    plausible?: FdrLambda.docs.v1.commons.PlausibleConfig;
-    fathom?: FdrLambda.docs.v1.commons.FathomConfig;
-    clearbit?: FdrLambda.docs.v1.commons.ClearBitConfig;
-    heap?: FdrLambda.docs.v1.commons.HeapConfig;
+    segment: FdrLambda.docs.v1.commons.SegmentConfig | undefined;
+    fullstory: FdrLambda.docs.v1.commons.FullStoryAnalyticsConfig | undefined;
+    intercom: FdrLambda.docs.v1.commons.IntercomConfig | undefined;
+    posthog: FdrLambda.docs.v1.commons.PostHogConfig | undefined;
+    gtm: FdrLambda.docs.v1.commons.GtmConfig | undefined;
+    ga4: FdrLambda.docs.v1.commons.GoogleAnalytics4Config | undefined;
+    amplitude: FdrLambda.docs.v1.commons.AmplitudeConfig | undefined;
+    mixpanel: FdrLambda.docs.v1.commons.MixpanelConfig | undefined;
+    hotjar: FdrLambda.docs.v1.commons.HotJarConfig | undefined;
+    koala: FdrLambda.docs.v1.commons.KoalaConfig | undefined;
+    logrocket: FdrLambda.docs.v1.commons.LogRocketConfig | undefined;
+    pirsch: FdrLambda.docs.v1.commons.PirschConfig | undefined;
+    plausible: FdrLambda.docs.v1.commons.PlausibleConfig | undefined;
+    fathom: FdrLambda.docs.v1.commons.FathomConfig | undefined;
+    clearbit: FdrLambda.docs.v1.commons.ClearBitConfig | undefined;
+    heap: FdrLambda.docs.v1.commons.HeapConfig | undefined;
 }

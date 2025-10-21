@@ -7,7 +7,7 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface CustomFontConfig {
     name: string;
     variants: FdrLambda.docs.v1.commons.CustomFontConfigVariant[];
-    display?: FdrLambda.docs.v1.commons.FontDisplay;
-    fallback?: string[];
-    fontVariationSettings?: string;
+    display: FdrLambda.docs.v1.commons.FontDisplay | undefined;
+    fallback: string[] | undefined;
+    fontVariationSettings: string | undefined;
 }

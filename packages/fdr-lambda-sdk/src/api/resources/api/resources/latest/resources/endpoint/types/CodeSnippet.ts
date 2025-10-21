@@ -5,9 +5,9 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface CodeSnippet extends FdrLambda.api.latest.WithDescription {
-    name?: string;
+    name: string | undefined;
     language: FdrLambda.api.latest.Language;
-    install?: string;
+    install: string | undefined;
     code: string;
     generated: boolean;
 }

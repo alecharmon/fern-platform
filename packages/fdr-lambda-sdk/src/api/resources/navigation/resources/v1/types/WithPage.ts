@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../index.js";
 
 export interface WithPage {
     pageId: FdrLambda.PageId;
-    noindex?: boolean;
+    noindex: boolean | undefined;
 }

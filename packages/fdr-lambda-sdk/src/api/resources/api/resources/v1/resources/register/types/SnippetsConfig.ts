@@ -5,13 +5,13 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface SnippetsConfig {
-    typescriptSdk?: FdrLambda.api.v1.register.TypescriptPackage;
-    pythonSdk?: FdrLambda.api.v1.register.PythonPackage;
-    goSdk?: FdrLambda.api.v1.register.GoModule;
-    javaSdk?: FdrLambda.api.v1.register.JavaCoordinate;
-    rubySdk?: FdrLambda.api.v1.register.RubyGem;
-    csharpSdk?: FdrLambda.api.v1.register.NugetPackage;
-    phpSdk?: FdrLambda.api.v1.register.ComposerPackage;
-    swiftSdk?: FdrLambda.api.v1.register.SwiftPackage;
-    rustSdk?: FdrLambda.api.v1.register.CratesPackage;
+    typescriptSdk: FdrLambda.api.v1.register.TypescriptPackage | undefined;
+    pythonSdk: FdrLambda.api.v1.register.PythonPackage | undefined;
+    goSdk: FdrLambda.api.v1.register.GoModule | undefined;
+    javaSdk: FdrLambda.api.v1.register.JavaCoordinate | undefined;
+    rubySdk: FdrLambda.api.v1.register.RubyGem | undefined;
+    csharpSdk: FdrLambda.api.v1.register.NugetPackage | undefined;
+    phpSdk: FdrLambda.api.v1.register.ComposerPackage | undefined;
+    swiftSdk: FdrLambda.api.v1.register.SwiftPackage | undefined;
+    rustSdk: FdrLambda.api.v1.register.CratesPackage | undefined;
 }

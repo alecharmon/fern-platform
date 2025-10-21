@@ -12,7 +12,7 @@ export type ExampleEndpointRequest =
 export namespace ExampleEndpointRequest {
     export interface Json {
         type: "json";
-        value?: unknown;
+        value: unknown;
     }
 
     export interface Form {

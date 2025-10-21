@@ -5,5 +5,5 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface WithFeatureFlags {
-    featureFlags?: FdrLambda.navigation.latest.FeatureFlagOptions[];
+    featureFlags: FdrLambda.navigation.latest.FeatureFlagOptions[] | undefined;
 }

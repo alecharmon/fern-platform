@@ -12,18 +12,13 @@ export declare namespace Docs {
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
         token: core.Supplier<core.BearerToken>;
-        /** Additional headers to include in requests. */
-        headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
 }
 
 export class Docs {
-    protected readonly _options: Docs.Options;
     protected _v2: V2 | undefined;
 
-    constructor(_options: Docs.Options) {
-        this._options = _options;
-    }
+    constructor(protected readonly _options: Docs.Options) {}
 
     public get v2(): V2 {
         return (this._v2 ??= new V2(this._options));

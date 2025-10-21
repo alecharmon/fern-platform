@@ -6,6 +6,6 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface NavigationTabLink {
     title: string;
-    icon?: string;
+    icon: string | undefined;
     url: FdrLambda.Url;
 }

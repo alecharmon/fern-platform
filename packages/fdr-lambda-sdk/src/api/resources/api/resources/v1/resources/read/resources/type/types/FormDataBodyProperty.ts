@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface FormDataBodyProperty extends FdrLambda.api.v1.read.ObjectProperty {
-    contentType?: FdrLambda.api.v1.read.ContentType;
-    exploded?: boolean;
+    contentType: FdrLambda.api.v1.read.ContentType | undefined;
+    exploded: boolean | undefined;
 }

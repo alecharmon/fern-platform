@@ -4,5 +4,5 @@
 
 export interface NugetPackage {
     package: string;
-    version?: string;
+    version: string | undefined;
 }

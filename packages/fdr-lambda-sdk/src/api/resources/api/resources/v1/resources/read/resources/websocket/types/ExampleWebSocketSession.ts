@@ -5,7 +5,7 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface ExampleWebSocketSession extends FdrLambda.api.v1.WithDescription {
-    name?: string;
+    name: string | undefined;
     path: string;
     pathParameters: Record<FdrLambda.PropertyKey, unknown>;
     queryParameters: Record<string, unknown>;

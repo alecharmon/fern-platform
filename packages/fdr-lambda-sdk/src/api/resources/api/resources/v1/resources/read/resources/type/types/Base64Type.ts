@@ -3,6 +3,6 @@
  */
 
 export interface Base64Type {
-    default?: string;
-    mimeType?: string;
+    default: string | undefined;
+    mimeType: string | undefined;
 }

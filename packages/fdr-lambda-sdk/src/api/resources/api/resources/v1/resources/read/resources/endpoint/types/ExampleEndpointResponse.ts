@@ -13,7 +13,7 @@ export type ExampleEndpointResponse =
 export namespace ExampleEndpointResponse {
     export interface Json {
         type: "json";
-        value?: unknown;
+        value: unknown;
     }
 
     export interface Filename {

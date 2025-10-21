@@ -8,6 +8,6 @@ export interface DocsUrlMetadata {
     url: FdrLambda.Url;
     org: FdrLambda.OrgId;
     isPreviewUrl: boolean;
-    gitUrl?: FdrLambda.Url;
+    gitUrl: FdrLambda.Url | undefined;
     enableAlgoliaOnPreview: boolean;
 }

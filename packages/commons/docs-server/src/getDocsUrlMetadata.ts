@@ -1,5 +1,5 @@
 import { withoutStaging } from "@fern-api/docs-utils";
-import { FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
+import { FdrLambda, FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -48,14 +48,21 @@ export const uncachedGetDocsUrlMetadata = async (
         });
 
         const response = await client.docs.v2.read.getDocsUrlMetadata({
-            url: withoutStaging(domain)
+            url: FdrLambda.Url(withoutStaging(domain))
         });
 
+        if (!response.ok) {
+            console.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
+                error: response.error
+            });
+            notFound();
+        }
+
         return {
-            url: response.url,
-            org: response.org,
-            isPreview: response.isPreviewUrl,
-            enableAlgoliaOnPreview: response.enableAlgoliaOnPreview
+            url: response.body.url,
+            org: response.body.org,
+            isPreview: response.body.isPreviewUrl,
+            enableAlgoliaOnPreview: response.body.enableAlgoliaOnPreview
         };
     } catch (error) {
         console.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {

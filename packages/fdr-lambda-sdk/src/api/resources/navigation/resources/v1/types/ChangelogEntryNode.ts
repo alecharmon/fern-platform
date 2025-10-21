@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../index.js";
 export interface ChangelogEntryNode extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithPage {
     type: "changelogEntry";
     date: string;
-    tags?: string[];
+    tags: string[] | undefined;
 }

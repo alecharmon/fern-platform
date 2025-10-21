@@ -8,5 +8,5 @@ export interface RootNode extends FdrLambda.navigation.v1.WithNodeMetadata, FdrL
     type: "root";
     version: "v1";
     child: FdrLambda.navigation.v1.RootChild;
-    roles?: FdrLambda.RoleId[];
+    roles: FdrLambda.RoleId[] | undefined;
 }

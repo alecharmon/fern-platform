@@ -8,8 +8,8 @@ export interface WebSocketChannel extends FdrLambda.api.v1.WithDescription, FdrL
     urlSlug: string;
     id: FdrLambda.WebSocketId;
     auth: boolean;
-    name?: string;
-    defaultEnvironment?: FdrLambda.EnvironmentId;
+    name: string | undefined;
+    defaultEnvironment: FdrLambda.EnvironmentId | undefined;
     environments: FdrLambda.api.v1.Environment[];
     path: FdrLambda.api.v1.read.EndpointPath;
     headers: FdrLambda.api.v1.read.Header[];

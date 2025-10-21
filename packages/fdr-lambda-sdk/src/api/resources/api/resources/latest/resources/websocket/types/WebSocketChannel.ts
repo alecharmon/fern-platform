@@ -9,16 +9,16 @@ export interface WebSocketChannel
         FdrLambda.api.latest.WithAvailability,
         FdrLambda.api.latest.WithNamespace {
     id: FdrLambda.WebSocketId;
-    displayName?: string;
-    operationId?: string;
+    displayName: string | undefined;
+    operationId: string | undefined;
     path: FdrLambda.api.latest.PathPart[];
     /** The messages that can be sent and received on this channel */
     messages: FdrLambda.api.latest.WebSocketMessage[];
-    auth?: FdrLambda.AuthSchemeId[];
-    defaultEnvironment?: FdrLambda.EnvironmentId;
-    environments?: FdrLambda.api.latest.Environment[];
-    pathParameters?: FdrLambda.api.latest.ObjectProperty[];
-    queryParameters?: FdrLambda.api.latest.ObjectProperty[];
-    requestHeaders?: FdrLambda.api.latest.ObjectProperty[];
-    examples?: FdrLambda.api.latest.ExampleWebSocketSession[];
+    auth: FdrLambda.AuthSchemeId[] | undefined;
+    defaultEnvironment: FdrLambda.EnvironmentId | undefined;
+    environments: FdrLambda.api.latest.Environment[] | undefined;
+    pathParameters: FdrLambda.api.latest.ObjectProperty[] | undefined;
+    queryParameters: FdrLambda.api.latest.ObjectProperty[] | undefined;
+    requestHeaders: FdrLambda.api.latest.ObjectProperty[] | undefined;
+    examples: FdrLambda.api.latest.ExampleWebSocketSession[] | undefined;
 }

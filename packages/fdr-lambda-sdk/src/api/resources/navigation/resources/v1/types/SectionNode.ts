@@ -9,7 +9,7 @@ export interface SectionNode
         FdrLambda.navigation.v1.WithOverviewPage,
         FdrLambda.navigation.v1.WithRedirect {
     type: "section";
-    collapsed?: boolean;
+    collapsed: boolean | undefined;
     children: FdrLambda.navigation.v1.NavigationChild[];
-    availability?: FdrLambda.navigation.v1.NavigationV1Availability;
+    availability: FdrLambda.navigation.v1.NavigationV1Availability | undefined;
 }

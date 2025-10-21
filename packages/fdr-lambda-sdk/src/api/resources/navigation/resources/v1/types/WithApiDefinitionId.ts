@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../index.js";
 
 export interface WithApiDefinitionId {
     apiDefinitionId: FdrLambda.ApiDefinitionId;
-    availability?: FdrLambda.navigation.v1.NavigationV1Availability;
+    availability: FdrLambda.navigation.v1.NavigationV1Availability | undefined;
 }

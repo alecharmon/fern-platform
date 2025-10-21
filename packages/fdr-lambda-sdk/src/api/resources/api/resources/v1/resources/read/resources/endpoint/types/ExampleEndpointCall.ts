@@ -5,16 +5,16 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface ExampleEndpointCall extends FdrLambda.api.v1.WithDescription {
-    name?: string;
+    name: string | undefined;
     path: string;
     pathParameters: Record<FdrLambda.PropertyKey, unknown>;
     queryParameters: Record<string, unknown>;
     headers: Record<string, unknown>;
-    requestBody?: unknown;
-    requestBodyV3?: FdrLambda.api.v1.read.ExampleEndpointRequest;
+    requestBody: unknown;
+    requestBodyV3: FdrLambda.api.v1.read.ExampleEndpointRequest | undefined;
     responseStatusCode: number;
-    responseBody?: unknown;
-    responseBodyV3?: FdrLambda.api.v1.read.ExampleEndpointResponse;
+    responseBody: unknown;
+    responseBodyV3: FdrLambda.api.v1.read.ExampleEndpointResponse | undefined;
     codeExamples: FdrLambda.api.v1.read.CodeExamples;
     codeSamples: FdrLambda.api.v1.read.CustomCodeSample[];
 }

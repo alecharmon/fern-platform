@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface EndpointSnippetTemplates {
-    typescript?: FdrLambda.VersionedSnippetTemplate;
-    python?: FdrLambda.VersionedSnippetTemplate;
+    typescript: FdrLambda.VersionedSnippetTemplate | undefined;
+    python: FdrLambda.VersionedSnippetTemplate | undefined;
 }

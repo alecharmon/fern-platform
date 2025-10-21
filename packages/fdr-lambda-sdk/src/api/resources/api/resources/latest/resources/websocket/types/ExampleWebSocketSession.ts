@@ -6,9 +6,9 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface ExampleWebSocketSession extends FdrLambda.api.latest.WithDescription {
     path: string;
-    name?: string;
-    pathParameters?: Record<FdrLambda.PropertyKey, unknown>;
-    queryParameters?: Record<FdrLambda.PropertyKey, unknown>;
-    requestHeaders?: Record<FdrLambda.PropertyKey, unknown>;
-    messages?: FdrLambda.api.latest.ExampleWebSocketMessage[];
+    name: string | undefined;
+    pathParameters: Record<FdrLambda.PropertyKey, unknown> | undefined;
+    queryParameters: Record<FdrLambda.PropertyKey, unknown> | undefined;
+    requestHeaders: Record<FdrLambda.PropertyKey, unknown> | undefined;
+    messages: FdrLambda.api.latest.ExampleWebSocketMessage[] | undefined;
 }

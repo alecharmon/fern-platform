@@ -5,11 +5,11 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface DocsSettingsConfig {
-    searchText?: string;
-    disableSearch?: boolean;
-    darkModeCode?: boolean;
-    defaultSearchFilters?: boolean;
-    httpSnippets?: FdrLambda.docs.v1.commons.HttpSnippetsConfig;
-    hide404Page?: boolean;
-    useJavascriptAsTypescript?: boolean;
+    searchText: string | undefined;
+    disableSearch: boolean | undefined;
+    darkModeCode: boolean | undefined;
+    defaultSearchFilters: boolean | undefined;
+    httpSnippets: FdrLambda.docs.v1.commons.HttpSnippetsConfig | undefined;
+    hide404Page: boolean | undefined;
+    useJavascriptAsTypescript: boolean | undefined;
 }

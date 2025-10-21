@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface FilePropertySingle extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     key: FdrLambda.PropertyKey;
     isOptional: boolean;
-    contentType?: FdrLambda.api.v1.read.ContentType;
+    contentType: FdrLambda.api.v1.read.ContentType | undefined;
 }

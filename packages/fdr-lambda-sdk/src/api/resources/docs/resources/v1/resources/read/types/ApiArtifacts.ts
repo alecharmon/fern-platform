@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface ApiArtifacts {
     sdks: FdrLambda.docs.v1.read.PublishedSdk[];
-    postman?: FdrLambda.docs.v1.read.PublishedPostmanCollection;
+    postman: FdrLambda.docs.v1.read.PublishedPostmanCollection | undefined;
 }

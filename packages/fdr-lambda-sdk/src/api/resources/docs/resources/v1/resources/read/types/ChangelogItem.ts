@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface ChangelogItem {
     date: string;
     pageId: FdrLambda.PageId;
-    tags?: string[];
+    tags: string[] | undefined;
 }

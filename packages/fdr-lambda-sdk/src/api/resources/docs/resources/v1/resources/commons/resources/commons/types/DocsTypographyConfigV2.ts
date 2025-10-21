@@ -5,7 +5,7 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface DocsTypographyConfigV2 {
-    headingsFont?: FdrLambda.docs.v1.commons.FontConfigV2;
-    bodyFont?: FdrLambda.docs.v1.commons.FontConfigV2;
-    codeFont?: FdrLambda.docs.v1.commons.FontConfigV2;
+    headingsFont: FdrLambda.docs.v1.commons.FontConfigV2 | undefined;
+    bodyFont: FdrLambda.docs.v1.commons.FontConfigV2 | undefined;
+    codeFont: FdrLambda.docs.v1.commons.FontConfigV2 | undefined;
 }

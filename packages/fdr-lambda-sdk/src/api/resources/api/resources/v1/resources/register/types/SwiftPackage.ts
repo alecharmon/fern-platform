@@ -4,5 +4,5 @@
 
 export interface SwiftPackage {
     package: string;
-    version?: string;
+    version: string | undefined;
 }

@@ -14,5 +14,5 @@ export interface ApiDefinitionPackage {
      * if present, this package should be replaced with the provided subpackage
      * in the docs navigation.
      */
-    pointsTo?: FdrLambda.api.v1.SubpackageId;
+    pointsTo: FdrLambda.api.v1.SubpackageId | undefined;
 }

@@ -5,15 +5,15 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface DocsLayoutConfig {
-    pageWidth?: FdrLambda.docs.v1.commons.PageWidthSizeConfig;
-    contentWidth?: FdrLambda.docs.v1.commons.SizeConfig;
-    sidebarWidth?: FdrLambda.docs.v1.commons.SizeConfig;
-    headerHeight?: FdrLambda.docs.v1.commons.SizeConfig;
-    searchbarPlacement?: FdrLambda.docs.v1.commons.SearchbarPlacement;
-    tabsPlacement?: FdrLambda.docs.v1.commons.TabsPlacement;
-    contentAlignment?: FdrLambda.docs.v1.commons.ContentAlignment;
-    headerPosition?: FdrLambda.docs.v1.commons.HeaderPosition;
-    disableHeader?: boolean;
-    hideNavLinks?: boolean;
-    hideFeedback?: boolean;
+    pageWidth: FdrLambda.docs.v1.commons.PageWidthSizeConfig | undefined;
+    contentWidth: FdrLambda.docs.v1.commons.SizeConfig | undefined;
+    sidebarWidth: FdrLambda.docs.v1.commons.SizeConfig | undefined;
+    headerHeight: FdrLambda.docs.v1.commons.SizeConfig | undefined;
+    searchbarPlacement: FdrLambda.docs.v1.commons.SearchbarPlacement | undefined;
+    tabsPlacement: FdrLambda.docs.v1.commons.TabsPlacement | undefined;
+    contentAlignment: FdrLambda.docs.v1.commons.ContentAlignment | undefined;
+    headerPosition: FdrLambda.docs.v1.commons.HeaderPosition | undefined;
+    disableHeader: boolean | undefined;
+    hideNavLinks: boolean | undefined;
+    hideFeedback: boolean | undefined;
 }

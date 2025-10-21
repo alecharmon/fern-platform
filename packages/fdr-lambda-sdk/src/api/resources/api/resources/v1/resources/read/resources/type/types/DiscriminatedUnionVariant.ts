@@ -6,6 +6,6 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface DiscriminatedUnionVariant extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     discriminantValue: string;
-    displayName?: string;
+    displayName: string | undefined;
     additionalProperties: FdrLambda.api.v1.read.ObjectType;
 }

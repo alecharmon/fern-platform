@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface PageActionsConfig {
-    default?: FdrLambda.docs.v1.commons.PageActionOption;
-    options?: FdrLambda.docs.v1.commons.PageActionOptions;
+    default: FdrLambda.docs.v1.commons.PageActionOption | undefined;
+    options: FdrLambda.docs.v1.commons.PageActionOptions | undefined;
 }

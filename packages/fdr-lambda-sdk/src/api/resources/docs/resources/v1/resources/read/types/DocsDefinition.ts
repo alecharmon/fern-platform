@@ -14,7 +14,7 @@ export interface DocsDefinition {
      * A map of file names to their contents.
      * The key is the absolute path file name and the value is the file contents.
      */
-    jsFiles?: Record<string, string>;
-    id?: FdrLambda.DocsConfigId;
+    jsFiles: Record<string, string> | undefined;
+    id: FdrLambda.DocsConfigId | undefined;
     config: FdrLambda.docs.v1.read.DocsConfig;
 }

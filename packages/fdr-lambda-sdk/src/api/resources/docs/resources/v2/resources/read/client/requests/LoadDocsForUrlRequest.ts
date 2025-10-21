@@ -7,7 +7,7 @@ import * as FdrLambda from "../../../../../../../../index.js";
 /**
  * @example
  *     {
- *         url: "url"
+ *         url: FdrLambda.Url("url")
  *     }
  */
 export interface LoadDocsForUrlRequest {

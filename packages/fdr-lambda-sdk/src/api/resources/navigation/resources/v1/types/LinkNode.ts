@@ -7,6 +7,6 @@ import * as FdrLambda from "../../../../../index.js";
 export interface LinkNode extends FdrLambda.navigation.v1.WithNodeId {
     type: "link";
     title: string;
-    icon?: string;
+    icon: string | undefined;
     url: FdrLambda.Url;
 }

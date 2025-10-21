@@ -5,8 +5,8 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface ErrorDeclarationV2 extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
-    type?: FdrLambda.api.v1.read.TypeShape;
+    type: FdrLambda.api.v1.read.TypeShape | undefined;
     statusCode: number;
-    name?: string;
-    examples?: FdrLambda.api.v1.read.ErrorExample[];
+    name: string | undefined;
+    examples: FdrLambda.api.v1.read.ErrorExample[] | undefined;
 }

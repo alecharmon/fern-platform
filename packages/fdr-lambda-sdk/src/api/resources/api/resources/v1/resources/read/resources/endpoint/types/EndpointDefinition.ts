@@ -8,25 +8,25 @@ export interface EndpointDefinition extends FdrLambda.api.v1.WithDescription, Fd
     /** When this is true, the api definition will have a union for auth */
     authed: boolean;
     /** List of auth scheme IDs that apply to this endpoint. Empty list means no auth required. */
-    authV2?: FdrLambda.AuthSchemeId[];
-    defaultEnvironment?: FdrLambda.EnvironmentId;
+    authV2: FdrLambda.AuthSchemeId[] | undefined;
+    defaultEnvironment: FdrLambda.EnvironmentId | undefined;
     environments: FdrLambda.api.v1.Environment[];
     method: FdrLambda.HttpMethod;
     id: FdrLambda.EndpointId;
-    originalEndpointId?: string;
+    originalEndpointId: string | undefined;
     urlSlug: string;
-    migratedFromUrlSlugs?: string[];
-    name?: string;
+    migratedFromUrlSlugs: string[] | undefined;
+    name: string | undefined;
     path: FdrLambda.api.v1.read.EndpointPath;
     queryParameters: FdrLambda.api.v1.read.QueryParameter[];
     headers: FdrLambda.api.v1.read.Header[];
-    request?: FdrLambda.api.v1.read.HttpRequest;
-    requestsV2?: FdrLambda.api.v1.read.HttpRequestsV2;
-    response?: FdrLambda.api.v1.read.HttpResponse;
-    responsesV2?: FdrLambda.api.v1.read.HttpResponsesV2;
+    request: FdrLambda.api.v1.read.HttpRequest | undefined;
+    requestsV2: FdrLambda.api.v1.read.HttpRequestsV2 | undefined;
+    response: FdrLambda.api.v1.read.HttpResponse | undefined;
+    responsesV2: FdrLambda.api.v1.read.HttpResponsesV2 | undefined;
     errors: FdrLambda.api.v1.read.ErrorDeclaration[];
-    errorsV2?: FdrLambda.api.v1.read.ErrorDeclarationV2[];
+    errorsV2: FdrLambda.api.v1.read.ErrorDeclarationV2[] | undefined;
     examples: FdrLambda.api.v1.read.ExampleEndpointCall[];
-    snippetTemplates?: FdrLambda.api.v1.read.EndpointSnippetTemplates;
-    protocol?: FdrLambda.api.v1.Protocol;
+    snippetTemplates: FdrLambda.api.v1.read.EndpointSnippetTemplates | undefined;
+    protocol: FdrLambda.api.v1.Protocol | undefined;
 }

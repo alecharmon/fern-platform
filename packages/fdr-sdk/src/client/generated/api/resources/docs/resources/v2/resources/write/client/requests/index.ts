@@ -6,3 +6,4 @@ export { type SetIsArchivedRequest } from "./SetIsArchivedRequest.js";
 export { type SetDocsUrlMetadataRequest } from "./SetDocsUrlMetadataRequest.js";
 export { type AddAlgoliaPreviewWhitelistRequest } from "./AddAlgoliaPreviewWhitelistRequest.js";
 export { type RemoveAlgoliaPreviewWhitelistRequest } from "./RemoveAlgoliaPreviewWhitelistRequest.js";
+export { type DeleteDocsSiteRequest } from "./DeleteDocsSiteRequest.js";

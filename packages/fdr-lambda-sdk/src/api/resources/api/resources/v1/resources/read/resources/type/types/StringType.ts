@@ -3,9 +3,9 @@
  */
 
 export interface StringType {
-    format?: string;
-    regex?: string;
-    minLength?: number;
-    maxLength?: number;
-    default?: string;
+    format: string | undefined;
+    regex: string | undefined;
+    minLength: number | undefined;
+    maxLength: number | undefined;
+    default: string | undefined;
 }

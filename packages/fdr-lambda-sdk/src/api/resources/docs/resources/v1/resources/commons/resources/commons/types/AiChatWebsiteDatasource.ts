@@ -4,5 +4,5 @@
 
 export interface AiChatWebsiteDatasource {
     url: string;
-    title?: string;
+    title: string | undefined;
 }

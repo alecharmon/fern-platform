@@ -9,6 +9,6 @@ export interface StreamResponse {
      * The terminator for each message. For example, for OpenAPI
      * the terminator is [DATA].
      */
-    terminator?: string;
+    terminator: string | undefined;
     shape: FdrLambda.api.latest.TypeShape;
 }

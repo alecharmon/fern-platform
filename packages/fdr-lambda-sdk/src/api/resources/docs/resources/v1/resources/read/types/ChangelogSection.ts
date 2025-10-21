@@ -5,8 +5,8 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface ChangelogSection extends FdrLambda.docs.v1.read.NavigationNodeMetadata {
-    title?: string;
-    description?: string;
-    pageId?: FdrLambda.PageId;
+    title: string | undefined;
+    description: string | undefined;
+    pageId: FdrLambda.PageId | undefined;
     items: FdrLambda.docs.v1.read.ChangelogItem[];
 }

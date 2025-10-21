@@ -5,23 +5,23 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface MetadataConfig {
-    "og:site_name"?: string;
-    "og:title"?: string;
-    "og:description"?: string;
-    "og:url"?: string;
-    "og:image"?: FdrLambda.docs.v1.commons.FileIdOrUrl;
-    "og:image:width"?: number;
-    "og:image:height"?: number;
-    "og:locale"?: string;
-    "og:logo"?: FdrLambda.docs.v1.commons.FileIdOrUrl;
-    "twitter:title"?: string;
-    "twitter:description"?: string;
-    "twitter:handle"?: string;
-    "twitter:image"?: FdrLambda.docs.v1.commons.FileIdOrUrl;
-    "twitter:site"?: string;
-    "twitter:url"?: string;
-    "twitter:card"?: FdrLambda.docs.v1.commons.TwitterCardSetting;
-    noindex?: boolean;
-    nofollow?: boolean;
-    canonicalHost?: string;
+    "og:site_name": string | undefined;
+    "og:title": string | undefined;
+    "og:description": string | undefined;
+    "og:url": string | undefined;
+    "og:image": FdrLambda.docs.v1.commons.FileIdOrUrl | undefined;
+    "og:image:width": number | undefined;
+    "og:image:height": number | undefined;
+    "og:locale": string | undefined;
+    "og:logo": FdrLambda.docs.v1.commons.FileIdOrUrl | undefined;
+    "twitter:title": string | undefined;
+    "twitter:description": string | undefined;
+    "twitter:handle": string | undefined;
+    "twitter:image": FdrLambda.docs.v1.commons.FileIdOrUrl | undefined;
+    "twitter:site": string | undefined;
+    "twitter:url": string | undefined;
+    "twitter:card": FdrLambda.docs.v1.commons.TwitterCardSetting | undefined;
+    noindex: boolean | undefined;
+    nofollow: boolean | undefined;
+    canonicalHost: string | undefined;
 }

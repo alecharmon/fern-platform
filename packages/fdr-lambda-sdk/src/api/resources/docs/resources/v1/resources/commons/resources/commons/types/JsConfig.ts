@@ -5,7 +5,7 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface JsConfig {
-    remote?: FdrLambda.docs.v1.commons.JsRemoteConfig[];
+    remote: FdrLambda.docs.v1.commons.JsRemoteConfig[] | undefined;
     files: FdrLambda.docs.v1.commons.JsFileConfig[];
-    inline?: string[];
+    inline: string[] | undefined;
 }

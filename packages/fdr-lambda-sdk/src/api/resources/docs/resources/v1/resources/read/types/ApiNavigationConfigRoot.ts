@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface ApiNavigationConfigRoot {
-    summaryPageId?: FdrLambda.PageId;
+    summaryPageId: FdrLambda.PageId | undefined;
     items: FdrLambda.docs.v1.read.ApiNavigationConfigItem[];
 }

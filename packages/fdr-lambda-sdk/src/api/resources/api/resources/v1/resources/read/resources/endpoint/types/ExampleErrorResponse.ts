@@ -9,6 +9,6 @@ export type ExampleErrorResponse = FdrLambda.api.v1.read.ExampleErrorResponse.Js
 export namespace ExampleErrorResponse {
     export interface Json {
         type: "json";
-        value?: unknown;
+        value: unknown;
     }
 }

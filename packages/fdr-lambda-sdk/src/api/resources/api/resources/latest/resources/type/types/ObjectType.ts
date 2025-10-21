@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface ObjectType {
     extends: FdrLambda.TypeId[];
     properties: FdrLambda.api.latest.ObjectProperty[];
-    extraProperties?: FdrLambda.api.latest.TypeReference;
+    extraProperties: FdrLambda.api.latest.TypeReference | undefined;
 }

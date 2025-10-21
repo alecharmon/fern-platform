@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../index.js";
 export interface PayloadInput {
     location: FdrLambda.PayloadLocation;
     /** Dot delimited path to the value within the payload, if omitted the full payload is used. */
-    path?: string;
+    path: string | undefined;
 }

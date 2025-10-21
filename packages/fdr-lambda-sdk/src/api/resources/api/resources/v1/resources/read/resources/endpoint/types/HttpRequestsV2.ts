@@ -5,5 +5,5 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface HttpRequestsV2 {
-    requests?: FdrLambda.api.v1.read.HttpRequest[];
+    requests: FdrLambda.api.v1.read.HttpRequest[] | undefined;
 }

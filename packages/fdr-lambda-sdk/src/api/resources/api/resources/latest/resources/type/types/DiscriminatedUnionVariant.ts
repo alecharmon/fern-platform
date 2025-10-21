@@ -9,5 +9,5 @@ export interface DiscriminatedUnionVariant
         FdrLambda.api.latest.WithAvailability,
         FdrLambda.api.latest.ObjectType {
     discriminantValue: string;
-    displayName?: string;
+    displayName: string | undefined;
 }

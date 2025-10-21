@@ -139,6 +139,14 @@ export class FdrLambdaDeployStack extends Stack {
             })
         );
 
+        // Grant permission to write docs definitions to S3 (for ensureDocsInS3 endpoint)
+        lambdaFunction.addToRolePolicy(
+            new iam.PolicyStatement({
+                actions: ["s3:PutObject"],
+                resources: [`arn:aws:s3:::${dbDocsDefinitionBucketName}/*`]
+            })
+        );
+
         // Grant permission to list buckets (needed by S3 SDK for error handling)
         lambdaFunction.addToRolePolicy(
             new iam.PolicyStatement({

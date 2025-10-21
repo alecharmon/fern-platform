@@ -5,5 +5,5 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface WithAvailability {
-    availability?: FdrLambda.Availability;
+    availability: FdrLambda.Availability | undefined;
 }

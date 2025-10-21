@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface ExampleWebSocketMessage {
     type: FdrLambda.api.v1.WebSocketMessageId;
-    body?: unknown;
+    body: unknown;
 }

@@ -7,6 +7,6 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface OAuthClientCredentialsReferencedEndpoint extends FdrLambda.api.v1.WithDescription {
     endpointId: FdrLambda.EndpointId;
     accessTokenLocator: FdrLambda.JqString;
-    headerName?: string;
-    tokenPrefix?: string;
+    headerName: string | undefined;
+    tokenPrefix: string | undefined;
 }

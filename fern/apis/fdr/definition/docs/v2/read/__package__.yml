@@ -52,6 +52,25 @@ service:
         - DomainNotRegisteredError
         - rootCommons.UnauthorizedError
 
+    ensureDocsInS3:
+      method: POST
+      path: /ensure-docs-in-s3
+      audiences:
+        - fdr-lambda
+      docs: |
+        Loads docs from the database and stores them in S3.
+        Returns the S3 URL where the docs definition can be accessed.
+        This endpoint always writes to S3 idempotently, regardless of whether the docs already exist in S3.
+      request:
+        name: EnsureDocsInS3Request
+        body:
+          properties:
+            url: rootCommons.Url
+      response: EnsureDocsInS3Response
+      errors:
+        - DomainNotRegisteredError
+        - rootCommons.UnauthorizedError
+
     getPrivateDocsForUrl:
       availability: deprecated
       method: POST
@@ -122,6 +141,11 @@ types:
       baseUrl: BaseUrl
       definition: v1DocsRead.DocsDefinition
       lightModeEnabled: boolean
+
+  EnsureDocsInS3Response:
+    properties:
+      s3Url: rootCommons.Url
+      orgId: rootCommons.OrgId
 
   BaseUrl:
     properties:

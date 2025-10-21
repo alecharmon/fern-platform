@@ -5,8 +5,8 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface AiChatConfig {
-    model?: FdrLambda.docs.v1.commons.AiModel;
-    systemPrompt?: string;
-    location?: FdrLambda.docs.v1.commons.AiChatLocation[];
-    datasources?: FdrLambda.docs.v1.commons.AiChatDatasource[];
+    model: FdrLambda.docs.v1.commons.AiModel | undefined;
+    systemPrompt: string | undefined;
+    location: FdrLambda.docs.v1.commons.AiChatLocation[] | undefined;
+    datasources: FdrLambda.docs.v1.commons.AiChatDatasource[] | undefined;
 }

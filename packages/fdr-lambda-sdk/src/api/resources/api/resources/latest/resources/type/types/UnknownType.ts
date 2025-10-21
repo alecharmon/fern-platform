@@ -3,5 +3,5 @@
  */
 
 export interface UnknownType {
-    displayName?: string;
+    displayName: string | undefined;
 }

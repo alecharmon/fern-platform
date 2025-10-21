@@ -12,5 +12,5 @@ export interface ApiPackageNode
     type: "apiPackage";
     children: FdrLambda.navigation.v1.ApiPackageChild[];
     /** Settings for the api playground that is applied only to descendants of this api package. */
-    playground?: FdrLambda.navigation.v1.PlaygroundSettings;
+    playground: FdrLambda.navigation.v1.PlaygroundSettings | undefined;
 }

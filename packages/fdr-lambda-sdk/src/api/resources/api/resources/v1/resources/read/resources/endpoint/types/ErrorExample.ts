@@ -5,6 +5,6 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface ErrorExample extends FdrLambda.api.v1.WithDescription {
-    name?: string;
+    name: string | undefined;
     responseBody: FdrLambda.api.v1.read.ExampleErrorResponse;
 }

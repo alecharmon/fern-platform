@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface PublishedPostmanCollection {
     url: FdrLambda.Url;
-    githubRepo?: FdrLambda.docs.v1.read.GitHubRepo;
+    githubRepo: FdrLambda.docs.v1.read.GitHubRepo | undefined;
 }

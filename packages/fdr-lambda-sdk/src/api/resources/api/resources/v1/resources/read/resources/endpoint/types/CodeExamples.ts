@@ -5,10 +5,10 @@
 import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface CodeExamples {
-    nodeAxios?: string;
-    pythonSdk?: FdrLambda.api.v1.read.PythonSnippet;
-    typescriptSdk?: FdrLambda.api.v1.read.TypescriptSnippet;
-    goSdk?: FdrLambda.api.v1.read.GoSnippet;
-    rubySdk?: FdrLambda.api.v1.read.RubySnippet;
-    csharpSdk?: FdrLambda.api.v1.read.CsharpSnippet;
+    nodeAxios: string | undefined;
+    pythonSdk: FdrLambda.api.v1.read.PythonSnippet | undefined;
+    typescriptSdk: FdrLambda.api.v1.read.TypescriptSnippet | undefined;
+    goSdk: FdrLambda.api.v1.read.GoSnippet | undefined;
+    rubySdk: FdrLambda.api.v1.read.RubySnippet | undefined;
+    csharpSdk: FdrLambda.api.v1.read.CsharpSnippet | undefined;
 }

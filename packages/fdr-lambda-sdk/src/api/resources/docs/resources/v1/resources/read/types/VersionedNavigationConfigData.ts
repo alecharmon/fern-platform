@@ -7,6 +7,6 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface VersionedNavigationConfigData {
     version: FdrLambda.VersionId;
     urlSlug: string;
-    availability?: FdrLambda.Availability;
+    availability: FdrLambda.Availability | undefined;
     config: FdrLambda.docs.v1.read.UnversionedNavigationConfig;
 }

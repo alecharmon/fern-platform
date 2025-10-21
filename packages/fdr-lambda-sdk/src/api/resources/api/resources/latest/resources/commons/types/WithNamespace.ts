@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../index.js";
 
 export interface WithNamespace {
     /** A list of subpackage names based on the order in which values are rendered in the frontend. */
-    namespace?: FdrLambda.api.latest.SubpackageId[];
+    namespace: FdrLambda.api.latest.SubpackageId[] | undefined;
 }

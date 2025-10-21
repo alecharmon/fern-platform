@@ -3,11 +3,11 @@
  */
 
 export interface PageActionOptions {
-    copyPage?: boolean;
-    viewAsMarkdown?: boolean;
-    askAi?: boolean;
-    openAi?: boolean;
-    claude?: boolean;
-    cursor?: boolean;
-    vscode?: boolean;
+    copyPage: boolean | undefined;
+    viewAsMarkdown: boolean | undefined;
+    askAi: boolean | undefined;
+    openAi: boolean | undefined;
+    claude: boolean | undefined;
+    cursor: boolean | undefined;
+    vscode: boolean | undefined;
 }

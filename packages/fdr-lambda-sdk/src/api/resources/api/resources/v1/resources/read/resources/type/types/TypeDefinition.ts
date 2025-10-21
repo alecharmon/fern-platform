@@ -7,5 +7,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface TypeDefinition extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     name: string;
     shape: FdrLambda.api.v1.read.TypeShape;
-    displayName?: string;
+    displayName: string | undefined;
 }

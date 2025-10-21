@@ -19,6 +19,11 @@ export interface ReadServiceMethods {
         cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
         locals: any;
     }, next: express.NextFunction): void | Promise<void>;
+    ensureDocsInS3(req: express.Request<never, FernRegistry.docs.v2.read.EnsureDocsInS3Response, FernRegistry.docs.v2.read.EnsureDocsInS3Request, never>, res: {
+        send: (responseBody: FernRegistry.docs.v2.read.EnsureDocsInS3Response) => Promise<void>;
+        cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+        locals: any;
+    }, next: express.NextFunction): void | Promise<void>;
     getPrivateDocsForUrl(req: express.Request<never, FernRegistry.docs.v2.read.LoadDocsForUrlResponse, FernRegistry.docs.v2.read.LoadPrivateDocsForUrlRequest, never>, res: {
         send: (responseBody: FernRegistry.docs.v2.read.LoadDocsForUrlResponse) => Promise<void>;
         cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;

@@ -6,10 +6,10 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface WebhookDefinition extends FdrLambda.api.v1.WithDescription {
     urlSlug: string;
-    migratedFromUrlSlugs?: string[];
+    migratedFromUrlSlugs: string[] | undefined;
     method: FdrLambda.api.v1.WebhookHttpMethod;
     id: FdrLambda.WebhookId;
-    name?: string;
+    name: string | undefined;
     path: string[];
     headers: FdrLambda.api.v1.read.Header[];
     payload: FdrLambda.api.v1.read.WebhookPayload;

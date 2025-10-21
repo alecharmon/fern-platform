@@ -31,9 +31,19 @@
     "test": "vitest --run --passWithNoTests --globals",
     "test:update": "vitest --run  --passWithNoTests --globals -u"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/readable-stream": "^4.0.21",
+    "form-data": "4.0.4",
+    "js-base64": "3.7.7",
+    "node-fetch": "2.7.0",
+    "qs": "catalog:",
+    "readable-stream": "^4.7.0",
+    "url-join": "catalog:"
+  },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
+    "@types/node-fetch": "catalog:",
+    "@types/qs": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

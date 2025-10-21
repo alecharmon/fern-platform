@@ -5,7 +5,7 @@
 import * as FdrLambda from "../../../index.js";
 
 export interface UnionTemplate {
-    imports?: string[];
+    imports: string[] | undefined;
     /**
      * We might not need this, but the idea here is to be able to omit if it's optional and undefined,
      * or default if omitted and required.
@@ -14,5 +14,5 @@ export interface UnionTemplate {
     templateString: string;
     /** A map of the union member's typeID to the template. */
     members: Record<string, FdrLambda.Template>;
-    templateInput?: FdrLambda.PayloadInput;
+    templateInput: FdrLambda.PayloadInput | undefined;
 }

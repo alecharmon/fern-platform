@@ -5,8 +5,8 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface HeaderAuth extends FdrLambda.api.v1.WithDescription {
-    nameOverride?: string;
+    nameOverride: string | undefined;
     headerWireValue: string;
     /** The prefix that comes before the header */
-    prefix?: string;
+    prefix: string | undefined;
 }

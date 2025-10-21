@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface JsFileConfig {
     fileId: FdrLambda.FileId;
-    strategy?: FdrLambda.docs.v1.commons.JsScriptStrategy;
+    strategy: FdrLambda.docs.v1.commons.JsScriptStrategy | undefined;
 }

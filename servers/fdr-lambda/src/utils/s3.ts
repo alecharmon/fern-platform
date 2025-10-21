@@ -1,4 +1,4 @@
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { DocsV2Read } from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
@@ -18,6 +18,7 @@ interface S3Config {
 }
 
 // Initialize S3 clients lazily
+// @ts-expect-error - publicDocsS3Client is initialized but not yet used
 let publicDocsS3Client: S3Client | undefined;
 let privateDocsS3Client: S3Client | undefined;
 let dbDocsDefinitionS3Client: S3Client | undefined;
@@ -116,4 +117,31 @@ export async function getDocsDefinitionFromS3(domain: string): Promise<DocsV2Rea
     } catch (error) {
         return null;
     }
+}
+
+export async function storeDocsDefinitionInS3(
+    domain: string,
+    docsDefinition: DocsV2Read.LoadDocsForUrlResponse
+): Promise<void> {
+    if (!s3Config) {
+        throw new Error("S3 not initialized. Call initializeS3() first.");
+    }
+
+    if (!dbDocsDefinitionS3Client) {
+        throw new Error("DB Docs Definition S3 client not initialized");
+    }
+
+    if (!s3Config.dbDocsDefinitionS3BucketName || s3Config.dbDocsDefinitionS3BucketName.trim() === "") {
+        throw new Error("DB Docs Definition S3 bucket not configured");
+    }
+
+    const key = getS3KeyForV1DocsDefinition(domain);
+
+    const command = new PutObjectCommand({
+        Bucket: s3Config.dbDocsDefinitionS3BucketName,
+        Key: key,
+        Body: JSON.stringify(docsDefinition),
+        ContentType: "application/json"
+    });
+    await dbDocsDefinitionS3Client.send(command);
 }

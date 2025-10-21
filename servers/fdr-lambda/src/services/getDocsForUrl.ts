@@ -1,5 +1,6 @@
 /** biome-ignore-all lint/suspicious/noConsole: i am too lazy to install a real logger here right now */
 import {
+    type APIV1Db,
     type APIV1Read,
     convertDbAPIDefinitionToRead,
     convertDocsDefinitionToRead,
@@ -53,7 +54,7 @@ export async function getDocsForUrl(
             filesV2,
             apis: apiDefinitions.apiV1Definitions,
             apisV2: apiDefinitions.apiV2Definitions,
-            id: dbDocs.docsConfigInstanceId ?? undefined
+            id: dbDocs.docsConfigInstanceId != null ? DocsV1Read.DocsConfigId(dbDocs.docsConfigInstanceId) : undefined
         });
         return {
             orgId: dbDocs.orgId,
@@ -137,7 +138,7 @@ async function fetchApiDefinitions(
 
     const apiV1Definitions: Record<string, APIV1Read.ApiDefinition> = {};
     for (const row of apiV1Result.rows) {
-        const apiDefinitionJson = readBuffer(row.definition);
+        const apiDefinitionJson = readBuffer(row.definition) as APIV1Db.DbApiDefinition;
         apiV1Definitions[row.apiDefinitionId] = convertDbAPIDefinitionToRead(apiDefinitionJson);
     }
 
@@ -167,13 +168,13 @@ async function getFilesV2(
                 fileDbInfo.type === "image"
                     ? {
                           type: "image",
-                          url: presignedUrl,
+                          url: DocsV1Read.Url(presignedUrl),
                           width: fileDbInfo.width,
                           height: fileDbInfo.height,
                           blurDataUrl: fileDbInfo.blurDataUrl,
                           alt: fileDbInfo.alt
                       }
-                    : { type: "url", url: presignedUrl };
+                    : { type: "url", url: DocsV1Read.Url(presignedUrl) };
 
             return [DocsV1Read.FileId(fileId), readFile];
         }

@@ -5,12 +5,12 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface ThemeConfig {
-    logo?: FdrLambda.FileId;
-    backgroundImage?: FdrLambda.FileId;
+    logo: FdrLambda.FileId | undefined;
+    backgroundImage: FdrLambda.FileId | undefined;
     accentPrimary: FdrLambda.docs.v1.commons.RgbaColor;
     background: FdrLambda.docs.v1.read.Background;
-    border?: FdrLambda.docs.v1.commons.RgbaColor;
-    sidebarBackground?: FdrLambda.docs.v1.commons.RgbaColor;
-    headerBackground?: FdrLambda.docs.v1.commons.RgbaColor;
-    cardBackground?: FdrLambda.docs.v1.commons.RgbaColor;
+    border: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    sidebarBackground: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    headerBackground: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    cardBackground: FdrLambda.docs.v1.commons.RgbaColor | undefined;
 }

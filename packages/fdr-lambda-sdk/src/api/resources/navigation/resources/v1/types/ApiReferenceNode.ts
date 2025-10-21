@@ -11,11 +11,11 @@ export interface ApiReferenceNode
         FdrLambda.navigation.v1.WithRedirect {
     type: "apiReference";
     /** If true, long-scrolling will be disabled. */
-    paginated?: boolean;
-    showErrors?: boolean;
-    hideTitle?: boolean;
+    paginated: boolean | undefined;
+    showErrors: boolean | undefined;
+    hideTitle: boolean | undefined;
     children: FdrLambda.navigation.v1.ApiPackageChild[];
-    changelog?: FdrLambda.navigation.v1.ChangelogNode;
+    changelog: FdrLambda.navigation.v1.ChangelogNode | undefined;
     /** Settings for the api playground that affects all endpoints. */
-    playground?: FdrLambda.navigation.v1.PlaygroundSettings;
+    playground: FdrLambda.navigation.v1.PlaygroundSettings | undefined;
 }

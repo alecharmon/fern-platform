@@ -9,16 +9,16 @@ export interface ApiDefinition {
     rootPackage: FdrLambda.api.v1.read.ApiDefinitionPackage;
     types: Record<FdrLambda.TypeId, FdrLambda.api.v1.read.TypeDefinition>;
     subpackages: Record<FdrLambda.api.v1.SubpackageId, FdrLambda.api.v1.read.ApiDefinitionSubpackage>;
-    snippetsConfiguration?: FdrLambda.api.v1.register.SnippetsConfig;
-    auth?: FdrLambda.api.v1.read.ApiAuth;
-    authSchemes?: Record<FdrLambda.AuthSchemeId, FdrLambda.api.v1.read.ApiAuth>;
+    snippetsConfiguration: FdrLambda.api.v1.register.SnippetsConfig | undefined;
+    auth: FdrLambda.api.v1.read.ApiAuth | undefined;
+    authSchemes: Record<FdrLambda.AuthSchemeId, FdrLambda.api.v1.read.ApiAuth> | undefined;
     /**
      * If empty, assume false.
      * Whether or not endpoints are being served at different
      * base urls (i.e. https://a.com and https://b.com)
      */
-    hasMultipleBaseUrls?: boolean;
+    hasMultipleBaseUrls: boolean | undefined;
     /** Use the docs navigation instead. */
-    navigation?: FdrLambda.api.v1.read.ApiNavigationConfigRoot;
-    globalHeaders?: FdrLambda.api.v1.read.Header[];
+    navigation: FdrLambda.api.v1.read.ApiNavigationConfigRoot | undefined;
+    globalHeaders: FdrLambda.api.v1.read.Header[] | undefined;
 }

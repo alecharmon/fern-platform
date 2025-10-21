@@ -6,5 +6,5 @@ import * as FdrLambda from "../../../../../index.js";
 
 export interface PageNode extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithPage {
     type: "page";
-    availability?: FdrLambda.navigation.v1.NavigationV1Availability;
+    availability: FdrLambda.navigation.v1.NavigationV1Availability | undefined;
 }

@@ -6,8 +6,8 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 
 export interface NavbarLinkMetadata {
     url: FdrLambda.Url;
-    text?: string;
-    icon?: string;
-    rightIcon?: string;
-    rounded?: boolean;
+    text: string | undefined;
+    icon: string | undefined;
+    rightIcon: string | undefined;
+    rounded: boolean | undefined;
 }

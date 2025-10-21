@@ -27,12 +27,13 @@ env:
 
 jobs:
   preview_lambda:
-    runs-on: Seed
+    runs-on: ubuntu-latest
     environment: Fern Dev
     strategy:
       matrix:
         concurrency: [1]
     env:
+      NODE_OPTIONS: --max-old-space-size=8192
       APPLICATION_ENVIRONMENT: dev
       PREVIEW: "true"
       PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -172,7 +173,7 @@ jobs:
             }
 
   cleanup_preview:
-    runs-on: Seed
+    runs-on: ubuntu-latest
     if: github.event.action == 'closed'
     environment: Fern Dev
     env:

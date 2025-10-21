@@ -4,5 +4,5 @@
 
 export interface CratesPackage {
     package: string;
-    version?: string;
+    version: string | undefined;
 }

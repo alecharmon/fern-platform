@@ -5,5 +5,5 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface BearerAuth extends FdrLambda.api.v1.WithDescription {
-    tokenName?: string;
+    tokenName: string | undefined;
 }

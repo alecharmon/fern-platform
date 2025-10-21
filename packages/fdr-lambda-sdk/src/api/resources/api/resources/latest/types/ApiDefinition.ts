@@ -12,6 +12,6 @@ export interface ApiDefinition {
     types: Record<FdrLambda.TypeId, FdrLambda.api.latest.TypeDefinition>;
     subpackages: Record<FdrLambda.api.latest.SubpackageId, FdrLambda.api.latest.SubpackageMetadata>;
     auths: Record<FdrLambda.AuthSchemeId, FdrLambda.api.latest.AuthScheme>;
-    globalHeaders?: FdrLambda.api.latest.ObjectProperty[];
-    snippetsConfiguration?: FdrLambda.api.v1.register.SnippetsConfig;
+    globalHeaders: FdrLambda.api.latest.ObjectProperty[] | undefined;
+    snippetsConfiguration: FdrLambda.api.v1.register.SnippetsConfig | undefined;
 }
