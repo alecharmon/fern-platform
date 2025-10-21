@@ -43,7 +43,7 @@ async function generateSuggestions(domain: string, algoliaSearchKey: string) {
         result = await generateObject({
             model: languageModel,
             mode: "json",
-            abortSignal: AbortSignal.timeout(8500),
+            abortSignal: AbortSignal.timeout(25000),
             system: `You are a helpful assistant that makes suggestions of questions for the user to ask about the documentation.
 The prompt will be an array of separate search results that are JSON objects.
 Generate exactly 5 questions based on the search results provided.
@@ -65,7 +65,7 @@ DO NOT include any explanatory text - only return the JSON object.`,
                         `# ${hit.title}\n${hit.description ?? ""}\n${hit.type === "changelog" || hit.type === "markdown" ? (hit.content ?? "") : ""}`
                 )
                 .join("\n\n"),
-            maxRetries: 3,
+            maxRetries: 0,
             schema: SuggestionsSchema,
             experimental_telemetry: {
                 isEnabled: true,
