@@ -374,6 +374,12 @@ export class Settings {
     /**
      * Toggle Ask AI setting and return job_id for tracking.
      *
+     * Args:
+     *     domain: Domain to toggle Ask AI for
+     *     org_name: Organization name
+     *     preview: Whether this is a preview deployment
+     *     locations: Optional list of locations to enable. Valid values: docs, slack, discord
+     *
      * @param {FernAI.ToggleAskAiRequest} request
      * @param {Settings.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -396,12 +402,20 @@ export class Settings {
         request: FernAI.ToggleAskAiRequest,
         requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ToggleAskAiResponse>> {
-        const { domain, org_name: orgName, preview } = request;
+        const { domain, org_name: orgName, preview, locations } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         _queryParams["domain"] = domain;
         _queryParams["org_name"] = orgName;
         if (preview != null) {
             _queryParams["preview"] = preview.toString();
+        }
+
+        if (locations != null) {
+            if (Array.isArray(locations)) {
+                _queryParams["locations"] = locations.map((item) => item);
+            } else {
+                _queryParams["locations"] = locations;
+            }
         }
 
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(

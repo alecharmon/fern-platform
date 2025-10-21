@@ -1,9 +1,11 @@
 from datetime import datetime
+from typing import Literal
 
 import httpx
 from fastapi import (
     BackgroundTasks,
     Depends,
+    Query,
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -150,9 +152,17 @@ async def toggle_ask_ai(
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     preview: bool = False,
+    locations: list[Literal["docs", "slack", "discord"]] | None = Query(None),
 ) -> JSONResponse:
-    """Toggle Ask AI setting and return job_id for tracking."""
-    LOGGER.info(f"Toggling Ask AI for domain {domain} and org_name {org_name}")
+    """Toggle Ask AI setting and return job_id for tracking.
+
+    Args:
+        domain: Domain to toggle Ask AI for
+        org_name: Organization name
+        preview: Whether this is a preview deployment
+        locations: Optional list of locations to enable. Valid values: docs, slack, discord
+    """
+    LOGGER.info(f"Toggling Ask AI for domain {domain} and org_name {org_name}, locations: {locations}")
     try:
         stripped_domain = strip_domain(domain)
 
@@ -189,15 +199,30 @@ async def toggle_ask_ai(
 
             if existing_record:
                 existing_record.job_id = job_id
+                if locations is not None:
+                    existing_record.docs_enabled = "docs" in locations
+                    existing_record.slack_enabled = "slack" in locations
+                    existing_record.discord_enabled = "discord" in locations
                 await db.commit()
                 LOGGER.info(f"Updated existing record for domain {stripped_domain}")
             else:
+                docs_enabled = True
+                slack_enabled = True
+                discord_enabled = True
+                if locations is not None:
+                    docs_enabled = "docs" in locations
+                    slack_enabled = "slack" in locations
+                    discord_enabled = "discord" in locations
+
                 new_record = SettingsDb(
                     domain=stripped_domain,
                     org_name=org_name,
                     job_id=job_id,
                     last_reindex_time=None,
                     is_preview=preview,
+                    docs_enabled=docs_enabled,
+                    slack_enabled=slack_enabled,
+                    discord_enabled=discord_enabled,
                 )
                 db.add(new_record)
                 await db.commit()

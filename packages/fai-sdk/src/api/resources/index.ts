@@ -1,3 +1,5 @@
+export * as settings from "./settings/index.js";
+export * from "./settings/types/index.js";
 export * as analytics from "./analytics/index.js";
 export * as chat from "./chat/index.js";
 export * as conversation from "./conversation/index.js";
@@ -9,7 +11,6 @@ export * as health from "./health/index.js";
 export * as index from "./index/index.js";
 export * as mcp from "./mcp/index.js";
 export * as query from "./query/index.js";
-export * as settings from "./settings/index.js";
 export * as slack from "./slack/index.js";
 export * from "./analytics/client/requests/index.js";
 export * from "./chat/client/requests/index.js";
