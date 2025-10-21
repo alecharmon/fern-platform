@@ -7,6 +7,7 @@ import {
     getSortedRowModel,
     useReactTable
 } from "@tanstack/react-table";
+import { useState } from "react";
 
 import type { FeedbackEntry } from "@/app/actions/getFeedback";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
@@ -14,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/utils/utils";
 
 import { BORDER_STYLES } from "../analytics/AnalyticsPageClient";
+import { exportFeedbackToCSV } from "./exportFeedbackToCSV";
 import { columns } from "./FeedbackColumnDef";
 import { FeedbackTableHeader } from "./FeedbackTableHeader";
 
@@ -27,6 +29,8 @@ interface FeedbackTableProps {
 }
 
 export function FeedbackTable({ feedback, isLoading, error, dateRange, setDateRange, onRowClick }: FeedbackTableProps) {
+    const [isExporting, setIsExporting] = useState(false);
+
     const table = useReactTable({
         data: feedback,
         columns,
@@ -34,6 +38,19 @@ export function FeedbackTable({ feedback, isLoading, error, dateRange, setDateRa
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel()
     });
+
+    const handleExport = () => {
+        setIsExporting(true);
+        try {
+            const allRows = table.getFilteredRowModel().rows;
+            const feedbackToExport = allRows.map((row) => row.original);
+            exportFeedbackToCSV(feedbackToExport, "feedback-export");
+        } catch (error) {
+            console.error("Failed to export CSV:", error);
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     if (error) {
         return (
@@ -47,7 +64,13 @@ export function FeedbackTable({ feedback, isLoading, error, dateRange, setDateRa
 
     return (
         <div className={cn(BORDER_STYLES, "border-gray-0 w-full overflow-hidden border")}>
-            <FeedbackTableHeader table={table} dateRange={dateRange} setDateRange={setDateRange} />
+            <FeedbackTableHeader
+                table={table}
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                onExport={handleExport}
+                isExporting={isExporting}
+            />
             <div className="max-h-[600px] min-h-[400px] overflow-y-auto">
                 <Table className="table-fixed">
                     <TableHeader>
