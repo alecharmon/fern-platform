@@ -6,5 +6,5 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
     const params = await props.params;
     await getAuthenticatedSessionOrRedirect(params.orgName);
 
-    return <SearchAnalyticsPage />;
+    return <SearchAnalyticsPage docsUrl={params.docsUrl} />;
 }

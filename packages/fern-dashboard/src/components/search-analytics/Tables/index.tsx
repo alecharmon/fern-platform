@@ -15,6 +15,7 @@ import AnalyticsMiniTable from "../../web-analytics/Tables/AnalyticsMiniTable";
 
 interface SearchAnalyticsTablesProps {
     dateRange: DateRangeOptions;
+    domain: string;
 }
 
 const formatNumber = (value: number) => new Intl.NumberFormat("en-US").format(value);
@@ -24,7 +25,7 @@ const MAX_TABLE_LIMIT = 10;
 const filterTableData = (data: TopSearch[] | SearchWithNoResults[]) => {
     return data.filter((item) => !!item.search).slice(0, MAX_TABLE_LIMIT);
 };
-function SearchAnalyticsTables({ dateRange }: SearchAnalyticsTablesProps) {
+function SearchAnalyticsTables({ dateRange, domain }: SearchAnalyticsTablesProps) {
     // Track sorting state for both tables
     const [topSearchesSortState, setTopSearchesSortState] = useState<{
         field: string;
@@ -44,22 +45,24 @@ function SearchAnalyticsTables({ dateRange }: SearchAnalyticsTablesProps) {
 
     // Fetch top searches data
     const topSearchesQuery = useQuery({
-        queryKey: ["top-searches", dateRange, topSearchesSortState],
+        queryKey: ["top-searches", dateRange, topSearchesSortState, domain],
         queryFn: () =>
             getTopSearches({
                 dateRange,
-                limit: 50
+                limit: 50,
+                tags: domain
             }),
         refetchInterval: 60000
     });
 
     // Fetch searches with no results data
     const noResultsQuery = useQuery({
-        queryKey: ["no-results-searches", dateRange, noResultsSortState],
+        queryKey: ["no-results-searches", dateRange, noResultsSortState, domain],
         queryFn: () =>
             getSearchesWithNoResults({
                 dateRange,
-                limit: 50
+                limit: 50,
+                tags: domain
             }),
         refetchInterval: 60000
     });

@@ -13,7 +13,24 @@ import SelectDate from "../web-analytics/SelectDate";
 import { SearchMetricsCard } from "./SearchMetricsCard";
 import SearchAnalyticsTables from "./Tables";
 
-export default function SearchAnalyticsPage() {
+function getBaseDomain(rawUrl: string) {
+    const decodedUrl = decodeURIComponent(rawUrl);
+    let baseDomain: string;
+    try {
+        const url = new URL(decodedUrl.startsWith("http") ? decodedUrl : `https://${decodedUrl}`);
+        baseDomain = url.hostname;
+    } catch {
+        baseDomain = decodedUrl.split("/")[0] ?? "";
+    }
+
+    if (!baseDomain) {
+        throw new Error("Invalid docs URL");
+    }
+
+    return baseDomain;
+}
+
+export default function SearchAnalyticsPage({ docsUrl }: { docsUrl: string }) {
     const [dateRange, setDateRange] = useState<DateRangeOptions>({
         type: "last_n_days",
         days: 7
@@ -21,11 +38,14 @@ export default function SearchAnalyticsPage() {
 
     const queryClient = useQueryClient();
 
+    const domain = getBaseDomain(docsUrl);
+
     const { data, isLoading, error } = useQuery({
-        queryKey: ["search-metrics", dateRange],
+        queryKey: ["search-metrics", dateRange, domain],
         queryFn: () =>
             getSearchMetrics({
-                dateRange
+                dateRange,
+                tags: domain
             }),
         refetchInterval: 60000 // Refetch every minute
     });
@@ -84,7 +104,7 @@ export default function SearchAnalyticsPage() {
             </div>
 
             {/* Analytics Tables - Top Searches and No Results */}
-            <SearchAnalyticsTables dateRange={dateRange} />
+            <SearchAnalyticsTables dateRange={dateRange} domain={domain} />
         </div>
     );
 }
