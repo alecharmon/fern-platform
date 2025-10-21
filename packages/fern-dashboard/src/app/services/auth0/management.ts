@@ -48,7 +48,7 @@ export function getAuth0ManagementClient() {
  * caches *
  **********/
 
-const ORGANIZATIONS_CACHE = new AsyncRedisCache(RedisCacheKeyType.ORGANIZATION, { ttlInSeconds: 10 });
+const ORGANIZATIONS_CACHE = new AsyncRedisCache(RedisCacheKeyType.ORGANIZATION, { ttlInSeconds: 10, debug: true });
 
 const ORGANIZATION_NAME_TO_ID_CACHE = new AsyncRedisCache(RedisCacheKeyType.ORGANIZATION_NAME_TO_ID, {
     ttlInSeconds: 10
@@ -113,10 +113,13 @@ export async function createInviteToken(orgName: Auth0OrgName, inviterId: string
 }
 
 export async function getOrganization(orgName: Auth0OrgName) {
+    console.log(`[getOrganization] Fetching organization: ${orgName}`);
     return await ORGANIZATIONS_CACHE.get(RedisCacheKey.organization(orgName), async () => {
+        console.log(`[getOrganization] Cache miss for ${orgName}, fetching from Auth0`);
         const { data: organization } = await getAuth0ManagementClient().organizations.getByName({
             name: orgName
         });
+        console.log(`[getOrganization] Successfully fetched organization ${orgName} from Auth0`);
 
         return organization as Auth0Organization;
     });
@@ -248,9 +251,13 @@ async function getAllOrgInvitations(orgId: Auth0OrgID) {
 
 export async function doesOrgExist(orgName: Auth0OrgName) {
     try {
+        console.log(`[doesOrgExist] Checking if organization exists: ${orgName}`);
         const org = await getOrganization(orgName);
-        return org != null;
-    } catch (_error) {
+        const exists = org != null;
+        console.log(`[doesOrgExist] Organization ${orgName} exists: ${exists}`);
+        return exists;
+    } catch (error) {
+        console.error(`[doesOrgExist] Error checking organization ${orgName}:`, error);
         return false;
     }
 }
