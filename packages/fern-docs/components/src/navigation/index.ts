@@ -12,5 +12,5 @@ export {
     getAllSectionsFromSidebarRootNode,
     getClientPageDefaultFilename
 } from "./pageUtils";
-export { constructEditorSlug, ROOT_SLUG_ALIAS } from "./routingUtils";
+export { constructEditorSlug, getEditorRedirectSlug, ROOT_SLUG_ALIAS } from "./routingUtils";
 export * from "./types";
