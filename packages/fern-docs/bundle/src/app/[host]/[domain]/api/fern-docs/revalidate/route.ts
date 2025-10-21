@@ -23,6 +23,7 @@ import { escapeRegExp } from "es-toolkit/string";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
+import { Agent, fetch } from "undici";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex, queueTurbopufferReindex } from "@/server/queue-reindex";
 
@@ -37,6 +38,15 @@ class RevalidationError extends Error {
         this.name = "RevalidationError";
     }
 }
+
+// Create persistent HTTP connection pool to avoid EMFILE errors
+// Reuses connections across all fetches to the same origin
+const revalidationAgent = new Agent({
+    connections: 20, // Max concurrent connections per origin
+    pipelining: 10, // Max requests per connection
+    keepAliveTimeout: 30000, // Keep connections alive for 30s
+    keepAliveMaxTimeout: 60000
+});
 
 export const maxDuration = 800; // 13 minutes timeout
 
@@ -116,9 +126,9 @@ export async function GET(
                 const cachePromises = cacheEndpoints.map(({ path, name }) =>
                     fetch(`${req.nextUrl.origin}${path}`, {
                         method: "HEAD",
-                        cache: "no-store",
                         headers: { [HEADER_X_FERN_HOST]: domain },
-                        signal: AbortSignal.timeout(600_000)
+                        signal: AbortSignal.timeout(600_000),
+                        dispatcher: revalidationAgent
                     })
                         .then(() => {
                             controller.enqueue(`${name}-revalidated\n`);
@@ -246,9 +256,9 @@ export async function GET(
                                 try {
                                     const res = await fetch(`${req.nextUrl.origin}${slugToHref(slug)}`, {
                                         method: "HEAD",
-                                        cache: "no-store",
                                         headers: { [HEADER_X_FERN_HOST]: domain },
-                                        signal: AbortSignal.timeout(600_000)
+                                        signal: AbortSignal.timeout(600_000),
+                                        dispatcher: revalidationAgent
                                     });
                                     const endTime = performance.now();
                                     track("revalidate_page_stats", {
@@ -325,7 +335,8 @@ export async function GET(
                             body: JSON.stringify({
                                 url: `${docs.baseUrl.domain.replace(/\/$/, "")}${docs.baseUrl.basePath ?? ""}`
                             }),
-                            signal: AbortSignal.timeout(600_000)
+                            signal: AbortSignal.timeout(600_000),
+                            dispatcher: revalidationAgent
                         });
                     } catch (e) {
                         console.error(`[revalidate:homepage-image-revalidate] error: ${JSON.stringify(e)}`);
