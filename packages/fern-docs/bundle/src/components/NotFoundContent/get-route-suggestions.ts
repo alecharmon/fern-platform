@@ -12,6 +12,35 @@ export interface RouteSuggestion {
     title: string;
     href: string;
     score: number;
+    subtitle?: string;
+}
+
+/**
+ * Generate a breadcrumb-style subtitle from parent navigation nodes
+ */
+function generateSubtitle(
+    node: FernNavigation.NavigationNodeWithMetadata,
+    slugMapWithParents: ReadonlyMap<
+        string,
+        { node: FernNavigation.NavigationNodeWithMetadata; parents: readonly FernNavigation.NavigationNodeParent[] }
+    >
+): string | undefined {
+    const entry = slugMapWithParents.get(node.slug);
+    if (!entry?.parents || entry.parents.length === 0) {
+        // If it's a product node, use its subtitle
+        if (node.type === "product" && "subtitle" in node) {
+            return node.subtitle;
+        }
+        return undefined;
+    }
+
+    // Build breadcrumb from parents, excluding root
+    const breadcrumbParts = entry.parents
+        .filter((parent) => parent.type !== "root" && parent.type !== "sidebarRoot")
+        .map((parent) => parent.title)
+        .filter((title): title is string => title != null && title.length > 0);
+
+    return breadcrumbParts.length > 0 ? breadcrumbParts.join(" › ") : undefined;
 }
 
 export async function getRouteSuggestions(requestedPath: string): Promise<RouteSuggestion[]> {
@@ -44,6 +73,7 @@ export async function getRouteSuggestions(requestedPath: string): Promise<RouteS
 
         const collector = FernNavigation.NodeCollector.collect(root);
         const allNodes = Array.from(collector.slugMap.entries());
+        const slugMapWithParents = collector.getSlugMapWithParents();
 
         if (allNodes.length === 0) {
             console.error("[getRouteSuggestions] No nodes found in navigation");
@@ -55,7 +85,10 @@ export async function getRouteSuggestions(requestedPath: string): Promise<RouteS
             .map(([slug, node]) => ({
                 slug,
                 title: node.title,
-                href: slugToHref(slug)
+                // Use canonicalSlug for href generation to ensure proper deduplication
+                // when multiple slugs point to the same canonical page
+                href: slugToHref(node.canonicalSlug ?? slug),
+                subtitle: generateSubtitle(node, slugMapWithParents)
             }));
 
         if (availablePaths.length === 0) {

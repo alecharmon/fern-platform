@@ -68,7 +68,11 @@ export default function NotFoundContent() {
                                 >
                                     <div className="flex flex-col gap-1">
                                         <span className="text-(color:--grayscale-a12) font-medium">{route.title}</span>
-                                        <span className="text-sm text-(color:--grayscale-a10)">{route.href}</span>
+                                        {route.subtitle && (
+                                            <span className="text-sm text-(color:--grayscale-a10)">
+                                                {route.subtitle}
+                                            </span>
+                                        )}
                                     </div>
                                 </Link>
                             ))}

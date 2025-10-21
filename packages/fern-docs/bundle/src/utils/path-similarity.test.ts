@@ -113,6 +113,21 @@ describe("findSimilarPaths", () => {
         const uniqueHrefs = new Set(hrefs);
         expect(uniqueHrefs.size).toBe(3);
     });
+
+    it("should prioritize the first occurrence when deduplicating by href", () => {
+        const pathsWithDuplicates = [
+            { slug: "/api/users-v1", title: "Users API v1", href: "/api/users" },
+            { slug: "/api/users", title: "Users API", href: "/api/users" },
+            { slug: "/api/posts", title: "Posts API", href: "/api/posts" }
+        ];
+        const results = findSimilarPaths("/api/users-v1", pathsWithDuplicates, 2);
+        expect(results).toHaveLength(2);
+        // Should include the first occurrence with the matching href
+        expect(results[0].href).toBe("/api/users");
+        expect(results[0].slug).toBe("/api/users-v1");
+        // Second result should be different
+        expect(results[1].href).not.toBe("/api/users");
+    });
 });
 
 describe("elevenlabs.io/docs test cases", () => {
