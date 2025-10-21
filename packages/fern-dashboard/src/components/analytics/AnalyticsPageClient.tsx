@@ -8,6 +8,7 @@ import { getConversationResolution } from "@/app/actions/getConversationResoluti
 import { getQueries } from "@/app/actions/getQueries";
 import { useSidepanel } from "@/components/layout/SidepanelContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/utils/utils";
 
 import { AnalyticsHistogramSkeleton } from "./AnalyticsHistogramSkeleton";
 import { ITEMS_PER_PAGE } from "./AnalyticsPage";
@@ -172,13 +173,34 @@ export function AnalyticsPageClient({
         <div className={ANALYTICS_PAGE_STYLES}>
             <AnalyticsPageHeader analyticsBillingEnabled={analyticsBillingEnabled} />
             {isLoading ? (
-                <div className="mb-4 flex w-full max-w-[1200px] flex-col gap-4">
-                    <div className="border-border flex flex-col gap-2 rounded-xl border p-4">
+                <div className={cn(BORDER_STYLES, "border-gray-0 w-full max-w-[1200px] border")}>
+                    <div className="mb-6 flex w-full items-center justify-between">
+                        <Skeleton className="h-7 w-32" />
+                        <Skeleton className="h-9 w-32" />
+                    </div>
+
+                    <div className="mb-6 flex w-full gap-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="flex flex-1 flex-col items-start">
+                                <Skeleton className="mb-1 h-5 w-20" />
+                                <Skeleton className="h-7 w-16" />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mb-6 w-full overflow-x-auto">
                         <AnalyticsHistogramSkeleton />
                     </div>
-                    <div className="border-border flex flex-col gap-2 rounded-xl border p-4">
+
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <Skeleton className="h-9 w-64" />
+                        <Skeleton className="h-9 w-32" />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <Skeleton className="h-10 w-full" />
                         {Array.from({ length: 8 }).map((_, i) => (
-                            <Skeleton key={i} className="h-10 w-full" />
+                            <Skeleton key={i} className="h-12 w-full" />
                         ))}
                     </div>
                 </div>
