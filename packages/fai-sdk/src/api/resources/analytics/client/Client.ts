@@ -430,6 +430,102 @@ export class Analytics {
         }
     }
 
+    /**
+     * Get conversation resolution metrics for a domain in a given time period.
+     *
+     * @param {string} domain
+     * @param {FernAI.GetConversationResolutionRequest} request
+     * @param {Analytics.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.analytics.getConversationResolution("domain")
+     */
+    public getConversationResolution(
+        domain: string,
+        request: FernAI.GetConversationResolutionRequest = {},
+        requestOptions?: Analytics.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.GetConversationResolutionResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getConversationResolution(domain, request, requestOptions));
+    }
+
+    private async __getConversationResolution(
+        domain: string,
+        request: FernAI.GetConversationResolutionRequest = {},
+        requestOptions?: Analytics.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.GetConversationResolutionResponse>> {
+        const { start_date: startDate, end_date: endDate } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        if (startDate != null) {
+            _queryParams["start_date"] = startDate;
+        }
+
+        if (endDate != null) {
+            _queryParams["end_date"] = endDate;
+        }
+
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `analytics/resolution/${encodeURIComponent(domain)}`,
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as FernAI.GetConversationResolutionResponse,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling GET /analytics/resolution/{domain}.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
     protected async _getAuthorizationHeader(): Promise<string | undefined> {
         const bearer = await core.Supplier.get(this._options.token);
         if (bearer != null) {

@@ -7,7 +7,12 @@ from fastapi import Depends
 from fastapi import Query as QueryParam
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from sqlalchemy import select
+from sqlalchemy import (
+    Integer,
+    distinct,
+    func,
+    select,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.app import fai_app
@@ -17,10 +22,13 @@ from fai.dependencies import (
 )
 from fai.jobs.insights_job import generate_insights_for_all_domains
 from fai.models.api.analytics_api import (
+    GetConversationResolutionResponse,
     GetHistogramAnalyticsResponse,
     GetInsightsResponse,
 )
+from fai.models.db.conversation_report_db import ConversationReportDb
 from fai.models.db.insight_db import InsightDb
+from fai.models.db.query_db import QueryDb
 from fai.models.enums.analytics_enums import GroupBy
 from fai.scheduler import (
     generate_weekly_insights_job,
@@ -159,8 +167,6 @@ async def get_query_insights(
 async def get_scheduler_status() -> JSONResponse:
     """Get the status of the scheduler and its jobs."""
     try:
-        from fai.scheduler import get_scheduler
-
         scheduler = get_scheduler()
 
         jobs_info = []
@@ -178,4 +184,91 @@ async def get_scheduler_status() -> JSONResponse:
         return JSONResponse(content={"scheduler_running": scheduler.running, "jobs": jobs_info})
     except Exception as e:
         LOGGER.exception("Failed to get scheduler status")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.get(
+    "/analytics/resolution/{domain}",
+    response_model=GetConversationResolutionResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+    dependencies=[Depends(get_db), Depends(verify_token)],
+)
+async def get_conversation_resolution(
+    domain: str,
+    start_date: datetime | None = QueryParam(
+        default=None, description="The start date of the period to retrieve resolution metrics for"
+    ),
+    end_date: datetime | None = QueryParam(
+        default=None, description="The end date of the period to retrieve resolution metrics for"
+    ),
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
+) -> JSONResponse:
+    """Get conversation resolution metrics for a domain in a given time period."""
+    try:
+        now = datetime.now()
+        start = start_date or (now - timedelta(days=7))
+        end = end_date or now
+
+        conversation_ids_query = (
+            select(distinct(QueryDb.conversation_id))
+            .where(QueryDb.domain == domain)
+            .where(QueryDb.created_at >= start)
+            .where(QueryDb.created_at <= end)
+        )
+        result = await db.execute(conversation_ids_query)
+        conversation_ids = [row[0] for row in result.all()]
+
+        LOGGER.info(
+            f"Found {len(conversation_ids)} unique conversations for domain: {domain}, " f"period: {start} to {end}"
+        )
+
+        if not conversation_ids:
+            LOGGER.info(f"No conversations found for domain: {domain}")
+            response = GetConversationResolutionResponse(
+                total_conversations=0,
+                resolved_conversations=0,
+                unresolved_conversations=0,
+                resolution_rate=0,
+            )
+            return JSONResponse(jsonable_encoder(response))
+
+        reports_query = (
+            select(
+                func.count(ConversationReportDb.conversation_id).label("total"),
+                func.sum(func.cast(ConversationReportDb.resolved, type_=Integer)).label("resolved"),
+            )
+            .where(ConversationReportDb.domain == domain)
+            .where(ConversationReportDb.conversation_id.in_(conversation_ids))
+        )
+
+        result = await db.execute(reports_query)
+        row = result.one()
+
+        reports_total = row.total or 0
+        resolved = int(row.resolved) if row.resolved is not None else 0
+
+        LOGGER.info(
+            f"Found {reports_total} reports for {len(conversation_ids)} conversations, " f"with {resolved} resolved"
+        )
+
+        total = reports_total
+        unresolved = total - resolved
+        resolution_rate = (resolved / total * 100) if total > 0 else 0
+
+        response = GetConversationResolutionResponse(
+            total_conversations=total,
+            resolved_conversations=resolved,
+            unresolved_conversations=unresolved,
+            resolution_rate=round(resolution_rate, 2),
+        )
+
+        LOGGER.info(
+            f"Retrieved resolution metrics for domain: {domain}, period: {start} to {end}, "
+            f"total: {total}, resolved: {resolved}, rate: {resolution_rate:.2f}%"
+        )
+        return JSONResponse(jsonable_encoder(response))
+
+    except Exception as e:
+        LOGGER.exception("Failed to get conversation resolution metrics")
         return JSONResponse(status_code=500, content={"detail": str(e)})

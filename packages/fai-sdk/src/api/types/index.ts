@@ -13,6 +13,7 @@ export * from "./DeleteGuidanceResponse.js";
 export * from "./DiscordIntegrationResponse.js";
 export * from "./Document.js";
 export * from "./Feedback.js";
+export * from "./GetConversationResolutionResponse.js";
 export * from "./GetConversationResponse.js";
 export * from "./GetDocumentResponse.js";
 export * from "./GetDocumentsResponse.js";

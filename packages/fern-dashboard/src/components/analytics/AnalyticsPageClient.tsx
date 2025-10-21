@@ -4,16 +4,16 @@ import type { FernAI } from "@fern-api/fai-sdk";
 import React, { useEffect, useState } from "react";
 
 import { getDomainAnalytics } from "@/app/actions/getAnalytics";
+import { getConversationResolution } from "@/app/actions/getConversationResolution";
 import { getQueries } from "@/app/actions/getQueries";
 import { useSidepanel } from "@/components/layout/SidepanelContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { AnalyticsHistogram } from "./AnalyticsHistogram";
 import { AnalyticsHistogramSkeleton } from "./AnalyticsHistogramSkeleton";
 import { ITEMS_PER_PAGE } from "./AnalyticsPage";
 import { AnalyticsPageHeader } from "./AnalyticsPageHeader";
 import { ConversationSidePanel } from "./ConversationSidePanel";
-import { QueriesTable } from "./QueriesTable";
+import { ConversationsCard } from "./ConversationsCard";
 import { TimeRange } from "./utils/get-request-params";
 
 export type RenderType = "QUERIES" | "CONVERSATIONS";
@@ -25,6 +25,7 @@ export function AnalyticsPageClient({
     baseDocsUrl,
     initialQueriesData,
     initialHistogramData,
+    initialResolutionData,
     initialTotalQueries,
     cutoffTime,
     analyticsBillingEnabled
@@ -32,14 +33,14 @@ export function AnalyticsPageClient({
     baseDocsUrl: string;
     initialQueriesData: FernAI.Query[];
     initialHistogramData: FernAI.GetHistogramAnalyticsResponse;
+    initialResolutionData: FernAI.GetConversationResolutionResponse;
     initialTotalQueries: number;
     cutoffTime: string;
     analyticsBillingEnabled: boolean;
 }) {
-    const [renderType, setRenderType] = useState<RenderType>("QUERIES");
-    const [histogramTimeRange, setHistogramTimeRange] = useState<TimeRange>(TimeRange.LAST_WEEK);
+    const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_WEEK);
     const [histogramData, setHistogramData] = useState(initialHistogramData);
-    const [queryTimeRange, setQueryTimeRange] = useState<TimeRange>(TimeRange.LAST_WEEK);
+    const [resolutionData, setResolutionData] = useState(initialResolutionData);
     const [queriesData, setQueriesData] = useState(initialQueriesData);
     const [totalQueriesPages, setTotalQueriesPages] = useState(Math.ceil(initialTotalQueries / ITEMS_PER_PAGE));
     const [selectedConversation, setSelectedConversation] = useState<FernAI.Conversation | null>(null);
@@ -47,23 +48,31 @@ export function AnalyticsPageClient({
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [pageCache, setPageCache] = useState<Record<number, FernAI.Query[]>>({});
+    const [selectedBarIndex, setSelectedBarIndex] = useState<number | null>(null);
     const { setContent, clear } = useSidepanel();
 
     useEffect(() => {
-        async function fetchHistogramData() {
+        async function fetchData() {
             try {
-                const data = await getDomainAnalytics({
-                    docsUrl: baseDocsUrl,
-                    timeRange: histogramTimeRange
-                });
-                setHistogramData(data);
+                const [histogram, resolution] = await Promise.all([
+                    getDomainAnalytics({
+                        docsUrl: baseDocsUrl,
+                        timeRange
+                    }),
+                    getConversationResolution({
+                        docsUrl: baseDocsUrl,
+                        timeRange
+                    })
+                ]);
+                setHistogramData(histogram);
+                setResolutionData(resolution);
             } catch (error) {
-                console.error("Failed to fetch histogram data:", error);
+                console.error("Failed to fetch analytics data:", error);
             }
         }
 
-        void fetchHistogramData();
-    }, [baseDocsUrl, histogramTimeRange]);
+        void fetchData();
+    }, [baseDocsUrl, timeRange]);
 
     useEffect(() => {
         async function fetchQueriesData() {
@@ -80,7 +89,7 @@ export function AnalyticsPageClient({
                     page: currentPage,
                     limit: ITEMS_PER_PAGE,
                     cutoffTime,
-                    timeRange: queryTimeRange
+                    timeRange
                 });
 
                 setPageCache((prev) => ({
@@ -98,14 +107,20 @@ export function AnalyticsPageClient({
         }
 
         void fetchQueriesData();
-    }, [baseDocsUrl, currentPage, queryTimeRange, cutoffTime, pageCache]);
+    }, [baseDocsUrl, currentPage, timeRange, cutoffTime, pageCache]);
 
     useEffect(() => {
         setPageCache({});
         setCurrentPage(1);
-    }, [queryTimeRange, cutoffTime]);
+    }, [timeRange, cutoffTime]);
 
     const timeoutRef = React.useRef<number | null>(null);
+
+    function handleBarClick(barIndex: number) {
+        setSelectedBarIndex(barIndex === selectedBarIndex ? null : barIndex);
+        setCurrentPage(1);
+        setPageCache({});
+    }
 
     function handleSelectConversation(convo: FernAI.Conversation | null) {
         if (convo) {
@@ -168,28 +183,22 @@ export function AnalyticsPageClient({
                     </div>
                 </div>
             ) : (
-                <>
-                    <AnalyticsHistogram
-                        renderType={renderType}
-                        setRenderType={setRenderType}
-                        histogramTimeRange={histogramTimeRange}
-                        setHistogramTimeRange={setHistogramTimeRange}
-                        histogramData={histogramData}
-                    />
-                    <QueriesTable
-                        queries={queriesData}
-                        baseDocsUrl={baseDocsUrl}
-                        onSelectConversation={handleSelectConversation}
-                        selectedConversation={selectedConversation}
-                        totalPages={totalQueriesPages}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        isLoading={isLoading}
-                        cutoffTime={cutoffTime}
-                        queryTimeRange={queryTimeRange}
-                        setQueryTimeRange={setQueryTimeRange}
-                    />
-                </>
+                <ConversationsCard
+                    histogramData={histogramData}
+                    resolutionData={resolutionData}
+                    timeRange={timeRange}
+                    onTimeRangeChange={setTimeRange}
+                    onBarClick={handleBarClick}
+                    queries={queriesData}
+                    baseDocsUrl={baseDocsUrl}
+                    onSelectConversation={handleSelectConversation}
+                    selectedConversation={selectedConversation}
+                    totalPages={totalQueriesPages}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    isLoading={isLoading}
+                    cutoffTime={cutoffTime}
+                />
             )}
         </div>
     );

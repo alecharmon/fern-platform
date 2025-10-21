@@ -12,6 +12,8 @@ interface AnalyticsHistogramProps {
         count: number;
     }[];
     renderType: RenderType;
+    onBarClick?: (index: number) => void;
+    selectedBarIndex?: number | null;
 }
 
 const CHART_CONFIG = {
@@ -21,7 +23,12 @@ const CHART_CONFIG = {
     }
 };
 
-export function AnalyticsHistogramChart({ chartData, renderType }: AnalyticsHistogramProps) {
+export function AnalyticsHistogramChart({
+    chartData,
+    renderType,
+    onBarClick,
+    selectedBarIndex
+}: AnalyticsHistogramProps) {
     return (
         <div
             style={{
@@ -94,6 +101,8 @@ export function AnalyticsHistogramChart({ chartData, renderType }: AnalyticsHist
                             fill: "url(#barGradientHover)"
                         }}
                         radius={[8, 8, 0, 0]}
+                        onClick={(data, index) => onBarClick?.(index)}
+                        cursor={onBarClick ? "pointer" : "default"}
                     />
                 </BarChart>
             </ChartContainer>

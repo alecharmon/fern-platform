@@ -17,7 +17,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { QueriesDataTableHeader } from "./QueriesDataTableHeader";
 import type { ConversationRow } from "./types";
-import type { TimeRange } from "./utils/get-request-params";
 
 interface QueriesDataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -25,8 +24,6 @@ interface QueriesDataTableProps<TData, TValue> {
     baseDocsUrl: string;
     onSelectConversation: (conversation: FernAI.Conversation) => void;
     selectedConversation: FernAI.Conversation | null;
-    queryTimeRange: TimeRange;
-    setQueryTimeRange: (range: TimeRange) => void;
     onExport: () => void;
     isExporting?: boolean;
 }
@@ -37,8 +34,6 @@ export function QueriesDataTable<TData, TValue>({
     baseDocsUrl,
     onSelectConversation,
     selectedConversation,
-    queryTimeRange,
-    setQueryTimeRange,
     onExport,
     isExporting
 }: QueriesDataTableProps<TData, TValue>) {
@@ -82,13 +77,7 @@ export function QueriesDataTable<TData, TValue>({
     return (
         <div className="flex w-full flex-row gap-6 rounded-md">
             <div className="grow">
-                <QueriesDataTableHeader
-                    table={table}
-                    queryTimeRange={queryTimeRange}
-                    setQueryTimeRange={setQueryTimeRange}
-                    onExport={onExport}
-                    isExporting={isExporting}
-                />
+                <QueriesDataTableHeader table={table} onExport={onExport} isExporting={isExporting} />
                 <div className="max-h-[400px] min-h-[400px] overflow-y-auto">
                     <Table className="table-fixed">
                         <TableHeader>
