@@ -158,12 +158,18 @@ for currently_down_site in sites_down[region]:
                 sys.exit(f"Request failed with status code {edit_response.status_code}")
 
             print("Test incident closed, opening standard incident")
+            #Determine severity
+            severity_id = "01HR85VFNX9NYZG6B5Z40K8Y9V" # Minor
+            if len(sites_down[region])>10:
+                severity_id = "01HR85VFNXA1RTYRR744G9FN6J" # Critical
+            elif len(sites_down[region])>5:
+                severity_id = "01HR85VFNXR6H5YPKJTE79YHG4" # Major
             sites_down[other_region]=test_incident_sites_down[other_region]
             create_response = requests.post('https://api.incident.io/v2/incidents', headers=auth_header, json={
                 "idempotency_key": f"{region}-{time.time()}",
                 "name": incident_name,
                 "incident_status_id": "01HR85VFNXWH1H6976YCEJ5XJB", # Monitoring
-                "severity_id": "01HR85VFNX9NYZG6B5Z40K8Y9V", # Minor
+                "severity_id": severity_id,
                 "summary": f"The following sites are down as of {time.strftime('%l:%M%p %Z on %b %d, %Y')}.\n\n\nUS Sites:\n\n- {"\n\n- ".join(sites_down["US"])}\n\n\nEU Sites:\n\n- {"\n\n- ".join(sites_down["EU"])}",
                 "visibility": "public"
                 })
