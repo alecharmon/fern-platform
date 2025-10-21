@@ -1109,8 +1109,8 @@ importers:
         specifier: workspace:*
         version: link:../commons/core-utils
       '@fern-api/venus-api-sdk':
-        specifier: ^0.19.8
-        version: 0.19.8
+        specifier: ^0.19.10
+        version: 0.19.10
       '@fern-api/visual-editor-server':
         specifier: workspace:*
         version: link:../commons/visual-editor-server
@@ -3203,7 +3203,7 @@ importers:
         version: link:../../packages/commons/core-utils
       '@fern-api/venus-api-sdk':
         specifier: ^0.19.5
-        version: 0.19.8
+        version: 0.19.10
       '@fern-docs/search-ask-fern':
         specifier: workspace:*
         version: link:../../packages/fern-docs/search-server/ask-fern
@@ -3420,7 +3420,7 @@ importers:
         version: link:../../packages/fdr-sdk
       '@fern-api/venus-api-sdk':
         specifier: ^0.19.5
-        version: 0.19.8
+        version: 0.19.10
       '@prisma/client':
         specifier: 5.13.0
         version: 5.13.0(prisma@5.13.0)
@@ -5825,8 +5825,8 @@ packages:
   '@fern-api/venus-api-sdk@0.13.4-7-g5ff8ee8':
     resolution: {integrity: sha512-4JqNAPTZb9Q9ZgeLOV+FNaK06GchwTWKm9cI590juXYHMp/E2zsFKzu/GZtpzgHQu2cZ+tSt9uJZ2328qFAzcg==}
 
-  '@fern-api/venus-api-sdk@0.19.8':
-    resolution: {integrity: sha512-HJXG1ZbocJJNbnnyzYBm6KZYGChfxTaG0JuMPdUEyZFsYGBRvf3N2kYNnLVLMSP3vrRfij63HjuGCIJxBNMcxA==}
+  '@fern-api/venus-api-sdk@0.19.10':
+    resolution: {integrity: sha512-JSaql5pywCbEK7nAJJ1NLnEc4RNiurLzqZ8DQKcgXxdudBEv/n7NDpjrDhZ8STUY68MUR1hekYq3JXGbxRvs5A==}
     engines: {node: '>=18.0.0'}
 
   '@fern-fern/fdr-cjs-sdk@0.0.6432':
@@ -23956,7 +23956,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@fern-api/venus-api-sdk@0.19.8': {}
+  '@fern-api/venus-api-sdk@0.19.10': {}
 
   '@fern-fern/fdr-cjs-sdk@0.0.6432':
     dependencies:
