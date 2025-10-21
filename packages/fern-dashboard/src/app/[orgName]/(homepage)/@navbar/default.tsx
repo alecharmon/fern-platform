@@ -47,7 +47,6 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_BILLING_PAGE} orgName={orgName}>
                     <NavbarItem title="Billing" iconType="billing" href="/billing" />
                 </FeatureFlaggedServerSide>
-                <NavbarItem title="Settings" iconType="settings" href="/settings" />
             </div>
         </div>
     );
