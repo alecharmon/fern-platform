@@ -1,6 +1,11 @@
 {
   "name": "@fern-api/fdr-sdk",
   "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/fdr-sdk"
+  },
   "sideEffects": false,
   "type": "module",
   "exports": {

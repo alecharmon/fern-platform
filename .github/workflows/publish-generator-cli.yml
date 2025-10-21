@@ -10,7 +10,10 @@ env:
   TURBO_TEAM: "buildwithfern"
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
-  NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
 
 jobs:
   publish-cli:
@@ -22,12 +25,13 @@ jobs:
       - name: 📥 Install
         uses: ./.github/actions/install
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: 🧪 Build and test
         run: pnpm turbo codegen build test --filter=${{ env.PACKAGE_NAME }}
 
       - name: Publish generator-cli
-        env:
-          NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
           git_version="$(scripts/generator-cli-version.sh)"
           cd packages/generator-cli
@@ -35,7 +39,6 @@ jobs:
           version_replace="s/0.0.0/${git_version}/"
           cat package.json.tmp| sed "${version_replace}" > package.json
           rm -rf package.json.tmp
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           npm publish --access public
 
   publish-sdks:

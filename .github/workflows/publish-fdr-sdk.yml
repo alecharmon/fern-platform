@@ -10,7 +10,10 @@ env:
   TURBO_TEAM: "buildwithfern"
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
-  NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
 
 jobs:
   publish_fiddle_sdk:
@@ -45,6 +48,9 @@ jobs:
       - name: 📥 Install
         uses: ./.github/actions/install
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: 🧪 Build and test
         run: pnpm turbo codegen build test --filter=${{ env.PACKAGE_NAME }}
 
@@ -52,8 +58,6 @@ jobs:
         run: npm install -g fern-api
 
       - name: Publish FDR SDK
-        env:
-          NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
           git_version="$(scripts/fdr-version.sh)"
           working_dir=$(pwd)
@@ -61,7 +65,6 @@ jobs:
           mv package.json package.json.tmp
           version_replace="s/0.0.0/${git_version}/"
           cat package.json.tmp| sed "${version_replace}" > package.json
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           rm -rf package.json.tmp
           npm publish --access public
           cd $working_dir/packages/fdr-sdk
@@ -73,8 +76,6 @@ jobs:
           npm publish --access public
 
       - name: Publish CJS SDK
-        env:
-          NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
           git_version="$(scripts/fdr-version.sh)"
           fern generate --api fdr --group fdr-cjs-sdk --version ${git_version} --log-level debug
