@@ -39,7 +39,7 @@ jobs:
           version_replace="s/0.0.0/${git_version}/"
           cat package.json.tmp| sed "${version_replace}" > package.json
           rm -rf package.json.tmp
-          npm publish --access public
+          npm publish --access public --tag latest
 
   publish-sdks:
     if: github.ref_type == 'tag' && github.event_name == 'push'  && startsWith(github.ref, 'refs/tags/generator-cli@')
