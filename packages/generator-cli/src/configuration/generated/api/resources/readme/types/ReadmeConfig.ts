@@ -29,4 +29,6 @@ export interface ReadmeConfig {
      * The features are rendered in the order they're specified.
      */
     features?: FernGeneratorCli.ReadmeFeature[];
+    /** Controls whether usage examples show only required parameters (minimal) or all parameters (comprehensive). Defaults to comprehensive. */
+    exampleStyle?: FernGeneratorCli.ExampleStyle;
 }

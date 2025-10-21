@@ -32,6 +32,9 @@ types:
           Specifies the list of features supported by a specific generator.
           The features are rendered in the order they're specified.
         type: optional<list<ReadmeFeature>>
+      exampleStyle:
+        docs: "Controls whether usage examples show only required parameters (minimal) or all parameters (comprehensive). Defaults to comprehensive."
+        type: optional<ExampleStyle>
 
   CustomSection:
     properties:
@@ -160,3 +163,9 @@ types:
     properties:
       gitUrl: string
       minVersion: string
+
+  ExampleStyle:
+    docs: "Controls the verbosity of usage examples in README generation"
+    enum:
+      - minimal
+      - comprehensive

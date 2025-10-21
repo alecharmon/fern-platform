@@ -22,3 +22,4 @@ export * from "./RubyGemsPublishInfo";
 export * from "./NugetPublishInfo";
 export * from "./CargoPublishInfo";
 export * from "./SwiftPackageManagerPublishInfo";
+export * from "./ExampleStyle";

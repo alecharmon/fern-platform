@@ -10,6 +10,7 @@ import { LanguageInfo } from "./LanguageInfo";
 import { FeatureId } from "../../feature/types/FeatureId";
 import { CustomSection } from "./CustomSection";
 import { ReadmeFeature } from "./ReadmeFeature";
+import { ExampleStyle } from "./ExampleStyle";
 
 export const ReadmeConfig: core.serialization.ObjectSchema<
     serializers.ReadmeConfig.Raw,
@@ -28,6 +29,7 @@ export const ReadmeConfig: core.serialization.ObjectSchema<
     whiteLabel: core.serialization.boolean().optional(),
     customSections: core.serialization.list(CustomSection).optional(),
     features: core.serialization.list(ReadmeFeature).optional(),
+    exampleStyle: ExampleStyle.optional(),
 });
 
 export declare namespace ReadmeConfig {
@@ -45,5 +47,6 @@ export declare namespace ReadmeConfig {
         whiteLabel?: boolean | null;
         customSections?: CustomSection.Raw[] | null;
         features?: ReadmeFeature.Raw[] | null;
+        exampleStyle?: ExampleStyle.Raw | null;
     }
 }
