@@ -1102,6 +1102,9 @@ importers:
       '@fern-api/fai-sdk':
         specifier: workspace:*
         version: link:../fai-sdk
+      '@fern-api/fdr-lambda-sdk':
+        specifier: workspace:*
+        version: link:../fdr-lambda-sdk
       '@fern-api/fdr-sdk':
         specifier: workspace:*
         version: link:../fdr-sdk

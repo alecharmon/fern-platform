@@ -3,6 +3,7 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsUrl } from "@/utils/types";
 
 import { ArchiveSiteButton } from "./ArchiveSiteButton";
+import { DeleteDocsSiteButton } from "./DeleteDocsSiteButton";
 import { ToggleAskAiButton } from "./ToggleAskAiButton";
 
 export async function Settings({
@@ -42,6 +43,15 @@ export async function Settings({
                     </div>
                 </div>
             )}
+            <div className="border-border mx-auto mt-6 flex w-full max-w-[750px] flex-1 flex-col rounded-xl border bg-gray-100 p-4 sm:mt-8 md:mt-10">
+                <div className="flex flex-col gap-1">
+                    <div className="font-bold">Delete docs site</div>
+                    <div className="text-gray-900">This is a destructive action and cannot be reversed.</div>
+                </div>
+                <div className="mt-5 flex justify-center md:justify-end">
+                    <DeleteDocsSiteButton docsUrl={docsUrl} orgName={orgName} />
+                </div>
+            </div>
         </div>
     );
 }

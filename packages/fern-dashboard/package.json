@@ -45,6 +45,7 @@
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/endpoint-snippet-dependencies": "workspace:*",
     "@fern-api/fai-sdk": "workspace:*",
+    "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-api/venus-api-sdk": "0.19.9",
