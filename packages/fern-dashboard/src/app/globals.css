@@ -700,6 +700,21 @@ why? who knows. thanks monaco:)
   animation: shake 0.3s ease-in-out;
 }
 
+/* Icon animations: Settings */
+.group:hover .settings,
+.hover-animating .settings {
+  animation: rotateGear 0.3s ease-in-out;
+}
+
+@keyframes rotateGear {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
 /* PR Title scroll animation */
 @keyframes scroll-text {
   0% {

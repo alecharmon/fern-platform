@@ -40,6 +40,7 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
                 </FeatureFlaggedServerSide>
                 <NavbarSectionTitle title="Settings" />
                 <NavbarItem title="Members" iconType="members" href="/members" />
+                <NavbarItem title="Settings" iconType="settings" href="/settings" />
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_API_KEYS_PAGE} orgName={orgName}>
                     <NavbarItem title="API Keys" iconType="api-keys" href="/api-keys" />
                 </FeatureFlaggedServerSide>
