@@ -1,13 +1,12 @@
 import { searchClient } from "@algolia/client-search";
+import { track } from "@fern-api/docs-server/analytics/posthog";
 import { algoliaAppId } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-import { postToSlack } from "@fern-api/docs-server/slack";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { getLanguageModel, SuggestionsSchema } from "@fern-docs/search-ask-fern";
 import { type AlgoliaRecord, SEARCH_INDEX } from "@fern-docs/search-keyword";
-import { getEnv } from "@vercel/functions";
 import { generateObject } from "ai";
 import { unstable_cache } from "next/cache";
 import { cookies } from "next/headers";
@@ -81,10 +80,12 @@ DO NOT include any explanatory text - only return the JSON object.`,
         });
     } catch (error) {
         console.error("AI suggestions generation failed after retries, returning fallback suggestions:", error);
-        postToSlack(
-            "#search-notifs",
-            `:rotating_light: [${domain}] AI suggestions generation failed with error: ${String(error)}`
-        );
+        track("ai_suggestions_generation_failed", {
+            domain,
+            error: String(error),
+            indexName: SEARCH_INDEX,
+            languageModel: "claude-4"
+        });
         result = {
             object: {
                 suggestions: [
