@@ -9,6 +9,7 @@ import { cn } from "@/utils/utils";
 import { Pagination } from "../ui/pagination";
 import { AnalyticsHistogramChart } from "./AnalyticsHistogramChart";
 import { BORDER_STYLES } from "./AnalyticsPageClient";
+import { AnimatedStatistic } from "./AnimatedStatistic";
 import { columns } from "./ConversationColumnDef";
 import { QueriesDataTable } from "./QueriesDataTable";
 import { type TimeRangeOption, TimeRangeSelect } from "./TimeRangeSelect";
@@ -111,28 +112,24 @@ export function ConversationsCard({
             </div>
 
             <div className="mb-6 flex w-full gap-6">
-                <div className="flex flex-1 flex-col items-start">
-                    <span className="text-gray-1100 mb-1 text-sm">Total</span>
-                    <span className="text-xl font-bold">{total_conversations}</span>
-                </div>
-                <div className="flex flex-1 flex-col items-start">
-                    <span className="text-gray-1100 mb-1 text-sm">Resolved</span>
-                    <span className={cn("text-xl font-bold", resolved_conversations > 0 && "text-primary")}>
-                        {resolved_conversations}
-                    </span>
-                </div>
-                <div className="flex flex-1 flex-col items-start">
-                    <span className="text-gray-1100 mb-1 text-sm">Unresolved</span>
-                    <span className={cn("text-xl font-bold", unresolved_conversations > 0 && "text-destructive")}>
-                        {unresolved_conversations}
-                    </span>
-                </div>
-                <div className="flex flex-1 flex-col items-start">
-                    <span className="text-gray-1100 mb-1 text-sm">Resolution rate</span>
-                    <span className={cn("text-xl font-bold", getResolutionRateColor())}>
-                        {resolution_rate.toFixed(1)}%
-                    </span>
-                </div>
+                <AnimatedStatistic label="Total" value={total_conversations} />
+                <AnimatedStatistic
+                    label="Resolved"
+                    value={resolved_conversations}
+                    colorClass={resolved_conversations > 0 ? "text-primary" : ""}
+                />
+                <AnimatedStatistic
+                    label="Unresolved"
+                    value={unresolved_conversations}
+                    colorClass={unresolved_conversations > 0 ? "text-destructive" : ""}
+                />
+                <AnimatedStatistic
+                    label="Resolution rate"
+                    value={resolution_rate}
+                    suffix="%"
+                    decimals={1}
+                    colorClass={getResolutionRateColor()}
+                />
             </div>
 
             <div className="mb-6 w-full overflow-x-auto">
