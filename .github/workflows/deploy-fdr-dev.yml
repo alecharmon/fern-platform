@@ -30,10 +30,6 @@ env:
   CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
 
 jobs:
-  sdk:
-    uses: ./.github/workflows/publish-fdr-sdk.yml
-    secrets: inherit
-
   deploy_dev:
     runs-on: Seed
     environment: Fern Dev
