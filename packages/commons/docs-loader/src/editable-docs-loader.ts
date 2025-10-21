@@ -86,7 +86,13 @@ interface GetFernProjectSuccess {
 
 type GetFernProjectErrors =
     | { type: "REPO_NOT_FOUND" }
-    | { type: "SITE_NOT_FOUND" }
+    | {
+          type: "SITE_NOT_FOUND";
+          searchedSite: string;
+          foundSites: string[];
+          docsYmlPath?: string;
+          defaultBranch?: string;
+      }
     | { type: "MULTIPLE_PROJECTS_WITH_SITE" }
     | { type: "NO_PROJECTS" };
 

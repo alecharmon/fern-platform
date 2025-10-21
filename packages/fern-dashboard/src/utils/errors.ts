@@ -35,8 +35,7 @@ export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
         "The fern.config.json file was not found in the repository. Please ensure the configuration file exists in the root directory.",
     FERN_CONFIG_JSON_MALFORMED:
         "The fern.config.json file is malformed or contains invalid JSON. Please check the file syntax.",
-    SITE_NOT_FOUND:
-        "Your repository has one or more Fern projects, however, none of the projects are configured for this docs site.",
+    SITE_NOT_FOUND: "Your repository contains one or more Fern projects, but is missing a valid instance URL.",
     MULTIPLE_PROJECTS_WITH_SITE:
         "Your repository has more than one Fern project that is configured for this docs site. Only one Fern project can be configured for a docs site.",
     NO_PROJECTS: "No valid fern projects were detected in your repository.",
@@ -62,8 +61,12 @@ export function getValidationErrorMessage(error: GithubRepoValidationError): str
             return ERROR_DIGEST_MESSAGES.FERN_CONFIG_JSON_MALFORMED;
         case "REPO_NOT_FOUND":
             return ERROR_DIGEST_MESSAGES.REPO_NOT_FOUND;
-        case "SITE_NOT_FOUND":
+        case "SITE_NOT_FOUND": {
+            if (error.foundSites && error.foundSites.length > 0) {
+                return "Your repository is only configured for the following domain(s):";
+            }
             return ERROR_DIGEST_MESSAGES.SITE_NOT_FOUND;
+        }
         case "MULTIPLE_PROJECTS_WITH_SITE":
             return ERROR_DIGEST_MESSAGES.MULTIPLE_PROJECTS_WITH_SITE;
         case "NO_PROJECTS":

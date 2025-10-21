@@ -202,11 +202,18 @@ export class GitHubLoader implements GitLoader {
         }
 
         const matchingProjects: FernProject[] = [];
+        const allFoundSites: string[] = [];
+        let firstDocsYmlPath: string | undefined;
 
         for (const project of projects) {
             const docsYmlContent = await this.getFileContent(owner, repo, defaultBranch, project.docsYmlPath);
             if (docsYmlContent) {
                 const urls = this.parseUrlsFromDocsYml(docsYmlContent);
+                allFoundSites.push(...urls);
+
+                if (!firstDocsYmlPath && urls.length > 0) {
+                    firstDocsYmlPath = project.docsYmlPath;
+                }
 
                 const strippedUrls = urls.map(stripAndSanitizeUrl);
 
@@ -245,7 +252,13 @@ export class GitHubLoader implements GitLoader {
         } else {
             return {
                 type: "error",
-                error: { type: "SITE_NOT_FOUND" }
+                error: {
+                    type: "SITE_NOT_FOUND",
+                    searchedSite: site,
+                    foundSites: allFoundSites,
+                    docsYmlPath: firstDocsYmlPath,
+                    defaultBranch
+                }
             };
         }
     }
