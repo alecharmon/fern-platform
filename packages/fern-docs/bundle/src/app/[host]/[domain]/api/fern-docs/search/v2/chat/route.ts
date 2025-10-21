@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         token: fernToken_admin()
     });
 
-    const isAskAiEnabled = (await faiClient.settings.getSettings({ domain })).ask_ai_enabled;
+    const isAskAiEnabled = (await faiClient.settings.getDocsSettings({ domain })).ask_ai_enabled;
 
     if (!isAskAiEnabled) {
         return NextResponse.json("Ask AI is not enabled for this domain", {

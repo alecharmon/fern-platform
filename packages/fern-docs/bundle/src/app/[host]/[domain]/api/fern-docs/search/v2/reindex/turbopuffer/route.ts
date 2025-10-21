@@ -58,7 +58,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             token: fernToken_admin()
         });
 
-        const isAskAiEnabled = (await faiClient.settings.getSettings({ domain })).ask_ai_enabled;
+        const isAskAiEnabled = (await faiClient.settings.getDocsSettings({ domain })).ask_ai_enabled;
 
         const askAiProcessing = await kv.hget(domain, "tpuf_job").then((job) => {
             return job && typeof job === "object" && "status" in job && job.status === "in_progress";

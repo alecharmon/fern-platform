@@ -119,7 +119,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     const isAskAiEnabled = (
         await getFaiClient({
             token: process.env.FERN_TOKEN ?? ""
-        }).settings.getSettings({ domain })
+        }).settings.getDocsSettings({ domain })
     ).ask_ai_enabled;
 
     if (!isAskAiEnabled) {

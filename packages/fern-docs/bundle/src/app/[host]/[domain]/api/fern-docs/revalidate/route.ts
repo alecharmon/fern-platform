@@ -393,7 +393,7 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
     const isAskAiEnabled = (
         await getFaiClient({
             token: process.env.FERN_TOKEN ?? ""
-        }).settings.getSettings({ domain })
+        }).settings.getDocsSettings({ domain })
     ).ask_ai_enabled;
 
     if (isAskAiEnabled) {
