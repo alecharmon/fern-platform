@@ -215,7 +215,7 @@ describe("backfillSnippets", () => {
         expect(snippets?.swift).toBeUndefined();
     });
 
-    it("should always include curl even when not specified in the language list", async () => {
+    it("should not include curl when not specified in the language list", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
             endpoints: {
@@ -298,8 +298,7 @@ describe("backfillSnippets", () => {
         const snippets = example?.snippets;
         expect(snippets).toBeDefined();
 
-        expect(snippets?.curl).toBeDefined();
-        expect(snippets?.curl).toHaveLength(1);
+        expect(snippets?.curl).toBeUndefined();
         expect(snippets?.python).toBeDefined();
         expect(snippets?.python).toHaveLength(1);
         expect(snippets?.javascript).toBeDefined();
