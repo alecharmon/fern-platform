@@ -23,7 +23,7 @@ interface CreateIncidentForm {
     name: string;
     summary: string;
     severityId: string;
-    visibility: "public" | "private";
+    visibility: "public";
 }
 
 export function CreateIncidentPage() {
@@ -106,7 +106,7 @@ export function CreateIncidentPage() {
                     name: form.name,
                     idempotencyKey,
                     severityId: form.severityId || undefined,
-                    visibility: form.visibility,
+                    visibility: "public",
                     summary: form.summary || undefined
                 })
             });
@@ -156,14 +156,16 @@ export function CreateIncidentPage() {
                     <div className="mt-2 text-green-800">
                         Reference: <span className="font-mono font-semibold">{success.reference}</span>
                     </div>
-                    <a
-                        href={success.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-green-800 underline hover:text-green-900"
-                    >
-                        View incident →
-                    </a>
+                    {success.url && (
+                        <a
+                            href={success.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-block text-green-800 underline hover:text-green-900"
+                        >
+                            View incident →
+                        </a>
+                    )}
                 </div>
             )}
 
@@ -244,22 +246,6 @@ export function CreateIncidentPage() {
                                     </Button>
                                 </div>
                             )}
-                        </div>
-
-                        <div>
-                            <label htmlFor="visibility" className="mb-2 block text-sm font-semibold text-gray-1100">
-                                Visibility
-                            </label>
-                            <select
-                                id="visibility"
-                                value={form.visibility}
-                                onChange={handleInputChange("visibility")}
-                                disabled={isSubmitting}
-                                className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input shadow-xs flex h-9 w-full min-w-0 rounded-md border bg-white px-3 py-1 text-base outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/30 focus-visible:ring-[3px] sm:text-sm"
-                            >
-                                <option value="public">Public</option>
-                                <option value="private">Private</option>
-                            </select>
                         </div>
                     </div>
                 </div>
