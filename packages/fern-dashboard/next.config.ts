@@ -172,6 +172,13 @@ let nextConfig: NextConfig = {
         ignoreDuringBuilds: true
     },
 
+    logging: {
+        fetches: {
+            fullUrl: true
+        },
+        incomingRequests: true
+    },
+
     // Exclude esbuild from server bundle to avoid .d.ts parsing issues
     serverExternalPackages: ["esbuild"],
 
