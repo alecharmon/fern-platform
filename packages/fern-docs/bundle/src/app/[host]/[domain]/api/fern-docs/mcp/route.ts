@@ -155,11 +155,29 @@ async function isAuthed(req: NextRequest): Promise<boolean> {
 
 // Next.js route handlers for GET, POST, DELETE
 export async function GET(request: NextRequest, { params }: { params: Promise<{ host: string; domain: string }> }) {
+    const { host, domain } = await params;
+
+    const contentType = request.headers.get("content-type");
+    const acceptHeader = request.headers.get("accept");
+    const hasJsonRpcParams =
+        request.nextUrl.searchParams.has("method") ||
+        request.nextUrl.searchParams.has("jsonrpc") ||
+        contentType?.includes("application/json");
+
+    if (!hasJsonRpcParams && !acceptHeader?.includes("application/json")) {
+        const url = `https://${domain}`;
+        return new NextResponse(`This is an mcp server for ${url}`, {
+            status: 200,
+            headers: {
+                "Content-Type": "text/plain"
+            }
+        });
+    }
+
     const authed = await isAuthed(request);
     if (!authed) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { host, domain } = await params;
     const handler = await createHandler(host, domain);
     return handler(request);
 }
