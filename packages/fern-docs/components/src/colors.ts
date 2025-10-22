@@ -1,4 +1,15 @@
-export type SemanticColor = "error" | "danger" | "success" | "warning" | "info" | "none" | "primary";
+export type SemanticColor =
+    | "error"
+    | "danger"
+    | "success"
+    | "warning"
+    | "info"
+    | "none"
+    | "primary"
+    | "note"
+    | "tip"
+    | "launch"
+    | "check";
 
 export type GrayscaleColor = "gray" | "mauve" | "slate" | "sage" | "olive" | "sand";
 export type RadixColor =
@@ -110,7 +121,11 @@ export const SemanticColor: Record<Capitalize<SemanticColor>, SemanticColor> = {
     Warning: "warning",
     Info: "info",
     None: "none",
-    Primary: "primary"
+    Primary: "primary",
+    Note: "note",
+    Tip: "tip",
+    Launch: "launch",
+    Check: "check"
 } as const;
 
 export const SemanticColorOrder = [
@@ -120,7 +135,11 @@ export const SemanticColorOrder = [
     SemanticColor.Danger,
     SemanticColor.Error,
     SemanticColor.None,
-    SemanticColor.Primary
+    SemanticColor.Primary,
+    SemanticColor.Note,
+    SemanticColor.Tip,
+    SemanticColor.Launch,
+    SemanticColor.Check
 ] as const;
 
 export const SemanticColorMap: Record<SemanticColor, UIColor> = {
@@ -128,7 +147,11 @@ export const SemanticColorMap: Record<SemanticColor, UIColor> = {
     danger: "red",
     success: "green",
     warning: "amber",
-    info: "blue",
+    info: "gray",
     none: "gray",
-    primary: "accent"
+    primary: "accent",
+    note: "blue",
+    tip: "green",
+    launch: "accent",
+    check: "green"
 } as const;
