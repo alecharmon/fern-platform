@@ -72,7 +72,7 @@ export const Callout: FC<PropsWithChildren<Callout.Props>> = ({ intent: intentRa
                 >
                     <h5 className={cn("leading-snug", isWithinEditor && "mb-2")}>{title}</h5>
 
-                    {isWithinEditor ? <div className="-ml-8 -mt-4">{children}</div> : children}
+                    {isWithinEditor ? <div className="-ml-8 -my-4 not-prose">{children}</div> : children}
                 </div>
             </div>
         </div>

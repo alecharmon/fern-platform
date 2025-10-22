@@ -12,6 +12,8 @@ const DROPDOWN_SELECTORS = [
     ".fern-dropdown"
 ].join(",");
 
+const EDITOR_SELECTORS = ".ProseMirror";
+
 export function EditorLinkInterceptor() {
     const { orgName, docsUrl, branch, basePath } = useEditorRouting();
     const router = useRouter();
@@ -23,8 +25,11 @@ export function EditorLinkInterceptor() {
 
             if (!link) return;
 
-            // Check if the click is within our target containers
-            const isInTargetContainer = link.closest("#preview-container") || link.closest(DROPDOWN_SELECTORS);
+            // Check if the click is within our target containers (preview, dropdowns, or editor)
+            const isInTargetContainer =
+                link.closest("#preview-container") ||
+                link.closest(DROPDOWN_SELECTORS) ||
+                link.closest(EDITOR_SELECTORS);
 
             if (isInTargetContainer) {
                 const interceptedLink = getInterceptedLink(event, {
@@ -38,7 +43,7 @@ export function EditorLinkInterceptor() {
                 }
             }
         },
-        [orgName, docsUrl, branch, router]
+        [orgName, docsUrl, branch, basePath, router]
     );
 
     useEffect(() => {

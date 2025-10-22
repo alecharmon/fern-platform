@@ -73,7 +73,7 @@ const extensions = [
         autolink: true,
         linkOnPaste: true,
         HTMLAttributes: {
-            class: "text-blue-600 underline cursor-pointer hover:text-blue-800"
+            class: "fern-mdx-link"
         }
     }),
     FVEAttributesExtension.configure({
