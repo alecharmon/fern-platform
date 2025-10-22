@@ -13,7 +13,7 @@ const DROPDOWN_SELECTORS = [
 ].join(",");
 
 export function EditorLinkInterceptor() {
-    const { orgName, docsUrl, branch } = useEditorRouting();
+    const { orgName, docsUrl, branch, basePath } = useEditorRouting();
     const router = useRouter();
 
     const handleClick = useCallback(
@@ -30,7 +30,8 @@ export function EditorLinkInterceptor() {
                 const interceptedLink = getInterceptedLink(event, {
                     orgName,
                     docsUrl,
-                    branch
+                    branch,
+                    basePath
                 });
                 if (interceptedLink) {
                     router.push(interceptedLink);

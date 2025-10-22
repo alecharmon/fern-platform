@@ -3,30 +3,4 @@
     max-width: 100%;
     height: auto;
   }
-
-  /* Show outline for all selected custom elements */
-  .node-custom-element-v2:not([fve-data-name="img"])
-    div[data-node-view-wrapper]:first-child,
-  .node-custom-element-v2[fve-data-name="img"].ProseMirror-selectednode img {
-    outline: 0.125rem solid transparent;
-    outline-offset: 0.25rem;
-    border-radius: var(--radius);
-  }
-
-  .node-custom-element-v2[fve-data-name="img"].ProseMirror-selectednode:not(
-      :has(.ProseMirror-selectednode)
-    )
-    img {
-    outline-color: var(--primary);
-    outline-offset: 0.25rem;
-  }
-
-  .node-custom-element-v2:not(
-      [fve-data-name="img"]
-    ).ProseMirror-selectednode:not(:has(.ProseMirror-selectednode))
-    div[data-node-view-wrapper]:first-child {
-    outline: 0.125rem solid var(--primary);
-    outline-offset: 0.25rem;
-    border-radius: var(--radius);
-  }
 }

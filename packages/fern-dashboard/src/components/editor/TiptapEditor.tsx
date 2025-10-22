@@ -184,7 +184,7 @@ export default function TiptapEditor({
             extensions={[...extensions, ConfiguredMediaUploadNode(), ConfiguredFileHandler()]}
             editorProps={{
                 attributes: {
-                    class: "prose prose-md focus:outline-none max-w-none p-4 prose-inherit-colors"
+                    class: "focus:outline-none max-w-none p-4"
                 }
             }}
             parseOptions={{

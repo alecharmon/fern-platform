@@ -7,6 +7,7 @@ interface EditorRoutingContextValue {
     orgName: string;
     docsUrl: string;
     branch: string;
+    basePath?: string;
 }
 
 const EditorRoutingContext = createContext<EditorRoutingContextValue | null>(null);

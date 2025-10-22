@@ -67,16 +67,16 @@ export default async function VisualEditorPreviewLayout({
         branchName: branch
     });
 
-    const [colors, layout, fonts, config, root, unsafe_fullRoot, files] = await Promise.all([
+    const [colors, layout, fonts, config, root, unsafe_fullRoot, files, { basePath }] = await Promise.all([
         loader.getColors(),
         loader.getLayout(),
         loader.getFonts(),
         loader.getConfig(),
         loader.getRoot(),
         loader.unsafe_getFullRoot(),
-        loader.getFiles()
+        loader.getFiles(),
+        loader.getMetadata()
     ]);
-    // const announcementText = config.announcement?.text;
 
     const hasProductsOrVersions = root.child.type === "productgroup" || root.child.type === "versioned";
 
@@ -116,7 +116,8 @@ export default async function VisualEditorPreviewLayout({
                                             value={{
                                                 orgName,
                                                 docsUrl,
-                                                branch
+                                                branch,
+                                                basePath
                                             }}
                                         >
                                             <div id="preview-container">

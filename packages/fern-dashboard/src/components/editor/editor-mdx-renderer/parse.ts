@@ -33,6 +33,9 @@ const editableComponents = [...richTextComponents, ...componentsWithoutChildren]
 
 const contentDraggingDisabledComponents = ["Button"];
 
+// HTML elements that mark boundaries - these and all their children will be treated as terminal/non-editable
+const boundaryElements = ["div", "span", "section", "article", "body", "aside"];
+
 export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     // Parse MDX to AST using mdxToAST
     const { mdast } = mdxToAST(mdx);
@@ -61,6 +64,17 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
                     }
                 })) as any;
             }
+        }
+
+        // Check if this is a boundary element - if so, treat it and all children as terminal
+        const isBoundaryElement =
+            node.type === "mdxJsxFlowElement" && node.name != null && boundaryElements.includes(node.name);
+
+        if (isBoundaryElement) {
+            return {
+                type: "terminalElement",
+                originalMdx: astToMDX(node)
+            };
         }
 
         const isEditableComponent =
@@ -169,4 +183,10 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
 }
 
 // Export the component arrays for use in playground
-export { richTextComponents, componentsWithoutChildren, editableComponents, contentDraggingDisabledComponents };
+export {
+    richTextComponents,
+    componentsWithoutChildren,
+    editableComponents,
+    contentDraggingDisabledComponents,
+    boundaryElements
+};

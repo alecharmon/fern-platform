@@ -67,9 +67,7 @@ export const Image = forwardRef<
     });
 
     const imageContent = (
-        <div ref={imageRef} className="relative w-full">
-            {isWithinEditor && <EditorComponentPopoverButton className="absolute -right-[38px] z-10" />}
-
+        <>
             {!src || src.trim() === "" ? (
                 // Placeholder when no src is provided
                 <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-3">
@@ -106,7 +104,16 @@ export const Image = forwardRef<
                     );
                 })()
             )}
+        </>
+    );
+
+    const wrappedImageContent = isWithinEditor ? (
+        <div ref={imageRef} className="relative w-full">
+            <EditorComponentPopoverButton className="absolute -right-[38px] z-10" />
+            {imageContent}
         </div>
+    ) : (
+        imageContent
     );
 
     if (isWithinEditor) {
@@ -133,7 +140,7 @@ export const Image = forwardRef<
                 targetRef={imageRef}
                 hoverSlopThreshold={42}
             >
-                {imageContent}
+                {wrappedImageContent}
             </EditorComponentPopoverProvider>
         );
     }

@@ -1,29 +1,12 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
-
-import { useDevMode } from "@/providers/DevModeProvider";
-
-import { Button } from "../ui/button";
+import { EditInDevModeButton } from "./EditInDevModeButton";
 
 export const UnsupportedContent = ({ children }: { children: React.ReactNode }) => {
-    const { setPanelOpen } = useDevMode();
-
-    const handleToggleDevMode = () => {
-        setPanelOpen(true);
-    };
-
     return (
         <UnsupportedContentDisplayOnly>
             <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                <Button
-                    onClick={handleToggleDevMode}
-                    variant="outline"
-                    size="sm"
-                    className="w-fit bg-gray-300 hover:bg-gray-500/80"
-                >
-                    Edit in dev mode <ArrowRight className="size-4" />
-                </Button>
+                <EditInDevModeButton className="w-fit bg-gray-300 hover:bg-gray-500/80" />
             </div>
             {children}
         </UnsupportedContentDisplayOnly>

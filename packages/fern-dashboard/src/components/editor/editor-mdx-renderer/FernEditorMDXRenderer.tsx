@@ -1,3 +1,4 @@
+import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
 import {
     astToMDX,
     htmlToMdx,
@@ -6,20 +7,20 @@ import {
     type MdxJsxExpressionAttribute,
     mdxToHtml
 } from "@fern-docs/mdx";
-
 import { useMDXComponents } from "@mdx-js/react";
 import type { Transaction } from "@tiptap/pm/state";
 import { getMDXComponent } from "mdx-bundler/client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { EditorComponentChildrenProvider } from "@/components/editor/editor-component/EditorComponentChildrenContext";
 import { EditorComponentProvider } from "@/components/editor/editor-component/EditorComponentContext";
+import { CustomElementHoverWrapper } from "@/components/editor/NodeHoverWrapper";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { UnsupportedContent, UnsupportedContentDisplayOnly } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
-import { parseMDX } from "./parse";
+import { boundaryElements, parseMDX } from "./parse";
 import type { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
 
 function buildMdxElement(
@@ -147,7 +148,11 @@ const TerminalMDXRenderer = React.memo(({ code, components }: TerminalMDXRendere
         }
     }, [code]);
 
-    return <MDXComponent components={components} />;
+    return (
+        <NoZoomContext.Provider value={true}>
+            <MDXComponent components={components} />
+        </NoZoomContext.Provider>
+    );
 });
 TerminalMDXRenderer.displayName = "TerminalMDXRenderer";
 
@@ -158,11 +163,40 @@ interface MDXRendererProps {
     branch?: string;
 }
 
+// Helper function to check if MDX starts with a boundary element
+function isBoundaryElement(mdx: string): boolean {
+    const trimmed = mdx.trim();
+    // Check if MDX starts with any boundary element
+    return boundaryElements.some((element) => {
+        const openingTag = `<${element}`;
+        if (!trimmed.startsWith(openingTag)) {
+            return false;
+        }
+
+        // Check the character immediately after the element name
+        const nextCharIndex = openingTag.length;
+        if (nextCharIndex >= trimmed.length) {
+            return false; // String ends before we can check next character - incomplete tag
+        }
+
+        const nextChar = trimmed[nextCharIndex];
+        if (nextChar === undefined) {
+            return false;
+        }
+        // Valid boundary is:
+        // 1. '>' (opening tag)
+        // 2. '/' (self-closing tag like <div/>)
+        // 3. whitespace (attributes like <div class="test">)
+        return nextChar === ">" || nextChar === "/" || /\s/.test(nextChar);
+    });
+}
+
 const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
     const [state, setState] = useState<MDXRendererState>({
         type: "BUNDLING"
     });
     const components = useMDXComponents();
+    const isBoundary = useMemo(() => isBoundaryElement(mdx), [mdx]);
 
     useEffect(() => {
         let cancelled = false;
@@ -213,6 +247,11 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
             </ErrorBoundary>
         );
     }, [state, mdx, components]);
+
+    // Only wrap with CustomElementHoverWrapper if it's a boundary element
+    if (isBoundary) {
+        return <CustomElementHoverWrapper>{content}</CustomElementHoverWrapper>;
+    }
 
     return content;
 });

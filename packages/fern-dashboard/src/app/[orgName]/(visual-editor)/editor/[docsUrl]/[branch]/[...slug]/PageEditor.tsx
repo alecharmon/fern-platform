@@ -96,7 +96,6 @@ export default function PageEditor({ className, filename, initialHtml }: PageEdi
     return (
         <div key={saveCounter} className="relative">
             <TiptapEditor
-                autofocus={true}
                 className={className}
                 initialContent={latestTiptapHtml.current}
                 onCreate={onTiptapEditorCreate}
