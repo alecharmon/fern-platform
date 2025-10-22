@@ -1,8 +1,9 @@
 import logging
 
 from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, TextBlock, ToolUseBlock, query
-from git import configure_git_auth, setup_session_repo
-from system_prompts import GIT_PR_SYSTEM_PROMPT, TECHNICAL_WRITER_SYSTEM_PROMPT
+
+from .git import configure_git_auth, setup_session_repo
+from .system_prompts import GIT_PR_SYSTEM_PROMPT, TECHNICAL_WRITER_SYSTEM_PROMPT
 
 logger = logging.getLogger()
 

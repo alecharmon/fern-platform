@@ -65,7 +65,7 @@ def test_handler_invalid_repository_type():
     assert response["statusCode"] == 500
 
 
-@patch("src.handler.run_agent_on_session_repo")
+@patch("src.utils.agent.run_agent_on_session_repo")
 @patch("src.handler.os.path.exists")
 def test_handler_success(mock_exists, mock_run_agent):
     """Test that handler returns success with valid input."""

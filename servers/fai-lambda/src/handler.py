@@ -5,8 +5,8 @@ import os
 from datetime import datetime
 from typing import Any
 
-from agent import run_agent_on_session_repo
-from validation import validate_body_param_or_throw
+from .utils.agent import run_agent_on_session_repo
+from .utils.validation import validate_body_param_or_throw
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
