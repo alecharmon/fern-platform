@@ -35,7 +35,23 @@ let nextConfig: NextConfig = {
             // this will separate the `createLowlight` from the `all` import
             "lowlight"
         ],
-        useCache: true
+        useCache: true,
+        turbo: {
+            rules: {
+                "*.frag": {
+                    loaders: ["raw-loader"],
+                    as: "*.js"
+                },
+                "*.vert": {
+                    loaders: ["raw-loader"],
+                    as: "*.js"
+                },
+                "*.glsl": {
+                    loaders: ["raw-loader"],
+                    as: "*.js"
+                }
+            }
+        }
     },
     images: {
         remotePatterns: [
