@@ -1870,9 +1870,6 @@ importers:
       ts-essentials:
         specifier: 'catalog:'
         version: 10.0.4(typescript@5.7.3)
-      undici:
-        specifier: ^6.21.2
-        version: 6.21.2
       url-join:
         specifier: 'catalog:'
         version: 5.0.0

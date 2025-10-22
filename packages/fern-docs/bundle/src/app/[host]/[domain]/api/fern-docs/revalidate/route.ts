@@ -17,15 +17,14 @@ import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { getEnv, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
-import { chunk } from "es-toolkit/array";
 import { mapValues } from "es-toolkit/object";
 import { escapeRegExp } from "es-toolkit/string";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
-import { Agent, fetch } from "undici";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex, queueTurbopufferReindex } from "@/server/queue-reindex";
+import { ResilientQueue } from "@/utils/resilient-queue";
 
 // Custom error type for intentional revalidation failures
 class RevalidationError extends Error {
@@ -38,15 +37,6 @@ class RevalidationError extends Error {
         this.name = "RevalidationError";
     }
 }
-
-// Create persistent HTTP connection pool to avoid EMFILE errors
-// Reuses connections across all fetches to the same origin
-const revalidationAgent = new Agent({
-    connections: 20, // Max concurrent connections per origin
-    pipelining: 10, // Max requests per connection
-    keepAliveTimeout: 30000, // Keep connections alive for 30s
-    keepAliveMaxTimeout: 60000
-});
 
 export const maxDuration = 800; // 13 minutes timeout
 
@@ -127,8 +117,7 @@ export async function GET(
                     fetch(`${req.nextUrl.origin}${path}`, {
                         method: "HEAD",
                         headers: { [HEADER_X_FERN_HOST]: domain },
-                        signal: AbortSignal.timeout(600_000),
-                        dispatcher: revalidationAgent
+                        signal: AbortSignal.timeout(600_000)
                     })
                         .then(() => {
                             controller.enqueue(`${name}-revalidated\n`);
@@ -233,85 +222,112 @@ export async function GET(
 
                 if (req.nextUrl.searchParams.get("regenerate") !== "false") {
                     const collector = FernNavigation.NodeCollector.collect(staticRoot);
-                    const batches = chunk(collector.staticPageSlugs, 200);
 
-                    controller.enqueue(`revalidate-queued:urls=${collector.slugs.length};batches=${batches.length}\n`);
+                    controller.enqueue(`revalidate-queued:urls=${collector.slugs.length}\n`);
 
-                    for (let i = 0; i < batches.length; i++) {
-                        controller.enqueue(
-                            `revalidate-batch:${i * 200 + 1}-${Math.min(
-                                (i + 1) * 200,
-                                collector.slugs.length
-                            )}/${collector.slugs.length}\n`
-                        );
-                        await Promise.all(
-                            (batches[i] ?? []).map(async (slug: string) => {
-                                const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
-                                // force revalidate the static page
-                                revalidatePath(
-                                    `/${host}/${domain}/static/${encodeURIComponent(slugToHref(slug))}`,
-                                    "page"
-                                );
-                                const startTime = performance.now();
-                                try {
-                                    const res = await fetch(`${req.nextUrl.origin}${slugToHref(slug)}`, {
-                                        method: "HEAD",
-                                        headers: { [HEADER_X_FERN_HOST]: domain },
-                                        signal: AbortSignal.timeout(600_000),
-                                        dispatcher: revalidationAgent
-                                    });
-                                    const endTime = performance.now();
-                                    track("revalidate_page_stats", {
+                    // Use ResilientQueue for adaptive concurrency and retry logic
+                    const queue = new ResilientQueue<string>({
+                        processItem: async (slug: string, attempt: number) => {
+                            const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
+
+                            // Force revalidate the static page
+                            revalidatePath(`/${host}/${domain}/static/${encodeURIComponent(slugToHref(slug))}`, "page");
+
+                            const startTime = performance.now();
+
+                            try {
+                                const res = await fetch(`${req.nextUrl.origin}${slugToHref(slug)}`, {
+                                    method: "HEAD",
+                                    headers: { [HEADER_X_FERN_HOST]: domain },
+                                    signal: AbortSignal.timeout(600_000)
+                                });
+
+                                const endTime = performance.now();
+
+                                track("revalidate_page_stats", {
+                                    url,
+                                    domain,
+                                    durationMs: endTime - startTime,
+                                    status: res?.status ?? null,
+                                    ok: res?.ok ?? false,
+                                    attempt
+                                });
+
+                                if (!res?.ok) {
+                                    track("revalidate_page_error_res_not_ok", {
                                         url,
                                         domain,
-                                        durationMs: endTime - startTime,
                                         status: res?.status ?? null,
-                                        ok: res?.ok ?? false
+                                        error: `Failed to revalidate ${url}. Status code: ${res?.status}`,
+                                        attempt
                                     });
-                                    if (!res?.ok) {
-                                        track("revalidate_page_error_res_not_ok", {
-                                            url,
-                                            domain,
-                                            status: res?.status ?? null,
-                                            error: `Failed to revalidate ${url}. Status code: ${res?.status}`
-                                        });
-                                        throw new RevalidationError(
-                                            `Failed to revalidate ${url}. Status code: ${res?.status}`,
-                                            url,
-                                            res?.status
-                                        );
-                                    }
-                                    controller.enqueue(`revalidated:${url}\n`);
-                                } catch (e) {
-                                    console.error(
-                                        `[revalidate:page-revalidate] error: url=${url}; error=${JSON.stringify((e as Error)?.message)}`
-                                    );
-
-                                    // Check if this is an intentional revalidation error or an unexpected error
-                                    if (!(e instanceof RevalidationError)) {
-                                        // This is an unexpected error
-                                        const errorMessage = String(e);
-                                        const errorDetails: any = {};
-
-                                        if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
-                                            errorDetails.cause = e.cause;
-                                        }
-
-                                        track("revalidate_page_error_unexpected", {
-                                            url,
-                                            domain,
-                                            error: errorMessage,
-                                            errorDetails
-                                        });
-                                    }
-
-                                    controller.enqueue(
-                                        `revalidate-failed:url=${url}:error=${escapeRegExp(String(e))}\n`
+                                    throw new RevalidationError(
+                                        `Failed to revalidate ${url}. Status code: ${res?.status}`,
+                                        url,
+                                        res?.status
                                     );
                                 }
-                            })
-                        );
+
+                                controller.enqueue(`revalidated:${url}\n`);
+                            } catch (e) {
+                                console.error(
+                                    `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; error=${JSON.stringify((e as Error)?.message)}`
+                                );
+
+                                // Check if this is an intentional revalidation error or an unexpected error
+                                if (!(e instanceof RevalidationError)) {
+                                    // This is an unexpected error
+                                    const errorMessage = String(e);
+                                    const errorDetails: any = {};
+
+                                    if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
+                                        errorDetails.cause = e.cause;
+                                    }
+
+                                    track("revalidate_page_error_unexpected", {
+                                        url,
+                                        domain,
+                                        error: errorMessage,
+                                        errorDetails,
+                                        attempt
+                                    });
+                                }
+
+                                // Re-throw to let queue handle retry
+                                throw e;
+                            }
+                        },
+                        maxRetries: 3,
+                        initialConcurrency: 50,
+                        maxConcurrency: 150,
+                        minConcurrency: 5,
+                        errorRateThreshold: 0.2,
+                        backoffBaseMs: 1000,
+                        onProgress: (stats) => {
+                            controller.enqueue(
+                                `revalidate-progress:completed=${stats.completed}/${stats.total};` +
+                                    `failed=${stats.failed};inFlight=${stats.inFlight};` +
+                                    `concurrency=${stats.currentConcurrency};errorRate=${(stats.errorRate * 100).toFixed(1)}%\n`
+                            );
+                        }
+                    });
+
+                    const result = await queue.process(collector.staticPageSlugs);
+
+                    // Log permanently failed pages
+                    if (result.failed > 0) {
+                        console.error(`[revalidate] ${result.failed} pages failed permanently after ${3} retries`);
+                        track("revalidate_pages_failed_permanently", {
+                            domain,
+                            failedCount: result.failed,
+                            totalCount: result.total
+                        });
                     }
+
+                    controller.enqueue(
+                        `revalidate-pages-finished:total=${result.total};` +
+                            `completed=${result.completed};failed=${result.failed}\n`
+                    );
                 }
 
                 // update homepage images for dashboard
@@ -335,8 +351,7 @@ export async function GET(
                             body: JSON.stringify({
                                 url: `${docs.baseUrl.domain.replace(/\/$/, "")}${docs.baseUrl.basePath ?? ""}`
                             }),
-                            signal: AbortSignal.timeout(600_000),
-                            dispatcher: revalidationAgent
+                            signal: AbortSignal.timeout(600_000)
                         });
                     } catch (e) {
                         console.error(`[revalidate:homepage-image-revalidate] error: ${JSON.stringify(e)}`);
