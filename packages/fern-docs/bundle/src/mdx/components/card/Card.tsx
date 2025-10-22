@@ -1,6 +1,7 @@
 import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
 import { FernCard } from "@fern-docs/components/FernCard";
+import { FernImage } from "@fern-docs/components/FernImage";
 import { FaIcon } from "@fern-docs/components/fa-icon";
 import { isValidElement } from "react";
 
@@ -25,6 +26,11 @@ export declare namespace Card {
 
         // in-development:
         badge?: string;
+
+        src?: string;
+        imageWidth?: string;
+        imageHeight?: string;
+        imagePosition?: "top" | "left" | "right" | "bottom";
     }
 }
 
@@ -39,15 +45,71 @@ export const Card: React.FC<Card.Props> = ({
     children,
     href,
     badge,
-    className
+    className,
+    src,
+    imageWidth,
+    imageHeight,
+    imagePosition = "top"
 }) => {
     if (isNaN(iconSize)) {
         iconSize = 8;
     }
 
-    const combinedClassName = cn("not-prose rounded-3 relative block border p-6 text-base", className);
+    const hasImage = src != null;
 
-    const content = (
+    const combinedClassName = cn(
+        "not-prose rounded-3 relative block border text-base",
+        {
+            "p-6": !hasImage,
+            "overflow-hidden": hasImage
+        },
+        className
+    );
+
+    const imageStyle: React.CSSProperties = {};
+    if (hasImage) {
+        if (imageWidth && imageHeight) {
+            imageStyle.width = imageWidth;
+            imageStyle.height = imageHeight;
+        } else if (imageWidth) {
+            imageStyle.width = imageWidth;
+            imageStyle.height = "auto";
+        } else if (imageHeight) {
+            imageStyle.height = imageHeight;
+            imageStyle.width = "auto";
+        }
+    }
+
+    const content = hasImage ? (
+        <>
+            {badge != null && (
+                <Badge intent="primary" className="absolute -right-2 -top-2">
+                    {badge}
+                </Badge>
+            )}
+            <div
+                className={cn("flex w-full h-full items-start justify-between", {
+                    "flex-col": imagePosition === "top",
+                    "flex-row": imagePosition === "left",
+                    "flex-row-reverse": imagePosition === "right",
+                    "flex-col-reverse": imagePosition === "bottom"
+                })}
+            >
+                <div className="w-full h-full flex items-center justify-center">
+                    <FernImage
+                        src={src}
+                        alt={title}
+                        style={Object.keys(imageStyle).length > 0 ? imageStyle : undefined}
+                        className="card-image"
+                    />
+                </div>
+                <div className="w-full h-full space-y-1 overflow-hidden p-6">
+                    <div className="text-body text-base font-semibold">{title}</div>
+                    {children != null && <div className="text-(color:--grayscale-a11)">{children}</div>}
+                </div>
+            </div>
+        </>
+    ) : (
         <>
             {badge != null && (
                 <Badge intent="primary" className="absolute -right-2 -top-2">
