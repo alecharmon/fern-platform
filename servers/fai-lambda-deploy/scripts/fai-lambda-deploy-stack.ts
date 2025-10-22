@@ -1,12 +1,12 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
-import { CfnOutput, Duration, Stack, type StackProps } from "aws-cdk-lib";
+import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as efs from "aws-cdk-lib/aws-efs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import type { Construct } from "constructs";
@@ -19,12 +19,16 @@ export class FaiLambdaDeployStack extends Stack {
         version: string,
         environmentType: EnvironmentType,
         environmentInfo: EnvironmentInfo,
-        rdsProxySecurityGroupId: string,
         props?: StackProps
     ) {
         super(scope, id, props);
 
-        const logGroup = LogGroup.fromLogGroupName(this, "log-group", environmentInfo.logGroupInfo.logGroupName);
+        // Create a dedicated log group for this Lambda function
+        const logGroup = new LogGroup(this, "log-group", {
+            logGroupName: `/aws/lambda/fai-scribe-${environmentType.toLowerCase()}`,
+            retention: RetentionDays.ONE_MONTH,
+            removalPolicy: RemovalPolicy.DESTROY
+        });
 
         const certificate = Certificate.fromCertificateArn(
             this,
@@ -48,23 +52,6 @@ export class FaiLambdaDeployStack extends Stack {
             description: "Security group for FAI Scribe Lambda function",
             allowAllOutbound: true
         });
-
-        // Import the existing RDS Proxy security group
-        const rdsProxySecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
-            this,
-            "rds-proxy-security-group",
-            rdsProxySecurityGroupId,
-            {
-                mutable: true
-            }
-        );
-
-        // Allow RDS Proxy security group to accept inbound connections from Lambda
-        rdsProxySecurityGroup.addIngressRule(
-            lambdaSecurityGroup,
-            ec2.Port.tcp(5432),
-            "Allow inbound PostgreSQL traffic from Lambda"
-        );
 
         // Create or reference EFS file system
         // Note: In production, you may want to reference an existing EFS file system
