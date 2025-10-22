@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React from "react";
 
+import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
@@ -65,6 +66,7 @@ export const NavbarItem = ({ title, icon, iconType, href, hrefForActualLinking =
 
     const orgName = useOrgNameFromPathname();
     const pathname = usePathnameWithoutOrgName();
+    const [isCollapsed] = useIsSidebarCollapsed();
 
     const isSelected = pathname.startsWith(href);
     const isClickable = !isSelected;
@@ -74,7 +76,8 @@ export const NavbarItem = ({ title, icon, iconType, href, hrefForActualLinking =
         "group flex flex-1 flex-col items-center gap-2 py-2 text-sm transition md:flex-row",
         isSelected ? "text-primary" : "text-gray-900",
         isClickable && "hover:text-gray-1100",
-        hoverAnimating && "hover-animating"
+        hoverAnimating && "hover-animating",
+        isCollapsed && "md:justify-center"
     );
 
     const children = (
@@ -87,7 +90,7 @@ export const NavbarItem = ({ title, icon, iconType, href, hrefForActualLinking =
             {iconType === "settings" && <SettingsIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "incidents" && <AlertIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
 
-            <div>{title}</div>
+            {!isCollapsed && <div>{title}</div>}
         </>
     );
 

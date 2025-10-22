@@ -1,21 +1,42 @@
 @layer components {
+  .fern-sidebar-collapsed {
+    .fern-sidebar-heading-content,
+    .fern-sidebar-link-title,
+    .fern-sidebar-link > span:not(.expand-indicator) {
+      @apply hidden;
+    }
+
+    .fern-sidebar-heading,
+    .fern-sidebar-link {
+      @apply justify-center px-2;
+    }
+
+    .fern-sidebar-heading > svg,
+    .fern-sidebar-link > svg {
+      @apply mr-0;
+    }
+  }
+
   .fern-sidebar-heading {
     @apply mb-1 flex min-h-[32px] lg:min-h-[36px];
     @apply inline-flex items-center px-4 lg:px-2;
+    @apply transition-all duration-300;
 
     .fern-sidebar-heading-content {
       @apply m-0 text-base font-semibold leading-6 lg:text-sm lg:leading-5;
+      @apply transition-opacity duration-300;
     }
 
     > svg {
       @apply mr-3 size-4 shrink-0;
+      @apply transition-all duration-300;
 
       color: var(--grayscale-a9);
     }
   }
 
   .fern-sidebar-link {
-    @apply text-(color:--grayscale-a11) lg:rounded-2 flex w-full items-center gap-3 px-4 py-2 text-left text-base leading-tight transition-colors lg:p-2 lg:text-sm;
+    @apply text-(color:--grayscale-a11) lg:rounded-2 flex w-full items-center gap-3 px-4 py-2 text-left text-base leading-tight transition-all duration-300 lg:p-2 lg:text-sm;
 
     @variant hover {
       @apply text-(color:--grayscale-a12) bg-(color:--grayscale-a3) transition-none;
@@ -23,6 +44,7 @@
 
     svg {
       @apply size-icon text-(color:--grayscale-a9) shrink-0;
+      @apply transition-all duration-300;
     }
 
     &.nested {

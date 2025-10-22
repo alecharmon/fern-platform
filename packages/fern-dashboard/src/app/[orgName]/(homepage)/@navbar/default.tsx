@@ -5,8 +5,10 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { DocsNavbarItem } from "@/components/navbar/DocsNavbarItem";
 import { DocsNavbarItems } from "@/components/navbar/DocsNavbarItems";
+import { NavbarCollapseToggle } from "@/components/navbar/NavbarCollapseToggle";
 import { NavbarItem } from "@/components/navbar/NavbarItem";
 import { NavbarSectionTitle } from "@/components/navbar/NavbarSectionTitle";
+import { NavbarWrapper } from "@/components/navbar/NavbarWrapper";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { FeatureFlaggedServerSide } from "@/components/posthog/feature-flags/server-side";
 
@@ -27,7 +29,7 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
     }
 
     return (
-        <div className="flex h-full w-fit max-w-full flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--sidebar)] md:w-[var(--sidebar-width)] md:border-0 md:py-6 md:pl-4 md:transition-[width]">
+        <NavbarWrapper>
             <div className="flex gap-8 overflow-y-auto px-8 md:flex-col md:gap-0 md:px-0 md:pb-4">
                 <Suspense fallback={<DocsNavbarItem />}>
                     <DocsNavbarItems orgName={orgName} />
@@ -48,6 +50,7 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
                     <NavbarItem title="Billing" iconType="billing" href="/billing" />
                 </FeatureFlaggedServerSide>
             </div>
-        </div>
+            <NavbarCollapseToggle />
+        </NavbarWrapper>
     );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type React from "react";
 
+import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
 
@@ -19,12 +20,14 @@ export declare namespace NavbarSubItem {
 export const NavbarSubItem = ({ title, icon, href, docsUrlParam }: NavbarSubItem.Props) => {
     const orgName = useOrgNameFromPathname();
     const params = useParams();
+    const [isCollapsed] = useIsSidebarCollapsed();
     const isSelected = params.docsUrl ? docsUrlParam === String(params.docsUrl) : false;
 
     const className = cn(
         "hidden md:flex",
         "flex-1 flex-row gap-2 text-sm transition",
-        isSelected ? "text-primary" : "hover:text-gray-1100 text-gray-900"
+        isSelected ? "text-primary" : "hover:text-gray-1100 text-gray-900",
+        isCollapsed && "justify-center"
     );
 
     const children = (
@@ -32,10 +35,12 @@ export const NavbarSubItem = ({ title, icon, href, docsUrlParam }: NavbarSubItem
             <div className="flex w-5 shrink-0 justify-center">
                 <div className={cn("w-px", isSelected ? "bg-green-1100" : "bg-gray-700")} />
             </div>
-            <div className="flex min-w-0 items-center py-2 pr-4">
-                {icon}
-                <div className="truncate">{title}</div>
-            </div>
+            {!isCollapsed && (
+                <div className="flex min-w-0 items-center py-2 pr-4">
+                    {icon}
+                    <div className="truncate">{title}</div>
+                </div>
+            )}
         </>
     );
 
