@@ -220,7 +220,7 @@ export async function GET(
                     controller.enqueue(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
                 }
 
-                if (req.nextUrl.searchParams.get("regenerate") !== "false") {
+                if (!metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false") {
                     const collector = FernNavigation.NodeCollector.collect(staticRoot);
 
                     controller.enqueue(`revalidate-queued:urls=${collector.slugs.length}\n`);
