@@ -163,14 +163,14 @@
       }
 
       &.filled {
-        @apply bg-black/60 text-black dark:bg-white/60 dark:text-white;
+        @apply bg-(color:--grayscale-12) text-(color:--grayscale-1);
 
         &:hover,
         &[data-state="on"],
         &[data-state="checked"],
         &[data-state="open"],
         &[data-state="opening"] {
-          @apply bg-black/60 text-black dark:bg-white/60 dark:text-white;
+          @apply bg-(color:--grayscale-11) text-(color:--grayscale-1);
         }
 
         &.primary {
