@@ -41,22 +41,35 @@ export class FaiLambdaDeployStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        const vpc = new ec2.Vpc(this, "fai-scribe-vpc", {
-            maxAzs: 2,
-            natGateways: 1,
-            subnetConfiguration: [
-                {
-                    cidrMask: 24,
-                    name: "public",
-                    subnetType: ec2.SubnetType.PUBLIC
-                },
-                {
-                    cidrMask: 24,
-                    name: "private",
-                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
-                }
-            ]
-        });
+        // Get or create VPC
+        // Use VPC_ID environment variable to share VPC between dev and prod
+        const vpcId = process.env["VPC_ID"];
+        let vpc: ec2.IVpc;
+
+        if (vpcId) {
+            // Reference existing VPC
+            vpc = ec2.Vpc.fromLookup(this, "fai-scribe-vpc", {
+                vpcId
+            });
+        } else {
+            // Create new VPC
+            vpc = new ec2.Vpc(this, "fai-scribe-vpc", {
+                maxAzs: 2,
+                natGateways: 1,
+                subnetConfiguration: [
+                    {
+                        cidrMask: 24,
+                        name: "public",
+                        subnetType: ec2.SubnetType.PUBLIC
+                    },
+                    {
+                        cidrMask: 24,
+                        name: "private",
+                        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+                    }
+                ]
+            });
+        }
 
         // Create security group for Lambda
         const lambdaSecurityGroup = new ec2.SecurityGroup(this, "lambda-security-group", {
@@ -225,6 +238,11 @@ export class FaiLambdaDeployStack extends Stack {
         new CfnOutput(this, "EfsFileSystemId", {
             value: fileSystem.fileSystemId,
             description: "EFS File System ID"
+        });
+
+        new CfnOutput(this, "VpcId", {
+            value: vpc.vpcId,
+            description: "VPC ID (use this in VPC_ID env var to share VPC between environments)"
         });
     }
 }

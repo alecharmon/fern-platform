@@ -12,6 +12,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
   EFS_FILE_SYSTEM_ID: ${{ secrets.PROD_FAI_LAMBDA_EFS_FILE_SYSTEM_ID }}
+  VPC_ID: ${{ secrets.FAI_LAMBDA_VPC_ID }}
 
 jobs:
   deploy_prod:
