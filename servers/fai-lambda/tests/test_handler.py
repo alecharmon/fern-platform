@@ -1,7 +1,7 @@
 """Tests for the Lambda handler."""
 
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from src.handler import handler
 
@@ -13,7 +13,7 @@ def test_handler_missing_repository():
     }
 
     context = MagicMock()
-    context.request_id = "test-request-id"
+    context.aws_request_id = "test-request-id"
 
     response = handler(event, context)
 
@@ -28,7 +28,7 @@ def test_handler_missing_prompt():
     }
 
     context = MagicMock()
-    context.request_id = "test-request-id"
+    context.aws_request_id = "test-request-id"
 
     response = handler(event, context)
 
@@ -43,7 +43,7 @@ def test_handler_missing_base_branch():
     }
 
     context = MagicMock()
-    context.request_id = "test-request-id"
+    context.aws_request_id = "test-request-id"
 
     response = handler(event, context)
 
@@ -58,14 +58,14 @@ def test_handler_invalid_repository_type():
     }
 
     context = MagicMock()
-    context.request_id = "test-request-id"
+    context.aws_request_id = "test-request-id"
 
     response = handler(event, context)
 
     assert response["statusCode"] == 500
 
 
-@patch("src.utils.agent.run_agent_on_session_repo")
+@patch("src.handler.run_agent_on_session_repo", new_callable=AsyncMock)
 @patch("src.handler.os.path.exists")
 def test_handler_success(mock_exists, mock_run_agent):
     """Test that handler returns success with valid input."""
@@ -81,7 +81,7 @@ def test_handler_success(mock_exists, mock_run_agent):
     }
 
     context = MagicMock()
-    context.request_id = "test-request-id"
+    context.aws_request_id = "test-request-id"
 
     response = handler(event, context)
 
@@ -111,7 +111,7 @@ def test_handler_efs_not_mounted(mock_exists):
     }
 
     context = MagicMock()
-    context.request_id = "test-request-id"
+    context.aws_request_id = "test-request-id"
 
     response = handler(event, context)
 
