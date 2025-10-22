@@ -14,12 +14,12 @@ export function FeedbackSidePanel({ feedback, onClose }: FeedbackSidePanelProps)
         feedback.selection.replaceAll("-", " ").charAt(0).toUpperCase() +
         feedback.selection.replaceAll("-", " ").slice(1).toLowerCase();
 
-    let channelValue = feedback.userFeedback || "-";
-    if (channelValue === "[Ask Fern]") {
-        channelValue = "Ask Fern";
-    } else if (channelValue === "-") {
-        channelValue = "Docs";
-    }
+    const channel = feedback.userFeedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
+    const message = feedback.userFeedback?.startsWith("[Ask Fern] ")
+        ? feedback.userFeedback.slice(11)
+        : feedback.userFeedback?.trim() === "[Ask Fern]"
+          ? ""
+          : feedback.userFeedback;
 
     return (
         <div className="flex w-full flex-col p-0 lg:max-w-lg lg:p-8">
@@ -72,12 +72,19 @@ export function FeedbackSidePanel({ feedback, onClose }: FeedbackSidePanelProps)
                     <p className="text-sm">{sentenceCasedSelection}</p>
                 </div>
 
-                {feedback.userFeedback && (
+                <div className="flex flex-col gap-2">
+                    <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
+                        Channel
+                    </h3>
+                    <p className="text-sm">{channel}</p>
+                </div>
+
+                {message && (
                     <div className="flex flex-col gap-2">
                         <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
-                            Channel
+                            User Message
                         </h3>
-                        <p className="whitespace-pre-wrap text-sm">{channelValue}</p>
+                        <p className="whitespace-pre-wrap text-sm">{message}</p>
                     </div>
                 )}
 

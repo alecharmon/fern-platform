@@ -21,7 +21,7 @@ export function exportFeedbackToCSV(feedback: FeedbackEntry[], filename: string 
         "Current URL",
         "Was Helpful",
         "Reason",
-        "User Feedback",
+        "User Message",
         "Channel",
         "Location",
         "Device",
@@ -36,20 +36,19 @@ export function exportFeedbackToCSV(feedback: FeedbackEntry[], filename: string 
         const selection = entry.selection.replaceAll("-", " ");
         const sentenceCased = selection.charAt(0).toUpperCase() + selection.slice(1).toLowerCase();
 
-        // Format channel
-        let channel = entry.userFeedback || "-";
-        if (channel.trim() === "[Ask Fern]") {
-            channel = "Ask Fern";
-        } else if (channel === "-") {
-            channel = "Docs";
-        }
+        const channel = entry.userFeedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
+        const message = entry.userFeedback?.startsWith("[Ask Fern] ")
+            ? entry.userFeedback.slice(11)
+            : entry.userFeedback?.trim() === "[Ask Fern]"
+              ? ""
+              : entry.userFeedback || "";
 
         return [
             isoDate,
             escapeCSVField(entry.currentUrl),
             entry.wasHelpful ? "True" : "False",
             escapeCSVField(sentenceCased),
-            escapeCSVField(entry.userFeedback || "-"),
+            escapeCSVField(message),
             escapeCSVField(channel),
             escapeCSVField(entry.location),
             escapeCSVField(entry.device),

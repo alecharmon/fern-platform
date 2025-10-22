@@ -89,7 +89,9 @@ export function FeedbackTable({ feedback, isLoading, error, dateRange, setDateRa
                                                     ? "w-48"
                                                     : header.column.id === "currentUrl"
                                                       ? "pl-0"
-                                                      : undefined
+                                                      : header.column.id === "channel"
+                                                        ? "w-28"
+                                                        : undefined
                                         )}
                                     >
                                         {header.isPlaceholder
@@ -126,7 +128,9 @@ export function FeedbackTable({ feedback, isLoading, error, dateRange, setDateRa
                                                         ? "w-48"
                                                         : cell.column.id === "currentUrl"
                                                           ? "pl-0"
-                                                          : undefined
+                                                          : cell.column.id === "channel"
+                                                            ? "w-28"
+                                                            : undefined
                                             )}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

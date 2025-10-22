@@ -42,18 +42,14 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
     },
     {
         accessorKey: "userFeedback",
+        id: "channel",
         header: "Channel",
         cell: ({ row }) => {
             const feedback = row.getValue("userFeedback") as string;
-            let displayValue = feedback || "-";
-            if (displayValue.trim() === "[Ask Fern]") {
-                displayValue = "Ask Fern";
-            } else if (displayValue === "-") {
-                displayValue = "Docs";
-            }
+            const channel = feedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
             return (
-                <div className="truncate" title={displayValue} style={{ fontFamily: "GT Planar, sans-serif" }}>
-                    {displayValue}
+                <div className="truncate" title={channel} style={{ fontFamily: "GT Planar, sans-serif" }}>
+                    {channel}
                 </div>
             );
         }
