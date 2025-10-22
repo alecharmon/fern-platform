@@ -47,6 +47,7 @@ service:
         body:
           properties:
             url: rootCommons.Url
+            excludeApis: optional<boolean>
       response: LoadDocsForUrlResponse
       errors:
         - DomainNotRegisteredError
@@ -81,6 +82,7 @@ service:
         body:
           properties:
             url: rootCommons.Url
+            excludeApis: optional<boolean>
       response: LoadDocsForUrlResponse
       errors:
         - DomainNotRegisteredError

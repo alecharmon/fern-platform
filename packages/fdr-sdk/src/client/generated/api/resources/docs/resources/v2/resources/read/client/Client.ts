@@ -207,7 +207,8 @@ export class Read {
      *
      * @example
      *     await client.docs.v2.read.getDocsForUrl({
-     *         url: FernRegistry.Url("url")
+     *         url: FernRegistry.Url("url"),
+     *         excludeApis: undefined
      *     })
      */
     public getDocsForUrl(
@@ -393,7 +394,8 @@ export class Read {
      *
      * @example
      *     await client.docs.v2.read.getPrivateDocsForUrl({
-     *         url: FernRegistry.Url("url")
+     *         url: FernRegistry.Url("url"),
+     *         excludeApis: undefined
      *     })
      */
     public getPrivateDocsForUrl(

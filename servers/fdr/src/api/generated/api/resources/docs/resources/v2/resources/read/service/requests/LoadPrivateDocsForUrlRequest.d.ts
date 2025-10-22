@@ -4,4 +4,5 @@
 import * as FernRegistry from "../../../../../../../../index";
 export interface LoadPrivateDocsForUrlRequest {
     url: FernRegistry.Url;
+    excludeApis?: boolean;
 }

@@ -70,7 +70,8 @@ export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
             }
             const parsedUrl = ParsedBaseUrl.parse(req.body.url);
             const response = await app.docsDefinitionCache.getDocsForUrl({
-                url: parsedUrl.toURL()
+                url: parsedUrl.toURL(),
+                excludeApis: req.body.excludeApis ?? false
             });
             return res.send(response);
         },

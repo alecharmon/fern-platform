@@ -72,6 +72,7 @@ service:
         body:
           properties:
             docsDefinition: v1DocsWrite.DocsDefinition
+            excludeApis: optional<boolean>
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError

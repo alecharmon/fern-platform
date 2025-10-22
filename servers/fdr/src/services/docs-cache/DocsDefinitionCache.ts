@@ -13,14 +13,16 @@ import type RedisDocsDefinitionStore from "./RedisDocsDefinitionStore";
 const DOCS_DOMAIN_REGX = /^([^.\s]+)/;
 
 export interface DocsDefinitionCache {
-    getDocsForUrl(request: { url: URL }): Promise<DocsV2Read.LoadDocsForUrlResponse>;
+    getDocsForUrl(request: { url: URL; excludeApis?: boolean | undefined }): Promise<DocsV2Read.LoadDocsForUrlResponse>;
 
     storeDocsForUrl({
         docsRegistrationInfo,
-        dbDocsDefinition
+        dbDocsDefinition,
+        excludeApis
     }: {
         docsRegistrationInfo: DocsRegistrationInfo;
         dbDocsDefinition: DocsV1Db.DocsDefinitionDb.V3;
+        excludeApis?: boolean | undefined;
     }): Promise<void>;
 
     replaceDocsForInstanceId({
@@ -98,7 +100,13 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
         }
     }
 
-    public async getDocsForUrl({ url }: { url: URL }): Promise<DocsV2Read.LoadDocsForUrlResponse> {
+    public async getDocsForUrl({
+        url,
+        excludeApis
+    }: {
+        url: URL;
+        excludeApis?: boolean | undefined;
+    }): Promise<DocsV2Read.LoadDocsForUrlResponse> {
         const cachedResponse = await this.getDocsForUrlFromCache({ url });
         if (cachedResponse != null) {
             this.app.logger.info(`Cache HIT for ${url}`);
@@ -133,7 +141,7 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
         }
 
         this.app.logger.info(`Cache MISS for ${url}`);
-        const dbResponse = await this.getDocsForUrlFromDatabase({ url });
+        const dbResponse = await this.getDocsForUrlFromDatabase({ url, excludeApis: excludeApis ?? false });
 
         // we don't want to cache from READ if we are currently updating the cache via WRITE
         if (!this.getDocsWriteMonitor(url.hostname).isLocked()) {
@@ -145,10 +153,12 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
 
     public async storeDocsForUrl({
         docsRegistrationInfo,
-        dbDocsDefinition
+        dbDocsDefinition,
+        excludeApis
     }: {
         docsRegistrationInfo: DocsRegistrationInfo;
         dbDocsDefinition: DocsV1Db.DocsDefinitionDb.V3;
+        excludeApis?: boolean | undefined;
     }): Promise<void> {
         const resp = await this.dao.docsV2().storeDocsDefinition({
             docsRegistrationInfo,
@@ -162,7 +172,7 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
                 // it also prevents two cache-write operations to the same hostname from happening at the same time
                 return await this.getDocsWriteMonitor(docsUrl.hostname).use(async () => {
                     const url = docsUrl.toURL();
-                    const dbResponse = await this.getDocsForUrlFromDatabase({ url });
+                    const dbResponse = await this.getDocsForUrlFromDatabase({ url, excludeApis: excludeApis ?? false });
                     await this.cacheResponse({ url, value: dbResponse });
                 });
             })
@@ -214,13 +224,20 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
         return record;
     }
 
-    private async getDocsForUrlFromDatabase({ url }: { url: URL }): Promise<CachedDocsResponse> {
+    private async getDocsForUrlFromDatabase({
+        url,
+        excludeApis
+    }: {
+        url: URL;
+        excludeApis?: boolean | undefined;
+    }): Promise<CachedDocsResponse> {
         const dbDocs = await this.dao.docsV2().loadDocsForURL(url);
         if (dbDocs != null) {
             const definition = await getDocsDefinition({
                 app: this.app,
                 docsDbDefinition: dbDocs.docsDefinition,
-                docsV2: dbDocs
+                docsV2: dbDocs,
+                excludeApis: excludeApis ?? false
             });
             return {
                 version: "v3",
@@ -247,7 +264,8 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
             }
             const v1Docs = await getDocsForDomain({
                 app: this.app,
-                domain: v1Domain
+                domain: v1Domain,
+                excludeApis: excludeApis ?? false
             });
             return {
                 version: "v3",

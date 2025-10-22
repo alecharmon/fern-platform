@@ -51,7 +51,15 @@ export function getDocsReadService(app: FdrApplication): DocsV1ReadService {
     });
 }
 
-export async function getDocsForDomain({ app, domain }: { app: FdrApplication; domain: string }): Promise<{
+export async function getDocsForDomain({
+    app,
+    domain,
+    excludeApis
+}: {
+    app: FdrApplication;
+    domain: string;
+    excludeApis?: boolean | undefined;
+}): Promise<{
     response: DocsV1Read.DocsDefinition;
     dbFiles?: Record<DocsV1Read.FileId, DocsV1Db.DbFileInfoV2>;
 }> {
@@ -99,7 +107,8 @@ export async function getDocsForDomain({ app, domain }: { app: FdrApplication; d
                           hasPublicS3Assets: docsV2.hasPublicS3Assets,
                           isPreview: docsV2.isPreview
                       }
-                    : null
+                    : null,
+            excludeApis: excludeApis ?? false
         }),
         dbFiles: docsDbDefinition.files
     };
@@ -108,28 +117,38 @@ export async function getDocsForDomain({ app, domain }: { app: FdrApplication; d
 export async function getDocsDefinition({
     app,
     docsDbDefinition,
-    docsV2
+    docsV2,
+    excludeApis
 }: {
     app: FdrApplication;
     docsDbDefinition: DocsV1Db.DocsDefinitionDb;
     docsV2: LoadDocsDefinitionByUrlResponse | null;
+    excludeApis?: boolean | undefined;
 }): Promise<DocsV1Read.DocsDefinition> {
-    const [apiDefinitions, apiV2Definitions] = await Promise.all([
-        app.services.db.prisma.apiDefinitionsV2.findMany({
-            where: {
-                apiDefinitionId: {
-                    in: Array.from(docsDbDefinition.referencedApis)
+    let apiDefinitions: any[];
+    let apiV2Definitions: any[];
+
+    if (excludeApis) {
+        apiDefinitions = [];
+        apiV2Definitions = [];
+    } else {
+        [apiDefinitions, apiV2Definitions] = await Promise.all([
+            app.services.db.prisma.apiDefinitionsV2.findMany({
+                where: {
+                    apiDefinitionId: {
+                        in: Array.from(docsDbDefinition.referencedApis)
+                    }
                 }
-            }
-        }),
-        app.services.db.prisma.apiDefinitionsLatest.findMany({
-            where: {
-                apiDefinitionId: {
-                    in: Array.from(docsDbDefinition.referencedApis)
+            }),
+            app.services.db.prisma.apiDefinitionsLatest.findMany({
+                where: {
+                    apiDefinitionId: {
+                        in: Array.from(docsDbDefinition.referencedApis)
+                    }
                 }
-            }
-        })
-    ]);
+            })
+        ]);
+    }
 
     const bufferedApiDefinitionsById = keyBy(apiDefinitions, (def) => DocsV1Db.ApiDefinitionId(def.apiDefinitionId));
 

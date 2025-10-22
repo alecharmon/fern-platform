@@ -7,9 +7,11 @@ import * as FernRegistry from "../../../../../../../../index.js";
 /**
  * @example
  *     {
- *         url: FernRegistry.Url("url")
+ *         url: FernRegistry.Url("url"),
+ *         excludeApis: undefined
  *     }
  */
 export interface LoadPrivateDocsForUrlRequest {
     url: FernRegistry.Url;
+    excludeApis?: boolean;
 }

@@ -4,4 +4,5 @@
 import * as FernRegistry from "../../../../../../../../index";
 export interface RegisterDocsRequest {
     docsDefinition: FernRegistry.docs.v1.write.DocsDefinition;
+    excludeApis?: boolean;
 }

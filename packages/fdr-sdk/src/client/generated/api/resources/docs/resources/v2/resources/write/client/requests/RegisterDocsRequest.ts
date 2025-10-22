@@ -47,9 +47,11 @@ import * as FernRegistry from "../../../../../../../../index.js";
  *                 typography: undefined
  *             },
  *             jsFiles: undefined
- *         }
+ *         },
+ *         excludeApis: undefined
  *     }
  */
 export interface RegisterDocsRequest {
     docsDefinition: FernRegistry.docs.v1.write.DocsDefinition;
+    excludeApis?: boolean;
 }

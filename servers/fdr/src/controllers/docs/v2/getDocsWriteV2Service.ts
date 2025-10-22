@@ -300,6 +300,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
         await app.docsDefinitionCache.storeDocsForUrl({
           docsRegistrationInfo,
           dbDocsDefinition,
+          excludeApis: req.body.excludeApis ?? false
         });
 
         /**
@@ -324,6 +325,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
           try {
             const response = await app.docsDefinitionCache.getDocsForUrl({
               url: url.toURL(),
+              excludeApis: req.body.excludeApis ?? false
             });
 
             await app.services.s3.writeLoadDocsForUrlResponse({

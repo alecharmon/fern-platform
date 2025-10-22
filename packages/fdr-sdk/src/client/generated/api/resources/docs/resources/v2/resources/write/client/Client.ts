@@ -276,7 +276,8 @@ export class Write {
      *                 typography: undefined
      *             },
      *             jsFiles: undefined
-     *         }
+     *         },
+     *         excludeApis: undefined
      *     })
      */
     public finishDocsRegister(
