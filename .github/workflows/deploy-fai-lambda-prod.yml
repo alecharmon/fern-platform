@@ -5,7 +5,6 @@ on:
     tags: ["fai-scribe@*"]
 
 env:
-  PACKAGE_NAME: "@fern-platform/fai-lambda"
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: "buildwithfern"
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

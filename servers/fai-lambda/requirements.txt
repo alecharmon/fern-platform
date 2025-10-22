@@ -1,2 +1,1 @@
-# No runtime dependencies for the basic Hello World handler
-# Add dependencies here as needed
+claude-agent-sdk

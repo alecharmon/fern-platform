@@ -1,51 +1,51 @@
-"""
-FAI Scribe Lambda Handler
-
-A simple AWS Lambda handler for FAI Scribe that returns Hello World.
-"""
-
+import asyncio
 import json
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
-# Configure logging
+from agent import run_agent_on_session_repo
+from validation import validate_body_param_or_throw
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    """
-    Lambda handler function for FAI Scribe.
-
-    Args:
-        event: API Gateway event
-        context: Lambda context
-
-    Returns:
-        API Gateway response
-    """
+def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     logger.info(f"Event: {json.dumps(event)}")
     logger.info(f"Context: {context}")
 
-    path = event.get("path", "/")
-    method = event.get("httpMethod", "GET")
-
     try:
-        # Check EFS mount
         efs_mount_path = os.environ.get("EFS_MOUNT_PATH", "/mnt/efs")
-        efs_status = "mounted" if os.path.exists(efs_mount_path) else "not mounted"
 
-        # Build response
+        if not os.path.exists(efs_mount_path):
+            raise RuntimeError(f"EFS not mounted at {efs_mount_path}")
+
+        body = json.loads(event.get("body", "{}"))
+
+        repository = validate_body_param_or_throw(body, "repository")
+        prompt = validate_body_param_or_throw(body, "prompt")
+        base_branch = validate_body_param_or_throw(body, "base_branch")
+
+        repo_folder_base_path = f"{efs_mount_path}/repos/base"
+        sessions_folder_base_path = f"{efs_mount_path}/repos/sessions"
+
+        result = asyncio.run(
+            run_agent_on_session_repo(
+                repo_folder_base_path=repo_folder_base_path,
+                repository=repository,
+                sessions_folder_base_path=sessions_folder_base_path,
+                prompt=prompt,
+                base_branch=base_branch,
+            )
+        )
+
         response_body = {
-            "message": "Hello World from fai-scribe!",
+            "message": "Agent execution completed",
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "requestId": context.request_id,
-            "path": path,
-            "method": method,
-            "efs_mount_path": efs_mount_path,
-            "efs_status": efs_status,
+            "requestId": context.aws_request_id,
+            "result": result,
         }
 
         return {
@@ -66,9 +66,5 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
-            "body": json.dumps({
-                "message": "Error processing request",
-                "error": str(e),
-                "requestId": context.request_id,
-            }),
+            "body": json.dumps({"message": "Error processing request", "error": str(e), "requestId": context.aws_request_id}),
         }

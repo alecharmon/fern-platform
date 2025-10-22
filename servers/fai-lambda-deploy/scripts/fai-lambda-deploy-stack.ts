@@ -41,9 +41,21 @@ export class FaiLambdaDeployStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        // Import existing VPC using environmentInfo
-        const vpc = ec2.Vpc.fromLookup(this, "vpc", {
-            vpcId: environmentInfo.vpcId
+        const vpc = new ec2.Vpc(this, "fai-scribe-vpc", {
+            maxAzs: 2,
+            natGateways: 1,
+            subnetConfiguration: [
+                {
+                    cidrMask: 24,
+                    name: "public",
+                    subnetType: ec2.SubnetType.PUBLIC
+                },
+                {
+                    cidrMask: 24,
+                    name: "private",
+                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+                }
+            ]
         });
 
         // Create security group for Lambda
@@ -70,12 +82,20 @@ export class FaiLambdaDeployStack extends Stack {
 
         if (efsFileSystemId) {
             // Reference existing EFS file system
+            // Note: When referencing an existing EFS, ensure it has mount targets in the VPC subnets
             fileSystem = efs.FileSystem.fromFileSystemAttributes(this, "efs-file-system", {
                 fileSystemId: efsFileSystemId,
                 securityGroup: efsSecurityGroup
             });
+
+            vpc.privateSubnets.forEach((subnet, index) => {
+                new efs.CfnMountTarget(this, `efs-mount-target-${index}`, {
+                    fileSystemId: efsFileSystemId,
+                    subnetId: subnet.subnetId,
+                    securityGroups: [efsSecurityGroup.securityGroupId]
+                });
+            });
         } else {
-            // Create new EFS file system
             fileSystem = new efs.FileSystem(this, "efs-file-system", {
                 vpc,
                 lifecyclePolicy: efs.LifecyclePolicy.AFTER_14_DAYS,
@@ -83,7 +103,7 @@ export class FaiLambdaDeployStack extends Stack {
                 throughputMode: efs.ThroughputMode.BURSTING,
                 securityGroup: efsSecurityGroup,
                 vpcSubnets: {
-                    subnetType: ec2.SubnetType.PUBLIC
+                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
                 }
             });
         }
@@ -106,24 +126,22 @@ export class FaiLambdaDeployStack extends Stack {
         // Create Lambda function
         const functionName = `fai-scribe-${environmentType.toLowerCase()}`;
 
-        const lambdaFunction = new lambda.Function(this, "fai-scribe-lambda-function", {
+        const lambdaFunction = new lambda.DockerImageFunction(this, "fai-scribe-lambda-function", {
             functionName,
-            runtime: lambda.Runtime.PYTHON_3_12,
-            handler: "handler.handler",
-            code: lambda.Code.fromAsset(path.join(__dirname, "../../fai-lambda/src")),
-            timeout: Duration.seconds(30),
+            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../fai-lambda")),
+            timeout: Duration.minutes(15),
             memorySize: 512,
             logGroup,
             vpc,
             vpcSubnets: {
-                subnetType: ec2.SubnetType.PUBLIC
+                subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
             },
-            allowPublicSubnet: true,
             securityGroups: [lambdaSecurityGroup],
             filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, "/mnt/efs"),
             environment: {
                 ENVIRONMENT_TYPE: environmentType,
                 FERN_TOKEN: getEnvironmentVariableOrThrow("FERN_TOKEN"),
+                GITHUB_TOKEN: getEnvironmentVariableOrThrow("GITHUB_TOKEN"),
                 EFS_MOUNT_PATH: "/mnt/efs"
             }
         });
