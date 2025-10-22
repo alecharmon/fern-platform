@@ -62,6 +62,8 @@ jobs:
 
       - name: 📥 Install
         uses: ./.github/actions/install
+        with:
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Update npm
         run: npm install -g npm@latest
@@ -73,6 +75,8 @@ jobs:
         run: npm install -g fern-api
 
       - name: Publish FDR SDK
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
           git_version="$(scripts/fdr-version.sh)"
           working_dir=$(pwd)
