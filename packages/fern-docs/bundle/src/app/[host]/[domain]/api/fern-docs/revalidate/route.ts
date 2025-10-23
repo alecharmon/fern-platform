@@ -55,7 +55,7 @@ export async function GET(
     revalidateTag(domain);
 
     // delay to ensure invalidation propagates before cache is accessed
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const stream = new ReadableStream({
         async start(controller) {
