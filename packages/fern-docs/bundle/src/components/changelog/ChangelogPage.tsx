@@ -103,7 +103,8 @@ export async function ChangelogPageOverview({
     node,
     breadcrumb,
     showRssFeedButton = true,
-    tags
+    tags,
+    showBackIcon = false
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -111,6 +112,7 @@ export async function ChangelogPageOverview({
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     showRssFeedButton?: boolean;
     tags: string[] | undefined;
+    showBackIcon?: boolean;
 }) {
     const page = node.overviewPageId != null ? await loader.getPage(node.overviewPageId) : undefined;
     const mdx = await serialize(page?.markdown, {
@@ -129,6 +131,7 @@ export async function ChangelogPageOverview({
                 slug={node.slug}
                 showRssFeedButton={showRssFeedButton}
                 filters={tags}
+                showBackIcon={showBackIcon}
             />
             <Markdown mdx={mdx} fallback={page?.markdown} useNextMdx={mdx?.engine === "next-remote"} />
         </>

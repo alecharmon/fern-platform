@@ -14,10 +14,14 @@
 
       .fern-changelog-content {
         @apply max-w-content-wide-width relative mx-auto grid w-full grid-cols-1 gap-4 lg:grid-cols-[1fr_minmax(0,var(--content-width))_1fr];
+
+        &[data-has-aside="false"] {
+          @apply lg:grid-cols-1;
+        }
       }
 
       .eyebrow {
-        @apply flex lg:hidden;
+        @apply mb-4 flex lg:hidden;
 
         .filter-row {
           @apply flex-nowrap! min-w-0;
@@ -29,7 +33,7 @@
       }
 
       .fern-changelog-content > aside {
-        @apply sticky hidden h-fit min-w-0 lg:flex lg:justify-end;
+        @apply top-header-height-padded sticky hidden h-fit min-w-0 lg:flex lg:justify-end;
       }
     }
 
@@ -40,8 +44,12 @@
         @apply w-content-width;
       }
 
-      .fern-changelog-content > aside {
-        @apply hidden;
+      .fern-changelog-content {
+        @apply max-w-content-width relative mx-auto grid w-full grid-cols-1 gap-4;
+
+        > aside {
+          @apply hidden;
+        }
       }
     }
 
@@ -110,6 +118,10 @@
 
     .eyebrow {
       @apply mb-4;
+    }
+
+    &[data-has-aside="false"] {
+      @apply max-w-full;
     }
   }
 }

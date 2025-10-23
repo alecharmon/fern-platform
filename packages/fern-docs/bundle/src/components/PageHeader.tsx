@@ -3,6 +3,7 @@ import "server-only";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernLink } from "@fern-docs/components/FernLink";
+import { ChevronLeft } from "lucide-react";
 import React from "react";
 
 import { MdxServerComponent } from "@/mdx/components/server-component";
@@ -26,7 +27,8 @@ export function PageHeader({
     markdown,
     pageActionOptions,
     showRssFeedButton,
-    filters
+    filters,
+    showBackIcon
 }: {
     slug: string;
     serialize: MdxSerializer;
@@ -42,6 +44,7 @@ export function PageHeader({
     showRssFeedButton?: boolean;
     // tags for the changelog section
     filters?: string[];
+    showBackIcon?: boolean;
 }) {
     return (
         <header className="my-8 space-y-2">
@@ -54,16 +57,32 @@ export function PageHeader({
             <WithAction action={action}>
                 <div className="flex flex-row items-center justify-between gap-2">
                     <div className="flex flex-row items-center gap-4">
-                        {titleHref == null ? (
-                            <h1 className="fern-page-heading text-balance break-words">
-                                <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
-                            </h1>
-                        ) : (
-                            <FernLink href={titleHref} scroll={true}>
-                                <h1 className="fern-page-heading text-balance break-words">
-                                    <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
-                                </h1>
+                        {showBackIcon && titleHref != null ? (
+                            <FernLink href={titleHref} scroll={true} className="group w-fit">
+                                <div
+                                    className="flex flex-row items-center pl-2 pr-4 py-1.5 -ml-2 group-hover:bg-(color:--grayscale-a2) transition-colors"
+                                    style={{ gap: "8px", borderRadius: "8px" }}
+                                >
+                                    <ChevronLeft className="size-icon-md text-(color:--grayscale-a11)" />
+                                    <h1 className="fern-page-heading text-balance break-words">
+                                        <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                    </h1>
+                                </div>
                             </FernLink>
+                        ) : (
+                            <div className="flex flex-row items-center" style={{ gap: "8px" }}>
+                                {titleHref == null ? (
+                                    <h1 className="fern-page-heading text-balance break-words">
+                                        <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                    </h1>
+                                ) : (
+                                    <FernLink href={titleHref} scroll={true}>
+                                        <h1 className="fern-page-heading text-balance break-words">
+                                            <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                        </h1>
+                                    </FernLink>
+                                )}
+                            </div>
                         )}
                         {tags}
                     </div>

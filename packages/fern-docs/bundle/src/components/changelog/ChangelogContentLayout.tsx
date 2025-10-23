@@ -13,11 +13,16 @@ export function ChangelogContentLayout({
     stickyContent,
     ...props
 }: ChangelogContentLayoutProps): ReactElement<any> {
+    const hasAside = stickyContent != null;
     return (
-        <Component {...props} className={cn("fern-changelog-content", props.className)}>
-            <aside>{stickyContent}</aside>
+        <Component
+            {...props}
+            className={cn("fern-changelog-content", props.className)}
+            data-has-aside={hasAside ? "true" : "false"}
+        >
+            {hasAside && <aside>{stickyContent}</aside>}
             <div className="max-w-content-width mx-auto w-full">
-                {stickyContent != null && <div className="eyebrow">{stickyContent}</div>}
+                {hasAside && <div className="eyebrow">{stickyContent}</div>}
                 {children}
             </div>
         </Component>

@@ -78,6 +78,8 @@ export async function DocsMainContent({
                         node={changelogNode}
                         breadcrumb={breadcrumb.slice(0, -3)}
                         showRssFeedButton={false}
+                        showBackIcon={true}
+                        tags={undefined}
                     />
                 }
                 bottomNavigation={bottomNavigation}
