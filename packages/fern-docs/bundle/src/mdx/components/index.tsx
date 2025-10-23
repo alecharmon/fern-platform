@@ -13,6 +13,7 @@ import { Availability } from "./availability";
 import { Badge } from "./badge";
 import { Bleed } from "./bleed";
 import { Button, ButtonGroup } from "./button";
+import { CallToAction } from "./call-to-action";
 import {
     Callout,
     CheckCallout,
@@ -65,6 +66,7 @@ const FERN_COMPONENTS = {
     Button,
     ButtonGroup,
     Callout,
+    CallToAction,
     Card,
     CardGroup,
     ClientLibraries,
