@@ -51,46 +51,76 @@ export async function GET(
     const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
     const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
-    const { content, timingStats } = await getLlmsTxt(host, domain, path, fernToken);
 
     const userAgent = req.headers.get("user-agent");
     const acceptHeader = req.headers.get("accept");
     const possibleBot = !isLikelyBrowser(userAgent);
 
-    track("static_content_served", {
-        domain,
-        host,
-        path,
-        contentLength: content.length,
-        loadTimeMs: Math.round(timingStats.loadTimeMs),
-        rootRetrievalMs: Math.round(timingStats.rootRetrievalMs),
-        markdownProcessingMs: Math.round(timingStats.markdownProcessingMs),
-        possibleBot,
-        userAgent,
-        acceptHeader,
-        staticContentType: "llms.txt"
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+        async start(controller) {
+            const startTime = performance.now();
+            let contentLength = 0;
+            let rootRetrievalMs = 0;
+            let markdownProcessingMs = 0;
+
+            try {
+                const { content: streamedContent, timingStats } = await getLlmsTxtStreaming(
+                    host,
+                    domain,
+                    path,
+                    fernToken,
+                    (chunk: string) => {
+                        contentLength += chunk.length;
+                        controller.enqueue(encoder.encode(chunk));
+                    }
+                );
+
+                rootRetrievalMs = timingStats.rootRetrievalMs;
+                markdownProcessingMs = timingStats.markdownProcessingMs;
+
+                controller.close();
+
+                const loadTimeMs = performance.now() - startTime;
+
+                track("static_content_served", {
+                    domain,
+                    host,
+                    path,
+                    contentLength,
+                    loadTimeMs,
+                    rootRetrievalMs,
+                    markdownProcessingMs,
+                    possibleBot,
+                    userAgent,
+                    acceptHeader,
+                    staticContentType: "llms.txt",
+                    streaming: true
+                });
+            } catch (error) {
+                console.error(`[llmsTxt:${domain}] Stream error:`, error);
+                controller.error(error);
+            }
+        }
     });
 
-    return new NextResponse(content, {
+    return new NextResponse(stream, {
         status: 200,
         headers: {
             "Content-Type": "text/plain; charset=utf-8",
-            "Cache-Control": "s-maxage=60"
+            "Cache-Control": "s-maxage=3600",
+            "Transfer-Encoding": "chunked"
         }
     });
 }
 
-async function getLlmsTxt(
+async function getLlmsTxtStreaming(
     host: string,
     domain: string,
     path: string,
-    fernToken: string | undefined
+    fernToken: string | undefined,
+    onChunk: (chunk: string) => void
 ): Promise<{ content: string; timingStats: any }> {
-    "use cache";
-
-    const startTime = performance.now();
-    unstable_cacheTag(domain, "getLlmsTxt");
-
     const loader = await createCachedDocsLoader(host, domain, fernToken);
 
     // Time the root retrieval and section root
@@ -121,6 +151,9 @@ async function getLlmsTxt(
 
     const landingPage = getLandingPage(root);
     const markdown = landingPage != null ? await getMarkdownForPath(landingPage, loader) : undefined;
+
+    const header = markdown?.content ?? `# ${root.title}`;
+    onChunk(header + "\n\n");
 
     // traverse the tree in a depth-first manner to collect all the nodes that have markdown content
     // in the order that they appear in the sidebar
@@ -174,82 +207,89 @@ async function getLlmsTxt(
     });
 
     const markdownStartTime = performance.now();
-    const docs = await Promise.allSettled(
-        pageInfos.map(
-            async (
-                pageInfo
-            ): Promise<{
-                title: string;
-                description: string | undefined;
-                href: string;
-            }> => {
-                if (pageInfo.pageId != null) {
-                    const page = await loader.getPage(pageInfo.pageId);
-                    if (page != null) {
-                        const { title, description } = getLlmTxtMetadata(page.markdown, pageInfo.nodeTitle);
-                        return {
-                            title,
-                            description,
-                            href: String(
-                                new URL(
-                                    addLeadingSlash(
-                                        pageInfo.slug + (pageInfo.pageId.endsWith(".mdx") ? ".mdx" : ".md")
-                                    ),
-                                    withDefaultProtocol(domain)
-                                )
-                            )
-                        };
-                    }
-                }
 
-                return {
-                    title: pageInfo.nodeTitle,
-                    description: undefined,
-                    href: String(new URL(slugToHref(pageInfo.slug), withDefaultProtocol(domain)))
-                };
+    if (pageInfos.length > 0) {
+        onChunk("## Docs\n\n");
+    }
+
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < pageInfos.length; i += BATCH_SIZE) {
+        const batch = pageInfos.slice(i, i + BATCH_SIZE);
+        const results = await Promise.allSettled(
+            batch.map(
+                async (
+                    pageInfo
+                ): Promise<{
+                    title: string;
+                    description: string | undefined;
+                    href: string;
+                }> => {
+                    if (pageInfo.pageId != null) {
+                        const page = await loader.getPage(pageInfo.pageId);
+                        if (page != null) {
+                            const { title, description } = getLlmTxtMetadata(page.markdown, pageInfo.nodeTitle);
+                            return {
+                                title,
+                                description,
+                                href: String(
+                                    new URL(
+                                        addLeadingSlash(
+                                            pageInfo.slug + (pageInfo.pageId.endsWith(".mdx") ? ".mdx" : ".md")
+                                        ),
+                                        withDefaultProtocol(domain)
+                                    )
+                                )
+                            };
+                        }
+                    }
+
+                    return {
+                        title: pageInfo.nodeTitle,
+                        description: undefined,
+                        href: String(new URL(slugToHref(pageInfo.slug), withDefaultProtocol(domain)))
+                    };
+                }
+            )
+        );
+
+        for (const result of results) {
+            if (result.status === "fulfilled") {
+                const doc = result.value;
+                const line = `- [${doc.title}](${doc.href})${doc.description != null ? `: ${doc.description}` : ""}\n`;
+                onChunk(line);
             }
-        )
-    );
+        }
+    }
+
     const markdownEndTime = performance.now();
 
-    const endpoints = endpointPageInfos
-        .map((endpointPageInfo) => {
-            return {
-                title: endpointPageInfo.nodeTitle,
-                href: String(
-                    new URL(
-                        endpointPageInfo.endpointId != null
-                            ? addLeadingSlash(`${endpointPageInfo.slug}.mdx`)
-                            : slugToHref(endpointPageInfo.slug),
-                        withDefaultProtocol(domain)
-                    )
-                ),
-                breadcrumb: endpointPageInfo.breadcrumb
-            };
-        })
-        .map((endpoint) => `- ${endpoint.breadcrumb.join(" > ")} [${endpoint.title}](${endpoint.href})`);
+    if (endpointPageInfos.length > 0) {
+        onChunk("\n## API Docs\n\n");
 
-    const content = [
-        // if there's a landing page, use the llm-friendly markdown version instead of the ${root.title}
-        markdown?.content ?? `# ${root.title}`,
-        docs.length > 0
-            ? `## Docs\n\n${docs
-                  .filter((doc) => doc.status === "fulfilled")
-                  .map((doc) => doc.value)
-                  .map((doc) => `- [${doc.title}](${doc.href})${doc.description != null ? `: ${doc.description}` : ""}`)
-                  .join("\n")}`
-            : undefined,
-        endpoints.length > 0 ? `## API Docs\n\n${endpoints.join("\n")}` : undefined
-    ]
-        .filter(isNonNullish)
-        .join("\n\n");
+        const endpoints = endpointPageInfos
+            .map((endpointPageInfo) => {
+                return {
+                    title: endpointPageInfo.nodeTitle,
+                    href: String(
+                        new URL(
+                            endpointPageInfo.endpointId != null
+                                ? addLeadingSlash(`${endpointPageInfo.slug}.mdx`)
+                                : slugToHref(endpointPageInfo.slug),
+                            withDefaultProtocol(domain)
+                        )
+                    ),
+                    breadcrumb: endpointPageInfo.breadcrumb
+                };
+            })
+            .map((endpoint) => `- ${endpoint.breadcrumb.join(" > ")} [${endpoint.title}](${endpoint.href})`);
 
-    const totalTime = performance.now() - startTime;
+        onChunk(endpoints.join("\n"));
+    }
 
     return {
-        content,
+        content: "", // Content is streamed via onChunk
         timingStats: {
-            loadTimeMs: totalTime,
+            loadTimeMs: 0, // Will be calculated by caller
             rootRetrievalMs: rootEndTime - rootStartTime,
             markdownProcessingMs: markdownEndTime - markdownStartTime
         }
