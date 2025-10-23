@@ -11,7 +11,6 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
-  EFS_FILE_SYSTEM_ID: ${{ secrets.PROD_FAI_LAMBDA_EFS_FILE_SYSTEM_ID }}
 
 jobs:
   deploy_prod:

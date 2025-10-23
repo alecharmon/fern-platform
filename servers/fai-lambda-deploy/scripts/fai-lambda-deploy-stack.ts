@@ -3,7 +3,6 @@ import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as efs from "aws-cdk-lib/aws-efs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
@@ -65,64 +64,6 @@ export class FaiLambdaDeployStack extends Stack {
             allowAllOutbound: true
         });
 
-        // Create or reference EFS file system
-        // Note: In production, you may want to reference an existing EFS file system
-        const efsSecurityGroup = new ec2.SecurityGroup(this, "efs-security-group", {
-            vpc,
-            description: "Security group for EFS",
-            allowAllOutbound: true
-        });
-
-        // Allow Lambda to access EFS on NFS port
-        efsSecurityGroup.addIngressRule(lambdaSecurityGroup, ec2.Port.tcp(2049), "Allow NFS access from Lambda");
-
-        // Get or create EFS file system ID from environment variable
-        const efsFileSystemId = process.env["EFS_FILE_SYSTEM_ID"];
-        let fileSystem: efs.IFileSystem;
-
-        if (efsFileSystemId) {
-            // Reference existing EFS file system
-            // Note: When referencing an existing EFS, ensure it has mount targets in the VPC subnets
-            fileSystem = efs.FileSystem.fromFileSystemAttributes(this, "efs-file-system", {
-                fileSystemId: efsFileSystemId,
-                securityGroup: efsSecurityGroup
-            });
-
-            vpc.privateSubnets.forEach((subnet, index) => {
-                new efs.CfnMountTarget(this, `efs-mount-target-${index}`, {
-                    fileSystemId: efsFileSystemId,
-                    subnetId: subnet.subnetId,
-                    securityGroups: [efsSecurityGroup.securityGroupId]
-                });
-            });
-        } else {
-            fileSystem = new efs.FileSystem(this, "efs-file-system", {
-                vpc,
-                lifecyclePolicy: efs.LifecyclePolicy.AFTER_14_DAYS,
-                performanceMode: efs.PerformanceMode.GENERAL_PURPOSE,
-                throughputMode: efs.ThroughputMode.BURSTING,
-                securityGroup: efsSecurityGroup,
-                vpcSubnets: {
-                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
-                }
-            });
-        }
-
-        // Create EFS access point
-        const accessPoint = new efs.AccessPoint(this, "efs-access-point", {
-            fileSystem,
-            path: "/lambda",
-            posixUser: {
-                uid: "1001",
-                gid: "1001"
-            },
-            createAcl: {
-                ownerUid: "1001",
-                ownerGid: "1001",
-                permissions: "755"
-            }
-        });
-
         // Create Lambda function
         const functionName = `fai-scribe-${environmentType.toLowerCase()}`;
 
@@ -137,26 +78,13 @@ export class FaiLambdaDeployStack extends Stack {
                 subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
             },
             securityGroups: [lambdaSecurityGroup],
-            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, "/mnt/efs"),
             environment: {
                 ENVIRONMENT_TYPE: environmentType,
                 FERN_TOKEN: getEnvironmentVariableOrThrow("FERN_TOKEN"),
                 GITHUB_TOKEN: getEnvironmentVariableOrThrow("GITHUB_TOKEN"),
-                EFS_MOUNT_PATH: "/mnt/efs"
+                HOME: "/tmp"
             }
         });
-
-        // Grant Lambda permissions to access EFS
-        lambdaFunction.addToRolePolicy(
-            new iam.PolicyStatement({
-                actions: [
-                    "elasticfilesystem:ClientMount",
-                    "elasticfilesystem:ClientWrite",
-                    "elasticfilesystem:ClientRootAccess"
-                ],
-                resources: [fileSystem.fileSystemArn]
-            })
-        );
 
         // Create API Gateway with custom domain
         const apiName = `fai-scribe-${environmentType.toLowerCase()}`;
@@ -220,11 +148,6 @@ export class FaiLambdaDeployStack extends Stack {
         new CfnOutput(this, "LambdaFunctionName", {
             value: lambdaFunction.functionName,
             description: "Lambda Function Name"
-        });
-
-        new CfnOutput(this, "EfsFileSystemId", {
-            value: fileSystem.fileSystemId,
-            description: "EFS File System ID"
         });
     }
 }

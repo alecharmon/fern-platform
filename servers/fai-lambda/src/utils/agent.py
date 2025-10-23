@@ -26,8 +26,8 @@ async def update_repo_with_agent(repo_path: str, user_prompt: str) -> None:
                     logger.info(f"Using tool: {block.name}")
 
 
-async def create_pr_with_agent(repo_path: str, base_branch: str, ssh_key_path: str = "/mnt/efs/.ssh/id_rsa") -> None:
-    configure_git_auth(repo_path, ssh_key_path)
+async def create_pr_with_agent(repo_path: str, base_branch: str) -> None:
+    configure_git_auth(repo_path)
 
     options = ClaudeAgentOptions(
         allowed_tools=["Bash"],
@@ -63,16 +63,14 @@ async def create_pr_with_agent(repo_path: str, base_branch: str, ssh_key_path: s
 
 
 async def run_agent_on_session_repo(
-    repo_folder_base_path: str, 
-    repository: str, 
-    sessions_folder_base_path: str, 
-    prompt: str, 
+    repository: str,
+    prompt: str,
     base_branch: str = "main"
 ) -> dict[str, str]:
-    session_repo_path = setup_session_repo(repo_folder_base_path, repository, sessions_folder_base_path, base_branch)
-    logger.info(f"Session repo created at: {session_repo_path}")
+    session_repo_path = setup_session_repo(repository, base_branch)
+    logger.info(f"Repository cloned to: {session_repo_path}")
 
-    # await update_repo_with_agent(session_repo_path, prompt)
-    # await create_pr_with_agent(session_repo_path, base_branch)
+    await update_repo_with_agent(session_repo_path, prompt)
+    await create_pr_with_agent(session_repo_path, base_branch)
 
-    return {"repository": repository, "base_branch": base_branch, "status": "success"}
+    return {"repository": repository, "base_branch": base_branch, "session_repo_path": session_repo_path, "status": "success"}
