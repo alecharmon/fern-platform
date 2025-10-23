@@ -7,8 +7,12 @@ RUN curl -fsSL https://cli.github.com/packages/rpm/gh-cli.repo | tee /etc/yum.re
 
 RUN npm install -g @anthropic-ai/claude-code
 
-COPY requirements.txt .
-RUN pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+RUN pip3 install poetry
+
+COPY pyproject.toml poetry.lock* ./
+
+RUN poetry config virtualenvs.create false && \
+    poetry install --only main --no-root
 
 WORKDIR ${LAMBDA_TASK_ROOT}
 COPY src/ ./src/

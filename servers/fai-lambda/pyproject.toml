@@ -3,11 +3,10 @@ name = "fai-lambda"
 version = "0.1.0"
 description = "FAI Scribe Lambda Function"
 authors = ["Fern Team"]
-readme = "README.md"
 packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.11,<4.0"
 claude-agent-sdk = "*"
 
 [tool.poetry.group.dev.dependencies]
@@ -24,8 +23,21 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
 ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "tests"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 [tool.mypy]
 python_version = "3.12"

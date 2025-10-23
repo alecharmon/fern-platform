@@ -1,16 +1,15 @@
 """Tests for the Lambda handler."""
 
 import json
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from src.handler import handler
 
 
-def test_handler_missing_repository():
+def test_handler_missing_repository() -> None:
     """Test that handler returns 400 when repository is missing."""
-    event = {
-        "body": json.dumps({"prompt": "Test prompt", "base_branch": "main"})
-    }
+    event = {"body": json.dumps({"prompt": "Test prompt", "base_branch": "main"})}
 
     context = MagicMock()
     context.aws_request_id = "test-request-id"
@@ -21,11 +20,9 @@ def test_handler_missing_repository():
     assert "Content-Type" in response["headers"]
 
 
-def test_handler_missing_prompt():
+def test_handler_missing_prompt() -> None:
     """Test that handler returns 400 when prompt is missing."""
-    event = {
-        "body": json.dumps({"repository": "fern/docs", "base_branch": "main"})
-    }
+    event = {"body": json.dumps({"repository": "fern/docs", "base_branch": "main"})}
 
     context = MagicMock()
     context.aws_request_id = "test-request-id"
@@ -36,11 +33,9 @@ def test_handler_missing_prompt():
     assert "Content-Type" in response["headers"]
 
 
-def test_handler_missing_base_branch():
+def test_handler_missing_base_branch() -> None:
     """Test that handler returns 400 when base_branch is missing."""
-    event = {
-        "body": json.dumps({"repository": "fern/docs", "prompt": "Test prompt"})
-    }
+    event = {"body": json.dumps({"repository": "fern/docs", "prompt": "Test prompt"})}
 
     context = MagicMock()
     context.aws_request_id = "test-request-id"
@@ -51,11 +46,9 @@ def test_handler_missing_base_branch():
     assert "Content-Type" in response["headers"]
 
 
-def test_handler_invalid_repository_type():
+def test_handler_invalid_repository_type() -> None:
     """Test that handler returns 400 when repository is not a string."""
-    event = {
-        "body": json.dumps({"repository": 123, "prompt": "Test prompt", "base_branch": "main"})
-    }
+    event = {"body": json.dumps({"repository": 123, "prompt": "Test prompt", "base_branch": "main"})}
 
     context = MagicMock()
     context.aws_request_id = "test-request-id"
@@ -66,19 +59,11 @@ def test_handler_invalid_repository_type():
 
 
 @patch("src.handler.run_agent_on_session_repo", new_callable=AsyncMock)
-@patch("src.handler.os.path.exists")
-def test_handler_success(mock_exists, mock_run_agent):
+def test_handler_success(mock_run_agent: Any) -> None:
     """Test that handler returns success with valid input."""
-    mock_exists.return_value = True
-    mock_run_agent.return_value = {"session_repo_path": "/mnt/efs/repos/sessions/test/fern/docs", "status": "success"}
+    mock_run_agent.return_value = {"session_repo_path": "/tmp/test/fern/docs", "status": "success"}
 
-    event = {
-        "body": json.dumps({
-            "repository": "fern/docs",
-            "prompt": "Update documentation",
-            "base_branch": "main"
-        })
-    }
+    event = {"body": json.dumps({"repository": "fern/docs", "prompt": "Update documentation", "base_branch": "main"})}
 
     context = MagicMock()
     context.aws_request_id = "test-request-id"
@@ -97,18 +82,12 @@ def test_handler_success(mock_exists, mock_run_agent):
     assert body["result"]["status"] == "success"
 
 
-@patch("src.handler.os.path.exists")
-def test_handler_efs_not_mounted(mock_exists):
-    """Test that handler returns 500 when EFS is not mounted."""
-    mock_exists.return_value = False
+@patch("src.handler.run_agent_on_session_repo", new_callable=AsyncMock)
+def test_handler_with_error(mock_run_agent: Any) -> None:
+    """Test that handler returns 500 when agent fails."""
+    mock_run_agent.side_effect = RuntimeError("Agent execution failed")
 
-    event = {
-        "body": json.dumps({
-            "repository": "fern/docs",
-            "prompt": "Update documentation",
-            "base_branch": "main"
-        })
-    }
+    event = {"body": json.dumps({"repository": "fern/docs", "prompt": "Update documentation", "base_branch": "main"})}
 
     context = MagicMock()
     context.aws_request_id = "test-request-id"
@@ -117,4 +96,4 @@ def test_handler_efs_not_mounted(mock_exists):
 
     assert response["statusCode"] == 500
     body = json.loads(response["body"])
-    assert "EFS not mounted" in body["error"]
+    assert "Agent execution failed" in body["error"]

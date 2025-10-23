@@ -62,15 +62,16 @@ async def create_pr_with_agent(repo_path: str, base_branch: str) -> None:
                     logger.info(f"Using tool: {block.name}")
 
 
-async def run_agent_on_session_repo(
-    repository: str,
-    prompt: str,
-    base_branch: str = "main"
-) -> dict[str, str]:
+async def run_agent_on_session_repo(repository: str, prompt: str, base_branch: str = "main") -> dict[str, str]:
     session_repo_path = setup_session_repo(repository, base_branch)
     logger.info(f"Repository cloned to: {session_repo_path}")
 
     await update_repo_with_agent(session_repo_path, prompt)
     await create_pr_with_agent(session_repo_path, base_branch)
 
-    return {"repository": repository, "base_branch": base_branch, "session_repo_path": session_repo_path, "status": "success"}
+    return {
+        "repository": repository,
+        "base_branch": base_branch,
+        "session_repo_path": session_repo_path,
+        "status": "success",
+    }

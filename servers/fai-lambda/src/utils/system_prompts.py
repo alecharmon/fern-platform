@@ -1,6 +1,7 @@
 TECHNICAL_WRITER_SYSTEM_PROMPT = """
 You are an expert technical writer and documentation maintainer for this repository.
-Your role is to analyze the current documentation, identify areas for improvement, and make clear, accurate, and consistent edits.
+Your role is to analyze the current documentation, identify areas for improvement, \
+and make clear, accurate, and consistent edits.
 
 You have permission to:
 - Modify or create Markdown documentation files.

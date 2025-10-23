@@ -13,7 +13,6 @@ def setup_session_repo(relative_repo_path: str, base_branch: str) -> str:
     if not github_token:
         raise RuntimeError("GITHUB_TOKEN environment variable not set")
 
-    # Create a unique directory in /tmp for this invocation
     session_id = str(uuid.uuid4())
     repo_path = Path("/tmp") / session_id / relative_repo_path
     repo_path.parent.mkdir(parents=True, exist_ok=True)
@@ -26,7 +25,7 @@ def setup_session_repo(relative_repo_path: str, base_branch: str) -> str:
             ["git", "clone", clone_url, str(repo_path), "--branch", base_branch, "--depth", "1"],
             check=True,
             capture_output=True,
-            text=True
+            text=True,
         )
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to clone repository: {e.stderr}")

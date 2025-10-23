@@ -114,6 +114,32 @@ jobs:
           cd servers/fai-discord
           poetry run mypy .
 
+  lint-fai-lambda:
+    runs-on: CLI
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Setup poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+          cd servers/fai-lambda
+          poetry install
+
+      - name: Lint & Format
+        run: |
+          cd servers/fai-lambda
+          make code-cleanup
+
+      - name: Type check
+        run: |
+          cd servers/fai-lambda
+          poetry run mypy .
+
   test-fai:
     runs-on: ubuntu-latest
     environment: Fern Dev

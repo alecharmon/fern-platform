@@ -1,8 +1,7 @@
 import asyncio
 import json
 import logging
-import os
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from .utils.agent import run_agent_on_session_repo
@@ -33,7 +32,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 
         response_body = {
             "message": "Agent execution completed",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(UTC).isoformat(),
             "requestId": context.aws_request_id,
             "result": result,
         }
@@ -56,5 +55,11 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
-            "body": json.dumps({"message": "Error processing request", "error": str(e), "requestId": context.aws_request_id}),
+            "body": json.dumps(
+                {
+                    "message": "Error processing request",
+                    "error": str(e),
+                    "requestId": context.aws_request_id,
+                }
+            ),
         }
