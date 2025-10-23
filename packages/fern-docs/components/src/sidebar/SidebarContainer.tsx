@@ -6,9 +6,7 @@ import { FERN_SIDEBAR_SCROLL_AREA_ID } from "../constants";
 import { FernScrollArea } from "../FernScrollArea";
 import { ThemeSwitch } from "../header/theme-switch";
 import { useDismountMeasureSidebarScrollPosition } from "../hooks/sidebar-scroll";
-import { useIsSidebarCollapsed } from "../state/sidebar-collapse";
 import { MobileSidebarHeaderLinks } from "./MobileSidebarHeaderLinks";
-import { SidebarCollapseToggle } from "./SidebarCollapseToggle";
 import { SidebarFixedItemsSection } from "./SidebarFixedItemsSection";
 
 export const SidebarContainer = React.memo(function SidebarContainer({
@@ -34,10 +32,9 @@ export const SidebarContainer = React.memo(function SidebarContainer({
 }) {
     const ref = React.useRef<HTMLDivElement>(null);
     useDismountMeasureSidebarScrollPosition(ref);
-    const [isCollapsed] = useIsSidebarCollapsed();
 
     return (
-        <div className={cn("flex h-full flex-col", isCollapsed && "fern-sidebar-collapsed")}>
+        <>
             <SidebarFixedItemsSection
                 logo={logo}
                 productSelect={productSelect}
@@ -55,7 +52,6 @@ export const SidebarContainer = React.memo(function SidebarContainer({
             >
                 <React.Fragment key="login-button">{loginButton}</React.Fragment>
                 {children}
-                <SidebarCollapseToggle className="mt-6 hidden lg:flex" key="sidebar-collapse-toggle" />
                 <MobileSidebarHeaderLinks hideInDesktop={!showHeaderInSidebar} key="mobile-sidebar-header-links">
                     {navbarLinks}
                 </MobileSidebarHeaderLinks>
@@ -64,6 +60,6 @@ export const SidebarContainer = React.memo(function SidebarContainer({
                     key="theme-switch"
                 />
             </FernScrollArea>
-        </div>
+        </>
     );
 });

@@ -53,7 +53,6 @@
       @apply pointer-events-auto z-30;
       @apply lg:flex lg:shrink-0 lg:translate-x-0 lg:flex-col;
       @apply pl-(--aside-offset) w-(--sticky-aside-width);
-      @apply transition-all duration-300;
 
       &[data-state="fixed"] {
         @apply border-border-concealed bg-(color:--sidebar-background) fixed bottom-0 left-0 border-r backdrop-blur-xl;
@@ -61,10 +60,6 @@
 
       &[data-state="sticky"] {
         @apply sticky h-fit max-h-[calc(100dvh-var(--header-height))] shrink-0 border-r-0;
-      }
-
-      &:has(.fern-sidebar-collapsed) {
-        @apply w-[calc(4rem+var(--aside-offset))];
       }
     }
 
@@ -74,11 +69,6 @@
 
     #fern-sidebar-spacer {
       @apply w-(--sticky-aside-width) pointer-events-none hidden lg:block lg:shrink-0;
-      @apply transition-all duration-300;
-    }
-
-    #fern-sidebar[data-viewport="desktop"]:has(.fern-sidebar-collapsed) + #fern-sidebar-spacer {
-      @apply w-[calc(4rem+var(--aside-offset))];
     }
 
     #fern-toc {
