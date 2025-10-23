@@ -75,20 +75,20 @@ export default function WebAnalyticsAreaChart({
         };
     });
 
-    // Custom tooltip
+    // Custom tooltip matching dashboard theme
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload?.[0]) {
             const metricLabel = metric === "visitors" ? "Visitors" : "Views";
             return (
-                <div className="w-40 rounded-md border bg-white shadow-sm dark:bg-black">
-                    <div className="border-b border-gray-200 px-3 py-3 dark:border-gray-700">
-                        <p className="text-muted-foreground text-sm">{payload[0].payload.fullDate}</p>
+                <div className="shadow-card-grayscale w-40 rounded-lg border-none bg-[var(--gray-1200)] p-2 text-[var(--gray-100)]">
+                    <div className="border-b border-[var(--gray-700)] px-1 py-2">
+                        <p className="text-sm text-[var(--gray-100)]">{payload[0].payload.fullDate}</p>
                     </div>
-                    <div className="px-3 py-3">
+                    <div className="px-1 py-2">
                         <p className="flex items-center gap-2 text-sm">
-                            <span className="bg-primary h-2 w-2 rounded-full" />
-                            <span className="">{metricLabel}</span>
-                            <span className="text-foreground ml-auto font-mono font-medium">
+                            <span className="h-2 w-2 rounded-full bg-[var(--green-800)]" />
+                            <span>{metricLabel}</span>
+                            <span className="ml-auto font-mono font-medium">
                                 {new Intl.NumberFormat("en-US").format(payload[0].value)}
                             </span>
                         </p>

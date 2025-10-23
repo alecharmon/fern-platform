@@ -812,3 +812,50 @@ export async function clearWebAnalyticsCache(docsUrl: string): Promise<{ success
 
     return { success: true };
 }
+
+/**
+ * Server action to fetch LLM bot traffic by provider from PostHog
+ */
+export async function getLLMBotTrafficByProvider(request: TableRequest): Promise<{
+    providers: { provider: string; count: number }[];
+}> {
+    const validated = TableRequestSchema.parse(request);
+
+    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    if (!hasAccess) {
+        throw new Error("You don't have access to analytics for this docs site");
+    }
+
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    const cacheKey = getCacheKey("llmBotProviders", baseDomain, {
+        dateRange,
+        includeInternal: validated.includeInternal,
+        groupBy: validated.groupBy,
+        limit: validated.limit,
+        order: validated.order
+    });
+
+    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
+        const analytics = getAnalyticsService({
+            userId,
+            baseSiteUrl: baseDomain
+        });
+
+        const providers = await analytics.getLLMBotTrafficByProvider({
+            dateRange,
+            includeInternal: validated.includeInternal,
+            groupBy: validated.groupBy,
+            limit: validated.limit || 20,
+            order: validated.order || "desc"
+        });
+
+        return { providers };
+    });
+
+    return { providers: cachedData.providers! };
+}

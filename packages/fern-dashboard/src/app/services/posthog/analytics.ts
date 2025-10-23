@@ -893,6 +893,52 @@ export class AnalyticsService {
     }
 
     /**
+     * Get LLM bot traffic by provider type
+     */
+    async getLLMBotTrafficByProvider(
+        options: TimeSeriesOptions & {
+            limit?: number;
+            order?: "asc" | "desc";
+        } = {}
+    ): Promise<{ provider: string; count: number }[]> {
+        const { limit = 20, order = "desc" } = options;
+        const { whereClause } = this.buildDateAndFilterClause(options);
+
+        const query = `
+      SELECT 
+        CASE
+          WHEN properties.userAgent LIKE '%chatgpt%' OR properties.userAgent LIKE '%openai%' THEN 'ChatGPT/OpenAI'
+          WHEN properties.userAgent LIKE '%googlebot%' OR properties.userAgent LIKE '%google-extended%' THEN 'GoogleBot/Bard'
+          WHEN properties.userAgent LIKE '%bingbot%' OR properties.userAgent LIKE '%msnbot%' THEN 'BingBot/Copilot'
+          WHEN properties.userAgent LIKE '%axios%' OR properties.userAgent LIKE '%claude%' OR properties.userAgent LIKE '%anthropic%' THEN 'Claude/Anthropic'
+          WHEN properties.userAgent LIKE '%perplexity%' THEN 'Perplexity'
+          WHEN properties.userAgent LIKE '%cohere%' THEN 'Cohere'
+          ELSE 'Other Bot/Crawler'
+        END as provider,
+        count(*) as count
+      FROM events 
+      WHERE 
+        event = 'static_content_served'
+        AND properties.domain = '${this.config.baseSiteUrl}'
+        AND properties.domain != 'preview.ferndocs.com'
+        AND (properties.possibleBot = true OR properties.possibleBot = 1)
+        ${whereClause}
+      GROUP BY provider
+      ORDER BY count ${order.toUpperCase()}
+      LIMIT ${limit}
+    `;
+
+        const response = await this.client.query<[string, number]>(query, {
+            name: `llm-bot-providers-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        });
+
+        return response.results.map((row) => ({
+            provider: row[0] || "Unknown",
+            count: row[1]
+        }));
+    }
+
+    /**
      * Generate query name suffix for caching/debugging
      */
     private getQueryNameSuffix(options: { dateRange?: DateRangeOptions }): string {

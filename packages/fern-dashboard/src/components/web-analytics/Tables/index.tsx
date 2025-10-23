@@ -12,6 +12,7 @@ import AnalyticsMiniTable from "./AnalyticsMiniTable";
 import APIExplorerRequestsTable from "./APIExplorerRequestsTable";
 import ChannelsTable from "./ChannelsTable";
 import DeviceTypesTable from "./DeviceTypesTable";
+import LLMBotProvidersTable from "./LLMBotProvidersTable";
 import LLMFileViewsTable from "./LLMFileViewsTable";
 import NotFoundPagesTable from "./NotFoundPagesTable";
 import ReferringDomainsTable from "./ReferringDomainsTable";
@@ -150,10 +151,15 @@ function AnalyticsTables({ docsUrl, dateRange }: AnalyticsTablesProps) {
                 <LLMFileViewsTable docsUrl={docsUrl} dateRange={dateRange} />
             </div>
 
-            {/* Fourth row: 404 Pages and API Explorer Requests */}
+            {/* Fourth row: 404 Pages */}
             <div className="flex flex-col gap-4 lg:flex-row">
                 <NotFoundPagesTable docsUrl={docsUrl} dateRange={dateRange} />
+            </div>
+
+            {/* Fifth row: API Explorer Requests and LLM Bot Traffic */}
+            <div className="flex flex-col gap-4 lg:flex-row">
                 <APIExplorerRequestsTable docsUrl={docsUrl} dateRange={dateRange} />
+                <LLMBotProvidersTable docsUrl={docsUrl} dateRange={dateRange} />
             </div>
         </div>
     );

@@ -3,7 +3,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
+import { WebAnalyticsTooltip, WebAnalyticsTooltipProvider } from "../WebAnalyticsTooltip";
 
 const COLOR_MAP = {
     red: "239 68 68", // #EF4444
@@ -43,12 +43,17 @@ function TruncatedText({ text, className, maxLength = 45 }: { text: string; clas
         return <span className={className}>{text}</span>;
     }
 
-    const truncatedText = text.slice(0, maxLength) + "...";
+    const charsToShow = maxLength - 3;
+    const startChars = Math.ceil(charsToShow / 2);
+    const endChars = Math.floor(charsToShow / 2);
+    const truncatedText = text.slice(0, startChars) + "..." + text.slice(-endChars);
 
     return (
-        <DashboardTooltip content={text} delayDuration={500}>
-            <span className={className}>{truncatedText}</span>
-        </DashboardTooltip>
+        <WebAnalyticsTooltipProvider>
+            <WebAnalyticsTooltip content={text} delayDuration={500}>
+                <span className={className}>{truncatedText}</span>
+            </WebAnalyticsTooltip>
+        </WebAnalyticsTooltipProvider>
     );
 }
 
