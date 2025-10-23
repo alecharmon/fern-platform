@@ -20,7 +20,7 @@ import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEd
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
-
+import { cn } from "@/utils/utils";
 import { EditorRedirect } from "./EditorRedirect";
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
 
@@ -128,7 +128,7 @@ export default async function Page({
         // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
         // on the tiptap editor's content.
         <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={frontmatter}>
-            <div className="flex w-full flex-col gap-2 py-12">
+            <div className={cn("flex w-full flex-col gap-2 py-12", frontmatter?.layout === "custom" && "py-10")}>
                 <PageNode pageDataDeps={pageDataDeps} fallbackFoundNode={serializableFoundNode} cssConfig={cssConfig} />
             </div>
         </AbstractLayoutEvaluatorContent>
