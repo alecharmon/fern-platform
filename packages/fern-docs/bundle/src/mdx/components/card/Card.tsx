@@ -80,36 +80,7 @@ export const Card: React.FC<Card.Props> = ({
         }
     }
 
-    const content = hasImage ? (
-        <>
-            {badge != null && (
-                <Badge intent="primary" className="absolute -right-2 -top-2">
-                    {badge}
-                </Badge>
-            )}
-            <div
-                className={cn("flex w-full h-full items-start justify-between", {
-                    "flex-col": imagePosition === "top",
-                    "flex-row": imagePosition === "left",
-                    "flex-row-reverse": imagePosition === "right",
-                    "flex-col-reverse": imagePosition === "bottom"
-                })}
-            >
-                <div className="w-full h-full flex items-center justify-center">
-                    <FernImage
-                        src={src}
-                        alt={title}
-                        style={Object.keys(imageStyle).length > 0 ? imageStyle : undefined}
-                        className="card-image"
-                    />
-                </div>
-                <div className="w-full h-full space-y-1 overflow-hidden p-6">
-                    <div className="text-body text-base font-semibold">{title}</div>
-                    {children != null && <div className="text-(color:--grayscale-a11)">{children}</div>}
-                </div>
-            </div>
-        </>
-    ) : (
+    const cardContent = (
         <>
             {badge != null && (
                 <Badge intent="primary" className="absolute -right-2 -top-2">
@@ -148,6 +119,31 @@ export const Card: React.FC<Card.Props> = ({
                 </div>
             </div>
         </>
+    );
+
+    const content = hasImage ? (
+        <>
+            <div
+                className={cn("flex w-full h-full items-start justify-between", {
+                    "flex-col": imagePosition === "top",
+                    "flex-row": imagePosition === "left",
+                    "flex-row-reverse": imagePosition === "right",
+                    "flex-col-reverse": imagePosition === "bottom"
+                })}
+            >
+                <div className="w-full h-full flex items-center justify-center">
+                    <FernImage
+                        src={src}
+                        alt={title}
+                        style={Object.keys(imageStyle).length > 0 ? imageStyle : undefined}
+                        className="card-image"
+                    />
+                </div>
+                <div className="w-full h-full space-y-1 overflow-hidden p-6">{cardContent}</div>
+            </div>
+        </>
+    ) : (
+        cardContent
     );
 
     if (href != null) {
