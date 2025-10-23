@@ -63,5 +63,13 @@ async function getEnvironments(): Promise<Environments> {
             }
         }
     );
+
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(
+            `Failed to fetch environments from GitHub (${response.status} ${response.statusText}): ${text}`
+        );
+    }
+
     return (await response.json()) as Environments;
 }

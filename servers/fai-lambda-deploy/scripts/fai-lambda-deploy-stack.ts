@@ -81,7 +81,7 @@ export class FaiLambdaDeployStack extends Stack {
             environment: {
                 ENVIRONMENT_TYPE: environmentType,
                 FERN_TOKEN: getEnvironmentVariableOrThrow("FERN_TOKEN"),
-                GITHUB_TOKEN: getEnvironmentVariableOrThrow("GITHUB_TOKEN"),
+                GITHUB_TOKEN: getEnvironmentVariableOrThrow("SCRIBE_GITHUB_TOKEN"),
                 ANTHROPIC_API_KEY: getEnvironmentVariableOrThrow("ANTHROPIC_API_KEY"),
                 HOME: "/tmp"
             }
