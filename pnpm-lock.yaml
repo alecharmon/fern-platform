@@ -1112,8 +1112,8 @@ importers:
         specifier: workspace:*
         version: link:../commons/core-utils
       '@fern-api/venus-api-sdk':
-        specifier: 0.19.9
-        version: 0.19.9
+        specifier: 0.20.0
+        version: 0.20.0
       '@fern-api/visual-editor-server':
         specifier: workspace:*
         version: link:../commons/visual-editor-server
@@ -5858,6 +5858,10 @@ packages:
 
   '@fern-api/venus-api-sdk@0.19.9':
     resolution: {integrity: sha512-vtCV6bSRB0LF1GNCPQxG6A5CILKm9QnsOIONaSXrrVp3Py23xEuZlSqjuUddrj3uOusHVGqI2bNfAhGPg0i6Jg==}
+    engines: {node: '>=18.0.0'}
+
+  '@fern-api/venus-api-sdk@0.20.0':
+    resolution: {integrity: sha512-lV6QaYD/kH809S09g1qV/dpNgyHWd4zKwltVX2IKoqpEgIoEG6ZGpTlBfRMpkes6mDEWPcbwtvqgl3Ogdxs/Yg==}
     engines: {node: '>=18.0.0'}
 
   '@fern-fern/fdr-cjs-sdk@0.0.6432':
@@ -23988,6 +23992,8 @@ snapshots:
       - encoding
 
   '@fern-api/venus-api-sdk@0.19.9': {}
+
+  '@fern-api/venus-api-sdk@0.20.0': {}
 
   '@fern-fern/fdr-cjs-sdk@0.0.6432':
     dependencies:

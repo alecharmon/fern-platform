@@ -1,5 +1,3 @@
-import { FernVenusApi } from "@fern-api/venus-api-sdk";
-
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
 interface CreateOrganizationRequestBody {
@@ -11,7 +9,7 @@ export default async function createOrganization(accessToken: string, body: Crea
     const venusClient = getVenusClient({ token: accessToken });
 
     const result = await venusClient.organization.create({
-        organizationId: FernVenusApi.OrganizationId(body.organizationId),
+        organizationId: body.organizationId,
         displayName: body.displayName,
         enableGithubConnection: true,
         artifactReadRequiresToken: false

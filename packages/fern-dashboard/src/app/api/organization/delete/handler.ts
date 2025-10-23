@@ -1,5 +1,3 @@
-import { FernVenusApi } from "@fern-api/venus-api-sdk";
-
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
 interface DeleteOrganizationRequestBody {
@@ -10,7 +8,7 @@ export default async function deleteOrganization(accessToken: string, body: Dele
     const venus = getVenusClient({ token: accessToken });
 
     console.log("[DELETE_ORG_HANDLER] Deleting organization:", body.organizationId);
-    const result = await venus.organization.delete(FernVenusApi.OrganizationId(body.organizationId));
+    const result = await venus.organization.delete(body.organizationId);
 
     console.log("[DELETE_ORG_HANDLER] Venus API result:", { ok: result.ok, error: result.error });
 

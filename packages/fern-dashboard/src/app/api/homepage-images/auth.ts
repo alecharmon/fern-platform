@@ -1,4 +1,3 @@
-import { FernVenusApi } from "@fern-api/venus-api-sdk";
 import { NextResponse } from "next/server";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -9,7 +8,7 @@ import type { MaybeErrorResponse } from "../utils/MaybeErrorResponse";
 export async function ensureUserOwnsUrl({ token, url }: { token: string; url: string }): Promise<MaybeErrorResponse> {
     const owner = await getDocsUrlOwner({ url, token });
 
-    const isMember = await getVenusClient({ token }).organization.isMember(FernVenusApi.OrganizationId(owner.orgName));
+    const isMember = await getVenusClient({ token }).organization.isMember(owner.orgName);
     if (!isMember.ok) {
         console.error("Failed to load org membership for user", JSON.stringify(isMember.error));
         throw new Error("Failed to load org membership for user");

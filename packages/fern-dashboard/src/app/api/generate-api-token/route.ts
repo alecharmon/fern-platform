@@ -1,4 +1,3 @@
-import { FernVenusApi } from "@fern-api/venus-api-sdk";
 import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
@@ -38,7 +37,7 @@ export async function POST(request: Request): Promise<NextResponse<generateApiTo
         const venusClient = getVenusClient({ token: session.accessToken });
 
         const response = await venusClient.registry.generateRegistryTokens({
-            organizationId: FernVenusApi.OrganizationId(organizationId)
+            organizationId
         });
 
         if (!response.ok) {

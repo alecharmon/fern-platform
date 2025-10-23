@@ -1,4 +1,3 @@
-import { FernVenusApi } from "@fern-api/venus-api-sdk";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
@@ -21,7 +20,7 @@ export const assertUserHasOrganizationAccess = cache(
             throw throwDigestibleError(new Error("Organization not found"), "ORG_NOT_FOUND");
         }
         const venusClient = getVenusClient({ token });
-        const result = await venusClient.organization.isMember(FernVenusApi.OrganizationId(orgName));
+        const result = await venusClient.organization.isMember(orgName);
 
         if (result.ok) {
             if (!result.body) {
