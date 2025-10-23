@@ -18,10 +18,11 @@ export default async function LogoPage({
     const { host, domain, slug } = await params;
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
 
-    const [{ basePath }, config, files, root] = await Promise.all([
+    const [{ basePath }, config, files, logoUrls, root] = await Promise.all([
         loader.getMetadata(),
         loader.getConfig(),
         loader.getFiles(),
+        loader.getLogoUrls(),
         loader.getRoot()
     ]);
 
@@ -37,5 +38,10 @@ export default async function LogoPage({
         }
     }
 
-    return <Logo logo={withLogo(config, resolveFileSrc, basePath, frontmatter?.data)} className="w-fit shrink-0" />;
+    return (
+        <Logo
+            logo={withLogo(config, resolveFileSrc, basePath, frontmatter?.data, logoUrls)}
+            className="w-fit shrink-0"
+        />
+    );
 }

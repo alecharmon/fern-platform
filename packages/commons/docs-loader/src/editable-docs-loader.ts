@@ -61,6 +61,8 @@ class EditableDocsLoader implements DocsLoader {
 
     getColors = () => this.readOnlyDocsLoader.getColors();
 
+    getLogoUrls = () => this.readOnlyDocsLoader.getLogoUrls();
+
     getFonts = () => this.readOnlyDocsLoader.getFonts();
 
     getLayout = () => this.readOnlyDocsLoader.getLayout();

@@ -926,6 +926,87 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
         return colors;
     });
 
+const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
+    cache(async (domainKey: string) => {
+        "use cache";
+        unstable_cacheTag(domainKey, "getLogoUrls");
+
+        try {
+            const cached = await kvGet<{ light?: FileData; dark?: FileData }>(
+                domainKey,
+                "logoUrls",
+                cacheConfig.cacheKeySuffix
+            );
+            if (cached != null) {
+                console.debug("[getLogoUrls] cache hit");
+                return cached;
+            }
+        } catch (error) {
+            console.warn(`Failed to get logo URLs for ${domainKey}, fallback to uncached`, error);
+        }
+
+        // Load directly from FDR, bypassing other caches
+        const response = await loadWithUrl(domainKey);
+        const config = response.definition.config;
+        const filesV2 = response.definition.filesV2;
+
+        // Extract logo file IDs from colorsV3
+        const lightLogoFileId =
+            config.colorsV3?.type === "light"
+                ? config.colorsV3?.logo
+                : config.colorsV3?.type === "darkAndLight"
+                  ? config.colorsV3?.light?.logo
+                  : undefined;
+
+        const darkLogoFileId =
+            config.colorsV3?.type === "dark"
+                ? config.colorsV3.logo
+                : config.colorsV3?.type === "darkAndLight"
+                  ? config.colorsV3.dark.logo
+                  : undefined;
+
+        // Resolve file IDs to FileData
+        const resolveFileId = (fileId: string | undefined): FileData | undefined => {
+            if (!fileId) {
+                return undefined;
+            }
+            // Cast to any to work around branded type indexing
+            const file = (filesV2 as any)[fileId];
+            if (!file) {
+                return undefined;
+            }
+            if (file.type === "url") {
+                return {
+                    src:
+                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                            : file.url
+                };
+            } else if (file.type === "image") {
+                return {
+                    src:
+                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                            : file.url,
+                    width: file.width,
+                    height: file.height,
+                    blurDataURL: file.blurDataUrl,
+                    alt: file.alt
+                };
+            }
+            return undefined;
+        };
+
+        const logoUrls = {
+            light: resolveFileId(lightLogoFileId),
+            dark: resolveFileId(darkLogoFileId)
+        };
+
+        kvSet(domainKey, "logoUrls", logoUrls, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        console.debug("[getLogoUrls] cache miss, resolved:", logoUrls);
+        return logoUrls;
+    });
+
 const getFonts = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
@@ -1185,6 +1266,7 @@ export const createCachedDocsLoader = async (
         getConfig: () => getConfig(config)(domainKey),
         getPage: (pageId) => getPage(config)(domainKey, pageId, options?.returnRawMarkdown),
         getColors: () => getColors(config)(domainKey),
+        getLogoUrls: () => getLogoUrls(config)(domainKey),
         getLayout: () => getLayout(config)(domainKey),
         getSettings: () => getSettings(config)(domainKey),
         getFonts: () => getFonts(config)(domainKey),

@@ -146,6 +146,14 @@ export interface DocsLoader<IsAsync extends boolean = true> {
         IsAsync
     >;
 
+    getLogoUrls: () => MaybePromise<
+        {
+            light?: FileData;
+            dark?: FileData;
+        },
+        IsAsync
+    >;
+
     getFonts: () => MaybePromise<FernFonts, IsAsync>;
 
     getLayout: () => MaybePromise<FernLayoutConfig, IsAsync>;

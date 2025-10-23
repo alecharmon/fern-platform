@@ -12,7 +12,8 @@ export function withLogo(
     config: Awaited<ReturnType<DocsLoader["getConfig"]>>,
     resolveFileSrc: (src: string | undefined) => FileData | undefined,
     basepath?: string,
-    frontmatter?: Frontmatter
+    frontmatter?: Frontmatter,
+    preResolvedLogos?: { light?: FileData; dark?: FileData }
 ): {
     height: number;
     href: string;
@@ -24,6 +25,27 @@ export function withLogo(
 
     const frontmatterLogo = getLogoFromFrontmatter(frontmatter);
 
+    // If frontmatter overrides exist, resolve them
+    if (frontmatterLogo.light || frontmatterLogo.dark) {
+        return {
+            height: height ?? DEFAULT_LOGO_HEIGHT,
+            href,
+            light: resolveFileSrc(frontmatterLogo.light),
+            dark: resolveFileSrc(frontmatterLogo.dark)
+        };
+    }
+
+    // If pre-resolved logos are provided, use them directly
+    if (preResolvedLogos) {
+        return {
+            height: height ?? DEFAULT_LOGO_HEIGHT,
+            href,
+            light: preResolvedLogos.light,
+            dark: preResolvedLogos.dark
+        };
+    }
+
+    // Fallback to old behavior: extract from config and resolve
     const lightDocsYmlLogo =
         config.colorsV3?.type === "light"
             ? config.colorsV3?.logo
@@ -40,8 +62,8 @@ export function withLogo(
     return {
         height: height ?? DEFAULT_LOGO_HEIGHT,
         href,
-        light: resolveFileSrc(frontmatterLogo.light ?? lightDocsYmlLogo),
-        dark: resolveFileSrc(frontmatterLogo.dark ?? darkDocsYmlLogo)
+        light: resolveFileSrc(lightDocsYmlLogo),
+        dark: resolveFileSrc(darkDocsYmlLogo)
     };
 }
 

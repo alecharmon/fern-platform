@@ -163,6 +163,13 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("getColors");
     }
 
+    getLogoUrls(): {
+        light?: FileData;
+        dark?: FileData;
+    } {
+        return this.notSupported("getLogoUrls");
+    }
+
     getFonts(): FernFonts {
         return this.notSupported("getFonts");
     }
