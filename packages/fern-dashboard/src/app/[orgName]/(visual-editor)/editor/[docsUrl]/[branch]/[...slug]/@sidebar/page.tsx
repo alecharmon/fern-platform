@@ -58,7 +58,7 @@ export default async function SidebarPage({
 
     const requestedSlug = slugjoin(slug);
 
-    let pageDataDeps: PageNodeNamespace.Props["pageDataDeps"];
+    let pageDataDeps: PageNodeNamespace.Props["pageDataDeps"] | undefined;
     let serializableFoundNode: SerializableFoundNode | undefined;
 
     if (resolvedSearchParams["client-page"]) {
@@ -104,19 +104,21 @@ export default async function SidebarPage({
         const pageId = getPageId(serializableFoundNode.node);
         const page = pageId ? await loader.getPage(pageId) : undefined;
 
+        // If the page is not found, set pageDataDeps to undefined so that the fallbackFoundNode is used
+        // This is used for api reference pages, and other non-page nodes
         if (page == null) {
-            throw new Error(`Could not find page with ID ${pageId}`);
+            pageDataDeps = undefined;
+        } else {
+            // TODO: if rawMarkdown is not available, show a warning to the user that they need to upgrade their CLI version
+            const rawMarkdown = page.rawMarkdown ?? page.markdown;
+
+            pageDataDeps = {
+                source: "server",
+                filename: page.filename,
+                initialMdx: rawMarkdown,
+                initialFoundNode: serializableFoundNode
+            };
         }
-
-        // TODO: if rawMarkdown is not available, show a warning to the user that they need to upgrade their CLI version
-        const rawMarkdown = page.rawMarkdown ?? page.markdown;
-
-        pageDataDeps = {
-            source: "server",
-            filename: page.filename,
-            initialMdx: rawMarkdown,
-            initialFoundNode: serializableFoundNode
-        };
     }
 
     return (
