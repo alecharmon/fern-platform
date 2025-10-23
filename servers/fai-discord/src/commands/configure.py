@@ -1,5 +1,8 @@
 import discord
-from sqlalchemy import update
+from sqlalchemy import (
+    select,
+    update,
+)
 
 from fai.db import async_session_maker
 from fai.models.db.discord_integration_db import DiscordIntegrationDb
@@ -45,12 +48,14 @@ class ConfigureView(discord.ui.View):
 
     @discord.ui.button(label="Save Configuration", style=discord.ButtonStyle.primary, row=2)
     async def save_config(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        await interaction.response.defer()
         try:
+            new_settings = await self.construct_settings(str(interaction.guild.id))
             async with async_session_maker() as session:
                 await session.execute(
                     update(DiscordIntegrationDb)
                     .where(DiscordIntegrationDb.discord_guild_id == str(interaction.guild.id))
-                    .values(settings=self.construct_settings())
+                    .values(settings=new_settings)
                 )
                 await session.commit()
 
@@ -64,8 +69,6 @@ class ConfigureView(discord.ui.View):
                     if member:
                         help_mention_text = member.mention
 
-            await interaction.response.edit_message(view=None, content="**Configure Ask Fern:**")
-
             message_text = (
                 f"**Configuration saved!**\n\n"
                 f"**Response mode:** {self.channel_response}\n\n"
@@ -73,17 +76,27 @@ class ConfigureView(discord.ui.View):
                 f"• {help_mention_text}"
             )
 
-            await interaction.followup.send(message_text, ephemeral=True)
+            await interaction.edit_original_response(view=None, content=message_text)
         except Exception as e:
-            await interaction.response.send_message(
+            LOGGER.exception("Failed to save configuration")
+            await interaction.followup.send(
                 f"**Error saving configuration:**\n\n{e}",
                 ephemeral=True,
             )
 
-    def construct_settings(self) -> dict[str, dict[str, str | None]]:
+    async def construct_settings(self, guild_id: str) -> dict[str, dict[str, str | None]]:
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(DiscordIntegrationDb).where(DiscordIntegrationDb.discord_guild_id == guild_id)
+            )
+            integration = result.scalar_one_or_none()
+            existing_settings = integration.settings if integration and integration.settings else {}
+
         settings: dict[str, str | None] = {
             "channel_response": self.channel_response,
         }
         if self.help_role_id:
             settings["help_role_id"] = self.help_role_id
-        return {self.channel_id: settings}
+
+        merged_settings = {**existing_settings, self.channel_id: settings}
+        return merged_settings
