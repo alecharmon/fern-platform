@@ -1,11 +1,12 @@
 import { type AbsoluteFilePath, cwd, doesPathExist, resolve } from "@fern-api/fs-utils";
 import fs from "fs";
-import { mkdir, readFile } from "fs/promises";
+import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
 import { loadGitHubConfig } from "./configuration/loadGitHubConfig";
+import { loadMetadataConfig } from "./configuration/loadMetadataConfig";
 import { loadReadmeConfig } from "./configuration/loadReadmeConfig";
 import { loadReferenceConfig } from "./configuration/loadReferenceConfig";
 import { GitHub } from "./github/GitHub";
@@ -82,6 +83,35 @@ void yargs(hideBin(process.argv))
             await generator.generate({
                 output: await createWriteStream(argv.output)
             });
+            process.exit(0);
+        }
+    )
+    .command(
+        "write-metadata",
+        "Write metadata to the output directory using the provided configuration file.",
+        (argv) =>
+            argv
+                .option("config", {
+                    string: true,
+                    required: true
+                })
+                .option("output", {
+                    string: true,
+                    required: false
+                }),
+        async (argv) => {
+            if (argv.config == null) {
+                process.stderr.write("missing required arguments; please specify the --config flag\n");
+                process.exit(1);
+            }
+            const wd = cwd();
+            const metadata = await loadMetadataConfig({
+                absolutePathToConfig: resolve(wd, argv.config)
+            });
+            const outputPath = argv.output != null ? resolve(wd, argv.output) : resolve(wd, ".fern/metadata.json");
+            const formattedMetadata = JSON.stringify(metadata, null, 2);
+            await mkdir(path.dirname(outputPath), { recursive: true });
+            await writeFile(outputPath, formattedMetadata, "utf8");
             process.exit(0);
         }
     )
