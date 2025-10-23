@@ -44,7 +44,7 @@ class FeedbackView(discord.ui.View):
             if isinstance(interaction.channel, discord.Thread):
                 current_name = interaction.channel.name
                 if not current_name.startswith("[RESOLVED]"):
-                    new_name = f"[RESOLVED] {current_name}"
+                    new_name = current_name.replace("Discussion: ", "[RESOLVED] ", 1)
                     await interaction.channel.edit(name=new_name)
                     LOGGER.info(f"Renamed thread to: {new_name}")
 
@@ -258,9 +258,17 @@ async def handle_discord_message(message: discord.Message) -> None:
                     target_channel = message.thread
                     reaction_target = message
                 else:
-                    target_channel = await message.create_thread(
-                        name=f"Discussion: {message.content.replace(f'<@{message.guild.me.id}>', '').strip()[:100]}"
-                    )
+                    thread_content = message.content.replace(f"<@{message.guild.me.id}>", "").strip()
+                    if not thread_content:
+                        thread_name = "Discussion"
+                    else:
+                        max_content_length = 85
+                        if len(thread_content) > max_content_length:
+                            thread_name = f"Discussion: {thread_content[:max_content_length]}..."
+                        else:
+                            thread_name = f"Discussion: {thread_content}"
+
+                    target_channel = await message.create_thread(name=thread_name)
                     reaction_target = message
 
                 for i, chunk in enumerate(chunks):

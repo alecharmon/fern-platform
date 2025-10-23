@@ -754,7 +754,7 @@ greenlet = "^3.2.3"
 numpy = "^2.3.1"
 openai = "^1.91.0"
 pandas = "^2.3.1"
-posthog = "^2.3.0"
+posthog = "^6.7.8"
 pydantic = "^2.8.0"
 PyJWT = "^2.6.0"
 python-multipart = "^0.0.20"
@@ -1425,18 +1425,6 @@ files = [
 ]
 
 [[package]]
-name = "monotonic"
-version = "1.6"
-description = "An implementation of time.monotonic() for Python 2 & < 3.3"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "monotonic-1.6-py2.py3-none-any.whl", hash = "sha256:68687e19a14f11f26d140dd5c86f3dba4bf5df58003000ed467e0e2a69bca96c"},
-    {file = "monotonic-1.6.tar.gz", hash = "sha256:3a55207bcfed53ddd5c5bae174524062935efed17792e9de2ad0205ce9ad63f7"},
-]
-
-[[package]]
 name = "multidict"
 version = "6.6.4"
 description = "multidict implementation"
@@ -1898,27 +1886,28 @@ testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
 name = "posthog"
-version = "2.5.0"
+version = "6.7.9"
 description = "Integrate PostHog into any python application."
 optional = false
-python-versions = "*"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "posthog-2.5.0-py2.py3-none-any.whl", hash = "sha256:3d3ece06c3fe4135497c239f211c82344962b93e4fd4ba5afd20bd4ad12d77be"},
-    {file = "posthog-2.5.0.tar.gz", hash = "sha256:7601ef75b483eb67a6229cafec02da9624f6d46df61066771ca9e3f986284fc3"},
+    {file = "posthog-6.7.9-py3-none-any.whl", hash = "sha256:1415c20fed34f4be2ed4fb910516637a28a18bdfa461ee6a41588baa2f4fa64a"},
+    {file = "posthog-6.7.9.tar.gz", hash = "sha256:506fd31a6a4a1a6ca207df5a05ec9bef10b64bbe148d983d8d6956bffad195c3"},
 ]
 
 [package.dependencies]
 backoff = ">=1.10.0"
-monotonic = ">=1.5"
-python-dateutil = ">2.1"
+distro = ">=1.5.0"
+python-dateutil = ">=2.2"
 requests = ">=2.7,<3.0"
 six = ">=1.5"
+typing-extensions = ">=4.2.0"
 
 [package.extras]
-dev = ["black", "flake8", "flake8-print", "isort", "pre-commit"]
-sentry = ["django", "sentry-sdk"]
-test = ["coverage", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)", "pylint", "pytest"]
+dev = ["django-stubs", "lxml", "mypy", "mypy-baseline", "packaging", "pre-commit", "pydantic", "ruff", "setuptools", "tomli", "tomli_w", "twine", "types-mock", "types-python-dateutil", "types-requests", "types-setuptools", "types-six", "wheel"]
+langchain = ["langchain (>=0.2.0)"]
+test = ["anthropic", "coverage", "django", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=0.3.15)", "langchain-community (>=0.3.25)", "langchain-core (>=0.3.65)", "langchain-openai (>=0.3.22)", "langgraph (>=0.4.8)", "mock (>=2.0.0)", "openai", "parameterized (>=0.8.1)", "pydantic", "pytest", "pytest-asyncio", "pytest-timeout"]
 
 [[package]]
 name = "propcache"
