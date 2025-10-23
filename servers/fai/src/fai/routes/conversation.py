@@ -26,7 +26,7 @@ from fai.settings import LOGGER
 @fai_app.get(
     "/conversation/{domain}/{conversation_id}",
     response_model=GetConversationResponse,
-    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def get_conversation_by_id(
     domain: str,

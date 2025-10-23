@@ -62,7 +62,7 @@ async def create_query(
 @fai_app.get(
     "/queries/{domain}",
     response_model=GetQueriesResponse,
-    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+    openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]},
 )
 async def get_recent_queries(
     domain: str,
