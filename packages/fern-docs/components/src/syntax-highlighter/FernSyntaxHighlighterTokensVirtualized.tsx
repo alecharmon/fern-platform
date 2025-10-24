@@ -89,7 +89,8 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
             tokens,
             maxLines,
             wordWrap,
-            template
+            template,
+            links
         } = props;
 
         const virtuosoRef = useRef<TableVirtuosoHandle>(null);
@@ -179,11 +180,11 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
                         </td>
                     )}
                     <td className="code-block-line-content">
-                        <HastToJSX hast={line} template={template} />
+                        <HastToJSX hast={line} template={template} links={links} />
                     </td>
                 </>
             ),
-            [gutterCli, plaintext, template]
+            [gutterCli, plaintext, template, links]
         );
 
         return (

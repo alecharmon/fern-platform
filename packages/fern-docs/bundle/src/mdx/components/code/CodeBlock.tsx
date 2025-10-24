@@ -52,6 +52,10 @@ export function CodeBlock(props: {
      * automatically scrolls to the specified line number (1-based) when the component mounts
      */
     startLine?: number;
+    /**
+     * maps exact string matches in the code to URLs, creating clickable links
+     */
+    links?: Record<string, string>;
 }) {
     const {
         className,
@@ -159,6 +163,7 @@ export function toSyntaxHighlighterProps(
         wordWrap: props.wordWrap,
         template: props.template,
         tooltips: props.tooltips,
-        viewportRef: props.viewportRef
+        viewportRef: props.viewportRef,
+        links: props.links
     };
 }

@@ -26,10 +26,11 @@ export interface FernSyntaxHighlighterProps {
     wordWrap?: boolean;
     template?: Record<string, string>;
     tooltips?: Record<string, React.ReactNode>;
+    links?: Record<string, string>;
 }
 
 export const FernSyntaxHighlighter = forwardRef<HTMLPreElement, FernSyntaxHighlighterProps>((props, ref) => {
-    const { code, language, tooltips, template, ...innerProps } = props;
+    const { code, language, tooltips, template, links, ...innerProps } = props;
     const highlighter = useHighlighter(language);
 
     const variableNames = useDeepCompareMemoize(
@@ -61,7 +62,7 @@ export const FernSyntaxHighlighter = forwardRef<HTMLPreElement, FernSyntaxHighli
 
     return (
         <TemplateTooltip.Provider value={tooltips ?? EMPTY_OBJECT}>
-            <TokenRenderer ref={ref} tokens={tokens} template={template} {...innerProps} />
+            <TokenRenderer ref={ref} tokens={tokens} template={template} links={links} {...innerProps} />
         </TemplateTooltip.Provider>
     );
 });

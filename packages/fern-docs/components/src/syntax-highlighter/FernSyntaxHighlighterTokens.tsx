@@ -32,6 +32,7 @@ export interface FernSyntaxHighlighterTokensProps {
     maxLines?: number;
     wordWrap?: boolean;
     template?: Record<string, string>;
+    links?: Record<string, string>;
 }
 
 export function fernSyntaxHighlighterTokenPropsAreEqual(
@@ -63,6 +64,7 @@ export const FernSyntaxHighlighterTokens = memo(
             maxLines,
             wordWrap,
             template,
+            links,
             id
         } = props;
         const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -182,7 +184,7 @@ export const FernSyntaxHighlighterTokens = memo(
                                                 </td>
                                             )}
                                             <td className="code-block-line-content">
-                                                <HastToJSX hast={line} template={template} />
+                                                <HastToJSX hast={line} template={template} links={links} />
                                             </td>
                                         </tr>
                                     ))}
