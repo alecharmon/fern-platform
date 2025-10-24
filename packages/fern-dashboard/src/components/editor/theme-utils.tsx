@@ -5,8 +5,9 @@ function getCSSCustomProperty(property: string, fallback: string): string {
     if (typeof window !== "undefined") {
         const root = document.documentElement;
         const value = getComputedStyle(root).getPropertyValue(property).trim();
-        // Monaco doesn't support oklch colors, so we need to fallback to a default color
-        if (value.startsWith("oklch")) {
+        // Monaco doesn't support oklch/lab colors, so we need to fallback to a default color
+        // Note: browsers may convert oklch() to lab() when using getComputedStyle()
+        if (value.startsWith("oklch") || value.startsWith("lab(") || value.startsWith("lch(")) {
             return fallback;
         }
         return value || fallback;
@@ -49,6 +50,9 @@ export function defineAppTheme(monaco: Monaco) {
             { token: "list.number", foreground: primaryColor }
         ],
         colors: {
+            // Editor background
+            "editor.background": "#FFFFFF",
+
             // Keep all light theme colors, with enhanced selections and highlights
             "editor.selectionBackground": primaryColor + "20", // Blue with transparency
             "editor.selectionHighlightBackground": primaryColor + "15",
