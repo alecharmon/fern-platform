@@ -38,7 +38,8 @@ export function VisualEditorSectionClient({
         const getBranches = async () => {
             const storage = createNavigationBufferedIndexedDBStorage();
             await storage.init();
-            const relevantBranches = storage.getAllStoredBranches();
+            const allBranches = storage.getAllStoredBranches();
+            const relevantBranches = await getRelevantUserBranchesForSite(orgName, docsUrl, allBranches);
             setRelevantBranches(relevantBranches);
             setLoadingBranches(false);
         };
