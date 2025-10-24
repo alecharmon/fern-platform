@@ -1,0 +1,18 @@
+name: Notify Docs Repo
+on:
+  release:
+    types: [created]
+    tags:
+      - "docs@*"
+
+jobs:
+  notify-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger docs repo workflow
+        run: |
+          curl -f -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.FERN_GITHUB_PAT }}" \
+            https://api.github.com/repos/fern-api/docs/dispatches \
+            -d '{"event_type":"docs_release","client_payload":{"version":"${{ github.ref_name }}"}}'
