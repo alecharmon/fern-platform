@@ -29,6 +29,7 @@ interface DocsYmlConfig {
 export class GitHubLoader implements GitLoader {
     private getOctokitInstance: () => Promise<Octokit | null>;
     private octokit: Octokit | null = null;
+    private inFlightRequests: Map<string, Promise<any>> = new Map();
 
     constructor(githubUrl: string) {
         this.getOctokitInstance = async () => {
@@ -38,6 +39,20 @@ export class GitHubLoader implements GitLoader {
             const result = await getFernBotOctokitForRepo(owner, repo);
             return result.ok ? result.octokit : null;
         };
+    }
+
+    private async deduplicateRequest<T>(key: string, fn: () => Promise<T>): Promise<T> {
+        const existing = this.inFlightRequests.get(key);
+        if (existing) {
+            return existing;
+        }
+
+        const promise = fn().finally(() => {
+            this.inFlightRequests.delete(key);
+        });
+
+        this.inFlightRequests.set(key, promise);
+        return promise;
     }
 
     async getOctokit() {
@@ -54,30 +69,34 @@ export class GitHubLoader implements GitLoader {
      * NOTE: I have not yet handled the recursion needed to get all docs.yml files and sub-files.
      */
     private async getFileContent(owner: string, repo: string, ref: string, path: string): Promise<string | null> {
-        try {
-            const octokit = await this.getOctokit();
-            if (!octokit) {
-                console.error("Failed to get Octokit instance");
+        const cacheKey = `github-file-${owner}-${repo}-${ref}-${path}`;
+
+        return this.deduplicateRequest(cacheKey, async () => {
+            try {
+                const octokit = await this.getOctokit();
+                if (!octokit) {
+                    console.error("Failed to get Octokit instance");
+                    return null;
+                }
+
+                const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+                    owner,
+                    repo,
+                    path,
+                    ref
+                });
+
+                if ("content" in response.data) {
+                    const content = Buffer.from(response.data.content, "base64").toString("utf8");
+                    return content;
+                }
+
+                return null;
+            } catch (error) {
+                console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
                 return null;
             }
-
-            const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-                owner,
-                repo,
-                path,
-                ref
-            });
-
-            if ("content" in response.data) {
-                const content = Buffer.from(response.data.content, "base64").toString("utf8");
-                return content;
-            }
-
-            return null;
-        } catch (error) {
-            console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
-            return null;
-        }
+        });
     }
 
     /**
@@ -112,25 +131,29 @@ export class GitHubLoader implements GitLoader {
     }
 
     private async getRepository(owner: string, repo: string) {
-        const octokit = await this.getOctokit();
-        if (!octokit) {
-            throw new Error("Failed to get Octokit instance");
-        }
+        const cacheKey = `github-repo-${owner}-${repo}`;
 
-        try {
-            const repositoryResponse = await octokit.request("GET /repos/{owner}/{repo}", {
-                owner,
-                repo
-            });
-
-            return repositoryResponse;
-        } catch (error: any) {
-            if (error?.status === 404) {
-                return null;
+        return this.deduplicateRequest(cacheKey, async () => {
+            const octokit = await this.getOctokit();
+            if (!octokit) {
+                throw new Error("Failed to get Octokit instance");
             }
 
-            throw error;
-        }
+            try {
+                const repositoryResponse = await octokit.request("GET /repos/{owner}/{repo}", {
+                    owner,
+                    repo
+                });
+
+                return repositoryResponse;
+            } catch (error: any) {
+                if (error?.status === 404) {
+                    return null;
+                }
+
+                throw error;
+            }
+        });
     }
     /**
      * Finds a Fern project by site URL using tree searching methodology.
@@ -154,12 +177,14 @@ export class GitHubLoader implements GitLoader {
 
         const defaultBranch = repository.data.default_branch;
 
-        // Get the full repository tree
-        const treeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
-            owner,
-            repo,
-            tree_sha: defaultBranch,
-            recursive: "true"
+        const cacheKey = `github-tree-${owner}-${repo}-${defaultBranch}`;
+        const treeResponse = await this.deduplicateRequest(cacheKey, async () => {
+            return await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
+                owner,
+                repo,
+                tree_sha: defaultBranch,
+                recursive: "true"
+            });
         });
 
         // Find all fern.config.json files
@@ -205,9 +230,15 @@ export class GitHubLoader implements GitLoader {
         const allFoundSites: string[] = [];
         let firstDocsYmlPath: string | undefined;
 
-        for (const project of projects) {
-            const docsYmlContent = await this.getFileContent(owner, repo, defaultBranch, project.docsYmlPath);
-            if (docsYmlContent) {
+        const docsYmlContents = await Promise.all(
+            projects.map((project) => this.getFileContent(owner, repo, defaultBranch, project.docsYmlPath))
+        );
+
+        for (let i = 0; i < projects.length; i++) {
+            const project = projects[i];
+            const docsYmlContent = docsYmlContents[i];
+
+            if (docsYmlContent && project) {
                 const urls = this.parseUrlsFromDocsYml(docsYmlContent);
                 allFoundSites.push(...urls);
 
