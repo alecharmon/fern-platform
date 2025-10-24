@@ -49,7 +49,8 @@ export async function getAuthenticatedSessionOrRedirect(orgName: Auth0OrgName) {
             orgName
         });
         return session;
-    } catch (_) {
+    } catch (error) {
+        console.error("Failed to assert user has organization access", error);
         notFound();
     }
 }
