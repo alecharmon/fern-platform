@@ -13,11 +13,49 @@
     }
 
     &[data-state="open"] {
-      @apply w-full;
+      width: 100%;
+      max-width: 100%;
     }
 
     &[data-state="closed"] {
       @apply w-fit max-sm:w-full;
+    }
+
+    /* Ensure prose content respects parent width constraints */
+    .fern-prose {
+      width: 100%;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+  }
+
+  /* Nested collapsibles should enable horizontal scrolling instead of growing parent */
+  .fern-collapsible-card-nested {
+    &[data-state="open"] {
+      /* Keep parent width fixed, don't grow */
+      width: 100%;
+      min-width: auto;
+    }
+
+    & > .fern-collapsible {
+      /* Enable horizontal scrolling for nested content */
+      overflow-x: auto;
+
+      /* Override the overflow behavior from FernCollapse */
+      &[style*="overflow: visible"] {
+        overflow: auto visible !important;
+      }
+
+      &[style*="overflow: hidden"] {
+        overflow: auto hidden !important;
+      }
+    }
+
+    & > .fern-collapsible > .fern-collapsible-child {
+      /* Allow child to grow beyond parent width, enabling scroll */
+      width: fit-content !important;
+      min-width: 100%;
     }
   }
 }

@@ -18,6 +18,8 @@ interface TypeDefinitionContextValue {
     slug: string;
     anchorIdParts: readonly string[];
     collapsible: boolean;
+    isWidthConstrained: boolean;
+    setIsWidthConstrained?: (value: boolean) => void;
 }
 
 export const TypeDefinitionContext = createContext<() => TypeDefinitionContextValue>(() => {
@@ -37,19 +39,26 @@ export function TypeDefinitionRoot({
     types: Record<string, TypeDefinition>;
     slug: string;
 }) {
-    const contextValue = useLazyRef(() => ({
-        isRootTypeDefinition: true,
-        jsonPropertyPath: [],
-        isResponse: undefined,
-        types,
-        slug,
-        anchorIdParts: [],
-        collapsible: false
-    }));
+    const [isWidthConstrained, setIsWidthConstrained] = React.useState(false);
+
+    const contextValue = useMemo(
+        () => ({
+            isRootTypeDefinition: true,
+            jsonPropertyPath: [],
+            isResponse: undefined,
+            types,
+            slug,
+            anchorIdParts: [],
+            collapsible: false,
+            isWidthConstrained,
+            setIsWidthConstrained
+        }),
+        [types, slug, isWidthConstrained]
+    );
 
     return (
         <ErrorBoundary>
-            <TypeDefinitionContext.Provider value={useMemo(() => () => contextValue.current, [contextValue])}>
+            <TypeDefinitionContext.Provider value={useMemo(() => () => contextValue, [contextValue])}>
                 {children}
             </TypeDefinitionContext.Provider>
         </ErrorBoundary>
@@ -57,63 +66,95 @@ export function TypeDefinitionRoot({
 }
 
 export function TypeDefinitionPathPart({ children, part }: { children: React.ReactNode; part: JsonPropertyPathPart }) {
-    const parent = useTypeDefinitionContext();
-    const contextValue = React.useRef(() => ({
-        ...parent,
-        isRootTypeDefinition: false,
-        jsonPropertyPath: [...parent.jsonPropertyPath, part]
-    }));
+    const parentContextFn = React.useContext(TypeDefinitionContext);
+    const contextValue = React.useMemo(
+        () => () => {
+            const parent = parentContextFn();
+            return {
+                ...parent,
+                isRootTypeDefinition: false,
+                jsonPropertyPath: [...parent.jsonPropertyPath, part]
+            };
+        },
+        [parentContextFn, part]
+    );
 
-    return <TypeDefinitionContext.Provider value={contextValue.current}>{children}</TypeDefinitionContext.Provider>;
+    return <TypeDefinitionContext.Provider value={contextValue}>{children}</TypeDefinitionContext.Provider>;
 }
 
 export function TypeDefinitionAnchorPart({ children, part }: { children: React.ReactNode; part: string }) {
-    const parent = useTypeDefinitionContext();
+    const parentContextFn = React.useContext(TypeDefinitionContext);
     const anchorPart = part.replaceAll(" ", "-");
-    const contextValue = React.useRef(() => ({
-        ...parent,
-        anchorIdParts: [...parent.anchorIdParts, anchorPart] as const
-    }));
+    const contextValue = React.useMemo(
+        () => () => {
+            const parent = parentContextFn();
+            return {
+                ...parent,
+                anchorIdParts: [...parent.anchorIdParts, anchorPart] as const
+            };
+        },
+        [parentContextFn, anchorPart]
+    );
 
-    return <TypeDefinitionContext.Provider value={contextValue.current}>{children}</TypeDefinitionContext.Provider>;
+    return <TypeDefinitionContext.Provider value={contextValue}>{children}</TypeDefinitionContext.Provider>;
 }
 
 export function TypeDefinitionResponse({ children }: { children: React.ReactNode }) {
-    const parent = useTypeDefinitionContext();
-    const contextValue = React.useRef(() => ({
-        ...parent,
-        isResponse: true
-    }));
+    const parentContextFn = React.useContext(TypeDefinitionContext);
+    const contextValue = React.useMemo(
+        () => () => {
+            const parent = parentContextFn();
+            return {
+                ...parent,
+                isResponse: true
+            };
+        },
+        [parentContextFn]
+    );
 
-    return <TypeDefinitionContext.Provider value={contextValue.current}>{children}</TypeDefinitionContext.Provider>;
+    return <TypeDefinitionContext.Provider value={contextValue}>{children}</TypeDefinitionContext.Provider>;
 }
 
 export function TypeDefinitionCollapsible({ children }: { children: React.ReactNode }) {
     const parent = useTypeDefinitionContext();
-    const contextValue = React.useRef(() => ({
-        ...parent,
-        collapsible: true
-    }));
+    const parentContextFn = React.useContext(TypeDefinitionContext);
+    const contextValue = React.useMemo(
+        () => () => {
+            const parent = parentContextFn();
+            return {
+                ...parent,
+                collapsible: true
+            };
+        },
+        [parentContextFn]
+    );
 
     if (parent.collapsible) {
         return children;
     }
 
-    return <TypeDefinitionContext.Provider value={contextValue.current}>{children}</TypeDefinitionContext.Provider>;
+    return <TypeDefinitionContext.Provider value={contextValue}>{children}</TypeDefinitionContext.Provider>;
 }
 
 export function TypeDefinitionUncollapsible({ children }: { children: React.ReactNode }) {
     const parent = useTypeDefinitionContext();
-    const contextValue = React.useRef(() => ({
-        ...parent,
-        collapsible: false
-    }));
+    const parentContextFn = React.useContext(TypeDefinitionContext);
+    const contextValue = React.useMemo(
+        () => () => {
+            const parent = parentContextFn();
+            return {
+                ...parent,
+                collapsible: false
+            };
+        },
+        [parentContextFn]
+    );
 
     if (parent.collapsible) {
         return children;
     }
 
-    return <TypeDefinitionContext.Provider value={contextValue.current}>{children}</TypeDefinitionContext.Provider>;
+    return <TypeDefinitionContext.Provider value={contextValue}>{children}</TypeDefinitionContext.Provider>;
 }
 
 export function useTypeDefinition(id: string) {
