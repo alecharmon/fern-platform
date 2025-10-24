@@ -13,11 +13,13 @@ export interface AccordionGroupProps {
 }
 
 export function AccordionGroup({ children, className }: AccordionGroupProps) {
-    const [activeTabs, setActiveTabs] = React.useState<string[]>([]);
+    const items = unwrapChildren(children, Accordion);
+    const [activeTabs, setActiveTabs] = React.useState<string[]>(() => {
+        return items.filter((item) => item.props.defaultOpen === true).map((item) => item.props.id || "");
+    });
     const anchor = useCurrentAnchor();
     const [updatedUrl, setUpdatedUrl] = React.useState<string | null>(null);
     const [isProgrammaticUpdate, setIsProgrammaticUpdate] = React.useState(false);
-    const items = unwrapChildren(children, Accordion);
 
     const findParentAccordion = React.useCallback(
         (anchor: string) => {
@@ -101,7 +103,8 @@ export function Accordion({
     id = "",
     children,
     nestedHeaders,
-    className
+    className,
+    defaultOpen = false
 }: {
     /**
      * the title of the accordion
@@ -129,6 +132,11 @@ export function Accordion({
      * the class name of the accordion
      */
     className?: string;
+    /**
+     * whether the accordion should be open by default
+     * @default false
+     */
+    defaultOpen?: boolean;
 }) {
     if (!children) {
         return null;
