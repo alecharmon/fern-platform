@@ -25,7 +25,7 @@ export async function GrpcContent({
     bottomNavigation,
     hideFeedback,
     pageActionOptions,
-    markdown
+    markdownPromise
 }: {
     serialize: MdxSerializer;
     context: GrpcContext;
@@ -34,7 +34,7 @@ export async function GrpcContent({
     bottomNavigation?: React.ReactNode;
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
-    markdown?: string;
+    markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
 }) {
     const { node, grpc, types } = context;
 
@@ -57,7 +57,7 @@ export async function GrpcContent({
                         }
                         slug={node.slug}
                         pageActionOptions={pageActionOptions}
-                        markdown={markdown}
+                        markdownPromise={markdownPromise}
                     />
                 }
                 aside={<GrpcContentCodeSnippets node={node} />}

@@ -38,7 +38,7 @@ export async function WebSocketContent({
     action,
     hideFeedback,
     pageActionOptions,
-    markdown
+    markdownPromise
 }: {
     serialize: MdxSerializer;
     context: WebSocketContext;
@@ -47,7 +47,7 @@ export async function WebSocketContent({
     action?: React.ReactNode;
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
-    markdown?: string;
+    markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
 }) {
     const { channel, node, types, globalHeaders } = context;
 
@@ -92,7 +92,7 @@ export async function WebSocketContent({
             header={
                 <PageHeader
                     serialize={serialize}
-                    markdown={markdown}
+                    markdownPromise={markdownPromise}
                     breadcrumb={breadcrumb}
                     title={node.title}
                     tags={

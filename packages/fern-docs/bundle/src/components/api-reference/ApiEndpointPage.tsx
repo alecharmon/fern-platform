@@ -47,7 +47,7 @@ export default async function ApiEndpointPage({
         slug: node.slug
     });
 
-    const markdown = (await getMarkdownForPath(node, loader, loader.domain))?.content;
+    const markdownPromise = getMarkdownForPath(node, loader, loader.domain);
 
     return (
         <ApiEndpointContent
@@ -59,7 +59,7 @@ export default async function ApiEndpointPage({
             action={action}
             hideFeedback={layout.hideFeedback}
             pageActionOptions={pageActionOptions}
-            markdown={markdown}
+            markdownPromise={markdownPromise}
         />
     );
 }
@@ -73,7 +73,7 @@ async function ApiEndpointContent({
     bottomNavigation,
     hideFeedback,
     pageActionOptions,
-    markdown
+    markdownPromise
 }: {
     serialize: MdxSerializer;
     node: FernNavigation.NavigationNodeApiLeaf;
@@ -83,7 +83,7 @@ async function ApiEndpointContent({
     bottomNavigation?: React.ReactNode;
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
-    markdown?: string;
+    markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
 }) {
     switch (node.type) {
         case "endpoint": {
@@ -102,7 +102,7 @@ async function ApiEndpointContent({
                     showAuth
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
-                    markdown={markdown}
+                    markdownPromise={markdownPromise}
                 />
             );
         }
@@ -120,7 +120,7 @@ async function ApiEndpointContent({
                     bottomNavigation={bottomNavigation}
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
-                    markdown={markdown}
+                    markdownPromise={markdownPromise}
                 />
             );
         }
@@ -138,7 +138,7 @@ async function ApiEndpointContent({
                     bottomNavigation={bottomNavigation}
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
-                    markdown={markdown}
+                    markdownPromise={markdownPromise}
                 />
             );
         }
@@ -156,7 +156,7 @@ async function ApiEndpointContent({
                     bottomNavigation={bottomNavigation}
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
-                    markdown={markdown}
+                    markdownPromise={markdownPromise}
                 />
             );
         }

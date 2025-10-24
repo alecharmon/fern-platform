@@ -28,7 +28,7 @@ export async function WebhookContent({
     action,
     hideFeedback,
     pageActionOptions,
-    markdown
+    markdownPromise
 }: {
     serialize: MdxSerializer;
     context: ApiDefinition.WebhookContext;
@@ -37,7 +37,7 @@ export async function WebhookContent({
     action?: React.ReactNode;
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
-    markdown?: string;
+    markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
 }) {
     const { node, webhook, types } = context;
 
@@ -55,7 +55,7 @@ export async function WebhookContent({
                     action={action}
                     slug={node.slug}
                     pageActionOptions={pageActionOptions}
-                    markdown={markdown}
+                    markdownPromise={markdownPromise}
                 />
             }
             aside={webhookExample}

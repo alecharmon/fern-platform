@@ -24,7 +24,7 @@ export function PageHeader({
     tags,
     subtitle,
     children,
-    markdown,
+    markdownPromise,
     pageActionOptions,
     showRssFeedButton,
     filters,
@@ -39,7 +39,7 @@ export function PageHeader({
     subtitle?: string;
     tags?: React.ReactNode;
     children?: React.ReactNode;
-    markdown?: string;
+    markdownPromise?: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     pageActionOptions?: FernDropdown.PageActionOption[];
     showRssFeedButton?: boolean;
     // tags for the changelog section
@@ -88,7 +88,10 @@ export function PageHeader({
                     </div>
                     {pageActionOptions && (
                         <div className="hidden md:flex">
-                            <PageActionsDropdown markdown={markdown} pageActionOptions={pageActionOptions} />
+                            <PageActionsDropdown
+                                markdownPromise={markdownPromise}
+                                pageActionOptions={pageActionOptions}
+                            />
                         </div>
                     )}
                     {showRssFeedButton && (

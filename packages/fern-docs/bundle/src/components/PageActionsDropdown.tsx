@@ -15,10 +15,10 @@ import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
 import { OpenAISearchOption, Separator } from "./PageActionsDropdownOptions";
 
 export function PageActionsDropdown({
-    markdown,
+    markdownPromise,
     pageActionOptions
 }: {
-    markdown?: string;
+    markdownPromise?: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     pageActionOptions: FernDropdown.PageActionOption[];
 }) {
     const [showCopied, setShowCopied] = useState<boolean>(false);
@@ -40,19 +40,24 @@ export function PageActionsDropdown({
         if (value === "copy-page") {
             window.focus();
 
-            if (markdown) {
+            if (markdownPromise) {
                 try {
-                    await navigator.clipboard.writeText(markdown);
-                    capturePosthogEventInternal("page_actions_dropdown", {
-                        type: "copy-option",
-                        page_location: window.location.pathname
-                    });
+                    const markdownResult = await markdownPromise;
+                    const markdown = markdownResult?.content;
 
-                    setShowCopied(true);
+                    if (markdown) {
+                        await navigator.clipboard.writeText(markdown);
+                        capturePosthogEventInternal("page_actions_dropdown", {
+                            type: "copy-option",
+                            page_location: window.location.pathname
+                        });
 
-                    setTimeout(() => {
-                        setShowCopied(false);
-                    }, 2000);
+                        setShowCopied(true);
+
+                        setTimeout(() => {
+                            setShowCopied(false);
+                        }, 2000);
+                    }
                 } catch (error) {
                     console.error("Failed to copy to clipboard:", error);
                 }

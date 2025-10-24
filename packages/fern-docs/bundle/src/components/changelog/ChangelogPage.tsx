@@ -132,6 +132,11 @@ export async function ChangelogPageOverview({
                 showRssFeedButton={showRssFeedButton}
                 filters={tags}
                 showBackIcon={showBackIcon}
+                markdownPromise={
+                    page?.markdown
+                        ? Promise.resolve({ content: page.markdown, contentType: "markdown" as const })
+                        : undefined
+                }
             />
             <Markdown mdx={mdx} fallback={page?.markdown} useNextMdx={mdx?.engine === "next-remote"} />
         </>

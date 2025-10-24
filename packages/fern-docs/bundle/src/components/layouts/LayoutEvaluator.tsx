@@ -61,7 +61,7 @@ export async function LayoutEvaluator({
             subtitle={subtitle}
             breadcrumb={breadcrumb}
             slug={slug}
-            markdown={markdown}
+            markdownPromise={Promise.resolve({ content: markdown, contentType: "markdown" })}
             pageActionOptions={
                 await constructPageOptions({
                     pageActionConfig: config,
