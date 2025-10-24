@@ -14,19 +14,14 @@ export function constructEditorSlug({
     orgName,
     docsUrl,
     branchName,
-    slug,
-    query
+    slug
 }: {
     orgName: Auth0OrgNameIsh;
     docsUrl: EncodedDocsUrlIsh;
     branchName: string;
     slug: string;
-    query?: {
-        clientPage?: boolean;
-    };
 }) {
-    const baseUrl = `/${orgName}/editor/${docsUrl}/${branchName}/${slug}`;
-    return query?.clientPage ? `${baseUrl}?client-page=true` : baseUrl;
+    return `/${orgName}/editor/${docsUrl}/${branchName}/${slug}`;
 }
 
 /**

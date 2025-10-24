@@ -8,19 +8,22 @@ import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import { useIsChildSelected, useIsExpanded, useToggleSidebarNode } from "../../state/navigation";
 import { CollapsibleSidebarGroup } from "../CollapsibleSidebarGroup";
 import { SidebarSlugLink } from "../SidebarLink";
+import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 
 export function SidebarCollapseGroup({
     node,
     icon,
     depth,
     className,
-    children
+    children,
+    renderOptions
 }: {
     node: FernNavigation.ApiReferenceNode | FernNavigation.ApiPackageNode | FernNavigation.SectionNode;
     icon: React.ReactNode;
     depth: number;
     className?: string;
     children: ReactNode;
+    renderOptions: SidebarRenderOptions;
 }): ReactNode {
     const handleToggleExpand = useToggleSidebarNode(node.id);
     const childSelected = useIsChildSelected(node.id);
@@ -28,7 +31,7 @@ export function SidebarCollapseGroup({
     const shallow = false;
     const showIndicator = childSelected && !expanded;
 
-    return (
+    const baseComponent = (
         <WithFeatureFlags featureFlags={node.featureFlags}>
             <CollapsibleSidebarGroup
                 open={expanded}
@@ -53,4 +56,9 @@ export function SidebarCollapseGroup({
             </CollapsibleSidebarGroup>
         </WithFeatureFlags>
     );
+
+    // If wrapSectionNode is provided (typically by fern-dashboard), apply it to node
+    const wrapSectionNode = renderOptions.wrapSectionNode;
+
+    return wrapSectionNode && node.type === "section" ? wrapSectionNode(node, baseComponent) : baseComponent;
 }

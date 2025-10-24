@@ -2,7 +2,7 @@ import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { ReactNode } from "react";
 import React from "react";
 
-import { SidebarClientNavigationChildInjector } from "./SidebarClientNavigationChildInjector";
+import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarCollapseGroup } from "./SidebarCollapseGroup";
 import { SidebarPageNode } from "./SidebarPageNode";
 
@@ -12,7 +12,7 @@ interface SidebarSectionNodeProps {
     depth: number;
     className?: string;
     children: ReactNode;
-    forceClientRender?: boolean;
+    renderOptions: SidebarRenderOptions;
 }
 
 export function SidebarSectionNode({
@@ -20,19 +20,24 @@ export function SidebarSectionNode({
     icon,
     className,
     depth,
-    forceClientRender,
-    children
+    children,
+    renderOptions
 }: SidebarSectionNodeProps): ReactNode {
+    // If wrapSectionNode is provided (typically by fern-dashboard), apply it to node
+    const wrapSectionNode = renderOptions.wrapSectionNode;
+
     if (React.Children.count(children) === 0 && FernNavigation.hasMarkdown(node)) {
-        return (
+        const pageNodeComponent = (
             <SidebarPageNode
                 node={node}
                 depth={depth}
                 className={className}
                 icon={icon}
-                forceClientRender={forceClientRender}
+                renderOptions={renderOptions}
             />
         );
+
+        return wrapSectionNode ? wrapSectionNode(node, pageNodeComponent) : pageNodeComponent;
     }
 
     if (React.Children.count(children) === 0) {
@@ -40,13 +45,7 @@ export function SidebarSectionNode({
     }
 
     return (
-        <SidebarCollapseGroup node={node} icon={icon} depth={depth} className={className}>
-            {/* Inject client nodes for this section */}
-            <SidebarClientNavigationChildInjector
-                parentNodeId={node.id}
-                childDepth={depth + 1}
-                forceClientRender={forceClientRender}
-            />
+        <SidebarCollapseGroup node={node} icon={icon} depth={depth} className={className} renderOptions={renderOptions}>
             {children}
         </SidebarCollapseGroup>
     );

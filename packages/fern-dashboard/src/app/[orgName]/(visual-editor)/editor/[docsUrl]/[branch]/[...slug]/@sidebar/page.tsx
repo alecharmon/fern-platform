@@ -2,14 +2,13 @@ import { PrefetchedDocsLoader } from "@fern-api/docs-loader";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { getPageId, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import {
+    type ClientPageDataDependencies,
     constructEditorSlug,
     getClientPageDefaultFilename,
     getEditorRedirectSlug,
     getSerializableFoundNode,
-    ROOT_SLUG_ALIAS,
-    type SerializableFoundNode
+    ROOT_SLUG_ALIAS
 } from "@fern-docs/components/navigation";
-import { notFound } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
@@ -57,68 +56,70 @@ export default async function SidebarPage({
     }).serializable();
 
     const requestedSlug = slugjoin(slug);
+    const root = await loader.getRoot();
 
-    let pageDataDeps: PageNodeNamespace.Props["pageDataDeps"] | undefined;
-    let serializableFoundNode: SerializableFoundNode | undefined;
+    // If requested slug == ROOT_SLUG_ALIAS ("root"), use slug from the root node instead
+    const navigationSlug = requestedSlug === ROOT_SLUG_ALIAS ? root.slug : requestedSlug;
+    const navigationNode = FernNavigation.utils.findNode(root, navigationSlug);
 
-    if (resolvedSearchParams["client-page"]) {
-        pageDataDeps = {
+    // Handle notFound case first - treat as potential client page instead of redirecting
+    if (navigationNode.type === "notFound") {
+        // Instead of redirecting to root, treat this as a potential client page
+        // The client will resolve it from the NavigationStore if it exists
+        const pageDataDeps: ClientPageDataDependencies = {
             source: "client",
-            filename: getClientPageDefaultFilename(requestedSlug)
+            filename: getClientPageDefaultFilename(navigationSlug)
         };
+
+        return (
+            <PageSidebar
+                prefetchedLoaderData={prefetchedLoaderData}
+                pageDataDeps={pageDataDeps}
+                serializableRootNode={root}
+            />
+        );
+    }
+
+    // Check if we need to redirect using the shared utility function
+    const redirectSlug = getEditorRedirectSlug({ navigationNode, navigationSlug, root });
+
+    if (redirectSlug != null) {
+        const redirectUrl = constructEditorSlug({
+            orgName,
+            docsUrl,
+            branchName: branch,
+            slug: redirectSlug
+        });
+        return <EditorRedirect redirectUrl={redirectUrl} />;
+    }
+
+    // Redirect should have been handled by the getEditorRedirectSlug, throw an error if it wasn't
+    if (navigationNode.type === "redirect") {
+        throw new Error("navigationNode of type 'redirect' should be handled by EditorRedirect");
+    }
+
+    // Get a serializable copy of the found node to be passed over the wire to PageSidebar
+    const serializableFoundNode = getSerializableFoundNode(navigationNode);
+
+    // This is a server page, get the page id and fetch data from the loader
+    const pageId = getPageId(serializableFoundNode.node);
+    const page = pageId ? await loader.getPage(pageId) : undefined;
+
+    // If the page is not found, set pageDataDeps to undefined so that the fallbackFoundNode is used
+    // This is used for api reference pages, and other non-page nodes
+    let pageDataDeps: PageNodeNamespace.Props["pageDataDeps"] | undefined;
+    if (page == null) {
+        pageDataDeps = undefined;
     } else {
-        const root = await loader.getRoot();
+        // TODO: if rawMarkdown is not available, show a warning to the user that they need to upgrade their CLI version
+        const rawMarkdown = page.rawMarkdown ?? page.markdown;
 
-        // If requested slug == ROOT_SLUG_ALIAS ("root"), use slug from the root node instead
-        const navigationSlug = requestedSlug === ROOT_SLUG_ALIAS ? root.slug : requestedSlug;
-        const navigationNode = FernNavigation.utils.findNode(root, navigationSlug);
-
-        // Check if we need to redirect using the shared utility function
-        const redirectSlug = getEditorRedirectSlug({ navigationNode, navigationSlug, root });
-
-        if (redirectSlug != null) {
-            const redirectUrl = constructEditorSlug({
-                orgName,
-                docsUrl,
-                branchName: branch,
-                slug: redirectSlug
-            });
-            // Return client component that redirects (to keep in sync, should be same as ../page.tsx)
-            return <EditorRedirect redirectUrl={redirectUrl} />;
-        }
-
-        // Redirect should have been handled by the getEditorRedirectSlug, throw an error if it wasn't
-        if (navigationNode.type === "redirect") {
-            throw new Error("navigationNode of type 'redirect' should be handled by EditorRedirect");
-        }
-
-        // If getEditorRedirectSlug returns null for a notFound node at root, we should 404
-        if (navigationNode.type === "notFound") {
-            notFound();
-        }
-
-        // Get a serializable copy of the found node to be passed over the wire to PageSidebar
-        serializableFoundNode = getSerializableFoundNode(navigationNode);
-
-        // This is a server page, get the page id and fetch data from the loader
-        const pageId = getPageId(serializableFoundNode.node);
-        const page = pageId ? await loader.getPage(pageId) : undefined;
-
-        // If the page is not found, set pageDataDeps to undefined so that the fallbackFoundNode is used
-        // This is used for api reference pages, and other non-page nodes
-        if (page == null) {
-            pageDataDeps = undefined;
-        } else {
-            // TODO: if rawMarkdown is not available, show a warning to the user that they need to upgrade their CLI version
-            const rawMarkdown = page.rawMarkdown ?? page.markdown;
-
-            pageDataDeps = {
-                source: "server",
-                filename: page.filename,
-                initialMdx: rawMarkdown,
-                initialFoundNode: serializableFoundNode
-            };
-        }
+        pageDataDeps = {
+            source: "server",
+            filename: page.filename,
+            initialMdx: rawMarkdown,
+            initialFoundNode: serializableFoundNode
+        };
     }
 
     return (
@@ -126,6 +127,7 @@ export default async function SidebarPage({
             prefetchedLoaderData={prefetchedLoaderData}
             pageDataDeps={pageDataDeps}
             fallbackFoundNode={serializableFoundNode}
+            serializableRootNode={root}
         />
     );
 }

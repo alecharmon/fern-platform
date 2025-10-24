@@ -62,4 +62,10 @@
   .fern-sidebar-header {
     @apply h-header-height-real mx-3 hidden border-b border-transparent lg:flex lg:items-center lg:justify-between;
   }
+
+  /* Shift trailing icons (expand/collapse) when menu in fern-dashboard is shown on hover or when menu is open */
+  .sidebar-section-with-menu:hover .expand-indicator,
+  .sidebar-section-with-menu:has(button[data-state="open"]) .expand-indicator {
+    @apply mr-6;
+  }
 }

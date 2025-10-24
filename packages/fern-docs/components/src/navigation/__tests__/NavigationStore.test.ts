@@ -145,4 +145,104 @@ describe("NavigationStore", () => {
             expect(updated?.mdx).toBe("# Updated");
         });
     });
+
+    describe("rootNode handling", () => {
+        it("should handle empty rootNode gracefully", () => {
+            expect(store.rootNode).toBeUndefined();
+
+            // Operations should not crash when rootNode is empty
+            expect(() => store.renameSection("section-id" as FernNavigation.NodeId, "New Title")).not.toThrow();
+        });
+
+        it("should persist rootNode in snapshot", () => {
+            const rootNode: FernNavigation.RootNode = {
+                type: "root",
+                id: "root" as FernNavigation.NodeId,
+                version: "v2",
+                title: "Root",
+                slug: "root" as FernNavigation.Slug,
+                canonicalSlug: undefined,
+                icon: undefined,
+                hidden: undefined,
+                authed: undefined,
+                viewers: undefined,
+                orphaned: undefined,
+                featureFlags: undefined,
+                pointsTo: undefined,
+                roles: undefined,
+                child: {
+                    type: "versioned",
+                    id: "versioned" as FernNavigation.NodeId,
+                    children: []
+                }
+            };
+
+            store.setRootNode(rootNode);
+            expect(store.rootNode).toEqual(rootNode);
+
+            const snapshot = store.getSnapshot();
+            expect(snapshot.rootNode).toEqual(rootNode);
+        });
+    });
+
+    describe("file tracking", () => {
+        it("should track changed pages", () => {
+            const testNode = createTestNode();
+            const filename = "test.mdx";
+
+            store.registerPage({
+                source: "server",
+                filename,
+                mdx: "# Test",
+                html: "<h1>Test</h1>",
+                frontmatter: { title: "Test" },
+                foundNode: {
+                    type: "found",
+                    node: testNode,
+                    parents: [],
+                    sidebar: undefined,
+                    tabs: [],
+                    currentTab: undefined,
+                    currentVersion: undefined,
+                    currentProduct: undefined,
+                    isCurrentVersionDefault: true,
+                    isCurrentProductDefault: true
+                }
+            });
+
+            expect(store.files.hasChangesToCommit).toBe(false);
+
+            store.updatePage(filename, { mdx: "# Updated" });
+            expect(store.files.hasChangesToCommit).toBe(true);
+            expect(store.files.changed[filename]).toBe("# Updated");
+        });
+
+        it("should track deleted pages", () => {
+            const testNode = createTestNode();
+            const filename = "test.mdx";
+
+            store.registerPage({
+                source: "server",
+                filename,
+                mdx: "# Test",
+                html: "<h1>Test</h1>",
+                frontmatter: { title: "Test" },
+                foundNode: {
+                    type: "found",
+                    node: testNode,
+                    parents: [],
+                    sidebar: undefined,
+                    tabs: [],
+                    currentTab: undefined,
+                    currentVersion: undefined,
+                    currentProduct: undefined,
+                    isCurrentVersionDefault: true,
+                    isCurrentProductDefault: true
+                }
+            });
+
+            store.markPageForDeletion(filename);
+            expect(store.files.deleted).toContain(filename);
+        });
+    });
 });

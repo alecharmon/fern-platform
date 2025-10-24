@@ -40,37 +40,6 @@ export function getSerializableFoundNode(foundNode: FernNavigation.utils.Node.Fo
     };
 }
 
-export function mergeFoundNodes(
-    foundNode: SerializableFoundNode,
-    fallbackFoundNode?: SerializableFoundNode
-): SerializableFoundNode {
-    // NavigationSnapshotV0 node.id is malformed; we need to correct it if data comes from migrated page
-    const nodeId =
-        foundNode.node.type === "page" &&
-        (foundNode.node.id as string) === (foundNode.node.pageId as string) &&
-        fallbackFoundNode?.node.id
-            ? fallbackFoundNode?.node.id
-            : undefined;
-
-    return {
-        ...foundNode,
-        node: {
-            ...(foundNode.node ?? fallbackFoundNode?.node),
-            id: nodeId ?? foundNode.node?.id ?? fallbackFoundNode?.node?.id
-        },
-        parents: foundNode.parents.length > 0 ? foundNode.parents : (fallbackFoundNode?.parents ?? []),
-        sidebar: foundNode.sidebar ?? fallbackFoundNode?.sidebar,
-        tabs: foundNode.tabs.length > 0 ? foundNode.tabs : (fallbackFoundNode?.tabs ?? []),
-        currentTab: foundNode.currentTab ?? fallbackFoundNode?.currentTab,
-        currentVersion: foundNode.currentVersion ?? fallbackFoundNode?.currentVersion,
-        currentProduct: foundNode.currentProduct ?? fallbackFoundNode?.currentProduct,
-        isCurrentVersionDefault:
-            foundNode.isCurrentVersionDefault ?? fallbackFoundNode?.isCurrentVersionDefault ?? false,
-        isCurrentProductDefault:
-            foundNode.isCurrentProductDefault ?? fallbackFoundNode?.isCurrentProductDefault ?? false
-    };
-}
-
 /** Metadata from traversing sections in navigation tree */
 export interface SectionAncestorMetadata {
     id: FernNavigation.NodeId;
@@ -138,7 +107,6 @@ export interface PageRegistryEntry {
     pageData: ResolvedPageData;
     status: "unchanged" | "changed" | "committed";
     isMarkedForDeletion: boolean;
-    index?: string;
     lastModified?: number;
     /** ID of the parent section node this page belongs to */
     parentSectionId?: FernNavigation.NodeId;
@@ -205,15 +173,26 @@ export interface YmlPageItem extends YmlNavigationItem {
 }
 
 /** Tracked docs.yml configuration change */
-export interface DocsYmlChange {
-    type: "add_page" | "remove_page";
-    sectionTitle?: string | null;
-    tabSlug?: string;
-    pageEntry: { page: string; path: string };
-    createdAt: number;
-    /** Fractional index for the page */
-    index?: string;
-}
+export type DocsYmlChange =
+    | {
+          type: "add_page" | "remove_page";
+          sectionTitle?: string | null;
+          tabSlug?: string;
+          pageEntry: { page: string; path: string };
+          createdAt: number;
+          /** Whether this change has been committed */
+          committed?: boolean;
+      }
+    | {
+          type: "rename_section";
+          sectionId: FernNavigation.NodeId;
+          oldTitle: string;
+          newTitle: string;
+          tabSlug?: string;
+          createdAt: number;
+          /** Whether this change has been committed */
+          committed?: boolean;
+      };
 
 /** Tracked docs.yml configuration changes by filename */
 export type DocsYmlChanges = Map<PageFilename, DocsYmlChange>;
@@ -297,7 +276,14 @@ function _isObject(value: unknown, throwIfNotValid?: boolean): value is Record<s
 // NAVIGATION STORE
 // ----------------------------------------------------------------------------
 
-/** Current schema version for NavigationSnapshot */
+/**
+ * Current schema version for NavigationSnapshot
+ *
+ * IMPORTANT: When modifying NavigationSnapshot structure:
+ * 1. Check if changes are backwards-compatible (optional fields, union additions)
+ * 2. If breaking changes: increment version and add migration in migrations.ts
+ * 3. If backwards-compatible: keep version unchanged (no migration needed)
+ */
 export const NAVIGATION_SNAPSHOT_SCHEMA_VERSION = 1;
 
 /** Snapshot of NavigationStore data stored in NavigationStorage */
@@ -313,6 +299,8 @@ export interface NavigationSnapshot {
     docsYmlChanges: DocsYmlChanges;
     lastCommittedHash?: string;
     version: number;
+    /** Root navigation node - single source of truth for navigation structure */
+    rootNode?: FernNavigation.RootNode;
 }
 
 export function createEmptyNavigationSnapshot(
@@ -331,12 +319,25 @@ export function createEmptyNavigationSnapshot(
         docsYmlBaseContent: null,
         docsYmlChanges: new Map(),
         lastCommittedHash: undefined,
-        version: 0
+        version: 0,
+        rootNode: undefined
     };
 }
 
 export function getHasUncommittedChanges(navigationStoreData: NavigationSnapshot): boolean {
-    return getChangedPages(navigationStoreData.pageRegistry).size > 0 || navigationStoreData.docsYmlChanges.size > 0;
+    // Check for changed pages in registry
+    if (getChangedPages(navigationStoreData.pageRegistry).size > 0) {
+        return true;
+    }
+
+    // Check for uncommitted changes in docsYmlChanges (filter out committed deletions)
+    for (const change of navigationStoreData.docsYmlChanges.values()) {
+        if (!change.committed) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /** Event emitted when a page is explicitly saved e.g. by Dev Mode (devPanel) */

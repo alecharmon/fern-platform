@@ -9,8 +9,10 @@ export * from "./NavigationStore";
 export * from "./NavigationStoreContext";
 export {
     createMdxFrontmatter,
+    extractLiveSidebarFromRootNode,
     getAllSectionsFromSidebarRootNode,
     getClientPageDefaultFilename
 } from "./pageUtils";
 export { constructEditorSlug, getEditorRedirectSlug, ROOT_SLUG_ALIAS } from "./routingUtils";
 export * from "./types";
+export * from "./useDerivedFoundNode";

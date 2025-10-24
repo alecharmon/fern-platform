@@ -113,13 +113,13 @@ export async function createInviteToken(orgName: Auth0OrgName, inviterId: string
 }
 
 export async function getOrganization(orgName: Auth0OrgName) {
-    console.log(`[getOrganization] Fetching organization: ${orgName}`);
+    console.debug(`[getOrganization] Fetching organization: ${orgName}`);
     return await ORGANIZATIONS_CACHE.get(RedisCacheKey.organization(orgName), async () => {
-        console.log(`[getOrganization] Cache miss for ${orgName}, fetching from Auth0`);
+        console.debug(`[getOrganization] Cache miss for ${orgName}, fetching from Auth0`);
         const { data: organization } = await getAuth0ManagementClient().organizations.getByName({
             name: orgName
         });
-        console.log(`[getOrganization] Successfully fetched organization ${orgName} from Auth0`);
+        console.debug(`[getOrganization] Successfully fetched organization ${orgName} from Auth0`);
 
         return organization as Auth0Organization;
     });
@@ -251,13 +251,13 @@ async function getAllOrgInvitations(orgId: Auth0OrgID) {
 
 export async function doesOrgExist(orgName: Auth0OrgName) {
     try {
-        console.log(`[doesOrgExist] Checking if organization exists: ${orgName}`);
+        console.debug(`[doesOrgExist] Checking if organization exists: ${orgName}`);
         const org = await getOrganization(orgName);
         const exists = org != null;
-        console.log(`[doesOrgExist] Organization ${orgName} exists: ${exists}`);
+        console.debug(`[doesOrgExist] Organization ${orgName} exists: ${exists}`);
         return exists;
     } catch (error) {
-        console.error(`[doesOrgExist] Error checking organization ${orgName}:`, error);
+        console.debug(`[doesOrgExist] Error checking organization ${orgName}:`, error);
         return false;
     }
 }

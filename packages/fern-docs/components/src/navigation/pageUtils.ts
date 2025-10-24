@@ -11,6 +11,55 @@ import type {
     ServerPageDataDependencies
 } from "./types";
 
+// ROOT NODE NAVIGATION
+// ----------------------------------------------------------------------------
+
+/**
+ * Extracts the live sidebar node for the current tab from a RootNode.
+ * This is useful for getting updated section information after client-side changes (e.g., renames).
+ *
+ * @param rootNode - The live RootNode from NavigationStore
+ * @param currentTabSlug - The slug of the current tab (if using tabbed navigation)
+ * @returns The SidebarRootNode for the current context, or undefined if not found
+ */
+export function extractLiveSidebarFromRootNode(
+    rootNode: FernNavigation.RootNode | undefined,
+    currentTabSlug?: string
+): FernNavigation.SidebarRootNode | undefined {
+    if (!rootNode) {
+        return undefined;
+    }
+
+    let node: FernNavigation.NavigationNode = rootNode.child;
+
+    // Unwrap unversioned node
+    if (node.type === "unversioned") {
+        node = node.child;
+    } else if (node.type === "versioned") {
+        // For versioned navigation, we'd need to find the right version
+        // For now, return undefined to fall back to baseFoundNode
+        return undefined;
+    }
+
+    // Handle tabbed vs non-tabbed navigation
+    if (node.type === "tabbed") {
+        if (!currentTabSlug) {
+            return undefined;
+        }
+        // Find the tab matching the current tab slug
+        const tab = node.children.find((child) => child.type === "tab" && child.slug === currentTabSlug);
+        if (tab && tab.type === "tab") {
+            return tab.child;
+        }
+        return undefined;
+    } else if (node.type === "sidebarRoot") {
+        // Non-tabbed navigation
+        return node;
+    }
+
+    return undefined;
+}
+
 // SECTIONS
 // ----------------------------------------------------------------------------
 

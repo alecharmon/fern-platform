@@ -67,8 +67,10 @@ function useNavigationStore(): NavigationStore {
 type NavigationSnapshotWithMethods = NavigationSnapshot & {
     _navigationStore: NavigationStore;
     hydrated: NavigationStore["hydrated"];
+    rootNode: NavigationStore["rootNode"];
     registeredPages: NavigationStore["registeredPages"];
     files: NavigationStore["files"];
+    canDirectlyEditDocsYmlNavigation: NavigationStore["canDirectlyEditDocsYmlNavigation"];
     resolveInitialPageData: NavigationStore["resolveInitialPageData"];
     registerPage: NavigationStore["registerPage"];
     createClientPage: NavigationStore["createClientPage"];
@@ -78,7 +80,9 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     resetPage: NavigationStore["resetPage"];
     markPageForDeletion: NavigationStore["markPageForDeletion"];
     unmarkPageForDeletion: NavigationStore["unmarkPageForDeletion"];
+    renameSection: NavigationStore["renameSection"];
     setDeletionToastCallback: NavigationStore["setDeletionToastCallback"];
+    setRootNode: NavigationStore["setRootNode"];
     emitPageSaveEvent: NavigationStore["emitPageSaveEvent"];
     subscribePageSaveEvent: NavigationStore["subscribePageSaveEvent"];
     emitNestedEditorUpdate: NavigationStore["emitNestedEditorUpdate"];
@@ -91,8 +95,10 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         ...snapshot,
         _navigationStore: store,
         hydrated: store.hydrated,
+        rootNode: store.rootNode,
         registeredPages: store.registeredPages,
         files: store.files,
+        canDirectlyEditDocsYmlNavigation: store.canDirectlyEditDocsYmlNavigation,
         resolveInitialPageData: store.resolveInitialPageData.bind(store),
         registerPage: store.registerPage.bind(store),
         createClientPage: store.createClientPage.bind(store),
@@ -102,7 +108,9 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         resetPage: store.resetPage.bind(store),
         markPageForDeletion: store.markPageForDeletion.bind(store),
         unmarkPageForDeletion: store.unmarkPageForDeletion.bind(store),
+        renameSection: store.renameSection.bind(store),
         setDeletionToastCallback: store.setDeletionToastCallback.bind(store),
+        setRootNode: store.setRootNode.bind(store),
         emitPageSaveEvent: store.emitPageSaveEvent.bind(store),
         subscribePageSaveEvent: store.subscribePageSaveEvent.bind(store),
         emitNestedEditorUpdate: store.emitNestedEditorUpdate.bind(store),

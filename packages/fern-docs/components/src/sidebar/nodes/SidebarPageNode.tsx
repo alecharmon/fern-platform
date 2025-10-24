@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import { SidebarSlugLink } from "../SidebarLink";
-import { withDeletablePageNode } from "./withDeletablePageNode";
+import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 
 export interface SidebarPageNodeProps {
     node: FernNavigation.NavigationNodeWithMarkdown;
@@ -11,7 +11,7 @@ export interface SidebarPageNodeProps {
     depth: number;
     className?: string;
     shallow?: boolean;
-    forceClientRender?: boolean;
+    renderOptions: SidebarRenderOptions;
 }
 
 export function SidebarPageNode({
@@ -20,7 +20,7 @@ export function SidebarPageNode({
     depth,
     className,
     shallow,
-    forceClientRender = false
+    renderOptions
 }: SidebarPageNodeProps): ReactNode {
     const baseComponent = (
         <WithFeatureFlags featureFlags={node.featureFlags}>
@@ -38,11 +38,8 @@ export function SidebarPageNode({
         </WithFeatureFlags>
     );
 
-    // Only wrap with deletable page node when explicitly in client render mode
-    if (forceClientRender) {
-        const DeletablePageNode = withDeletablePageNode(() => baseComponent);
-        return <DeletablePageNode node={node} icon={icon} depth={depth} className={className} shallow={shallow} />;
-    }
+    // If wrapPageNode is provided (typically by fern-dashboard), apply it to node
+    const wrapPageNode = renderOptions.wrapPageNode;
 
-    return baseComponent;
+    return wrapPageNode ? wrapPageNode(node, baseComponent) : baseComponent;
 }

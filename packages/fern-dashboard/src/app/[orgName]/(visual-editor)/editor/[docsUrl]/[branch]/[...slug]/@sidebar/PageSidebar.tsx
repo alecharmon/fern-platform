@@ -2,13 +2,13 @@
 
 import type { DangerousTransmittableDocsLoaderData } from "@fern-api/docs-loader";
 import { getIsSidebarFixed, getIsSingleOverviewPage } from "@fern-api/docs-utils";
-import type { FernNavigation } from "@fern-api/fdr-sdk";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import {
     type ClientPageDataDependencies,
-    mergeFoundNodes,
     type ResolvedPageData,
     type SerializableFoundNode,
     type ServerPageDataDependencies,
+    useDerivedFoundNode,
     useNavigation
 } from "@fern-docs/components/navigation";
 import { SidebarClientRootNode } from "@fern-docs/components/sidebar/nodes/SidebarClientRootNode";
@@ -17,7 +17,8 @@ import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import { useRef } from "react";
-
+import { DeletablePageNodeWrapper } from "@/components/editor/DeletablePageNodeWrapper";
+import { SidebarSectionWithMenu } from "@/components/editor/SidebarSectionWithMenu";
 import { CreatePageButton } from "./CreatePageButton";
 
 interface PageSidebarProps {
@@ -27,15 +28,27 @@ interface PageSidebarProps {
     pageDataDeps?: ClientPageDataDependencies | ServerPageDataDependencies;
     /** Directly accepts found node from loader for non-page nodes (e.g. "endpoint") */
     fallbackFoundNode?: SerializableFoundNode;
+    /** Root node from server to store in NavigationStore */
+    serializableRootNode?: FernNavigation.RootNode;
 }
 
-export default function PageSidebar({ prefetchedLoaderData, pageDataDeps, fallbackFoundNode }: PageSidebarProps) {
-    const { hydrated, resolveInitialPageData } = useNavigation();
+export default function PageSidebar({
+    prefetchedLoaderData,
+    pageDataDeps,
+    fallbackFoundNode,
+    serializableRootNode
+}: PageSidebarProps) {
+    const { resolveInitialPageData } = useNavigation();
 
     // Store initial page data in a ref so we don't re-resolve it on every render
-    const initialPageDataRef = useRef<ResolvedPageData>(null);
+    const initialPageDataRef = useRef<ResolvedPageData | null>(null);
 
-    let found: SerializableFoundNode | undefined;
+    // Use useDerivedFoundNode to get the current foundNode from RootNode
+    const { foundNode, hydrated } = useDerivedFoundNode({
+        initialFoundNode: pageDataDeps ? initialPageDataRef.current?.foundNode : fallbackFoundNode,
+        fallbackFoundNode,
+        serializableRootNode
+    });
 
     if (pageDataDeps) {
         const initialPageData =
@@ -43,17 +56,19 @@ export default function PageSidebar({ prefetchedLoaderData, pageDataDeps, fallba
                 ? (initialPageDataRef.current = resolveInitialPageData(pageDataDeps))
                 : initialPageDataRef.current;
 
-        if (!initialPageData) {
+        if (!initialPageData || !foundNode) {
             // TODO: show a loading state
             return null;
         }
-
-        found = mergeFoundNodes(initialPageData.foundNode, fallbackFoundNode);
-    } else if (fallbackFoundNode) {
-        found = fallbackFoundNode;
-    } else {
-        throw new Error("Either pageDataDeps or fallbackFoundNode must be provided");
     }
+
+    if (!foundNode) {
+        // TODO: show a loading state or error
+        return null;
+    }
+
+    // foundNode from useDerivedFoundNode already includes fallbackFoundNode merge logic
+    const found = foundNode;
 
     // these are all the "visible" nodes to prevent pruning if any of these nodes are hidden
     const visibleNodes = [...found.parents, found.node];
@@ -95,7 +110,18 @@ export default function PageSidebar({ prefetchedLoaderData, pageDataDeps, fallba
                         root={found.sidebar}
                         visibleNodeIds={visibleNodeIds}
                         loaderData={prefetchedLoaderData}
-                        forceClientRender={true}
+                        renderOptions={{
+                            forceClientRender: true,
+                            wrapPageNode: (node, component) => (
+                                <DeletablePageNodeWrapper
+                                    node={node}
+                                    component={component}
+                                    icon={undefined}
+                                    depth={0}
+                                />
+                            ),
+                            wrapSectionNode: (node, trigger) => <SidebarSectionWithMenu node={node} trigger={trigger} />
+                        }}
                     />
                 </>
             )}

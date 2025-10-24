@@ -2,6 +2,7 @@ import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 import { cn } from "../../cn";
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
+import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarApiPackageChild } from "./SidebarApiPackageChild";
 import { SidebarPageNode } from "./SidebarPageNode";
 import { SidebarRootHeading } from "./SidebarRootHeading";
@@ -10,15 +11,10 @@ export interface SidebarRootApiPackageNodeProps {
     node: FernNavigation.ApiReferenceNode | FernNavigation.ApiPackageNode;
     icon: React.ReactNode;
     className?: string;
-    forceClientRender?: boolean;
+    renderOptions: SidebarRenderOptions;
 }
 
-export function SidebarRootApiPackageNode({
-    node,
-    icon,
-    className,
-    forceClientRender
-}: SidebarRootApiPackageNodeProps) {
+export function SidebarRootApiPackageNode({ node, icon, className, renderOptions }: SidebarRootApiPackageNodeProps) {
     const shallow = false;
 
     if (node.children.length === 0 && FernNavigation.hasMarkdown(node)) {
@@ -29,7 +25,7 @@ export function SidebarRootApiPackageNode({
                 className={cn(className, "!text-body font-semibold")}
                 shallow={shallow}
                 icon={icon}
-                forceClientRender={forceClientRender}
+                renderOptions={renderOptions}
             />
         );
     }
@@ -40,7 +36,13 @@ export function SidebarRootApiPackageNode({
 
     return (
         <WithFeatureFlags featureFlags={node.featureFlags}>
-            <SidebarRootHeading node={node} className={className} shallow={shallow} icon={icon} />
+            <SidebarRootHeading
+                node={node}
+                className={className}
+                shallow={shallow}
+                icon={icon}
+                renderOptions={renderOptions}
+            />
 
             <ul className="fern-sidebar-group">
                 {node.children.map((child) => (
@@ -49,7 +51,7 @@ export function SidebarRootApiPackageNode({
                             node={child}
                             depth={1}
                             shallow={shallow}
-                            forceClientRender={forceClientRender}
+                            renderOptions={renderOptions}
                         />
                     </li>
                 ))}
@@ -59,7 +61,7 @@ export function SidebarRootApiPackageNode({
                             node={node.changelog}
                             depth={1}
                             shallow={shallow}
-                            forceClientRender={forceClientRender}
+                            renderOptions={renderOptions}
                         />
                     </li>
                 )}

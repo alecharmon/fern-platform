@@ -13,10 +13,10 @@ export async function getCurrentSession(): Promise<Auth0SessionData | undefined>
     const auth0 = await getAuth0Client();
     const session = await auth0.getSession();
     if (session == null) {
-        console.log("[getCurrentSession] No active session found");
+        console.debug("[getCurrentSession] No active session found");
         return undefined;
     }
-    console.log(`[getCurrentSession] Active session found for user: ${session.user.sub}`);
+    console.debug(`[getCurrentSession] Active session found for user: ${session.user.sub}`);
     return {
         user: {
             ...session.user,

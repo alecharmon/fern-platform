@@ -4,6 +4,7 @@ import { UnreachableCaseError } from "ts-essentials";
 
 import { cn } from "../../cn";
 import { processIcon } from "../../processIcon";
+import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarApiPackageChild } from "./SidebarApiPackageChild";
 import { SidebarApiPackageNode } from "./SidebarApiPackageNode";
 import { SidebarChangelogNode } from "./SidebarChangelogNode";
@@ -15,21 +16,28 @@ interface SidebarNavigationChildProps {
     node: FernNavigation.NavigationChild;
     depth: number;
     root?: boolean;
-    forceClientRender?: boolean;
+    renderOptions: SidebarRenderOptions;
 }
 
-export function SidebarNavigationChild({
-    node,
-    depth,
-    root,
-    forceClientRender = false
-}: SidebarNavigationChildProps): ReactNode {
+export function SidebarNavigationChild({ node, depth, root, renderOptions }: SidebarNavigationChildProps): ReactNode {
+    const forceClientRender = renderOptions.forceClientRender ?? false;
     switch (node.type) {
         case "apiReference":
             return (
-                <SidebarApiPackageNode node={node} depth={depth} icon={processIcon(node, undefined, forceClientRender)}>
+                <SidebarApiPackageNode
+                    node={node}
+                    depth={depth}
+                    icon={processIcon(node, undefined, forceClientRender)}
+                    renderOptions={renderOptions}
+                >
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
-                        <SidebarApiPackageChild key={node.id} node={node} depth={depth + 1} shallow={false} />
+                        <SidebarApiPackageChild
+                            key={node.id}
+                            node={node}
+                            depth={depth + 1}
+                            shallow={false}
+                            renderOptions={renderOptions}
+                        />
                     ))}
                 </SidebarApiPackageNode>
             );
@@ -42,14 +50,14 @@ export function SidebarNavigationChild({
                     className={cn({
                         "!text-body font-semibold": root
                     })}
-                    forceClientRender={forceClientRender}
+                    renderOptions={renderOptions}
                 >
                     {node.children.map((node: FernNavigation.NavigationChild) => (
                         <SidebarNavigationChild
                             key={node.id}
                             node={node}
                             depth={depth + 1}
-                            forceClientRender={forceClientRender}
+                            renderOptions={renderOptions}
                         />
                     ))}
                 </SidebarSectionNode>
@@ -60,7 +68,7 @@ export function SidebarNavigationChild({
                     node={node}
                     depth={depth}
                     icon={processIcon(node, undefined, forceClientRender)}
-                    forceClientRender={forceClientRender}
+                    renderOptions={renderOptions}
                 />
             );
         case "link":

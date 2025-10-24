@@ -1,11 +1,12 @@
 "use client";
 
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import {
     type ClientPageDataDependencies,
-    mergeFoundNodes,
     type ResolvedPageData,
     type SerializableFoundNode,
     type ServerPageDataDependencies,
+    useDerivedFoundNode,
     useNavigation
 } from "@fern-docs/components/navigation";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
@@ -23,17 +24,25 @@ export declare namespace PageNode {
         /** Directly accepts found node from loader for non-page nodes (e.g. "endpoint") */
         fallbackFoundNode?: SerializableFoundNode;
         cssConfig?: { inline?: string[] };
+        /** Root node from server to store in NavigationStore */
+        serializableRootNode?: FernNavigation.RootNode;
     };
 }
 
 export default function PageNode(props: PageNode.Props) {
-    const { pageDataDeps, fallbackFoundNode, cssConfig } = props;
+    const { pageDataDeps, fallbackFoundNode, cssConfig, serializableRootNode } = props;
 
-    const { hydrated, resolveInitialPageData, registerPage } = useNavigation();
+    const { resolveInitialPageData, registerPage } = useNavigation();
     const { setCurrentFilename } = useCurrentPage();
 
     // Store initial page data in a ref so we don't re-resolve it on every render
-    const initialPageDataRef = useRef<ResolvedPageData>(null);
+    const initialPageDataRef = useRef<ResolvedPageData | null>(null);
+    const { foundNode, hydrated } = useDerivedFoundNode({
+        initialFoundNode: pageDataDeps ? initialPageDataRef.current?.foundNode : fallbackFoundNode,
+        fallbackFoundNode,
+        serializableRootNode
+    });
+
     const initialPageData =
         hydrated && !initialPageDataRef.current
             ? (initialPageDataRef.current = resolveInitialPageData(pageDataDeps))
@@ -52,32 +61,21 @@ export default function PageNode(props: PageNode.Props) {
         }
     }, [hydrated, initialPageData, registerPage, setCurrentFilename]);
 
-    if (!initialPageData) {
+    if (!initialPageData || !foundNode) {
         // TODO: show a loading state
         return null;
     }
 
-    const initialFoundNode = initialPageData.foundNode;
+    // foundNode from useDerivedFoundNode already includes fallbackFoundNode merge logic
+    const found = foundNode;
 
-    if (!initialFoundNode) {
-        return (
-            <UnsupportedContent>
-                This page is not visible in Fern Editor: &ldquo;
-                {pageDataDeps.filename}
-                &rdquo;
-            </UnsupportedContent>
-        );
-    }
-
-    const found = mergeFoundNodes(initialFoundNode, fallbackFoundNode);
-
-    const isUnsupportedNodeType = initialFoundNode.node.type !== "page" && initialFoundNode.node.type !== "section";
+    const isUnsupportedNodeType = foundNode.node.type !== "page" && foundNode.node.type !== "section";
 
     if (isUnsupportedNodeType) {
         return (
             <UnsupportedContent>
                 This page type is not visible in Fern Editor: &ldquo;
-                {initialFoundNode.node.type}
+                {foundNode.node.type}
                 &rdquo;
             </UnsupportedContent>
         );

@@ -1,6 +1,5 @@
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import yaml from "js-yaml";
-
-import { compareByFractionalIndex } from "./indexingUtils";
 import {
     type DocsYmlConfig,
     isDocsYmlConfig,
@@ -15,7 +14,7 @@ import {
 
 /** Applies pending page additions/removals to docs.yml */
 export function buildDocsYmlFromChanges(navigationData: NavigationSnapshot): string {
-    const { docsYmlBaseContent: baseContent, docsYmlChanges: changes } = navigationData;
+    const { docsYmlBaseContent: baseContent, docsYmlChanges: changes, rootNode } = navigationData;
 
     if (baseContent == null) {
         throw new Error("Cannot build docs.yml: base content unavailable");
@@ -23,16 +22,39 @@ export function buildDocsYmlFromChanges(navigationData: NavigationSnapshot): str
 
     if (changes.size === 0) return baseContent;
 
+    // LIMITATION: Multi-product docs are not supported
+    // Check if this is a productgroup/multi-product docs.yml structure.
+    // Multi-product docs have a `products` array where each product references its own docs.yml file.
+    // To support section renaming in multi-product docs, we would need to:
+    // 1. Determine which product's docs.yml file contains the section
+    // 2. Load and modify that specific product's docs.yml file
+    // 3. Track changes separately per product docs.yml file
+    const parsedContent = yaml.load(baseContent) as any;
+    if (parsedContent.products && Array.isArray(parsedContent.products)) {
+        // This should not be reached since renameSection already blocks multi-product docs
+        throw new Error("Section renaming in multi-product docs is not yet supported");
+    }
+
     const config = _parseDocsYmlBaseContent(baseContent);
 
-    // Build index map and apply operations in single pass
-    const indexMap = new Map<string, string>();
+    // IMPORTANT: Apply operations in the correct order
+    // 1. First apply all rename_section changes to update section titles
+    // 2. Then apply add_page and remove_page changes using the updated titles
+
+    // Step 1: Apply all rename operations first
+    for (const change of changes.values()) {
+        if (change.type === "rename_section") {
+            _applyRenameSectionOperation(config, {
+                oldTitle: change.oldTitle,
+                newTitle: change.newTitle,
+                tabSlug: change.tabSlug
+            });
+        }
+    }
+
+    // Step 2: Apply add/remove operations
     for (const change of changes.values()) {
         if (change.type === "add_page" && change.pageEntry) {
-            // Build index map for sorting
-            if (change.index != null) {
-                indexMap.set(_normalizePath(change.pageEntry.path), change.index);
-            }
             // Apply add operation
             _applyAddOperation(config, {
                 sectionTitle: change.sectionTitle ?? null,
@@ -46,8 +68,11 @@ export function buildDocsYmlFromChanges(navigationData: NavigationSnapshot): str
         }
     }
 
-    // Sort all page entries by index after all operations
-    _sortNavigationByIndex(config, indexMap);
+    // Step 3: Sort by RootNode order (RootNode is now the single source of truth for order)
+    if (rootNode) {
+        const orderMap = _buildPageOrderMapFromRootNode(rootNode);
+        _sortNavigationByRootNodeOrder(config, orderMap);
+    }
 
     return yaml.dump(config, { lineWidth: -1 });
 }
@@ -202,6 +227,43 @@ function _applyRemoveOperation(docsConfig: DocsYmlConfig, update: { pageEntry: {
     });
 }
 
+/** Renames a section in the navigation structure */
+function _applyRenameSectionOperation(
+    docsConfig: DocsYmlConfig,
+    update: { oldTitle: string; newTitle: string; tabSlug?: string }
+) {
+    const { oldTitle, newTitle, tabSlug } = update;
+
+    if (!docsConfig.navigation) {
+        return;
+    }
+
+    // Helper to rename section in a navigation array
+    const renameSectionInArray = (items: YmlNavigationItem[]) => {
+        for (const item of items) {
+            // Check if this is the section we're looking for
+            if (item.section === oldTitle) {
+                item.section = newTitle;
+            }
+            // Recursively check nested sections in tabs
+            if (item.layout) {
+                renameSectionInArray(item.layout);
+            }
+        }
+    };
+
+    if (tabSlug) {
+        // Rename section within a specific tab
+        const tab = docsConfig.navigation.find((item) => item.tab === tabSlug);
+        if (tab?.layout) {
+            renameSectionInArray(tab.layout);
+        }
+    } else {
+        // Rename section in root navigation
+        renameSectionInArray(docsConfig.navigation);
+    }
+}
+
 /** Checks if item matches target page by path or title */
 function _isMatchingPage(item: YmlNavigationItem, targetPage: string, targetPath: string): boolean {
     // Only check page items for matches
@@ -223,35 +285,109 @@ function _isMatchingPage(item: YmlNavigationItem, targetPage: string, targetPath
     return false;
 }
 
-/** Recursively sorts all navigation pages by fractional index in navigation root, tabs, and sections */
-function _sortNavigationByIndex(docsConfig: DocsYmlConfig, indexMap: Map<string, string>): void {
+/** Builds a map of pageId -> order from RootNode tree structure */
+function _buildPageOrderMapFromRootNode(rootNode: FernNavigation.RootNode): Map<string, number> {
+    const orderMap = new Map<string, number>();
+    let orderCounter = 0;
+
+    const traverse = (node: FernNavigation.NavigationNode): void => {
+        // If this is a page node, record its order
+        if (node.type === "page") {
+            orderMap.set(node.pageId, orderCounter++);
+            return;
+        }
+
+        // Handle node types with single child property
+        if (
+            node.type === "root" ||
+            node.type === "unversioned" ||
+            node.type === "versioned" ||
+            node.type === "product"
+        ) {
+            traverse((node as any).child);
+            return;
+        }
+
+        // Handle tab node
+        if (node.type === "tab") {
+            traverse(node.child);
+            return;
+        }
+
+        // Handle node types with children array - traverse in order
+        if (
+            node.type === "sidebarRoot" ||
+            node.type === "sidebarGroup" ||
+            node.type === "section" ||
+            node.type === "productgroup" ||
+            node.type === "apiPackage"
+        ) {
+            for (const child of node.children) {
+                traverse(child);
+            }
+            return;
+        }
+
+        // Handle tabbed nodes
+        if (node.type === "tabbed") {
+            const tabbedNode = node as any;
+            const childrenArray = tabbedNode.children || tabbedNode.tabs || [];
+            for (const child of childrenArray) {
+                traverse(child);
+            }
+        }
+    };
+
+    traverse(rootNode);
+    return orderMap;
+}
+
+/** Sorts navigation by RootNode order */
+function _sortNavigationByRootNodeOrder(docsConfig: DocsYmlConfig, orderMap: Map<string, number>): void {
     if (!docsConfig.navigation) return;
 
     // Sort root navigation
-    _sortContainer(docsConfig.navigation, indexMap);
+    _sortContainerByRootNodeOrder(docsConfig.navigation, orderMap);
 
     // Sort tabs and their contents
     docsConfig.navigation.forEach((item) => {
         if (item.tab && item.layout) {
-            _sortContainer(item.layout, indexMap);
+            _sortContainerByRootNodeOrder(item.layout, orderMap);
             // Sort sections within tabs
             item.layout.forEach((layoutItem) => {
                 if (layoutItem.section && layoutItem.contents) {
-                    _sortContainer(layoutItem.contents, indexMap);
+                    _sortContainerByRootNodeOrder(layoutItem.contents, orderMap);
                 }
             });
+        }
+        // Sort sections in root navigation
+        if (item.section && item.contents) {
+            _sortContainerByRootNodeOrder(item.contents, orderMap);
         }
     });
 }
 
-/** Sorts container by fractional index */
-function _sortContainer(container: YmlNavigationItem[], indexMap: Map<string, string>): void {
+/** Sorts container by RootNode order */
+function _sortContainerByRootNodeOrder(container: YmlNavigationItem[], orderMap: Map<string, number>): void {
     container.sort((a, b) => {
         const aPath = a.path ? _normalizePath(a.path) : null;
         const bPath = b.path ? _normalizePath(b.path) : null;
-        const aIndex = aPath ? indexMap.get(aPath) : null;
-        const bIndex = bPath ? indexMap.get(bPath) : null;
 
-        return compareByFractionalIndex(aIndex, bIndex);
+        // Extract pageId from path (path format is like "docs/pages/concepts.mdx")
+        const aPageId = aPath ? (aPath as FernNavigation.PageId) : null;
+        const bPageId = bPath ? (bPath as FernNavigation.PageId) : null;
+
+        const aOrder = aPageId ? orderMap.get(aPageId) : null;
+        const bOrder = bPageId ? orderMap.get(bPageId) : null;
+
+        // Items with order come first, sorted by order
+        if (aOrder != null && bOrder != null) {
+            return aOrder - bOrder;
+        }
+        if (aOrder != null) return -1;
+        if (bOrder != null) return 1;
+
+        // Items without order maintain their relative position
+        return 0;
     });
 }

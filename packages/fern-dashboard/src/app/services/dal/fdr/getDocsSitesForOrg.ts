@@ -24,7 +24,7 @@ const getDocsSitesForOrg = cache(
               error: { type: GetDocsSitesForOrgError; message?: string };
           }
     > => {
-        console.log(`[getDocsSitesForOrg] Starting request for organization: ${orgName}`);
+        console.debug(`[getDocsSitesForOrg] Starting request for organization: ${orgName}`);
         const fdr = getFdrClient({ token });
 
         const orgExists = await doesOrgExist(orgName);
@@ -32,7 +32,7 @@ const getDocsSitesForOrg = cache(
             console.warn(`[getDocsSitesForOrg] Organization not found: ${orgName}`);
             return { ok: false, error: { type: "ORG_NOT_FOUND" } };
         }
-        console.log(`[getDocsSitesForOrg] Organization ${orgName} exists, fetching docs sites from FDR`);
+        console.debug(`[getDocsSitesForOrg] Organization ${orgName} exists, fetching docs sites from FDR`);
 
         try {
             const response = await fdr.dashboard.getDocsSitesForOrg({
@@ -58,7 +58,7 @@ const getDocsSitesForOrg = cache(
                     }
                 };
             }
-            console.log(
+            console.debug(
                 `[getDocsSitesForOrg] Successfully fetched ${response.body.docsSites.length} docs sites for ${orgName}`
             );
             return { ok: true, docsSites: response.body.docsSites };

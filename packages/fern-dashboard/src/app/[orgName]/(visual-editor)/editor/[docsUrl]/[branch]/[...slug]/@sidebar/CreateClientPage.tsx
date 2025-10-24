@@ -4,6 +4,7 @@ import { useRouter } from "@bprogress/next/app";
 import {
     constructEditorSlug,
     createMdxFrontmatter,
+    extractLiveSidebarFromRootNode,
     getAllSectionsFromSidebarRootNode,
     getClientPageDefaultFilename,
     type SectionNodeWithTraversalContext,
@@ -39,13 +40,25 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
     const router = useRouter();
     const params = useParams();
 
-    const { registeredPages, createClientPage } = useNavigation();
+    const navigationSnapshot = useNavigation();
+    const { registeredPages, createClientPage, rootNode, version } = navigationSnapshot;
 
     // Get all sections from the navigation tree (including nested ones)
-    const allSections = useMemo(
-        () => (baseFoundNode.sidebar ? getAllSectionsFromSidebarRootNode(baseFoundNode.sidebar) : []),
-        [baseFoundNode.sidebar]
-    );
+    // Use rootNode from NavigationStore instead of baseFoundNode.sidebar to get live updates (e.g., renames)
+    const allSections = useMemo(() => {
+        // Try to extract live sidebar from rootNode first
+        const liveSidebar = extractLiveSidebarFromRootNode(rootNode, baseFoundNode.currentTab?.slug);
+        if (liveSidebar) {
+            const sections = getAllSectionsFromSidebarRootNode(liveSidebar);
+            return sections;
+        }
+
+        // Fallback to baseFoundNode.sidebar (initial server state)
+        const sections = baseFoundNode.sidebar ? getAllSectionsFromSidebarRootNode(baseFoundNode.sidebar) : [];
+        return sections;
+        // Note: version dependency ensures re-computation when store updates (e.g., section renames).
+        // Depending only on rootNode may not trigger re-computation due to React's dependency comparison.
+    }, [version, rootNode, baseFoundNode.sidebar, baseFoundNode.currentTab]);
 
     // Set default section on first load
     useEffect(() => {
@@ -155,17 +168,13 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
                 });
 
                 // Navigate to the new page
-                router.push(
-                    constructEditorSlug({
-                        orgName,
-                        docsUrl,
-                        branchName: branch,
-                        slug: finalSlug,
-                        query: {
-                            clientPage: true
-                        }
-                    })
-                );
+                const targetUrl = constructEditorSlug({
+                    orgName,
+                    docsUrl,
+                    branchName: branch,
+                    slug: finalSlug
+                });
+                router.push(targetUrl);
             } catch (pageCreationError) {
                 console.error("Failed to create page in store:", pageCreationError);
                 throw new Error(
@@ -199,6 +208,11 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
 
     // Button is disabled if form is invalid or currently creating
     const isCreateDisabled = blockSubmission || isCreating;
+
+    // Don't render if there are no sections available
+    if (allSections.length === 0) {
+        return null;
+    }
 
     return (
         <Popover

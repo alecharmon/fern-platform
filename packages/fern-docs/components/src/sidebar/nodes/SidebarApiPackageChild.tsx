@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { UnreachableCaseError } from "ts-essentials";
 
 import { processIcon } from "../../processIcon";
+import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarApiLeafNode } from "./SidebarApiLeafNode";
 import { SidebarApiPackageNode } from "./SidebarApiPackageNode";
 import { SidebarChangelogNode } from "./SidebarChangelogNode";
@@ -14,10 +15,12 @@ interface SidebarApiPackageChild {
     node: FernNavigation.ApiPackageChild | FernNavigation.ChangelogNode;
     depth: number;
     shallow: boolean;
-    forceClientRender?: boolean;
+    renderOptions: SidebarRenderOptions;
 }
 
-export function SidebarApiPackageChild({ node, depth, shallow, forceClientRender }: SidebarApiPackageChild): ReactNode {
+export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: SidebarApiPackageChild): ReactNode {
+    const forceClientRender = renderOptions.forceClientRender ?? false;
+
     switch (node.type) {
         case "page":
             return (
@@ -26,6 +29,7 @@ export function SidebarApiPackageChild({ node, depth, shallow, forceClientRender
                     node={node}
                     depth={depth}
                     shallow={shallow}
+                    renderOptions={renderOptions}
                 />
             );
         case "link":
@@ -46,9 +50,20 @@ export function SidebarApiPackageChild({ node, depth, shallow, forceClientRender
                 })();
             }
             return (
-                <SidebarApiPackageNode node={node} depth={depth} icon={processIcon(node, undefined, forceClientRender)}>
+                <SidebarApiPackageNode
+                    node={node}
+                    depth={depth}
+                    icon={processIcon(node, undefined, forceClientRender)}
+                    renderOptions={renderOptions}
+                >
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
-                        <SidebarApiPackageChild key={node.id} node={node} depth={depth + 1} shallow={shallow} />
+                        <SidebarApiPackageChild
+                            key={node.id}
+                            node={node}
+                            depth={depth + 1}
+                            shallow={shallow}
+                            renderOptions={renderOptions}
+                        />
                     ))}
                 </SidebarApiPackageNode>
             );

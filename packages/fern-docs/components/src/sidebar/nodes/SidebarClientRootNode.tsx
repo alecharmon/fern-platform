@@ -3,19 +3,24 @@
 import { type DangerousTransmittableDocsLoaderData, PrefetchedDocsLoader } from "@fern-api/docs-loader/client";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
+import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarRootNodeImpl } from "./SidebarRootNodeImpl";
 
 export function SidebarClientRootNode({
     root,
     visibleNodeIds,
     loaderData,
-    forceClientRender
+    renderOptions
 }: {
     root: FernNavigation.SidebarRootNode | undefined;
     visibleNodeIds: FernNavigation.NodeId[] | undefined;
     loaderData: DangerousTransmittableDocsLoaderData;
-    forceClientRender?: boolean;
+    renderOptions?: SidebarRenderOptions;
 }) {
+    const forceClientRender = renderOptions?.forceClientRender ?? true;
+    const wrapSectionNode = renderOptions?.wrapSectionNode;
+    const wrapPageNode = renderOptions?.wrapPageNode;
+
     const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
     const authState = loader.getAuthState();
     const edgeFlags = loader.getEdgeFlags();
@@ -26,7 +31,7 @@ export function SidebarClientRootNode({
             visibleNodeIds={visibleNodeIds}
             authState={authState}
             edgeFlags={edgeFlags}
-            forceClientRender={forceClientRender}
+            renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode }}
         />
     );
 }
