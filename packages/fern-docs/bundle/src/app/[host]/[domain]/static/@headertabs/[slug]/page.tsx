@@ -6,6 +6,8 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { HeaderTabsList } from "@fern-docs/components/HeaderTabsList";
 
+export const revalidate = false;
+
 export default async function HeaderTabsPage({
     params
 }: {

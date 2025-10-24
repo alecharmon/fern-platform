@@ -10,6 +10,8 @@ import { getFernToken } from "@/app/fern-token";
 import { Logo } from "@/components/logo";
 import { withLogo } from "@/server/withLogo";
 
+export const revalidate = false;
+
 export default async function LogoPage({
     params
 }: {

@@ -9,6 +9,7 @@ import { generateMetadataFromPage } from "@/components/seo";
 import SharedPage from "@/components/shared-page";
 
 export const dynamic = "force-static";
+export const revalidate = false;
 
 export default async function StaticPage({
     params

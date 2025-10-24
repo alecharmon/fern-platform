@@ -10,6 +10,8 @@ import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SidebarTabsRoot } from "@fern-docs/components/sidebar/SidebarTabsRoot";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 
+export const revalidate = false;
+
 export default async function SidebarPage({
     params
 }: {

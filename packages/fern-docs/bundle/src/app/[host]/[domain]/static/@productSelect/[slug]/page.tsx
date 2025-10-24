@@ -8,6 +8,8 @@ import { ProductDropdown } from "@fern-docs/components/header/ProductDropdown";
 
 import { getFernToken } from "@/app/fern-token";
 
+export const revalidate = false;
+
 export default async function ProductSelectPage({
     params
 }: {

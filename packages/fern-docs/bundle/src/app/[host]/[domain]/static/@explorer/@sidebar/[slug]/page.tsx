@@ -8,6 +8,8 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { PlaygroundEndpointSelectorContent } from "@/components/playground/endpoint/PlaygroundEndpointSelectorContent";
 import { flattenApiSection } from "@/components/playground/utils/flatten-apis";
 
+export const revalidate = false;
+
 export default async function EndpointSelectorPage({
     params
 }: {

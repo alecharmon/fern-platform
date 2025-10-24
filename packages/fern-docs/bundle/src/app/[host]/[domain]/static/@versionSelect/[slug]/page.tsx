@@ -8,6 +8,8 @@ import { VersionDropdown } from "@fern-docs/components/header/VersionDropdown";
 
 import { getFernToken } from "@/app/fern-token";
 
+export const revalidate = false;
+
 export default async function VersionSelectPage({
     params
 }: {

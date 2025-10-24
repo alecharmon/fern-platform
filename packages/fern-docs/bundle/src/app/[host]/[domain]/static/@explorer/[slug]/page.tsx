@@ -14,6 +14,8 @@ import React from "react";
 
 import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
 
+export const revalidate = false;
+
 export default async function ExplorerPage({
     params
 }: {
