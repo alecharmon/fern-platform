@@ -527,14 +527,6 @@ export function createEndpointCacheKey(pruneType: PruningNodeType) {
     }
 }
 
-const getAllApisForDomain = async (domainKey: string): Promise<ApiDefinition.ApiDefinition[]> => {
-    const response = await loadWithUrl(domainKey);
-    if (response.definition.apisV2 && Object.keys(response.definition.apisV2).length > 0) {
-        return Object.values(response.definition.apisV2);
-    }
-    return Object.values(response.definition.apis).map((v1) => ApiDefinitionV1ToLatest.from(v1).migrate());
-};
-
 const getEndpointById = async ({
     domainKey,
     apiDefinitionId,
@@ -592,8 +584,18 @@ const getEndpointByLocator = async (
     endpoint: ApiDefinition.EndpointDefinition;
     slugs: Slug[];
 }> => {
-    const apis = await getAllApisForDomain(domainKey);
-    for (const api of apis) {
+    const root = await unsafe_getFullRoot(domainKey);
+
+    const apiIds = new Set<string>();
+    FernNavigation.traverseBF(root, (node) => {
+        if (FernNavigation.hasMetadata(node) && "apiDefinitionId" in node && node.apiDefinitionId) {
+            apiIds.add(node.apiDefinitionId);
+        }
+        return CONTINUE;
+    });
+
+    for (const apiId of apiIds) {
+        const api = await getApi(domainKey, apiId);
         const endpoint = findEndpoint({
             apiDefinition: api,
             method,
@@ -601,7 +603,6 @@ const getEndpointByLocator = async (
             example
         });
         if (endpoint != null) {
-            const root = await unsafe_getFullRoot(domainKey);
             const slugs = FernNavigation.NodeCollector.collect(root)
                 .getNodesInOrder()
                 .filter(FernNavigation.hasMetadata)
