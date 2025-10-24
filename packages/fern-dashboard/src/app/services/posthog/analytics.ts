@@ -531,16 +531,16 @@ export class AnalyticsService {
         const { whereClause } = this.buildDateAndFilterClause(options);
 
         // Valid device types to filter for
-        const validDeviceTypes = [
-            "Desktop",
-            "Mobile",
-            "Tablet",
-            "Console",
-            "TV",
-            "Mobile Phone",
-            "Smart TV",
-            "Game Console"
-        ];
+        // const validDeviceTypes = [
+        //     "Desktop",
+        //     "Mobile",
+        //     "Tablet",
+        //     "Console",
+        //     "TV",
+        //     "Mobile Phone",
+        //     "Smart TV",
+        //     "Game Console"
+        // ];
 
         const query = `
       SELECT
@@ -621,7 +621,7 @@ export class AnalyticsService {
                     views: row[2]
                 };
             })
-            .filter((item): item is { deviceType: string; visitors: number; views: number } => item !== null);
+            .filter((item): item is { deviceType: string; visitors: number; views: number } => item != null);
     }
 
     /**
@@ -785,18 +785,18 @@ export class AnalyticsService {
             userFeedback: string;
         }[]
     > {
-        const { limit = 100 } = options;
+        const { limit = 10000 } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
         const query = `
-      SELECT 
+      SELECT
         to_date(timestamp) as date,
         CONCAT(
           COALESCE(properties.$geoip_city_name, ''),
-          CASE 
-            WHEN properties.$geoip_city_name IS NOT NULL AND properties.$geoip_country_name IS NOT NULL 
-            THEN ' ' 
-            ELSE '' 
+          CASE
+            WHEN properties.$geoip_city_name IS NOT NULL AND properties.$geoip_country_name IS NOT NULL
+            THEN ' '
+            ELSE ''
           END,
           COALESCE(properties.$geoip_country_name, 'Unknown')
         ) as location,
@@ -812,9 +812,9 @@ export class AnalyticsService {
         COALESCE(properties.$browser, 'Unknown') as browser,
         COALESCE(properties.$os, 'Unknown') as os,
         COALESCE(properties.message, '') as user_feedback
-      FROM events 
-      WHERE 
-        event = 'feedback_submitted' 
+      FROM events
+      WHERE
+        event = 'feedback_submitted'
         AND properties.$host = '${this.config.baseSiteUrl}'
         ${whereClause}
       ORDER BY timestamp DESC

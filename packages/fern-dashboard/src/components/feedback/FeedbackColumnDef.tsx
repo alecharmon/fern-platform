@@ -7,7 +7,7 @@ import type { FeedbackEntry } from "@/app/actions/getFeedback";
 export const columns: ColumnDef<FeedbackEntry>[] = [
     {
         accessorKey: "currentUrl",
-        header: ({ column }) => <div className="pl-0">Current URL</div>,
+        header: () => <div className="pl-0">Current URL</div>,
         cell: ({ row }) => {
             const url = row.getValue("currentUrl") as string;
             return (
@@ -45,7 +45,7 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
         id: "channel",
         header: "Channel",
         cell: ({ row }) => {
-            const feedback = row.getValue("userFeedback") as string;
+            const feedback = row.original.userFeedback as string;
             const channel = feedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
             return (
                 <div className="truncate" title={channel} style={{ fontFamily: "GT Planar, sans-serif" }}>
