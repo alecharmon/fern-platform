@@ -4,6 +4,7 @@ import { redisDel, redisGet, redisSet } from "./redis";
 export class AsyncRedisCache<T extends RedisCacheKeyType> {
     private debug: boolean;
     private ttlInSeconds: number;
+    private inFlightRequests: Map<string, Promise<inferCachedData<T>>> = new Map();
 
     constructor(
         private readonly type: T,
@@ -26,16 +27,31 @@ export class AsyncRedisCache<T extends RedisCacheKeyType> {
             return cachedValue;
         }
 
+        const existingRequest = this.inFlightRequests.get(key);
+        if (existingRequest != null) {
+            log?.("request already in flight, waiting for result");
+            return await existingRequest;
+        }
+
         log?.("cache miss, getting value");
-        const newValue = await getter();
+        const requestPromise = (async () => {
+            try {
+                const newValue = await getter();
 
-        log?.("updating cache");
-        await redisSet(key, newValue, {
-            ttlInSeconds: this.ttlInSeconds
-        });
+                log?.("updating cache");
+                await redisSet(key, newValue, {
+                    ttlInSeconds: this.ttlInSeconds
+                });
 
-        log?.("returning value");
-        return newValue;
+                log?.("returning value");
+                return newValue;
+            } finally {
+                this.inFlightRequests.delete(key);
+            }
+        })();
+
+        this.inFlightRequests.set(key, requestPromise);
+        return await requestPromise;
     }
 
     public async set(key: RedisCacheKey<T>, value: inferCachedData<T>): Promise<void> {

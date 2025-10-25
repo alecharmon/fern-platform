@@ -71,6 +71,7 @@ export const RedisCacheKeyType = {
     ORGANIZATION_MEMBERS: "ORGANIZATION_MEMBERS",
     ORGANIZATION_INVITATIONS: "ORGANIZATION_INVITATIONS",
     ORGANIZATION_NAME_TO_ID: "ORGANIZATION_NAME_TO_ID",
+    ORGANIZATION_NOT_FOUND: "ORGANIZATION_NOT_FOUND",
     INVITE_TOKEN: "INVITE_TOKEN",
     GITHUB_INSTALLATION_ID: "GITHUB_INSTALLATION_ID",
     GITHUB_PR_FOR_BRANCH: "GITHUB_PR_FOR_BRANCH",
@@ -85,6 +86,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.ORGANIZATION_MEMBERS]: GetMembers200ResponseOneOfInner[];
     [RedisCacheKeyType.ORGANIZATION_INVITATIONS]: GetInvitations200ResponseOneOfInner[];
     [RedisCacheKeyType.ORGANIZATION_NAME_TO_ID]: Auth0OrgID;
+    [RedisCacheKeyType.ORGANIZATION_NOT_FOUND]: boolean;
     [RedisCacheKeyType.INVITE_TOKEN]: InviteToken;
     [RedisCacheKeyType.GITHUB_INSTALLATION_ID]: number;
     [RedisCacheKeyType.GITHUB_PR_FOR_BRANCH]: GithubPrInfo;
@@ -100,6 +102,8 @@ export const RedisCacheKey = {
         cacheKey(RedisCacheKeyType.ORGANIZATION_INVITATIONS)(`org-invitations-${orgName}`),
     organizationNameToId: (orgName: Auth0OrgName) =>
         cacheKey(RedisCacheKeyType.ORGANIZATION_NAME_TO_ID)(`org-name-to-id-${orgName}`),
+    organizationNotFound: (orgName: Auth0OrgName) =>
+        cacheKey(RedisCacheKeyType.ORGANIZATION_NOT_FOUND)(`org:not_found:${orgName}`),
     inviteToken: (token: string) => cacheKey(RedisCacheKeyType.INVITE_TOKEN)(`invite-token-${token}`),
     githubInstallationId: (owner: string, repo: string) =>
         cacheKey(RedisCacheKeyType.GITHUB_INSTALLATION_ID)(`github-installation-id-${owner}-${repo}`),
