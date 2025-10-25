@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -6,6 +7,13 @@ import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
 
 import type { Auth0OrgName } from "../../services/auth0/types";
 import { OrgNameProvider } from "../context/OrgNameContext";
+
+export async function generateMetadata({ params }: { params: Promise<{ orgName: Auth0OrgName }> }): Promise<Metadata> {
+    const { orgName } = await params;
+    return {
+        title: `Fern Dashboard - ${orgName}`
+    };
+}
 
 export default async function AuthedLayout({
     params,
