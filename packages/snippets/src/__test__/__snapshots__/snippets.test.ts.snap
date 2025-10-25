@@ -147,6 +147,23 @@ client.users.get_users({});
 "
 `;
 
+exports[`Integration Tests > should generate snippets for multiple languages > swift-snippet 1`] = `
+"import Foundation
+import CatSwift
+
+private func main() async throws {
+    let client = CatClient(
+        baseURL: "https://api.example.com",
+        token: "123"
+    )
+
+    _ = try await client.users.getUsers()
+}
+
+try await main()
+"
+`;
+
 exports[`Integration Tests > should generate snippets for multiple languages > typescript-snippet 1`] = `
 "import { CatClient } from "@treetreetree/treetreetree-js";
 

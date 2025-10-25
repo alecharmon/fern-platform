@@ -9,6 +9,7 @@ import javaFixture from "./fixtures/demo/java.json";
 import phpFixture from "./fixtures/demo/php.json";
 import pythonFixture from "./fixtures/demo/python.json";
 import rubyFixture from "./fixtures/demo/ruby.json";
+import swiftFixture from "./fixtures/demo/swift.json";
 import typescriptFixture from "./fixtures/demo/typescript.json";
 
 describe("Integration Tests", () => {
@@ -40,6 +41,10 @@ describe("Integration Tests", () => {
         {
             language: "ruby",
             ir: rubyFixture as unknown as dynamic.DynamicIntermediateRepresentation
+        },
+        {
+            language: "swift",
+            ir: swiftFixture as unknown as dynamic.DynamicIntermediateRepresentation
         }
     ];
 
@@ -54,6 +59,7 @@ describe("Integration Tests", () => {
         const goSDK = resolver.sdk("go");
         const phpSDK = resolver.sdk("php");
         const rubySDK = resolver.sdk("ruby");
+        const swiftSDK = resolver.sdk("swift");
 
         const tsEndpoint = typescriptSDK.endpoint("GET /users");
         const pyEndpoint = pythonSDK.endpoint("GET /users");
@@ -62,6 +68,7 @@ describe("Integration Tests", () => {
         const goEndpoint = goSDK.endpoint("GET /users");
         const phpEndpoint = phpSDK.endpoint("GET /users");
         const rubyEndpoint = rubySDK.endpoint("GET /users");
+        const swiftEndpoint = swiftSDK.endpoint("GET /users");
 
         // Provide custom requests since fixtures don't have default examples
         const request = {
@@ -83,6 +90,7 @@ describe("Integration Tests", () => {
         const goSnippet = goEndpoint.generateSync(request);
         const phpSnippet = phpEndpoint.generateSync(request);
         const rubySnippet = rubyEndpoint.generateSync(request);
+        const swiftSnippet = swiftEndpoint.generateSync(request);
 
         expect(tsSnippet).toBeDefined();
         expect(pySnippet).toBeDefined();
@@ -91,6 +99,7 @@ describe("Integration Tests", () => {
         expect(goSnippet).toBeDefined();
         expect(phpSnippet).toBeDefined();
         expect(rubySnippet).toBeDefined();
+        expect(swiftSnippet).toBeDefined();
         expect(tsSnippet.snippet).not.toBe(pySnippet.snippet);
 
         // Snapshot testing for each language
@@ -101,6 +110,7 @@ describe("Integration Tests", () => {
         expect(goSnippet.snippet).toMatchSnapshot("go-snippet");
         expect(phpSnippet.snippet).toMatchSnapshot("php-snippet");
         expect(rubySnippet.snippet).toMatchSnapshot("ruby-snippet");
+        expect(swiftSnippet.snippet).toMatchSnapshot("swift-snippet");
     });
 
     it("should generate different snippets for different endpoints", () => {

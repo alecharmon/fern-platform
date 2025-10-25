@@ -3023,6 +3023,9 @@ importers:
       '@fern-api/snippets-core':
         specifier: 0.1.11
         version: 0.1.11
+      '@fern-api/swift-dynamic-snippets':
+        specifier: 0.1.1
+        version: 0.1.1
       '@fern-api/typescript-dynamic-snippets':
         specifier: 0.0.9
         version: 0.0.9
@@ -5843,6 +5846,9 @@ packages:
 
   '@fern-api/snippets-core@0.1.11':
     resolution: {integrity: sha512-FoFHuHqyBR9xHeuOjOHlIFNc1heQLLcXudgU83qW+UgGCpSCGKyW+y0CmTYN86PTPAaeog80CQ1QcSX1T2OQRg==}
+
+  '@fern-api/swift-dynamic-snippets@0.1.1':
+    resolution: {integrity: sha512-mei7ldg+YrhlDeBqap0qrCj21lB7vWCCq8CVYO78xOBoVxLeEvFAn5+GtSsTlVGS7XLwUJEbyOWwvZ1wLtdydQ==}
 
   '@fern-api/typescript-dynamic-snippets@0.0.9':
     resolution: {integrity: sha512-3Tcigu6YTAY6LKO3QtKIcSOCzRsryv9lt5xX3gLpmL2AETZwigVBGLiZd/0WaFaW29JR8g0Go0egT0ceU3VIXA==}
@@ -23966,6 +23972,8 @@ snapshots:
   '@fern-api/ruby-dynamic-snippets@0.0.1': {}
 
   '@fern-api/snippets-core@0.1.11': {}
+
+  '@fern-api/swift-dynamic-snippets@0.1.1': {}
 
   '@fern-api/typescript-dynamic-snippets@0.0.9': {}
 

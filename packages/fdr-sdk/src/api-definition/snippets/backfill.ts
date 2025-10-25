@@ -284,6 +284,13 @@ function createSnippetGenerators({
         });
     }
 
+    if (dynamicIr.swift) {
+        snippetInputs.push({
+            language: "swift" as const,
+            ir: dynamicIr.swift as any
+        });
+    }
+
     if (dynamicIr.csharp) {
         snippetInputs.push({
             language: "csharp" as const,
@@ -334,6 +341,11 @@ function createSnippetGenerators({
     if (dynamicIr.ruby) {
         const rubySdk = snippetResolver.sdk("ruby");
         generators.ruby = rubySdk?.endpoint(endpointPath);
+    }
+
+    if (dynamicIr.swift) {
+        const swiftSdk = snippetResolver.sdk("swift");
+        generators.swift = swiftSdk?.endpoint(endpointPath);
     }
 
     if (dynamicIr.csharp) {

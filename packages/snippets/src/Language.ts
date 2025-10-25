@@ -1,1 +1,1 @@
-export type Language = "typescript" | "python" | "go" | "java" | "csharp" | "php" | "ruby";
+export type Language = "typescript" | "python" | "go" | "java" | "csharp" | "php" | "ruby" | "swift";

@@ -6,6 +6,7 @@ import java from "./config/java/config.json";
 import php from "./config/php/config.json";
 import python from "./config/python/config.json";
 import ruby from "./config/ruby/config.json";
+import swift from "./config/swift/config.json";
 import typescript from "./config/typescript/config.json";
 import { EndpointProvider } from "./EndpointProvider";
 import type { Language } from "./Language";
@@ -59,7 +60,8 @@ export class SnippetResolver {
             php: php as unknown as generatorExec.config.GeneratorConfig,
             ruby: ruby as unknown as generatorExec.config.GeneratorConfig,
             csharp: csharp as unknown as generatorExec.config.GeneratorConfig,
-            go: go as unknown as generatorExec.config.GeneratorConfig
+            go: go as unknown as generatorExec.config.GeneratorConfig,
+            swift: swift as unknown as generatorExec.config.GeneratorConfig
         };
 
         const config = configMap[language];

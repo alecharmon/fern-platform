@@ -31,5 +31,11 @@
     "*.css": "tailwindcss",
     "*.scss": "tailwindcss"
   },
-  "cSpell.words": ["fernignore"]
+  "cSpell.words": ["fernignore"],
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
 }

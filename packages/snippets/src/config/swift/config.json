@@ -1,0 +1,27 @@
+{
+  "irFilepath": "/fern/ir.json",
+  "output": {
+    "mode": {
+      "type": "github",
+      "repoUrl": "",
+      "version": "",
+      "publishInfo": null
+    },
+    "path": "/fern/output",
+    "publishingMetadata": null,
+    "snippetFilepath": "/fern/snippet.json",
+    "snippetTemplateFilepath": "/fern/snippet-templates.json"
+  },
+  "publish": null,
+  "customConfig": {},
+  "workspaceName": "",
+  "organization": "",
+  "environment": {
+    "_type": "local"
+  },
+  "dryRun": false,
+  "whitelabel": false,
+  "writeUnitTests": true,
+  "generateOauthClients": true,
+  "generatePaginatedClients": true
+}

@@ -13,7 +13,7 @@ import type { PlaygroundEndpointRequestFormState } from "../types";
 import { returnSelectedOption } from "../utils/parse-auth-options";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 
-export type DynamicSnippetLanguage = "typescript" | "python" | "java" | "ruby" | "csharp" | "go" | "php";
+export type DynamicSnippetLanguage = "typescript" | "python" | "java" | "ruby" | "csharp" | "go" | "php" | "swift";
 
 interface PlaygroundDynamicRequestPreviewProps {
     context: EndpointContext;
@@ -98,6 +98,13 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
                 });
             }
 
+            if (dynamicIRsByLanguage.swift) {
+                snippetInputs.push({
+                    language: "swift" as const,
+                    ir: dynamicIRsByLanguage.swift as any
+                });
+            }
+
             const snippetResolver = new SnippetResolver({ snippetInputs });
 
             // create endpoint generators only for languages that have IR data
@@ -143,6 +150,11 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
             if (dynamicIRsByLanguage.php) {
                 const phpSdk = snippetResolver.sdk("php");
                 generators.php = phpSdk?.endpoint(endpointPath);
+            }
+
+            if (dynamicIRsByLanguage.swift) {
+                const swiftSdk = snippetResolver.sdk("swift");
+                generators.swift = swiftSdk?.endpoint(endpointPath);
             }
 
             return generators;
