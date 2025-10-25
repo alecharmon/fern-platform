@@ -766,11 +766,12 @@ export class AnalyticsService {
     }
 
     /**
-     * Get feedback submissions from PostHog
+     * Get feedback submissions from PostHog with pagination support
      */
     async getFeedback(
         options: TimeSeriesOptions & {
             limit?: number;
+            offset?: number;
         } = {}
     ): Promise<
         {
@@ -785,7 +786,7 @@ export class AnalyticsService {
             userFeedback: string;
         }[]
     > {
-        const { limit = 10000 } = options;
+        const { limit = 100, offset = 0 } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
         const query = `
@@ -819,6 +820,7 @@ export class AnalyticsService {
         ${whereClause}
       ORDER BY timestamp DESC
       LIMIT ${limit}
+      OFFSET ${offset}
     `;
 
         const response = await this.client.query<

@@ -7,10 +7,12 @@ import {
     getSortedRowModel,
     useReactTable
 } from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 import type { FeedbackEntry } from "@/app/actions/getFeedback";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/utils/utils";
 
@@ -26,9 +28,24 @@ interface FeedbackTableProps {
     dateRange: DateRangeOptions;
     setDateRange: (dateRange: DateRangeOptions) => void;
     onRowClick: (feedback: FeedbackEntry) => void;
+    pagination: {
+        page: number;
+        pageSize: number;
+        hasMore: boolean;
+    };
+    onPageChange: (page: number) => void;
 }
 
-export function FeedbackTable({ feedback, isLoading, error, dateRange, setDateRange, onRowClick }: FeedbackTableProps) {
+export function FeedbackTable({
+    feedback,
+    isLoading,
+    error,
+    dateRange,
+    setDateRange,
+    onRowClick,
+    pagination,
+    onPageChange
+}: FeedbackTableProps) {
     const [isExporting, setIsExporting] = useState(false);
 
     const table = useReactTable({
@@ -147,6 +164,31 @@ export function FeedbackTable({ feedback, isLoading, error, dateRange, setDateRa
                         )}
                     </TableBody>
                 </Table>
+            </div>
+            <div className="flex items-center justify-between border-t px-4 py-3">
+                <div className="text-sm text-gray-600">
+                    Page {pagination.page} • Showing {feedback.length} {feedback.length === 1 ? "entry" : "entries"}
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(pagination.page - 1)}
+                        disabled={pagination.page === 1 || isLoading}
+                    >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(pagination.page + 1)}
+                        disabled={!pagination.hasMore || isLoading}
+                    >
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                </div>
             </div>
         </div>
     );

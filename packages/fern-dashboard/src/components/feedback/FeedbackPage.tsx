@@ -19,15 +19,17 @@ export function FeedbackPage({ docsUrl }: FeedbackPageProps) {
         type: "last_n_days",
         days: 7
     });
+    const [page, setPage] = useState(1);
     const [selectedFeedback, setSelectedFeedback] = useState<FeedbackEntry | null>(null);
     const { setContent, clear } = useSidepanel();
 
     const { data, isLoading, error } = useQuery({
-        queryKey: ["feedback", docsUrl, dateRange],
+        queryKey: ["feedback", docsUrl, dateRange, page],
         queryFn: () =>
             getFeedback({
                 docsUrl,
-                dateRange
+                dateRange,
+                page
             }),
         refetchInterval: 60000
     });
@@ -39,6 +41,11 @@ export function FeedbackPage({ docsUrl }: FeedbackPageProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedFeedback]);
 
+    const handleDateRangeChange = (newDateRange: DateRangeOptions) => {
+        setDateRange(newDateRange);
+        setPage(1);
+    };
+
     return (
         <div className="flex w-full flex-col gap-4">
             <FeedbackTable
@@ -46,8 +53,16 @@ export function FeedbackPage({ docsUrl }: FeedbackPageProps) {
                 isLoading={isLoading}
                 error={error}
                 dateRange={dateRange}
-                setDateRange={setDateRange}
+                setDateRange={handleDateRangeChange}
                 onRowClick={setSelectedFeedback}
+                pagination={
+                    data?.pagination ?? {
+                        page: 1,
+                        pageSize: 100,
+                        hasMore: false
+                    }
+                }
+                onPageChange={setPage}
             />
         </div>
     );

@@ -42,7 +42,9 @@ const GetFeedbackSchema = z.object({
             })
         ])
         .optional(),
-    includeInternal: z.boolean().optional()
+    includeInternal: z.boolean().optional(),
+    page: z.number().int().min(1).optional(),
+    pageSize: z.number().int().min(1).max(1000).optional()
 });
 
 export type GetFeedbackRequest = z.infer<typeof GetFeedbackSchema>;
@@ -63,6 +65,11 @@ export interface GetFeedbackResponse {
     feedback: FeedbackEntry[];
     baseSiteUrl: string;
     dateRange: DateRangeOptions;
+    pagination: {
+        page: number;
+        pageSize: number;
+        hasMore: boolean;
+    };
 }
 
 function getBaseDomain(rawUrl: string) {
@@ -109,9 +116,14 @@ async function verifyDomainAccess(url: string) {
     return hasAccess;
 }
 
-function getCacheKey(domain: string, params: { dateRange?: DateRangeOptions; includeInternal?: boolean }): string {
+function getCacheKey(
+    domain: string,
+    params: { dateRange?: DateRangeOptions; includeInternal?: boolean; page?: number; pageSize?: number }
+): string {
     const flatParams: Record<string, unknown> = {
-        includeInternal: params.includeInternal
+        includeInternal: params.includeInternal,
+        page: params.page,
+        pageSize: params.pageSize
     };
 
     const dateRange = params.dateRange;
@@ -146,10 +158,14 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
     const userId = session.user.sub;
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
     const baseDomain = getBaseDomain(validated.docsUrl);
+    const page = validated.page || 1;
+    const pageSize = validated.pageSize || 100;
 
     const cacheKey = getCacheKey(baseDomain, {
         dateRange,
-        includeInternal: validated.includeInternal
+        includeInternal: validated.includeInternal,
+        page,
+        pageSize
     });
 
     const cachedData = await FEEDBACK_CACHE.get(cacheKey, async () => {
@@ -158,18 +174,31 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
             baseSiteUrl: baseDomain
         });
 
+        const offset = (page - 1) * pageSize;
+        const limit = pageSize + 1;
+
         const feedback = await analytics.getFeedback({
             dateRange,
-            includeInternal: validated.includeInternal
+            includeInternal: validated.includeInternal,
+            limit,
+            offset
         });
 
-        return { feedback };
+        const hasMore = feedback.length > pageSize;
+        const feedbackPage = hasMore ? feedback.slice(0, pageSize) : feedback;
+
+        return { feedback: feedbackPage, hasMore };
     });
 
     return {
         feedback: cachedData.feedback!,
         baseSiteUrl: baseDomain,
-        dateRange
+        dateRange,
+        pagination: {
+            page,
+            pageSize,
+            hasMore: cachedData.hasMore!
+        }
     };
 }
 

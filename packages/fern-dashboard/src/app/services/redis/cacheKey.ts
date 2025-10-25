@@ -35,6 +35,20 @@ export interface WebAnalyticsData {
     deviceTypes?: { deviceType: string; visitors: number; views: number }[];
     referringDomains?: { domain: string; visitors: number; views: number }[];
     pages404?: { path: string; count: number }[];
+    feedback?: {
+        date: string;
+        location: string;
+        wasHelpful: boolean;
+        selection: string;
+        currentUrl: string;
+        device: string;
+        browser: string;
+        operatingSystem: string;
+        userFeedback: string;
+    }[];
+    hasMore?: boolean;
+    apiExplorerRequests?: { endpoint: string; count: number }[];
+    providers?: { provider: string; count: number }[];
 }
 
 export interface AlgoliaAnalyticsData {
