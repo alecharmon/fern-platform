@@ -62,6 +62,21 @@ import { after } from "next/server";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
+import {
+    CACHE_KEY_ASK_AI_ENABLED,
+    CACHE_KEY_COLORS,
+    CACHE_KEY_CONFIG,
+    CACHE_KEY_FILES,
+    CACHE_KEY_FONTS,
+    CACHE_KEY_LOGO_URLS,
+    CACHE_KEY_MDX_BUNDLER_FILES,
+    CACHE_KEY_METADATA,
+    CACHE_KEY_ROOT,
+    createApiCacheKey,
+    createDynamicIrCacheKey,
+    createPageCacheKey
+} from "./cache-keys";
+
 const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrlResponse> => {
     const { domain, branchName } = decodeDocsLoaderDomainKey(domainKey);
     if (branchName) {
@@ -381,7 +396,7 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
 
         try {
             const cached = DocsMetadataSchema.safeParse(
-                await kvGet<DocsMetadata>(domainKey, "metadata", cacheConfig.cacheKeySuffix)
+                await kvGet<DocsMetadata>(domainKey, CACHE_KEY_METADATA, cacheConfig.cacheKeySuffix)
             );
             if (cached.success) {
                 console.debug("[getMetadata] cache hit:", cached.data);
@@ -392,7 +407,7 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
         }
 
         const metadata = await getMetadataFromResponse(domainKey, loadWithUrl(domainKey));
-        kvSet(domainKey, "metadata", metadata, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domainKey, CACHE_KEY_METADATA, metadata, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         console.debug("[getMetadata] cache miss:", metadata);
         return metadata;
     });
@@ -403,7 +418,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
         unstable_cacheTag(domain, "getFiles");
 
         try {
-            const cached = await kvGet<Record<string, FileData>>(domain, "files", cacheConfig.cacheKeySuffix);
+            const cached = await kvGet<Record<string, FileData>>(domain, CACHE_KEY_FILES, cacheConfig.cacheKeySuffix);
             if (cached) {
                 return cached;
             }
@@ -434,7 +449,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
             throw new UnreachableCaseError(file);
         });
 
-        kvSet(domain, "files", files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domain, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return files;
     });
 
@@ -645,7 +660,7 @@ export function convertResponseToRootNode(response: DocsV2Read.LoadDocsForUrlRes
 
 const unsafe_getFullRoot = async (domainKey: string) => {
     try {
-        const cached = await kvGet<FernNavigation.RootNode>(domainKey, "root");
+        const cached = await kvGet<FernNavigation.RootNode>(domainKey, CACHE_KEY_ROOT);
         if (cached != null) {
             return cached;
         }
@@ -666,7 +681,11 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
         return await unstable_cache(
             async (domainKey: string) => {
                 try {
-                    const cached = await kvGet<FernNavigation.RootNode>(domainKey, "root", cacheConfig.cacheKeySuffix);
+                    const cached = await kvGet<FernNavigation.RootNode>(
+                        domainKey,
+                        CACHE_KEY_ROOT,
+                        cacheConfig.cacheKeySuffix
+                    );
                     if (cached != null) {
                         return cached;
                     }
@@ -678,7 +697,7 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
                 const root = await unsafe_getFullRoot(domainKey);
 
                 // Cache the result
-                kvSet(domainKey, "root", root, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+                kvSet(domainKey, CACHE_KEY_ROOT, root, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
 
                 return root;
             },
@@ -763,7 +782,7 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
         try {
             const cached = await kvGet<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(
                 domainKey,
-                "config",
+                CACHE_KEY_CONFIG,
                 cacheConfig.cacheKeySuffix
             );
             if (cached != null) {
@@ -779,7 +798,7 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
         const { navigation, root, ...config } = response.definition.config;
 
         // Store in both Upstash and in-memory cache
-        kvSet(domainKey, "config", config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domainKey, CACHE_KEY_CONFIG, config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         setInMemoryCache(cacheKey, config);
 
         return config;
@@ -788,7 +807,11 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
 const getPage = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string, pageId: string, returnRawMarkdown: boolean = false) => {
         try {
-            const page = await kvGet<DocsV1Read.PageContent>(domainKey, `page:${pageId}`, cacheConfig.cacheKeySuffix);
+            const page = await kvGet<DocsV1Read.PageContent>(
+                domainKey,
+                createPageCacheKey({ pageId }),
+                cacheConfig.cacheKeySuffix
+            );
             if (page != null && isPlainObject(page) && "markdown" in page) {
                 const config = await getConfig(cacheConfig)(domainKey);
                 return {
@@ -810,7 +833,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
             notFound();
         }
 
-        kvSet(domainKey, `page:${pageId}`, page, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domainKey, createPageCacheKey({ pageId }), page, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return {
             filename: pageId,
             markdown: page.markdown,
@@ -828,7 +851,7 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
         try {
             const cached = await kvGet<Record<string, string>>(
                 domainKey,
-                "mdx-bundler-files",
+                CACHE_KEY_MDX_BUNDLER_FILES,
                 cacheConfig.cacheKeySuffix
             );
             if (cached) {
@@ -840,7 +863,7 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
 
         const response = await loadWithUrl(domainKey);
         const files = response.definition.jsFiles ?? {};
-        kvSet(domainKey, "mdx-bundler-files", files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domainKey, CACHE_KEY_MDX_BUNDLER_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return files;
     });
 
@@ -853,7 +876,7 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
             const cached = await kvGet<{
                 light: FernColorTheme | undefined;
                 dark: FernColorTheme | undefined;
-            }>(domainKey, "colors", cacheConfig.cacheKeySuffix);
+            }>(domainKey, CACHE_KEY_COLORS, cacheConfig.cacheKeySuffix);
             if (cached) {
                 return cached;
             }
@@ -923,7 +946,7 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
                 : undefined
         };
 
-        kvSet(domainKey, "colors", colors, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domainKey, CACHE_KEY_COLORS, colors, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return colors;
     });
 
@@ -935,7 +958,7 @@ const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
         try {
             const cached = await kvGet<{ light?: FileData; dark?: FileData }>(
                 domainKey,
-                "logoUrls",
+                CACHE_KEY_LOGO_URLS,
                 cacheConfig.cacheKeySuffix
             );
             if (cached != null) {
@@ -1003,7 +1026,7 @@ const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
             dark: resolveFileId(darkLogoFileId)
         };
 
-        kvSet(domainKey, "logoUrls", logoUrls, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domainKey, CACHE_KEY_LOGO_URLS, logoUrls, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         console.debug("[getLogoUrls] cache miss, resolved:", logoUrls);
         return logoUrls;
     });
@@ -1014,7 +1037,7 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
         unstable_cacheTag(domainKey, "getFonts");
 
         try {
-            const cached = await kvGet<FernFonts>(domainKey, "fonts", cacheConfig.cacheKeySuffix);
+            const cached = await kvGet<FernFonts>(domainKey, CACHE_KEY_FONTS, cacheConfig.cacheKeySuffix);
             if (cached != null) {
                 return cached;
             }
@@ -1024,7 +1047,7 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
 
         const response = await loadWithUrl(domainKey);
         const fonts = generateFonts(response.definition.config.typographyV2, await getFiles(cacheConfig)(domainKey));
-        kvSet(domainKey, "fonts", fonts, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        kvSet(domainKey, CACHE_KEY_FONTS, fonts, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return fonts;
     });
 
@@ -1080,7 +1103,7 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
         try {
             const cached = await kvGet<DynamicIRsByLanguage>(
                 domain,
-                `dynamicIr:${orgId}:${apiName}:${configHash}`,
+                createDynamicIrCacheKey({ orgId, apiName, configHash }),
                 cacheConfig.cacheKeySuffix
             );
             if (cached) {
@@ -1101,7 +1124,7 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
             console.debug(`Caching dynamic IR for ${orgId}:${apiName}`);
             kvSet(
                 domain,
-                `dynamicIr:${orgId}:${apiName}:${configHash}`,
+                createDynamicIrCacheKey({ orgId, apiName, configHash }),
                 response,
                 cacheConfig.kvTtl,
                 cacheConfig.cacheKeySuffix
@@ -1158,7 +1181,7 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
         }
 
         try {
-            const cached = await kvGet<boolean>(domain, "askAiEnabled", cacheConfig.cacheKeySuffix);
+            const cached = await kvGet<boolean>(domain, CACHE_KEY_ASK_AI_ENABLED, cacheConfig.cacheKeySuffix);
             if (cached != null) {
                 console.debug("[getAskAiEnabled] cache hit:", cached);
                 return cached;
@@ -1176,7 +1199,7 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
                 }).settings.getDocsSettings({ domain })
             ).ask_ai_enabled;
 
-            kvSet(domain, "askAiEnabled", result, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+            kvSet(domain, CACHE_KEY_ASK_AI_ENABLED, result, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         } catch (error) {
             console.warn(`Failed to fetch askAiEnabled for ${domain}`, error);
         }

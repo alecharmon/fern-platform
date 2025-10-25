@@ -1,4 +1,14 @@
-import { convertResponseToRootNode, createEndpointCacheKey, getMetadataFromResponse } from "@fern-api/docs-loader";
+import {
+    CACHE_KEY_CONFIG,
+    CACHE_KEY_FILES,
+    CACHE_KEY_MDX_BUNDLER_FILES,
+    CACHE_KEY_METADATA,
+    CACHE_KEY_ROOT,
+    convertResponseToRootNode,
+    createEndpointCacheKey,
+    createPageCacheKey,
+    getMetadataFromResponse
+} from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
@@ -148,17 +158,17 @@ export async function GET(
                 try {
                     const keys: Record<string, unknown> = {};
 
-                    keys.metadata = metadata;
+                    keys[CACHE_KEY_METADATA] = metadata;
 
                     if (root != null) {
-                        keys.root = root;
+                        keys[CACHE_KEY_ROOT] = root;
                     }
 
                     const { navigation, root: _, ...config } = docs.definition.config;
-                    keys.config = config;
+                    keys[CACHE_KEY_CONFIG] = config;
 
                     Object.entries(docs.definition.pages).forEach(([id, page]) => {
-                        keys[`page:${id}`] = page;
+                        keys[createPageCacheKey({ pageId: id })] = page;
                     });
 
                     Object.values(docs.definition.apisV2).forEach((api) => {
@@ -175,7 +185,7 @@ export async function GET(
                         });
                     });
 
-                    keys[`${domain}:files`] = mapValues(docs.definition.filesV2, (file) => {
+                    keys[CACHE_KEY_FILES] = mapValues(docs.definition.filesV2, (file) => {
                         if (file.type === "url") {
                             return {
                                 src:
@@ -198,7 +208,7 @@ export async function GET(
                         throw new UnreachableCaseError(file);
                     });
 
-                    keys[`mdx-bundler-files`] = docs.definition.jsFiles ?? {};
+                    keys[CACHE_KEY_MDX_BUNDLER_FILES] = docs.definition.jsFiles ?? {};
 
                     const promises = [];
 
