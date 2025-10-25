@@ -1,10 +1,7 @@
-FROM node:22.16-alpine3.20 AS base
-RUN apk upgrade --no-cache
+FROM cgr.dev/chainguard/wolfi-base:latest AS base
+RUN apk add --no-cache nodejs-22 npm
 
 FROM base AS builder
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-RUN apk update
 
 # Produce a pruned version of the monorepo
 WORKDIR /app
@@ -14,8 +11,6 @@ RUN turbo prune @fern-platform/fdr --docker
 
 # Add lockfile and package.json's
 FROM base AS installer
-RUN apk add --no-cache libc6-compat
-RUN apk update
 RUN npm install -g pnpm@10.11.0 fern-api
 WORKDIR /app
 
@@ -38,13 +33,14 @@ RUN pnpm turbo --filter=@fern-platform/fdr codegen
 RUN pnpm turbo --filter=@fern-platform/fdr compile
 
 FROM base AS runner
+RUN apk add --no-cache ca-certificates openssl bash wget
 WORKDIR /app
 
-RUN npm install -g prisma
+RUN npm install -g prisma@5.13.0
 
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
 COPY --from=installer /app .
 
-ENTRYPOINT ["/bin/sh", "/app/servers/fdr/scripts/run.sh"]
+ENTRYPOINT ["/bin/bash", "/app/servers/fdr/scripts/run.sh"]
