@@ -12,9 +12,10 @@ import { FeedbackTable } from "./FeedbackTable";
 
 interface FeedbackPageProps {
     docsUrl: string;
+    initialData?: Awaited<ReturnType<typeof getFeedback>>;
 }
 
-export function FeedbackPage({ docsUrl }: FeedbackPageProps) {
+export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
     const [dateRange, setDateRange] = useState<DateRangeOptions>({
         type: "last_n_days",
         days: 7
@@ -31,7 +32,9 @@ export function FeedbackPage({ docsUrl }: FeedbackPageProps) {
                 dateRange,
                 page
             }),
-        refetchInterval: 60000
+        initialData: page === 1 && dateRange.type === "last_n_days" && dateRange.days === 7 ? initialData : undefined,
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false
     });
 
     useEffect(() => {

@@ -6,8 +6,6 @@ import { cache } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
 
-import { doesOrgExist } from "../../auth0/management";
-
 export type GetDocsSitesForOrgError = FdrAPI.dashboard.getDocsSitesForOrg.Error | "UNKNOWN_ERROR" | "ORG_NOT_FOUND";
 
 const getDocsSitesForOrg = cache(
@@ -27,13 +25,6 @@ const getDocsSitesForOrg = cache(
         console.debug(`[getDocsSitesForOrg] Starting request for organization: ${orgName}`);
         const fdr = getFdrClient({ token });
 
-        const orgExists = await doesOrgExist(orgName);
-        if (!orgExists) {
-            console.warn(`[getDocsSitesForOrg] Organization not found: ${orgName}`);
-            return { ok: false, error: { type: "ORG_NOT_FOUND" } };
-        }
-        console.debug(`[getDocsSitesForOrg] Organization ${orgName} exists, fetching docs sites from FDR`);
-
         try {
             const response = await fdr.dashboard.getDocsSitesForOrg({
                 // fdr uses org name (not id) as the org identifier
@@ -45,9 +36,10 @@ const getDocsSitesForOrg = cache(
                     JSON.stringify(response.error, null, 2)
                 );
                 if (response.error.error) {
+                    const errorType = response.error.error as GetDocsSitesForOrgError;
                     return {
                         ok: false,
-                        error: { type: response.error.error as GetDocsSitesForOrgError }
+                        error: { type: errorType === "ORG_NOT_FOUND" ? "ORG_NOT_FOUND" : errorType }
                     };
                 }
                 return {

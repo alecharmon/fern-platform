@@ -19,6 +19,10 @@ const DEFAULT_DATE_RANGE: DateRangeOptions = {
 
 const FEEDBACK_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, { ttlInSeconds: 3600 });
 
+const VERIFY_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, {
+    ttlInSeconds: 600
+});
+
 const GetFeedbackSchema = z.object({
     docsUrl: z.string(),
     dateRange: z
@@ -89,37 +93,58 @@ function getBaseDomain(rawUrl: string) {
     return baseDomain;
 }
 
-async function verifyDomainAccess(url: string) {
-    const session = await getCurrentSessionOrThrow();
+async function verifyDomainAccess(params: {
+    url: string;
+    token: string;
+    userId: string;
+    orgName?: string;
+}): Promise<boolean> {
+    const { url, token, userId, orgName } = params;
     const decodedUrl = decodeURIComponent(url);
-
-    const docsMetadata = await getDocsUrlMetadata({
-        url: decodedUrl,
-        token: fernToken_admin() ?? session.accessToken
-    });
-
     const baseDomain = getBaseDomain(decodedUrl);
-    if (!docsMetadata.ok || !docsMetadata.body.org) {
-        throw new Error(`Invalid docs URL`);
-    }
 
-    const orgSites = await getDocsSitesForOrg({
-        token: session.accessToken,
-        // @ts-expect-error - OrgId vs Auth0OrgName type mismatch
-        orgName: docsMetadata.body.org
+    const cacheKeyParams = JSON.stringify({
+        userId,
+        orgName: orgName ?? "unknown"
     });
-    if (!orgSites.ok) {
-        throw new Error("Failed to fetch organization sites");
-    }
-    const hasAccess = orgSites.docsSites.some((site) => site.mainUrl.domain === baseDomain);
+    const cacheKey = RedisCacheKey.webAnalytics("verify-access", baseDomain, cacheKeyParams);
 
-    return hasAccess;
+    const cachedResult = await VERIFY_ACCESS_CACHE.get(cacheKey, async () => {
+        let resolvedOrgName = orgName;
+
+        if (!resolvedOrgName) {
+            const docsMetadata = await getDocsUrlMetadata({
+                url: decodedUrl,
+                token: fernToken_admin() ?? token
+            });
+
+            if (!docsMetadata.ok || !docsMetadata.body.org) {
+                throw new Error(`Invalid docs URL`);
+            }
+            resolvedOrgName = docsMetadata.body.org;
+        }
+
+        const orgSites = await getDocsSitesForOrg({
+            token,
+            // @ts-expect-error - OrgId vs Auth0OrgName type mismatch
+            orgName: resolvedOrgName
+        });
+
+        if (!orgSites.ok) {
+            throw new Error("Failed to fetch organization sites");
+        }
+
+        const hasAccess = orgSites.docsSites.some((site) => site.mainUrl.domain === baseDomain);
+        return { metrics: { visitors: hasAccess ? 1 : 0, pageViews: 0, sessions: 0 } };
+    });
+
+    return (cachedResult.metrics?.visitors ?? 0) > 0;
 }
 
 function getCacheKey(
     domain: string,
     params: { dateRange?: DateRangeOptions; includeInternal?: boolean; page?: number; pageSize?: number }
-): string {
+) {
     const flatParams: Record<string, unknown> = {
         includeInternal: params.includeInternal,
         page: params.page,
@@ -149,13 +174,19 @@ function getCacheKey(
 export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedbackResponse> {
     const validated = GetFeedbackSchema.parse(request);
 
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+    const token = session.accessToken;
+
+    const hasAccess = await verifyDomainAccess({
+        url: validated.docsUrl,
+        token,
+        userId
+    });
     if (!hasAccess) {
         throw new Error("You don't have access to analytics for this docs site");
     }
 
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
     const baseDomain = getBaseDomain(validated.docsUrl);
     const page = validated.page || 1;
