@@ -16,7 +16,10 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "!dist/__test__/"],
+  "files": [
+    "dist",
+    "!dist/__test__/"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "clean": "rm -rf ./dist && tsc --build --clean",
@@ -30,11 +33,11 @@
   },
   "dependencies": {
     "@fern-api/csharp-dynamic-snippets": "0.0.2",
-    "@fern-api/dynamic-ir-sdk": "57.0.0",
+    "@fern-api/dynamic-ir-sdk": "61.4.0",
     "@fern-api/go-dynamic-snippets": "0.0.15",
     "@fern-api/java-dynamic-snippets": "0.0.4",
-    "@fern-api/php-dynamic-snippets": "0.0.5",
-    "@fern-api/python-dynamic-snippets": "0.0.2",
+    "@fern-api/php-dynamic-snippets": "0.0.6",
+    "@fern-api/python-dynamic-snippets": "0.0.6",
     "@fern-api/ruby-dynamic-snippets": "0.0.1",
     "@fern-api/snippets-core": "0.1.11",
     "@fern-api/typescript-dynamic-snippets": "0.0.9",
