@@ -10,6 +10,8 @@ import type {
 } from "@fern-api/docs-loader";
 import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
+import { revalidateTag, unstable_cache } from "next/cache";
+import pLimit from "p-limit";
 import z from "zod";
 
 import { getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
@@ -23,6 +25,11 @@ interface DocsYmlConfig {
     }[];
 }
 
+interface CachedFileContent {
+    content: string;
+    etag: string;
+}
+
 /**
  * The GitHubLoader is used to get files from a remote GitHub repository.
  */
@@ -30,6 +37,7 @@ export class GitHubLoader implements GitLoader {
     private getOctokitInstance: () => Promise<Octokit | null>;
     private octokit: Octokit | null = null;
     private inFlightRequests: Map<string, Promise<any>> = new Map();
+    private concurrencyLimit = pLimit(8); // Bounded concurrency for parallel file fetching
 
     constructor(githubUrl: string) {
         this.getOctokitInstance = async () => {
@@ -63,13 +71,10 @@ export class GitHubLoader implements GitLoader {
     }
 
     /**
-     * Helper function to get the content of a file from a GitHub repository. If docs.yml
-     * files are divided into multiple files, we can reuse this for each file we need.
-     *
-     * NOTE: I have not yet handled the recursion needed to get all docs.yml files and sub-files.
+     * Helper function to resolve a ref to a commit SHA for stable caching.
      */
-    private async getFileContent(owner: string, repo: string, ref: string, path: string): Promise<string | null> {
-        const cacheKey = `github-file-${owner}-${repo}-${ref}-${path}`;
+    private async resolveRefToSha(owner: string, repo: string, ref: string): Promise<string | null> {
+        const cacheKey = `github-ref-${owner}-${repo}-${ref}`;
 
         return this.deduplicateRequest(cacheKey, async () => {
             try {
@@ -79,23 +84,76 @@ export class GitHubLoader implements GitLoader {
                     return null;
                 }
 
-                const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+                const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
                     owner,
                     repo,
-                    path,
                     ref
                 });
 
-                if ("content" in response.data) {
-                    const content = Buffer.from(response.data.content, "base64").toString("utf8");
-                    return content;
-                }
-
-                return null;
+                return response.data.sha;
             } catch (error) {
-                console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+                console.error(`Failed to resolve ref ${ref} from ${owner}/${repo}:`, error);
                 return null;
             }
+        });
+    }
+
+    /**
+     * Helper function to get the content of a file from a GitHub repository.
+     *
+     * Optimizations implemented:
+     * 1. Fetches raw content directly (Accept: application/vnd.github.v3.raw) - no base64 decoding
+     * 2. Uses bounded concurrency (p-limit) for parallel fetching
+     * 3. Aggressive caching with Next.js unstable_cache, ETags, and commit SHA for stable cache keys
+     */
+    private async getFileContent(owner: string, repo: string, ref: string, path: string): Promise<string | null> {
+        const commitSha = await this.resolveRefToSha(owner, repo, ref);
+        if (!commitSha) {
+            console.error(`Failed to resolve ref ${ref} to commit SHA`);
+            return null;
+        }
+
+        const cacheKey = `github-file-${owner}-${repo}-${commitSha}-${path}`;
+        const tag = `github-file:${owner}/${repo}:${path}`;
+
+        return this.deduplicateRequest(cacheKey, async () => {
+            return this.concurrencyLimit(async () => {
+                try {
+                    const octokit = await this.getOctokit();
+                    if (!octokit) {
+                        console.error("Failed to get Octokit instance");
+                        return null;
+                    }
+
+                    const getCached = unstable_cache(
+                        async () => {
+                            const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+                                owner,
+                                repo,
+                                path,
+                                ref: commitSha,
+                                headers: { accept: "application/vnd.github.v3.raw" }
+                            });
+
+                            const content = response.data as unknown as string;
+                            const etag = response.headers.etag ?? "";
+
+                            return { content, etag };
+                        },
+                        ["github-file", owner, repo, path, commitSha],
+                        {
+                            revalidate: 60 * 60 * 24 * 365,
+                            tags: [tag]
+                        }
+                    );
+
+                    const cached = await getCached();
+                    return cached?.content ?? null;
+                } catch (error) {
+                    console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+                    return null;
+                }
+            });
         });
     }
 
@@ -370,6 +428,9 @@ export class GitHubLoader implements GitLoader {
             sha: currentFile.data.sha,
             branch: ref
         });
+
+        const tag = `github-file:${owner}/${repo}:${projectResult.result.project.docsYmlPath}`;
+        revalidateTag(tag);
 
         return { type: "ok" };
     }
