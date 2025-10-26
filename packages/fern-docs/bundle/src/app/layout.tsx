@@ -41,12 +41,37 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         }
     }
 
+    const cdnOrigin = process.env.NEXT_PUBLIC_CDN_URI ? new URL(process.env.NEXT_PUBLIC_CDN_URI).origin : undefined;
+
     const headers = (
         <head>
+            {/* Preconnect to critical domains for faster resource loading */}
+            {cdnOrigin && (
+                <>
+                    <link rel="preconnect" href={cdnOrigin} crossOrigin="anonymous" />
+                    <link rel="dns-prefetch" href={cdnOrigin} />
+                </>
+            )}
+            <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+            {/* Non-blocking KaTeX CSS loading */}
             <link
+                rel="preload"
+                as="style"
                 href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+                crossOrigin="anonymous"
+            />
+            <link
                 rel="stylesheet"
-                fetchPriority="low"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+                media="print"
+                onload="this.media='all'"
+            />
+            <noscript
+                dangerouslySetInnerHTML={{
+                    __html: '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />'
+                }}
             />
         </head>
     );

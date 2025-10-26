@@ -57,6 +57,7 @@ const nextConfig: NextConfig = {
         appNavFailHandling: true,
         scrollRestoration: true,
         optimisticClientCache: true,
+        optimizeCss: true,
         optimizePackageImports: [
             "@fern-api/fdr-sdk",
             "@fern-docs/mdx",
