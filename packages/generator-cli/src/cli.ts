@@ -5,14 +5,12 @@ import path from "path";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
+import { generateReadmeToStream, generateReferenceToStream, githubPr, githubPush } from "./api";
+import { githubRelease } from "./api/github-release";
 import { loadGitHubConfig } from "./configuration/loadGitHubConfig";
 import { loadMetadataConfig } from "./configuration/loadMetadataConfig";
 import { loadReadmeConfig } from "./configuration/loadReadmeConfig";
 import { loadReferenceConfig } from "./configuration/loadReferenceConfig";
-import { GitHub } from "./github/GitHub";
-import { ReadmeGenerator } from "./readme/ReadmeGenerator";
-import { ReadmeParser } from "./readme/ReadmeParser";
-import { ReferenceGenerator } from "./reference/ReferenceGenerator";
 
 void yargs(hideBin(process.argv))
     // eslint-disable-next-line turbo/no-undeclared-env-vars
@@ -44,13 +42,12 @@ void yargs(hideBin(process.argv))
             const readmeConfig = await loadReadmeConfig({
                 absolutePathToConfig: resolve(wd, argv.config)
             });
-            const generator = new ReadmeGenerator({
-                readmeParser: new ReadmeParser(),
+            const originalReadmeContent =
+                argv.originalReadme != null ? await readFile(argv.originalReadme, "utf8") : undefined;
+            await generateReadmeToStream({
+                originalReadmeContent,
                 readmeConfig,
-                originalReadme: argv.originalReadme != null ? await readFile(argv.originalReadme, "utf8") : undefined
-            });
-            await generator.generateReadme({
-                output: await createWriteStream(argv.output)
+                outputStream: await createWriteStream(argv.output)
             });
             process.exit(0);
         }
@@ -77,11 +74,9 @@ void yargs(hideBin(process.argv))
             const referenceConfig = await loadReferenceConfig({
                 absolutePathToConfig: resolve(wd, argv.config)
             });
-            const generator = new ReferenceGenerator({
-                referenceConfig
-            });
-            await generator.generate({
-                output: await createWriteStream(argv.output)
+            await generateReferenceToStream({
+                referenceConfig,
+                outputStream: await createWriteStream(argv.output)
             });
             process.exit(0);
         }
@@ -136,10 +131,7 @@ void yargs(hideBin(process.argv))
                     const githubConfig = await loadGitHubConfig({
                         absolutePathToConfig: resolve(wd, argv.config)
                     });
-                    const github = new GitHub({
-                        githubConfig
-                    });
-                    await github.push();
+                    await githubPush({ githubConfig });
                     process.exit(0);
                 }
             )
@@ -162,10 +154,7 @@ void yargs(hideBin(process.argv))
                     const githubConfig = await loadGitHubConfig({
                         absolutePathToConfig: resolve(wd, argv.config)
                     });
-                    const github = new GitHub({
-                        githubConfig
-                    });
-                    await github.pr();
+                    await githubPr({ githubConfig });
                     // Implementation for github pr command
                     process.stderr.write(`Creating PR on GitHub with config: ${resolve(wd, argv.config)}\n`);
                     process.exit(0);
@@ -188,10 +177,7 @@ void yargs(hideBin(process.argv))
                         const githubConfig = await loadGitHubConfig({
                             absolutePathToConfig: resolve(wd, argv.config)
                         });
-                        const github = new GitHub({
-                            githubConfig
-                        });
-                        await github.release();
+                        await githubRelease({ githubConfig });
                         process.exit(1);
                     }
                     const wd = cwd();

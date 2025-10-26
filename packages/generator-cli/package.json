@@ -6,15 +6,18 @@
     "url": "https://github.com/fern-api/fern-platform"
   },
   "type": "module",
-  "main": "dist/cli.cjs",
+  "main": "dist/api.cjs",
   "source": "src/index.ts",
+  "types": "dist/api.d.cts",
   "bin": {
     "generator-cli": "dist/cli.cjs"
   },
   "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
-    "compile": "tsup ./src/cli.ts --format cjs && echo '#!/usr/bin/env node' | cat - dist/cli.cjs > dist/tmp && mv dist/tmp dist/cli.cjs",
+    "compile": "pnpm compile:api && pnpm compile:cli",
+    "compile:api": "tsup ./src/api.ts --format cjs --dts",
+    "compile:cli": "tsup ./src/cli.ts --format cjs && echo '#!/usr/bin/env node' | cat - dist/cli.cjs > dist/tmp && mv dist/tmp dist/cli.cjs",
     "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",

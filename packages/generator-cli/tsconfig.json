@@ -1,7 +1,6 @@
 {
   "extends": "../../shared/tsconfig.shared.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "dist",
     "rootDir": ".",
     "types": ["vitest/globals"]
