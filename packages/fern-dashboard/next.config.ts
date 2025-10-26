@@ -96,6 +96,14 @@ let nextConfig: NextConfig = {
             "mermaid"
         );
 
+        // Configure rspack/webpack to use CommonJS for @fern-api/venus-api-sdk specifically
+        // The ESM build of venus-api-sdk is broken, so we need to force it to use CJS
+        config.resolve ??= {};
+        config.resolve.alias ??= {};
+        config.resolve.alias["@fern-api/venus-api-sdk"] = require.resolve(
+            "./node_modules/@fern-api/venus-api-sdk/dist/cjs/index.js"
+        );
+
         config.plugins ??= [];
         config.plugins.push(
             new (isRspackEnabled ? rspack : webpack).DefinePlugin({
