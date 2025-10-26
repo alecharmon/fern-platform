@@ -14,6 +14,7 @@ import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generat
 import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
 import type { updatePrStatus } from "@/app/api/update-pr-status/route";
 import type { updatePrTitle } from "@/app/api/update-pr-title/route";
+import type { ValidateGithubRepoAccess } from "@/app/api/validate-github-repo-access/route";
 
 export const DashboardApiClient = {
     getMyOrganizations: () => typedFetch<getMyOrganizations.Response>("/api/get-my-organizations"),
@@ -35,6 +36,8 @@ export const DashboardApiClient = {
         typedFetch<postDocsGithubSource.Response>("/api/post-docs-github-source", request),
     validateGithubBranch: (request: validateGithubBranch.Request) =>
         typedFetch<validateGithubBranch.Response>("/api/get-validate-github-branch", request),
+    validateGithubRepoAccess: (request: ValidateGithubRepoAccess.Request) =>
+        typedFetch<ValidateGithubRepoAccess.Response>("/api/validate-github-repo-access", request),
     preloadEditorData: (request: preloadEditorData.Request) =>
         typedFetch<preloadEditorData.Response>("/api/preload-editor-data", request),
     getPrForBranch: (request: getPrForBranch.Request) =>

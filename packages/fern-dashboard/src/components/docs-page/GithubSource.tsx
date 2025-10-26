@@ -1,6 +1,6 @@
 "use client";
 
-import { Cog, Loader2 } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { useState } from "react";
 
 import type { GithubRepoValidationResult } from "@/app/services/dal/github/validators";
@@ -29,14 +29,13 @@ export function GithubSource({
     isLoading?: boolean;
 }) {
     const [isSaving, setIsSaving] = useState(false);
-    const [isDomainHovered, setIsDomainHovered] = useState(false);
 
     return (
         <>
             {isLoading ? (
                 <Skeleton className="h-4 w-24" />
             ) : (
-                <div className="flex flex-wrap items-center gap-2" onMouseEnter={() => setIsDomainHovered(true)}>
+                <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2">
                         {githubUrl ? (
                             <>
@@ -44,18 +43,25 @@ export function GithubSource({
                                 <a href={githubUrl} className="dashboard-link" target="_blank">
                                     <span className="truncate">{getRepoDisplayNameFromUrl(githubUrl)}</span>
                                 </a>
-                                {isDomainHovered && (
-                                    <SetGithubSourcePopover docsUrl={docsUrl} setIsSaving={setIsSaving}>
-                                        <Button
-                                            size={isSaving ? "sm" : "iconSm"}
-                                            variant="ghost"
-                                            disabled={isSaving}
-                                            className="size-4 p-0"
-                                        >
-                                            {isSaving ? <Loader2 className="animate-spin" /> : <Cog />}
-                                        </Button>
-                                    </SetGithubSourcePopover>
-                                )}
+                                <SetGithubSourcePopover
+                                    docsUrl={docsUrl}
+                                    setIsSaving={setIsSaving}
+                                    initialUrl={githubUrl}
+                                >
+                                    <Button size="sm" variant="ghost" disabled={isSaving} className="h-6 px-2 text-xs">
+                                        {isSaving ? (
+                                            <>
+                                                <Loader2 className="mr-1 size-3 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Pencil className="mr-1 size-3" />
+                                                Edit
+                                            </>
+                                        )}
+                                    </Button>
+                                </SetGithubSourcePopover>
                             </>
                         ) : (
                             <SetGithubSourcePopover docsUrl={docsUrl} setIsSaving={setIsSaving}>

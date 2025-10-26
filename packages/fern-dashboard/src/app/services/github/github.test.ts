@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getOwnerAndRepoFromGithubUrl } from "./github";
+import { getOwnerAndRepoFromGithubUrl, normalizeGithubUrl } from "./github";
 
 describe("getOwnerAndRepoFromGithubUrl", () => {
     it("parses HTTPS URL without .git suffix", () => {
@@ -77,6 +77,108 @@ describe("getOwnerAndRepoFromGithubUrl", () => {
         expect(getOwnerAndRepoFromGithubUrl("http://github.com/fern-api/venus.git")).toEqual({
             owner: "fern-api",
             repo: "venus"
+        });
+    });
+});
+
+describe("normalizeGithubUrl", () => {
+    it("normalizes HTTPS URL without .git suffix", () => {
+        const result = normalizeGithubUrl("https://github.com/fern-api/venus");
+        expect(result).toEqual({
+            owner: "fern-api",
+            repo: "venus",
+            canonicalUrl: "https://github.com/fern-api/venus",
+            isValidShape: true
+        });
+    });
+
+    it("normalizes HTTPS URL with .git suffix", () => {
+        const result = normalizeGithubUrl("https://github.com/fern-api/venus.git");
+        expect(result).toEqual({
+            owner: "fern-api",
+            repo: "venus",
+            canonicalUrl: "https://github.com/fern-api/venus",
+            isValidShape: true
+        });
+    });
+
+    it("normalizes HTTPS URL with trailing slash", () => {
+        const result = normalizeGithubUrl("https://github.com/fern-api/venus/");
+        expect(result).toEqual({
+            owner: "fern-api",
+            repo: "venus",
+            canonicalUrl: "https://github.com/fern-api/venus",
+            isValidShape: true
+        });
+    });
+
+    it("normalizes SSH URL with .git suffix", () => {
+        const result = normalizeGithubUrl("git@github.com:fern-api/venus.git");
+        expect(result).toEqual({
+            owner: "fern-api",
+            repo: "venus",
+            canonicalUrl: "https://github.com/fern-api/venus",
+            isValidShape: true
+        });
+    });
+
+    it("trims whitespace from input", () => {
+        const result = normalizeGithubUrl("  https://github.com/fern-api/venus  ");
+        expect(result).toEqual({
+            owner: "fern-api",
+            repo: "venus",
+            canonicalUrl: "https://github.com/fern-api/venus",
+            isValidShape: true
+        });
+    });
+
+    it("returns invalid for empty string", () => {
+        const result = normalizeGithubUrl("");
+        expect(result).toEqual({
+            owner: null,
+            repo: null,
+            canonicalUrl: null,
+            isValidShape: false
+        });
+    });
+
+    it("returns invalid for whitespace-only string", () => {
+        const result = normalizeGithubUrl("   ");
+        expect(result).toEqual({
+            owner: null,
+            repo: null,
+            canonicalUrl: null,
+            isValidShape: false
+        });
+    });
+
+    it("returns invalid for non-GitHub URL", () => {
+        const result = normalizeGithubUrl("https://example.com/fern-api/venus");
+        expect(result).toEqual({
+            owner: null,
+            repo: null,
+            canonicalUrl: null,
+            isValidShape: false
+        });
+    });
+
+    it("returns invalid for URL without repo", () => {
+        const result = normalizeGithubUrl("https://github.com/fern-api");
+        expect(result).toEqual({
+            owner: "fern-api",
+            repo: null,
+            canonicalUrl: null,
+            isValidShape: false
+        });
+    });
+
+    it("returns invalid for URL with empty owner", () => {
+        const result = normalizeGithubUrl("https://github.com/");
+        expect(result).toEqual({
+            owner: "",
+            repo: null,
+            canonicalUrl: null,
+            isValidShape: false
         });
     });
 });

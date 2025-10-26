@@ -118,6 +118,29 @@ export function getRepoDisplayNameFromUrl(githubUrl: string) {
     return `${owner}/${repo}`;
 }
 
+export interface NormalizedGithubUrl {
+    owner: string | null;
+    repo: string | null;
+    canonicalUrl: string | null;
+    isValidShape: boolean;
+}
+
+export function normalizeGithubUrl(input: string): NormalizedGithubUrl {
+    const trimmed = input.trim();
+    if (!trimmed) {
+        return { owner: null, repo: null, canonicalUrl: null, isValidShape: false };
+    }
+
+    const { owner, repo } = getOwnerAndRepoFromGithubUrl(trimmed);
+
+    if (!owner || !repo || owner === "" || repo === "") {
+        return { owner, repo, canonicalUrl: null, isValidShape: false };
+    }
+
+    const canonicalUrl = `https://github.com/${owner}/${repo}`;
+    return { owner, repo, canonicalUrl, isValidShape: true };
+}
+
 export function validateUrlIsGithubUrl(inputUrl: string): boolean {
     if (inputUrl === "") {
         return false;
