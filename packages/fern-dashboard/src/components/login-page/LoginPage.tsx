@@ -5,12 +5,11 @@ import { ThemedFernLogo } from "../theme/ThemedFernLogo";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { Button } from "../ui/button";
 import { LoginImage } from "./LoginImage";
+import { AdobeLogo } from "./logos/AdobeLogo";
 import { Auth0Logo } from "./logos/Auth0Logo";
-import { CohereLogo } from "./logos/CohereLogo";
+import { BloombergLogo } from "./logos/BloombergLogo";
 import { ElevenLabsLogo } from "./logos/ElevenLabsLogo";
-import { IntercomLogo } from "./logos/IntercomLogo";
 import { SquareLogo } from "./logos/SquareLogo";
-import { WebflowLogo } from "./logos/WebflowLogo";
 
 export const LoginPage = () => {
     return (
@@ -66,10 +65,9 @@ export const LoginPage = () => {
                         </div>
                         <div className="flex flex-wrap items-center sm:gap-3 md:gap-6 lg:gap-8">
                             <SquareLogo />
-                            <WebflowLogo />
-                            <IntercomLogo />
+                            <BloombergLogo />
+                            <AdobeLogo />
                             <ElevenLabsLogo />
-                            <CohereLogo />
                             <Auth0Logo />
                         </div>
                     </div>
