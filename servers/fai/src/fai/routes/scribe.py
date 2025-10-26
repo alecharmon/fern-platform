@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from fai.app import fai_app
 from fai.settings import LOGGER
+from fai.utils.github_utils import get_repo_from_docs_domain
 from fai.utils.slack.client import send_slack_message
 from fai.utils.slack.message_handler import get_slack_integration
 
@@ -14,6 +15,7 @@ class ScribeSlackCallbackRequest(BaseModel):
 class ScribeSlackCallbackResponse(BaseModel):
     status: str
     status_code: int
+
 
 @fai_app.post(
     "/scribe/callback/slack/{team_id}/{channel_id}/{thread_ts}",
@@ -57,3 +59,21 @@ async def scribe_slack_callback(
     except Exception as e:
         LOGGER.error(f"Error handling scribe callback for thread {thread_ts}: {e}")
         raise HTTPException(status_code=500, detail="Failed to process scribe callback")
+
+
+class DomainRepoResponse(BaseModel):
+    domain: str
+    repo: str | None
+
+
+@fai_app.get(
+    "/scribe/test/domain-to-repo",
+    response_model=DomainRepoResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def test_domain_to_repo(domain: str) -> DomainRepoResponse:
+    LOGGER.info(f"Testing domain to repo mapping for domain: {domain}")
+
+    repo = await get_repo_from_docs_domain(domain)
+
+    return DomainRepoResponse(domain=domain, repo=repo)

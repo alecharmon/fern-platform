@@ -39,6 +39,7 @@ async function main() {
                         ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL")
@@ -71,6 +72,7 @@ async function main() {
                         ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL")
@@ -103,6 +105,7 @@ async function main() {
                         ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL")

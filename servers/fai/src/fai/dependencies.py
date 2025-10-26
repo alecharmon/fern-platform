@@ -13,7 +13,10 @@ from upstash_redis.asyncio import Redis
 
 from fai.db import async_session_maker
 from fai.models.db.settings_db import SettingsDb
-from fai.settings import VARIABLES
+from fai.settings import (
+    LOGGER,
+    VARIABLES,
+)
 from fai.utils.get_venus_client import get_venus_client
 
 redis = Redis(url=VARIABLES.KV_REST_API_URL, token=VARIABLES.KV_REST_API_READ_ONLY_TOKEN)
@@ -25,10 +28,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def verify_token(request: Request, domain: str) -> str:
-    """Verify user is a Fern admin or belongs to the organization owning `domain`."""
-
-    print(f"Verifying token for domain {domain}")
-
     auth_header = request.headers.get("Authorization")
 
     if not auth_header or not auth_header.startswith("Bearer "):
@@ -45,8 +44,7 @@ async def verify_token(request: Request, domain: str) -> str:
         if await venus_client.organization.is_member(org_name):
             return token
     except Exception:
-        print(f"Domain metadata not found for {domain}")
-        print("Falling back to Venus auth check")
+        LOGGER.warning(f"Domain metadata not found for {domain}")
 
     orgs = await venus_client.organization.get_org_ids_from_token()
     is_fern_member = "fern" in orgs
@@ -69,7 +67,6 @@ async def ask_ai_enabled(domain: str) -> None:
 
 
 def strip_domain(url: str) -> str:
-    """Extract domain from URL, removing protocol, path, and query parameters."""
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
     parsed = urlparse(url)

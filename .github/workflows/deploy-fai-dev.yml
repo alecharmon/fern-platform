@@ -18,6 +18,7 @@ jobs:
       TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+      FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
       POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
@@ -25,6 +26,7 @@ jobs:
       SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
       SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
       ASK_FERN_SLACK_BOT_TOKEN: ${{ secrets.ASK_FERN_SLACK_BOT_TOKEN }}
+      FAI_LAMBDA_FUNCTION_NAME: ${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       DISCORD_OAUTH_URL: ${{ secrets.DISCORD_OAUTH_URL }}
       KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
@@ -47,6 +49,7 @@ jobs:
           echo "ANTHROPIC_API_KEY=${{ env.ANTHROPIC_API_KEY }}" >> .env
           echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> .env
           echo "COHERE_API_KEY=${{ env.COHERE_API_KEY }}" >> .env
+          echo "FERN_TOKEN=${{ env.FERN_TOKEN }}" >> .env
           echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
           echo "SLACK_CLIENT_ID=${{ env.SLACK_CLIENT_ID }}" >> .env
           echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
@@ -57,6 +60,7 @@ jobs:
           echo "KV_REST_API_TOKEN=${{ env.KV_REST_API_TOKEN }}" >> .env
           echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
           echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
+          echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
       - name: Deploy to Dev
         run: |
           git_version="$(scripts/fai-version.sh)"

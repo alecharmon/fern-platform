@@ -26,12 +26,16 @@ class Variables:
     SLACK_CLIENT_SECRET: str | None = os.environ.get("SLACK_CLIENT_SECRET")
     SLACK_SIGNING_SECRET: str | None = os.environ.get("SLACK_SIGNING_SECRET")
 
+    FAI_LAMBDA_FUNCTION_NAME: str | None = os.environ.get("FAI_LAMBDA_FUNCTION_NAME")
+
     DISCORD_BOT_TOKEN: str | None = os.environ.get("DISCORD_BOT_TOKEN")
     DISCORD_OAUTH_URL: str | None = os.environ.get("DISCORD_OAUTH_URL")
 
     KV_REST_API_TOKEN: str | None = os.environ.get("KV_REST_API_TOKEN")
     KV_REST_API_READ_ONLY_TOKEN: str | None = os.environ.get("KV_REST_API_READ_ONLY_TOKEN")
     KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
+
+    FERN_TOKEN: str | None = os.environ.get("FERN_TOKEN")
 
     @classmethod
     def validate_env_variables(cls) -> None:

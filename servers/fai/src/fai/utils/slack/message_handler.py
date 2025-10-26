@@ -32,6 +32,7 @@ from fai.utils.generate.message_classification import (
 )
 from fai.utils.generate_model import generate_anthropic_generic_async
 from fai.utils.slack.client import add_reaction
+from fai.utils.slack.lambda_invoke import invoke_fai_lambda_for_docs_update
 from fai.utils.slack.postprocessing import SlackifyMarkdown
 from fai.utils.turbopuffer.namespace import (
     get_query_index_name,
@@ -450,6 +451,16 @@ async def handle_slack_message(
             )
             if slack_context_id:
                 LOGGER.info(f"Successfully saved and synced SlackContext: {slack_context_id}")
+
+                conversation_text = "\n\n".join([f"{msg['role'].upper()}: {msg['content']}" for msg in messages])
+                await invoke_fai_lambda_for_docs_update(
+                    conversation_history=conversation_text,
+                    domain=domain_to_use,
+                    base_branch="main",
+                    team_id=context.team_id,
+                    channel_id=context.channel,
+                    thread_ts=context.thread_ts,
+                )
             else:
                 LOGGER.error("Failed to save SlackContext to database")
                 response_text += "\n\n⚠️ Note: There was an error saving the context. Please try again."

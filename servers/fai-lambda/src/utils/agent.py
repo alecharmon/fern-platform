@@ -26,7 +26,7 @@ async def update_repo_with_agent(repo_path: str, user_prompt: str) -> None:
                     logger.info(f"Using tool: {block.name}")
 
 
-async def create_pr_with_agent(repo_path: str, base_branch: str) -> None:
+async def create_pr_with_agent(repo_path: str, base_branch: str) -> str | None:
     configure_git_auth(repo_path)
 
     options = ClaudeAgentOptions(
@@ -51,27 +51,35 @@ async def create_pr_with_agent(repo_path: str, base_branch: str) -> None:
     1. The branch name should be descriptive and concise as possible.
     2. The PR title should NOT be more than one sentence long.
     3. The PR description should be formatted in Markdown and provide a clear justification of the changes.
+    4. After creating the PR, you MUST output the PR URL on its own line starting with "PR_URL: "
     """
 
+    pr_url = None
     async for message in query(prompt=prompt, options=options):
         if isinstance(message, AssistantMessage):
             for block in message.content:
                 if isinstance(block, TextBlock):
                     logger.info(block.text)
+                    for line in block.text.split("\n"):
+                        if "PR_URL:" in line:
+                            pr_url = line.split("PR_URL:", 1)[1].strip()
                 if isinstance(block, ToolUseBlock):
                     logger.info(f"Using tool: {block.name}")
 
+    return pr_url
 
-async def run_agent_on_session_repo(repository: str, prompt: str, base_branch: str = "main") -> dict[str, str]:
+
+async def run_agent_on_session_repo(repository: str, prompt: str, base_branch: str = "main") -> dict[str, str | None]:
     session_repo_path = setup_session_repo(repository, base_branch)
     logger.info(f"Repository cloned to: {session_repo_path}")
 
     await update_repo_with_agent(session_repo_path, prompt)
-    await create_pr_with_agent(session_repo_path, base_branch)
+    pr_url = await create_pr_with_agent(session_repo_path, base_branch)
 
     return {
         "repository": repository,
         "base_branch": base_branch,
         "session_repo_path": session_repo_path,
         "status": "success",
+        "pr_url": pr_url,
     }
