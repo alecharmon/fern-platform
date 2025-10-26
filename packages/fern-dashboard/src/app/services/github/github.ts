@@ -93,11 +93,20 @@ export async function handleGeneratePrDescription({
 }
 
 export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
-    const piecesAfterGithubCom = githubUrl.split("github.com/")[1];
+    let piecesAfterGithubCom = githubUrl.split("github.com/")[1];
     if (piecesAfterGithubCom == null) {
-        return { owner: null, repo: null };
+        const sshMatch = githubUrl.match(/github\.com:(.+)/);
+        if (sshMatch) {
+            piecesAfterGithubCom = sshMatch[1];
+        } else {
+            return { owner: null, repo: null };
+        }
     }
-    const [owner, repo] = piecesAfterGithubCom.split("/").slice(0, 2);
+    const [owner, repoRaw] = piecesAfterGithubCom.split("/").slice(0, 2);
+    if (repoRaw == null) {
+        return { owner, repo: null };
+    }
+    const repo = repoRaw.replace(/\.git$/, "").replace(/\/$/, "");
     return { owner, repo };
 }
 
