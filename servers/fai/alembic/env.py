@@ -11,6 +11,7 @@ from fai.db import (
 from fai.models.db.discord_integration_db import DiscordIntegrationDb  # noqa: F401
 from fai.models.db.discord_message_cache_db import DiscordMessageCacheDb  # noqa: F401
 from fai.models.db.document_db import DocumentDb  # noqa: F401
+from fai.models.db.editing_session_db import EditingSessionDb  # noqa: F401
 from fai.models.db.feedback_db import FeedbackDb  # noqa: F401
 from fai.models.db.guidance_db import GuidanceDb  # noqa: F401
 from fai.models.db.insight_db import InsightDb  # noqa: F401
