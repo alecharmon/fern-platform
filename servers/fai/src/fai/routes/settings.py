@@ -19,6 +19,8 @@ from fai.dependencies import (
     verify_token,
 )
 from fai.models.api.settings_api import (
+    EnableAskAiRequest,
+    EnableAskAiResponse,
     GetSettingsResponse,
     ToggleAskAiResponse,
     ToggleStatusResponse,
@@ -55,7 +57,6 @@ async def get_settings(
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
     except Exception:
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
-
 
 @fai_app.get(
     "/settings/ask-ai/docs",
@@ -139,6 +140,90 @@ async def get_discord_settings(
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
     except Exception:
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
+
+
+@fai_app.post(
+    "/settings/ask-ai/enable",
+    response_model=EnableAskAiResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def enable_ask_ai(
+    request: EnableAskAiRequest,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+) -> EnableAskAiResponse:
+    """Enable Ask AI for multiple domains with specified locations and trigger reindex.
+
+    Args:
+        request: Request containing domains, org_name, and locations to enable
+    """
+    LOGGER.info(f"Enabling Ask AI for domains {request.domains}, locations: {request.locations}")
+
+    docs_enabled = "docs" in request.locations
+    slack_enabled = "slack" in request.locations
+    discord_enabled = "discord" in request.locations
+
+    results = []
+
+    for domain in request.domains:
+        try:
+            stripped_domain = strip_domain(domain)
+
+            if not docs_enabled and not slack_enabled and not discord_enabled:
+                LOGGER.warning(f"Skipping domain {domain}: no locations specified for enablement")
+                results.append({"domain": domain, "success": False})
+                continue
+
+            existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+            existing_record = existing.scalar_one_or_none()
+
+            if existing_record:
+                existing_record.docs_enabled = docs_enabled
+                existing_record.slack_enabled = slack_enabled
+                existing_record.discord_enabled = discord_enabled
+                await db.commit()
+                LOGGER.info(f"Updated existing record for domain {stripped_domain}")
+            else:
+                new_record = SettingsDb(
+                    domain=stripped_domain,
+                    org_name=request.org_name,
+                    job_id=None,
+                    last_reindex_time=None,
+                    is_preview=True,
+                    docs_enabled=docs_enabled,
+                    slack_enabled=slack_enabled,
+                    discord_enabled=discord_enabled,
+                )
+                db.add(new_record)
+                await db.commit()
+                await db.refresh(new_record)
+                existing_record = new_record
+                LOGGER.info(f"Created new record for domain {stripped_domain}")
+
+            LOGGER.info(f"Starting reindex for domain {stripped_domain}")
+            async with httpx.AsyncClient(follow_redirects=True) as client:
+                response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
+                if response.status_code == 200:
+                    job_id = response.json().get("job_id", None)
+                    LOGGER.info(
+                        f"Successfully started turbopuffer reindex for domain {stripped_domain}, job_id: {job_id}"
+                    )
+                    existing_record.job_id = job_id
+                    await db.commit()
+                    results.append({"domain": domain, "success": True, "job_id": job_id})
+                    background_tasks.add_task(revalidate_domain, domain)
+                else:
+                    LOGGER.error(f"Failed to start reindex for domain {stripped_domain}: {response.status_code}")
+                    results.append({"domain": domain, "success": False})
+
+        except Exception as e:
+            LOGGER.exception(f"Failed to enable Ask AI for domain {domain}: {e}")
+            results.append({"domain": domain, "success": False})
+
+    overall_success = all(result["success"] for result in results)
+    return EnableAskAiResponse(
+        success=overall_success
+    )
 
 
 @fai_app.post(

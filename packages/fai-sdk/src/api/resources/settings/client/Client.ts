@@ -372,6 +372,94 @@ export class Settings {
     }
 
     /**
+     * Enable Ask AI for multiple domains with specified locations and trigger reindex.
+     *
+     * Args:
+     *     request: Request containing domains, org_name, and locations to enable
+     *
+     * @param {FernAI.EnableAskAiRequest} request
+     * @param {Settings.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.settings.enableAskAi({
+     *         domains: ["domains"],
+     *         org_name: "org_name",
+     *         locations: ["locations"]
+     *     })
+     */
+    public enableAskAi(
+        request: FernAI.EnableAskAiRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.EnableAskAiResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__enableAskAi(request, requestOptions));
+    }
+
+    private async __enableAskAi(
+        request: FernAI.EnableAskAiRequest,
+        requestOptions?: Settings.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.EnableAskAiResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                "settings/ask-ai/enable",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.EnableAskAiResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /settings/ask-ai/enable.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * Toggle Ask AI setting and return job_id for tracking.
      *
      * Args:

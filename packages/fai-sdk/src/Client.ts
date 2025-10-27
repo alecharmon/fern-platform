@@ -10,6 +10,7 @@ import { Chat } from "./api/resources/chat/client/Client.js";
 import { Conversation } from "./api/resources/conversation/client/Client.js";
 import { Discord } from "./api/resources/discord/client/Client.js";
 import { Document } from "./api/resources/document/client/Client.js";
+import { EditingSessions } from "./api/resources/editingSessions/client/Client.js";
 import { Feedback } from "./api/resources/feedback/client/Client.js";
 import { Guidance } from "./api/resources/guidance/client/Client.js";
 import { Health } from "./api/resources/health/client/Client.js";
@@ -51,6 +52,7 @@ export class FernAIClient {
     protected _conversation: Conversation | undefined;
     protected _discord: Discord | undefined;
     protected _document: Document | undefined;
+    protected _editingSessions: EditingSessions | undefined;
     protected _feedback: Feedback | undefined;
     protected _guidance: Guidance | undefined;
     protected _health: Health | undefined;
@@ -93,6 +95,10 @@ export class FernAIClient {
 
     public get document(): Document {
         return (this._document ??= new Document(this._options));
+    }
+
+    public get editingSessions(): EditingSessions {
+        return (this._editingSessions ??= new EditingSessions(this._options));
     }
 
     public get feedback(): Feedback {

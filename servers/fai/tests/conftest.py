@@ -68,6 +68,7 @@ async def test_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession,
     from fai.models.db.insight_db import InsightDb  # noqa: F401
     from fai.models.db.job_db import JobDb  # noqa: F401
     from fai.models.db.query_db import QueryDb  # noqa: F401
+    from fai.models.db.settings_db import SettingsDb  # noqa: F401
 
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
