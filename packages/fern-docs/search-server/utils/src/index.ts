@@ -5,6 +5,7 @@ export {
 export { endpointToMarkdown } from "./records/endpoint-to-markdown";
 export { OpenApiYamlFormatter } from "./records/endpointDefinitionToOpenApi";
 export { maybePrepareMdxContent } from "./records/prepare-mdx-content";
+export { AsyncApiYamlFormatter } from "./records/websocketDefinitionToAsyncApi";
 export { createRoleFacet } from "./roles/create-role-facet";
 export { createViewersForNodes } from "./roles/create-viewers-for-node";
 export {

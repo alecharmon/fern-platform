@@ -5,7 +5,7 @@ import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
-import { OpenApiYamlFormatter } from "@fern-docs/search-utils";
+import { AsyncApiYamlFormatter, OpenApiYamlFormatter } from "@fern-docs/search-utils";
 
 import { convertToLlmTxtMarkdown } from "./llm-txt-md";
 
@@ -17,6 +17,42 @@ function generateEndpointSections(endpoint: EndpointDefinition, apiDefinition?: 
         const openApiYaml = formatter.generateYamlFromEndpoint(endpoint, apiDefinition);
 
         sections.push(`## OpenAPI Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``);
+    } catch (error) {
+        console.error(JSON.stringify(error));
+    }
+
+    return sections;
+}
+
+function generateWebhookSections(
+    webhook: ApiDefinition.WebhookDefinition,
+    apiDefinition?: ApiDefinition.ApiDefinition
+): string[] {
+    const sections: string[] = [];
+
+    try {
+        const formatter = new OpenApiYamlFormatter();
+        const openApiYaml = formatter.generateYamlFromWebhook(webhook, apiDefinition);
+
+        sections.push(`## OpenAPI 3.1 Webhook Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``);
+    } catch (error) {
+        console.error(JSON.stringify(error));
+    }
+
+    return sections;
+}
+
+function generateWebSocketSections(
+    websocket: ApiDefinition.WebSocketChannel,
+    apiDefinition?: ApiDefinition.ApiDefinition
+): string[] {
+    const sections: string[] = [];
+
+    try {
+        const asyncFormatter = new AsyncApiYamlFormatter();
+        const asyncApiYaml = asyncFormatter.generateYamlFromWebSocket(websocket, apiDefinition);
+
+        sections.push(`## AsyncAPI Specification\n\n\`\`\`yaml\n${asyncApiYaml}\n\`\`\``);
     } catch (error) {
         console.error(JSON.stringify(error));
     }
@@ -41,6 +77,26 @@ export async function getMarkdownForPath(
             }
             return {
                 content: endpointDefinitionToMarkdown(endpoint, node, domain, apiDefinition),
+                contentType: "mdx"
+            };
+        }
+        if (node.type === "webhook") {
+            const webhook = apiDefinition.webhooks[node.webhookId];
+            if (webhook == null) {
+                return undefined;
+            }
+            return {
+                content: webhookDefinitionToMarkdown(webhook, node, domain, apiDefinition),
+                contentType: "mdx"
+            };
+        }
+        if (node.type === "webSocket") {
+            const websocket = apiDefinition.websockets[node.webSocketId];
+            if (websocket == null) {
+                return undefined;
+            }
+            return {
+                content: websocketDefinitionToMarkdown(websocket, node, domain, apiDefinition),
                 contentType: "mdx"
             };
         }
@@ -136,6 +192,50 @@ export function endpointDefinitionToMarkdown(
         ...endpointSections,
         hasExamples ? "## SDK Code Examples" : undefined,
         hasExamples ? examplesContent : undefined
+    ]
+        .filter(isNonNullish)
+        .join("\n\n");
+}
+
+export function webhookDefinitionToMarkdown(
+    webhook: ApiDefinition.WebhookDefinition,
+    node: FernNavigation.NavigationNodePage,
+    domain?: string,
+    apiDefinition?: ApiDefinition.ApiDefinition
+): string {
+    const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
+    const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
+
+    const webhookSections = generateWebhookSections(webhook, apiDefinition);
+
+    return [
+        `# ${node.title}`,
+        `${webhook.method} ${webhook.path.join("")}`,
+        typeof webhook.description === "string" ? webhook.description : undefined,
+        fullUrl ? `Reference: ${fullUrl}` : undefined,
+        ...webhookSections
+    ]
+        .filter(isNonNullish)
+        .join("\n\n");
+}
+
+export function websocketDefinitionToMarkdown(
+    websocket: ApiDefinition.WebSocketChannel,
+    node: FernNavigation.NavigationNodePage,
+    domain?: string,
+    apiDefinition?: ApiDefinition.ApiDefinition
+): string {
+    const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
+    const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
+
+    const websocketSections = generateWebSocketSections(websocket, apiDefinition);
+
+    return [
+        `# ${node.title}`,
+        `GET ${ApiDefinition.toCurlyBraceEndpointPathLiteral(websocket.path)}`,
+        typeof websocket.description === "string" ? websocket.description : undefined,
+        fullUrl ? `Reference: ${fullUrl}` : undefined,
+        ...websocketSections
     ]
         .filter(isNonNullish)
         .join("\n\n");

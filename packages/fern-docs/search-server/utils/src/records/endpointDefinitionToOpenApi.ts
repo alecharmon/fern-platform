@@ -38,12 +38,42 @@ export class OpenApiYamlFormatter {
 
         return yamlStringify(openApiSpec);
     }
+
+    public generateYamlFromWebhook(
+        webhook: ApiDefinition.WebhookDefinition,
+        apiDefinition?: ApiDefinition.ApiDefinition
+    ): string {
+        const webhookPath = webhook.path.join("");
+        const method = webhook.method.toLowerCase() as OpenAPIV3_1.HttpMethods;
+
+        const context: WebhookContext = {
+            webhook,
+            types: apiDefinition?.types || {},
+            globalHeaders: apiDefinition?.globalHeaders,
+            apiDefinition,
+            components: {},
+            visitedTypes: new Set<string>()
+        };
+
+        const openApiSpec = generateOpenApiFromWebhookContext(context, webhookPath, method);
+
+        return yamlStringify(openApiSpec);
+    }
 }
 
 export interface EndpointContext {
     endpoint: ApiDefinition.EndpointDefinition;
     types: Record<string, ApiDefinition.TypeDefinition>;
     auth?: ApiDefinition.AuthScheme;
+    globalHeaders?: ApiDefinition.ObjectProperty[];
+    apiDefinition?: ApiDefinition.ApiDefinition;
+    components: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject>;
+    visitedTypes: Set<string>;
+}
+
+export interface WebhookContext {
+    webhook: ApiDefinition.WebhookDefinition;
+    types: Record<string, ApiDefinition.TypeDefinition>;
     globalHeaders?: ApiDefinition.ObjectProperty[];
     apiDefinition?: ApiDefinition.ApiDefinition;
     components: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject>;
@@ -412,7 +442,7 @@ function convertDiscriminatedUnionToSchema(
 /**
  * Converts Fern type shape to OpenAPI schema, recursively calling helper functions
  */
-function convertToOpenApiSchema(
+export function convertToOpenApiSchema(
     shape: ApiShapeTypes,
     context: EndpointContext
 ): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject {
@@ -637,6 +667,95 @@ export function generateOpenApiFromEndpointContext(
             };
         });
     }
+
+    if (Object.keys(context.components).length > 0) {
+        openApiSpec.components = {
+            schemas: context.components
+        };
+    }
+
+    return openApiSpec;
+}
+
+export function generateOpenApiFromWebhookContext(
+    context: WebhookContext,
+    path: string,
+    method: string
+): OpenAPIV3_1.Document {
+    const { webhook, globalHeaders } = context;
+
+    const webhookName = webhook.operationId || webhook.id;
+
+    const operation: OpenAPIV3_1.OperationObject = {
+        operationId: webhook.operationId || webhook.id,
+        summary: webhook.displayName || webhook.id,
+        description: typeof webhook.description === "string" ? webhook.description : undefined,
+        tags: webhook.namespace ? [String(webhook.namespace)] : undefined,
+        parameters: [],
+        responses: {}
+    };
+
+    const headers = [...(globalHeaders || []), ...(webhook.headers || [])];
+
+    headers.forEach((header) => {
+        operation.parameters!.push(
+            createOpenApiParameter(
+                header as ApiDefinition.ObjectProperty,
+                "header",
+                context as unknown as EndpointContext
+            )
+        );
+    });
+
+    if (webhook.payloads && webhook.payloads.length > 0) {
+        if (webhook.payloads.length === 1) {
+            const payload = webhook.payloads[0];
+            if (payload && payload.shape) {
+                operation.requestBody = {
+                    description: typeof payload.description === "string" ? payload.description : undefined,
+                    content: {
+                        "application/json": {
+                            schema: convertToOpenApiSchema(payload.shape, context as unknown as EndpointContext)
+                        }
+                    }
+                };
+            }
+        } else {
+            const payloadSchemas = webhook.payloads
+                .filter((p) => p && p.shape)
+                .map((p) => convertToOpenApiSchema(p.shape!, context as unknown as EndpointContext));
+
+            if (payloadSchemas.length > 0) {
+                operation.requestBody = {
+                    description: "Webhook payload (multiple variants)",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                oneOf: payloadSchemas
+                            } as OpenAPIV3_1.SchemaObject
+                        }
+                    }
+                };
+            }
+        }
+    }
+
+    operation.responses!["200"] = {
+        description: "Webhook received successfully"
+    };
+
+    const openApiSpec: OpenAPIV3_1.Document = {
+        openapi: "3.1.1",
+        info: {
+            title: webhook.displayName ?? "Webhook",
+            version: webhook.id
+        },
+        webhooks: {
+            [webhookName]: {
+                [method as OpenAPIV3_1.HttpMethods]: operation
+            }
+        }
+    };
 
     if (Object.keys(context.components).length > 0) {
         openApiSpec.components = {

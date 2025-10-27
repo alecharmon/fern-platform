@@ -272,7 +272,9 @@ async function getLlmsTxtStreaming(
                     title: endpointPageInfo.nodeTitle,
                     href: String(
                         new URL(
-                            endpointPageInfo.endpointId != null
+                            endpointPageInfo.endpointId != null ||
+                                endpointPageInfo.webhookId != null ||
+                                endpointPageInfo.websocketId != null
                                 ? addLeadingSlash(`${endpointPageInfo.slug}.mdx`)
                                 : slugToHref(endpointPageInfo.slug),
                             withDefaultProtocol(domain)

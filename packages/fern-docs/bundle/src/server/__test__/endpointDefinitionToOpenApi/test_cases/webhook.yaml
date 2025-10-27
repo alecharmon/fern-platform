@@ -1,0 +1,100 @@
+webhook_input:
+  id: onOrderStatusChanged
+  method: POST
+  path: []
+  name: Order status change notification
+  description: Notifies when an order's status changes
+  headers: []
+  payloads:
+    - shape:
+        type: alias
+        value:
+          type: id
+          id: OrderStatusWebhook
+      description: Order status change event payload
+  examples:
+    - name: Order shipped notification
+      payload:
+        event: order.shipped
+        timestamp: "2024-01-15T14:30:00Z"
+        data:
+          orderId: 12345
+          status: shipped
+type_definitions:
+  OrderStatusWebhook:
+    name: OrderStatusWebhook
+    shape:
+      type: object
+      extends: []
+      properties:
+        - key: event
+          valueShape:
+            type: primitive
+            value:
+              type: string
+        - key: timestamp
+          valueShape:
+            type: primitive
+            value:
+              type: string
+              format: date-time
+        - key: data
+          valueShape:
+            type: object
+            extends: []
+            properties:
+              - key: orderId
+                valueShape:
+                  type: primitive
+                  value:
+                    type: integer
+              - key: status
+                valueShape:
+                  type: primitive
+                  value:
+                    type: string
+output:
+  openapi: 3.1.1
+  info:
+    title: Webhook
+    version: onOrderStatusChanged
+  webhooks:
+    onOrderStatusChanged:
+      post:
+        operationId: onOrderStatusChanged
+        summary: onOrderStatusChanged
+        description: Notifies when an order's status changes
+        parameters: []
+        responses:
+          "200":
+            description: Webhook received successfully
+        requestBody:
+          description: Order status change event payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderStatusWebhook"
+  components:
+    schemas:
+      OrderStatusWebhook:
+        type: object
+        properties:
+          event:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+          data:
+            type: object
+            properties:
+              orderId:
+                type: integer
+              status:
+                type: string
+            required:
+              - orderId
+              - status
+        required:
+          - event
+          - timestamp
+          - data

@@ -1,15 +1,29 @@
-import { OpenApiYamlFormatter } from "@fern-docs/search-utils";
+import { AsyncApiYamlFormatter, OpenApiYamlFormatter } from "@fern-docs/search-utils";
 import fs from "fs";
 import yaml from "js-yaml";
 import path from "path";
 
 const TEST_CASES_DIR = path.join(__dirname, "test_cases");
 
-type TestCase = {
+type EndpointTestCase = {
     endpoint_input: any;
     endpoint_definitions: any;
     output: any;
 };
+
+type WebhookTestCase = {
+    webhook_input: any;
+    type_definitions: any;
+    output: any;
+};
+
+type WebSocketTestCase = {
+    websocket_input: any;
+    type_definitions: any;
+    output: any;
+};
+
+type TestCase = EndpointTestCase | WebhookTestCase | WebSocketTestCase;
 
 describe("OpenAPI endpoint snapshots", () => {
     // Get specific test file from environment variable or command line argument
@@ -28,11 +42,28 @@ describe("OpenAPI endpoint snapshots", () => {
             const testCaseContent = fs.readFileSync(testCasePath, "utf8");
             const testCase = yaml.load(testCaseContent) as TestCase;
 
-            const formatter = new OpenApiYamlFormatter();
-            const generatedYaml = formatter.generateYamlFromEndpoint(
-                testCase.endpoint_input,
-                testCase.endpoint_definitions || {}
-            );
+            let generatedYaml: string;
+
+            if ("webhook_input" in testCase) {
+                // Webhook test case
+                const formatter = new OpenApiYamlFormatter();
+                generatedYaml = formatter.generateYamlFromWebhook(testCase.webhook_input, {
+                    types: testCase.type_definitions || {}
+                });
+            } else if ("websocket_input" in testCase) {
+                // WebSocket test case
+                const formatter = new AsyncApiYamlFormatter();
+                generatedYaml = formatter.generateYamlFromWebSocket(testCase.websocket_input, {
+                    types: testCase.type_definitions || {}
+                });
+            } else {
+                // Endpoint test case (default)
+                const formatter = new OpenApiYamlFormatter();
+                generatedYaml = formatter.generateYamlFromEndpoint(
+                    testCase.endpoint_input,
+                    testCase.endpoint_definitions || {}
+                );
+            }
 
             if (process.env.UPDATE_SNAPSHOTS) {
                 testCase.output = yaml.load(generatedYaml);

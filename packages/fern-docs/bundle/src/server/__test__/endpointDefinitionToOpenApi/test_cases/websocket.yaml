@@ -1,0 +1,87 @@
+websocket_input:
+  id: orders
+  name: Orders
+  description: Order event notifications
+  auth: false
+  defaultEnvironment: production
+  environments:
+    - id: production
+      baseUrl: wss://events.example.com
+  path:
+    - type: literal
+      value: /orders
+  pathParameters: []
+  queryParameters: []
+  requestHeaders: []
+  messages:
+    - type: subscribe
+      displayName: subscribe
+      origin: server
+      body:
+        type: alias
+        value:
+          type: id
+          id: OrderCreated
+  examples:
+    - path: /orders
+      pathParameters: {}
+      queryParameters: {}
+      headers: {}
+      messages:
+        - type: subscribe
+          body:
+            orderId: "123"
+            createdAt: "2024-01-15T14:30:00Z"
+type_definitions:
+  OrderCreated:
+    name: OrderCreated
+    shape:
+      type: object
+      extends: []
+      properties:
+        - key: orderId
+          valueShape:
+            type: primitive
+            value:
+              type: string
+        - key: createdAt
+          valueShape:
+            type: primitive
+            value:
+              type: string
+              format: date-time
+output:
+  asyncapi: 2.6.0
+  info:
+    title: WebSocket
+    version: orders
+    description: Order event notifications
+  channels:
+    /orders:
+      description: Order event notifications
+      publish:
+        operationId: orders-publish
+        summary: subscribe
+        message:
+          name: subscribe
+          title: subscribe
+          payload:
+            $ref: "#/components/schemas/OrderCreated"
+  servers:
+    production:
+      url: wss://events.example.com/
+      protocol: wss
+      x-default: true
+  components:
+    schemas:
+      OrderCreated:
+        type: object
+        properties:
+          orderId:
+            type: string
+          createdAt:
+            type: string
+            format: date-time
+        required:
+          - orderId
+          - createdAt
