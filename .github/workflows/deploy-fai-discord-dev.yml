@@ -31,6 +31,7 @@ jobs:
       KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+      FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,6 +60,7 @@ jobs:
           echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
           echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
           echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
+          echo "FERN_TOKEN=${{ env.FERN_TOKEN }}" >> .env
       - name: Deploy to Dev
         run: |
           git_version="$(scripts/fai-discord-version.sh)"
