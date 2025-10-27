@@ -1,89 +1,87 @@
 import logging
-import re
 
-from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, TextBlock, ToolUseBlock, query
+from claude_agent_sdk import (
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ClaudeSDKClient,
+    ResultMessage,
+    TextBlock,
+    ToolUseBlock,
+)
 
-from .git import configure_git_auth, setup_session_repo
-from .system_prompts import GIT_PR_SYSTEM_PROMPT, TECHNICAL_WRITER_SYSTEM_PROMPT
+from .git import configure_git_auth
+from .system_prompts import EDITING_SYSTEM_PROMPT
 
 logger = logging.getLogger()
 
-GITHUB_PR_URL_PATTERN = r"(https://)?github\.com/[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+/pull/\d+"
 
-async def update_repo_with_agent(repo_path: str, user_prompt: str) -> None:
-    options = ClaudeAgentOptions(
-        allowed_tools=["Read", "Write", "Bash"],
-        permission_mode="acceptEdits",
-        system_prompt=TECHNICAL_WRITER_SYSTEM_PROMPT,
-        cwd=repo_path,
-        max_turns=50,
-    )
-
-    async for message in query(prompt=user_prompt, options=options):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, TextBlock):
-                    logger.info(block.text)
-                if isinstance(block, ToolUseBlock):
-                    logger.info(f"Using tool: {block.name}")
-
-
-async def create_pr_with_agent(repo_path: str, base_branch: str) -> str | None:
+async def run_editing_session(
+    repo_path: str,
+    user_prompt: str,
+    base_branch: str,
+    working_branch: str,
+    resume_session_id: str | None = None,
+    existing_pr_url: str | None = None,
+) -> tuple[str, str | None]:
     configure_git_auth(repo_path)
 
+    if existing_pr_url:
+        full_prompt = f"""{user_prompt}
+
+After making the changes:
+1. Stage and commit all changes with a descriptive commit message
+2. Push the changes to the existing branch '{working_branch}'
+3. The PR at {existing_pr_url} will be automatically updated
+4. Output the PR URL on a line starting with "PR_URL: {existing_pr_url}"
+"""
+    else:
+        full_prompt = f"""{user_prompt}
+
+After making the changes:
+1. Stage and commit all changes with a descriptive commit message
+2. Push the changes to branch '{working_branch}'
+3. Create a new PR against '{base_branch}' using: gh pr create --base {base_branch} --title "<title>" --body "<body>"
+4. The PR title should be concise (one sentence)
+5. The PR description should summarize the changes in Markdown
+6. Output the PR URL on a line starting with "PR_URL: "
+"""
+
     options = ClaudeAgentOptions(
-        allowed_tools=["Bash"],
+        allowed_tools=["Read", "Write", "Bash", "Glob", "Grep", "Edit"],
         permission_mode="acceptEdits",
-        system_prompt=GIT_PR_SYSTEM_PROMPT,
+        system_prompt=EDITING_SYSTEM_PROMPT,
         cwd=repo_path,
         max_turns=50,
+        resume=resume_session_id,
     )
 
-    prompt = f"""
-    You are in a git repository currently on branch '{base_branch}'.
+    session_id = resume_session_id
+    pr_url = existing_pr_url
 
-    Your task:
-    1. Review the changes that were made (use git diff to see what changed)
-    2. Create a new branch with a descriptive name based on the changes
-    3. Stage and commit all changes with a descriptive message
-    4. Push the new branch to origin
-    5. Create a PR against '{base_branch}' with a clear title and description
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query(full_prompt)
 
-    IMPORTANT:
-    1. The branch name should be descriptive and concise as possible.
-    2. The PR title should NOT be more than one sentence long.
-    3. The PR description should be formatted in Markdown and provide a clear justification of the changes.
-    4. After creating the PR, you MUST output the PR URL on its own line starting with "PR_URL: "
-    """
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        logger.info(f"Claude: {block.text}")
+                        for line in block.text.split("\n"):
+                            if "PR_URL:" in line:
+                                extracted_url = line.split("PR_URL:", 1)[1].strip()
+                                if extracted_url:
+                                    pr_url = extracted_url
+                    if isinstance(block, ToolUseBlock):
+                        logger.info(f"Using tool: {block.name}")
 
-    pr_url = None
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, TextBlock):
-                    logger.info(block.text)
-                    for line in block.text.split("\n"):
-                        if "PR_URL:" in line:
-                            url_candidate = line.split("PR_URL:", 1)[1].strip()
-                            match = re.search(GITHUB_PR_URL_PATTERN, url_candidate)
-                            pr_url = match.group(0) if match else None
-                if isinstance(block, ToolUseBlock):
-                    logger.info(f"Using tool: {block.name}")
+            if isinstance(message, ResultMessage):
+                session_id = message.session_id
+                logger.info(f"Session ID: {session_id}")
+                logger.info(f"Turns used: {message.num_turns}")
+                if message.total_cost_usd:
+                    logger.info(f"Cost: ${message.total_cost_usd}")
 
-    return pr_url
+    if session_id is None:
+        raise RuntimeError("Failed to obtain session ID from Claude")
 
-
-async def run_agent_on_session_repo(repository: str, prompt: str, base_branch: str = "main") -> dict[str, str | None]:
-    session_repo_path = setup_session_repo(repository, base_branch)
-    logger.info(f"Repository cloned to: {session_repo_path}")
-
-    await update_repo_with_agent(session_repo_path, prompt)
-    pr_url = await create_pr_with_agent(session_repo_path, base_branch)
-
-    return {
-        "repository": repository,
-        "base_branch": base_branch,
-        "session_repo_path": session_repo_path,
-        "status": "success",
-        "pr_url": pr_url,
-    }
+    return session_id, pr_url

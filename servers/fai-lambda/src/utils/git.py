@@ -7,29 +7,62 @@ from pathlib import Path
 logger = logging.getLogger()
 
 
-def setup_session_repo(relative_repo_path: str, base_branch: str) -> str:
-    """Clone repository directly into /tmp for this Lambda invocation."""
+def setup_editing_repo(
+    repository: str,
+    base_branch: str,
+    working_branch: str,
+    is_new_session: bool,
+) -> str:
     github_token = os.environ.get("GITHUB_TOKEN")
     if not github_token:
         raise RuntimeError("GITHUB_TOKEN environment variable not set")
 
     session_id = str(uuid.uuid4())
-    repo_path = Path("/tmp") / session_id / relative_repo_path
+    repo_path = Path("/tmp") / session_id / repository
     repo_path.parent.mkdir(parents=True, exist_ok=True)
 
-    clone_url = f"https://x-access-token:{github_token}@github.com/{relative_repo_path}.git"
+    clone_url = f"https://x-access-token:{github_token}@github.com/{repository}.git"
 
-    logger.info(f"Cloning {relative_repo_path} into {repo_path}")
+    logger.info(f"Cloning {repository} into {repo_path}")
     try:
         subprocess.run(
-            ["git", "clone", clone_url, str(repo_path), "--branch", base_branch, "--depth", "1"],
+            ["git", "clone", clone_url, str(repo_path)],
             check=True,
             capture_output=True,
             text=True,
         )
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to clone repository: {e.stderr}")
-        raise RuntimeError(f"Failed to clone {relative_repo_path}: {e.stderr}")
+        raise RuntimeError(f"Failed to clone {repository}: {e.stderr}")
+
+    configure_git_auth(str(repo_path))
+
+    if is_new_session:
+        logger.info(f"Creating new branch '{working_branch}' from '{base_branch}'")
+        try:
+            subprocess.run(
+                ["git", "checkout", "-b", working_branch, f"origin/{base_branch}"],
+                cwd=repo_path,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to create branch: {e.stderr}")
+            raise RuntimeError(f"Failed to create branch {working_branch}: {e.stderr}")
+    else:
+        logger.info(f"Checking out existing branch '{working_branch}'")
+        try:
+            subprocess.run(
+                ["git", "checkout", working_branch],
+                cwd=repo_path,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to checkout branch: {e.stderr}")
+            raise RuntimeError(f"Failed to checkout branch {working_branch}: {e.stderr}")
 
     return str(repo_path)
 
