@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -17,9 +18,17 @@ def setup_editing_repo(
     if not github_token:
         raise RuntimeError("GITHUB_TOKEN environment variable not set")
 
-    # Use editing_id for deterministic path across Lambda invocations
     repo_path = Path("/tmp") / f"editing-{editing_id}" / repository
     repo_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if repo_path.exists():
+        logger.info(f"Directory {repo_path} already exists, removing it (Lambda container reuse)")
+        try:
+            shutil.rmtree(repo_path)
+            logger.info(f"Successfully removed existing directory at {repo_path}")
+        except Exception as e:
+            logger.error(f"Failed to remove existing directory at {repo_path}: {e}")
+            raise RuntimeError(f"Failed to clean up existing directory: {e}")
 
     clone_url = f"https://x-access-token:{github_token}@github.com/{repository}.git"
 
