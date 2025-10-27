@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-import uuid
 from pathlib import Path
 
 logger = logging.getLogger()
@@ -12,13 +11,14 @@ def setup_editing_repo(
     base_branch: str,
     working_branch: str,
     is_new_session: bool,
+    editing_id: str,
 ) -> str:
     github_token = os.environ.get("GITHUB_TOKEN")
     if not github_token:
         raise RuntimeError("GITHUB_TOKEN environment variable not set")
 
-    session_id = str(uuid.uuid4())
-    repo_path = Path("/tmp") / session_id / repository
+    # Use editing_id for deterministic path across Lambda invocations
+    repo_path = Path("/tmp") / f"editing-{editing_id}" / repository
     repo_path.parent.mkdir(parents=True, exist_ok=True)
 
     clone_url = f"https://x-access-token:{github_token}@github.com/{repository}.git"

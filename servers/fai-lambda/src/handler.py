@@ -65,6 +65,7 @@ async def handle_editing_request(
             base_branch=session["base_branch"],
             working_branch=session["working_branch"],
             is_new_session=is_new_session,
+            editing_id=editing_id,
         )
         logger.info(f"Repository ready at: {repo_path}")
 
