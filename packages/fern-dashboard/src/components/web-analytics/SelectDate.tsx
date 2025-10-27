@@ -46,9 +46,10 @@ type DateUnit = (typeof DATE_UNITS)[number]["value"];
 interface SelectDateProps {
     value: DateRangeOptions;
     onChange: (value: DateRangeOptions) => void;
+    className?: string;
 }
 
-export default function SelectDate({ value, onChange }: SelectDateProps) {
+export default function SelectDate({ value, onChange, className }: SelectDateProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     // Always derive custom values from the current value prop
@@ -160,7 +161,9 @@ export default function SelectDate({ value, onChange }: SelectDateProps) {
             onValueChange={handleSelectChange}
             value={currentPreset?.value || "custom"}
         >
-            <SelectTrigger className="border-border gap-2 bg-white px-3 py-1.5 text-sm dark:bg-transparent">
+            <SelectTrigger
+                className={`border-border gap-2 bg-white px-3 py-1.5 text-sm dark:bg-transparent ${className || ""}`}
+            >
                 <CalendarIcon className="text-muted-foreground size-4" />
                 <SelectValue placeholder={displayValue}>{displayValue}</SelectValue>
             </SelectTrigger>

@@ -55,35 +55,37 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
 
     return (
         <div className="flex w-full flex-col gap-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                <div className="flex gap-4 md:order-2">
-                    <MetricsCard
-                        title="Visitors"
-                        value={data?.metrics.visitors ?? 0}
-                        isLoading={isLoading}
-                        error={error}
-                    />
-                    <MetricsCard
-                        title="Page views"
-                        value={data?.metrics.pageViews ?? 0}
-                        isLoading={isLoading}
-                        error={error}
-                    />
-                </div>
+            {/* Date Range and Refresh Button */}
+            <div className="flex items-center gap-2">
+                <SelectDate value={dateRange} onChange={setDateRange} />
+                <Button
+                    variant="outline"
+                    size="default"
+                    onClick={() => refreshMutation.mutate()}
+                    disabled={refreshMutation.isPending}
+                    className="border-border shadow-xs gap-2 bg-white px-3 py-1.5 text-sm dark:border-border dark:bg-transparent dark:hover:bg-input/50"
+                >
+                    <RefreshCwIcon className={`size-4 ${refreshMutation.isPending ? "animate-spin" : ""}`} />
+                    Refresh
+                </Button>
+            </div>
 
-                <div className="flex items-center gap-2 md:order-1">
-                    <SelectDate value={dateRange} onChange={setDateRange} />
-                    <Button
-                        variant="outline"
-                        size="default"
-                        onClick={() => refreshMutation.mutate()}
-                        disabled={refreshMutation.isPending}
-                        className="border-border shadow-xs gap-2 bg-white px-3 py-1.5 text-sm dark:border-border dark:bg-transparent dark:hover:bg-input/50"
-                    >
-                        <RefreshCwIcon className={`size-4 ${refreshMutation.isPending ? "animate-spin" : ""}`} />
-                        Refresh
-                    </Button>
-                </div>
+            {/* Metrics Cards */}
+            <div className="flex gap-4">
+                <MetricsCard
+                    title="Visitors"
+                    value={data?.metrics.visitors ?? 0}
+                    isLoading={isLoading}
+                    error={error}
+                    className="flex-1"
+                />
+                <MetricsCard
+                    title="Page views"
+                    value={data?.metrics.pageViews ?? 0}
+                    isLoading={isLoading}
+                    error={error}
+                    className="flex-1"
+                />
             </div>
 
             <WebAnalyticsChart dateRange={dateRange} docsUrl={docsUrl} groupBy={groupBy} setGroupBy={setGroupBy} />

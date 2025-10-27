@@ -7,9 +7,10 @@ interface MetricsCardProps {
     value: number;
     isLoading: boolean;
     error: Error | null;
+    className?: string;
 }
 
-export function MetricsCard({ title, value, isLoading, error }: MetricsCardProps) {
+export function MetricsCard({ title, value, isLoading, error, className }: MetricsCardProps) {
     const countupRef = useRef<HTMLDivElement>(null);
     const countUpAnimRef = useRef<any>(null);
     const previousValueRef = useRef<number>(0);
@@ -70,7 +71,9 @@ export function MetricsCard({ title, value, isLoading, error }: MetricsCardProps
     }
 
     return (
-        <div className="border-border flex flex-1 flex-col gap-3 rounded-lg border bg-white p-6 dark:bg-transparent">
+        <div
+            className={`border-border flex flex-col gap-3 rounded-lg border bg-white p-6 dark:bg-transparent ${className || ""}`}
+        >
             <p className="text-muted-foreground text-sm">{title}</p>
             <div className="text-3xl font-semibold">
                 {isLoading ? (
