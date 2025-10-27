@@ -42,7 +42,8 @@ async function main() {
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
-                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL")
+                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -75,7 +76,8 @@ async function main() {
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
-                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL")
+                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -108,7 +110,8 @@ async function main() {
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
-                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL")
+                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
