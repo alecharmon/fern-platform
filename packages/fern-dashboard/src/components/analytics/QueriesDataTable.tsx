@@ -115,44 +115,71 @@ export function QueriesDataTable<TData, TValue>({
                                             selectedConversation?.conversation_id ===
                                                 (row.original as ConversationRow).conversation_id && "selected"
                                         }
-                                        className="data-[state=selected]:bg-accent cursor-pointer border-none md:table-row flex flex-col gap-1 py-3 border-b md:border-b-0 last:border-b-0"
+                                        className="data-[state=selected]:bg-accent cursor-pointer border-none py-3 border-b md:border-b-0 last:border-b-0"
                                         onClick={onClickRow(row)}
                                     >
-                                        <td className="md:hidden flex flex-col gap-1 px-0">
-                                            <div
-                                                className="truncate font-medium"
-                                                style={{ fontFamily: "GT Planar, sans-serif" }}
-                                            >
-                                                {(row.original as ConversationRow).first_query}
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                {flexRender(
-                                                    row.getVisibleCells().find((cell) => cell.column.id === "source")
-                                                        ?.column.columnDef.cell,
-                                                    row
-                                                        .getVisibleCells()
-                                                        .find((cell) => cell.column.id === "source")
-                                                        ?.getContext()
-                                                )}
-                                                <span>•</span>
-                                                <span>{(row.original as ConversationRow).message_count} messages</span>
-                                                <span>•</span>
-                                                <span>
-                                                    {new Date(
-                                                        (row.original as ConversationRow).created_at
-                                                    ).toLocaleDateString("en-US", {
-                                                        month: "short",
-                                                        day: "numeric",
-                                                        year: "numeric"
-                                                    })}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        {row.getVisibleCells().map((cell) => (
-                                            <td key={cell.id} className="hidden md:table-cell">
-                                                {renderCell(cell)}
-                                            </td>
-                                        ))}
+                                        {row.getVisibleCells().map((cell) => {
+                                            if (cell.column.id === "conversation") {
+                                                return (
+                                                    <TableCell key={cell.id} className="p-2 md:pl-0">
+                                                        <div className="md:hidden">
+                                                            <div
+                                                                className="truncate font-medium"
+                                                                style={{ fontFamily: "GT Planar, sans-serif" }}
+                                                            >
+                                                                {(row.original as ConversationRow).first_query}
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-sm text-gray-1000">
+                                                                {flexRender(
+                                                                    row
+                                                                        .getVisibleCells()
+                                                                        .find((c) => c.column.id === "source")?.column
+                                                                        .columnDef.cell,
+                                                                    row
+                                                                        .getVisibleCells()
+                                                                        .find((c) => c.column.id === "source")
+                                                                        ?.getContext()
+                                                                )}
+                                                                <span>•</span>
+                                                                <span>
+                                                                    {(row.original as ConversationRow).message_count}{" "}
+                                                                    messages
+                                                                </span>
+                                                                <span>•</span>
+                                                                <span>
+                                                                    {new Date(
+                                                                        (row.original as ConversationRow).created_at
+                                                                    ).toLocaleDateString("en-US", {
+                                                                        month: "short",
+                                                                        day: "numeric",
+                                                                        year: "numeric"
+                                                                    })}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="hidden md:block">
+                                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                        </div>
+                                                    </TableCell>
+                                                );
+                                            }
+                                            return (
+                                                <TableCell
+                                                    key={cell.id}
+                                                    data-desktop-only
+                                                    className={
+                                                        cell.column.id === "created_at"
+                                                            ? "hidden md:table-cell w-32"
+                                                            : cell.column.id === "message_count" ||
+                                                                cell.column.id === "source"
+                                                              ? "hidden md:table-cell w-24"
+                                                              : "hidden md:table-cell"
+                                                    }
+                                                >
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </TableCell>
+                                            );
+                                        })}
                                     </TableRow>
                                 ))
                             ) : (

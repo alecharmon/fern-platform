@@ -42,7 +42,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
                 "overflow-hidden rounded-md border-b transition-colors",
                 // stack cells vertically on mobile, revert to table layout on md+
                 "block md:table-row",
-                "[&>td]:block md:[&>td]:table-cell",
+                "[&>td:not([data-desktop-only])]:block md:[&>td:not([data-mobile-only])]:table-cell",
                 // apply bg to cells so rounding is visible
                 "hover:[&>td]:bg-muted data-[state=selected]:[&>td]:bg-muted",
                 // round outer cell corners
