@@ -25,6 +25,7 @@ jobs:
       SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
       SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
       ASK_FERN_SLACK_BOT_TOKEN: ${{ secrets.ASK_FERN_SLACK_BOT_TOKEN }}
+      FAI_LAMBDA_FUNCTION_NAME: ${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       DISCORD_OAUTH_URL: ${{ secrets.DISCORD_OAUTH_URL }}
       KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
@@ -57,6 +58,7 @@ jobs:
           echo "KV_REST_API_TOKEN=${{ env.KV_REST_API_TOKEN }}" >> .env
           echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
           echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
+          echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
       - name: Deploy to Dev
         run: |
           git_version="$(scripts/fai-discord-version.sh)"
