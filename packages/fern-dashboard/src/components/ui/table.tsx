@@ -47,8 +47,6 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
                 "hover:[&>td]:bg-muted data-[state=selected]:[&>td]:bg-muted",
                 // round outer cell corners
                 "md:[&>td:first-child]:rounded-l-md md:[&>td:last-child]:rounded-r-md",
-                // add transition to left/right padding on first/last cell
-                "md:[&>td:first-child]:transition-[padding,background-color] md:[&>td:last-child]:transition-[padding,background-color]",
                 // no left/right padding on first/last cell
                 "md:[&>td:first-child]:pl-0 md:[&>td:last-child]:pr-0",
                 // add left/right padding to first/last cell on hover
@@ -85,6 +83,9 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
                 "text-gray-1100 whitespace-normal p-2 text-left align-middle md:whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
                 className
             )}
+            style={{
+                transition: "background-color 200ms ease-in-out, padding 200ms ease-in-out"
+            }}
             {...props}
         />
     );

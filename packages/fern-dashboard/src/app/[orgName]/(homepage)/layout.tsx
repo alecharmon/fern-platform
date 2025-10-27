@@ -18,13 +18,11 @@ export async function generateMetadata({ params }: { params: Promise<{ orgName: 
 export default async function AuthedLayout({
     params,
     children,
-    sidepanel,
     navbar,
     header
 }: Readonly<{
     params: Promise<{ orgName: Auth0OrgName }>;
     children: React.JSX.Element;
-    sidepanel: React.ReactNode;
     navbar: React.ReactNode;
     header: React.ReactNode;
 }>) {
@@ -36,7 +34,7 @@ export default async function AuthedLayout({
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                 <OrgNameProvider orgName={orgName}>
                     <SidepanelProvider>
-                        <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
+                        <AppLayout navbar={navbar} header={header}>
                             {children}
                         </AppLayout>
                     </SidepanelProvider>
