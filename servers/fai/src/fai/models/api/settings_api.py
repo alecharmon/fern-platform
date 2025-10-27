@@ -21,15 +21,18 @@ class ToggleAskAiResponse(BaseModel):
     job_id: str | None = Field(None, description="Job ID for tracking reindex progress (only when enabling Ask AI)")
     ask_ai_enabled: bool = Field(description="Current state of Ask AI (true if enabled, false if disabled)")
 
+
 class ToggleStatusResponse(BaseModel):
     status: str = Field(description="Current job status (running, completed, failed, etc.)")
     ask_ai_enabled: bool = Field(description="Current state of Ask AI")
     last_reindex_time: str | None = Field(None, description="ISO timestamp of last reindex")
 
+
 class EnableAskAiRequest(BaseModel):
     domains: list[str] = Field(description="List of domains to enable Ask AI for")
     org_name: str = Field(description="Organization name")
     locations: list[str] = Field(description="List of locations to enable (docs, slack, discord)")
+
 
 class EnableAskAiResponse(BaseModel):
     success: bool = Field(description="Whether the enable operation was successful")

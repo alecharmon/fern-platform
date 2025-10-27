@@ -58,6 +58,7 @@ async def get_settings(
     except Exception:
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
 
+
 @fai_app.get(
     "/settings/ask-ai/docs",
     response_model=GetSettingsResponse,
@@ -221,9 +222,7 @@ async def enable_ask_ai(
             results.append({"domain": domain, "success": False})
 
     overall_success = all(result["success"] for result in results)
-    return EnableAskAiResponse(
-        success=overall_success
-    )
+    return EnableAskAiResponse(success=overall_success)
 
 
 @fai_app.post(

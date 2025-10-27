@@ -26,6 +26,8 @@ class SlackMessageClassificationDb(Base):
 
     classification = Column(String, nullable=False)
 
+    reasoning = Column(Text, nullable=True)
+
     message_text = Column(Text, nullable=False)
 
     classified_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))

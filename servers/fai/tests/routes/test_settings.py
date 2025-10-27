@@ -1,4 +1,7 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import (
+    AsyncMock,
+    patch,
+)
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,6 +17,7 @@ async def test_enable_ask_ai_success(test_client: TestClient, test_session: Asyn
     with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
         # Mock successful reindex response
         from unittest.mock import Mock
+
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json = Mock(return_value={"job_id": "test-job-123"})
@@ -30,8 +34,8 @@ async def test_enable_ask_ai_success(test_client: TestClient, test_session: Asyn
                 json={
                     "domains": ["test1.docs.buildwithfern.com", "test2.docs.buildwithfern.com"],
                     "org_name": "test-org",
-                    "locations": ["docs", "slack"]
-                }
+                    "locations": ["docs", "slack"],
+                },
             )
 
     print(f"Response: {response.status_code}, {response.json()}")
@@ -76,6 +80,7 @@ async def test_enable_ask_ai_updates_existing_record(test_client: TestClient, te
 
     with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
         from unittest.mock import Mock
+
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json = Mock(return_value={"job_id": "new-job-456"})
@@ -91,8 +96,8 @@ async def test_enable_ask_ai_updates_existing_record(test_client: TestClient, te
                 json={
                     "domains": ["existing.docs.buildwithfern.com"],
                     "org_name": "new-org",
-                    "locations": ["docs", "discord"]
-                }
+                    "locations": ["docs", "discord"],
+                },
             )
 
     assert response.status_code == 200
@@ -113,11 +118,7 @@ async def test_enable_ask_ai_no_locations(test_client: TestClient, test_session:
     """Test that enabling Ask AI with no locations skips the domain."""
     response = test_client.post(
         "/settings/ask-ai/enable",
-        json={
-            "domains": ["test.docs.buildwithfern.com"],
-            "org_name": "test-org",
-            "locations": []
-        }
+        json={"domains": ["test.docs.buildwithfern.com"], "org_name": "test-org", "locations": []},
     )
 
     assert response.status_code == 200
@@ -136,6 +137,7 @@ async def test_enable_ask_ai_reindex_fails(test_client: TestClient, test_session
     with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
         # Mock failed reindex response
         from unittest.mock import Mock
+
         mock_response = Mock()
         mock_response.status_code = 500
 
@@ -146,11 +148,7 @@ async def test_enable_ask_ai_reindex_fails(test_client: TestClient, test_session
 
         response = test_client.post(
             "/settings/ask-ai/enable",
-            json={
-                "domains": ["test.docs.buildwithfern.com"],
-                "org_name": "test-org",
-                "locations": ["docs"]
-            }
+            json={"domains": ["test.docs.buildwithfern.com"], "org_name": "test-org", "locations": ["docs"]},
         )
 
     assert response.status_code == 200
@@ -171,6 +169,7 @@ async def test_enable_ask_ai_partial_success(test_client: TestClient, test_sessi
     with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
         # First domain succeeds, second fails
         from unittest.mock import Mock
+
         mock_success = Mock()
         mock_success.status_code = 200
         mock_success.json = Mock(return_value={"job_id": "test-job-123"})
@@ -189,8 +188,8 @@ async def test_enable_ask_ai_partial_success(test_client: TestClient, test_sessi
                 json={
                     "domains": ["success.docs.buildwithfern.com", "failure.docs.buildwithfern.com"],
                     "org_name": "test-org",
-                    "locations": ["docs"]
-                }
+                    "locations": ["docs"],
+                },
             )
 
     assert response.status_code == 200
@@ -223,11 +222,7 @@ async def test_enable_ask_ai_http_exception(test_client: TestClient, test_sessio
 
         response = test_client.post(
             "/settings/ask-ai/enable",
-            json={
-                "domains": ["test.docs.buildwithfern.com"],
-                "org_name": "test-org",
-                "locations": ["docs"]
-            }
+            json={"domains": ["test.docs.buildwithfern.com"], "org_name": "test-org", "locations": ["docs"]},
         )
 
     assert response.status_code == 200

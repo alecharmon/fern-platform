@@ -53,7 +53,7 @@ async def classify_message(
     text: str,
     message_history: list[dict[str, str]] | None = None,
     bot_user_id: str | None = None,
-) -> Literal["question", "index", "ignore"]:
+) -> MessageClassification:
     bot_info = ""
     if bot_user_id:
         bot_info = (
@@ -76,12 +76,12 @@ async def classify_message(
     )
 
     if result is None:
-        LOGGER.warning(f"Failed to classify message after retries: {text[:100]}")
-        return "ignore"
+        LOGGER.warning(f"Failed to classify message after retries: {text[:100]}, defaulting to 'ignore'")
+        return MessageClassification(classification="ignore", reasoning="Classification failed - defaulting to ignore")
 
     LOGGER.info(f"Message classification: {result.classification} - Reasoning: {result.reasoning}")
 
-    return result.classification
+    return result
 
 
 @dataclass
@@ -168,6 +168,7 @@ async def log_slack_classification_to_db(
     team_id: str,
     classification: Literal["question", "index", "ignore"],
     message_text: str,
+    reasoning: str | None = None,
 ) -> str | None:
     try:
         async with async_session_maker() as session:
@@ -176,6 +177,7 @@ async def log_slack_classification_to_db(
                 message_ts=message_ts,
                 team_id=team_id,
                 classification=classification,
+                reasoning=reasoning,
                 message_text=message_text,
                 classified_at=datetime.now(UTC),
             )
@@ -439,7 +441,7 @@ async def handle_slack_message(
         )
         LOGGER.info(f"Retrieved {len(message_history)} messages from thread history")
 
-    message_classification = None
+    classification_result = None
     should_classify = False
     if channel_settings and channel_settings.respond_to == "auto":
         should_classify = True
@@ -449,19 +451,25 @@ async def handle_slack_message(
     if should_classify:
         LOGGER.info(f"Classifying message: {context.text[:100]}...")
         try:
-            message_classification = await classify_message(
-                context.text, message_history, integration.slack_bot_user_id
+            classification_result = await classify_message(context.text, message_history, integration.slack_bot_user_id)
+            LOGGER.info(
+                f"Classification: {classification_result.classification}\nReasoning: {classification_result.reasoning}"
             )
-            LOGGER.info(f"Message classified as: {message_classification}")
         except Exception as e:
-            LOGGER.error(f"Error classifying message: {e}, treating as 'ignore'")
-            message_classification = "ignore"
-
-        if message_classification:
-            await log_slack_classification_to_db(
-                str(message_ts) or "", context.team_id, message_classification, context.text
+            LOGGER.error(f"Error classifying message: {e}, defaulting to 'ignore'")
+            classification_result = MessageClassification(
+                classification="ignore", reasoning=f"Exception during classification: {str(e)}"
             )
 
+        await log_slack_classification_to_db(
+            str(message_ts) or "",
+            context.team_id,
+            classification_result.classification,
+            context.text,
+            classification_result.reasoning,
+        )
+
+    message_classification = classification_result.classification if classification_result else None
     message_action = get_message_action(channel_settings, is_app_mention, message_classification)
 
     LOGGER.info(
