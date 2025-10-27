@@ -248,6 +248,28 @@ const nextConfig: NextConfig = {
         //   minimize: false,
         // };
 
+        // Handle node: protocol imports by aliasing them to their non-prefixed versions
+        // This is needed for packages like critters that use the node: prefix
+        config.resolve.alias = {
+            ...config.resolve.alias,
+            "node:console": "console",
+            "node:process": "process",
+            "node:path": "path",
+            "node:fs": "fs",
+            "node:url": "url",
+            "node:util": "util",
+            "node:stream": "stream",
+            "node:buffer": "buffer",
+            "node:events": "events",
+            "node:assert": "assert",
+            "node:os": "os",
+            "node:crypto": "crypto",
+            "node:net": "net",
+            "node:http": "http",
+            "node:https": "https",
+            "node:zlib": "zlib"
+        };
+
         if (isServer) {
             config.externals = config.externals || [];
             config.externals.push("esbuild");

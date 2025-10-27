@@ -16,6 +16,7 @@
     "@upstash/qstash",
     "@vercel/analytics",
     "@vercel/speed-insights",
+    "critters",
     "cssnano",
     "esbuild",
     "glslify-import",
