@@ -1,8 +1,8 @@
 import discord
 from sqlalchemy import (
     select,
-    update,
 )
+from sqlalchemy.orm import attributes
 
 from fai.db import async_session_maker
 from fai.models.db.discord_integration_db import DiscordIntegrationDb
@@ -52,12 +52,24 @@ class ConfigureView(discord.ui.View):
         try:
             new_settings = await self.construct_settings(str(interaction.guild.id))
             async with async_session_maker() as session:
-                await session.execute(
-                    update(DiscordIntegrationDb)
-                    .where(DiscordIntegrationDb.discord_guild_id == str(interaction.guild.id))
-                    .values(settings=new_settings)
+                result = await session.execute(
+                    select(DiscordIntegrationDb).where(
+                        DiscordIntegrationDb.discord_guild_id == str(interaction.guild.id)
+                    )
                 )
-                await session.commit()
+                integration = result.scalar_one_or_none()
+                if integration:
+                    integration.settings = new_settings
+                    attributes.flag_modified(integration, "settings")
+                    await session.commit()
+                    LOGGER.info(f"Saved settings for guild {interaction.guild.id}: {new_settings}")
+                else:
+                    LOGGER.error(f"No integration found for guild {interaction.guild.id}")
+                    await interaction.followup.send(
+                        "**Error:** Integration not found for this server.",
+                        ephemeral=True,
+                    )
+                    return
 
             help_mention_text = "Not set"
             if self.help_role_id:

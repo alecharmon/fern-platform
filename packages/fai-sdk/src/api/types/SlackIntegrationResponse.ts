@@ -9,4 +9,5 @@ export interface SlackIntegrationResponse {
     slack_team_name?: string;
     created_at: string;
     installed_at?: string;
+    integration_url: string;
 }

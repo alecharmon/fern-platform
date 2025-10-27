@@ -22,7 +22,6 @@ from fai.settings import LOGGER
 from fai.utils.chat.response.anthropic import get_anthropic_response
 from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.integration import get_discord_integration
-from src.message.channel_not_configured import channel_not_configured
 from src.message.classify import classify_message
 
 MESSAGE_CACHE_TTL = 30
@@ -211,7 +210,6 @@ async def handle_discord_message(message: discord.Message) -> None:
                 LOGGER.info(f"Using domain override for channel {message.channel.id}: {domain_to_use}")
 
     if channel_settings is None:
-        await channel_not_configured(channel_settings, message, is_in_thread)
         return
 
     message_history = None

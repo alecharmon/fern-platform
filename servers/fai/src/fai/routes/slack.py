@@ -14,6 +14,7 @@ from uuid import uuid4
 
 from fastapi import (
     BackgroundTasks,
+    Depends,
     HTTPException,
     Request,
 )
@@ -27,18 +28,22 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import attributes
 
 from fai.app import fai_app
 from fai.db import async_session_maker
+from fai.dependencies import (
+    ask_ai_enabled,
+    get_db,
+    strip_domain,
+    verify_token,
+)
 from fai.models.api.update_channel_settings import ChannelSettings
 from fai.models.db.feedback_db import FeedbackDb
 from fai.models.db.slack_integration_db import SlackIntegrationDb
 from fai.models.db.slack_message_cache_db import SlackMessageCacheDb
-from fai.models.types.slack_integration_types import (
-    CreateSlackIntegration,
-    SlackIntegrationResponse,
-)
+from fai.models.types.slack_integration_types import SlackIntegrationResponse
 from fai.settings import (
     LOGGER,
     VARIABLES,
@@ -114,26 +119,70 @@ async def get_domain_from_slack_team(team_id: str) -> str | None:
         return integration.domain if integration else None
 
 
-@fai_app.post("/slack/integrations", openapi_extra={"x-fern-audiences": ["internal"]})
-async def create_slack_integration(integration_request: CreateSlackIntegration) -> SlackIntegrationResponse:
-    try:
-        async with async_session_maker() as session:
-            new_integration = SlackIntegrationDb(domain=integration_request.domain, created_at=datetime.now(UTC))
-            session.add(new_integration)
-            await session.commit()
-            await session.refresh(new_integration)
+def create_slack_integration_url(integration_id: str) -> str:
+    scopes = [
+        "app_mentions:read",
+        "channels:history",
+        "channels:join",
+        "channels:read",
+        "chat:write",
+        "commands",
+        "groups:history",
+        "im:history",
+        "mpim:history",
+        "reactions:read",
+        "reactions:write",
+        "users:read",
+        "users:read.email",
+    ]
+    scope_string = ",".join(scopes)
+    return (
+        f"https://slack.com/oauth/v2/authorize?"
+        f"client_id={VARIABLES.SLACK_CLIENT_ID}&"
+        f"scope={quote(scope_string)}&"
+        f"state={integration_id}"
+    )
 
+
+@fai_app.post("/slack/install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]})
+async def create_slack_integration(
+    domain: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_token), __: None = Depends(ask_ai_enabled)
+) -> SlackIntegrationResponse:
+    try:
+        stripped_domain = strip_domain(domain)
+
+        existing = await db.execute(select(SlackIntegrationDb).where(SlackIntegrationDb.domain == stripped_domain))
+        existing_record = existing.scalar_one_or_none()
+        if existing_record:
+            integration_url = create_slack_integration_url(existing_record.integration_id)
             return SlackIntegrationResponse(
-                integration_id=new_integration.integration_id,
-                domain=new_integration.domain,
-                slack_team_id=new_integration.slack_team_id,
-                slack_team_name=new_integration.slack_team_name,
-                created_at=new_integration.created_at,
-                installed_at=new_integration.installed_at,
+                integration_id=existing_record.integration_id,
+                domain=existing_record.domain,
+                slack_team_id=existing_record.slack_team_id,
+                slack_team_name=existing_record.slack_team_name,
+                created_at=existing_record.created_at,
+                installed_at=existing_record.installed_at,
+                integration_url=integration_url,
             )
 
-    except Exception as e:
-        LOGGER.error(f"Error creating Slack integration: {e}")
+        new_integration = SlackIntegrationDb(domain=stripped_domain, created_at=datetime.now(UTC))
+        db.add(new_integration)
+        await db.commit()
+        await db.refresh(new_integration)
+
+        integration_url = create_slack_integration_url(new_integration.integration_id)
+        return SlackIntegrationResponse(
+            integration_id=new_integration.integration_id,
+            domain=new_integration.domain,
+            slack_team_id=new_integration.slack_team_id,
+            slack_team_name=new_integration.slack_team_name,
+            created_at=new_integration.created_at,
+            installed_at=new_integration.installed_at,
+            integration_url=integration_url,
+        )
+
+    except Exception:
+        LOGGER.error("Failed to create Slack integration")
         raise HTTPException(status_code=500, detail="Failed to create integration")
 
 
@@ -222,7 +271,7 @@ async def handle_slack_slash_commands(request: Request) -> JSONResponse:
 
         LOGGER.info(f"Received Slack slash command: {command} from user {user_id}")
 
-        if command in ["/fern", "/fern-dev"]:
+        if isinstance(command, str) and (command == "/fern" or command.startswith("/fern-dev")):
             if not team_id or not channel_id or not user_id:
                 return JSONResponse(
                     content={
@@ -1391,62 +1440,3 @@ async def list_slack_integrations(domain: str) -> JSONResponse:
     except Exception as e:
         LOGGER.error(f"Error listing Slack integrations for domain {domain}: {e}")
         raise HTTPException(status_code=500, detail="Failed to list integrations")
-
-
-@fai_app.get("/slack/get-install/{integration_id}", openapi_extra={"x-fern-audiences": ["internal"]})
-async def get_slack_install_link_by_id(integration_id: str) -> JSONResponse:
-    try:
-        async with async_session_maker() as session:
-            result = await session.execute(
-                select(SlackIntegrationDb).where(SlackIntegrationDb.integration_id == integration_id)
-            )
-            integration = result.scalar_one_or_none()
-
-            if not integration:
-                raise HTTPException(status_code=404, detail=f"Integration {integration_id} not found")
-
-            LOGGER.info(
-                f"Generating install link for existing integration {integration_id}, domain: {integration.domain}"
-            )
-
-        scopes = [
-            "app_mentions:read",
-            "channels:history",
-            "channels:join",
-            "channels:read",
-            "chat:write",
-            "commands",
-            "groups:history",
-            "im:history",
-            "mpim:history",
-            "reactions:read",
-            "reactions:write",
-            "users:read",
-            "users:read.email",
-        ]
-
-        scope_string = ",".join(scopes)
-
-        install_url = (
-            f"https://slack.com/oauth/v2/authorize?"
-            f"client_id={VARIABLES.SLACK_CLIENT_ID}&"
-            f"scope={quote(scope_string)}&"
-            f"state={integration_id}"
-        )
-
-        return JSONResponse(
-            content={
-                "integration_id": integration_id,
-                "domain": integration.domain,
-                "install_url": install_url,
-                "scopes": scopes,
-                "slack_team_id": integration.slack_team_id,
-                "installed_at": integration.installed_at.isoformat() if integration.installed_at else None,
-            }
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        LOGGER.error(f"Error generating Slack install link for integration {integration_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate install link")

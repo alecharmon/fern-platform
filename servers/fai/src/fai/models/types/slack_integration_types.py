@@ -29,3 +29,4 @@ class SlackIntegrationResponse(BaseModel):
     slack_team_name: str | None = None
     created_at: datetime
     installed_at: datetime | None = None
+    integration_url: str

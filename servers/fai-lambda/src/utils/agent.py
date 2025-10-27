@@ -1,4 +1,5 @@
 import logging
+import re
 
 from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, TextBlock, ToolUseBlock, query
 
@@ -7,6 +8,7 @@ from .system_prompts import GIT_PR_SYSTEM_PROMPT, TECHNICAL_WRITER_SYSTEM_PROMPT
 
 logger = logging.getLogger()
 
+GITHUB_PR_URL_PATTERN = r"(https://)?github\.com/[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+/pull/\d+"
 
 async def update_repo_with_agent(repo_path: str, user_prompt: str) -> None:
     options = ClaudeAgentOptions(
@@ -62,7 +64,9 @@ async def create_pr_with_agent(repo_path: str, base_branch: str) -> str | None:
                     logger.info(block.text)
                     for line in block.text.split("\n"):
                         if "PR_URL:" in line:
-                            pr_url = line.split("PR_URL:", 1)[1].strip()
+                            url_candidate = line.split("PR_URL:", 1)[1].strip()
+                            match = re.search(GITHUB_PR_URL_PATTERN, url_candidate)
+                            pr_url = match.group(0) if match else None
                 if isinstance(block, ToolUseBlock):
                     logger.info(f"Using tool: {block.name}")
 

@@ -5,9 +5,9 @@
 /**
  * @example
  *     {
- *         domain: "domain"
+ *         pr_url: "pr_url"
  *     }
  */
-export interface CreateSlackIntegration {
-    domain: string;
+export interface ScribeSlackCallbackRequest {
+    pr_url: string;
 }

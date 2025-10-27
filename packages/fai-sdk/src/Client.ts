@@ -16,6 +16,7 @@ import { Health } from "./api/resources/health/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
 import { Mcp } from "./api/resources/mcp/client/Client.js";
 import { Query } from "./api/resources/query/client/Client.js";
+import { Scribe } from "./api/resources/scribe/client/Client.js";
 import { Settings } from "./api/resources/settings/client/Client.js";
 import { Slack } from "./api/resources/slack/client/Client.js";
 
@@ -56,6 +57,7 @@ export class FernAIClient {
     protected _index: Index | undefined;
     protected _mcp: Mcp | undefined;
     protected _query: Query | undefined;
+    protected _scribe: Scribe | undefined;
     protected _settings: Settings | undefined;
     protected _slack: Slack | undefined;
 
@@ -115,6 +117,10 @@ export class FernAIClient {
 
     public get query(): Query {
         return (this._query ??= new Query(this._options));
+    }
+
+    public get scribe(): Scribe {
+        return (this._scribe ??= new Scribe(this._options));
     }
 
     public get settings(): Settings {
