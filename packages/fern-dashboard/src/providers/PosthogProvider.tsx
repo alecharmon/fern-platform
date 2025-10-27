@@ -20,28 +20,34 @@ export declare namespace PostHogProvider {
 }
 
 export function PostHogProvider({ session, children }: PostHogProvider.Props) {
-    const isPosthogTrackingEnabled = process.env.NEXT_PUBLIC_POSTHOG_TRACKING_ENABLED === "true";
-
     const params = useParams();
     const orgName = params.orgName as Auth0OrgName;
 
     useEffect(() => {
+        if (!isPosthogTrackingEnabled()) {
+            return;
+        }
+
         if (process.env.NEXT_PUBLIC_POSTHOG_KEY == null) {
             throw new Error("NEXT_PUBLIC_POSTHOG_KEY is not defined in the environment");
         }
 
+        // Initialize PostHog client
         posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
             api_host: "/ingest",
             capture_pageview: isProduction()
         });
 
-        if (!isPosthogTrackingEnabled) {
-            posthog.opt_out_capturing();
-        }
-
+        // Register build timestamp as a super property and include it in ALL events automatically
         const buildTimestamp = getBuildTimestamp();
         if (buildTimestamp) {
             posthog.register({ buildTimestamp });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isPosthogTrackingEnabled()) {
+            return;
         }
 
         // Identify user immediately after initialization to prevent anonymous UUID sessions
@@ -54,18 +60,22 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
                 email: session.user.email
             });
         }
-    }, [isPosthogTrackingEnabled, session?.user, session?.user.sub, session?.user.email, session?.user.name]);
+    }, [session?.user, session?.user.sub, session?.user.email, session?.user.name]);
 
     useEffect(() => {
-        if (isPosthogTrackingEnabled && orgName) {
-            // Register organization as a super property and include it in ALL events automatically
+        if (!isPosthogTrackingEnabled()) {
+            return;
+        }
+
+        // Register organization as a super property and include it in ALL events automatically
+        if (orgName) {
             posthog.register({ orgName: orgName });
         }
-    }, [isPosthogTrackingEnabled, orgName]);
+    }, [orgName]);
 
     return (
         <PHProvider client={posthog}>
-            {isPosthogTrackingEnabled && (
+            {isPosthogTrackingEnabled() && (
                 <>
                     <PostHogPageView />
                 </>
@@ -73,4 +83,8 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
             {children}
         </PHProvider>
     );
+}
+
+function isPosthogTrackingEnabled() {
+    return process.env.NEXT_PUBLIC_POSTHOG_TRACKING_ENABLED === "true";
 }

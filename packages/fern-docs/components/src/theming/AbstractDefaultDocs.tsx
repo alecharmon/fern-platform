@@ -109,6 +109,7 @@ export default function AbstractDefaultDocs({
                         isSidePanelOpen={isSidePanelOpen}
                     >
                         <div
+                            key="product-select-version-select"
                             className={cn("fern-header-switchers px-2 py-4 lg:hidden", {
                                 hidden: !hasProductsOrVersions
                             })}
@@ -117,6 +118,7 @@ export default function AbstractDefaultDocs({
                             {versionSelect}
                         </div>
                         <Separator
+                            key="separator"
                             className={cn("bg-border-concealed lg:hidden", {
                                 hidden: !hasProductsOrVersions
                             })}

@@ -163,6 +163,7 @@ export default async function VisualEditorPreviewLayout({
                                                     }
                                                     sidebar={
                                                         <SidebarContainer
+                                                            key="sidebar-container"
                                                             logo={
                                                                 <React.Suspense fallback={null}>{logo}</React.Suspense>
                                                             }
