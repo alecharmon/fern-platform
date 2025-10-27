@@ -7,12 +7,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 
 export function NavbarWithOverflow({ children }: { children: React.ReactNode }) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [visibleCount, setVisibleCount] = useState(3);
-    const [isMobile, setIsMobile] = useState(true);
+    const [mounted, setMounted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(99);
 
     useEffect(() => {
+        setMounted(true);
+
         const calculateVisibleItems = () => {
-            const mobile = window.innerWidth < 768;
+            const mobile = window.matchMedia("(max-width: 767px)").matches;
             setIsMobile(mobile);
 
             if (!containerRef.current || !mobile) {
@@ -23,17 +26,18 @@ export function NavbarWithOverflow({ children }: { children: React.ReactNode }) 
             setVisibleCount(3);
         };
 
-        const timeoutId = setTimeout(calculateVisibleItems, 100);
+        calculateVisibleItems();
         window.addEventListener("resize", calculateVisibleItems);
         return () => {
-            clearTimeout(timeoutId);
             window.removeEventListener("resize", calculateVisibleItems);
         };
     }, []);
 
     const childArray = React.Children.toArray(children);
 
-    const mobileVisibleChildren = isMobile
+    const effectiveMobile = mounted && isMobile;
+
+    const mobileVisibleChildren = effectiveMobile
         ? childArray.filter((child) => {
               if (!React.isValidElement(child)) {
                   return true;
@@ -43,21 +47,21 @@ export function NavbarWithOverflow({ children }: { children: React.ReactNode }) 
           })
         : childArray;
 
-    const visibleItems = mobileVisibleChildren.slice(0, visibleCount);
-    const overflowItems = mobileVisibleChildren.slice(visibleCount);
+    const visibleItems = effectiveMobile ? mobileVisibleChildren.slice(0, 3) : mobileVisibleChildren;
+    const overflowItems = effectiveMobile ? mobileVisibleChildren.slice(3) : [];
 
     return (
         <div ref={containerRef} className="flex gap-6 overflow-y-auto px-8 md:flex-col md:gap-0 md:px-0 md:pb-4">
             {visibleItems}
-            {isMobile && overflowItems.length > 0 && (
+            {effectiveMobile && overflowItems.length > 0 && (
                 <DropdownMenu>
-                    <DropdownMenuTrigger className="overflow-menu-trigger group flex flex-1 flex-col items-center gap-2 py-2 text-sm transition text-gray-900 hover:text-gray-1100 focus:ring-0 px-2">
+                    <DropdownMenuTrigger className="overflow-menu-trigger group flex flex-1 flex-col items-center gap-2 py-2 text-sm transition text-gray-900 hover:text-gray-1100 focus:ring-0 px-2 md:hidden">
                         <MoreHorizontal className="size-5" />
                         <div>More</div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         align="end"
-                        className="[&_a]:!flex-row [&_a]:!px-2 [&_a]:!items-start [&_a]:flex-[0] [&_div.group]:!flex-row [&_div.group]:!px-2 [&_div.group]:!items-start [&_div.group]:flex-[0]"
+                        className="md:hidden [&_a]:!flex-row [&_a]:!px-2 [&_a]:!items-start [&_a]:flex-[0] [&_div.group]:!flex-row [&_div.group]:!px-2 [&_div.group]:!items-start [&_div.group]:flex-[0]"
                     >
                         {overflowItems}
                     </DropdownMenuContent>
