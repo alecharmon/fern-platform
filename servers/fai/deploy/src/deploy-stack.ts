@@ -7,6 +7,7 @@ import { Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Cluster, ContainerImage, LogDriver } from "aws-cdk-lib/aws-ecs";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { ApplicationProtocol, HttpCodeTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { PrivateDnsNamespace } from "aws-cdk-lib/aws-servicediscovery";
@@ -146,6 +147,17 @@ export class FernAiDeployStack extends Stack {
             path: "/health",
             port: "8080"
         });
+
+        const lambdaFunctionName = envVariables.FAI_LAMBDA_FUNCTION_NAME;
+        if (lambdaFunctionName) {
+            fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
+                new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: ["lambda:InvokeFunction"],
+                    resources: [`arn:aws:lambda:us-east-1:985111089818:function:${lambdaFunctionName}`]
+                })
+            );
+        }
 
         const lbResponseTimeAlarm = new cloudwatch.Alarm(
             this,
