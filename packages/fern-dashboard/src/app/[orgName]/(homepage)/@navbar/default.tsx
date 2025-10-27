@@ -8,6 +8,7 @@ import { DocsNavbarItems } from "@/components/navbar/DocsNavbarItems";
 import { NavbarCollapseToggle } from "@/components/navbar/NavbarCollapseToggle";
 import { NavbarItem } from "@/components/navbar/NavbarItem";
 import { NavbarSectionTitle } from "@/components/navbar/NavbarSectionTitle";
+import { NavbarWithOverflow } from "@/components/navbar/NavbarWithOverflow";
 import { NavbarWrapper } from "@/components/navbar/NavbarWrapper";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { FeatureFlaggedServerSide } from "@/components/posthog/feature-flags/server-side";
@@ -30,7 +31,7 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
 
     return (
         <NavbarWrapper>
-            <div className="flex gap-8 overflow-y-auto px-8 md:flex-col md:gap-0 md:px-0 md:pb-4">
+            <NavbarWithOverflow>
                 <Suspense fallback={<DocsNavbarItem />}>
                     <DocsNavbarItems orgName={orgName} />
                 </Suspense>
@@ -42,14 +43,14 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
                 </FeatureFlaggedServerSide>
                 <NavbarSectionTitle title="Settings" />
                 <NavbarItem title="Members" iconType="members" href="/members" />
-                <NavbarItem title="Settings" iconType="settings" href="/settings" />
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_API_KEYS_PAGE} orgName={orgName}>
-                    <NavbarItem title="API Keys" iconType="api-keys" href="/api-keys" />
+                    <NavbarItem title="API Keys" mobileTitle="Keys" iconType="api-keys" href="/api-keys" />
                 </FeatureFlaggedServerSide>
+                <NavbarItem title="Settings" iconType="settings" href="/settings" />
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_BILLING_PAGE} orgName={orgName}>
                     <NavbarItem title="Billing" iconType="billing" href="/billing" />
                 </FeatureFlaggedServerSide>
-            </div>
+            </NavbarWithOverflow>
             <NavbarCollapseToggle />
         </NavbarWrapper>
     );

@@ -90,7 +90,7 @@ export function FeedbackTable({
             />
             <div className="max-h-[600px] min-h-[400px] overflow-y-auto">
                 <Table className="table-fixed">
-                    <TableHeader>
+                    <TableHeader className="hidden md:table-header-group">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="border-none">
                                 {headerGroup.headers.map((header) => (
@@ -130,13 +130,46 @@ export function FeedbackTable({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    className="cursor-pointer border-none hover:bg-gray-100"
+                                    className="cursor-pointer border-none hover:bg-gray-100 md:table-row flex flex-col gap-1 py-3 border-b md:border-b-0 last:border-b-0"
                                     onClick={() => onRowClick(row.original)}
                                 >
+                                    <td className="md:hidden flex flex-col gap-1 px-0">
+                                        <div
+                                            className="truncate font-medium"
+                                            style={{ fontFamily: "GT Planar, sans-serif" }}
+                                        >
+                                            {row.original.currentUrl}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                                            <span>{row.original.wasHelpful ? "Helpful" : "Not helpful"}</span>
+                                            <span>•</span>
+                                            <span>
+                                                {row.original.selection.replaceAll("-", " ").charAt(0).toUpperCase() +
+                                                    row.original.selection.replaceAll("-", " ").slice(1).toLowerCase()}
+                                            </span>
+                                            <span>•</span>
+                                            <span>
+                                                {row.original.userFeedback?.startsWith("[Ask Fern]")
+                                                    ? "Ask Fern"
+                                                    : "Docs"}
+                                            </span>
+                                            <span>•</span>
+                                            <span>{row.original.location}</span>
+                                            <span>•</span>
+                                            <span>
+                                                {new Date(row.original.date).toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    year: "numeric"
+                                                })}
+                                            </span>
+                                        </div>
+                                    </td>
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
                                             className={cn(
+                                                "hidden md:table-cell",
                                                 cell.column.id === "date"
                                                     ? "w-32 px-2"
                                                     : cell.column.id === "wasHelpful"

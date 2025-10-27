@@ -80,7 +80,7 @@ export function QueriesDataTable<TData, TValue>({
                 <QueriesDataTableHeader table={table} onExport={onExport} isExporting={isExporting} />
                 <div className="max-h-[400px] min-h-[400px] overflow-y-auto">
                     <Table className="table-fixed">
-                        <TableHeader>
+                        <TableHeader className="hidden md:table-header-group">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id} className="border-none">
                                     {headerGroup.headers.map((header) => (
@@ -115,10 +115,44 @@ export function QueriesDataTable<TData, TValue>({
                                             selectedConversation?.conversation_id ===
                                                 (row.original as ConversationRow).conversation_id && "selected"
                                         }
-                                        className="data-[state=selected]:bg-accent cursor-pointer border-none"
+                                        className="data-[state=selected]:bg-accent cursor-pointer border-none md:table-row flex flex-col gap-1 py-3 border-b md:border-b-0 last:border-b-0"
                                         onClick={onClickRow(row)}
                                     >
-                                        {row.getVisibleCells().map((cell) => renderCell(cell))}
+                                        <td className="md:hidden flex flex-col gap-1 px-0">
+                                            <div
+                                                className="truncate font-medium"
+                                                style={{ fontFamily: "GT Planar, sans-serif" }}
+                                            >
+                                                {(row.original as ConversationRow).first_query}
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                {flexRender(
+                                                    row.getVisibleCells().find((cell) => cell.column.id === "source")
+                                                        ?.column.columnDef.cell,
+                                                    row
+                                                        .getVisibleCells()
+                                                        .find((cell) => cell.column.id === "source")
+                                                        ?.getContext()
+                                                )}
+                                                <span>•</span>
+                                                <span>{(row.original as ConversationRow).message_count} messages</span>
+                                                <span>•</span>
+                                                <span>
+                                                    {new Date(
+                                                        (row.original as ConversationRow).created_at
+                                                    ).toLocaleDateString("en-US", {
+                                                        month: "short",
+                                                        day: "numeric",
+                                                        year: "numeric"
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <td key={cell.id} className="hidden md:table-cell">
+                                                {renderCell(cell)}
+                                            </td>
+                                        ))}
                                     </TableRow>
                                 ))
                             ) : (

@@ -1,8 +1,11 @@
+import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { AskAiEnabledServerSide } from "@/components/ask-ai/AskAiEnabledServerSide";
 import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
+import { DocsSiteNavBarWithOverflow, type NavItem } from "@/components/docs-page/DocsSiteNavBarWithOverflow";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
 export default async function DocsSiteNavbar({
     params
@@ -16,16 +19,42 @@ export default async function DocsSiteNavbar({
 
     const isEmployee = await isFernEmployee(session.user.sub);
 
+    const parsedDocsUrl = parseDocsUrlParam({ docsUrl });
+    let askAiStatus = null;
+    try {
+        askAiStatus = await isAskAiEnabled({ domain: parsedDocsUrl });
+    } catch (error) {
+        console.error("Failed to fetch Ask AI status:", error);
+    }
+
+    const navItems: NavItem[] = [
+        { title: "Overview", href: "" },
+        { title: "Web Analytics", href: "web-analytics" },
+        { title: "Search", href: "search" },
+        { title: "Feedback", href: "feedback" }
+    ];
+
+    if (askAiStatus?.ask_ai_enabled) {
+        navItems.splice(3, 0, { title: "Ask Fern", href: "ask-fern" });
+    }
+
+    if (isEmployee) {
+        navItems.push({ title: "Settings", href: "settings" });
+    }
+
     return (
-        <div className="flex">
-            <DocsSiteNavBarItem title="Overview" href="" />
-            <DocsSiteNavBarItem title="Web Analytics" href="web-analytics" />
-            <DocsSiteNavBarItem title="Search" href="search" />
-            <AskAiEnabledServerSide docsUrl={docsUrl}>
-                <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
-            </AskAiEnabledServerSide>
-            <DocsSiteNavBarItem title="Feedback" href="feedback" />
-            {isEmployee && <DocsSiteNavBarItem title="Settings" href="settings" />}
-        </div>
+        <>
+            <div className="hidden md:flex">
+                <DocsSiteNavBarItem title="Overview" href="" />
+                <DocsSiteNavBarItem title="Web Analytics" href="web-analytics" />
+                <DocsSiteNavBarItem title="Search" href="search" />
+                <AskAiEnabledServerSide docsUrl={docsUrl}>
+                    <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
+                </AskAiEnabledServerSide>
+                <DocsSiteNavBarItem title="Feedback" href="feedback" />
+                {isEmployee && <DocsSiteNavBarItem title="Settings" href="settings" />}
+            </div>
+            <DocsSiteNavBarWithOverflow items={navItems} />
+        </>
     );
 }

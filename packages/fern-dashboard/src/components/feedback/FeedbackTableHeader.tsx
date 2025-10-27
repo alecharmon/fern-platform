@@ -25,7 +25,7 @@ export function FeedbackTableHeader({
     isExporting
 }: FeedbackTableHeaderProps) {
     return (
-        <div className="mb-4 flex w-full items-center justify-between gap-2">
+        <div className="mb-4 flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
                 <MessageSquareIcon className="h-4 w-4" />
                 <span>All Feedback</span>
