@@ -11,8 +11,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/utils/utils";
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
     const { theme, setTheme } = useTheme();
 
     /**
@@ -31,7 +32,10 @@ export function ThemeToggle() {
                 <Button
                     size="sm"
                     variant="ghost"
-                    className="w-fit justify-start px-0 text-left hover:px-2 has-[>svg]:px-0 hover:has-[>svg]:px-2 md:w-8 md:justify-center"
+                    className={cn(
+                        "w-fit justify-start px-0 text-left hover:px-2 has-[>svg]:px-0 hover:has-[>svg]:px-2 md:w-8 md:justify-center",
+                        className
+                    )}
                 >
                     {mountedTheme === "light" && <Sun className="h-[1.2rem] w-[1.2rem]" />}
                     {mountedTheme === "dark" && <Moon className="h-[1.2rem] w-[1.2rem]" />}
