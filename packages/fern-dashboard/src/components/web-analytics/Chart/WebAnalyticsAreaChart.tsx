@@ -80,18 +80,16 @@ export default function WebAnalyticsAreaChart({
         if (active && payload?.[0]) {
             const metricLabel = metric === "visitors" ? "Visitors" : "Views";
             return (
-                <div className="shadow-card-grayscale w-40 rounded-lg border-none bg-[var(--gray-1200)] p-2 text-[var(--gray-100)]">
-                    <div className="border-b border-[var(--gray-700)] px-1 py-2">
-                        <p className="text-sm text-[var(--gray-100)]">{payload[0].payload.fullDate}</p>
+                <div className="shadow-card-grayscale rounded-lg border-none bg-[var(--gray-1200)] p-2 text-left text-sm leading-normal text-[var(--gray-100)]">
+                    <div className="pb-1">
+                        <div className="font-medium">{payload[0].payload.fullDate}</div>
                     </div>
-                    <div className="px-1 py-2">
-                        <p className="flex items-center gap-2 text-sm">
-                            <span className="h-2 w-2 rounded-full bg-[var(--green-800)]" />
-                            <span>{metricLabel}</span>
-                            <span className="ml-auto font-mono font-medium">
-                                {new Intl.NumberFormat("en-US").format(payload[0].value)}
-                            </span>
-                        </p>
+                    <div className="flex items-center justify-between gap-4 pt-2">
+                        <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-[var(--primary)]" />
+                            <span className="text-[var(--gray-400)]">{metricLabel}:</span>
+                        </div>
+                        <span className="font-medium">{new Intl.NumberFormat("en-US").format(payload[0].value)}</span>
                     </div>
                 </div>
             );

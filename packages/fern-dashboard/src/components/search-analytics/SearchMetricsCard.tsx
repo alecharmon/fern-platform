@@ -3,7 +3,7 @@
 import { InfoIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { DashboardTooltip } from "../editor/DashboardTooltip";
+import { WebAnalyticsTooltip, WebAnalyticsTooltipProvider } from "../web-analytics/WebAnalyticsTooltip";
 
 interface SearchMetricsCardProps {
     title: string;
@@ -78,9 +78,11 @@ export function SearchMetricsCard({ title, value, isLoading, error, tooltip }: S
             <div className="flex items-center gap-1.5">
                 <p className="text-muted-foreground text-sm">{title}</p>
                 {tooltip && (
-                    <DashboardTooltip content={tooltip} delayDuration={300}>
-                        <InfoIcon className="text-muted-foreground h-3.5 w-3.5" />
-                    </DashboardTooltip>
+                    <WebAnalyticsTooltipProvider>
+                        <WebAnalyticsTooltip content={tooltip} delayDuration={300}>
+                            <InfoIcon className="text-muted-foreground h-3.5 w-3.5" />
+                        </WebAnalyticsTooltip>
+                    </WebAnalyticsTooltipProvider>
                 )}
             </div>
             <div className="text-3xl font-semibold">

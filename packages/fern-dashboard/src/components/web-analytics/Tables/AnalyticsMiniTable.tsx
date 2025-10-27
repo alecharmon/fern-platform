@@ -180,57 +180,89 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                         ? (item.barVariant as "green" | "red" | "yellow" | "blue")
                                         : barVariant;
 
+                                const firstColumnValue = columns[0]?.render
+                                    ? columns[0].render(item, index)
+                                    : String(item[columns[0]?.key || ""]);
+
+                                const tooltipContent = (
+                                    <div className="flex flex-col gap-1 text-left">
+                                        <div className="font-medium">{firstColumnValue}</div>
+                                        {columns.slice(1).map((column) => (
+                                            <div key={column.key} className="flex justify-between gap-4">
+                                                <span className="text-[var(--gray-400)]">{column.label}:</span>
+                                                <span className="font-medium">
+                                                    {column.format ? column.format(item[column.key]) : item[column.key]}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+
                                 return (
-                                    <div
-                                        key={getItemKey(item)}
-                                        className="group relative flex items-center justify-between rounded py-2 transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/30"
-                                    >
-                                        {/* First column with optional gradient */}
-                                        <span className="relative flex-1 truncate font-mono text-sm">
-                                            {showGradient && (
-                                                <span
-                                                    className="absolute inset-y-0 left-0"
-                                                    style={{
-                                                        width: `${percentage}%`,
-                                                        borderRadius: "4px",
-                                                        pointerEvents: "none",
-                                                        background: `linear-gradient(to right,
+                                    <WebAnalyticsTooltipProvider key={getItemKey(item)}>
+                                        <WebAnalyticsTooltip content={tooltipContent} delayDuration={300}>
+                                            <div className="group relative flex items-center justify-between rounded py-2 transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                                                {/* First column with optional gradient */}
+                                                <span className="relative flex-1 truncate font-mono text-sm">
+                                                    {showGradient && (
+                                                        <span
+                                                            className="absolute inset-y-0 left-0"
+                                                            style={{
+                                                                width: `${percentage}%`,
+                                                                borderRadius: "4px",
+                                                                pointerEvents: "none",
+                                                                background: `linear-gradient(to right,
                                                             transparent 0%,
                                                             rgb(${COLOR_MAP[rowBarVariant]} / 0.1) 30%,
                                                             rgb(${COLOR_MAP[rowBarVariant]} / 0.25) 50%,
                                                             rgb(${COLOR_MAP[rowBarVariant]} / 0.35) 60%,
                                                             rgb(${COLOR_MAP[rowBarVariant]} / 0.35) 70%,
                                                             rgb(${COLOR_MAP[rowBarVariant]} / 0.5) 80%)`
-                                                    }}
-                                                />
-                                            )}
-                                            <span className="z-10 flex h-[30px] items-center px-2">
-                                                {columns[0]?.render ? (
-                                                    columns[0].render(item, index)
-                                                ) : (
-                                                    <TruncatedText
-                                                        text={String(item[columns[0]?.key || ""])}
-                                                        className="flex items-center truncate"
-                                                        maxLength={maxLength}
-                                                    />
-                                                )}
-                                            </span>
-                                        </span>
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <span className="z-10 flex h-[30px] items-center px-2">
+                                                        {columns[0]?.render ? (
+                                                            columns[0].render(item, index)
+                                                        ) : (
+                                                            <span className="flex items-center truncate">
+                                                                {(() => {
+                                                                    const text = String(item[columns[0]?.key || ""]);
+                                                                    if (text.length <= maxLength) {
+                                                                        return text;
+                                                                    }
+                                                                    const charsToShow = maxLength - 3;
+                                                                    const startChars = Math.ceil(charsToShow / 2);
+                                                                    const endChars = Math.floor(charsToShow / 2);
+                                                                    return (
+                                                                        text.slice(0, startChars) +
+                                                                        "..." +
+                                                                        text.slice(-endChars)
+                                                                    );
+                                                                })()}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </span>
 
-                                        {/* Other columns */}
-                                        {columns.slice(1).map((column) => (
-                                            <span
-                                                key={column.key}
-                                                className="text-sm tabular-nums"
-                                                style={{
-                                                    width: column.width || "90px",
-                                                    textAlign: "right"
-                                                }}
-                                            >
-                                                {column.format ? column.format(item[column.key]) : item[column.key]}
-                                            </span>
-                                        ))}
-                                    </div>
+                                                {/* Other columns */}
+                                                {columns.slice(1).map((column) => (
+                                                    <span
+                                                        key={column.key}
+                                                        className="text-sm tabular-nums"
+                                                        style={{
+                                                            width: column.width || "90px",
+                                                            textAlign: "right"
+                                                        }}
+                                                    >
+                                                        {column.format
+                                                            ? column.format(item[column.key])
+                                                            : item[column.key]}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </WebAnalyticsTooltip>
+                                    </WebAnalyticsTooltipProvider>
                                 );
                             })
                         ) : (

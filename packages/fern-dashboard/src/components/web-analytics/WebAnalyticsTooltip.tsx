@@ -41,7 +41,7 @@ export const WebAnalyticsTooltip: FC<WebAnalyticsTooltipProps> = ({
                     sideOffset={6}
                     collisionPadding={6}
                     {...props}
-                    className="shadow-card-grayscale z-50 max-w-xs rounded-lg border-none bg-[var(--gray-1200)] p-2 text-center text-sm leading-normal text-[var(--gray-100)] will-change-[transform,opacity]"
+                    className="shadow-card-grayscale z-50 max-w-xs rounded-lg border-none bg-[var(--gray-1200)] p-2 text-left text-sm leading-normal text-[var(--gray-100)] will-change-[transform,opacity]"
                 >
                     {content}
                 </Tooltip.Content>

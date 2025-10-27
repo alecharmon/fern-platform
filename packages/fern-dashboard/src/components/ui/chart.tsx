@@ -149,12 +149,12 @@ function ChartTooltipContent({
     return (
         <div
             className={cn(
-                "border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
+                "shadow-card-grayscale z-50 max-w-xs rounded-lg border-none bg-[var(--gray-1200)] p-2 text-center text-sm leading-normal text-[var(--gray-100)]",
                 className
             )}
         >
             {!nestLabel ? tooltipLabel : null}
-            <div className="text-foreground flex justify-between gap-2 text-xs">
+            <div className="flex justify-between gap-2 text-sm">
                 <span className="mr-2 font-semibold">{label}</span>
                 <span className="font-mono">
                     {payload[0]?.value} {name}
