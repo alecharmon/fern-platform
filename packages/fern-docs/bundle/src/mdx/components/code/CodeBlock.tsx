@@ -7,32 +7,11 @@ import {
     FernSyntaxHighlighter,
     type ScrollToHandle
 } from "@fern-docs/components/syntax-highlighter";
-import { type ComponentProps, type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
+import { type ComponentProps, type ReactNode, type RefObject, useEffect, useRef } from "react";
 
 import { useIsDarkCode } from "@/state/dark-code";
 
 import { applyTemplates, useTemplate } from "./Template";
-
-function useCurrentHash() {
-    const [hash, setHash] = useState("");
-
-    useEffect(() => {
-        const updateHash = () => setHash(window.location.hash);
-
-        // Listen to hash changes
-        window.addEventListener("hashchange", updateHash);
-
-        // Poll as fallback for cases where hashchange doesn't fire (e.g., programmatic changes)
-        const interval = setInterval(updateHash, 100);
-
-        return () => {
-            window.removeEventListener("hashchange", updateHash);
-            clearInterval(interval);
-        };
-    }, []);
-
-    return hash;
-}
 
 export function CodeBlock(props: {
     className?: string;
@@ -77,10 +56,6 @@ export function CodeBlock(props: {
      * maps exact string matches in the code to URLs, creating clickable links
      */
     links?: Record<string, string>;
-    /**
-     * optional id for the code block, used for URL hash navigation and emphasis
-     */
-    id?: string;
 }) {
     const {
         className,
@@ -89,8 +64,7 @@ export function CodeBlock(props: {
         filename,
         language = "plaintext",
         template: templateProp,
-        tooltips: tooltipsProp,
-        id
+        tooltips: tooltipsProp
     } = props;
     const isDarkCode = useIsDarkCode();
     // TODO: once this is in beta, we can add expandable logic for any code block greater than 20 lines
@@ -102,8 +76,6 @@ export function CodeBlock(props: {
     const tooltips = { ...useTemplate().tooltips, ...tooltipsProp };
 
     const viewportRef = useRef<ScrollToHandle>(null);
-    const currentHash = useCurrentHash();
-    const isEmphasized = id != null && currentHash === `#${id}`;
 
     useEffect(() => {
         const { current } = viewportRef;
@@ -120,11 +92,9 @@ export function CodeBlock(props: {
     if (title || filename) {
         return (
             <div
-                id={id}
                 className={cn(
                     "bg-card-background border-card-border rounded-3 shadow-card-grayscale relative mb-6 mt-4 flex w-full min-w-0 max-w-full flex-col border first:mt-0",
-                    { "bg-card-solid dark": isDarkCode },
-                    isEmphasized && "ring-2 ring-(color:--accent) "
+                    { "bg-card-solid dark": isDarkCode }
                 )}
             >
                 <div className="bg-(color:--grayscale-a2) rounded-t-[inherit]">
@@ -160,23 +130,21 @@ export function CodeBlock(props: {
     }
 
     return (
-        <div id={id} className={cn(isEmphasized && "ring-2 ring-(color:--accent) rounded-3")}>
-            <CodeBlockWithClipboardButton
-                code={() => applyTemplates(code, template)}
-                className={cn({ "bg-card-solid dark": isDarkCode }, className)}
-                expandable={expandable}
-                language={language}
-            >
-                <FernSyntaxHighlighter
-                    {...toSyntaxHighlighterProps({
-                        ...props,
-                        template,
-                        tooltips,
-                        viewportRef
-                    })}
-                />
-            </CodeBlockWithClipboardButton>
-        </div>
+        <CodeBlockWithClipboardButton
+            code={() => applyTemplates(code, template)}
+            className={cn({ "bg-card-solid dark": isDarkCode }, className)}
+            expandable={expandable}
+            language={language}
+        >
+            <FernSyntaxHighlighter
+                {...toSyntaxHighlighterProps({
+                    ...props,
+                    template,
+                    tooltips,
+                    viewportRef
+                })}
+            />
+        </CodeBlockWithClipboardButton>
     );
 }
 

@@ -1,9 +1,30 @@
 "use client";
 
+import { cn } from "@fern-docs/components/cn";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
-import React, { type ReactNode, useRef } from "react";
-
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import { FernAnchor } from "@/components/FernAnchor";
+
+function useCurrentHash() {
+    const [hash, setHash] = useState("");
+
+    useEffect(() => {
+        const updateHash = () => setHash(window.location.hash);
+
+        // Listen to hash changes
+        window.addEventListener("hashchange", updateHash);
+
+        // Poll as fallback for cases where hashchange doesn't fire (e.g., programmatic changes)
+        const interval = setInterval(updateHash, 100);
+
+        return () => {
+            window.removeEventListener("hashchange", updateHash);
+            clearInterval(interval);
+        };
+    }, []);
+
+    return hash;
+}
 
 interface AnchorProps {
     /**
@@ -28,9 +49,11 @@ interface AnchorProps {
 export function Anchor({ id, children }: AnchorProps) {
     const pathname = useCurrentPathname();
     const elementRef = useRef<HTMLSpanElement>(null);
+    const currentHash = useCurrentHash();
 
     const anchorId = id.startsWith("#") ? id.slice(1) : id;
     const fullHref = `${pathname}#${anchorId}`;
+    const isActive = currentHash === `#${anchorId}`;
 
     const handleClick = (e: React.MouseEvent) => {
         if (elementRef.current) {
@@ -42,7 +65,12 @@ export function Anchor({ id, children }: AnchorProps) {
 
     return (
         <FernAnchor href={fullHref} asChild>
-            <span id={anchorId} ref={elementRef} onClick={handleClick}>
+            <span
+                onClick={handleClick}
+                id={anchorId}
+                ref={elementRef}
+                className={cn(isActive && "ring-2 ring-(color:--accent) rounded-3/2 block px-0.5")}
+            >
                 {children}
             </span>
         </FernAnchor>
