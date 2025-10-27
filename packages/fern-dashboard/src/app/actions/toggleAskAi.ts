@@ -26,7 +26,7 @@ export async function isAskAiEnabled({
     domain: string;
 }): Promise<{ ask_ai_enabled: boolean; job_id?: string }> {
     const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
-    const settings = await faiClient.settings.getSettings({ domain });
+    const settings = await faiClient.settings.getDocsSettings({ domain });
     return {
         ask_ai_enabled: settings.ask_ai_enabled || false,
         job_id: settings.job_id
