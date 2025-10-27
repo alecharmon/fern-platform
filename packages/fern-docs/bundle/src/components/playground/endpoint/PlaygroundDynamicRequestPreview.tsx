@@ -32,7 +32,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
 >(({ context, formState, requestType, dynamicIRsByLanguage }, ref) => {
     const [code, setCode] = useState<string>("Loading...");
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
-    const [baseURL] = usePlaygroundBaseUrl(context.endpoint);
+    const [baseURL] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
     useImperativeHandle(
         ref,

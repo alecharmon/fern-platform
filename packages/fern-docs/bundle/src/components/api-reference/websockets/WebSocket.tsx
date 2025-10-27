@@ -17,6 +17,7 @@ import { MdxServerComponentProseSuspense } from "@/mdx/components/server-compone
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
+import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
 import { EndpointSection } from "../endpoints/EndpointSection";
 import { EndpointUrlWithPlaygroundBaseUrl } from "../endpoints/EndpointUrlWithPlaygroundBaseUrl";
 import { TitledExample } from "../examples/TitledExample";
@@ -104,28 +105,32 @@ export async function WebSocketContent({
                     slug={node.slug}
                     pageActionOptions={pageActionOptions}
                 >
-                    <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} className="hidden lg:flex" method="WSS" />
+                    <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
+                        <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} className="hidden lg:flex" method="WSS" />
+                    </ApiReferenceClientWrapper>
                 </PageHeader>
             }
             aside={
-                <div className="not-prose grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6">
-                    <TitledExample
-                        title="Handshake"
-                        tryIt={node != null ? <PlaygroundButtonTray state={node} /> : undefined}
-                        disableClipboard={true}
-                    >
-                        <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
-                            <HandshakeExample channel={channel} example={example} />
-                        </FernScrollArea>
-                    </TitledExample>
-                    {exampleMessages.length > 0 && (
-                        <TitledExample title={"Messages"} className="min-h-0 shrink">
+                <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
+                    <div className="not-prose grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6">
+                        <TitledExample
+                            title="Handshake"
+                            tryIt={node != null ? <PlaygroundButtonTray state={node} /> : undefined}
+                            disableClipboard={true}
+                        >
                             <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
-                                <WebSocketMessages messages={exampleMessages} />
+                                <HandshakeExample channel={channel} example={example} />
                             </FernScrollArea>
                         </TitledExample>
-                    )}
-                </div>
+                        {exampleMessages.length > 0 && (
+                            <TitledExample title={"Messages"} className="min-h-0 shrink">
+                                <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
+                                    <WebSocketMessages messages={exampleMessages} />
+                                </FernScrollArea>
+                            </TitledExample>
+                        )}
+                    </div>
+                </ApiReferenceClientWrapper>
             }
             reference={
                 <TypeDefinitionRoot types={types} slug={node.slug}>
@@ -152,10 +157,12 @@ export async function WebSocketContent({
                             }
                             slug={node.slug}
                             headingElement={
-                                <div className="border-border-default rounded-3 -mx-2 flex items-center justify-between border px-2 py-1 transition-colors">
-                                    <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} method="WSS" />
-                                    <CopyWithBaseUrl channel={channel} />
-                                </div>
+                                <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
+                                    <div className="border-border-default rounded-3 -mx-2 flex items-center justify-between border px-2 py-1 transition-colors">
+                                        <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} method="WSS" />
+                                        <CopyWithBaseUrl channel={channel} />
+                                    </div>
+                                </ApiReferenceClientWrapper>
                             }
                         >
                             <TypeDefinitionAnchorPart part="request">

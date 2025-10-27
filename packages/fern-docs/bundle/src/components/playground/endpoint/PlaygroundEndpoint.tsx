@@ -63,7 +63,7 @@ export const PlaygroundEndpoint = ({
 
     const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
 
-    const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);
+    const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
     const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
 
@@ -236,8 +236,6 @@ export const PlaygroundEndpoint = ({
                         }}
                         environmentId={environmentId}
                         baseUrl={baseUrl}
-                        // TODO: this is a temporary fix to show all environments in the playground, unless filtered in the settings
-                        // this is so that the playground can be specifically disabled for certain environments
                         options={
                             settings?.environments
                                 ? endpoint.environments?.filter(
@@ -249,6 +247,7 @@ export const PlaygroundEndpoint = ({
                         queryParameters={endpoint.queryParameters}
                         sendRequestIcon={<SendHorizonal className="transition-transform group-hover:translate-x-0.5" />}
                         types={context.types}
+                        apiDefinitionId={node.apiDefinitionId}
                     />
                 </div>
                 <div className="flex min-h-0 flex-1 shrink">

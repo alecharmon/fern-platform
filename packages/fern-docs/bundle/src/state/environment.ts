@@ -1,5 +1,6 @@
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { atom, useAtomValue, useSetAtom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { atomFamily, atomWithStorage } from "jotai/utils";
 
 // Capture all possible environments in a list, in useEffect at top level
 export const ALL_ENVIRONMENTS_ATOM = atom<string[]>([]);
@@ -22,8 +23,19 @@ export const useAllEnvironmentIds = (): string[] => {
 
 // separately track the URL that matches the given environment + api
 // used to match the environment specified in the playground env_state key
-export const SELECTED_ENVIRONMENT_URL_ATOM = atomWithStorage<string | undefined>("selected-environment-url", undefined);
+const selectedEnvironmentUrlFamily = atomFamily((apiDefinitionId: FdrAPI.ApiDefinitionId | undefined) => {
+    const storageKey = apiDefinitionId ? `selected-environment-url:${apiDefinitionId}` : "selected-environment-url";
+    const urlAtom = atomWithStorage<string | undefined>(storageKey, undefined);
+    urlAtom.debugLabel = `selected-environment-url:${apiDefinitionId ?? "global"}`;
+    return urlAtom;
+});
 
-export const useSelectedEnvironmentUrl = (): string | undefined => {
-    return useAtomValue(SELECTED_ENVIRONMENT_URL_ATOM);
+export const SELECTED_ENVIRONMENT_URL_ATOM = selectedEnvironmentUrlFamily(undefined);
+
+export const useSelectedEnvironmentUrl = (apiDefinitionId?: FdrAPI.ApiDefinitionId): string | undefined => {
+    return useAtomValue(selectedEnvironmentUrlFamily(apiDefinitionId));
+};
+
+export const useSelectedEnvironmentUrlAtom = (apiDefinitionId?: FdrAPI.ApiDefinitionId) => {
+    return selectedEnvironmentUrlFamily(apiDefinitionId);
 };

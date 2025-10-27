@@ -8,6 +8,7 @@ import type {
     TypeId
 } from "@fern-api/fdr-sdk/api-definition";
 import { buildRequestUrl, unwrapReference } from "@fern-api/fdr-sdk/api-definition";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import unknownToString from "@fern-api/ui-core-utils/unknownToString";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { HttpMethodBadge } from "@fern-docs/components/badges";
@@ -39,6 +40,7 @@ interface PlaygroundEndpointPathProps {
     sendRequestButtonLabel?: string;
     sendRequestIcon?: ReactNode;
     types: Record<TypeId, TypeDefinition>;
+    apiDefinitionId?: FdrAPI.ApiDefinitionId;
 }
 
 export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
@@ -52,7 +54,8 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
     sendRequest,
     sendRequestButtonLabel,
     sendRequestIcon,
-    types
+    types,
+    apiDefinitionId
 }) => {
     const environmentIds = useAllEnvironmentIds();
     const isEditingEnvironment = useBooleanState(false);
@@ -79,6 +82,7 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                             protocolTextStyle="playground-endpoint-baseurl max-sm:hidden"
                             editable
                             isEditingEnvironment={isEditingEnvironment}
+                            apiDefinitionId={apiDefinitionId}
                         />
                     </span>
                     {path.map((part, idx) => {

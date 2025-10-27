@@ -97,7 +97,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
             <span className="text-(color:--grayscale-a11) line-clamp-1 text-sm">{getExampleId(selectedExample)}</span>
         );
 
-    const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);
+    const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
     const segmentedControlExamples = useMemo(() => {
         return Object.entries(examplesByKeyAndStatusCode)

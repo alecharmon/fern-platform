@@ -12,6 +12,7 @@ import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKey
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
+import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
 import { TypeDefinitionRoot } from "../type-definitions/TypeDefinitionContext";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { EndpointContentCodeSnippets } from "./EndpointContentCodeSnippets";
@@ -63,13 +64,19 @@ export async function EndpointContent({
                         pageActionOptions={pageActionOptions}
                         markdownPromise={markdownPromise}
                     >
-                        <EndpointUrlWithPlaygroundBaseUrl
-                            endpoint={endpoint}
-                            className={endpoint.protocol?.type === "grpc" ? "hidden" : "hidden lg:flex"}
-                        />
+                        <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
+                            <EndpointUrlWithPlaygroundBaseUrl
+                                endpoint={endpoint}
+                                className={endpoint.protocol?.type === "grpc" ? "hidden" : "hidden lg:flex"}
+                            />
+                        </ApiReferenceClientWrapper>
                     </PageHeader>
                 }
-                aside={<EndpointContentCodeSnippets endpoint={endpoint} showErrors={showErrors} node={node} />}
+                aside={
+                    <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
+                        <EndpointContentCodeSnippets endpoint={endpoint} showErrors={showErrors} node={node} />
+                    </ApiReferenceClientWrapper>
+                }
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
                         <TypeDefinitionSlotsServer types={types}>

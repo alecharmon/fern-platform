@@ -21,7 +21,7 @@ interface PlaygroundRequestPreviewProps {
 export const PlaygroundRequestPreview: FC<PlaygroundRequestPreviewProps> = ({ context, formState, requestType }) => {
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
     const [oAuthValue, setOAuthValue] = useAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
-    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
+    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
     const builder = useMemo(() => new PlaygroundCodeSnippetResolverBuilder(context, true), [context]);
 

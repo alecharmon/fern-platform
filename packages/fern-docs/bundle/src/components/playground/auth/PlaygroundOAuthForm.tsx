@@ -33,7 +33,7 @@ export function FoundOAuthReferencedEndpointForm({
     const closeContainer = useClosePlaygroundAuthorizationFormCard();
     const [value, setValue] = useAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
     const [formState, setFormState] = usePlaygroundEndpointFormState(context);
-    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
+    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
     const [displayFailedLogin, setDisplayFailedLogin] = useState(false);
 

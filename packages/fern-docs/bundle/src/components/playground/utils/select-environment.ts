@@ -4,8 +4,10 @@ import type {
     EnvironmentId,
     WebSocketChannel
 } from "@fern-api/fdr-sdk/api-definition";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { sanitizeUrl } from "@fern-api/ui-core-utils";
 
+import { useApiDefinitionIdFromContext } from "@/contexts/ApiDefinitionIdContext";
 import { useSelectedEnvironmentId, useSelectedEnvironmentUrl } from "@/state/environment";
 
 function selectEnvironment(
@@ -25,11 +27,14 @@ export function useSelectedEnvironment(endpoint: WebSocketChannel | EndpointDefi
 }
 
 export function usePlaygroundBaseUrl(
-    endpoint: WebSocketChannel | EndpointDefinition
+    endpoint: WebSocketChannel | EndpointDefinition,
+    apiDefinitionId?: FdrAPI.ApiDefinitionId
 ): [baseUrl: string | undefined, environmentId: EnvironmentId | undefined] {
+    const idFromContext = useApiDefinitionIdFromContext();
+    const id = apiDefinitionId ?? idFromContext;
     const environment = useSelectedEnvironment(endpoint);
     const sanitizedBaseUrl = sanitizeUrl(environment?.baseUrl);
-    const sanitizedPlaygroundUrl = useSelectedEnvironmentUrl();
+    const sanitizedPlaygroundUrl = useSelectedEnvironmentUrl(id);
 
     // if there is a protocol mismatch, force an update to the base url
     if (sanitizedPlaygroundUrl?.substring(0, 5) !== sanitizedBaseUrl?.substring(0, 5)) {

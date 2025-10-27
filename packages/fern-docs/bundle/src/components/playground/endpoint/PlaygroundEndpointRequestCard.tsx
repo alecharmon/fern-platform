@@ -68,7 +68,7 @@ export function PlaygroundEndpointRequestCard({
 }: PlaygroundEndpointRequestCardProps): ReactElement<any> | null {
     const [requestType, setRequestType] = useRequestType(dynamicIRsByLanguage);
     const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
-    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
+    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
     const dynamicPreviewRef = useRef<PlaygroundDynamicRequestPreviewRef>(null);
 
     const hasDynamicIr = Object.keys(dynamicIRsByLanguage ?? {}).length > 0;

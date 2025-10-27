@@ -6,6 +6,8 @@ import { createEndpointContext, createWebSocketContext } from "@fern-api/fdr-sdk
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { ApiDefinitionIdProvider } from "@/contexts/ApiDefinitionIdContext";
+
 import { PlaygroundAuthorizationFormCard } from "./auth";
 import { PlaygroundEndpoint } from "./endpoint";
 import { PlaygroundWebSocket } from "./websocket";
@@ -46,7 +48,11 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
                 auth={context.auths[0]}
             />
         );
-        return <PlaygroundEndpoint context={context} authForm={authForm} dynamicIRsByLanguage={dynamicIRsByLanguage} />;
+        return (
+            <ApiDefinitionIdProvider value={node.apiDefinitionId}>
+                <PlaygroundEndpoint context={context} authForm={authForm} dynamicIRsByLanguage={dynamicIRsByLanguage} />
+            </ApiDefinitionIdProvider>
+        );
     } else if (node.type === "webSocket") {
         const context = createWebSocketContext(node, api);
         if (!context) return null;
@@ -57,7 +63,11 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
                 auth={context.auths[0]}
             />
         );
-        return <PlaygroundWebSocket context={context} authForm={authForm} />;
+        return (
+            <ApiDefinitionIdProvider value={node.apiDefinitionId}>
+                <PlaygroundWebSocket context={context} authForm={authForm} />
+            </ApiDefinitionIdProvider>
+        );
     }
     return <NoEndpointSelected />;
 }

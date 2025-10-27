@@ -68,7 +68,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
 
     const settings = usePlaygroundSettings();
 
-    const [baseUrl, environmentId] = usePlaygroundBaseUrl(context.channel);
+    const [baseUrl, environmentId] = usePlaygroundBaseUrl(context.channel, context.node.apiDefinitionId);
 
     const startSession = useCallback(async () => {
         return new Promise<boolean>((resolve) => {
@@ -190,8 +190,6 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         }}
                         environmentId={environmentId}
                         baseUrl={baseUrl}
-                        // TODO: this is a temporary fix to show all environments in the playground, unless filtered in the settings
-                        // this is so that the playground can be specifically disabled for certain environments
                         options={
                             settings?.environments
                                 ? context.channel.environments?.filter(
@@ -216,6 +214,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                             )
                         }
                         types={context.types}
+                        apiDefinitionId={context.node.apiDefinitionId}
                     />
                 </div>
                 <div className="flex min-h-0 flex-1 shrink">

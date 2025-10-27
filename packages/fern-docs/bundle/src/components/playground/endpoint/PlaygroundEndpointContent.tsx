@@ -37,7 +37,7 @@ export function PlaygroundEndpointContent({
     dynamicIRsByLanguage
 }: PlaygroundEndpointContentProps): ReactElement<any> {
     const deferredFormState = useDeferredValue(formState);
-    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint);
+    const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
     const requestDisabled = !isLocal() && baseUrl?.includes("localhost");
 
     const form = (
