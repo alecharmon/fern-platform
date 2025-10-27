@@ -3,8 +3,8 @@ from pydantic import BaseModel
 
 from fai.app import fai_app
 from fai.settings import LOGGER
-from fai.utils.github_utils import get_repo_from_docs_domain
 from fai.utils.slack.client import send_slack_message
+from fai.utils.slack.edit_handler import store_editing_session_for_thread
 from fai.utils.slack.message_handler import get_slack_integration
 
 
@@ -61,19 +61,58 @@ async def scribe_slack_callback(
         raise HTTPException(status_code=500, detail="Failed to process scribe callback")
 
 
-class DomainRepoResponse(BaseModel):
-    domain: str
-    repo: str | None
+class ScribeEditCallbackRequest(BaseModel):
+    editing_id: str
+    pr_url: str | None = None
 
 
-@fai_app.get(
-    "/scribe/test/domain-to-repo",
-    response_model=DomainRepoResponse,
+class ScribeEditCallbackResponse(BaseModel):
+    status: str
+    status_code: int
+
+
+@fai_app.post(
+    "/scribe/callback/slack/edit/{team_id}/{channel_id}/{thread_ts}",
+    response_model=ScribeEditCallbackResponse,
     openapi_extra={"x-fern-audiences": ["internal"]},
 )
-async def test_domain_to_repo(domain: str) -> DomainRepoResponse:
-    LOGGER.info(f"Testing domain to repo mapping for domain: {domain}")
+async def scribe_edit_callback(
+    team_id: str, channel_id: str, thread_ts: str, request: ScribeEditCallbackRequest
+) -> ScribeEditCallbackResponse:
+    try:
+        LOGGER.info(
+            f"Received edit callback for thread {thread_ts} with editing_id: {request.editing_id} "
+            f"(team: {team_id}, channel: {channel_id}, pr_url: {request.pr_url})"
+        )
 
-    repo = await get_repo_from_docs_domain(domain)
+        await store_editing_session_for_thread(team_id, channel_id, thread_ts, request.editing_id)
 
-    return DomainRepoResponse(domain=domain, repo=repo)
+        integration = await get_slack_integration(team_id)
+        if not integration or not integration.slack_bot_token:
+            LOGGER.error(f"No Slack integration or bot token found for team {team_id}")
+            raise HTTPException(status_code=404, detail="Slack integration not found")
+
+        if request.pr_url:
+            message_text = f"✅ Edit complete! PR created: {request.pr_url}"
+        else:
+            message_text = "✅ Edit session completed successfully!"
+
+        success = await send_slack_message(
+            channel=channel_id,
+            text=message_text,
+            bot_token=integration.slack_bot_token,
+            thread_ts=thread_ts,
+        )
+
+        if not success:
+            LOGGER.error(f"Failed to send message to Slack thread {thread_ts}")
+            raise HTTPException(status_code=500, detail="Failed to send Slack message")
+
+        return ScribeEditCallbackResponse(
+            status="success",
+            status_code=200,
+        )
+
+    except Exception as e:
+        LOGGER.error(f"Error handling edit callback for thread {thread_ts}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to process edit callback")

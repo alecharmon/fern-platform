@@ -32,6 +32,11 @@ from fai.utils.generate.message_classification import (
 )
 from fai.utils.generate_model import generate_anthropic_generic_async
 from fai.utils.slack.client import add_reaction
+from fai.utils.slack.edit_detection import detect_edit_flag
+from fai.utils.slack.edit_handler import (
+    get_or_create_editing_session_for_thread,
+    invoke_editing_lambda,
+)
 from fai.utils.slack.lambda_invoke import invoke_fai_lambda_for_docs_update
 from fai.utils.slack.postprocessing import SlackifyMarkdown
 from fai.utils.turbopuffer.namespace import (
@@ -311,8 +316,11 @@ async def handle_slack_message(
 ) -> SlackMessageResponse:
     message_ts = event.get("ts")
 
+    raw_text = event.get("text", "")
+    is_edit_mode, cleaned_text = detect_edit_flag(raw_text)
+
     context = SlackMessageContext(
-        text=event.get("text", ""),
+        text=cleaned_text,
         channel=event.get("channel", ""),
         thread_ts=event.get("thread_ts") or event.get("ts"),
         user=event.get("user"),
@@ -342,6 +350,56 @@ async def handle_slack_message(
             if channel_settings.allowed_roles:
                 roles_to_use = channel_settings.allowed_roles
                 LOGGER.info(f"Using roles override for channel {context.channel}: {roles_to_use}")
+
+    if is_edit_mode:
+        LOGGER.info(f"Edit mode detected in message from {context.user}: {context.text[:100]}...")
+
+        if integration.slack_bot_token and message_ts and context.channel:
+            try:
+                await add_reaction(context.channel, message_ts, "hammer_and_wrench", integration.slack_bot_token)
+                LOGGER.info(f"Added hammer_and_wrench reaction to edit message {message_ts}")
+            except Exception as e:
+                LOGGER.warning(f"Failed to add reaction: {e}")
+
+        existing_editing_id = await get_or_create_editing_session_for_thread(
+            context.team_id, context.channel, context.thread_ts
+        )
+
+        result = await invoke_editing_lambda(
+            prompt=context.text,
+            domain=domain_to_use,
+            base_branch="main",
+            editing_id=existing_editing_id,
+            team_id=context.team_id,
+            channel_id=context.channel,
+            thread_ts=context.thread_ts,
+        )
+
+        if result:
+            response_text = f"✏️ Starting edit session for repository `{result['repository']}`..."
+            if existing_editing_id:
+                response_text += "\n_Resuming existing session_"
+
+            return SlackMessageResponse(
+                response_text=response_text,
+                channel=context.channel,
+                thread_ts=context.thread_ts,
+                bot_token=integration.slack_bot_token,
+                query_id=None,
+                user_id=context.user,
+            )
+        else:
+            error_text = (
+                "Sorry, I couldn't start the editing session. " "Please ensure the domain is configured correctly."
+            )
+            return SlackMessageResponse(
+                response_text=error_text,
+                channel=context.channel,
+                thread_ts=context.thread_ts,
+                bot_token=integration.slack_bot_token,
+                query_id=None,
+                user_id=context.user,
+            )
 
     if not is_app_mention and integration.slack_bot_user_id and context.text:
         if f"<@{integration.slack_bot_user_id}>" in context.text:
