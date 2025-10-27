@@ -136,30 +136,38 @@ export class Scribe {
     }
 
     /**
-     * @param {FernAI.TestDomainToRepoRequest} request
+     * @param {string} teamId
+     * @param {string} channelId
+     * @param {string} threadTs
+     * @param {FernAI.ScribeEditCallbackRequest} request
      * @param {Scribe.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.scribe.testDomainToRepo({
-     *         domain: "domain"
+     *     await client.scribe.editCallback("team_id", "channel_id", "thread_ts", {
+     *         editing_id: "editing_id"
      *     })
      */
-    public testDomainToRepo(
-        request: FernAI.TestDomainToRepoRequest,
+    public editCallback(
+        teamId: string,
+        channelId: string,
+        threadTs: string,
+        request: FernAI.ScribeEditCallbackRequest,
         requestOptions?: Scribe.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.DomainRepoResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__testDomainToRepo(request, requestOptions));
+    ): core.HttpResponsePromise<FernAI.ScribeEditCallbackResponse> {
+        return core.HttpResponsePromise.fromPromise(
+            this.__editCallback(teamId, channelId, threadTs, request, requestOptions),
+        );
     }
 
-    private async __testDomainToRepo(
-        request: FernAI.TestDomainToRepoRequest,
+    private async __editCallback(
+        teamId: string,
+        channelId: string,
+        threadTs: string,
+        request: FernAI.ScribeEditCallbackRequest,
         requestOptions?: Scribe.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.DomainRepoResponse>> {
-        const { domain } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        _queryParams["domain"] = domain;
+    ): Promise<core.WithRawResponse<FernAI.ScribeEditCallbackResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -170,17 +178,20 @@ export class Scribe {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "scribe/test/domain-to-repo",
+                `scribe/callback/slack/edit/${encodeURIComponent(teamId)}/${encodeURIComponent(channelId)}/${encodeURIComponent(threadTs)}`,
             ),
-            method: "GET",
+            method: "POST",
             headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.DomainRepoResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.ScribeEditCallbackResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -207,7 +218,9 @@ export class Scribe {
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /scribe/test/domain-to-repo.");
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling POST /scribe/callback/slack/edit/{team_id}/{channel_id}/{thread_ts}.",
+                );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,

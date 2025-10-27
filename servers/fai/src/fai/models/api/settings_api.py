@@ -32,7 +32,7 @@ class EnableAskAiRequest(BaseModel):
     domains: list[str] = Field(description="List of domains to enable Ask AI for")
     org_name: str = Field(description="Organization name")
     locations: list[str] = Field(description="List of locations to enable (docs, slack, discord)")
-
+    preview: bool = Field(default=False, description="Whether this is a preview domain")
 
 class EnableAskAiResponse(BaseModel):
     success: bool = Field(description="Whether the enable operation was successful")

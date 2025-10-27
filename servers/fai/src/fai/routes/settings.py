@@ -190,7 +190,7 @@ async def enable_ask_ai(
                     org_name=request.org_name,
                     job_id=None,
                     last_reindex_time=None,
-                    is_preview=True,
+                    is_preview=request.preview,
                     docs_enabled=docs_enabled,
                     slack_enabled=slack_enabled,
                     discord_enabled=discord_enabled,

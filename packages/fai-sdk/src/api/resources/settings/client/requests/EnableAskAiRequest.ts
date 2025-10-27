@@ -17,4 +17,6 @@ export interface EnableAskAiRequest {
     org_name: string;
     /** List of locations to enable (docs, slack, discord) */
     locations: string[];
+    /** Whether this is a preview domain */
+    preview?: boolean;
 }
