@@ -85,7 +85,10 @@ async def scribe_edit_callback(
             f"(team: {team_id}, channel: {channel_id}, pr_url: {request.pr_url})"
         )
 
-        await store_editing_session_for_thread(team_id, channel_id, thread_ts, request.editing_id)
+        try:
+            await store_editing_session_for_thread(team_id, channel_id, thread_ts, request.editing_id)
+        except Exception as store_error:
+            LOGGER.error(f"Error storing editing session for thread {thread_ts}: {store_error}", exc_info=True)
 
         integration = await get_slack_integration(team_id)
         if not integration or not integration.slack_bot_token:
@@ -113,6 +116,8 @@ async def scribe_edit_callback(
             status_code=200,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
-        LOGGER.error(f"Error handling edit callback for thread {thread_ts}: {e}")
+        LOGGER.error(f"Error handling edit callback for thread {thread_ts}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to process edit callback")

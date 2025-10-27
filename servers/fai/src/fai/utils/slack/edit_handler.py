@@ -38,17 +38,31 @@ async def store_editing_session_for_thread(team_id: str, channel_id: str, thread
             datetime,
         )
 
-        slack_editing = SlackEditingSessionDb(
-            team_id=team_id,
-            channel_id=channel_id,
-            thread_ts=thread_ts,
-            editing_id=editing_id,
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
+        result = await session.execute(
+            select(SlackEditingSessionDb).where(
+                SlackEditingSessionDb.team_id == team_id,
+                SlackEditingSessionDb.channel_id == channel_id,
+                SlackEditingSessionDb.thread_ts == thread_ts,
+            )
         )
-        session.add(slack_editing)
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            existing.updated_at = datetime.now(UTC)
+            logger.info(f"Updated editing session {editing_id} for thread {thread_ts}")
+        else:
+            slack_editing = SlackEditingSessionDb(
+                team_id=team_id,
+                channel_id=channel_id,
+                thread_ts=thread_ts,
+                editing_id=editing_id,
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+            )
+            session.add(slack_editing)
+            logger.info(f"Stored new editing session {editing_id} for thread {thread_ts}")
+
         await session.commit()
-        logger.info(f"Stored editing session {editing_id} for thread {thread_ts}")
 
 
 async def invoke_editing_lambda(
