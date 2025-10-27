@@ -20,8 +20,8 @@ export function ConversationSidePanel({
 }: ConversationSidePanelProps) {
     const showLoading = isConversationLoading || conversation.turns.length === 0;
     return (
-        <div className="flex w-full flex-col p-0 lg:p-4">
-            <div className="flex items-start justify-between pb-4">
+        <div className="flex w-full flex-col p-0 lg:max-w-lg lg:p-8">
+            <div className="flex items-center justify-between pb-6">
                 <div className="flex items-start gap-4">
                     <div className="flex h-10 w-10 items-center justify-center">
                         <ChatBubbleLeftEllipsisIcon className="h-6 w-6" />

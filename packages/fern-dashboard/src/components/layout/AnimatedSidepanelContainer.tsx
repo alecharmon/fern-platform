@@ -1,19 +1,61 @@
 "use client";
 
 import React from "react";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import { cn } from "@/utils/utils";
 
 import { useSidepanel } from "./SidepanelContext";
 
 export function AnimatedSidepanelContainer({ children }: { children: React.ReactNode }) {
+    const containerRef = React.useRef<HTMLDivElement>(null);
     const contentRef = React.useRef<HTMLDivElement>(null);
+    const [hasContent, setHasContent] = React.useState(false);
     // Initialize to true to avoid SSR/window access; update on mount
     const [isMobile, setIsMobile] = React.useState<boolean>(true);
-    const { content, clear } = useSidepanel();
+    const { clear } = useSidepanel();
 
-    const hasContent = content != null;
+    const checkHasContent = React.useCallback(() => {
+        const node = contentRef.current;
+        if (!node) {
+            setHasContent(false);
+            return;
+        }
+        const directChild = node.children.item(0) as HTMLElement | null;
+        if (!directChild) {
+            setHasContent(false);
+            return;
+        }
+        const directHasElements = directChild.childElementCount > 0;
+        const directHasNonEmptyText = (directChild.textContent || "").trim().length > 0;
+        setHasContent(directHasElements || directHasNonEmptyText);
+    }, []);
+
+    React.useLayoutEffect(() => {
+        // Ensure we re-check content whenever children or layout (mobile/desktop) might change
+        checkHasContent();
+    }, [checkHasContent, children]);
+
+    React.useEffect(() => {
+        // Attach observers to the current content node; reattach when layout switches
+        const node = contentRef.current;
+        if (!node) return;
+        const resizeObserver = new ResizeObserver(() => {
+            checkHasContent();
+        });
+        const mutationObserver = new MutationObserver(() => {
+            checkHasContent();
+        });
+        resizeObserver.observe(node);
+        mutationObserver.observe(node, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+        return () => {
+            resizeObserver.disconnect();
+            mutationObserver.disconnect();
+        };
+    }, [checkHasContent, isMobile]);
 
     React.useLayoutEffect(() => {
         // Align breakpoint with Tailwind's lg (min-width: 1024px) => mobile is < 1024px
@@ -40,11 +82,15 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
         };
     }, []);
 
+    React.useLayoutEffect(() => {
+        // Re-evaluate content presence when breakpoint changes
+        checkHasContent();
+    }, [checkHasContent, isMobile]);
+
     if (isMobile) {
         const show = hasContent;
         return (
             <>
-                {children}
                 <div
                     aria-hidden
                     className={cn(
@@ -66,7 +112,7 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
                 >
                     <div className="h-full max-h-[calc(80vh-0.5rem)] overflow-y-auto p-4">
                         <div ref={contentRef} className="w-full">
-                            {content}
+                            {children}
                         </div>
                     </div>
                 </div>
@@ -74,56 +120,16 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
         );
     }
 
-    // Desktop/tablet: resizable panel with slide-in animation
+    // Desktop/tablet: slide-out container with width transition
     return (
-        <PanelGroup direction="horizontal" className="flex-1">
-            <Panel defaultSize={hasContent ? 70 : 100} minSize={30} className="h-full overflow-hidden">
-                <div className={cn("flex min-w-0 flex-1 h-full", !hasContent && "md:pr-2")}>{children}</div>
-            </Panel>
-            <PanelResizeHandle className={cn("group relative w-4 bg-transparent", !hasContent && "hidden")}>
-                <div className="absolute inset-y-0 left-1 flex flex-col items-center justify-center">
-                    <div
-                        className="absolute top-6 bottom-0 w-px transition-colors duration-200"
-                        style={{
-                            background: "transparent"
-                        }}
-                    />
-                    <div
-                        className="absolute top-6 bottom-0 w-px opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-data-[resize-handle-active]:opacity-100"
-                        style={{
-                            background:
-                                "linear-gradient(to bottom, transparent 0%, var(--primary) 64px, var(--primary) 100%)"
-                        }}
-                    />
-                    <div
-                        className="relative z-10 h-6 w-2 rounded-full border transition-colors duration-200"
-                        style={{
-                            background: "var(--sidebar)",
-                            borderColor: "var(--gray-500)"
-                        }}
-                    />
-                    <div
-                        className="absolute z-10 h-6 w-2 rounded-full border opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-data-[resize-handle-active]:opacity-100"
-                        style={{
-                            background: "var(--primary)",
-                            borderColor: "var(--primary)"
-                        }}
-                    />
-                </div>
-            </PanelResizeHandle>
-            <Panel
-                defaultSize={30}
-                minSize={15}
-                maxSize={50}
-                className={cn("sidepanel-container", hasContent && "pr-2", !hasContent && "hidden")}
-                style={{ minWidth: "320px" }}
-            >
-                <div ref={contentRef} className="h-full">
-                    <div className="h-full w-full overflow-y-auto bg-[var(--gray-100)] transition-all duration-500 ease-out md:rounded-t-2xl">
-                        {content}
-                    </div>
-                </div>
-            </Panel>
-        </PanelGroup>
+        <div
+            ref={containerRef}
+            className={cn("sidepanel-container overflow-hidden transition-[width] duration-300", hasContent && "pr-2")}
+            style={{ width: hasContent ? "var(--sidepanel-max-width, 32rem)" : 0 }}
+        >
+            <div ref={contentRef} className="h-full w-full">
+                {children}
+            </div>
+        </div>
     );
 }
