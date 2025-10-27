@@ -3,7 +3,6 @@ import type { AuthEdgeConfig } from "@fern-api/docs-auth";
 import {
     type AuthState,
     loadWithUrl as cachedLoadWithUrl,
-    cacheSeed,
     cleanBasePath,
     createGetAuthState,
     type DynamicIRsByLanguage,
@@ -72,7 +71,6 @@ import {
     CACHE_KEY_MDX_BUNDLER_FILES,
     CACHE_KEY_METADATA,
     CACHE_KEY_ROOT,
-    createApiCacheKey,
     createDynamicIrCacheKey,
     createPageCacheKey
 } from "./cache-keys";
@@ -1206,6 +1204,37 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
         return result;
     });
 
+// we already cache the API definitions, so no need to cache the types as well
+const getTypes = () =>
+    cache(async (domainKey: string): Promise<Record<TypeId, TypeDefinition>> => {
+        "use cache";
+        unstable_cacheTag(domainKey, "getTypes");
+
+        const response = await loadWithUrl(domainKey);
+        const allTypes: Record<TypeId, TypeDefinition> = {};
+
+        // Get all types from apisV2
+        for (const apiId of Object.keys(response.definition.apisV2)) {
+            const api = response.definition.apisV2[ApiDefinitionId(apiId)];
+            if (api?.types) {
+                Object.assign(allTypes, api.types);
+            }
+        }
+
+        // Get all types from apis (v1)
+        for (const apiId of Object.keys(response.definition.apis)) {
+            const v1Api = response.definition.apis[ApiDefinitionId(apiId)];
+            if (v1Api) {
+                const migratedApi = ApiDefinitionV1ToLatest.from(v1Api).migrate();
+                if (migratedApi.types) {
+                    Object.assign(allTypes, migratedApi.types);
+                }
+            }
+        }
+
+        return allTypes;
+    });
+
 export type DocsLoaderOptions = {
     cacheConfig?: CacheConfig;
     skipAuth?: boolean;
@@ -1304,6 +1333,7 @@ export const createCachedDocsLoader = async (
             const m = await metadata;
             return getDynamicIr(config)(m.org, m.domain, apiName);
         },
+        getTypes: () => getTypes()(domainKey),
         clearKvCache: () => clearKvCache(domainKey),
         isAskAiEnabledForDocs: () => getAskAiEnabledForDocs(config)(domainKey)
     };

@@ -167,4 +167,9 @@ export interface DocsLoader<IsAsync extends boolean = true> {
     getBaseUrl: () => MaybePromise<string, IsAsync>;
 
     getDynamicIr: (apiName: string) => MaybePromise<DynamicIRsByLanguage | undefined, IsAsync>;
+
+    /**
+     * @returns all types defined by all APIs (not pruned)
+     */
+    getTypes: () => MaybePromise<Record<TypeId, TypeDefinition>, IsAsync>;
 }

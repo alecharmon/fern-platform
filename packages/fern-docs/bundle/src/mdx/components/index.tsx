@@ -44,7 +44,7 @@ import { Json } from "./json";
 import { Mermaid } from "./mermaid";
 import { ParamField } from "./parameters/ParamField";
 import { RunnableEndpoint } from "./runnable-endpoint";
-import { EndpointRequestSnippet, EndpointResponseSnippet } from "./snippets";
+import { EndpointRequestSnippet, EndpointResponseSnippet, Schema } from "./snippets";
 import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
 import { Tab, TabGroup } from "./tabs";
@@ -86,6 +86,7 @@ const FERN_COMPONENTS = {
     Mermaid,
     ParamField,
     RunnableEndpoint,
+    Schema,
     SearchBar: SearchV2Trigger,
     Step,
     StepGroup,

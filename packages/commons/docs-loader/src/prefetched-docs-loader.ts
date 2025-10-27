@@ -186,6 +186,10 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("getSettings");
     }
 
+    getTypes(): Record<TypeId, TypeDefinition> {
+        return this.notSupported("getTypes");
+    }
+
     private notAllowed(methodName: string): never {
         throw new Error(`${methodName} not allowed in client-side loader`);
     }
