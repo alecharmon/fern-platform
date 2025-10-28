@@ -4,7 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { getTopCountries, getTopPages } from "@/app/actions/getWebAnalytics";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { ANALYTICS_FIELDS, ANALYTICS_SORT_DIR, type AnalyticsSortState } from "../constants";
 import { getCountryFlag, getCountryName } from "../constants/countries";
@@ -18,13 +20,16 @@ import NotFoundPagesTable from "./NotFoundPagesTable";
 import ReferringDomainsTable from "./ReferringDomainsTable";
 
 interface AnalyticsTablesProps {
-    docsUrl: string;
+    docsUrl: DocsUrl;
     dateRange: DateRangeOptions;
+    orgName?: Auth0OrgName;
+    githubUrl?: string;
+    baseBranch?: string;
 }
 
 const formatNumber = (value: number) => new Intl.NumberFormat("en-US").format(value);
 
-function AnalyticsTables({ docsUrl, dateRange }: AnalyticsTablesProps) {
+function AnalyticsTables({ docsUrl, dateRange, orgName, githubUrl, baseBranch }: AnalyticsTablesProps) {
     // Track sorting state for both tables
     const [pagesSortState, setPagesSortState] = useState<AnalyticsSortState>({
         field: ANALYTICS_FIELDS.VISITORS,
@@ -153,7 +158,13 @@ function AnalyticsTables({ docsUrl, dateRange }: AnalyticsTablesProps) {
 
             {/* Fourth row: 404 Pages */}
             <div className="flex flex-col gap-4 lg:flex-row">
-                <NotFoundPagesTable docsUrl={docsUrl} dateRange={dateRange} />
+                <NotFoundPagesTable
+                    docsUrl={docsUrl}
+                    dateRange={dateRange}
+                    orgName={orgName}
+                    githubUrl={githubUrl}
+                    baseBranch={baseBranch}
+                />
             </div>
 
             {/* Fifth row: API Explorer Requests and LLM Bot Traffic */}

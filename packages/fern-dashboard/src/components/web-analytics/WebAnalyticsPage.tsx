@@ -5,8 +5,10 @@ import { RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { getDocsGithubMetadata } from "@/app/actions/getDocsGithubMetadata";
 import { clearWebAnalyticsCache, getWebAnalytics } from "@/app/actions/getWebAnalytics";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
+import type { DocsUrl } from "@/utils/types";
 
 import { Button } from "../ui/button";
 import WebAnalyticsChart from "./Chart";
@@ -36,6 +38,12 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
                 groupBy
             }),
         refetchInterval: 60000 // Refetch every minute
+    });
+
+    const { data: githubMetadata } = useQuery({
+        queryKey: ["docs-github-metadata", docsUrl],
+        queryFn: () => getDocsGithubMetadata(docsUrl),
+        staleTime: 1000 * 60 * 10 // 10 minutes
     });
 
     const refreshMutation = useMutation({
@@ -90,7 +98,14 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
 
             <WebAnalyticsChart dateRange={dateRange} docsUrl={docsUrl} groupBy={groupBy} setGroupBy={setGroupBy} />
 
-            <AnalyticsTables docsUrl={docsUrl} dateRange={dateRange} />
+            {/* Analytics Tables - Top Pages, Countries, and LLM Files */}
+            <AnalyticsTables
+                docsUrl={docsUrl as DocsUrl}
+                dateRange={dateRange}
+                orgName={githubMetadata?.orgName}
+                githubUrl={githubMetadata?.githubUrl}
+                baseBranch={githubMetadata?.baseBranch}
+            />
         </div>
     );
 }

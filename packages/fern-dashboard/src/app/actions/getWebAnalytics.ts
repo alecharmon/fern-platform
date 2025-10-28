@@ -155,7 +155,6 @@ async function verifyDomainAccess(url: string) {
         url: decodedUrl,
         token: fernToken_admin() ?? session.accessToken
     });
-
     const baseDomain = getBaseDomain(decodedUrl);
     // Get all organizations the user has access to
     if (!docsMetadata.ok || !docsMetadata.body.org) {
@@ -743,7 +742,13 @@ export async function get404Pages(request: TableRequest): Promise<{ pages404: { 
  * Server action to fetch API Explorer requests from PostHog
  */
 export async function getAPIExplorerRequests(request: TableRequest): Promise<{
-    apiExplorerRequests: { host: string; method: string; endpoint: string; name: string; count: number }[];
+    apiExplorerRequests: {
+        host: string;
+        method: string;
+        endpoint: string;
+        name: string;
+        count: number;
+    }[];
 }> {
     // Validate input
     const validated = TableRequestSchema.parse(request);
