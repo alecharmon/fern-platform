@@ -34,6 +34,8 @@ export function followRedirect(
         // version is a special case where it should only consider it's first child (the first version)
         versioned: (node) => followRedirect(node.children.filter((node) => !node.hidden)[0]),
         unversioned: (node) => followRedirect(node.landingPage ?? node.child),
+        varianted: (node) => followRedirect(node.children.filter((node) => !node.hidden)[0]),
+        variant: (node) => followRedirects(node.children),
         tabbed: (node) => followRedirects(node.children),
         sidebarRoot: (node) => followRedirects(node.children),
         endpointPair: (node) => followRedirect(node.nonStream),

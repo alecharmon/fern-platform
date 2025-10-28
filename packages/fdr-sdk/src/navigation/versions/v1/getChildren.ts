@@ -18,6 +18,8 @@ export function getChildren(node: NavigationNode): readonly NavigationNode[] {
         case "sidebarRoot":
         case "tabbed":
         case "versioned":
+        case "varianted":
+        case "variant":
             return node.children;
         case "product":
         case "root":

@@ -112,7 +112,8 @@ export class FernNavigationV1ToLatest {
             landingPage,
             child: visitDiscriminatedUnion(node.child)._visit<FernNavigation.VersionChild>({
                 tabbed: (value) => this.tabbed(value, [...parents, node]),
-                sidebarRoot: (value) => this.sidebarRoot(value, [...parents, node])
+                sidebarRoot: (value) => this.sidebarRoot(value, [...parents, node]),
+                varianted: (value) => this.varianted(value, [...parents, node])
             }),
             availability: this.#availability(node.availability),
             title: node.title,
@@ -175,6 +176,44 @@ export class FernNavigationV1ToLatest {
         return latest;
     };
 
+    public varianted = (
+        node: FernNavigation.V1.VariantedNode,
+        parents: FernNavigation.V1.NavigationNode[]
+    ): FernNavigation.VariantedNode => {
+        const latest: FernNavigation.VariantedNode = {
+            type: "varianted",
+            id: FernNavigation.NodeId(node.id),
+            children: node.children.map((child) => this.variant(child, [...parents, node]))
+        };
+        return latest;
+    };
+
+    public variant = (
+        node: FernNavigation.V1.VariantNode,
+        parents: FernNavigation.V1.NavigationNode[]
+    ): FernNavigation.VariantNode => {
+        const latest: FernNavigation.VariantNode = {
+            type: "variant",
+            default: node.default,
+            variantId: FernNavigation.VariantId(node.variantId),
+            subtitle: node.subtitle,
+            image: node.image,
+            children: node.children.map((child) => this.#variantChild(child, [...parents, node])),
+            title: node.title,
+            slug: FernNavigation.Slug(node.slug),
+            canonicalSlug: undefined,
+            icon: node.icon,
+            hidden: node.hidden,
+            authed: node.authed,
+            id: FernNavigation.NodeId(node.id),
+            pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
+            viewers: node.viewers,
+            orphaned: node.orphaned,
+            featureFlags: node.featureFlags
+        };
+        return latest;
+    };
+
     public tab = (
         node: FernNavigation.V1.TabNode,
         parents: FernNavigation.V1.NavigationNode[]
@@ -219,7 +258,8 @@ export class FernNavigationV1ToLatest {
             type: "unversioned",
             child: visitDiscriminatedUnion(node.child)._visit<FernNavigation.VersionChild>({
                 tabbed: (value) => this.tabbed(value, [...parents, node]),
-                sidebarRoot: (value) => this.sidebarRoot(value, [...parents, node])
+                sidebarRoot: (value) => this.sidebarRoot(value, [...parents, node]),
+                varianted: (value) => this.varianted(value, [...parents, node])
             }),
             landingPage: node.landingPage ? this.landingPage(node.landingPage, [...parents, node]) : undefined,
             id: FernNavigation.NodeId(node.id)
@@ -316,7 +356,8 @@ export class FernNavigationV1ToLatest {
                 visitDiscriminatedUnion(child)._visit<FernNavigation.SidebarRootChild>({
                     sidebarGroup: (value) => this.sidebarGroup(value, [...parents, node]),
                     apiReference: (value) => this.apiReference(value, [...parents, node]),
-                    section: (value) => this.section(value, [...parents, node])
+                    section: (value) => this.section(value, [...parents, node]),
+                    varianted: (value) => this.varianted(value, [...parents, node])
                 })
             )
         };
@@ -718,6 +759,20 @@ export class FernNavigationV1ToLatest {
         return latest;
     };
 
+    #variantChild = (
+        child: FernNavigation.V1.VariantChild,
+        parents: FernNavigation.V1.NavigationNode[]
+    ): FernNavigation.VariantChild => {
+        return visitDiscriminatedUnion(child)._visit<FernNavigation.VariantChild>({
+            apiReference: (value) => this.apiReference(value, parents),
+            section: (value) => this.section(value, parents),
+            sidebarGroup: (value) => this.sidebarGroup(value, parents),
+            link: (value) => this.link(value, parents),
+            page: (value) => this.page(value, parents),
+            changelog: (value) => this.changelog(value, parents)
+        });
+    };
+
     #navigationChild = (
         child: FernNavigation.V1.NavigationChild,
         parents: FernNavigation.V1.NavigationNode[]
@@ -727,7 +782,8 @@ export class FernNavigationV1ToLatest {
             section: (value) => this.section(value, parents),
             link: (value) => this.link(value, parents),
             page: (value) => this.page(value, parents),
-            changelog: (value) => this.changelog(value, parents)
+            changelog: (value) => this.changelog(value, parents),
+            varianted: (value) => this.varianted(value, parents)
         });
     };
 

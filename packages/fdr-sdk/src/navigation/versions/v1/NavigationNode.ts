@@ -13,6 +13,8 @@ export type NavigationNode =
     | FernNavigation.ProductNode
     | FernNavigation.VersionNode
     | FernNavigation.UnversionedNode
+    | FernNavigation.VariantedNode
+    | FernNavigation.VariantNode
     | FernNavigation.TabNode
     | FernNavigation.LinkNode
     | FernNavigation.PageNode

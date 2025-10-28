@@ -7,4 +7,5 @@ import * as FernRegistry from "../../../../../index.js";
 export type SidebarRootChild =
     | FernRegistry.navigation.v1.SidebarGroupNode
     | FernRegistry.navigation.v1.ApiReferenceNode
-    | FernRegistry.navigation.v1.SectionNode;
+    | FernRegistry.navigation.v1.SectionNode
+    | FernRegistry.navigation.v1.VariantedNode;

@@ -4,4 +4,7 @@
 
 import * as FernRegistry from "../../../../../index.js";
 
-export type VersionChild = FernRegistry.navigation.v1.TabbedNode | FernRegistry.navigation.v1.SidebarRootNode;
+export type VersionChild =
+    | FernRegistry.navigation.v1.TabbedNode
+    | FernRegistry.navigation.v1.SidebarRootNode
+    | FernRegistry.navigation.v1.VariantedNode;
