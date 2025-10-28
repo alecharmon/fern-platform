@@ -25,6 +25,7 @@ export * from "./FathomConfig.js";
 export * from "./ClearBitConfig.js";
 export * from "./HeapConfig.js";
 export * from "./DocsLayoutConfig.js";
+export * from "./DocsThemeConfig.js";
 export * from "./DocsSettingsConfig.js";
 export * from "./HttpSnippetsConfig.js";
 export * from "./HttpSnippetLanguage.js";

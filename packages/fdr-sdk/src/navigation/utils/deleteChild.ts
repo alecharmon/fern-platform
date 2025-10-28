@@ -100,6 +100,12 @@ export function mutableDeleteChild(
         case "versioned":
             parent.children = parent.children.filter((child) => child.id !== node.id);
             break;
+        case "varianted":
+            parent.children = parent.children.filter((child) => child.id !== node.id);
+            break;
+        case "variant":
+            parent.children = parent.children.filter((child) => child.id !== node.id);
+            break;
         default:
             throw new UnreachableCaseError(parent);
     }

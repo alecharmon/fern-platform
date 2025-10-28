@@ -20,6 +20,7 @@ export interface DocsConfig {
     redirects: FdrLambda.docs.v1.commons.RedirectConfig[] | undefined;
     colorsV3: FdrLambda.docs.v1.read.ColorsConfigV3 | undefined;
     layout: FdrLambda.docs.v1.commons.DocsLayoutConfig | undefined;
+    theme: FdrLambda.docs.v1.commons.DocsThemeConfig | undefined;
     settings: FdrLambda.docs.v1.commons.DocsSettingsConfig | undefined;
     typographyV2: FdrLambda.docs.v1.commons.DocsTypographyConfigV2 | undefined;
     analyticsConfig: FdrLambda.docs.v1.commons.AnalyticsConfig | undefined;

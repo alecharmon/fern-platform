@@ -38,6 +38,10 @@ export function hasChildren(node: NavigationNodeParent): boolean {
             return true;
         case "versioned":
             return node.children.length > 0;
+        case "varianted":
+            return node.children.length > 0;
+        case "variant":
+            return node.children.length > 0;
         default:
             throw new UnreachableCaseError(node);
     }

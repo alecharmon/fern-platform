@@ -36,6 +36,8 @@ export function SidebarRootChild({
                     renderOptions={renderOptions}
                 />
             );
+        case "varianted":
+            throw new Error("unsupported type: varianted");
         default:
             throw new UnreachableCaseError(node);
     }

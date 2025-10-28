@@ -14,10 +14,12 @@ export function getApiReferenceId(
     return visitDiscriminatedUnion(node)._visit({
         root: RETURN_UNDEFINED,
         versioned: RETURN_UNDEFINED,
+        varianted: RETURN_UNDEFINED,
         tabbed: RETURN_UNDEFINED,
         sidebarRoot: RETURN_UNDEFINED,
         sidebarGroup: RETURN_UNDEFINED,
         version: RETURN_UNDEFINED,
+        variant: RETURN_UNDEFINED,
         tab: RETURN_UNDEFINED,
         link: RETURN_UNDEFINED,
         page: RETURN_UNDEFINED,

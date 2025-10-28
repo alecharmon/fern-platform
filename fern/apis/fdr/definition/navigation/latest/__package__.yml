@@ -13,6 +13,7 @@ types:
   TabId: string
   NodeId: string
   ProductId: string
+  VariantId: string
 
   # discriminated unions
 
@@ -34,6 +35,20 @@ types:
     union:
       - TabbedNode
       - SidebarRootNode
+      - VariantedNode
+
+  VariantChild:
+    discriminated: false
+    docs: |
+      The child of a variant node. This can contain sidebar-level items or section-level items,
+      depending on where the VariantedNode appears in the tree.
+    union:
+      - ApiReferenceNode
+      - SectionNode
+      - SidebarGroupNode
+      - PageNode
+      - LinkNode
+      - ChangelogNode
 
   TabChild:
     discriminated: false
@@ -48,6 +63,7 @@ types:
       - SidebarGroupNode
       - ApiReferenceNode
       - SectionNode
+      - VariantedNode
 
   NavigationChild:
     discriminated: false
@@ -57,6 +73,7 @@ types:
       - PageNode
       - LinkNode
       - ChangelogNode
+      - VariantedNode
 
   ApiPackageChild:
     discriminated: false
@@ -93,6 +110,12 @@ types:
       type: literal<"unversioned">
       child: VersionChild
       landingPage: optional<LandingPageNode>
+
+  VariantedNode:
+    extends: WithNodeId
+    properties:
+      type: literal<"varianted">
+      children: list<VariantNode>
 
   TabbedNode:
     extends: WithNodeId
@@ -168,6 +191,24 @@ types:
       child: VersionChild
       availability: optional<commons.Availability>
       landingPage: optional<LandingPageNode>
+
+  VariantNode:
+    extends:
+      - WithNodeMetadata
+      - WithRedirect
+    properties:
+      type: literal<"variant">
+      default: boolean
+      variantId: VariantId
+      subtitle:
+        type: string
+        docs: Couple words for what the variant is
+      image:
+        type: optional<commons.FileId>
+        docs: A URL to an image that will be displayed. Takes precedence over `icon` if both are provided.
+      children:
+        type: list<VariantChild>
+        docs: The navigation items that belong to this variant
 
   TabNode:
     extends:

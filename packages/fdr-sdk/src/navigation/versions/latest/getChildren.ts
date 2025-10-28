@@ -18,11 +18,14 @@ export function getChildren(node: NavigationNode): readonly NavigationNode[] {
         case "sidebarRoot":
         case "tabbed":
         case "versioned":
+        case "varianted":
             return node.children;
         case "product":
         case "root":
         case "tab":
             return [node.child];
+        case "variant":
+            return node.children;
         case "apiReference":
             return [...node.children, ...(node.changelog ? [node.changelog] : [])];
         case "endpointPair":

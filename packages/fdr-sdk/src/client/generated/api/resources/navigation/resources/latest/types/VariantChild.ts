@@ -4,10 +4,14 @@
 
 import * as FernRegistry from "../../../../../index.js";
 
-export type NavigationChild =
+/**
+ * The child of a variant node. This can contain sidebar-level items or section-level items,
+ * depending on where the VariantedNode appears in the tree.
+ */
+export type VariantChild =
     | FernRegistry.navigation.latest.ApiReferenceNode
     | FernRegistry.navigation.latest.SectionNode
+    | FernRegistry.navigation.latest.SidebarGroupNode
     | FernRegistry.navigation.latest.PageNode
     | FernRegistry.navigation.latest.LinkNode
-    | FernRegistry.navigation.latest.ChangelogNode
-    | FernRegistry.navigation.latest.VariantedNode;
+    | FernRegistry.navigation.latest.ChangelogNode;

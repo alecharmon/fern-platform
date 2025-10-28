@@ -81,6 +81,8 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                     icon={processIcon(node, undefined, forceClientRender)}
                 />
             );
+        case "varianted":
+            throw new Error("unsupported type: varianted");
         default:
             throw new UnreachableCaseError(node);
     }

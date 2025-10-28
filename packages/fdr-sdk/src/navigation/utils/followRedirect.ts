@@ -42,6 +42,8 @@ export function followRedirect(
         case "unversioned":
         case "version":
         case "changelog":
+        case "varianted":
+        case "variant":
             return followRedirects(FernNavigation.getChildren(nodeToFollow));
         default:
             throw new UnreachableCaseError(nodeToFollow);

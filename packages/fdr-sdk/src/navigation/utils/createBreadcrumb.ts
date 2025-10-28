@@ -12,6 +12,7 @@ export function createBreadcrumb(nodes: readonly FernNavigation.NavigationNode[]
         visitDiscriminatedUnion(node)._visit({
             root: noop,
             version: noop,
+            variant: noop,
             tab: noop,
             product: noop,
             section: (section) => {

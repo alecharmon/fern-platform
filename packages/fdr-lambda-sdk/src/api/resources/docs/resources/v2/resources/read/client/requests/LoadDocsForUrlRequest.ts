@@ -12,4 +12,5 @@ import * as FdrLambda from "../../../../../../../../index.js";
  */
 export interface LoadDocsForUrlRequest {
     url: FdrLambda.Url;
+    excludeApis?: boolean;
 }

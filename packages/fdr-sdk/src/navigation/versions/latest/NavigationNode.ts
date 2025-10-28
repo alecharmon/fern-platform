@@ -7,11 +7,13 @@ export type NavigationNode =
     | FernNavigation.RootNode
     | FernNavigation.ProductGroupNode
     | FernNavigation.VersionedNode
+    | FernNavigation.VariantedNode
     | FernNavigation.TabbedNode
     | FernNavigation.SidebarRootNode
     | FernNavigation.SidebarGroupNode
     | FernNavigation.ProductNode
     | FernNavigation.VersionNode
+    | FernNavigation.VariantNode
     | FernNavigation.UnversionedNode
     | FernNavigation.TabNode
     | FernNavigation.LinkNode
