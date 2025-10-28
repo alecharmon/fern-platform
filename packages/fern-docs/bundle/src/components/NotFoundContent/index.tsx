@@ -57,7 +57,7 @@ export default function NotFoundContent() {
                 {!isLoading && suggestedRoutes.length > 0 && (
                     <div className="flex flex-col items-center gap-3 max-w-md w-full px-4">
                         <p className="text-sm text-(color:--grayscale-a11) font-medium">
-                            How about one of these pages?
+                            Were you looking for one of these?
                         </p>
                         <div className="flex flex-col gap-2 w-full">
                             {suggestedRoutes.map((route) => (
