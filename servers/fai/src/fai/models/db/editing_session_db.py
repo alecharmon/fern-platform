@@ -6,11 +6,15 @@ from datetime import (
 from sqlalchemy import (
     Column,
     DateTime,
+    Enum,
     String,
 )
 
 from fai.db import Base
-from fai.models.types.editing_session_types import EditingSession
+from fai.models.types.editing_session_types import (
+    EditingSession,
+    EditingSessionStatus,
+)
 
 
 class EditingSessionDb(Base):
@@ -24,21 +28,17 @@ class EditingSessionDb(Base):
     __tablename__ = "editing_sessions"
     __table_args__ = {"extend_existing": True}
 
-    # Primary key - unique identifier for this editing session
     id = Column(String, primary_key=True)
 
-    # Claude CLI session ID for conversation resumption
     session_id = Column(String, nullable=True)
+    status = Column(Enum(EditingSessionStatus), nullable=False, default=EditingSessionStatus.WAITING)
 
     # Repository information
     repository = Column(String, nullable=False)
     base_branch = Column(String, nullable=False)
     working_branch = Column(String, nullable=False)
-
-    # PR information
     pr_url = Column(String, nullable=True)
 
-    # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     updated_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
@@ -51,6 +51,7 @@ class EditingSessionDb(Base):
             base_branch=self.base_branch,
             working_branch=self.working_branch,
             pr_url=self.pr_url,
+            status=self.status,
             created_at=self.created_at,
             updated_at=self.updated_at,
         )

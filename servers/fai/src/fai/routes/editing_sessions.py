@@ -16,10 +16,12 @@ from fai.models.api.editing_session_api import (
     CreateEditingSessionRequest,
     CreateEditingSessionResponse,
     GetEditingSessionResponse,
+    InterruptEditingSessionResponse,
     UpdateEditingSessionRequest,
     UpdateEditingSessionResponse,
 )
 from fai.models.db.editing_session_db import EditingSessionDb
+from fai.models.types.editing_session_types import EditingSessionStatus
 from fai.settings import LOGGER
 
 
@@ -53,6 +55,7 @@ async def create_editing_session(
             base_branch=request.base_branch,
             working_branch=working_branch,
             pr_url=None,
+            status=EditingSessionStatus.WAITING,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )
@@ -135,6 +138,8 @@ async def update_editing_session(
             db_session.session_id = request.session_id
         if request.pr_url is not None:
             db_session.pr_url = request.pr_url
+        if request.status is not None:
+            db_session.status = request.status
 
         db_session.updated_at = datetime.now(UTC)
 
@@ -149,5 +154,56 @@ async def update_editing_session(
         LOGGER.exception(f"Failed to update editing session: {e}")
         return JSONResponse(
             content={"error": "Failed to update editing session", "details": str(e)},
+            status_code=500,
+        )
+
+
+@fai_app.post(
+    "/editing-sessions/{editing_id}/interrupt",
+    response_model=InterruptEditingSessionResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def interrupt_editing_session(
+    editing_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    """Interrupt a running editing session."""
+    LOGGER.info(f"Interrupting editing session: {editing_id}")
+    try:
+        result = await db.execute(select(EditingSessionDb).where(EditingSessionDb.id == editing_id))
+        db_session = result.scalar_one_or_none()
+
+        if db_session is None:
+            LOGGER.warning(f"Editing session not found: {editing_id}")
+            return JSONResponse(
+                content={"error": "Editing session not found"},
+                status_code=404,
+            )
+
+        # Only interrupt if session is active
+        if db_session.status != EditingSessionStatus.ACTIVE:
+            LOGGER.warning(f"Cannot interrupt session with status {db_session.status}: {editing_id}")
+            return JSONResponse(
+                content={"error": f"Cannot interrupt session with status: {db_session.status}"},
+                status_code=400,
+            )
+
+        db_session.status = EditingSessionStatus.INTERRUPTED
+        db_session.updated_at = datetime.now(UTC)
+
+        await db.commit()
+        await db.refresh(db_session)
+
+        LOGGER.info(f"Interrupted editing session: {editing_id}")
+
+        return JSONResponse(
+            content=jsonable_encoder(InterruptEditingSessionResponse(editing_session=db_session.to_api())),
+            status_code=200,
+        )
+
+    except Exception as e:
+        LOGGER.exception(f"Failed to interrupt editing session: {e}")
+        return JSONResponse(
+            content={"error": "Failed to interrupt editing session", "details": str(e)},
             status_code=500,
         )

@@ -1,6 +1,16 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel
+
+
+class EditingSessionStatus(str, Enum):
+    """Status of an editing session."""
+
+    WAITING = "waiting"
+    ACTIVE = "active"
+    INTERRUPTED = "interrupted"
+    COMPLETED = "completed"
 
 
 class EditingSession(BaseModel):
@@ -10,5 +20,6 @@ class EditingSession(BaseModel):
     base_branch: str
     working_branch: str
     pr_url: str | None
+    status: EditingSessionStatus
     created_at: datetime
     updated_at: datetime
