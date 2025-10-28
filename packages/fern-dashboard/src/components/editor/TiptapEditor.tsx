@@ -13,7 +13,7 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { createLowlight } from "lowlight";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
@@ -168,6 +168,9 @@ export default function TiptapEditor({
     const isEditingDisabled = useEditingDisabled();
     const skipFirstUpdateRef = useRef(true);
 
+    // Generate a unique ID for this editor instance to prevent cross-editor drag-and-drop
+    const editorId = useMemo(() => Math.random().toString(36).slice(2), []);
+
     const handleUpdate: EditorProviderProps["onUpdate"] = (props) => {
         // Skip the first update event as it's always just processing the initial content
         if (skipFirstUpdateRef.current) {
@@ -184,7 +187,38 @@ export default function TiptapEditor({
             extensions={[...extensions, ConfiguredMediaUploadNode(), ConfiguredFileHandler()]}
             editorProps={{
                 attributes: {
-                    class: "focus:outline-none max-w-none p-4"
+                    class: "focus:outline-none max-w-none p-4",
+                    // Attach editor ID to DOM for cross-editor drag detection
+                    "data-editor-id": editorId
+                },
+                handleDOMEvents: {
+                    // Block drops from other editors (e.g., outer → nested or vice versa) by comparing editor IDs
+                    drop: (view, event) => {
+                        const e = event as unknown as DragEvent;
+                        const fromId = e.dataTransfer?.getData("editor-id") || "";
+                        const toId = (view.dom as HTMLElement)?.getAttribute("data-editor-id") || "";
+                        if (fromId && toId && fromId !== toId) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return true;
+                        }
+                        return false;
+                    },
+                    // Show "not-allowed" cursor when dragging between different editors
+                    dragover: (view, event) => {
+                        const e = event as unknown as DragEvent;
+                        const fromId = e.dataTransfer?.getData("editor-id") || "";
+                        const toId = (view.dom as HTMLElement)?.getAttribute("data-editor-id") || "";
+                        if (fromId && toId && fromId !== toId) {
+                            try {
+                                if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+                            } catch {}
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return true;
+                        }
+                        return false;
+                    }
                 }
             }}
             parseOptions={{
