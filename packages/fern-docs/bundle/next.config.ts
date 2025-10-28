@@ -114,8 +114,8 @@ const nextConfig: NextConfig = {
         parallelServerBuildTraces: true,
         webpackMemoryOptimizations: true,
         taint: true,
-        useCache: true,
-        serverComponentsHmrCache: true,
+        useCache: !isStandalone && !isSelfHosted,
+        serverComponentsHmrCache: !isStandalone && !isSelfHosted,
         serverActions: {
             allowedOrigins: ["*"]
         }
