@@ -27,7 +27,7 @@ export function BranchListItem({
     return (
         <>
             <div className="flex items-center justify-between gap-x-4 gap-y-1">
-                <div className="flex-1 overflow-x-scroll">
+                <div className="flex-1 overflow-x-hidden">
                     <BranchPRInfo branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl} />
                 </div>
                 <div className="flex items-center justify-end gap-2">
