@@ -3,10 +3,12 @@ import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { ArrowUpRight } from "lucide-react";
 
+import { I18N } from "@/constants";
+
 export const ApiReferenceButton: React.FC<{ slug: string }> = ({ slug }) => {
     return (
         <FernTooltipProvider>
-            <FernTooltip content="Open in API reference">
+            <FernTooltip content={I18N.apiReference.openInApiReference}>
                 <FernLinkButton
                     className="-m-1"
                     rounded

@@ -5,6 +5,8 @@ import { Button } from "@fern-docs/components/button";
 import { useAtomValue } from "jotai";
 import { Key } from "lucide-react";
 import type { ReactElement } from "react";
+
+import { I18N } from "@/constants";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 import type { PlaygroundAuthState } from "../types";
 import { isMultiAuthToken } from "../utils/parse-auth-options";
@@ -29,11 +31,11 @@ export function PlaygroundCardTriggerManual({
     }
 
     const authButtonCopy = visitDiscriminatedUnion(auth)._visit({
-        bearerAuth: () => "Enter your bearer token",
-        basicAuth: () => "Enter your username and password",
-        header: () => "Enter your credentials",
-        oAuth: () => "Enter your credentials",
-        _other: () => "Enter your credentials"
+        bearerAuth: () => I18N.auth.enterBearerToken,
+        basicAuth: () => I18N.auth.enterUsernameAndPassword,
+        header: () => I18N.auth.enterCredentials,
+        oAuth: () => I18N.auth.enterCredentials,
+        _other: () => I18N.auth.enterCredentials
     });
 
     const authed = isAuthed(auth, authState);

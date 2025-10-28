@@ -8,6 +8,7 @@ import { useSetAtom } from "jotai";
 import { type ReactElement, useRef } from "react";
 
 import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
+import { I18N } from "@/constants";
 import { useProgrammingLanguage } from "@/state/language";
 import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/state/playground";
 import { PlaygroundCodeSnippetResolverBuilder } from "../code-snippets/resolver";
@@ -84,7 +85,7 @@ export function PlaygroundEndpointRequestCard({
     return (
         <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
             <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
-                <span className="text-(color:--grayscale-a11) text-xs uppercase">Request</span>
+                <span className="text-(color:--grayscale-a11) text-xs uppercase">{I18N.apiReference.request}</span>
                 {!hasDynamicIr && (
                     <FernButtonGroup>
                         <FernButton

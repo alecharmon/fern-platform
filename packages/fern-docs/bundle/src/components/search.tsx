@@ -23,9 +23,9 @@ import { atom, useAtom, useSetAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { z } from "zod";
-
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
+import { I18N } from "@/constants";
 import { useSetTheme, useThemeSwitchEnabled } from "@/hooks/use-theme";
 import { useIsDarkCode } from "@/state/dark-code";
 import {
@@ -204,7 +204,7 @@ export const SearchV2 = React.memo(function SearchV2({ domain }: { domain: strin
                             }
                             return (
                                 <Feedback
-                                    feedbackQuestion="Was this response helpful?"
+                                    feedbackQuestion={I18N.feedback.wasThisResponseHelpful}
                                     type="conversational-search"
                                     metadata={() => ({
                                         user: user?.content,

@@ -6,6 +6,8 @@ import { FernCard } from "@fern-docs/components/FernCard";
 import { File, FilePlus, Mic, X } from "lucide-react";
 import prettyBytes from "pretty-bytes";
 import { type ChangeEvent, type DragEventHandler, memo, useEffect, useRef, useState } from "react";
+
+import { I18N } from "@/constants";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { isValidFile, uniqueFiles } from "../utils/utils";
 import { WithLabelInternal } from "../WithLabel";
@@ -151,7 +153,7 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                             <div className="flex gap-2">
                                 <FernButton
                                     onClick={() => ref.current?.click()}
-                                    text="Browse files"
+                                    text={I18N.buttons.browseFiles}
                                     rounded
                                     variant="outlined"
                                     intent="primary"
@@ -187,7 +189,7 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                                             {audioUrl && <PlaygroundAudioControls audioUrl={audioUrl} />}
                                             {!audioUrl && (
                                                 <FernButton
-                                                    text="Change"
+                                                    text={I18N.buttons.change}
                                                     onClick={() => ref.current?.click()}
                                                     size="small"
                                                     variant="minimal"
@@ -222,7 +224,7 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                                     <FernButton
                                         onClick={() => ref.current?.click()}
                                         icon={<FilePlus />}
-                                        text="Add more files"
+                                        text={I18N.buttons.addMoreFiles}
                                         rounded
                                         variant="outlined"
                                         intent="primary"

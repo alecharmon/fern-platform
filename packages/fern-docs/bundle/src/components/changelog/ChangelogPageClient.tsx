@@ -18,6 +18,7 @@ import React, { Fragment, type ReactElement, useEffect, useMemo } from "react";
 
 import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
+import { I18N } from "@/constants";
 import { useSelectedFilters } from "@/state/search";
 import { BottomNavigationClient } from "../bottom-nav-client";
 import { PageFilters } from "../PageFilters";
@@ -134,7 +135,7 @@ export default function ChangelogPageClient({
         }
 
         return {
-            title: "Older posts",
+            title: I18N.changelog.olderPosts,
             href: `#page-${page + 1}`,
             shallow: true,
             onClick: () => {

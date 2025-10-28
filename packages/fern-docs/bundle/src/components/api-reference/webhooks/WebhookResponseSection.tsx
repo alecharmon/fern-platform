@@ -1,6 +1,7 @@
+import { I18N } from "@/constants";
 import { Markdown } from "@/mdx/components/Markdown";
 
-const STATUS_200_TEXT = "Return a 200 status to indicate that the data was received successfully.";
+const STATUS_200_TEXT = I18N.responses.return200Status;
 
 export const WebhookResponseSection: React.FC = () => {
     return (

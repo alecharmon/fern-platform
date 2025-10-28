@@ -3,6 +3,8 @@
 import { Empty } from "@fern-docs/components/Empty";
 import React from "react";
 
+import { I18N } from "@/constants";
+
 export interface EnumDefinitionDetailsProps {
     elements: {
         element: React.ReactNode;
@@ -41,7 +43,7 @@ export function EnumDefinitionDetails({ elements, searchInput }: EnumDefinitionD
                     ))}
                 </div>
             ) : (
-                <Empty name="No results" description="No enum values found" />
+                <Empty name={I18N.search.noResults} description={I18N.errors.noEnumValuesFound} />
             )}
         </div>
     );

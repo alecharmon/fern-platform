@@ -5,6 +5,7 @@ import { Copy, ExternalLink } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
 import type { ReactNode } from "react";
 
+import { I18N } from "@/constants";
 import { isSelfHosted } from "@/server/isSelfHosted";
 
 import {
@@ -26,8 +27,8 @@ export const CopyPageOption = (): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "copy-page",
-        label: "Copy page",
-        helperText: "Copy this page as Markdown for LLMs",
+        label: I18N.documentation.copyPage,
+        helperText: I18N.documentation.copyPageAsMarkdown,
         icon: <Copy className="size-icon" height={24} width={24} />
     } as FernDropdown.ValueOption;
 };
@@ -36,8 +37,8 @@ export const ViewAsMarkdownOption = (domain: string, slug: string): FernDropdown
     return {
         type: "value",
         value: "view-as-markdown",
-        label: "View as Markdown",
-        helperText: "View this page as plain text",
+        label: I18N.buttons.viewAsMarkdown,
+        helperText: I18N.documentation.viewThisPageAsPlainText,
         icon: <MarkdownIcon />,
         href: `https://${domain}/${slug}.md`,
         rightElement: <ExternalLink className="size-icon" />
@@ -55,8 +56,8 @@ export const OpenAISearchOption = (): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "open-ai-search",
-        label: "Ask a question",
-        helperText: "Chat with an AI assistant",
+        label: I18N.search.askAQuestion,
+        helperText: I18N.search.chatWithAIAssistant,
         icon: <SparklesIconHollow />
     } as FernDropdown.ValueOption;
 };
@@ -65,8 +66,8 @@ export const OpenLLMSTxtOption = (): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "open-llms-txt",
-        label: "LLM?",
-        helperText: "Read llms.txt",
+        label: I18N.ai.llm,
+        helperText: I18N.buttons.readLlmsTxt,
         icon: <TextIcon key="llms-txt-logo" />,
         href: `/llms.txt`
     } as FernDropdown.ValueOption;
@@ -102,7 +103,7 @@ export const OpenWithLLM = ({
         type: "value",
         value: `open-${llm.toLowerCase()}`,
         label: `Open in ${llm}`,
-        helperText: "Ask questions about this page",
+        helperText: I18N.search.askQuestionsAboutThisPage,
         icon: LLM_URLS[llm][1],
         href: `${LLM_URLS[llm][0]}${encodeURIComponent(prompt)}`,
         rightElement: <ExternalLink className="size-icon" />
@@ -131,8 +132,8 @@ export const OpenWithCursor = async ({ domain }: { domain: ParamValue }): Promis
     return {
         type: "value",
         value: "open-cursor",
-        label: "Connect to Cursor",
-        helperText: "Install MCP server on Cursor",
+        label: I18N.buttons.connectToCursor,
+        helperText: I18N.documentation.installMcpServerOnCursor,
         icon: <CursorIcon />,
         // Example MCP server config for Cursor install link
         // See: https://modelcontextprotocol.org/docs/context/mcp

@@ -3,8 +3,7 @@ import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { ArrowUpRight } from "lucide-react";
 
-const USE_EXAMPLE_TEXT = "Use example";
-const CLEAR_FORM_TEXT = "Clear form";
+import { I18N } from "@/constants";
 
 interface PlaygroundEndpointFormButtonsProps {
     node: FernNavigation.EndpointNode;
@@ -22,10 +21,10 @@ export function PlaygroundEndpointFormButtons({
         <div className="flex items-center justify-between">
             <FernButtonGroup>
                 <FernButton onClick={resetWithExample} size="small" variant="minimal">
-                    {USE_EXAMPLE_TEXT}
+                    {I18N.buttons.useExample}
                 </FernButton>
                 <FernButton onClick={resetWithoutExample} size="small" variant="minimal">
-                    {CLEAR_FORM_TEXT}
+                    {I18N.buttons.clearForm}
                 </FernButton>
             </FernButtonGroup>
 
@@ -35,7 +34,7 @@ export function PlaygroundEndpointFormButtons({
                 className="text-(color:--grayscale-a11) hover:text-(color:--accent) inline-flex items-center gap-1 text-sm font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
                 scroll={true}
             >
-                <span>View in API Reference</span>
+                <span>{I18N.apiReference.apiReference}</span>
                 <ArrowUpRight className="size-icon" />
             </FernLink>
         </div>

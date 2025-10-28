@@ -3,7 +3,7 @@ import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 import { Edit } from "lucide-react";
 import type { ReactElement } from "react";
 
-const EDIT_THIS_PAGE_TEXT = "Edit this page";
+import { I18N } from "@/constants";
 
 interface EditThisPageButton {
     editThisPageUrl: string | undefined;
@@ -15,7 +15,7 @@ export function EditThisPageButton(props: EditThisPageButton): ReactElement<any>
     return (
         <ButtonLink href={props.editThisPageUrl} variant="outline" size="sm">
             <Edit />
-            {EDIT_THIS_PAGE_TEXT}
+            {I18N.buttons.editThisPage}
         </ButtonLink>
     );
 }

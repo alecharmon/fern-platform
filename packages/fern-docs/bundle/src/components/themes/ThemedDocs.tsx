@@ -1,5 +1,7 @@
 import dynamic from "next/dynamic";
 
+import { I18N } from "@/constants";
+
 const THEMES = {
     default: dynamic(() => import("./default/DefaultDocs"), { ssr: true }),
     cohere: dynamic(() => import("./cohere/CohereDocs"), { ssr: true })
@@ -24,7 +26,7 @@ export function ThemedDocs({
     darkSidebarClassName,
     lightHeaderClassName,
     darkHeaderClassName,
-    searchPlaceholder = "Search"
+    searchPlaceholder = I18N.search.search
 }: {
     theme?: FernTheme;
     announcement?: React.ReactNode;

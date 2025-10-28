@@ -7,6 +7,7 @@ import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter"
 import { useAtomValue } from "jotai";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 
+import { I18N } from "@/constants";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 
 import type { PlaygroundEndpointRequestFormState } from "../types";
@@ -30,7 +31,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
     PlaygroundDynamicRequestPreviewRef,
     PlaygroundDynamicRequestPreviewProps
 >(({ context, formState, requestType, dynamicIRsByLanguage }, ref) => {
-    const [code, setCode] = useState<string>("Loading...");
+    const [code, setCode] = useState<string>(I18N.status.loading);
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
     const [baseURL] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
@@ -168,7 +169,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         const generateCode = () => {
             try {
                 if (!memoizedGenerators) {
-                    setCode("Failed to create snippet generators");
+                    setCode(I18N.errors.failedToCreateSnippetGenerators);
                     return;
                 }
 
@@ -203,10 +204,10 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
 
                 const result = generator.generateSync(request);
 
-                setCode(result.snippet ?? "Error generating code snippet");
+                setCode(result.snippet ?? I18N.errors.errorGeneratingCodeSnippet);
             } catch (error: unknown) {
                 console.error(`Error generating ${requestType} snippet:`, error);
-                const errorMessage = error instanceof Error ? error.message : "Unknown error";
+                const errorMessage = error instanceof Error ? error.message : I18N.status.unknownError;
                 setCode(`Failed to generate ${requestType} code: ${errorMessage}`);
             }
         };

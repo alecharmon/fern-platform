@@ -1,6 +1,8 @@
 import { FernTabs } from "@fern-docs/components/FernTabs";
 import { type ReactElement, type ReactNode, useState } from "react";
 
+import { I18N } from "@/constants";
+
 interface PlaygroundEndpointMobileLayoutProps {
     form: ReactNode;
     requestCard: ReactNode;
@@ -24,7 +26,7 @@ export function PlaygroundEndpointMobileLayout({
             onValueChange={setTabValue}
             tabs={[
                 {
-                    title: "Request",
+                    title: I18N.apiReference.request,
                     content: (
                         <div className="space-y-4 pb-6">
                             {form}
@@ -44,7 +46,7 @@ export function PlaygroundEndpointMobileLayout({
                         </div>
                     )
                 },
-                { title: "Response", content: responseCard }
+                { title: I18N.apiReference.response, content: responseCard }
             ]}
         />
     );

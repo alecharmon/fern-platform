@@ -8,6 +8,8 @@ import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
 
+import { I18N } from "@/constants";
+
 const Markdown = dynamic(() => import("@/mdx/components/Markdown").then(({ Markdown }) => Markdown));
 
 interface PlaygroundEnumFormProps {
@@ -66,7 +68,7 @@ export const PlaygroundEnumForm = memo<PlaygroundEnumFormProps>((props) => {
                     activeItem != null ? (
                         <span className="font-mono">{activeItem.value}</span>
                     ) : (
-                        <span className="text-(color:--grayscale-a11)">Select an enum...</span>
+                        <span className="text-(color:--grayscale-a11)">{I18N.playground.selectAnEnum}</span>
                     )
                 }
                 variant="outlined"

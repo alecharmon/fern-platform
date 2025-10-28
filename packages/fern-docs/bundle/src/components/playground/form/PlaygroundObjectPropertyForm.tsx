@@ -14,8 +14,8 @@ import { useBooleanState } from "@fern-ui/react-commons";
 import { PlusCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type FC, memo, useCallback, useEffect, useMemo, useState } from "react";
-
 import { withErrorBoundary } from "@/components/error-boundary";
+import { I18N } from "@/constants";
 
 import { renderTypeShorthandRoot } from "../../type-shorthand";
 import { castToRecord, getEmptyValueForType, isExpandable } from "../utils";
@@ -166,7 +166,7 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                 {
                     type: "value",
                     value: ADD_ALL_KEY,
-                    label: "Add all optional properties",
+                    label: I18N.buttons.addAllOptionalProperties,
                     rightElement: <PlusCircle className="size-icon" />
                 }
             );

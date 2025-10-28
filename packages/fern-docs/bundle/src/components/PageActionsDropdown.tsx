@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
+import { I18N } from "@/constants";
 import { useIsAskAiEnabled } from "@/state/search";
 import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
 
@@ -97,12 +98,12 @@ export function PageActionsDropdown({
                 {showCopied ? (
                     <div className="flex items-center gap-2">
                         <Check className="size-icon" />
-                        <span>Copied!</span>
+                        <span>{I18N.buttons.copied}</span>
                     </div>
                 ) : (
                     <div className="flex items-center gap-2">
                         <Copy className="size-icon" />
-                        <span>Copy page</span>
+                        <span>{I18N.buttons.copyPage}</span>
                     </div>
                 )}
             </FernButton>

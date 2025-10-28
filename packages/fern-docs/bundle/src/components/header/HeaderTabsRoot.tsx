@@ -1,6 +1,8 @@
 "use client";
 
 import { AbstractHeaderTabsRoot } from "@fern-docs/components/abstract/AbstractHeaderTabsRoot";
+
+import { I18N } from "@/constants";
 import { SearchV2Trigger, useIsAskAiEnabled } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 
@@ -8,7 +10,7 @@ export function HeaderTabsRoot({
     children,
     showSearchBar,
     className,
-    placeholder = "Search"
+    placeholder = I18N.search.search
 }: {
     children: React.ReactNode;
     showSearchBar: boolean;

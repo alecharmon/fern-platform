@@ -12,8 +12,8 @@ import { useBooleanState, useCopyToClipboard } from "@fern-ui/react-commons";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import React, { type PropsWithChildren, type ReactElement, useMemo, useRef, useState } from "react";
 import { noop } from "ts-essentials";
-
 import { MaybeEnvironmentDropdown } from "@/components/MaybeEnvironmentDropdown";
+import { I18N } from "@/constants";
 
 export declare namespace EndpointUrl {
     export type Props = React.PropsWithChildren<{
@@ -106,7 +106,7 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
     return (
         <FernTooltipProvider>
             <FernTooltip
-                content={wasJustCopied && hideCopyButton ? "Copied!" : undefined}
+                content={wasJustCopied && hideCopyButton ? I18N.buttons.copied : undefined}
                 open={wasJustCopied && hideCopyButton ? true : undefined}
             >
                 <div

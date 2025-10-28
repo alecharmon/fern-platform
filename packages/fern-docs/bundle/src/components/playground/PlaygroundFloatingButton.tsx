@@ -7,6 +7,8 @@ import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTool
 import { useCurrentVersionSlug } from "@fern-docs/components/state/navigation";
 import { ChevronUp, SquareTerminal } from "lucide-react";
 
+import { I18N } from "@/constants";
+
 // TODO(catherine): add this to the endpoint content
 export const PlaygroundFloatingButton = () => {
     const slug = useCurrentVersionSlug();
@@ -16,8 +18,8 @@ export const PlaygroundFloatingButton = () => {
             <FernTooltip
                 content={
                     <span>
-                        Customize and run in{" "}
-                        <span className="text-(color:--accent-a11) font-semibold">API Explorer</span>
+                        {I18N.apiReference.customizeAndRunIn}
+                        <span className="text-(color:--accent-a11) font-semibold">{I18N.apiReference.apiExplorer}</span>
                     </span>
                 }
             >

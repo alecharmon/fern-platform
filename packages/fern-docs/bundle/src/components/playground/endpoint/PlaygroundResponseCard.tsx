@@ -9,6 +9,7 @@ import { round } from "es-toolkit/math";
 import { Download } from "lucide-react";
 import type { ReactElement } from "react";
 import { ErrorBoundaryFallback } from "@/components/error-boundary";
+import { I18N } from "@/constants";
 import { PlaygroundResponsePreview } from "../PlaygroundResponsePreview";
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import type { PlaygroundResponse } from "../types/playgroundResponse";
@@ -67,7 +68,7 @@ export function PlaygroundResponseCard({
                     loaded: (response) =>
                         response.type === "file" ? (
                             <FernTooltipProvider>
-                                <FernTooltip content="Download file">
+                                <FernTooltip content={I18N.buttons.downloadFile}>
                                     <FernButton
                                         icon={<Download />}
                                         size="small"
@@ -135,7 +136,7 @@ export function PlaygroundResponseCard({
                             <iframe
                                 src={response.response.body}
                                 className="size-full"
-                                title="PDF preview"
+                                title={I18N.status.pdfPreview}
                                 allowFullScreen
                             />
                         );

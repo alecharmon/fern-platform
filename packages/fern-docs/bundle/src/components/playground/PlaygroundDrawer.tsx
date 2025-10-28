@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import React, { useCallback } from "react";
 import { Drawer } from "vaul";
 
+import { I18N } from "@/constants";
 import { useUrlParams } from "@/hooks/use-url-params";
 
 import { useHeaderHeight, useViewportSize } from "../hooks/useViewportSize";
@@ -83,7 +84,7 @@ export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
                         preventCycle
                     />
                     <VisuallyHidden>
-                        <Drawer.Title>API Explorer</Drawer.Title>
+                        <Drawer.Title>{I18N.apiReference.apiExplorer}</Drawer.Title>
                         <Drawer.Description>
                             Browse, explore, and try out API endpoints without leaving the documentation.
                         </Drawer.Description>

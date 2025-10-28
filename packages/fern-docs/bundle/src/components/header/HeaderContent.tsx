@@ -4,6 +4,8 @@ import { AbstractHeaderContent } from "@fern-docs/components/abstract/AbstractHe
 import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";
 import type React from "react";
 import type { CSSProperties } from "react";
+
+import { I18N } from "@/constants";
 import { SearchV2Trigger, useIsAskAiEnabled } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 
@@ -18,7 +20,7 @@ export function HeaderContent({
     loginButton,
     forceHeader = false,
     headerDisabled = false,
-    placeholder = "Search"
+    placeholder = I18N.search.search
 }: {
     logo: React.ReactNode;
     versionSelect: React.ReactNode;

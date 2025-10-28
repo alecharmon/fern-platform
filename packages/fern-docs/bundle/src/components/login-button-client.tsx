@@ -5,6 +5,8 @@ import { WithReturnTo } from "@fern-docs/components/header/WithReturnTo";
 import { LogInIcon, LogOutIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
+import { I18N } from "@/constants";
+
 export function LoginButtonClient({
     authed,
     returnToQueryParam,
@@ -18,7 +20,7 @@ export function LoginButtonClient({
     return (
         <WithReturnTo queryParam={returnToQueryParam}>
             <ButtonLink variant="outline" {...props} target="_self">
-                {authed ? "Logout" : "Login"}
+                {authed ? I18N.auth.logout : I18N.auth.login}
                 {showIcon && (authed ? <LogOutIcon /> : <LogInIcon />)}
             </ButtonLink>
         </WithReturnTo>

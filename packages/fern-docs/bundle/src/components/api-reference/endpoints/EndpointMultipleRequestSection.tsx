@@ -4,6 +4,7 @@ import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
 import React, { useCallback } from "react";
 
+import { I18N } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
@@ -20,7 +21,7 @@ export function EndpointMultipleRequestSection({ requests, types }: EndpointMult
     const { selectedRequest, setSelectedRequest } = useEndpointContext();
 
     const getRequestId = useCallback((request: HttpRequest) => {
-        const contentType = request.contentType ?? "Request";
+        const contentType = request.contentType ?? I18N.apiReference.request;
         return (
             <span className="inline-flex items-center gap-2">
                 <span className="text-intent-info">{contentType}</span>
@@ -34,7 +35,7 @@ export function EndpointMultipleRequestSection({ requests, types }: EndpointMult
 
     return (
         <EndpointSection
-            title="Request"
+            title={I18N.apiReference.request}
             description={
                 <MdxServerComponentProseSuspense
                     size="sm"

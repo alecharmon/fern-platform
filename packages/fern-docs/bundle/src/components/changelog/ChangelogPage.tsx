@@ -8,8 +8,8 @@ import { FernLink } from "@fern-docs/components/FernLink";
 import { makeToc, type TableOfContentsItem, toTree } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/compat";
 import { notFound } from "next/navigation";
-
 import { PageHeader } from "@/components/PageHeader";
+import { I18N } from "@/constants";
 import { Markdown } from "@/mdx/components/Markdown";
 import { MdxContent } from "@/mdx/components/MdxContent";
 import type { MdxSerializer } from "@/server/mdx-serializer";
@@ -56,7 +56,7 @@ export default async function ChangelogPage({
     ).filter(isNonNullish);
 
     const tags = new Set(entries.flatMap((e) => e.tags ?? []));
-    const allTags = tags.size > 0 ? ["All", ...tags] : undefined;
+    const allTags = tags.size > 0 ? [I18N.ui.all, ...tags] : undefined;
 
     /**
      * if there are duplicate anchor tags, the anchor from the first page where it appears will be used

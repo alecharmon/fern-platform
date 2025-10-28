@@ -8,6 +8,7 @@ import { Prose } from "@fern-docs/components/mdx/prose";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { renderTypeShorthand } from "@/components/type-shorthand";
+import { I18N } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -65,7 +66,7 @@ export async function WebhookContent({
                         <TypeDefinitionAnchorPart part="payload">
                             {webhook.headers && webhook.headers.length > 0 && (
                                 <TypeDefinitionAnchorPart part="header">
-                                    <EndpointSection title="Headers">
+                                    <EndpointSection title={I18N.apiReference.headers}>
                                         <WithSeparator>
                                             {webhook.headers.map((parameter) => (
                                                 <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
@@ -80,7 +81,7 @@ export async function WebhookContent({
                             {webhook.payloads?.[0] && (
                                 <TypeDefinitionAnchorPart part="body">
                                     <EndpointSection
-                                        title="Payload"
+                                        title={I18N.apiReference.payload}
                                         description={
                                             <Prose className="text-(color:--grayscale-a11) my-3" size="sm">
                                                 {`The payload of this webhook request is ${renderTypeShorthand(webhook.payloads[0].shape, { withArticle: true }, types)}.`}
@@ -94,7 +95,7 @@ export async function WebhookContent({
                         </TypeDefinitionAnchorPart>
 
                         <TypeDefinitionAnchorPart part="response">
-                            <EndpointSection title="Response">
+                            <EndpointSection title={I18N.apiReference.response}>
                                 <WebhookResponseSection />
                             </EndpointSection>
                         </TypeDefinitionAnchorPart>

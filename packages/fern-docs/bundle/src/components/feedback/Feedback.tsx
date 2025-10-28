@@ -9,6 +9,8 @@ import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-path
 import { useKeyboardPress } from "@fern-ui/react-commons";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
+
+import { I18N } from "@/constants";
 import { track } from "../analytics";
 import { registerPosthogProperties } from "../analytics/posthog";
 import { FeedbackForm } from "./FeedbackForm";
@@ -27,7 +29,7 @@ export interface FeedbackProps {
 
 export const Feedback: FC<FeedbackProps> = ({
     className,
-    feedbackQuestion = "Was this page helpful?",
+    feedbackQuestion = I18N.feedback.wasThisPageHelpful,
     type = "on-page-feedback",
     metadata,
     pathname: pathnameProp,
@@ -121,7 +123,7 @@ export const Feedback: FC<FeedbackProps> = ({
                 type,
                 ...(typeof metadata === "function" ? metadata() : metadata)
             });
-            toast.success("Thank you for submitting feedback!");
+            toast.success(I18N.feedback.thankYouForFeedback);
             setSent(true);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,7 +187,7 @@ export const Feedback: FC<FeedbackProps> = ({
                 </div>
             ) : (
                 <div className="flex h-6 items-center">
-                    <span className="text-(color:--grayscale-a11) text-xs">Thank you for your feedback!</span>
+                    <span className="text-(color:--grayscale-a11) text-xs">{I18N.feedback.thankYouForFeedback}</span>
                 </div>
             )}
         </div>

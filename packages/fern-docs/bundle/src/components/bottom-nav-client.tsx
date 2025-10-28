@@ -7,6 +7,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import { I18N } from "@/constants";
+
 export function BottomNavigationClient({
     prev,
     next
@@ -50,7 +52,7 @@ export function BottomNavigationClient({
     }
 
     return (
-        <nav aria-label="Up next" className="fern-footer-nav">
+        <nav aria-label={I18N.navigation.upNext} className="fern-footer-nav">
             {prev && (
                 <MaybeFernLink
                     href={prev.href}

@@ -6,6 +6,7 @@ import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { ChevronDown } from "lucide-react";
 
+import { I18N } from "@/constants";
 import { useSelectedFilters, useSetSelectedFilters } from "@/state/search";
 
 export function PageFilters({ filters, forcePillDisplay }: { filters: string[]; forcePillDisplay?: boolean }) {
@@ -77,7 +78,7 @@ export function PageFilters({ filters, forcePillDisplay }: { filters: string[]; 
 
 function filterText(selectedFilters: string[]) {
     if (selectedFilters.length === 0) {
-        return "Select filters";
+        return I18N.search.selectFilters;
     }
 
     if (selectedFilters.join(", ").length < 12) {

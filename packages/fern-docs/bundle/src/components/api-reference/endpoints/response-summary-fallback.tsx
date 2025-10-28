@@ -1,8 +1,8 @@
 "use client";
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-
 import { renderTypeShorthand } from "@/components/type-shorthand";
+import { I18N } from "@/constants";
 
 import { useEndpointContext } from "./EndpointContext";
 
@@ -37,7 +37,7 @@ function getResponseSummary({
 }) {
     switch (response.body.type) {
         case "empty":
-            return "This endpoint returns nothing.";
+            return I18N.responses.thisEndpointReturnsNothing;
         case "fileDownload": {
             if (isAudioFileDownloadSpanSummary) {
                 return (
@@ -46,10 +46,10 @@ function getResponseSummary({
                     </span>
                 );
             }
-            return "This endpoint returns a file.";
+            return I18N.responses.thisEndpointReturnsFile;
         }
         case "streamingText":
-            return "This endpoint sends text responses over a long-lived HTTP connection.";
+            return I18N.responses.thisEndpointSendsTextResponses;
         case "stream":
             return `This endpoint returns a stream of ${exampleResponseBody?.type === "sse" ? "server sent events" : renderTypeShorthand(response.body.shape, { withArticle: false }, types)}.`;
         default:

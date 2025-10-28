@@ -1,6 +1,7 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
+import { I18N } from "@/constants";
 import { FernCollapseWithButtonUncontrolled } from "../type-definitions/FernCollapseWithButtonUncontrolled";
 import { PropertyRenderer } from "../type-definitions/ObjectProperty";
 import { WithSeparator } from "../type-definitions/TypeDefinitionDetails";
@@ -17,15 +18,13 @@ function authSchemeToDisplay(auth: ApiDefinition.AuthScheme): AuthSchemeDisplay 
     return visitDiscriminatedUnion(auth)._visit<AuthSchemeDisplay>({
         basicAuth: (basicAuth) => ({
             name: "Authorization",
-            description: basicAuth.description ?? "Basic authentication of the form `Basic <username:password>`.",
+            description: basicAuth.description ?? I18N.authTypes.basicAuth,
             availability: undefined,
             typeShorthand: "Basic"
         }),
         bearerAuth: (bearerAuth) => ({
             name: "Authorization",
-            description:
-                bearerAuth.description ??
-                "Bearer authentication of the form `Bearer <token>`, where token is your auth token.",
+            description: bearerAuth.description ?? I18N.authTypes.bearerAuth,
             availability: undefined,
             typeShorthand: "Bearer"
         }),
@@ -35,7 +34,7 @@ function authSchemeToDisplay(auth: ApiDefinition.AuthScheme): AuthSchemeDisplay 
                 value.description ??
                 (value.prefix != null
                     ? `Header authentication of the form \`${value.prefix} <token>\``
-                    : "API Key authentication via header"),
+                    : I18N.authTypes.apiKey),
             availability: undefined,
             typeShorthand: value.prefix || "string"
         }),
@@ -78,7 +77,7 @@ export function EndpointAuthSection({ auths }: { auths: ApiDefinition.AuthScheme
     }
 
     return (
-        <EndpointSection title="Authentication">
+        <EndpointSection title={I18N.apiReference.authentication}>
             <FernCollapseWithButtonUncontrolled
                 showText={`Show ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}
                 hideText={`Hide ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}

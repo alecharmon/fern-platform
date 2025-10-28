@@ -9,6 +9,7 @@ import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { sortBy } from "es-toolkit/array";
 import { memo, type ReactNode, useCallback, useMemo } from "react";
 import { WebSocketMessages } from "@/components/api-reference/websockets/WebSocketMessages";
+import { I18N } from "@/constants";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
 import { AudioExample } from "../examples/AudioExample";
@@ -64,20 +65,20 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                 case "json":
                 case "filename": {
                     if (endpoint.protocol?.type === "grpc") {
-                        return "Example Response";
+                        return I18N.apiReference.exampleResponse;
                     }
                     const title =
                         example.exampleCall.name ??
                         ApiDefinition.getMessageForStatus(example.exampleCall.responseStatusCode, endpoint.method) ??
-                        "Response";
+                        I18N.apiReference.response;
                     return renderResponseTitle(title, example.exampleCall.responseStatusCode);
                 }
                 case "stream":
-                    return "Streamed Response";
+                    return I18N.playground.streamedResponse;
                 case "sse":
-                    return "Server-Sent Events";
+                    return I18N.playground.serverSentEvents;
                 default:
-                    return "Response";
+                    return I18N.apiReference.response;
             }
         },
         [endpoint.method, endpoint.protocol?.type]
@@ -144,7 +145,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
             )}
             {endpoint.protocol?.type === "grpc" ? (
                 <JsonCodeSnippetExample
-                    title={"Example Request"}
+                    title={I18N.apiReference.exampleRequest}
                     onClick={(e) => {
                         e.stopPropagation();
                     }}
