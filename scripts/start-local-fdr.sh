@@ -1,0 +1,71 @@
+#!/bin/bash
+set -e
+
+# Script to start FDR server locally for testing
+# This sets up the full local FDR environment (Postgres, Redis, S3 Mock, FDR server)
+# Usage: ./start-local-fdr.sh [log_level]
+#   log_level: optional, defaults to "info" (options: error, warn, info, debug, verbose, silly)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLATFORM_ROOT="$(dirname "$SCRIPT_DIR")"
+FDR_DIR="$PLATFORM_ROOT/servers/fdr"
+
+# Get log level from first argument, default to "info"
+LOG_LEVEL="${1:-info}"
+
+echo "🚀 Starting local FDR server..."
+echo ""
+echo "Platform root: $PLATFORM_ROOT"
+echo "FDR directory: $FDR_DIR"
+echo ""
+
+# Check if FDR directory exists
+if [ ! -d "$FDR_DIR" ]; then
+    echo "❌ Error: FDR directory not found at $FDR_DIR"
+    exit 1
+fi
+
+cd "$FDR_DIR"
+
+# Step 1: Start Docker infrastructure
+echo "📦 Starting Docker infrastructure (Postgres, Redis, S3 Mock)..."
+docker compose -f docker-compose.local.yml up -d
+
+# Wait for services to be ready
+echo "⏳ Waiting for services to be ready..."
+sleep 5
+
+# Step 2: Check if migrations are needed
+echo ""
+echo "🔧 Running database migrations..."
+pnpm db:migrate:local
+
+# Step 3: Start FDR server
+echo ""
+echo "✅ Infrastructure is ready!"
+echo ""
+echo "📝 Services running:"
+echo "  - PostgreSQL:  localhost:5432"
+echo "  - Redis:       localhost:6379"
+echo "  - S3 Mock:     localhost:9090 (API), localhost:9191 (UI)"
+echo ""
+echo "🚀 Starting FDR server on http://localhost:8080..."
+echo ""
+echo "💡 To stop infrastructure, run: cd $FDR_DIR && docker compose -f docker-compose.local.yml down"
+echo ""
+
+# Start FDR in development mode (with watch/reload)
+# Set environment variables for local mode (using S3 Mock as MinIO)
+export LOCAL_MODE_OVERRIDE=true
+export DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public"
+export MINIO_USERNAME=minioadmin
+export MINIO_PASSWORD=minioadmin
+export MINIO_URL=http://localhost:9090
+export MINIO_BUCKET_NAME=fdr
+export S3_FORCE_PATH_STYLE=true
+export LOG_LEVEL="$LOG_LEVEL"
+
+echo "🔍 Log level set to: $LOG_LEVEL"
+echo ""
+
+pnpm dev

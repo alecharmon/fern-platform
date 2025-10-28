@@ -320,7 +320,8 @@
         "packages/fern-docs/icons-cdn/**/*.ts",
         "packages/fai-sdk/**",
         "packages/fdr-lambda-sdk/**",
-        "fern/apis/fai/openapi.json"
+        "fern/apis/fai/openapi.json",
+        "**/.local-sdk-output/**"
       ],
       "linter": {
         "enabled": false

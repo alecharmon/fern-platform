@@ -81,5 +81,8 @@ test-results
 # Local folder for dev tools
 .local
 
+# Local SDK bundle for CLI testing
+.local-sdk-output/
+
 # Claude
 **/settings.local.json

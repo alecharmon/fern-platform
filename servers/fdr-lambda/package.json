@@ -9,6 +9,7 @@
     "clean": "rm -rf dist lambda.zip",
     "deploy": "pnpm package && aws lambda update-function-code --function-name fdr-lambda --zip-file fileb://lambda.js",
     "dev": "tsup --watch",
+    "dev:server": "tsx src/dev-server.ts --watch",
     "package": "pnpm build && cp dist/index.js lambda.js",
     "test": "vitest --run --globals",
     "test:watch": "vitest --globals"
@@ -24,10 +25,13 @@
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
+    "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.11.0",
+    "express": "^5.0.0",
     "pg": "^8.11.3",
     "tsup": "catalog:",
+    "tsx": "^4.7.1",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
