@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from .utils.agent import run_editing_session
+from .utils.agent import SessionInterruptedError, run_editing_session
 from .utils.git import setup_editing_repo
 from .utils.validation import validate_body_param_or_throw
 
@@ -75,6 +75,7 @@ async def handle_editing_request(
                 user_prompt=prompt,
                 base_branch=session["base_branch"],
                 working_branch=session["working_branch"],
+                editing_id=editing_id,
                 resume_session_id=session.get("session_id"),
                 existing_pr_url=session.get("pr_url"),
             )
@@ -101,6 +102,16 @@ async def handle_editing_request(
                 "pr_url": pr_url,
                 "working_branch": session["working_branch"],
                 "status": "success",
+            }
+
+        except SessionInterruptedError:
+            logger.warning(f"Editing session interrupted: {editing_id}")
+            return {
+                "editing_id": editing_id,
+                "session_id": None,
+                "pr_url": None,
+                "working_branch": session["working_branch"],
+                "status": "interrupted",
             }
 
         except Exception as e:

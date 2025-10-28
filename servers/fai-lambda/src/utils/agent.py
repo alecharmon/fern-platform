@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 
+import httpx
 from claude_agent_sdk import (
     AssistantMessage,
     ClaudeAgentOptions,
@@ -15,6 +16,44 @@ from .git import configure_git_auth
 from .system_prompts import EDITING_SYSTEM_PROMPT
 
 logger = logging.getLogger()
+
+FAI_API_URL = os.environ.get("FAI_API_URL", "https://fai.buildwithfern.com")
+
+
+class SessionInterruptedError(Exception):
+    """Raised when an editing session is interrupted."""
+
+    pass
+
+
+async def update_session_status(editing_id: str, status: str) -> bool:
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.put(f"{FAI_API_URL}/editing-sessions/{editing_id}", json={"status": status})
+            if response.status_code == 200:
+                logger.info(f"Updated session {editing_id} status to {status}")
+                return True
+            else:
+                logger.warning(f"Failed to update session status: {response.status_code}")
+                return False
+    except Exception as e:
+        logger.warning(f"Error updating session status: {e}")
+        return False
+
+
+async def check_if_interrupted(editing_id: str) -> bool:
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(f"{FAI_API_URL}/editing-sessions/{editing_id}")
+            if response.status_code == 200:
+                session_data = response.json()
+                return session_data["editing_session"]["status"] == "interrupted"
+            else:
+                logger.warning(f"Failed to check interrupted status: {response.status_code}")
+                return False
+    except Exception as e:
+        logger.warning(f"Error checking interrupted status: {e}")
+        return False
 
 
 def setup_persistent_claude_storage(repo_path: str) -> None:
@@ -42,11 +81,14 @@ async def run_editing_session(
     user_prompt: str,
     base_branch: str,
     working_branch: str,
+    editing_id: str,
     resume_session_id: str | None = None,
     existing_pr_url: str | None = None,
 ) -> tuple[str, str | None]:
     setup_persistent_claude_storage(repo_path)
     configure_git_auth(repo_path)
+
+    await update_session_status(editing_id, "active")
 
     if existing_pr_url:
         full_prompt = f"""{user_prompt}
@@ -85,6 +127,11 @@ After making the changes:
         await client.query(full_prompt)
 
         async for message in client.receive_response():
+            if await check_if_interrupted(editing_id):
+                logger.warning(f"Session interrupted: {editing_id}")
+                await update_session_status(editing_id, "waiting")
+                raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
+
             if isinstance(message, AssistantMessage):
                 for block in message.content:
                     if isinstance(block, TextBlock):
@@ -106,5 +153,7 @@ After making the changes:
 
     if session_id is None:
         raise RuntimeError("Failed to obtain session ID from Claude")
+
+    await update_session_status(editing_id, "waiting")
 
     return session_id, pr_url
