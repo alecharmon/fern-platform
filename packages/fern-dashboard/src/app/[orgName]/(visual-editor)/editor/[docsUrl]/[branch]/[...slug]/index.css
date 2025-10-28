@@ -137,4 +137,10 @@
       }
     }
   }
+
+  /* Remove quotes from inline code elements added by Tailwind Typography plugin */
+  code:not(.code-block)::before,
+  code:not(.code-block)::after {
+    content: "" !important;
+  }
 }
