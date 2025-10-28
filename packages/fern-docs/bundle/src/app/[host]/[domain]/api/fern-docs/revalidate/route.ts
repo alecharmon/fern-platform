@@ -35,6 +35,7 @@ import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex, queueTurbopufferReindex } from "@/server/queue-reindex";
 import { ResilientQueue } from "@/utils/resilient-queue";
+import { createSafeStreamController } from "@/utils/safe-stream-controller";
 
 // Custom error type for intentional revalidation failures
 class RevalidationError extends Error {
@@ -69,6 +70,8 @@ export async function GET(
 
     const stream = new ReadableStream({
         async start(controller) {
+            const c = createSafeStreamController(controller, "[revalidate]");
+
             try {
                 try {
                     await kv.del(domain);
@@ -89,7 +92,7 @@ export async function GET(
                     waitUntil(kv.sadd(`${cdnUri}:domains`, domain));
                 }
 
-                controller.enqueue(`revalidating:${domain}\n`);
+                c.enqueue(`revalidating:${domain}\n`);
 
                 const loadWithUrlPromise = loadWithUrl(domain);
 
@@ -108,11 +111,11 @@ export async function GET(
                 ) {
                     reindexPromise = reindex(docs, host, domain, maxDuration)
                         .then((services) => {
-                            controller.enqueue(`reindex-queued:services=${services.join(",")}\n`);
+                            c.enqueue(`reindex-queued:services=${services.join(",")}\n`);
                         })
                         .catch((e: unknown) => {
                             console.error(`[revalidate:reindex] ${JSON.stringify(e)}`);
-                            controller.enqueue(`reindex-failed:error=${escapeRegExp(String(e))}\n`);
+                            c.enqueue(`reindex-failed:error=${escapeRegExp(String(e))}\n`);
                         });
                 }
 
@@ -130,11 +133,11 @@ export async function GET(
                         signal: AbortSignal.timeout(600_000)
                     })
                         .then(() => {
-                            controller.enqueue(`${name}-revalidated\n`);
+                            c.enqueue(`${name}-revalidated\n`);
                         })
                         .catch((e: unknown) => {
                             console.error(`[revalidate:${name}-revalidate] error: ${JSON.stringify(e)}`);
-                            controller.enqueue(`${name}-revalidate-failed:error=${escapeRegExp(String(e))}\n`);
+                            c.enqueue(`${name}-revalidate-failed:error=${escapeRegExp(String(e))}\n`);
                         })
                 );
 
@@ -224,16 +227,16 @@ export async function GET(
                         }
                     });
 
-                    controller.enqueue(`revalidate-kv-keys-set:${Object.keys(keys).length}\n`);
+                    c.enqueue(`revalidate-kv-keys-set:${Object.keys(keys).length}\n`);
                 } catch (e) {
                     console.error(`[revalidate:start] ${JSON.stringify(e)}`);
-                    controller.enqueue(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
+                    c.enqueue(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
                 }
 
                 if (!metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false") {
                     const collector = FernNavigation.NodeCollector.collect(staticRoot);
 
-                    controller.enqueue(`revalidate-queued:urls=${collector.slugs.length}\n`);
+                    c.enqueue(`revalidate-queued:urls=${collector.slugs.length}\n`);
 
                     // Use ResilientQueue for adaptive concurrency and retry logic
                     const queue = new ResilientQueue<string>({
@@ -278,7 +281,7 @@ export async function GET(
                                     );
                                 }
 
-                                controller.enqueue(`revalidated:${url}\n`);
+                                c.enqueue(`revalidated:${url}\n`);
                             } catch (e) {
                                 console.error(
                                     `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; error=${JSON.stringify((e as Error)?.message)}`
@@ -314,7 +317,7 @@ export async function GET(
                         errorRateThreshold: 0.2,
                         backoffBaseMs: 1000,
                         onProgress: (stats) => {
-                            controller.enqueue(
+                            c.enqueue(
                                 `revalidate-progress:completed=${stats.completed}/${stats.total};` +
                                     `failed=${stats.failed};inFlight=${stats.inFlight};` +
                                     `concurrency=${stats.currentConcurrency};errorRate=${(stats.errorRate * 100).toFixed(1)}%\n`
@@ -334,7 +337,7 @@ export async function GET(
                         });
                     }
 
-                    controller.enqueue(
+                    c.enqueue(
                         `revalidate-pages-finished:total=${result.total};` +
                             `completed=${result.completed};failed=${result.failed}\n`
                     );
@@ -375,7 +378,7 @@ export async function GET(
 
                 const end = performance.now();
                 console.log(`Reindex took ${end - start}ms`);
-                controller.enqueue(`revalidate-finished:${end - start}ms\n`);
+                c.enqueue(`revalidate-finished:${end - start}ms\n`);
             } catch (e) {
                 console.error(`[revalidate] ${JSON.stringify(e)}`);
 
@@ -396,9 +399,9 @@ export async function GET(
                     });
                 }
 
-                controller.enqueue(`revalidate-failed:error=${escapeRegExp(String(e))}\n`);
+                c.enqueue(`revalidate-failed:error=${escapeRegExp(String(e))}\n`);
             } finally {
-                controller.close();
+                c.close();
             }
         }
     });

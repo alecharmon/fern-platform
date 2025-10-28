@@ -234,7 +234,11 @@ export class ResilientQueue<T> {
         // Emit at most once per second, or when forced
         if (force || now - this.lastProgressEmit > 1000) {
             this.lastProgressEmit = now;
-            this.onProgress(this.getStats(total));
+            try {
+                this.onProgress(this.getStats(total));
+            } catch (e) {
+                console.error("[ResilientQueue] onProgress callback threw an error:", e);
+            }
         }
     }
 
