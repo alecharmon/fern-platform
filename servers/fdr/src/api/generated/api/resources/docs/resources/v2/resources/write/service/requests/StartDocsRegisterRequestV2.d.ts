@@ -8,6 +8,6 @@ export interface StartDocsRegisterRequestV2 {
     authConfig?: FernRegistry.docs.v2.write.AuthConfig;
     orgId: FernRegistry.OrgId;
     apiId: FernRegistry.ApiId;
-    filepaths: FernRegistry.docs.v1.write.FilePath[];
+    filepaths: FernRegistry.docs.v2.write.FilePathInput[];
     images?: FernRegistry.docs.v2.write.ImageFilePath[];
 }

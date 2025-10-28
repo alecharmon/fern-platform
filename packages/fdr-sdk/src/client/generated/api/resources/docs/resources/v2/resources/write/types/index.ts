@@ -1,3 +1,5 @@
+export * from "./FilePathWithHash.js";
+export * from "./FilePathInput.js";
 export * from "./ImageFilePath.js";
 export * from "./StartDocsPreviewRegisterResponse.js";
 export * from "./ListAlgoliaPreviewWhitelistResponse.js";

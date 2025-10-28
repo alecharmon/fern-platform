@@ -18,7 +18,7 @@ export interface StartDocsPreviewRegisterRequestV2 {
     basePath?: string;
     orgId: FernRegistry.OrgId;
     authConfig?: FernRegistry.docs.v2.write.AuthConfig;
-    /** Relative filepath from docs folder. */
-    filepaths: FernRegistry.docs.v1.write.FilePath[];
+    /** Relative filepath from docs folder with optional content hash. */
+    filepaths: FernRegistry.docs.v2.write.FilePathInput[];
     images?: FernRegistry.docs.v2.write.ImageFilePath[];
 }

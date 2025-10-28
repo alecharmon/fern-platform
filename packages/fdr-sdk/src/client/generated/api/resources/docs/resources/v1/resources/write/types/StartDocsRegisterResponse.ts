@@ -7,4 +7,6 @@ import * as FernRegistry from "../../../../../../../index.js";
 export interface StartDocsRegisterResponse {
     docsRegistrationId: FernRegistry.docs.v1.write.DocsRegistrationId;
     uploadUrls: Record<FernRegistry.docs.v1.write.FilePath, FernRegistry.docs.v1.write.FileS3UploadUrl>;
+    /** Files that were skipped because they already exist in S3 with the same hash (deduplicated). These files do not need to be uploaded. */
+    skippedFiles: FernRegistry.docs.v1.write.FilePath[];
 }

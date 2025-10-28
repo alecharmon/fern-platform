@@ -4,12 +4,8 @@
 
 import * as FernRegistry from "../../../../../../../index.js";
 
-export interface ImageFilePath {
-    filePath: FernRegistry.docs.v1.write.FilePath;
-    width: number;
-    height: number;
-    blurDataUrl: string | undefined;
-    alt: string | undefined;
+export interface FilePathWithHash {
+    path: FernRegistry.docs.v1.write.FilePath;
     /** SHA-256 hash of the file content in hex format. When provided, enables content-addressed storage and deduplication. */
     fileHash: string | undefined;
 }

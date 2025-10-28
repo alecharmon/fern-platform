@@ -1,3 +1,5 @@
+export * from "./FilePathWithHash";
+export * from "./FilePathInput";
 export * from "./ImageFilePath";
 export * from "./StartDocsPreviewRegisterResponse";
 export * from "./ListAlgoliaPreviewWhitelistResponse";

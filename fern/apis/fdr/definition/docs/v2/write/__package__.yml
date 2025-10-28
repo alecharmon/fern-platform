@@ -27,8 +27,8 @@ service:
               type: rootCommons.ApiId
               availability: deprecated
             filepaths:
-              type: list<v1DocsWrite.FilePath>
-              docs: Relative filepath from docs folder.
+              type: list<FilePathInput>
+              docs: Relative filepath from docs folder with optional content hash.
             images: optional<list<ImageFilePath>>
       response: v1DocsWrite.StartDocsRegisterResponse
       errors:
@@ -51,8 +51,8 @@ service:
             orgId: rootCommons.OrgId
             authConfig: optional<AuthConfig>
             filepaths:
-              type: list<v1DocsWrite.FilePath>
-              docs: Relative filepath from docs folder.
+              type: list<FilePathInput>
+              docs: Relative filepath from docs folder with optional content hash.
             images: optional<list<ImageFilePath>>
       response: StartDocsPreviewRegisterResponse
       errors:
@@ -172,6 +172,20 @@ service:
         - rootCommons.UnauthorizedError
 
 types:
+  FilePathWithHash:
+    properties:
+      path: v1DocsWrite.FilePath
+      fileHash: 
+        type: optional<string>
+        docs: SHA-256 hash of the file content in hex format. When provided, enables content-addressed storage and deduplication.
+
+  FilePathInput:
+    docs: Accepts either a plain file path string or an object with path and optional hash for content-addressed storage.
+    discriminated: false
+    union:
+      - v1DocsWrite.FilePath
+      - FilePathWithHash
+
   ImageFilePath:
     properties:
       filePath: v1DocsWrite.FilePath
@@ -179,6 +193,9 @@ types:
       height: double
       blurDataUrl: optional<string>
       alt: optional<string>
+      fileHash:
+        type: optional<string>
+        docs: SHA-256 hash of the file content in hex format. When provided, enables content-addressed storage and deduplication.
 
   StartDocsPreviewRegisterResponse:
     extends: v1DocsWrite.StartDocsRegisterResponse

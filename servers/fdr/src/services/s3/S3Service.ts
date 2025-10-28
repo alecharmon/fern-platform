@@ -1,5 +1,6 @@
 import {
     GetObjectCommand,
+    HeadObjectCommand,
     PutObjectCommand,
     type PutObjectCommandInput,
     type PutObjectCommandOutput,
@@ -29,6 +30,11 @@ export interface S3DocsFileInfo {
         | undefined;
 }
 
+export interface S3DocsUploadResult {
+    fileInfos: Record<DocsV1Write.FilePath, S3DocsFileInfo>;
+    skippedFiles: DocsV1Write.FilePath[];
+}
+
 export interface S3ApiDefinitionSourceFileInfo {
     presignedUrl: string;
     key: string;
@@ -49,12 +55,14 @@ export interface S3Service {
         isPrivate
     }: {
         domain: string;
-        filepaths: DocsV1Write.FilePath[];
+        filepaths: DocsV2Write.FilePathInput[];
         images: DocsV2Write.ImageFilePath[];
         isPrivate: boolean;
-    }): Promise<Record<DocsV1Write.FilePath, S3DocsFileInfo>>;
+    }): Promise<S3DocsUploadResult>;
 
     getPresignedDocsAssetsDownloadUrl({ key, isPrivate }: { key: string; isPrivate: boolean }): Promise<FdrAPI.Url>;
+
+    checkFileExists({ key, isPrivate }: { key: string; isPrivate: boolean }): Promise<boolean>;
 
     getPresignedApiDefinitionSourceUploadUrls({
         orgId,
@@ -185,6 +193,32 @@ export class S3ServiceImpl implements S3Service {
         return FdrAPI.Url(`${this.publicDocsCDNUrl}/${key}`);
     }
 
+    async checkFileExists({ key, isPrivate }: { key: string; isPrivate: boolean }): Promise<boolean> {
+        const s3Client = isPrivate ? this.privateDocsS3 : this.publicDocsS3;
+        const bucketName = isPrivate ? this.config.privateDocsS3.bucketName : this.config.publicDocsS3.bucketName;
+
+        try {
+            await s3Client.send(
+                new HeadObjectCommand({
+                    Bucket: bucketName,
+                    Key: key
+                })
+            );
+            return true;
+        } catch (error) {
+            // NotFound or 404 means file doesn't exist
+            if (
+                (error as { name?: string }).name === "NotFound" ||
+                (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404
+            ) {
+                return false;
+            }
+            // For other errors, log and assume file doesn't exist to be safe
+            this.app.logger.warn(`Error checking file existence for key ${key}`, error);
+            return false;
+        }
+    }
+
     async getPresignedDocsAssetsUploadUrls({
         domain,
         filepaths,
@@ -192,20 +226,64 @@ export class S3ServiceImpl implements S3Service {
         isPrivate
     }: {
         domain: string;
-        filepaths: DocsV1Write.FilePath[];
+        filepaths: DocsV2Write.FilePathInput[];
         images: DocsV2Write.ImageFilePath[];
         isPrivate: boolean;
-    }): Promise<Record<DocsV1Write.FilePath, S3DocsFileInfo>> {
-        const result: Record<DocsV1Write.FilePath, S3DocsFileInfo> = {};
+    }): Promise<S3DocsUploadResult> {
+        const fileInfos: Record<DocsV1Write.FilePath, S3DocsFileInfo> = {};
+        const skippedFiles: DocsV1Write.FilePath[] = [];
         const time: string = new Date().toISOString();
-        for (const filepath of filepaths) {
+
+        for (const filepathInput of filepaths) {
+            // Handle FilePathInput union type - can be string or object with hash
+            let filepath: DocsV1Write.FilePath;
+            let fileHash: string | undefined;
+
+            if (typeof filepathInput === "string") {
+                filepath = filepathInput;
+                fileHash = undefined;
+            } else {
+                filepath = filepathInput.path;
+                fileHash = filepathInput.fileHash;
+            }
+
+            // Check if file exists when hash is provided
+            if (fileHash != null) {
+                const key = this.constructS3DocsKeyWithHash({ domain, filepath, fileHash });
+                const exists = await this.checkFileExists({ key, isPrivate });
+
+                if (exists) {
+                    // File already exists - mark as skipped but still generate presigned URL
+                    // The presigned URL won't be used by the client but is needed for convertDocsDefinitionToDb
+                    skippedFiles.push(filepath);
+                    const { url } = await this.createPresignedDocsAssetsUploadUrlWithClient({
+                        domain,
+                        time,
+                        filepath,
+                        fileHash,
+                        isPrivate
+                    });
+                    fileInfos[filepath] = {
+                        presignedUrl: {
+                            fileId: APIV1Write.FileId(uuidv4()),
+                            uploadUrl: url
+                        },
+                        key,
+                        imageMetadata: undefined
+                    };
+                    continue;
+                }
+            }
+
+            // File doesn't exist or no hash - generate upload URL
             const { url, key } = await this.createPresignedDocsAssetsUploadUrlWithClient({
                 domain,
                 time,
                 filepath,
+                fileHash,
                 isPrivate
             });
-            result[filepath] = {
+            fileInfos[filepath] = {
                 presignedUrl: {
                     fileId: APIV1Write.FileId(uuidv4()),
                     uploadUrl: url
@@ -214,14 +292,53 @@ export class S3ServiceImpl implements S3Service {
                 imageMetadata: undefined
             };
         }
+
         for (const image of images) {
+            // Check if image exists when hash is provided
+            if (image.fileHash != null) {
+                const key = this.constructS3DocsKeyWithHash({
+                    domain,
+                    filepath: image.filePath,
+                    fileHash: image.fileHash
+                });
+                const exists = await this.checkFileExists({ key, isPrivate });
+
+                if (exists) {
+                    // Image already exists - mark as skipped but still generate presigned URL
+                    skippedFiles.push(image.filePath);
+                    const { url } = await this.createPresignedDocsAssetsUploadUrlWithClient({
+                        domain,
+                        time,
+                        filepath: image.filePath,
+                        fileHash: image.fileHash,
+                        isPrivate
+                    });
+                    fileInfos[image.filePath] = {
+                        presignedUrl: {
+                            fileId: APIV1Write.FileId(uuidv4()),
+                            uploadUrl: url
+                        },
+                        key,
+                        imageMetadata: {
+                            width: image.width,
+                            height: image.height,
+                            blurDataUrl: image.blurDataUrl,
+                            alt: image.alt
+                        }
+                    };
+                    continue;
+                }
+            }
+
+            // Image doesn't exist or no hash - generate upload URL
             const { url, key } = await this.createPresignedDocsAssetsUploadUrlWithClient({
                 domain,
                 time,
                 filepath: image.filePath,
+                fileHash: image.fileHash,
                 isPrivate
             });
-            result[image.filePath] = {
+            fileInfos[image.filePath] = {
                 presignedUrl: {
                     fileId: APIV1Write.FileId(uuidv4()),
                     uploadUrl: url
@@ -235,22 +352,28 @@ export class S3ServiceImpl implements S3Service {
                 }
             };
         }
-        return result;
+
+        return { fileInfos, skippedFiles };
     }
 
     async createPresignedDocsAssetsUploadUrlWithClient({
         domain,
         time,
         filepath,
+        fileHash,
         isPrivate
     }: {
         domain: string;
         time: string;
         filepath: DocsV1Write.FilePath;
+        fileHash?: string;
         isPrivate: boolean;
     }): Promise<{ url: string; key: string }> {
         let key: string;
-        if (this.config.localModeOverride) {
+        if (fileHash != null) {
+            // If hash is provided, use hash-based key (no timestamp)
+            key = this.constructS3DocsKeyWithHash({ domain, filepath, fileHash });
+        } else if (this.config.localModeOverride) {
             key = this.constructS3DocsKeyWithoutTime({ domain, filepath });
         } else {
             key = this.constructS3DocsKey({ domain, time, filepath });
@@ -423,6 +546,20 @@ export class S3ServiceImpl implements S3Service {
     constructS3DocsKeyWithoutTime({ domain, filepath }: { domain: string; filepath: DocsV1Write.FilePath }): string {
         // In self-hosted mode, bucket already represents the domain, so don't duplicate
         return this.config.localModeOverride ? filepath : `${domain}/${filepath}`;
+    }
+
+    constructS3DocsKeyWithHash({
+        domain,
+        filepath,
+        fileHash
+    }: {
+        domain: string;
+        filepath: DocsV1Write.FilePath;
+        fileHash: string;
+    }): string {
+        // Use hash-based key for content-addressed storage and deduplication
+        // Format: domain/hash/filepath
+        return `${domain}/${fileHash}/${filepath}`;
     }
 
     constructS3DynamicIrKey({

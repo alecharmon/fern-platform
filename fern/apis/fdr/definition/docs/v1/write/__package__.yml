@@ -54,6 +54,9 @@ types:
     properties:
       docsRegistrationId: DocsRegistrationId
       uploadUrls: map<FilePath, FileS3UploadUrl>
+      skippedFiles:
+        type: list<FilePath>
+        docs: Files that were skipped because they already exist in S3 with the same hash (deduplicated). These files do not need to be uploaded.
 
   FileS3UploadUrl:
     properties:

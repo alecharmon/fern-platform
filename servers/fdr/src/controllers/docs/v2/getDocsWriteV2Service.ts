@@ -138,7 +138,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
       }
 
       const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
-      const s3FileInfos =
+      const { fileInfos, skippedFiles } =
         await app.services.s3.getPresignedDocsAssetsUploadUrls({
           domain: req.body.domain,
           filepaths: req.body.filepaths,
@@ -159,7 +159,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
           fernUrl,
           customUrls,
           orgId: req.body.orgId,
-          s3FileInfos,
+          s3FileInfos: fileInfos,
           isPreview: false,
           authType:
             req.body.authConfig?.type === "private"
@@ -169,10 +169,11 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
       return res.send({
         docsRegistrationId,
         uploadUrls: Object.fromEntries(
-          Object.entries(s3FileInfos).map(([filepath, fileInfo]) => {
+          Object.entries(fileInfos).map(([filepath, fileInfo]) => {
             return [filepath, fileInfo.presignedUrl];
           })
         ),
+        skippedFiles,
       });
     },
     startDocsPreviewRegister: async (req, res) => {
@@ -204,7 +205,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
       const fernUrl = ParsedBaseUrl.parse(
         urlJoin(truncatedDomain, req.body.basePath ?? "")
       );
-      const s3FileInfos =
+      const { fileInfos, skippedFiles } =
         await app.services.s3.getPresignedDocsAssetsUploadUrls({
           domain: fernUrl.hostname,
           filepaths: req.body.filepaths,
@@ -217,7 +218,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
           fernUrl,
           customUrls: [],
           orgId: req.body.orgId,
-          s3FileInfos,
+          s3FileInfos: fileInfos,
           isPreview: true,
           authType:
             req.body.authConfig?.type === "private"
@@ -227,10 +228,11 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
       return res.send({
         docsRegistrationId,
         uploadUrls: Object.fromEntries(
-          Object.entries(s3FileInfos).map(([filepath, fileInfo]) => {
+          Object.entries(fileInfos).map(([filepath, fileInfo]) => {
             return [filepath, fileInfo.presignedUrl];
           })
         ),
+        skippedFiles,
         previewUrl: `https://${fernUrl.getFullUrl()}`,
       });
     },

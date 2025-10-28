@@ -23,7 +23,7 @@ export function getDocsWriteService(app: FdrApplication): DocsV1WriteService {
                 orgId: req.body.orgId
             });
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
-            const s3FileInfos = await app.services.s3.getPresignedDocsAssetsUploadUrls({
+            const { fileInfos, skippedFiles } = await app.services.s3.getPresignedDocsAssetsUploadUrls({
                 domain: req.body.domain,
                 filepaths: req.body.filepaths,
                 images: [],
@@ -32,15 +32,16 @@ export function getDocsWriteService(app: FdrApplication): DocsV1WriteService {
             DOCS_REGISTRATIONS[docsRegistrationId] = {
                 domain: req.body.domain,
                 orgId: req.body.orgId,
-                s3FileInfos
+                s3FileInfos: fileInfos
             };
             return res.send({
                 docsRegistrationId,
                 uploadUrls: Object.fromEntries(
-                    Object.entries(s3FileInfos).map(([filepath, fileInfo]) => {
+                    Object.entries(fileInfos).map(([filepath, fileInfo]) => {
                         return [filepath, fileInfo.presignedUrl];
                     })
-                )
+                ),
+                skippedFiles
             });
         },
         finishDocsRegister: async (req, res) => {
