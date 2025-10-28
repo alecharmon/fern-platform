@@ -11,10 +11,7 @@ import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 export async function inviteUserToOrg({ inviteeEmail, orgName }: { inviteeEmail: string; orgName: Auth0OrgName }) {
     const auth0 = getAuth0ManagementClient();
     const session = await getCurrentSessionOrThrow();
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     const invitation = await auth0.organizations.createInvitation(
         { id: await auth0Management.getOrgIdFromName(orgName) },

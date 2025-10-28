@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
     const { orgName } = parsedBody.data;
 
-    await assertUserHasOrganizationAccess({ token, orgName });
+    await assertUserHasOrganizationAccess(token, orgName);
 
     return NextResponse.json(await handler({ userId, orgName }));
 }

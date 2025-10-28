@@ -9,10 +9,7 @@ import { getFdrClient } from "../services/fdr/getFdrClient";
 
 export async function archiveSite({ url, orgName }: { url: string; orgName: Auth0OrgName }) {
     const session = await getCurrentSessionOrThrow();
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, orgName);
     const fdrClient = getFdrClient({ token: session.accessToken });
     const response = await fdrClient.docs.v2.write.setIsArchived({
         url: FdrAPI.Url(url),

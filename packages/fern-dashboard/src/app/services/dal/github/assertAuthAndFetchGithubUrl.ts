@@ -18,10 +18,7 @@ export const assertAuthAndFetchGithubUrl = cache(
         }
 
         // Validate organization access
-        await assertUserHasOrganizationAccess({
-            token: session.accessToken,
-            orgName
-        });
+        await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
         // Validate GitHub access
         const urlResult = await getDocsGithubUrl({

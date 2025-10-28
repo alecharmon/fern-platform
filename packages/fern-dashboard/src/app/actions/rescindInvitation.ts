@@ -9,10 +9,7 @@ import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function rescindInvitation({ invitationId, orgName }: { invitationId: string; orgName: Auth0OrgName }) {
     const session = await getCurrentSessionOrThrow();
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     const auth0 = getAuth0ManagementClient();
     await auth0.organizations.deleteInvitation({

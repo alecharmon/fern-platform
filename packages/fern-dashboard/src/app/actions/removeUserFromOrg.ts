@@ -17,10 +17,7 @@ export async function removeUserFromOrg({
     const session = await getCurrentSessionOrThrow();
     const userId = session.user.sub;
 
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     const isFernEmployee = await auth0Management.createIsFernEmployee();
 

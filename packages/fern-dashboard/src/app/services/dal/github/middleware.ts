@@ -41,7 +41,7 @@ export async function withGithubAuth<T>(
 
     // Validate user organization membership
     try {
-        await assertUserHasOrganizationAccess({ token, orgName });
+        await assertUserHasOrganizationAccess(token, orgName);
 
         // Parse the repo data to create a RepoIdentifier and extract information
         let identifier: RepoIdentifier;

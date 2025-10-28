@@ -7,10 +7,7 @@ import { getFdrLambdaClient } from "../services/fdr/getFdrLambdaClient";
 
 export async function deleteDocsSite({ url, orgName }: { url: string; orgName: Auth0OrgName }) {
     const session = await getCurrentSessionOrThrow();
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     const client = getFdrLambdaClient({ token: session.accessToken });
     const response = await client.docs.v2.write.deleteDocsSite({ url });

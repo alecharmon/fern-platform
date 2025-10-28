@@ -32,10 +32,7 @@ export default async function createBranchIfNotExists(request: {
     }
 
     try {
-        await assertUserHasOrganizationAccess({
-            token: session.accessToken,
-            orgName: request.orgName
-        });
+        await assertUserHasOrganizationAccess(session.accessToken, request.orgName);
     } catch (_) {
         return {
             success: false,

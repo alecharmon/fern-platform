@@ -21,10 +21,7 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
     }
     // Validate organization access, but return null rather than redirect, so that sidebar just doesn't show
     try {
-        await assertUserHasOrganizationAccess({
-            token: session.accessToken,
-            orgName
-        });
+        await assertUserHasOrganizationAccess(session.accessToken, orgName);
     } catch (_) {
         return null;
     }

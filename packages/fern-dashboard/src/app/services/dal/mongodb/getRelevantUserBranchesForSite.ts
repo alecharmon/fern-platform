@@ -27,10 +27,7 @@ export async function getRelevantUserBranchesForSite(
         if (session == null) {
             return [];
         }
-        await assertUserHasOrganizationAccess({
-            token: session.accessToken,
-            orgName
-        });
+        await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
         // Filter local branches to only include branches that match the user's branch naming format
         const userBranches = branchNamesInClientStorage.filter((branchName) =>

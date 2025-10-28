@@ -28,10 +28,7 @@ export async function POST(request: Request): Promise<NextResponse<generateApiTo
         return NextResponse.json({ error: "Organization ID is required" } as any, { status: 400 });
     }
 
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName: organizationId as Auth0OrgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, organizationId as Auth0OrgName);
 
     try {
         const venusClient = getVenusClient({ token: session.accessToken });

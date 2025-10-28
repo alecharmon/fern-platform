@@ -61,10 +61,7 @@ export async function POST(request: Request): Promise<NextResponse<uploadOrgLogo
 
         const orgName = Auth0OrgName(organizationName);
 
-        await assertUserHasOrganizationAccess({
-            token: session.accessToken,
-            orgName
-        });
+        await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
         // Upload to S3
         const timestamp = new Date().toISOString();

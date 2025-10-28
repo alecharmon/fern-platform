@@ -46,10 +46,7 @@ export async function POST(request: Request): Promise<NextResponse<updateOrganiz
 
     const orgName = Auth0OrgName(organizationName);
 
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     try {
         const auth0 = getAuth0ManagementClient();

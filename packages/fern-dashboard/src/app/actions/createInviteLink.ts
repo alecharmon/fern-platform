@@ -7,10 +7,7 @@ import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function createInviteLink({ orgName }: { orgName: Auth0OrgName }) {
     const session = await getCurrentSessionOrThrow();
-    await assertUserHasOrganizationAccess({
-        token: session.accessToken,
-        orgName
-    });
+    await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     const { token, expiresAt } = await createInviteToken(orgName, session.user.sub);
 
