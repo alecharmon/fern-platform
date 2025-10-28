@@ -504,7 +504,6 @@ async def reindex_preview_callback(
         else:
             LOGGER.error(f"Reindex failed for domain {stripped_domain} with status {request.status}")
             existing_record.job_id = None
-            existing_record.last_reindex_time = None
 
         await db.commit()
 
