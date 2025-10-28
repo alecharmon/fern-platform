@@ -13,6 +13,7 @@ import { track } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
+import { MDX_PIPELINE_VERSION } from "@fern-api/docs-server/mdx-pipeline-version";
 import { pruneWithAuthState } from "@fern-api/docs-server/withRbac";
 import { HEADER_X_FERN_HOST, slugToHref, withoutStaging } from "@fern-api/docs-utils";
 import { type ApiDefinition, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
@@ -79,8 +80,8 @@ export async function GET(
                     console.debug("Attempted to delete key", domain, "but failed with", e);
                 }
 
-                const deploymentId = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
-                const oldSuggestionsKey = `docs:${deploymentId}:${domain}:suggestions`;
+                const renderVersion = MDX_PIPELINE_VERSION || getEnv().VERCEL_DEPLOYMENT_ID || "development";
+                const oldSuggestionsKey = `docs:${renderVersion}:${domain}:suggestions`;
                 try {
                     await kv.del(oldSuggestionsKey);
                 } catch (e) {

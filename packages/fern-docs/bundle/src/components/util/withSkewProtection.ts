@@ -1,10 +1,11 @@
-const deploymentId = process.env.NEXT_DEPLOYMENT_ID;
+import { MDX_PIPELINE_VERSION } from "@fern-api/docs-server/mdx-pipeline-version";
 
-// appears to be a browser bug where `Headers` object is not settable, so we will use a plain object instead
+const renderVersion = MDX_PIPELINE_VERSION || process.env.VERCEL_DEPLOYMENT_ID;
+
 export function withSkewProtection(h?: Record<string, string>): HeadersInit | undefined {
-    if (!deploymentId) {
+    if (!renderVersion) {
         return h;
     }
 
-    return new Headers({ ...h, "X-Deployment-Id": deploymentId });
+    return new Headers({ ...h, "X-Render-Version": renderVersion });
 }

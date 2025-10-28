@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -5,6 +6,22 @@ import NextBundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 import webpack from "webpack";
+
+function getMdxPipelineVersion(): string {
+    try {
+        const mdxVersionPath = path.join(__dirname, "../../commons/docs-server/src/mdx-pipeline-version.ts");
+        const content = fs.readFileSync(mdxVersionPath, "utf-8");
+        const match = content.match(/export const MDX_PIPELINE_VERSION = ["'](.+?)["']/);
+        if (match && match[1]) {
+            return match[1];
+        }
+    } catch (error) {
+        console.warn("Failed to read MDX_PIPELINE_VERSION from canonical source:", error);
+    }
+    return "3";
+}
+
+const MDX_PIPELINE_VERSION = getMdxPipelineVersion();
 
 const cdnUri = process.env.NEXT_PUBLIC_CDN_URI != null ? new URL("/", process.env.NEXT_PUBLIC_CDN_URI) : undefined;
 const isTrailingSlashEnabled = process.env.NEXT_PUBLIC_TRAILING_SLASH === "1";
@@ -312,7 +329,7 @@ const nextConfig: NextConfig = {
 function withVercelEnv(config: NextConfig): NextConfig {
     return {
         ...config,
-        deploymentId: process.env.VERCEL_DEPLOYMENT_ID, // skew protection
+        deploymentId: MDX_PIPELINE_VERSION || process.env.VERCEL_DEPLOYMENT_ID,
         productionBrowserSourceMaps: false,
         reactProductionProfiling: false,
         experimental: {
