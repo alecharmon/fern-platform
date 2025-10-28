@@ -25,6 +25,7 @@ export function convertDbDocsConfigToRead({ dbShape }: { dbShape: DocsV1Db.DocsD
         favicon: dbShape.favicon,
         typographyV2: dbShape.typographyV2 ?? transformTypographyToV2(dbShape.typography),
         layout: dbShape.layout,
+        theme: dbShape.theme,
         settings: dbShape.settings,
         css: dbShape.css,
         js: dbShape.js,

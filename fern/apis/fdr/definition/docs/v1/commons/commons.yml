@@ -190,7 +190,11 @@ types:
       disableHeader: optional<boolean>
       hideNavLinks: optional<boolean>
       hideFeedback: optional<boolean>
-      
+
+  DocsThemeConfig:
+    properties:
+      sidebar: optional<string>
+
   DocsSettingsConfig:
     properties:
       searchText: optional<string>

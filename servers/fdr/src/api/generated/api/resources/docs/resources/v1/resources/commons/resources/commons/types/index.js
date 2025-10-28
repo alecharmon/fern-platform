@@ -25,6 +25,7 @@ export * from "./FathomConfig";
 export * from "./ClearBitConfig";
 export * from "./HeapConfig";
 export * from "./DocsLayoutConfig";
+export * from "./DocsThemeConfig";
 export * from "./DocsSettingsConfig";
 export * from "./HttpSnippetsConfig";
 export * from "./HttpSnippetLanguage";

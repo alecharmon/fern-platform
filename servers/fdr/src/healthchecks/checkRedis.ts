@@ -35,6 +35,7 @@ const HEALTHCHECK_DOCS_RESPONSE: CachedDocsResponse = {
                 redirects: undefined,
                 colorsV3: undefined,
                 layout: undefined,
+                theme: undefined,
                 settings: undefined,
                 typographyV2: undefined,
                 analyticsConfig: undefined,

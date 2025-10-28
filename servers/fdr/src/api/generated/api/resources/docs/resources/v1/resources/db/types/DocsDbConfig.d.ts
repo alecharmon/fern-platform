@@ -19,6 +19,7 @@ export interface DocsDbConfig {
     backgroundImage: FernRegistry.FileId | undefined;
     colorsV3: FernRegistry.docs.v1.read.ColorsConfigV3 | undefined;
     layout: FernRegistry.docs.v1.commons.DocsLayoutConfig | undefined;
+    theme: FernRegistry.docs.v1.commons.DocsThemeConfig | undefined;
     settings: FernRegistry.docs.v1.commons.DocsSettingsConfig | undefined;
     typographyV2: FernRegistry.docs.v1.commons.DocsTypographyConfigV2 | undefined;
     analyticsConfig: FernRegistry.docs.v1.commons.AnalyticsConfig | undefined;
