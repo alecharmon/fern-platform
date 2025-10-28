@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Agent, setGlobalDispatcher } from "undici";
 
+import { isDocsDev } from "./isDocsDev";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 import { loadDocsDefinitionFromMinIO } from "./loadDocsDefinitionFromMinIO";
@@ -24,7 +25,24 @@ setGlobalDispatcher(
     })
 );
 
+// In-memory cache for docs dev mode to avoid Next.js 2MB cache limit
+const docsDevCache = new Map<string, FdrAPI.docs.v2.read.LoadDocsForUrlResponse>();
+
 export const loadWithUrl = cache(async (domain: string): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse> => {
+    // In docs dev mode, use in-memory cache instead of unstable_cache
+    if (isDocsDev()) {
+        const cached = docsDevCache.get(domain);
+        if (cached) {
+            console.debug(`[DocsDevCache] Cache hit for domain: ${domain}`);
+            return cached;
+        }
+
+        console.debug(`[DocsDevCache] Cache miss for domain: ${domain}`);
+        const response = await uncachedLoadWithUrl(domain);
+        docsDevCache.set(domain, response);
+        return response;
+    }
+
     return unstable_cache(
         async () => {
             return uncachedLoadWithUrl(domain);

@@ -26,6 +26,7 @@ export * from "./handle-node-fallbacks";
 export * from "./handleLoadDocsError";
 export * from "./hash";
 export * from "./headerKeyCase";
+export * from "./isDocsDev";
 export * from "./isLocal";
 export * from "./isSelfHosted";
 export * from "./loadDocsDefinitionFromS3";

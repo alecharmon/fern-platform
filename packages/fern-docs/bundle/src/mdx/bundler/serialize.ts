@@ -1,8 +1,8 @@
 import "server-only";
 
+import { createKvCache } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
-import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { isDocsDev } from "@fern-api/docs-server/isDocsDev";
 import { postToSlack } from "@fern-api/docs-server/slack";
 import { isDevelopment, isPreviewDomain } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
@@ -24,7 +24,6 @@ import {
     remarkInjectEsm,
     remarkSanitizeAcorn
 } from "@fern-docs/mdx/plugins";
-import { kv } from "@vercel/kv";
 import { createHash } from "crypto";
 import { mapKeys } from "es-toolkit/object";
 import fs from "fs";
@@ -66,6 +65,9 @@ gracefulify(fs);
 
 const TWOSLASH_TIMEOUT = 240_000;
 const SERIALIZATION_TIMEOUT = 10_000;
+
+// Create KV cache instance for TwoSlash code transformation caching
+const kvCache = createKvCache(isDocsDev());
 
 export interface SerializeMdxResponse {
     code: string;
@@ -527,34 +529,21 @@ function hashKey(key: string): string {
 }
 
 function kvSet(key: string, value: unknown) {
-    if (isLocal() || isSelfHosted()) {
-        return;
-    }
+    const hashedKey = hashKey(key);
+    const cacheValue = {
+        value: value,
+        version: TWOSLASH_SEMANTIC_VERSION,
+        createdAt: new Date().toISOString()
+    };
 
-    after(async () => {
-        try {
-            const hashedKey = hashKey(key);
-            await kv.hset("twoslash", {
-                [hashedKey]: {
-                    value: value,
-                    version: TWOSLASH_SEMANTIC_VERSION,
-                    createdAt: new Date().toISOString()
-                }
-            });
-        } catch (error) {
-            console.warn(`Failed to set kv key ${key}: ${value}`, error);
-        }
-    });
+    kvCache.set("twoslash", hashedKey, cacheValue);
 }
 
 async function kvGet(key: string): Promise<Record<string, string> | null> {
-    if (isLocal() || isSelfHosted()) {
-        return null;
-    }
-
     try {
         const hashedKey = hashKey(key);
-        const cached = await kv.hget<Record<string, string>>("twoslash", hashedKey);
+        const cached = await kvCache.get<Record<string, string>>("twoslash", hashedKey);
+
         if (cached && cached.version === TWOSLASH_SEMANTIC_VERSION) {
             return cached;
         }

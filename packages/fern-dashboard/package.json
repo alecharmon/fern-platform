@@ -11,8 +11,8 @@
   "scripts": {
     "clean": "rm -rf ./.next",
     "dashboard:build": "next build",
-    "dashboard:dev": "next dev",
-    "dashboard:dev:inspect": "NODE_OPTIONS='--inspect' next dev",
+    "dashboard:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" next dev",
+    "dashboard:dev:inspect": "NODE_OPTIONS=\"--max-old-space-size=16384\" NODE_OPTIONS='--inspect' next dev",
     "dashboard:dev:turbopack": "next dev --turbopack",
     "dashboard:lint": "next lint",
     "dashboard:rsd": "RSD=1 NODE_OPTIONS='--max-old-space-size=8192' next build",

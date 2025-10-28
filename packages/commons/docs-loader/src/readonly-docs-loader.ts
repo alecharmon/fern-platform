@@ -11,6 +11,7 @@ import {
     generateFernColorPalette,
     generateFonts,
     getDocsUrlMetadata,
+    isDocsDev,
     isLocal,
     isSelfHosted,
     provideRegistryService,
@@ -52,12 +53,10 @@ import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
 import { visualEditorStorage } from "@fern-api/visual-editor-server";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
-import { kv } from "@vercel/kv";
 import { createHash } from "crypto";
-import { mapValues, Semaphore } from "es-toolkit";
+import { mapValues } from "es-toolkit";
 import { unstable_cache, unstable_cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
-import { after } from "next/server";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
@@ -74,6 +73,10 @@ import {
     createDynamicIrCacheKey,
     createPageCacheKey
 } from "./cache-keys";
+import { createKvCache, type KvCache } from "./kv-cache";
+
+// Create the appropriate cache implementation based on whether we're in docs dev mode
+const kvCache: KvCache = createKvCache(isDocsDev());
 
 const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrlResponse> => {
     const { domain, branchName } = decodeDocsLoaderDomainKey(domainKey);
@@ -139,153 +142,12 @@ function assertDocsDomain(domainKey: string) {
     }
 }
 
-const setMonitor = new Semaphore(10);
-
 function kvSet(domainKey: string, key: string, value: unknown, ttl?: number, cacheKeySuffix?: string) {
-    if (isLocal() || isSelfHosted()) {
-        return;
-    }
-
-    const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
-
-    console.debug(`[Upstash] SET operation - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
-
-    after(async () => {
-        await setMonitor.acquire();
-        const start = Date.now();
-        try {
-            if (ttl && ttl > 0) {
-                await kv.hset(domainKey, { [finalKey]: value });
-                // Set expiration for the hash field (note: Redis doesn't support per-field TTL in hashes)
-                // So we'll use a separate key for TTL tracking
-                await kv.setex(`${domainKey}:ttl:${finalKey}`, ttl, Date.now() + ttl * 1000);
-            } else {
-                await kv.hset(domainKey, { [finalKey]: value });
-            }
-            const duration = Date.now() - start;
-            console.debug(`[Upstash] SET completed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`);
-
-            // Disabled PostHog tracking for performance reasons
-            // track("upstash_cache_set", {
-            //   domain: domainKey,
-            //   cacheKey: finalKey,
-            //   hasTtl: Boolean(ttl && ttl > 0),
-            //   ttl: ttl,
-            //   duration,
-            // });
-        } catch (error) {
-            console.warn(`[Upstash] SET failed - domain: ${domainKey}, key: ${finalKey}`, error);
-            // Disabled PostHog tracking for performance reasons
-            // track("upstash_cache_set_error", {
-            //   domain: domainKey,
-            //   cacheKey: finalKey,
-            //   error: String(error),
-            // });
-        } finally {
-            setMonitor.release();
-        }
-    });
+    kvCache.set(domainKey, key, value, ttl, cacheKeySuffix);
 }
 
-const getMonitor = new Semaphore(10);
-
-// Deduplicate simultaneous requests for the same key
-const inFlightRequests = new Map<string, Promise<any>>();
-
 async function kvGet<T>(domainKey: string, key: string, cacheKeySuffix?: string): Promise<T | null> {
-    if (isLocal() || isSelfHosted()) {
-        return null;
-    }
-
-    const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
-    const requestKey = `${domainKey}:${finalKey}`;
-
-    // If there's already an in-flight request, wait for it
-    if (inFlightRequests.has(requestKey)) {
-        console.debug(`[Upstash] Waiting for in-flight request - domain: ${domainKey}, key: ${finalKey}`);
-        return inFlightRequests.get(requestKey) as Promise<T | null>;
-    }
-
-    console.debug(`[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`);
-
-    // Create the request promise
-    const requestPromise = (async () => {
-        await getMonitor.acquire();
-        const start = Date.now();
-        try {
-            // Check if the key has expired
-            const ttlKey = `${domainKey}:ttl:${finalKey}`;
-            const expiration = await kv.get<number>(ttlKey);
-
-            if (expiration && Date.now() > expiration) {
-                // Key has expired, delete it
-                await kv.hdel(domainKey, finalKey);
-                await kv.del(ttlKey);
-                const duration = Date.now() - start;
-                console.debug(
-                    `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
-                );
-
-                // Disabled PostHog tracking for performance reasons
-                // track("upstash_cache_get", {
-                //   domain: domainKey,
-                //   cacheKey: finalKey,
-                //   hit: false,
-                //   expired: true,
-                //   duration,
-                // });
-                return null;
-            }
-
-            const result = await kv.hget<T>(domainKey, finalKey);
-            const duration = Date.now() - start;
-            const isHit = result != null;
-
-            console.debug(
-                `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
-            );
-
-            // Disabled PostHog tracking for performance reasons
-            // track("upstash_cache_get", {
-            //   domain: domainKey,
-            //   cacheKey: finalKey,
-            //   hit: isHit,
-            //   expired: false,
-            //   duration,
-            // });
-
-            return result;
-        } catch (error) {
-            const duration = Date.now() - start;
-            console.warn(
-                `[Upstash] GET failed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`,
-                error
-            );
-
-            // Disabled PostHog tracking for performance reasons
-            // track("upstash_cache_get_error", {
-            //   domain: domainKey,
-            //   cacheKey: finalKey,
-            //   error: String(error),
-            //   duration,
-            // });
-            return null;
-        } finally {
-            getMonitor.release();
-        }
-    })();
-
-    // Store the promise and remove it when done
-    inFlightRequests.set(requestKey, requestPromise);
-    requestPromise
-        .finally(() => {
-            inFlightRequests.delete(requestKey);
-        })
-        .catch(() => {
-            // Errors are already handled in the main promise, this is just for cleanup
-        });
-
-    return requestPromise;
+    return kvCache.get<T>(domainKey, key, cacheKeySuffix);
 }
 
 // In-memory cache for config to reduce Upstash calls
@@ -321,7 +183,7 @@ function setInMemoryCache<T>(key: string, value: T): void {
 }
 
 async function clearKvCache(domainKey: string) {
-    // Clear in-memory cache entries for this domain
+    // Clear in-memory config cache entries for this domain
     const keysToDelete: string[] = [];
     for (const key of IN_MEMORY_CONFIG_CACHE.keys()) {
         if (key.startsWith(`${domainKey}:`)) {
@@ -332,30 +194,11 @@ async function clearKvCache(domainKey: string) {
         IN_MEMORY_CONFIG_CACHE.delete(key);
     }
     if (keysToDelete.length > 0) {
-        console.debug(`In-memory cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
+        console.debug(`In-memory config cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
     }
 
-    if (isLocal() || isSelfHosted()) {
-        return;
-    }
-
-    try {
-        // Clear KV cache for domainKey
-        const keys = await kv.hkeys(domainKey);
-        if (keys.length > 0) {
-            await kv.hdel(domainKey, ...keys);
-        }
-
-        // Clear TTL tracking keys
-        const ttlKeys = await kv.keys(`${domainKey}:ttl:*`);
-        if (ttlKeys.length > 0) {
-            await kv.del(...ttlKeys);
-        }
-
-        console.debug(`KV cache cleared for domainKey: ${domainKey}`);
-    } catch (error) {
-        console.error(`Failed to clear KV cache for domainKey ${domainKey}:`, error);
-    }
+    // Clear KV cache using the abstraction
+    await kvCache.clear(domainKey);
 }
 
 const cachedGetEdgeFlags = cache(async (domainKey: string) => {
