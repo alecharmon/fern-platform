@@ -30,10 +30,19 @@ const config: Config = {
                     "100%": {
                         transform: "translateY(0)"
                     }
+                },
+                shimmer: {
+                    "0%": {
+                        backgroundPosition: "-200% center"
+                    },
+                    "100%": {
+                        backgroundPosition: "200% center"
+                    }
                 }
             },
             animation: {
-                "slide-down": "slide-down 1s ease-in-out forwards"
+                "slide-down": "slide-down 1s ease-in-out forwards",
+                shimmer: "shimmer 3s infinite"
             },
             typography: {
                 DEFAULT: {

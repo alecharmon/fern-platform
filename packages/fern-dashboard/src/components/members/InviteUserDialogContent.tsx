@@ -1,8 +1,7 @@
-import ClipboardIcon from "@heroicons/react/24/outline/ClipboardIcon";
 import LinkIcon from "@heroicons/react/24/outline/LinkIcon";
 import PaperAirplaneIcon from "@heroicons/react/24/outline/PaperAirplaneIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +13,7 @@ import { getOrgDisplayName } from "@/utils/getOrgDisplayName";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { Button } from "../ui/button";
+import { CopyableText } from "../ui/CopyableText";
 import { DialogBody, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -34,7 +34,6 @@ export function InviteUserDialogContent({ org, close }: InviteUserDialogContent.
     const [email, setEmail] = useState("");
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"link" | "email">("link");
-    const [copied, setCopied] = useState(false);
 
     const isValidEmail = useMemo(() => EMAIL_REGEX.test(email), [email]);
 
@@ -91,18 +90,6 @@ export function InviteUserDialogContent({ org, close }: InviteUserDialogContent.
     const isInviting = inviteUser.isPending;
     const isCreatingLink = createLink.isPending;
 
-    const copyToClipboard = async () => {
-        if (inviteLink) {
-            await navigator.clipboard.writeText(inviteLink);
-            setCopied(true);
-            // Reset copied state after 4 seconds so we re-show the copy icon
-            setTimeout(() => {
-                setCopied(false);
-            }, 4000);
-            toast.success("Invite link copied to clipboard!");
-        }
-    };
-
     return (
         <>
             <DialogHeader>
@@ -142,18 +129,7 @@ export function InviteUserDialogContent({ org, close }: InviteUserDialogContent.
                                 </Button>
                             ) : (
                                 <div className="space-y-3">
-                                    <div>
-                                        <div className="flex items-center space-x-2">
-                                            <Input value={inviteLink} readOnly className="flex-1" />
-                                            <Button variant="outline" onClick={() => void copyToClipboard()}>
-                                                {copied ? (
-                                                    <CheckIcon className="text-primary size-4" />
-                                                ) : (
-                                                    <ClipboardIcon className="size-4" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
+                                    <CopyableText text={inviteLink} successMessage="Invite link copied to clipboard!" />
                                     <p className="text-muted-foreground text-xs">
                                         This link can be used once and expires in 24 hours.
                                     </p>

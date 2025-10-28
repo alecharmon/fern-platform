@@ -70,7 +70,7 @@ function DialogContent({
                     <DialogPrimitive.Close
                         className={cn(
                             // positioning
-                            "absolute right-4 top-4",
+                            "absolute right-4 top-4 cursor-pointer",
                             // shape + opacity
                             "rounded-xs opacity-70 transition-opacity hover:opacity-100",
                             // state appearance

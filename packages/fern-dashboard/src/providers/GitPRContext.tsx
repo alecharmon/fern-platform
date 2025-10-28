@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
@@ -19,6 +19,7 @@ export const GitPRContext = createContext<{
     site: string;
     owner: string | undefined;
     repo: string | undefined;
+    isReadyForReview: boolean;
 }>({
     gitPrUrl: undefined,
     setPrUrl: (_url: string) => {
@@ -36,6 +37,7 @@ export const GitPRContext = createContext<{
     setPrStatus: (_status: GithubPrStatus) => {
         return;
     },
+    isReadyForReview: false,
     prNumber: undefined,
     site: "",
     owner: undefined,
@@ -135,6 +137,10 @@ export function GitPRProvider({
         void fetchPrFromBranch();
     }, [fetchPrFromBranch]);
 
+    const isReadyForReview = useMemo(() => {
+        return prStatus === "open";
+    }, [prStatus]);
+
     return (
         <GitPRContext.Provider
             value={{
@@ -149,7 +155,8 @@ export function GitPRProvider({
                 setPrStatus,
                 site,
                 owner,
-                repo
+                repo,
+                isReadyForReview
             }}
         >
             {children}

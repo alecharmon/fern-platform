@@ -78,7 +78,7 @@ export function StatusBadge({ status, className, onClick, afterSlot, hideDot }: 
         >
             {!hideDot && <div className={cn("size-2 rounded-full", config.dotColor)} />}
             <div className={cn("mb-0.5 text-sm leading-none", config.textColor)}>{config.label}</div>
-            {afterSlot}
+            {afterSlot && <div className={config.textColor}>{afterSlot}</div>}
         </div>
     );
 }

@@ -12,7 +12,6 @@ import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import type { preloadEditorData } from "@/app/api/preload-editor-data/route";
 import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
 import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
-import type { updatePrStatus } from "@/app/api/update-pr-status/route";
 import type { updatePrTitle } from "@/app/api/update-pr-title/route";
 import type { ValidateGithubRepoAccess } from "@/app/api/validate-github-repo-access/route";
 
@@ -44,8 +43,6 @@ export const DashboardApiClient = {
         typedFetch<getPrForBranch.Response>("/api/get-pr-for-branch", request),
     updatePrTitle: (request: updatePrTitle.Request) =>
         typedFetch<updatePrTitle.Response>("/api/update-pr-title", request),
-    updatePrStatus: (request: updatePrStatus.Request) =>
-        typedFetch<updatePrStatus.Response>("/api/update-pr-status", request),
     generateSignedUploadUrl: (request: generateSignedUploadUrl.Request) =>
         typedFetch<generateSignedUploadUrl.Response>("/api/signed-image-url/generate", request),
     getSignedImageUrl: (request: getSignedImageUrl.Request) =>

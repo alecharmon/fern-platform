@@ -3,7 +3,7 @@
 import { useNavigation } from "@fern-docs/components/navigation";
 
 import * as Sentry from "@sentry/nextjs";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DEFAULT_COMMIT_MESSAGE, handleCreatePr } from "@/app/services/github/github";
@@ -24,7 +24,12 @@ import {
     WarningNoChangesToast
 } from "./EditorToasts";
 
-export function CommitButton() {
+export interface CommitButtonProps {
+    onFirstCommit?: () => void;
+    onShowCelebrationModal?: (show: boolean) => void;
+}
+
+export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitButtonProps = {}) {
     const orgName = useOrgName();
     const { branch } = useBranch();
     const { owner, repo, baseBranch } = useGitHubRepo();
@@ -34,6 +39,9 @@ export function CommitButton() {
     const { files, handleCommitSuccess } = useNavigation();
 
     const commitMutation = useCommitToGitHubMutation();
+
+    // Track if this is the first commit in this session
+    const hasCommittedRef = useRef(false);
 
     useEffect(() => {
         // NOTE: This is a temporary solution to persist the PR URL across route changes/refreshes.
@@ -72,6 +80,13 @@ export function CommitButton() {
             if (response.success) {
                 SuccessfulCommitToast();
                 handleCommitSuccess();
+
+                // Show celebration modal on first commit
+                if (!hasCommittedRef.current) {
+                    hasCommittedRef.current = true;
+                    onShowCelebrationModal?.(true);
+                    onFirstCommit?.();
+                }
             } else {
                 ErrorCommitToast(response.error);
                 Sentry.captureException(response.error);
@@ -118,7 +133,9 @@ export function CommitButton() {
         files.forCommit,
         files.hasChangesToCommit,
         handleCommitSuccess,
-        commitMutation
+        commitMutation,
+        onShowCelebrationModal,
+        onFirstCommit
     ]);
 
     const commitDisabledReason = useMemo(() => {

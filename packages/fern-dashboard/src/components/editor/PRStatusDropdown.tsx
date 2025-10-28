@@ -1,16 +1,12 @@
 "use client";
 
 import { ChevronDownIcon } from "lucide-react";
-import { useCallback, useState } from "react";
-
-import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import type { GithubPrStatus } from "@/app/services/github/types";
+import { useUpdatePrStatus } from "@/hooks/useUpdatePrStatus";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 
 import { StatusBadge } from "../ui/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
-import { ErrorUpdatePrStatusToast } from "./EditorToasts";
 
 interface PRStatusDropdownProps {
     owner: string | undefined;
@@ -20,50 +16,9 @@ interface PRStatusDropdownProps {
     baseBranch?: string;
 }
 
-export function PRStatusDropdown({ owner, repo, branch, gitPrUrl, baseBranch }: PRStatusDropdownProps) {
-    const { prStatus, setPrStatus, loading, site } = useGitPrInfo();
-    const orgName = useOrgName();
-    const [isUpdating, setIsUpdating] = useState(false);
-
-    const handleStatusChange = useCallback(
-        async (newStatus: GithubPrStatus) => {
-            // Don't update if same status or if we don't have required data
-            if (newStatus === prStatus || !owner || !repo || !branch || !gitPrUrl) {
-                return;
-            }
-
-            // We only support changing between ready (open) and draft
-            if (newStatus !== "open" && newStatus !== "draft") {
-                return;
-            }
-
-            setIsUpdating(true);
-
-            try {
-                const data = await DashboardApiClient.updatePrStatus({
-                    orgName,
-                    owner,
-                    repo,
-                    site,
-                    branch,
-                    status: newStatus,
-                    baseBranch
-                });
-
-                if (data.success && data.status) {
-                    setPrStatus(data.status);
-                } else {
-                    ErrorUpdatePrStatusToast();
-                }
-            } catch (err) {
-                ErrorUpdatePrStatusToast();
-                console.error("Error updating PR status:", err);
-            } finally {
-                setIsUpdating(false);
-            }
-        },
-        [owner, repo, branch, site, prStatus, gitPrUrl, setPrStatus, baseBranch, orgName]
-    );
+export function PRStatusDropdown({ gitPrUrl }: PRStatusDropdownProps) {
+    const { prStatus, loading } = useGitPrInfo();
+    const { updatePrStatus, loading: updatePrStatusLoading } = useUpdatePrStatus();
 
     // If the PR does not yet exist, we'll pretend it's a draft
     if (!loading && !gitPrUrl) {
@@ -77,18 +32,18 @@ export function PRStatusDropdown({ owner, repo, branch, gitPrUrl, baseBranch }: 
         return <StatusBadge status="closed" />;
     }
 
-    const isDisabled = loading || isUpdating || !gitPrUrl;
+    const isDisabled = loading || updatePrStatusLoading || !gitPrUrl;
 
     return (
         <Select
             value={prStatus}
-            onValueChange={(value) => void handleStatusChange(value as GithubPrStatus)}
+            onValueChange={(value) => void updatePrStatus(value as GithubPrStatus)}
             disabled={isDisabled}
         >
             <SelectTrigger className="border-none px-0 shadow-none focus-visible:ring-0" asChild>
                 <StatusBadge
                     status={prStatus || "loading"}
-                    afterSlot={!loading && <ChevronDownIcon className="size-4 opacity-50" />}
+                    afterSlot={!loading && <ChevronDownIcon className="size-4 text-inherit" />}
                 />
             </SelectTrigger>
             <SelectContent className="space-y-2 border-gray-500 px-0" checkOnLeft>
