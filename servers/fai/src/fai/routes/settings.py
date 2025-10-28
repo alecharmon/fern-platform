@@ -212,7 +212,6 @@ async def enable_ask_ai(
                     existing_record.job_id = job_id
                     await db.commit()
                     results.append({"domain": domain, "success": True, "job_id": job_id})
-                    background_tasks.add_task(revalidate_domain, domain)
                 else:
                     LOGGER.error(f"Failed to start reindex for domain {stripped_domain}: {response.status_code}")
                     results.append({"domain": domain, "success": False})
