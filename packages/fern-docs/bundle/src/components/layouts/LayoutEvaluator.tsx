@@ -54,6 +54,8 @@ export async function LayoutEvaluator({
 
     const config = await loader.getConfig();
 
+    const extractedStyles = mdx?.styles ?? [];
+
     const pageHeader = (
         <PageHeader
             serialize={serialize}
@@ -84,23 +86,27 @@ export async function LayoutEvaluator({
     );
 
     return (
-        <AbstractLayoutEvaluatorContent
-            frontmatter={frontmatter}
-            tableOfContents={toc}
-            pageHeader={pageHeader}
-            aside={
-                mdx && exports?.Aside ? (
-                    <MdxAside
-                        code={mdx.code}
-                        jsxElements={mdx.jsxElements}
-                        useNextMdx={mdx?.engine === "next-remote"}
-                    />
-                ) : undefined
-            }
-            footer={footer}
-            builtWithFern={<BuiltWithFern className="mx-auto my-8 w-fit" />}
-        >
-            <MdxContent mdx={mdx} fallback={markdown} useNextMdx={mdx?.engine === "next-remote"} />
-        </AbstractLayoutEvaluatorContent>
+        <>
+            {extractedStyles.length > 0 &&
+                extractedStyles.map((css, index) => <style key={index} dangerouslySetInnerHTML={{ __html: css }} />)}
+            <AbstractLayoutEvaluatorContent
+                frontmatter={frontmatter}
+                tableOfContents={toc}
+                pageHeader={pageHeader}
+                aside={
+                    mdx && exports?.Aside ? (
+                        <MdxAside
+                            code={mdx.code}
+                            jsxElements={mdx.jsxElements}
+                            useNextMdx={mdx?.engine === "next-remote"}
+                        />
+                    ) : undefined
+                }
+                footer={footer}
+                builtWithFern={<BuiltWithFern className="mx-auto my-8 w-fit" />}
+            >
+                <MdxContent mdx={mdx} fallback={markdown} useNextMdx={mdx?.engine === "next-remote"} />
+            </AbstractLayoutEvaluatorContent>
+        </>
     );
 }

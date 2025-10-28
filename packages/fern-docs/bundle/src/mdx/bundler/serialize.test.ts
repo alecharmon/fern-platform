@@ -254,3 +254,34 @@ This is a simple test.`;
         }
     }
 });
+
+it("should extract style tags from MDX", async () => {
+    const mdxContent = `
+<style>
+  {\`
+    #fern-sidebar {
+      display: none !important;
+    }
+    
+    .fern-background {
+      background-color: transparent !important;
+    }
+  \`}
+</style>
+
+# Hello World
+
+This is a test page with custom styles.
+`;
+
+    const result = await serializeMdx(mdxContent);
+
+    expect(result?.styles).toBeDefined();
+    expect(result?.styles?.length).toBeGreaterThan(0);
+    expect(result?.styles?.[0]).toContain("#fern-sidebar");
+    expect(result?.styles?.[0]).toContain("display: none !important");
+    expect(result?.styles?.[0]).toContain(".fern-background");
+
+    // The style tag should be removed from the bundled code
+    expect(result?.code).not.toContain("<style>");
+});

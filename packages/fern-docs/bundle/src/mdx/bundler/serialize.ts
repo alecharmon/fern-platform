@@ -49,6 +49,7 @@ import { rehypeCollectJsx } from "../plugins/rehype-collect-jsx";
 import { rehypeEndpointExampleSnippets } from "../plugins/rehype-endpoint-example-snippets";
 import { rehypeEndpointSchemaSnippets } from "../plugins/rehype-endpoint-schema-snippet";
 import { rehypeExtractAsides } from "../plugins/rehype-extract-asides";
+import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
 import { rehypeFiles } from "../plugins/rehype-files";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
@@ -75,6 +76,7 @@ export interface SerializeMdxResponse {
     jsxElements: string[];
     scope?: Record<string, unknown>;
     engine: "next-remote" | "esbuild";
+    styles?: string[];
 }
 
 async function serializeMdxImpl(
@@ -120,6 +122,7 @@ async function serializeMdxImpl(
     let files: Record<string, string> = {};
     let remoteFiles: Record<string, FileData> = {};
     const jsxElements: string[] = [];
+    const styles: string[] = [];
 
     remoteFiles = (await loader?.getFiles?.()) ?? {};
     files = (await loader?.getMdxBundlerFiles?.()) ?? {};
@@ -173,6 +176,14 @@ async function serializeMdxImpl(
                 rehypeParamField,
                 [rehypeSlug, { additionalJsxElements: ["Step", "Accordion", "Tab", "ParamField"] }],
                 [rehypeLinks, { replaceHref }],
+                [
+                    rehypeExtractStyles,
+                    {
+                        collect: (styles_: string[]) => {
+                            styles.push(...styles_);
+                        }
+                    }
+                ],
                 rehypeAccordionNestedHeaders,
                 [
                     rehypeExpressionToMd,
@@ -303,7 +314,7 @@ async function serializeMdxImpl(
     // TODO: this is doing duplicate work; figure out how to combine it with the compiler above.
     // const { jsxElements } = toTree(content, { sanitize: false });
 
-    return { code: bundled.code, frontmatter, jsxElements, engine: "esbuild" };
+    return { code: bundled.code, frontmatter, jsxElements, styles, engine: "esbuild" };
 }
 
 export function serializeMdx(
@@ -347,7 +358,6 @@ export function serializeMdx(
     });
 }
 
-// uncomment this to log the tree to the console in localhost only (DO NOT COMMIT)
 function rehypeLog() {
     return (_tree: Hast.Root) => {
         // console.debug(JSON.stringify(tree));

@@ -43,6 +43,7 @@ export type MdxSerializer = (
           frontmatter?: Partial<Frontmatter>;
           jsxElements: string[];
           engine: "esbuild" | "next-remote";
+          styles?: string[];
       }
     | undefined
 >;

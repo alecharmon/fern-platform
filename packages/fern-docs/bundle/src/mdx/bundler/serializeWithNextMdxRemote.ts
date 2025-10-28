@@ -28,6 +28,7 @@ import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested
 import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
+import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
 import { rehypeFiles } from "../plugins/rehype-files";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
@@ -44,7 +45,8 @@ type SerializeOptions = NonNullable<Parameters<typeof serialize>[1]>;
 function withDefaultMdxOptions(
     frontmatter: FernDocs.Frontmatter,
     files: Record<string, FileData>,
-    replaceHref?: RehypeLinksOptions["replaceHref"]
+    replaceHref?: RehypeLinksOptions["replaceHref"],
+    collectStyles?: (styles: string[]) => void
 ): SerializeOptions["mdxOptions"] {
     const remarkRehypeOptions = {
         handlers: {
@@ -75,6 +77,16 @@ function withDefaultMdxOptions(
         rehypeParamField,
         [rehypeSlug, { additionalJsxElements: ["Step", "Accordion", "Tab", "ParamField"] }],
         [rehypeLinks, { replaceHref }],
+        ...(collectStyles
+            ? [
+                  [
+                      rehypeExtractStyles,
+                      {
+                          collect: collectStyles
+                      }
+                  ] as const
+              ]
+            : []),
         rehypeAccordionNestedHeaders,
         [
             rehypeExpressionToMd,
@@ -150,13 +162,17 @@ export async function serializeMdxImpl(
     content = sanitizeBreaks(content);
     content = sanitizeMdxExpression(content)[0];
 
+    const styles: string[] = [];
+
     try {
         const { data: frontmatter, content: contentWithoutFrontmatter } = getFrontmatter(content);
 
         const files = (await loader?.getFiles?.()) ?? {};
 
         const result = await serialize<Record<string, unknown>, FernDocs.Frontmatter>(contentWithoutFrontmatter, {
-            mdxOptions: withDefaultMdxOptions(frontmatter, files, replaceHref),
+            mdxOptions: withDefaultMdxOptions(frontmatter, files, replaceHref, (styles_: string[]) => {
+                styles.push(...styles_);
+            }),
             parseFrontmatter: false // this is parsed above via getFrontmatter
         });
 
@@ -168,7 +184,8 @@ export async function serializeMdxImpl(
             frontmatter: frontmatter,
             jsxElements,
             scope: scope ?? {},
-            engine: "next-remote"
+            engine: "next-remote",
+            styles
         };
     } catch (e) {
         // TODO: sentry
@@ -180,7 +197,8 @@ export async function serializeMdxImpl(
             frontmatter: {},
             jsxElements: [],
             scope: scope ?? {},
-            engine: "next-remote"
+            engine: "next-remote",
+            styles: []
         };
     }
 }
