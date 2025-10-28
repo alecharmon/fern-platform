@@ -34,11 +34,8 @@ from fai.utils.generate_model import generate_anthropic_generic_async
 from fai.utils.slack.client import add_reaction
 from fai.utils.slack.edit_detection import detect_edit_flag
 from fai.utils.slack.edit_handler import (
-    get_editing_session_status,
     get_or_create_editing_session_for_thread,
-    interrupt_editing_session,
     invoke_editing_lambda,
-    wait_for_session_waiting,
 )
 from fai.utils.slack.lambda_invoke import invoke_fai_lambda_for_docs_update
 from fai.utils.slack.postprocessing import SlackifyMarkdown
@@ -369,35 +366,6 @@ async def handle_slack_message(
         existing_editing_id = await get_or_create_editing_session_for_thread(
             context.team_id, context.channel, context.thread_ts
         )
-
-        if existing_editing_id:
-            session_status = await get_editing_session_status(existing_editing_id)
-            LOGGER.info(f"Existing session {existing_editing_id} has status: {session_status}")
-
-            if session_status == "active":
-                LOGGER.info(f"Session {existing_editing_id} is active, interrupting...")
-                interrupted = await interrupt_editing_session(existing_editing_id)
-
-                if interrupted:
-                    LOGGER.info(f"Waiting for session {existing_editing_id} to become 'waiting'...")
-                    ready = await wait_for_session_waiting(existing_editing_id)
-
-                    if not ready:
-                        error_text = (
-                            "⚠️ The previous editing session is still running. " "Please wait a moment and try again."
-                        )
-                        return SlackMessageResponse(
-                            response_text=error_text,
-                            channel=context.channel,
-                            thread_ts=context.thread_ts,
-                            bot_token=integration.slack_bot_token,
-                            query_id=None,
-                            user_id=context.user,
-                        )
-
-                    LOGGER.info(f"Session {existing_editing_id} is now ready for new message")
-                else:
-                    LOGGER.warning(f"Failed to interrupt session {existing_editing_id}, proceeding anyway")
 
         result = await invoke_editing_lambda(
             prompt=context.text,

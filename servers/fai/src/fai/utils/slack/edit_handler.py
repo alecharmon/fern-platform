@@ -1,9 +1,7 @@
-import asyncio
 import json
 import logging
 
 import aioboto3
-import httpx
 from botocore.exceptions import ClientError
 from sqlalchemy import select
 
@@ -13,8 +11,6 @@ from fai.settings import VARIABLES
 from fai.utils.github_utils import get_repo_from_docs_domain
 
 logger = logging.getLogger(__name__)
-
-FAI_API_URL = "https://fai.buildwithfern.com"
 
 
 async def get_or_create_editing_session_for_thread(team_id: str, channel_id: str, thread_ts: str) -> str | None:
@@ -67,65 +63,6 @@ async def store_editing_session_for_thread(team_id: str, channel_id: str, thread
             logger.info(f"Stored new editing session {editing_id} for thread {thread_ts}")
 
         await session.commit()
-
-
-async def get_editing_session_status(editing_id: str) -> str | None:
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(f"{FAI_API_URL}/editing-sessions/{editing_id}")
-            if response.status_code == 200:
-                session_data = response.json()
-                status = session_data["editing_session"]["status"]
-                logger.info(f"Editing session {editing_id} status: {status}")
-                return status
-            else:
-                logger.warning(f"Failed to get editing session status: {response.status_code}")
-                return None
-    except Exception as e:
-        logger.error(f"Error getting editing session status: {e}", exc_info=True)
-        return None
-
-
-async def interrupt_editing_session(editing_id: str) -> bool:
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.post(f"{FAI_API_URL}/editing-sessions/{editing_id}/interrupt")
-            if response.status_code == 200:
-                logger.info(f"Successfully interrupted editing session: {editing_id}")
-                return True
-            elif response.status_code == 400:
-                logger.info(f"Session {editing_id} cannot be interrupted (may not be active)")
-                return False
-            else:
-                logger.warning(f"Failed to interrupt editing session: {response.status_code}")
-                return False
-    except Exception as e:
-        logger.error(f"Error interrupting editing session: {e}", exc_info=True)
-        return False
-
-
-async def wait_for_session_waiting(editing_id: str, max_wait_seconds: int = 30, poll_interval: float = 2.0) -> bool:
-    logger.info(f"Waiting for editing session {editing_id} to become 'waiting'...")
-    start_time = asyncio.get_event_loop().time()
-
-    while (asyncio.get_event_loop().time() - start_time) < max_wait_seconds:
-        status = await get_editing_session_status(editing_id)
-
-        if status == "waiting":
-            elapsed = asyncio.get_event_loop().time() - start_time
-            logger.info(f"Editing session {editing_id} is now waiting (took {elapsed:.1f}s)")
-            return True
-
-        if status is None:
-            logger.warning(f"Could not get status for session {editing_id}, assuming not ready")
-            await asyncio.sleep(poll_interval)
-            continue
-
-        logger.info(f"Session {editing_id} status is '{status}', waiting...")
-        await asyncio.sleep(poll_interval)
-
-    logger.warning(f"Timeout waiting for session {editing_id} to become 'waiting' (waited {max_wait_seconds}s)")
-    return False
 
 
 async def invoke_editing_lambda(
