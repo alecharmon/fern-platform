@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect, useRef, useState } from "react";
+import { type ReactElement, useEffect, useId, useRef, useState } from "react";
 
 import { useResolvedTheme } from "@/hooks/use-theme";
 
@@ -14,6 +14,8 @@ function MermaidInternal({ code }: { code: string }): ReactElement<any> {
     const ref = useRef<HTMLDivElement>(null);
     const [svg, setSvg] = useState<string>();
     const theme = useResolvedTheme();
+    const id = useId();
+    const mermaidId = `mermaid-${id.replace(/:/g, "-")}`;
 
     useEffect(() => {
         void (async () => {
@@ -23,11 +25,17 @@ function MermaidInternal({ code }: { code: string }): ReactElement<any> {
                 mermaid.initialize({
                     theme: theme === "dark" ? "dark" : "default"
                 });
-                const result = await mermaid.render("mermaid-svg", code, ref.current);
-                setSvg(result.svg);
+                const { svg: renderedSvg } = await mermaid.render(mermaidId, code);
+                setSvg(renderedSvg);
             }
         })();
-    }, [code, theme]);
+    }, [code, theme, mermaidId]);
 
-    return <div ref={ref} dangerouslySetInnerHTML={svg != null ? { __html: svg } : undefined} />;
+    return (
+        <div
+            ref={ref}
+            className="mermaid-container"
+            dangerouslySetInnerHTML={svg != null ? { __html: svg } : undefined}
+        />
+    );
 }
