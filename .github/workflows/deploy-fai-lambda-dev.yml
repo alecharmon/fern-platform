@@ -27,7 +27,30 @@ env:
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 jobs:
-  deploy_dev:
+  check_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      fai_scribe_changed: ${{ steps.filter.outputs.fai_scribe }}
+      fai_code_indexing_changed: ${{ steps.filter.outputs.fai_code_indexing }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            fai_scribe:
+              - 'servers/fai-lambda/fai-scribe/**'
+              - 'servers/fai-lambda-deploy/**'
+            fai_code_indexing:
+              - 'servers/fai-lambda/fai-code-indexing/**'
+              - 'servers/fai-lambda-deploy/**'
+
+  deploy_fai_scribe_dev:
+    needs: check_changes
+    if: needs.check_changes.outputs.fai_scribe_changed == 'true'
     runs-on: Seed
     environment: Fern Dev
     strategy:
@@ -50,9 +73,41 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: 🚀 cdk deploy
+      - name: 🚀 Deploy FAI Scribe
         run: |
           git_version="$(scripts/git-version.sh)"
           npm install -g aws-cdk
           cd servers/fai-lambda-deploy
-          VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:dev
+          VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:dev:scribe
+
+  deploy_fai_code_indexing_dev:
+    needs: check_changes
+    if: needs.check_changes.outputs.fai_code_indexing_changed == 'true'
+    runs-on: Seed
+    environment: Fern Dev
+    strategy:
+      matrix:
+        concurrency: [1]
+    env:
+      APPLICATION_ENVIRONMENT: dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 🚀 Deploy FAI Code Indexing
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          npm install -g aws-cdk
+          cd servers/fai-lambda-deploy
+          VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:dev:code-indexing

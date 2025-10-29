@@ -2,8 +2,8 @@
 
 import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/";
 import * as cdk from "aws-cdk-lib";
-
-import { FaiLambdaDeployStack } from "../scripts/fai-lambda-deploy-stack";
+import { FaiCodeIndexingStack } from "../scripts/fai-code-indexing-stack";
+import { FaiScribeStack } from "../scripts/fai-scribe-stack";
 
 void main();
 
@@ -16,7 +16,6 @@ async function main() {
     const environments = await getEnvironments();
     const app = new cdk.App();
 
-    // Deploy to dev2 and prod environments only (no preview deployments)
     for (const [environmentType, environmentInfo] of Object.entries(environments)) {
         if (environmentInfo == null) {
             throw new Error(`No info for environment ${environmentType}`);
@@ -24,7 +23,7 @@ async function main() {
         switch (environmentType) {
             case EnvironmentType.Dev:
             case EnvironmentType.Dev2:
-                new FaiLambdaDeployStack(
+                new FaiScribeStack(
                     app,
                     `fai-scribe-${environmentType.toLowerCase()}`,
                     version,
@@ -34,11 +33,33 @@ async function main() {
                         env: { account: "985111089818", region: "us-east-1" }
                     }
                 );
+
+                new FaiCodeIndexingStack(
+                    app,
+                    `fai-code-indexing-${environmentType.toLowerCase()}`,
+                    version,
+                    environmentType,
+                    environmentInfo,
+                    {
+                        env: { account: "985111089818", region: "us-east-1" }
+                    }
+                );
                 break;
             case EnvironmentType.Prod:
-                new FaiLambdaDeployStack(
+                new FaiScribeStack(
                     app,
                     `fai-scribe-${environmentType.toLowerCase()}`,
+                    version,
+                    environmentType,
+                    environmentInfo,
+                    {
+                        env: { account: "985111089818", region: "us-east-1" }
+                    }
+                );
+
+                new FaiCodeIndexingStack(
+                    app,
+                    `fai-code-indexing-${environmentType.toLowerCase()}`,
                     version,
                     environmentType,
                     environmentInfo,

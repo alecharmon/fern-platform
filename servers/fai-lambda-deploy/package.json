@@ -4,8 +4,10 @@
   "bin": "bin/fai-lambda-deploy.js",
   "scripts": {
     "cdk": "cdk",
-    "deploy:dev": "cdk deploy fai-scribe-dev2 --require-approval never --progress events",
-    "deploy:prod": "cdk deploy fai-scribe-prod --require-approval never --progress events",
+    "deploy:dev:scribe": "cdk deploy fai-scribe-dev2 --require-approval never --progress events",
+    "deploy:dev:code-indexing": "cdk deploy fai-code-indexing-dev2 --require-approval never --progress events",
+    "deploy:prod:scribe": "cdk deploy fai-scribe-prod --require-approval never --progress events",
+    "deploy:prod:code-indexing": "cdk deploy fai-code-indexing-prod --require-approval never --progress events",
     "watch": "tsc -w"
   },
   "dependencies": {

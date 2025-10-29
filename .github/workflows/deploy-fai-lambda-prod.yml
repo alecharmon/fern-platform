@@ -2,7 +2,9 @@ name: Deploy FAI Lambda Prod
 
 on:
   push:
-    tags: ["fai-scribe@*"]
+    tags:
+      - "fai-scribe@*"
+      - "fai-code-indexing@*"
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -15,7 +17,7 @@ env:
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 jobs:
-  deploy_prod:
+  deploy_fai_scribe_prod:
     runs-on: Seed
     if: github.ref_type == 'tag' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/fai-scribe@')
     environment: Fern Prod
@@ -44,7 +46,7 @@ jobs:
 
       - name: 🧪 Run Tests
         run: |
-          cd servers/fai-lambda
+          cd servers/fai-lambda/fai-scribe
           poetry install
           poetry run pytest -sv
 
@@ -60,4 +62,51 @@ jobs:
           git_version="$(scripts/git-version.sh)"
           npm install -g aws-cdk
           cd servers/fai-lambda-deploy
-          VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:prod
+          VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:prod:scribe
+
+  deploy_fai_code_indexing_prod:
+    runs-on: Seed
+    if: github.ref_type == 'tag' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/fai-code-indexing@')
+    environment: Fern Prod
+    strategy:
+      matrix:
+        concurrency: [1]
+    env:
+      APPLICATION_ENVIRONMENT: prod
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 📦 Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: 🧪 Run Tests
+        run: |
+          cd servers/fai-lambda/fai-code-indexing
+          poetry install
+          poetry run pytest -sv
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 🚀 Deploy to Production
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          npm install -g aws-cdk
+          cd servers/fai-lambda-deploy
+          VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:prod:code-indexing

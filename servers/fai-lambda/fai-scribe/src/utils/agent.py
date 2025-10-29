@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from pathlib import Path
 
 import httpx
@@ -16,6 +17,11 @@ from .git import configure_git_auth
 from .system_prompts import EDITING_SYSTEM_PROMPT
 
 logger = logging.getLogger()
+
+GITHUB_PR_URL_PATTERN = re.compile(
+    r"(?:https?://)?(?:www\.)?github\.com/([^/]+)/([^/]+)/pull/(\d+)",
+    re.IGNORECASE
+)
 
 FAI_API_URL = os.environ.get("FAI_API_URL", "https://fai.buildwithfern.com")
 
@@ -138,9 +144,14 @@ After making the changes:
                         logger.info(f"Claude: {block.text}")
                         for line in block.text.split("\n"):
                             if "PR_URL:" in line:
-                                extracted_url = line.split("PR_URL:", 1)[1].strip()
-                                if extracted_url:
-                                    pr_url = extracted_url
+                                extracted_text = line.split("PR_URL:", 1)[1].strip()
+                                if extracted_text:
+                                    match = GITHUB_PR_URL_PATTERN.search(extracted_text)
+                                    if match:
+                                        pr_url = match.group(0)
+                                        logger.info(f"Extracted PR URL: {pr_url}")
+                                    else:
+                                        logger.warning(f"Invalid PR URL format: {extracted_text}")
                     if isinstance(block, ToolUseBlock):
                         logger.info(f"Using tool: {block.name}")
 

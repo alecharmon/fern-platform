@@ -12,7 +12,9 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import type { Construct } from "constructs";
 import * as path from "path";
 
-export class FaiLambdaDeployStack extends Stack {
+export class FaiScribeStack extends Stack {
+    public readonly vpc: ec2.Vpc;
+
     constructor(
         scope: Construct,
         id: string,
@@ -23,9 +25,10 @@ export class FaiLambdaDeployStack extends Stack {
     ) {
         super(scope, id, props);
 
-        // Create a dedicated log group for this Lambda function
+        const lambdaName = "fai-scribe";
+
         const logGroup = new LogGroup(this, "log-group", {
-            logGroupName: `/aws/lambda/fai-scribe-${environmentType.toLowerCase()}`,
+            logGroupName: `/aws/lambda/${lambdaName}-${environmentType.toLowerCase()}`,
             retention: RetentionDays.ONE_MONTH,
             removalPolicy: RemovalPolicy.DESTROY
         });
@@ -41,7 +44,7 @@ export class FaiLambdaDeployStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        const vpc = new ec2.Vpc(this, "fai-scribe-vpc", {
+        this.vpc = new ec2.Vpc(this, `${lambdaName}-vpc`, {
             maxAzs: 2,
             natGateways: 1,
             subnetConfiguration: [
@@ -59,21 +62,21 @@ export class FaiLambdaDeployStack extends Stack {
         });
 
         const efsSecurityGroup = new ec2.SecurityGroup(this, "efs-security-group", {
-            vpc,
+            vpc: this.vpc,
             description: "Security group for EFS file system",
             allowAllOutbound: false
         });
 
         const lambdaSecurityGroup = new ec2.SecurityGroup(this, "lambda-security-group", {
-            vpc,
-            description: "Security group for FAI Scribe Lambda function",
+            vpc: this.vpc,
+            description: `Security group for ${lambdaName} Lambda function`,
             allowAllOutbound: true
         });
 
         efsSecurityGroup.addIngressRule(lambdaSecurityGroup, ec2.Port.tcp(2049), "Allow NFS access from Lambda");
 
         const fileSystem = new efs.FileSystem(this, "claude-session-storage", {
-            vpc,
+            vpc: this.vpc,
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
             },
@@ -98,16 +101,15 @@ export class FaiLambdaDeployStack extends Stack {
             }
         });
 
-        // Create Lambda function
-        const functionName = `fai-scribe-${environmentType.toLowerCase()}`;
+        const functionName = `${lambdaName}-${environmentType.toLowerCase()}`;
 
-        const lambdaFunction = new lambda.DockerImageFunction(this, "fai-scribe-lambda-function", {
+        const lambdaFunction = new lambda.DockerImageFunction(this, `${lambdaName}-lambda-function`, {
             functionName,
-            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../fai-lambda")),
+            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, `../../fai-lambda/${lambdaName}`)),
             timeout: Duration.minutes(15),
             memorySize: 512,
             logGroup,
-            vpc,
+            vpc: this.vpc,
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
             },
@@ -122,12 +124,11 @@ export class FaiLambdaDeployStack extends Stack {
             filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, "/mnt/efs")
         });
 
-        // Create API Gateway with custom domain
-        const apiName = `fai-scribe-${environmentType.toLowerCase()}`;
+        const apiName = `${lambdaName}-${environmentType.toLowerCase()}`;
 
-        const api = new apigateway.RestApi(this, "fai-scribe-api", {
+        const api = new apigateway.RestApi(this, `${lambdaName}-api`, {
             restApiName: apiName,
-            description: `FAI Scribe API for ${environmentType}`,
+            description: `${lambdaName} API for ${environmentType}`,
             deployOptions: {
                 stageName: environmentType.toLowerCase(),
                 loggingLevel: apigateway.MethodLoggingLevel.INFO,
@@ -135,40 +136,33 @@ export class FaiLambdaDeployStack extends Stack {
             }
         });
 
-        // Create custom domain name for API Gateway
-        const customDomain = new apigateway.DomainName(this, "fai-scribe-domain", {
-            domainName: getLambdaDomainName(environmentType, environmentInfo),
+        const customDomain = new apigateway.DomainName(this, `${lambdaName}-domain`, {
+            domainName: getLambdaDomainName(lambdaName, environmentType, environmentInfo),
             certificate
         });
 
-        // Map the custom domain to the API Gateway
-        new apigateway.BasePathMapping(this, "fai-scribe-base-path-mapping", {
+        new apigateway.BasePathMapping(this, `${lambdaName}-base-path-mapping`, {
             domainName: customDomain,
             restApi: api,
             stage: api.deploymentStage
         });
 
-        // Create Route53 record for custom domain
-        new ARecord(this, "fai-scribe-domain-record", {
+        new ARecord(this, `${lambdaName}-domain-record`, {
             zone: hostedZone,
             target: RecordTarget.fromAlias(new targets.ApiGatewayDomain(customDomain)),
-            recordName: getLambdaDomainName(environmentType, environmentInfo)
+            recordName: getLambdaDomainName(lambdaName, environmentType, environmentInfo)
         });
 
-        // Add Lambda integration
         const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction);
 
-        // Add proxy resource
         api.root.addProxy({
             defaultIntegration: lambdaIntegration,
             anyMethod: true
         });
 
-        // Add health endpoint
         const health = api.root.addResource("health");
         health.addMethod("GET", lambdaIntegration);
 
-        // Output the API URL (remove trailing slash to avoid double slashes)
         const apiUrlWithoutTrailingSlash = api.url.replace(/\/$/, "");
 
         new CfnOutput(this, "ApiUrl", {
@@ -177,7 +171,7 @@ export class FaiLambdaDeployStack extends Stack {
         });
 
         new CfnOutput(this, "CustomDomainUrl", {
-            value: `https://${getLambdaDomainName(environmentType, environmentInfo)}`,
+            value: `https://${getLambdaDomainName(lambdaName, environmentType, environmentInfo)}`,
             description: "Custom Domain URL"
         });
 
@@ -198,11 +192,11 @@ export class FaiLambdaDeployStack extends Stack {
     }
 }
 
-function getLambdaDomainName(environmentType: EnvironmentType, environmentInfo: EnvironmentInfo) {
+function getLambdaDomainName(lambdaName: string, environmentType: EnvironmentType, environmentInfo: EnvironmentInfo) {
     if (environmentType === EnvironmentType.Prod) {
-        return "fai-scribe" + "." + environmentInfo.route53Info.hostedZoneName;
+        return lambdaName + "." + environmentInfo.route53Info.hostedZoneName;
     }
-    return "fai-scribe" + "-" + environmentType.toLowerCase() + "." + environmentInfo.route53Info.hostedZoneName;
+    return lambdaName + "-" + environmentType.toLowerCase() + "." + environmentInfo.route53Info.hostedZoneName;
 }
 
 function getEnvironmentVariableOrThrow(environmentVariable: string): string {

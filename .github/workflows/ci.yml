@@ -124,20 +124,35 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
-      - name: Setup poetry
+      - name: Setup poetry for fai-scribe
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
-          cd servers/fai-lambda
+          cd servers/fai-lambda/fai-scribe
           poetry install
 
-      - name: Lint & Format
+      - name: Lint & Format fai-scribe
         run: |
-          cd servers/fai-lambda
+          cd servers/fai-lambda/fai-scribe
           make code-cleanup
 
-      - name: Type check
+      - name: Type check fai-scribe
         run: |
-          cd servers/fai-lambda
+          cd servers/fai-lambda/fai-scribe
+          poetry run mypy .
+
+      - name: Setup poetry for fai-code-indexing
+        run: |
+          cd servers/fai-lambda/fai-code-indexing
+          poetry install
+
+      - name: Lint & Format fai-code-indexing
+        run: |
+          cd servers/fai-lambda/fai-code-indexing
+          make code-cleanup
+
+      - name: Type check fai-code-indexing
+        run: |
+          cd servers/fai-lambda/fai-code-indexing
           poetry run mypy .
 
   test-fai:

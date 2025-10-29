@@ -1,7 +1,5 @@
 import discord
-from sqlalchemy import (
-    select,
-)
+from sqlalchemy import select
 from sqlalchemy.orm import attributes
 
 from fai.db import async_session_maker
