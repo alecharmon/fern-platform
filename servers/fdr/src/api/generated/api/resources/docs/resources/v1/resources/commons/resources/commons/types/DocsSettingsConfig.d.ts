@@ -10,4 +10,5 @@ export interface DocsSettingsConfig {
     httpSnippets: FernRegistry.docs.v1.commons.HttpSnippetsConfig | undefined;
     hide404Page: boolean | undefined;
     useJavascriptAsTypescript: boolean | undefined;
+    disableExplorerProxy: boolean | undefined;
 }

@@ -26,6 +26,7 @@ export class DefinitionObjectFactory {
                 root: undefined,
                 title: undefined,
                 defaultLanguage: undefined,
+                languages: undefined,
                 announcement: undefined,
                 footerLinks: undefined,
                 logoHeight: undefined,

@@ -9,6 +9,7 @@ export type NavbarLink =
     | FernRegistry.docs.v1.commons.NavbarLink.Outlined
     | FernRegistry.docs.v1.commons.NavbarLink.Minimal
     | FernRegistry.docs.v1.commons.NavbarLink.Github
+    | FernRegistry.docs.v1.commons.NavbarLink.Dropdown
     | FernRegistry.docs.v1.commons.NavbarLink.Primary
     | FernRegistry.docs.v1.commons.NavbarLink.Secondary;
 
@@ -27,6 +28,10 @@ export namespace NavbarLink {
 
     export interface Github extends FernRegistry.docs.v1.commons.NavbarGithubMetadata {
         type: "github";
+    }
+
+    export interface Dropdown extends FernRegistry.docs.v1.commons.NavbarLinkDropdownMetadata {
+        type: "dropdown";
     }
 
     export interface Primary extends FernRegistry.docs.v1.commons.NavbarLinkMetadata {

@@ -1,5 +1,8 @@
-export interface DefaultNavbarLink {
+export interface DefaultNavbarLink extends BaseNavbarLink {
     type: "filled" | "outlined" | "minimal" | "primary" | "secondary";
+}
+
+export interface BaseNavbarLink {
     href: string;
     text: string | undefined;
     icon: string | undefined;
@@ -17,4 +20,9 @@ export interface GithubNavbarLink {
     id: string | undefined;
 }
 
-export type NavbarLink = DefaultNavbarLink | GithubNavbarLink;
+export interface DropdownNavbarLink extends BaseNavbarLink {
+    type: "dropdown";
+    links: BaseNavbarLink[];
+}
+
+export type NavbarLink = DefaultNavbarLink | GithubNavbarLink | DropdownNavbarLink;

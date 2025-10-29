@@ -4,6 +4,6 @@
 
 import * as FernRegistry from "../../../../../../../../../index.js";
 
-export interface NavbarGithubMetadata extends FernRegistry.docs.v1.commons.WithPermissions {
-    url: FernRegistry.Url;
+export interface WithPermissions {
+    viewers: FernRegistry.RoleId[] | undefined;
 }

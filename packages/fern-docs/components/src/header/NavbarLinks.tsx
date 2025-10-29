@@ -1,7 +1,6 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 
 import { ArrowRight } from "lucide-react";
-import React from "react";
 import { cn } from "../cn";
 import { FernLinkButton } from "../FernLinkButton";
 import { FaIconServer } from "../fa-icon-server";
@@ -22,6 +21,8 @@ export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
                 className: undefined,
                 id: undefined
             });
+        } else if (link.type === "dropdown") {
+            // TODO: Implement dropdown links
         } else {
             navbarLinks.push({
                 type: link.type,
@@ -54,6 +55,11 @@ function HeaderNavbarLink({ navbarLink }: { navbarLink: NavbarLinkType }) {
     if (navbarLink.type === "github") {
         const repo = getGitHubRepo(navbarLink.href);
         return repo && <GitHubWidget repo={repo} className={navbarLink.className} id={navbarLink.id} />;
+    }
+
+    if (navbarLink.type === "dropdown") {
+        // todo: implement
+        return;
     }
 
     const link = (

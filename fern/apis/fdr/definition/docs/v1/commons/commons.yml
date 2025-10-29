@@ -56,6 +56,24 @@ types:
 
   # Docs layout config
 
+  Language:
+    enum:
+      - en
+      - es
+      - fr
+      - de
+      - it
+      - pt
+      - ja
+      - zh
+      - ko
+      - el
+      - no
+      - pl
+      - ru
+      - sv
+      - tr
+
   ProgrammingLanguage:
     enum:
       - typescript
@@ -193,7 +211,24 @@ types:
 
   DocsThemeConfig:
     properties:
-      sidebar: optional<string>
+      sidebar: optional<DocsSidebarConfig>
+      body: optional<DocsBodyConfig>
+      tabs: optional<DocsTabsConfig>
+      
+  DocsSidebarConfig:
+    enum:
+      - default
+      - minimal
+      
+  DocsBodyConfig:
+    enum:
+      - default
+      - canvas
+      
+  DocsTabsConfig:
+    enum:
+      - default
+      - bubble
 
   DocsSettingsConfig:
     properties:
@@ -204,6 +239,7 @@ types:
       httpSnippets: optional<HttpSnippetsConfig>
       hide404Page: optional<boolean>
       useJavascriptAsTypescript: optional<boolean>
+      disableExplorerProxy: optional<boolean>
       
   HttpSnippetsConfig:
     discriminated: false
@@ -302,11 +338,25 @@ types:
       outlined: NavbarLinkMetadata
       minimal: NavbarLinkMetadata
       github: NavbarGithubMetadata
+      dropdown: NavbarLinkDropdownMetadata
       # deprecated
       primary: NavbarLinkMetadata # -> outlined
       secondary: NavbarLinkMetadata # -> minimal
+      
+
+  NavbarLinkDropdownMetadata:
+    extends:
+      - WithPermissions
+    properties:
+      links: list<NavbarLinkMetadata>
+      text: optional<string>
+      icon: optional<string>
+      rightIcon: optional<string>
+      rounded: optional<boolean>
 
   NavbarLinkMetadata:
+    extends: 
+      - WithPermissions
     properties:
       url: rootCommons.Url
       text: optional<string>
@@ -315,8 +365,14 @@ types:
       rounded: optional<boolean>
 
   NavbarGithubMetadata:
+    extends:
+      - WithPermissions
     properties:
       url: rootCommons.Url # github repo url
+      
+  WithPermissions:
+    properties:
+      viewers: optional<list<rootCommons.RoleId>>
 
   FooterLink:
     union:

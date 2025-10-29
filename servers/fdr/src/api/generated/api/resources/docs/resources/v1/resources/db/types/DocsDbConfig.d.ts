@@ -5,6 +5,7 @@ import * as FernRegistry from "../../../../../../../index";
 export interface DocsDbConfig {
     title: string | undefined;
     defaultLanguage: FernRegistry.docs.v1.commons.ProgrammingLanguage | undefined;
+    languages: FernRegistry.docs.v1.commons.Language[] | undefined;
     announcement: FernRegistry.docs.v1.commons.AnnouncementConfig | undefined;
     navigation: FernRegistry.docs.v1.db.NavigationConfig | undefined;
     root: FernRegistry.navigation.v1.RootNode | undefined;

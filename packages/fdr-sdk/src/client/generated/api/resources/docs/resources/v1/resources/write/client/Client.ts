@@ -126,6 +126,7 @@ export class Write {
      *             config: {
      *                 title: undefined,
      *                 defaultLanguage: undefined,
+     *                 languages: undefined,
      *                 announcement: undefined,
      *                 navigation: undefined,
      *                 root: undefined,

@@ -33,6 +33,7 @@ export function convertDbDocsConfigToRead({ dbShape }: { dbShape: DocsV1Db.DocsD
         redirects: dbShape.redirects,
         integrations: dbShape.integrations,
         defaultLanguage: dbShape.defaultLanguage,
+        languages: dbShape.languages,
         analyticsConfig: dbShape.analyticsConfig,
         announcement: dbShape.announcement,
         aiChatConfig: dbShape.aiChatConfig,

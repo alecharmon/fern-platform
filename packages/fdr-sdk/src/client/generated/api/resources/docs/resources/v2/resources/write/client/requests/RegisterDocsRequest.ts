@@ -18,6 +18,7 @@ import * as FernRegistry from "../../../../../../../../index.js";
  *             config: {
  *                 title: undefined,
  *                 defaultLanguage: undefined,
+ *                 languages: undefined,
  *                 announcement: undefined,
  *                 navigation: undefined,
  *                 root: undefined,
