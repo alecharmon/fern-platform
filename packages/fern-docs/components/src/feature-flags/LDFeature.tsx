@@ -1,3 +1,5 @@
+"use client";
+
 import { isEqual } from "es-toolkit/predicate";
 import { camelCase } from "es-toolkit/string";
 import { type LDFlagSet, useFlags } from "launchdarkly-react-client-sdk";
