@@ -28,7 +28,7 @@ let nextConfig: NextConfig = {
     outputFileTracingExcludes: {
         "./": ["**/*.map"]
     },
-    transpilePackages: ["@fern-api/docs-utils", "@fern-docs/components", "@fern-ui/loadable"],
+    transpilePackages: ["@fern-api/docs-utils", "@fern-docs/components", "@fern-docs/mdx", "@fern-ui/loadable"],
     experimental: {
         webpackBuildWorker: true,
         optimizePackageImports: [

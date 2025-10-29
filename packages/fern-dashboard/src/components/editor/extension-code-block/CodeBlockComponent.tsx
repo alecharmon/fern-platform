@@ -11,9 +11,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchableDropdown } from "@/components/ui/SearchableDropdown";
 
 import { allLanguages } from "./lowlight-languages";
-import type { LowlightInstance } from "./types";
 
-export function createCodeBlockComponent(lowlight: LowlightInstance) {
+export function createCodeBlockComponent() {
     return function CodeBlockComponent(props: ReactNodeViewProps) {
         const defaultLanguage = props.node.attrs.language;
         const [searchTerm, setSearchTerm] = useState("");
@@ -101,13 +100,8 @@ export function createCodeBlockComponent(lowlight: LowlightInstance) {
             [props.getPos, props.editor]
         );
 
-        const onLoadedCallback = useCallback(() => {
-            props.updateAttributes({ language: currentLanguage?.value });
-        }, [currentLanguage?.value, props.updateAttributes]);
-
         return (
             <NodeViewWrapper className="relative">
-                <LanguageLoader lowlight={lowlight} onLoaded={onLoadedCallback} />
                 <div
                     className={cn(
                         "not-prose bg-card-background border-card-border rounded-3 shadow-card-grayscale group relative mb-6 mt-4 flex w-full border",
@@ -174,25 +168,4 @@ export function createCodeBlockComponent(lowlight: LowlightInstance) {
             </NodeViewWrapper>
         );
     };
-}
-
-// lazy load the languages to avoid importing all the lowlight package dependencies
-// TODO: this currently loads ALL languages, and attempts to do so on each new code block.
-// we can make this more efficient by only loading the languages that are needed for the current code block.
-function LanguageLoader({ lowlight, onLoaded }: { lowlight: LowlightInstance; onLoaded: () => void }) {
-    useEffect(() => {
-        const handleLanguageLoading = () => {
-            void import("lowlight")
-                .then((module) => module.all)
-                .then((languages) => {
-                    lowlight.register(languages);
-                    onLoaded();
-                });
-        };
-
-        // Load languages on editor creation
-        handleLanguageLoading();
-    }, [lowlight, onLoaded]);
-
-    return <></>;
 }

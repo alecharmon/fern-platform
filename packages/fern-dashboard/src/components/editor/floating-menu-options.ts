@@ -45,7 +45,12 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
         group: "Style",
         keywords: ["code", "code block"],
         onSelect: ({ editor }) => {
-            editor.chain().focus().setCodeBlock().insertContent("console.log('Hello world!');").run();
+            editor
+                .chain()
+                .focus()
+                .setCodeBlock({ language: "typescript" })
+                .insertContent("console.log('Hello world!');")
+                .run();
         }
     },
 
