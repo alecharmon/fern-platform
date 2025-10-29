@@ -7,7 +7,7 @@ export interface VariantNode extends FernRegistry.navigation.latest.WithNodeMeta
     default: boolean;
     variantId: FernRegistry.navigation.latest.VariantId;
     /** Couple words for what the variant is */
-    subtitle: string;
+    subtitle: string | undefined;
     /** A URL to an image that will be displayed. Takes precedence over `icon` if both are provided. */
     image: FernRegistry.FileId | undefined;
     /** The navigation items that belong to this variant */
