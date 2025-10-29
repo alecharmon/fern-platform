@@ -23,6 +23,7 @@ import { createCodeBlockComponent } from "./extension-code-block/CodeBlockCompon
 import type { LowlightInstance } from "./extension-code-block/types";
 import CustomElement from "./extension-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
+import { SelectBlockExtension } from "./extension-select-block/select-block-extension";
 import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
 import TableNodeView from "./TableNodeView";
@@ -79,6 +80,7 @@ const extensions = [
     FVEAttributesExtension.configure({
         types: dataAttributeNodeTypes
     }),
+    SelectBlockExtension,
     CustomElement,
     Placeholder.configure({
         placeholder: "Write or press `/` for components",
