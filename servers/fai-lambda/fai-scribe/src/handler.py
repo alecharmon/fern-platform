@@ -5,10 +5,10 @@ from datetime import UTC, datetime
 from typing import Any
 
 import httpx
+from shared.utils.validation import validate_body_param_or_throw
 
 from .utils.agent import SessionInterruptedError, run_editing_session
 from .utils.git import setup_editing_repo
-from .utils.validation import validate_body_param_or_throw
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

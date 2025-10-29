@@ -105,7 +105,9 @@ export class FaiScribeStack extends Stack {
 
         const lambdaFunction = new lambda.DockerImageFunction(this, `${lambdaName}-lambda-function`, {
             functionName,
-            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, `../../fai-lambda/${lambdaName}`)),
+            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, `../../fai-lambda`), {
+                file: `${lambdaName}/Dockerfile`
+            }),
             timeout: Duration.minutes(15),
             memorySize: 512,
             logGroup,

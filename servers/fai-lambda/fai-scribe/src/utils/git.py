@@ -1,10 +1,4 @@
-import logging
-import os
-import shutil
-import subprocess
-from pathlib import Path
-
-logger = logging.getLogger()
+from shared.utils.git import checkout_or_create_branch, clone_repo
 
 
 def setup_editing_repo(
@@ -14,68 +8,25 @@ def setup_editing_repo(
     is_new_session: bool,
     editing_id: str,
 ) -> str:
-    github_token = os.environ.get("GITHUB_TOKEN")
-    if not github_token:
-        raise RuntimeError("GITHUB_TOKEN environment variable not set")
+    """Setup a repository for editing by cloning and checking out the appropriate branch.
 
-    repo_path = Path("/tmp") / f"editing-{editing_id}" / repository
-    repo_path.parent.mkdir(parents=True, exist_ok=True)
+    Args:
+        repository: GitHub repository in format 'owner/repo'
+        base_branch: Base branch to create the working branch from
+        working_branch: Branch to work on
+        is_new_session: Whether this is a new editing session
+        editing_id: Unique identifier for this editing session
 
-    if repo_path.exists():
-        logger.info(f"Directory {repo_path} already exists, removing it (Lambda container reuse)")
-        try:
-            shutil.rmtree(repo_path)
-            logger.info(f"Successfully removed existing directory at {repo_path}")
-        except Exception as e:
-            logger.error(f"Failed to remove existing directory at {repo_path}: {e}")
-            raise RuntimeError(f"Failed to clean up existing directory: {e}")
+    Returns:
+        Path to the cloned repository
+    """
+    repo_path = clone_repo(repository=repository, session_id=editing_id, session_type="editing")
 
-    clone_url = f"https://x-access-token:{github_token}@github.com/{repository}.git"
+    checkout_or_create_branch(
+        repo_path=repo_path,
+        branch_name=working_branch,
+        base_branch=base_branch,
+        create_new=is_new_session,
+    )
 
-    logger.info(f"Cloning {repository} into {repo_path}")
-    try:
-        subprocess.run(
-            ["git", "clone", clone_url, str(repo_path)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to clone repository: {e.stderr}")
-        raise RuntimeError(f"Failed to clone {repository}: {e.stderr}")
-
-    configure_git_auth(str(repo_path))
-
-    if is_new_session:
-        logger.info(f"Creating new branch '{working_branch}' from '{base_branch}'")
-        try:
-            subprocess.run(
-                ["git", "checkout", "-b", working_branch, f"origin/{base_branch}"],
-                cwd=repo_path,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to create branch: {e.stderr}")
-            raise RuntimeError(f"Failed to create branch {working_branch}: {e.stderr}")
-    else:
-        logger.info(f"Checking out existing branch '{working_branch}'")
-        try:
-            subprocess.run(
-                ["git", "checkout", working_branch],
-                cwd=repo_path,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to checkout branch: {e.stderr}")
-            raise RuntimeError(f"Failed to checkout branch {working_branch}: {e.stderr}")
-
-    return str(repo_path)
-
-
-def configure_git_auth(repo_path: str) -> None:
-    subprocess.run(["git", "config", "user.name", "fern-support"], cwd=repo_path, check=True)
-    subprocess.run(["git", "config", "user.email", "support@buildwithfern.com"], cwd=repo_path, check=True)
+    return repo_path
