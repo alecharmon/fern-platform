@@ -143,4 +143,35 @@
   code:not(.code-block)::after {
     content: "" !important;
   }
+
+  /* Fix Step component padding and paragraph margins to match rendered docs */
+  .fern-step {
+    @apply px-0 py-0;
+  }
+
+  .fern-step > p {
+    @apply my-0;
+  }
+
+  /* Ensure all blocks in Tiptap have gap-2 spacing to match rendered docs */
+  .ProseMirror > * + * {
+    @apply mt-2;
+  }
+
+  .ProseMirror > *:first-child {
+    @apply mt-0;
+  }
+
+  /* For NodeViews, apply margin to the inner wrapper instead of the host element */
+  .ProseMirror > * + .react-renderer {
+    @apply mt-0;
+  }
+
+  .ProseMirror > * + .react-renderer > [data-node-view-wrapper] {
+    @apply mt-2;
+  }
+
+  .ProseMirror > .react-renderer:first-child > [data-node-view-wrapper] {
+    @apply mt-0;
+  }
 }
