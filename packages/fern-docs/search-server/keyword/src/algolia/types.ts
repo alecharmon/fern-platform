@@ -25,8 +25,8 @@ export const SEARCHABLE_ATTRIBUTES = [
     // make code snippets searchable
     "unordered(code_snippets.code)",
 
-    // hierarchy (in descending order of priority)
-    "hierarchy.h6.title,hierarchy.h5.title,hierarchy.h4.title,hierarchy.h3.title,hierarchy.h2.title,hierarchy.h1.title"
+    // hierarchy (h1 has highest priority, h6 has lowest)
+    "hierarchy.h1.title,hierarchy.h2.title,hierarchy.h3.title,hierarchy.h4.title,hierarchy.h5.title,hierarchy.h6.title"
 ] as const;
 
 export const FILTERABLE_FACET_ATTRIBUTES = [

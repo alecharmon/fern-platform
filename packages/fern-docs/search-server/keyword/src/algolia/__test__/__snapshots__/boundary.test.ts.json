@@ -2592,6 +2592,42 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root.uv.guide.guide.baml-basics.multi-modal-images-audio-calling-multimodal-baml-functions",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/guide/baml-basics/multi-modal",
+    "pathname": "/guide/baml-basics/multi-modal",
+    "icon": "fa-regular fa-image",
+    "title": "Calling Multimodal BAML Functions",
+    "breadcrumb": [
+      {
+        "title": "BAML Basics",
+        "pathname": "/guide/baml-basics"
+      }
+    ],
+    "tab": {
+      "title": "Guide",
+      "pathname": "/guide"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#calling-multimodal-baml-functions",
+    "hierarchy": {
+      "h0": {
+        "title": "Multi-Modal (Images / Audio)"
+      },
+      "h2": {
+        "id": "calling-multimodal-baml-functions",
+        "title": "Calling Multimodal BAML Functions"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.guide.guide.baml-basics.error-handling-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -5038,7 +5074,7 @@
       },
       "h3": {
         "id": "1-set-temperature-to-00-especially-if-extracting-data-verbatim",
-        "title": "1. Set temperature to 0.0 (especially if extracting data verbatim)"
+        "title": "Set temperature to 0.0 (especially if extracting data verbatim)"
       }
     },
     "level": "h3"
@@ -5075,7 +5111,7 @@
       },
       "h3": {
         "id": "2-reduce-the-number-of-input-tokens",
-        "title": "2. Reduce the number of input tokens"
+        "title": "Reduce the number of input tokens"
       }
     },
     "level": "h3"
@@ -5112,7 +5148,7 @@
       },
       "h3": {
         "id": "2-use-reasoning-or-reflection-prompting",
-        "title": "2. Use reasoning or reflection prompting"
+        "title": "Use reasoning or reflection prompting"
       }
     },
     "level": "h3"
@@ -5159,7 +5195,7 @@
       },
       "h3": {
         "id": "3-watch-out-for-contradictions-and-word-associations",
-        "title": "3. Watch out for contradictions and word associations"
+        "title": "Watch out for contradictions and word associations"
       }
     },
     "level": "h3"
@@ -7144,6 +7180,45 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.general-baml-syntax.array-list-usage-examples",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/general-baml-syntax/array-list",
+    "pathname": "/ref/baml/general-baml-syntax/array-list",
+    "title": "Usage Examples",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      },
+      {
+        "title": "General BAML Syntax",
+        "pathname": "/ref/baml/general-baml-syntax"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#usage-examples",
+    "hierarchy": {
+      "h0": {
+        "title": "array (list)"
+      },
+      "h2": {
+        "id": "usage-examples",
+        "title": "Usage Examples"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.ref.ref.baml.general-baml-syntax.map-dictionary-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -7261,6 +7336,45 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.general-baml-syntax.map-dictionary-usage-examples",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/general-baml-syntax/map-dictionary",
+    "pathname": "/ref/baml/general-baml-syntax/map-dictionary",
+    "title": "Usage Examples",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      },
+      {
+        "title": "General BAML Syntax",
+        "pathname": "/ref/baml/general-baml-syntax"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#usage-examples",
+    "hierarchy": {
+      "h0": {
+        "title": "map (dictionary)"
+      },
+      "h2": {
+        "id": "usage-examples",
+        "title": "Usage Examples"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.ref.ref.baml.types-chunk:0",
@@ -7944,6 +8058,41 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.types-compositestructured-types",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/types",
+    "pathname": "/ref/baml/types",
+    "title": "Composite/Structured Types",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#compositestructured-types",
+    "hierarchy": {
+      "h0": {
+        "title": "Types"
+      },
+      "h2": {
+        "id": "compositestructured-types",
+        "title": "Composite/Structured Types"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.ref.ref.baml.function-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -8290,6 +8439,111 @@
       "h2": {
         "id": "error-handling",
         "title": "Error Handling"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.function-function-declaration",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/function",
+    "pathname": "/ref/baml/function",
+    "title": "Function Declaration",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#function-declaration",
+    "hierarchy": {
+      "h0": {
+        "title": "function"
+      },
+      "h2": {
+        "id": "function-declaration",
+        "title": "Function Declaration"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.function-prompt-templates",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/function",
+    "pathname": "/ref/baml/function",
+    "title": "Prompt Templates",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#prompt-templates",
+    "hierarchy": {
+      "h0": {
+        "title": "function"
+      },
+      "h2": {
+        "id": "prompt-templates",
+        "title": "Prompt Templates"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.function-usage-examples",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/function",
+    "pathname": "/ref/baml/function",
+    "title": "Usage Examples",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#usage-examples",
+    "hierarchy": {
+      "h0": {
+        "title": "function"
+      },
+      "h2": {
+        "id": "usage-examples",
+        "title": "Usage Examples"
       }
     },
     "level": "h2"
@@ -8773,6 +9027,146 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.test-test-declaration",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/test",
+    "pathname": "/ref/baml/test",
+    "title": "Test Declaration",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#test-declaration",
+    "hierarchy": {
+      "h0": {
+        "title": "test"
+      },
+      "h2": {
+        "id": "test-declaration",
+        "title": "Test Declaration"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.test-input-types",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/test",
+    "pathname": "/ref/baml/test",
+    "title": "Input Types",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#input-types",
+    "hierarchy": {
+      "h0": {
+        "title": "test"
+      },
+      "h2": {
+        "id": "input-types",
+        "title": "Input Types"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.test-media-inputs",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/test",
+    "pathname": "/ref/baml/test",
+    "title": "Media Inputs",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#media-inputs",
+    "hierarchy": {
+      "h0": {
+        "title": "test"
+      },
+      "h2": {
+        "id": "media-inputs",
+        "title": "Media Inputs"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.baml.test-integration-with-development-tools",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/baml/test",
+    "pathname": "/ref/baml/test",
+    "title": "Integration with Development Tools",
+    "breadcrumb": [
+      {
+        "title": "Language Reference",
+        "pathname": "/ref/baml"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#integration-with-development-tools",
+    "hierarchy": {
+      "h0": {
+        "title": "test"
+      },
+      "h2": {
+        "id": "integration-with-development-tools",
+        "title": "Integration with Development Tools"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.ref.ref.baml.template-string-chunk:0",
@@ -9779,6 +10173,41 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.ref.ref.attributes.alias-alias-prompt-impact-class",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/attributes/alias-alias",
+    "pathname": "/ref/attributes/alias-alias",
+    "title": "Prompt Impact (class)",
+    "breadcrumb": [
+      {
+        "title": "Attributes",
+        "pathname": "/ref/attributes"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#prompt-impact-class",
+    "hierarchy": {
+      "h0": {
+        "title": "@alias / @@alias"
+      },
+      "h2": {
+        "id": "prompt-impact-class",
+        "title": "Prompt Impact (class)"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.ref.ref.attributes.description-description-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -10050,6 +10479,76 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.ref.ref.attributes.description-description-prompt-impact",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/attributes/description-description",
+    "pathname": "/ref/attributes/description-description",
+    "title": "Prompt Impact",
+    "breadcrumb": [
+      {
+        "title": "Attributes",
+        "pathname": "/ref/attributes"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#prompt-impact",
+    "hierarchy": {
+      "h0": {
+        "title": "@description / @@description"
+      },
+      "h2": {
+        "id": "prompt-impact",
+        "title": "Prompt Impact"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.attributes.description-description-prompt-impact-enum---value",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/attributes/description-description",
+    "pathname": "/ref/attributes/description-description",
+    "title": "Prompt Impact (enum - value)",
+    "breadcrumb": [
+      {
+        "title": "Attributes",
+        "pathname": "/ref/attributes"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#prompt-impact-enum---value",
+    "hierarchy": {
+      "h0": {
+        "title": "@description / @@description"
+      },
+      "h2": {
+        "id": "prompt-impact-enum---value",
+        "title": "Prompt Impact (enum - value)"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.ref.ref.attributes.skip-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -10173,6 +10672,41 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.attributes.skip-prompt-impact",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/attributes/skip",
+    "pathname": "/ref/attributes/skip",
+    "title": "Prompt Impact",
+    "breadcrumb": [
+      {
+        "title": "Attributes",
+        "pathname": "/ref/attributes"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#prompt-impact",
+    "hierarchy": {
+      "h0": {
+        "title": "@skip"
+      },
+      "h2": {
+        "id": "prompt-impact",
+        "title": "Prompt Impact"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.ref.ref.attributes.assert-chunk:0",
@@ -10391,6 +10925,41 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.ref.ref.attributes.check-usage",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/attributes/check",
+    "pathname": "/ref/attributes/check",
+    "title": "Usage",
+    "breadcrumb": [
+      {
+        "title": "Attributes",
+        "pathname": "/ref/attributes"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#usage",
+    "hierarchy": {
+      "h0": {
+        "title": "@check"
+      },
+      "h2": {
+        "id": "usage",
+        "title": "Usage"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.ref.ref.attributes.dynamic-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -10541,6 +11110,41 @@
       "h2": {
         "id": "using-dynamic-with-typebuilder",
         "title": "Using @@dynamic with TypeBuilder"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.attributes.dynamic-usage",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/attributes/dynamic",
+    "pathname": "/ref/attributes/dynamic",
+    "title": "Usage",
+    "breadcrumb": [
+      {
+        "title": "Attributes",
+        "pathname": "/ref/attributes"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#usage",
+    "hierarchy": {
+      "h0": {
+        "title": "@@dynamic"
+      },
+      "h2": {
+        "id": "usage",
+        "title": "Usage"
       }
     },
     "level": "h2"
@@ -12052,6 +12656,41 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.ref.ref.llm-client-strategies.retry-policy-strategies",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/ref/llm-client-strategies/retry-policy",
+    "pathname": "/ref/llm-client-strategies/retry-policy",
+    "title": "Strategies",
+    "breadcrumb": [
+      {
+        "title": "LLM Client Strategies",
+        "pathname": "/ref/llm-client-strategies"
+      }
+    ],
+    "tab": {
+      "title": "BAML Reference",
+      "pathname": "/ref"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#strategies",
+    "hierarchy": {
+      "h0": {
+        "title": "retry_policy"
+      },
+      "h2": {
+        "id": "strategies",
+        "title": "Strategies"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.ref.ref.llm-client-strategies.fallback-chunk:0",
@@ -17525,6 +18164,1060 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0650---2024-10-31",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.65.0 - 2024-10-31",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0650---2024-10-31",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0650---2024-10-31",
+        "title": "0.65.0 - 2024-10-31"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0640---2024-10-29",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.64.0 - 2024-10-29",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0640---2024-10-29",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0640---2024-10-29",
+        "title": "0.64.0 - 2024-10-29"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0630---2024-10-23",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.63.0 - 2024-10-23",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0630---2024-10-23",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0630---2024-10-23",
+        "title": "0.63.0 - 2024-10-23"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0620---2024-10-21",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.62.0 - 2024-10-21",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0620---2024-10-21",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0620---2024-10-21",
+        "title": "0.62.0 - 2024-10-21"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0611---2024-10-15",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.61.1 - 2024-10-15",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0611---2024-10-15",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0611---2024-10-15",
+        "title": "0.61.1 - 2024-10-15"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0610---2024-10-14",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.61.0 - 2024-10-14",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0610---2024-10-14",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0610---2024-10-14",
+        "title": "0.61.0 - 2024-10-14"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0600---2024-10-09",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.60.0 - 2024-10-09",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0600---2024-10-09",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0600---2024-10-09",
+        "title": "0.60.0 - 2024-10-09"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0590---2024-10-04",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.59.0 - 2024-10-04",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0590---2024-10-04",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0590---2024-10-04",
+        "title": "0.59.0 - 2024-10-04"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0580---2024-10-02",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.58.0 - 2024-10-02",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0580---2024-10-02",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0580---2024-10-02",
+        "title": "0.58.0 - 2024-10-02"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0571---2024-09-29",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.57.1 - 2024-09-29",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0571---2024-09-29",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0571---2024-09-29",
+        "title": "0.57.1 - 2024-09-29"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0570---2024-09-27",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.57.0 - 2024-09-27",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0570---2024-09-27",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0570---2024-09-27",
+        "title": "0.57.0 - 2024-09-27"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0561---2024-09-21",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.56.1 - 2024-09-21",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0561---2024-09-21",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0561---2024-09-21",
+        "title": "0.56.1 - 2024-09-21"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0552---2024-09-11",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.55.2 - 2024-09-11",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0552---2024-09-11",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0552---2024-09-11",
+        "title": "0.55.2 - 2024-09-11"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0551---2024-09-10",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.55.1 - 2024-09-10",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0551---2024-09-10",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0551---2024-09-10",
+        "title": "0.55.1 - 2024-09-10"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0542---2024-09-05",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.54.2 - 2024-09-05",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0542---2024-09-05",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0542---2024-09-05",
+        "title": "0.54.2 - 2024-09-05"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0541---2024-09-03",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.54.1 - 2024-09-03",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0541---2024-09-03",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0541---2024-09-03",
+        "title": "0.54.1 - 2024-09-03"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0540---2024-08-27",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.54.0 - 2024-08-27",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0540---2024-08-27",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0540---2024-08-27",
+        "title": "0.54.0 - 2024-08-27"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0531---2024-08-11",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.53.1 - 2024-08-11",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0531---2024-08-11",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0531---2024-08-11",
+        "title": "0.53.1 - 2024-08-11"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0530---2024-08-05",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.53.0 - 2024-08-05",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0530---2024-08-05",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0530---2024-08-05",
+        "title": "0.53.0 - 2024-08-05"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0521---2024-07-24",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.52.1 - 2024-07-24",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0521---2024-07-24",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0521---2024-07-24",
+        "title": "0.52.1 - 2024-07-24"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0520---2024-07-24",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.52.0 - 2024-07-24",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0520---2024-07-24",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0520---2024-07-24",
+        "title": "0.52.0 - 2024-07-24"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0512---2024-07-24",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.51.2 - 2024-07-24",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0512---2024-07-24",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0512---2024-07-24",
+        "title": "0.51.2 - 2024-07-24"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0511---2024-07-21",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.51.1 - 2024-07-21",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0511---2024-07-21",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0511---2024-07-21",
+        "title": "0.51.1 - 2024-07-21"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0510---2024-07-19",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.51.0 - 2024-07-19",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0510---2024-07-19",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0510---2024-07-19",
+        "title": "0.51.0 - 2024-07-19"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0500---2024-07-11",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.50.0 - 2024-07-11",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0500---2024-07-11",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0500---2024-07-11",
+        "title": "0.50.0 - 2024-07-11"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0490---2024-07-08",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.49.0 - 2024-07-08",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0490---2024-07-08",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0490---2024-07-08",
+        "title": "0.49.0 - 2024-07-08"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0480---2024-07-04",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.48.0 - 2024-07-04",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0480---2024-07-04",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0480---2024-07-04",
+        "title": "0.48.0 - 2024-07-04"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0470---2024-07-03",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.47.0 - 2024-07-03",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0470---2024-07-03",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0470---2024-07-03",
+        "title": "0.47.0 - 2024-07-03"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0460---2024-07-03",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.46.0 - 2024-07-03",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0460---2024-07-03",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0460---2024-07-03",
+        "title": "0.46.0 - 2024-07-03"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0450---2024-06-29",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.45.0 - 2024-06-29",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0450---2024-06-29",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0450---2024-06-29",
+        "title": "0.45.0 - 2024-06-29"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0440---2024-06-26",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.44.0 - 2024-06-26",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0440---2024-06-26",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0440---2024-06-26",
+        "title": "0.44.0 - 2024-06-26"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0430---2024-06-26",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.43.0 - 2024-06-26",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0430---2024-06-26",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0430---2024-06-26",
+        "title": "0.43.0 - 2024-06-26"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0420---2024-06-26",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "0.42.0 - 2024-06-26",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0420---2024-06-26",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0420---2024-06-26",
+        "title": "0.42.0 - 2024-06-26"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.changelog.changelog.changelog-0410---2024-06-20",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/changelog/changelog",
+    "pathname": "/changelog/changelog",
+    "icon": "fa-regular fa-history",
+    "title": "[0.41.0] - 2024-06-20",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#0410---2024-06-20",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "0410---2024-06-20",
+        "title": "[0.41.0] - 2024-06-20"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:eaa1074a-b676-4a6b-93df-43c52a64d62f.extractData",

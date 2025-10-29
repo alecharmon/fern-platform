@@ -4711,6 +4711,41 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root.uv.docs.docs.collections.documents-how-to-use-documents",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/collections/documents",
+    "pathname": "/docs/collections/documents",
+    "title": "How to Use Documents",
+    "breadcrumb": [
+      {
+        "title": "Collections",
+        "pathname": "/docs/collections"
+      }
+    ],
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#how-to-use-documents",
+    "hierarchy": {
+      "h0": {
+        "title": "Managing Documents in Scout"
+      },
+      "h2": {
+        "id": "how-to-use-documents",
+        "title": "How to Use Documents"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.docs.docs.collections.uploading-creating-documents-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -5058,6 +5093,45 @@
       "h2": {
         "id": "results",
         "title": "Results"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.docs.docs.collections.uploading-creating-documents.scraping-a-website-types-of-web-scrapes",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/collections/uploading-creating-documents/scraping-a-website",
+    "pathname": "/docs/collections/uploading-creating-documents/scraping-a-website",
+    "title": "Types of Web Scrapes",
+    "breadcrumb": [
+      {
+        "title": "Collections",
+        "pathname": "/docs/collections"
+      },
+      {
+        "title": "Uploading & Creating Documents",
+        "pathname": "/docs/collections/uploading-creating-documents"
+      }
+    ],
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#types-of-web-scrapes",
+    "hierarchy": {
+      "h0": {
+        "title": "Scraping a Website"
+      },
+      "h2": {
+        "id": "types-of-web-scrapes",
+        "title": "Types of Web Scrapes"
       }
     },
     "level": "h2"

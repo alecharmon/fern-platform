@@ -737,6 +737,47 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.developer-playground-using-the-playground",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/playground-overview",
+    "pathname": "/docs/playground-overview",
+    "title": "Using the Playground",
+    "breadcrumb": [
+      {
+        "title": "Get Started",
+        "pathname": "/v2/docs/get-started"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Large language model playground, generative AI",
+    "hash": "#using-the-playground",
+    "hierarchy": {
+      "h0": {
+        "title": "Developer Playground"
+      },
+      "h2": {
+        "id": "using-the-playground",
+        "title": "Using the Playground"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.cohere-fa-qs-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -1861,6 +1902,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.datasets-managing-datasets-using-the-python-sdk",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/datasets",
+    "pathname": "/docs/datasets",
+    "title": "Managing Datasets using the Python SDK",
+    "breadcrumb": [
+      {
+        "title": "Get Started",
+        "pathname": "/v2/docs/get-started"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "datasets, processing datasets with language models, generative AI",
+    "hash": "#managing-datasets-using-the-python-sdk",
+    "hierarchy": {
+      "h0": {
+        "title": "Datasets"
+      },
+      "h2": {
+        "id": "managing-datasets-using-the-python-sdk",
+        "title": "Managing Datasets using the Python SDK"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.improve-cohere-docs-chunk:0",
@@ -3240,6 +3322,96 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.models.command.command-and-command-light-get-started",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/command-beta",
+    "pathname": "/docs/command-beta",
+    "title": "Get Started",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v2/docs/models"
+      },
+      {
+        "title": "Command",
+        "pathname": "/v2/docs/models/command"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere's command model, generative AI",
+    "hash": "#get-started",
+    "hierarchy": {
+      "h0": {
+        "title": "Command and Command Light"
+      },
+      "h2": {
+        "id": "get-started",
+        "title": "Get Started"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.models.command.command-and-command-light-faq",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/command-beta",
+    "pathname": "/docs/command-beta",
+    "title": "FAQ",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v2/docs/models"
+      },
+      {
+        "title": "Command",
+        "pathname": "/v2/docs/models/command"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere's command model, generative AI",
+    "hash": "#faq",
+    "hierarchy": {
+      "h0": {
+        "title": "Command and Command Light"
+      },
+      "h2": {
+        "id": "faq",
+        "title": "FAQ"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.models.embed-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -3442,6 +3614,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.models.embed-frequently-asked-questions",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/cohere-embed",
+    "pathname": "/docs/cohere-embed",
+    "title": "Frequently Asked Questions",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v2/docs/models"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, large language models, generative AI, embeddings",
+    "hash": "#frequently-asked-questions",
+    "hierarchy": {
+      "h0": {
+        "title": "Embed Model"
+      },
+      "h2": {
+        "id": "frequently-asked-questions",
+        "title": "Frequently Asked Questions"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.models.rerank-chunk:0",
@@ -5147,6 +5360,186 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-basic-chat-stream-events",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/docs/streaming",
+    "title": "Basic Chat Stream Events",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#basic-chat-stream-events",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "basic-chat-stream-events",
+        "title": "Basic Chat Stream Events"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-retrieval-augmented-generation-stream-events",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/docs/streaming",
+    "title": "Retrieval Augmented Generation Stream Events",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#retrieval-augmented-generation-stream-events",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "retrieval-augmented-generation-stream-events",
+        "title": "Retrieval Augmented Generation Stream Events"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-tool-use-stream-events-for-tool-calling",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/docs/streaming",
+    "title": "Tool Use Stream Events (For Tool Calling)",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#tool-use-stream-events-for-tool-calling",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "tool-use-stream-events-for-tool-calling",
+        "title": "Tool Use Stream Events (For Tool Calling)"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-tool-use-stream-events-for-response-generation",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/docs/streaming",
+    "title": "Tool Use Stream Events (For Response Generation)",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#tool-use-stream-events-for-response-generation",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "tool-use-stream-events-for-response-generation",
+        "title": "Tool Use Stream Events (For Response Generation)"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.structured-generations-json-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -5744,7 +6137,7 @@
       },
       "h3": {
         "id": "1-pick-the-top-token-greedy-decoding",
-        "title": "1. Pick the top token: greedy decoding"
+        "title": "Pick the top token: greedy decoding"
       }
     },
     "level": "h3"
@@ -5790,7 +6183,7 @@
       },
       "h3": {
         "id": "2-pick-from-amongst-the-top-tokens-top-k",
-        "title": "2. Pick from amongst the top tokens: top-k"
+        "title": "Pick from amongst the top tokens: top-k"
       }
     },
     "level": "h3"
@@ -5836,7 +6229,7 @@
       },
       "h3": {
         "id": "3-pick-from-amongst-the-top-tokens-whose-probabilities-add-up-to-15-top-p",
-        "title": "3. Pick from amongst the top tokens whose probabilities add up to 15%: top-p"
+        "title": "Pick from amongst the top tokens whose probabilities add up to 15%: top-p"
       }
     },
     "level": "h3"
@@ -7442,6 +7835,51 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.tool-use-faq",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/tool-use",
+    "pathname": "/docs/tool-use",
+    "title": "FAQ",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "natural language processing, Cohere, large language models, tool use with LLMs, generative AI tool use",
+    "hash": "#faq",
+    "hierarchy": {
+      "h0": {
+        "title": "Tool Use"
+      },
+      "h2": {
+        "id": "faq",
+        "title": "FAQ"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -7729,6 +8167,50 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents-multi-step-tool-use-with-the-chat-api",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/multi-step-tool-use",
+    "pathname": "/docs/multi-step-tool-use",
+    "title": "Multi-step Tool Use With the Chat API",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#multi-step-tool-use-with-the-chat-api",
+    "hierarchy": {
+      "h0": {
+        "title": "Multi-step Tool Use (Agents)"
+      },
+      "h2": {
+        "id": "multi-step-tool-use-with-the-chat-api",
+        "title": "Multi-step Tool Use With the Chat API"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.implementing-a-multi-step-agent-with-langchain-chunk:0",
@@ -8306,6 +8788,51 @@
       "h2": {
         "id": "example---defaults",
         "title": "Example - Defaults"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.parameter-types-in-tool-use-example--arrays",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/parameter-types-in-tool-use",
+    "pathname": "/docs/parameter-types-in-tool-use",
+    "title": "Example – Arrays",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, AI tool use",
+    "hash": "#example--arrays",
+    "hierarchy": {
+      "h0": {
+        "title": "Parameter Types in Tool Use"
+      },
+      "h2": {
+        "id": "example--arrays",
+        "title": "Example – Arrays"
       }
     },
     "level": "h2"
@@ -9825,7 +10352,7 @@
       },
       "h2": {
         "id": "1-input-the-initial-prompt",
-        "title": "1. Input the initial prompt"
+        "title": "Input the initial prompt"
       }
     },
     "level": "h2"
@@ -9875,7 +10402,7 @@
       },
       "h2": {
         "id": "2-specify-criteria",
-        "title": "2. Specify criteria"
+        "title": "Specify criteria"
       }
     },
     "level": "h2"
@@ -9984,7 +10511,7 @@
       },
       "h2": {
         "id": "3-run-the-optimization",
-        "title": "3. Run the optimization"
+        "title": "Run the optimization"
       }
     },
     "level": "h2"
@@ -11925,7 +12452,7 @@
       },
       "h4": {
         "id": "1-prepare-your-image-for-embeddings",
-        "title": "1. Prepare your Image for Embeddings"
+        "title": "Prepare your Image for Embeddings"
       }
     },
     "level": "h4"
@@ -11978,6 +12505,47 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.multimodal-embeddings-how-to-use-multimodal-embeddings",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/multimodal-embeddings",
+    "pathname": "/docs/multimodal-embeddings",
+    "title": "How to use Multimodal Embeddings",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "vector embeddings, image embeddings, images, multimodal, multimodal embeddings, embeddings, natural language processing",
+    "hash": "#how-to-use-multimodal-embeddings",
+    "hierarchy": {
+      "h0": {
+        "title": "Multimodal Embeddings"
+      },
+      "h3": {
+        "id": "how-to-use-multimodal-embeddings",
+        "title": "How to use Multimodal Embeddings"
+      }
+    },
+    "level": "h3"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.batch-embedding-jobs-chunk:0",
@@ -12207,7 +12775,7 @@
       },
       "h3": {
         "id": "1-upload-your-dataset",
-        "title": "1. Upload your Dataset"
+        "title": "Upload your Dataset"
       }
     },
     "level": "h3"
@@ -12256,7 +12824,7 @@
       },
       "h3": {
         "id": "2-kick-off-the-embed-job",
-        "title": "2. Kick off the Embed Job"
+        "title": "Kick off the Embed Job"
       }
     },
     "level": "h3"
@@ -12310,7 +12878,7 @@
       },
       "h3": {
         "id": "3-save-down-the-results-of-your-embed-job-or-view-the-results-of-your-embed-job",
-        "title": "3. Save down the Results of your Embed Job or View the Results of your Embed Job"
+        "title": "Save down the Results of your Embed Job or View the Results of your Embed Job"
       }
     },
     "level": "h3"
@@ -12657,6 +13225,51 @@
       "h2": {
         "id": "multilingual-reranking",
         "title": "Multilingual Reranking"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking.rerank-overview-get-started",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/overview",
+    "pathname": "/docs/overview",
+    "title": "Get Started",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval"
+      },
+      {
+        "title": "Reranking",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval/reranking"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, reranking models, large language models",
+    "hash": "#get-started",
+    "hierarchy": {
+      "h0": {
+        "title": "Rerank Overview"
+      },
+      "h2": {
+        "id": "get-started",
+        "title": "Get Started"
       }
     },
     "level": "h2"
@@ -13136,6 +13749,51 @@
       "h2": {
         "id": "interpreting-results",
         "title": "Interpreting Results"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking.rerank-best-practices-max-number-of-documents",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reranking-best-practices",
+    "pathname": "/docs/reranking-best-practices",
+    "title": "Max Number of Documents",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval"
+      },
+      {
+        "title": "Reranking",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval/reranking"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "rerank, natural language processing",
+    "hash": "#max-number-of-documents",
+    "hierarchy": {
+      "h0": {
+        "title": "Rerank Best Practices"
+      },
+      "h2": {
+        "id": "max-number-of-documents",
+        "title": "Max Number of Documents"
       }
     },
     "level": "h2"
@@ -18652,6 +19310,47 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.fine-tuning.fa-qs-troubleshooting-faqs",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/troubleshooting-a-fine-tuned-model",
+    "pathname": "/docs/troubleshooting-a-fine-tuned-model",
+    "title": "FAQs",
+    "breadcrumb": [
+      {
+        "title": "Fine-Tuning",
+        "pathname": "/v2/docs/fine-tuning"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "fine-tuning, fine-tuning language models",
+    "hash": "#faqs",
+    "hierarchy": {
+      "h0": {
+        "title": "FAQs / Troubleshooting"
+      },
+      "h1": {
+        "id": "faqs",
+        "title": "FAQs"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.going-to-production.api-keys-and-rate-limits-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -19694,6 +20393,51 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.elasticsearch-and-cohere-build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/elasticsearch-and-cohere",
+    "pathname": "/docs/elasticsearch-and-cohere",
+    "title": "Build a Hybrid Search Index with Cohere and Elasticsearch",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere integrations, Elasticsearch",
+    "hash": "#build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "hierarchy": {
+      "h0": {
+        "title": "Elasticsearch and Cohere"
+      },
+      "h1": {
+        "id": "build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+        "title": "Build a Hybrid Search Index with Cohere and Elasticsearch"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.mongo-db-and-cohere-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -20341,6 +21085,96 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.redis-and-cohere-building-a-retrieval-pipeline-with-cohere-and-redis",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/redis-and-cohere",
+    "pathname": "/docs/redis-and-cohere",
+    "title": "Building a Retrieval Pipeline with Cohere and Redis",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Redis, Cohere",
+    "hash": "#building-a-retrieval-pipeline-with-cohere-and-redis",
+    "hierarchy": {
+      "h0": {
+        "title": "Redis and Cohere"
+      },
+      "h1": {
+        "id": "building-a-retrieval-pipeline-with-cohere-and-redis",
+        "title": "Building a Retrieval Pipeline with Cohere and Redis"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.redis-and-cohere-redis-filters",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/redis-and-cohere",
+    "pathname": "/docs/redis-and-cohere",
+    "title": "Redis Filters",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Redis, Cohere",
+    "hash": "#redis-filters",
+    "hierarchy": {
+      "h0": {
+        "title": "Redis and Cohere"
+      },
+      "h1": {
+        "id": "redis-filters",
+        "title": "Redis Filters"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.haystack-and-cohere-chunk:0",
@@ -21904,6 +22738,51 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.lang-chain.embed-on-lang-chain-cohere-with-langchain-and-bedrock",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/embed-on-langchain",
+    "pathname": "/docs/embed-on-langchain",
+    "title": "Cohere with LangChain and Bedrock",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "LangChain",
+        "pathname": "/docs/cohere-and-langchain"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, vector embedding model",
+    "hash": "#cohere-with-langchain-and-bedrock",
+    "hierarchy": {
+      "h0": {
+        "title": "Embed on LangChain"
+      },
+      "h3": {
+        "id": "cohere-with-langchain-and-bedrock",
+        "title": "Cohere with LangChain and Bedrock"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.lang-chain.rerank-on-lang-chain-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -22961,6 +23840,47 @@
       "h2": {
         "id": "feature-support",
         "title": "Feature support"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.deployment-options.cohere-sdk-cloud-platform-compatibility-snippets",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/cohere-works-everywhere",
+    "pathname": "/docs/cohere-works-everywhere",
+    "title": "Snippets",
+    "breadcrumb": [
+      {
+        "title": "Deployment Options",
+        "pathname": "/v2/docs/deployment-options"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, Cohere SDK, large language model SDK",
+    "hash": "#snippets",
+    "hierarchy": {
+      "h0": {
+        "title": "Cohere SDK Cloud Platform Compatibility"
+      },
+      "h2": {
+        "id": "snippets",
+        "title": "Snippets"
       }
     },
     "level": "h2"
@@ -30476,7 +31396,7 @@
       },
       "h3": {
         "id": "1-comprehend-cohere",
-        "title": "1. Comprehend Cohere"
+        "title": "Comprehend Cohere"
       }
     },
     "level": "h3"
@@ -30518,7 +31438,7 @@
       },
       "h3": {
         "id": "2-document-your-application",
-        "title": "2. Document your Application"
+        "title": "Document your Application"
       }
     },
     "level": "h3"
@@ -30560,7 +31480,7 @@
       },
       "h3": {
         "id": "3-understand-and-prevent-disallowed-use-cases",
-        "title": "3. Understand and Prevent Disallowed Use Cases"
+        "title": "Understand and Prevent Disallowed Use Cases"
       }
     },
     "level": "h3"
@@ -31196,6 +32116,47 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.teams-and-roles-role-types",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/reference/teams-and-roles",
+    "pathname": "/reference/teams-and-roles",
+    "title": "Role Types",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "RAG, retrieval, augmented, generation, LLM, connectors, connector, langchain",
+    "hash": "#role-types",
+    "hierarchy": {
+      "h0": {
+        "title": "Teams and Roles"
+      },
+      "h2": {
+        "id": "role-types",
+        "title": "Role Types"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.errors",
     "org_id": "test",
     "domain": "test.com",
@@ -31501,6 +32462,47 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.errors-http-status-codes",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/reference/errors",
+    "pathname": "/reference/errors",
+    "title": "Http status codes",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "RAG, retrieval, augmented, generation, LLM, connectors, connector, langchain",
+    "hash": "#http-status-codes",
+    "hierarchy": {
+      "h0": {
+        "title": "Errors"
+      },
+      "h1": {
+        "id": "http-status-codes",
+        "title": "Http status codes"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-chunk:0",
@@ -32621,6 +33623,129 @@
       "h1": {
         "id": "unsupported-features-in-v2",
         "title": "Unsupported features in v2"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-chat",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/migrating-v1-to-v2",
+    "pathname": "/docs/migrating-v1-to-v2",
+    "title": "Chat",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, text generation, LLMs, generative AI",
+    "hash": "#chat",
+    "hierarchy": {
+      "h0": {
+        "title": "Migrating From API v1 to API v2"
+      },
+      "h1": {
+        "id": "chat",
+        "title": "Chat"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-rag",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/migrating-v1-to-v2",
+    "pathname": "/docs/migrating-v1-to-v2",
+    "title": "RAG",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, text generation, LLMs, generative AI",
+    "hash": "#rag",
+    "hierarchy": {
+      "h0": {
+        "title": "Migrating From API v1 to API v2"
+      },
+      "h1": {
+        "id": "rag",
+        "title": "RAG"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-tool-use",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/migrating-v1-to-v2",
+    "pathname": "/docs/migrating-v1-to-v2",
+    "title": "Tool use",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, text generation, LLMs, generative AI",
+    "hash": "#tool-use",
+    "hierarchy": {
+      "h0": {
+        "title": "Migrating From API v1 to API v2"
+      },
+      "h1": {
+        "id": "tool-use",
+        "title": "Tool use"
       }
     },
     "level": "h1"
@@ -35557,6 +36682,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.analysis-of-form-10-k-10-q-using-cohere-and-rag-appendix",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/analysis-of-financial-forms",
+    "pathname": "/page/analysis-of-financial-forms",
+    "title": "Appendix",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, AI assistant for finance",
+    "hash": "#appendix",
+    "hierarchy": {
+      "h0": {
+        "title": "Analysis of Form 10-K/10-Q Using Cohere and RAG"
+      },
+      "h1": {
+        "id": "appendix",
+        "title": "Appendix"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.analyzing-hacker-news-with-six-language-understanding-methods-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -37378,6 +38539,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.basic-rag-given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/basic-rag",
+    "pathname": "/page/basic-rag",
+    "title": "Given a user query, retrieve the relevant chunks from the vector database",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents",
+    "hash": "#given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+    "hierarchy": {
+      "h0": {
+        "title": "Basic RAG"
+      },
+      "h2": {
+        "id": "given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+        "title": "Given a user query, retrieve the relevant chunks from the vector database"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.basic-semantic-search-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -37455,7 +38652,7 @@
       },
       "h2": {
         "id": "1-getting-set-up",
-        "title": "1. Getting Set Up"
+        "title": "Getting Set Up"
       }
     },
     "level": "h2"
@@ -37499,7 +38696,7 @@
       },
       "h2": {
         "id": "2-get-the-archive-of-questions",
-        "title": "2. Get The Archive of Questions"
+        "title": "Get The Archive of Questions"
       }
     },
     "level": "h2"
@@ -37551,7 +38748,7 @@
       },
       "h2": {
         "id": "2-embed-the-archive",
-        "title": "2. Embed the archive"
+        "title": "Embed the archive"
       }
     },
     "level": "h2"
@@ -37598,7 +38795,7 @@
       },
       "h2": {
         "id": "3-search-using-an-index-and-nearest-neighbor-search",
-        "title": "3. Search using an index and nearest neighbor search"
+        "title": "Search using an index and nearest neighbor search"
       }
     },
     "level": "h2"
@@ -37744,7 +38941,7 @@
       },
       "h2": {
         "id": "4-visualizing-the-archive",
-        "title": "4. Visualizing the archive"
+        "title": "Visualizing the archive"
       }
     },
     "level": "h2"
@@ -38868,6 +40065,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.chunking-strategies-chunking-strategies-framework",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/chunking-strategies",
+    "pathname": "/page/chunking-strategies",
+    "title": "Chunking strategies framework",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG",
+    "hash": "#chunking-strategies-framework",
+    "hierarchy": {
+      "h0": {
+        "title": "Chunking Strategies"
+      },
+      "h2": {
+        "id": "chunking-strategies-framework",
+        "title": "Chunking strategies framework"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.creating-a-qa-bot-from-technical-documentation-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -38943,7 +40176,7 @@
       },
       "h2": {
         "id": "1-embed-technical-documentation-and-store-as-vector-database",
-        "title": "1. Embed technical documentation and store as vector database"
+        "title": "Embed technical documentation and store as vector database"
       }
     },
     "level": "h2"
@@ -39002,7 +40235,7 @@
       },
       "h2": {
         "id": "2-build-a-retriever-using-coheres-rerank",
-        "title": "2. Build a retriever using Cohere's rerank"
+        "title": "Build a retriever using Cohere's rerank"
       }
     },
     "level": "h2"
@@ -39056,7 +40289,7 @@
       },
       "h2": {
         "id": "3-create-model-answers-for-100-qa-pairs",
-        "title": "3. Create model answers for 100 QA pairs"
+        "title": "Create model answers for 100 QA pairs"
       }
     },
     "level": "h2"
@@ -39100,7 +40333,7 @@
       },
       "h2": {
         "id": "4-evaluate-model-performance",
-        "title": "4. Evaluate model performance"
+        "title": "Evaluate model performance"
       }
     },
     "level": "h2"
@@ -39738,6 +40971,42 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-native-multi-step-cohere-api-notebook-overview",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent-native-api",
+    "pathname": "/page/csv-agent-native-api",
+    "title": "Notebook Overview",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#notebook-overview",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Native Multi-Step Cohere API"
+      },
+      "h1": {
+        "id": "notebook-overview",
+        "title": "Notebook Overview"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-langchain",
     "org_id": "test",
     "domain": "test.com",
@@ -40101,6 +41370,78 @@
       "h1": {
         "id": "sec_step3",
         "title": "QnA over Multiple Tables"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-langchain-notebook-overview",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent",
+    "pathname": "/page/csv-agent",
+    "title": "Notebook Overview",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#notebook-overview",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Langchain"
+      },
+      "h1": {
+        "id": "notebook-overview",
+        "title": "Notebook Overview"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-langchain-sec_step2",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent",
+    "pathname": "/page/csv-agent",
+    "title": "QnA over Single Table\" \"",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#sec_step2",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Langchain"
+      },
+      "h1": {
+        "id": "sec_step2",
+        "title": "QnA over Single Table\" \""
       }
     },
     "level": "h1"
@@ -42116,7 +43457,7 @@
       },
       "h2": {
         "id": "out-of-the-box-summarization-with-command-r",
-        "title": "2. Out-of-the-box summarization with Command-R"
+        "title": "Out-of-the-box summarization with Command-R"
       }
     },
     "level": "h2"
@@ -42173,7 +43514,7 @@
       },
       "h1": {
         "id": "introduce-citations-to-the-summary-for-grounding",
-        "title": "3. Introduce citations to the summary for grounding"
+        "title": "Introduce citations to the summary for grounding"
       }
     },
     "level": "h1"
@@ -42217,7 +43558,7 @@
       },
       "h1": {
         "id": "reduce-the-cost-of-summarization-calls",
-        "title": "4. Reduce the cost of summarization calls"
+        "title": "Reduce the cost of summarization calls"
       }
     },
     "level": "h1"
@@ -43769,7 +45110,7 @@
       },
       "h3": {
         "id": "1-generate-potential-conversation-questions",
-        "title": "1. Generate Potential Conversation Questions"
+        "title": "Generate Potential Conversation Questions"
       }
     },
     "level": "h3"
@@ -43818,7 +45159,7 @@
       },
       "h3": {
         "id": "2-classify-questions",
-        "title": "2. Classify Questions"
+        "title": "Classify Questions"
       }
     },
     "level": "h3"
@@ -45564,7 +46905,7 @@
       },
       "h2": {
         "id": "1-get-the-dataset",
-        "title": "1. Get the dataset"
+        "title": "Get the dataset"
       }
     },
     "level": "h2"
@@ -45621,7 +46962,7 @@
       },
       "h2": {
         "id": "2-set-up-the-cohere-client-and-get-the-embeddings-of-the-reviews",
-        "title": "2. Set up the Cohere client and get the embeddings of the reviews"
+        "title": "Set up the Cohere client and get the embeddings of the reviews"
       }
     },
     "level": "h2"
@@ -45668,7 +47009,7 @@
       },
       "h2": {
         "id": "3-train-a-classifier-using-the-training-set",
-        "title": "3. Train a classifier using the training set"
+        "title": "Train a classifier using the training set"
       }
     },
     "level": "h2"
@@ -45715,7 +47056,7 @@
       },
       "h2": {
         "id": "4-evaluate-the-performance-of-the-classifier-on-the-testing-set",
-        "title": "4. Evaluate the performance of the classifier on the testing set"
+        "title": "Evaluate the performance of the classifier on the testing set"
       }
     },
     "level": "h2"
@@ -47083,6 +48424,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.finetuning-on-cohere-s-platform-setup",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/convfinqa-finetuning-wandb",
+    "pathname": "/page/convfinqa-finetuning-wandb",
+    "title": "Setup",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#setup",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on Cohere's Platform"
+      },
+      "h2": {
+        "id": "setup",
+        "title": "Setup"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.deploy-your-finetuned-model-on-aws-marketplace",
     "org_id": "test",
     "domain": "test.com",
@@ -47300,7 +48677,7 @@
       },
       "h2": {
         "id": "1-subscribe-to-the-bring-your-own-finetuning-algorithm",
-        "title": "1. Subscribe to the bring your own finetuning algorithm"
+        "title": "Subscribe to the bring your own finetuning algorithm"
       }
     },
     "level": "h2"
@@ -47355,7 +48732,7 @@
       },
       "h2": {
         "id": "2-preliminary-setup",
-        "title": "2. Preliminary setup"
+        "title": "Preliminary setup"
       }
     },
     "level": "h2"
@@ -47402,7 +48779,7 @@
       },
       "h2": {
         "id": "3-get-the-merged-weights",
-        "title": "3. Get the merged weights"
+        "title": "Get the merged weights"
       }
     },
     "level": "h2"
@@ -47445,7 +48822,7 @@
       },
       "h2": {
         "id": "5-export-the-merged-weights-to-the-tensorrt-llm-inference-engine",
-        "title": "5. Export the merged weights to the TensorRT-LLM inference engine"
+        "title": "Export the merged weights to the TensorRT-LLM inference engine"
       }
     },
     "level": "h2"
@@ -47488,7 +48865,7 @@
       },
       "h2": {
         "id": "6-create-an-endpoint-for-inference-from-the-exported-engine",
-        "title": "6. Create an endpoint for inference from the exported engine"
+        "title": "Create an endpoint for inference from the exported engine"
       }
     },
     "level": "h2"
@@ -47535,7 +48912,7 @@
       },
       "h2": {
         "id": "7-perform-real-time-inference-by-calling-the-endpoint",
-        "title": "7. Perform real-time inference by calling the endpoint"
+        "title": "Perform real-time inference by calling the endpoint"
       }
     },
     "level": "h2"
@@ -47578,7 +48955,7 @@
       },
       "h2": {
         "id": "8-delete-the-endpoint-optional",
-        "title": "8. Delete the endpoint (optional)"
+        "title": "Delete the endpoint (optional)"
       }
     },
     "level": "h2"
@@ -47615,7 +48992,7 @@
       },
       "h2": {
         "id": "9-unsubscribe-to-the-listing-optional",
-        "title": "9. Unsubscribe to the listing (optional)"
+        "title": "Unsubscribe to the listing (optional)"
       }
     },
     "level": "h2"
@@ -47836,7 +49213,7 @@
       },
       "h2": {
         "id": "1-subscribe-to-the-finetune-algorithm",
-        "title": "1. Subscribe to the finetune algorithm"
+        "title": "Subscribe to the finetune algorithm"
       }
     },
     "level": "h2"
@@ -47879,7 +49256,7 @@
       },
       "h2": {
         "id": "2-upload-data-and-finetune-command-r",
-        "title": "2. Upload data and finetune Command-R"
+        "title": "Upload data and finetune Command-R"
       }
     },
     "level": "h2"
@@ -48212,6 +49589,78 @@
       "h2": {
         "id": "unsubscribe-to-the-listing-optional",
         "title": "Unsubscribe to the listing (optional)"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.finetuning-on-aws-sagemaker-3-create-an-endpoint-for-inference-with-the-custom-model",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/finetune-on-sagemaker",
+    "pathname": "/page/finetune-on-sagemaker",
+    "title": "3. Create an endpoint for inference with the custom model",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#3-create-an-endpoint-for-inference-with-the-custom-model",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on AWS Sagemaker"
+      },
+      "h2": {
+        "id": "3-create-an-endpoint-for-inference-with-the-custom-model",
+        "title": "3. Create an endpoint for inference with the custom model"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.finetuning-on-aws-sagemaker-4-clean-up",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/finetune-on-sagemaker",
+    "pathname": "/page/finetune-on-sagemaker",
+    "title": "4. Clean-up",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#4-clean-up",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on AWS Sagemaker"
+      },
+      "h2": {
+        "id": "4-clean-up",
+        "title": "4. Clean-up"
       }
     },
     "level": "h2"
@@ -48952,6 +50401,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.developer-playground-using-the-playground",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/playground-overview",
+    "pathname": "/v2/docs/playground-overview",
+    "title": "Using the Playground",
+    "breadcrumb": [
+      {
+        "title": "Get Started",
+        "pathname": "/v2/docs/get-started"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Large language model playground, generative AI",
+    "hash": "#using-the-playground",
+    "hierarchy": {
+      "h0": {
+        "title": "Developer Playground"
+      },
+      "h2": {
+        "id": "using-the-playground",
+        "title": "Using the Playground"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.cohere-fa-qs-chunk:0",
@@ -50078,6 +51568,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.datasets-managing-datasets-using-the-python-sdk",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/datasets",
+    "pathname": "/v2/docs/datasets",
+    "title": "Managing Datasets using the Python SDK",
+    "breadcrumb": [
+      {
+        "title": "Get Started",
+        "pathname": "/v2/docs/get-started"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "datasets, processing datasets with language models, generative AI",
+    "hash": "#managing-datasets-using-the-python-sdk",
+    "hierarchy": {
+      "h0": {
+        "title": "Datasets"
+      },
+      "h2": {
+        "id": "managing-datasets-using-the-python-sdk",
+        "title": "Managing Datasets using the Python SDK"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.get-started.improve-cohere-docs-chunk:0",
@@ -51457,6 +52988,96 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.models.command.command-and-command-light-get-started",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/command-beta",
+    "pathname": "/v2/docs/command-beta",
+    "title": "Get Started",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v2/docs/models"
+      },
+      {
+        "title": "Command",
+        "pathname": "/v2/docs/models/command"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere's command model, generative AI",
+    "hash": "#get-started",
+    "hierarchy": {
+      "h0": {
+        "title": "Command and Command Light"
+      },
+      "h2": {
+        "id": "get-started",
+        "title": "Get Started"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.models.command.command-and-command-light-faq",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/command-beta",
+    "pathname": "/v2/docs/command-beta",
+    "title": "FAQ",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v2/docs/models"
+      },
+      {
+        "title": "Command",
+        "pathname": "/v2/docs/models/command"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere's command model, generative AI",
+    "hash": "#faq",
+    "hierarchy": {
+      "h0": {
+        "title": "Command and Command Light"
+      },
+      "h2": {
+        "id": "faq",
+        "title": "FAQ"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.models.embed-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -51659,6 +53280,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.models.embed-frequently-asked-questions",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/cohere-embed",
+    "pathname": "/v2/docs/cohere-embed",
+    "title": "Frequently Asked Questions",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v2/docs/models"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, large language models, generative AI, embeddings",
+    "hash": "#frequently-asked-questions",
+    "hierarchy": {
+      "h0": {
+        "title": "Embed Model"
+      },
+      "h2": {
+        "id": "frequently-asked-questions",
+        "title": "Frequently Asked Questions"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.models.rerank-chunk:0",
@@ -53364,6 +55026,186 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-basic-chat-stream-events",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/v2/docs/streaming",
+    "title": "Basic Chat Stream Events",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#basic-chat-stream-events",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "basic-chat-stream-events",
+        "title": "Basic Chat Stream Events"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-retrieval-augmented-generation-stream-events",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/v2/docs/streaming",
+    "title": "Retrieval Augmented Generation Stream Events",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#retrieval-augmented-generation-stream-events",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "retrieval-augmented-generation-stream-events",
+        "title": "Retrieval Augmented Generation Stream Events"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-tool-use-stream-events-for-tool-calling",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/v2/docs/streaming",
+    "title": "Tool Use Stream Events (For Tool Calling)",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#tool-use-stream-events-for-tool-calling",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "tool-use-stream-events-for-tool-calling",
+        "title": "Tool Use Stream Events (For Tool Calling)"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.streaming-responses-tool-use-stream-events-for-response-generation",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/v2/docs/streaming",
+    "title": "Tool Use Stream Events (For Response Generation)",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#tool-use-stream-events-for-response-generation",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "tool-use-stream-events-for-response-generation",
+        "title": "Tool Use Stream Events (For Response Generation)"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.structured-generations-json-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -53961,7 +55803,7 @@
       },
       "h3": {
         "id": "1-pick-the-top-token-greedy-decoding",
-        "title": "1. Pick the top token: greedy decoding"
+        "title": "Pick the top token: greedy decoding"
       }
     },
     "level": "h3"
@@ -54007,7 +55849,7 @@
       },
       "h3": {
         "id": "2-pick-from-amongst-the-top-tokens-top-k",
-        "title": "2. Pick from amongst the top tokens: top-k"
+        "title": "Pick from amongst the top tokens: top-k"
       }
     },
     "level": "h3"
@@ -54053,7 +55895,7 @@
       },
       "h3": {
         "id": "3-pick-from-amongst-the-top-tokens-whose-probabilities-add-up-to-15-top-p",
-        "title": "3. Pick from amongst the top tokens whose probabilities add up to 15%: top-p"
+        "title": "Pick from amongst the top tokens whose probabilities add up to 15%: top-p"
       }
     },
     "level": "h3"
@@ -55659,6 +57501,51 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.tool-use-faq",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/tool-use",
+    "pathname": "/v2/docs/tool-use",
+    "title": "FAQ",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "natural language processing, Cohere, large language models, tool use with LLMs, generative AI tool use",
+    "hash": "#faq",
+    "hierarchy": {
+      "h0": {
+        "title": "Tool Use"
+      },
+      "h2": {
+        "id": "faq",
+        "title": "FAQ"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -55946,6 +57833,50 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents-multi-step-tool-use-with-the-chat-api",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/multi-step-tool-use",
+    "pathname": "/v2/docs/multi-step-tool-use",
+    "title": "Multi-step Tool Use With the Chat API",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#multi-step-tool-use-with-the-chat-api",
+    "hierarchy": {
+      "h0": {
+        "title": "Multi-step Tool Use (Agents)"
+      },
+      "h2": {
+        "id": "multi-step-tool-use-with-the-chat-api",
+        "title": "Multi-step Tool Use With the Chat API"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.implementing-a-multi-step-agent-with-langchain-chunk:0",
@@ -56523,6 +58454,51 @@
       "h2": {
         "id": "example---defaults",
         "title": "Example - Defaults"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-generation.tool-use.parameter-types-in-tool-use-example--arrays",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/parameter-types-in-tool-use",
+    "pathname": "/v2/docs/parameter-types-in-tool-use",
+    "title": "Example – Arrays",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v2/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, AI tool use",
+    "hash": "#example--arrays",
+    "hierarchy": {
+      "h0": {
+        "title": "Parameter Types in Tool Use"
+      },
+      "h2": {
+        "id": "example--arrays",
+        "title": "Example – Arrays"
       }
     },
     "level": "h2"
@@ -58042,7 +60018,7 @@
       },
       "h2": {
         "id": "1-input-the-initial-prompt",
-        "title": "1. Input the initial prompt"
+        "title": "Input the initial prompt"
       }
     },
     "level": "h2"
@@ -58092,7 +60068,7 @@
       },
       "h2": {
         "id": "2-specify-criteria",
-        "title": "2. Specify criteria"
+        "title": "Specify criteria"
       }
     },
     "level": "h2"
@@ -58201,7 +60177,7 @@
       },
       "h2": {
         "id": "3-run-the-optimization",
-        "title": "3. Run the optimization"
+        "title": "Run the optimization"
       }
     },
     "level": "h2"
@@ -60142,7 +62118,7 @@
       },
       "h4": {
         "id": "1-prepare-your-image-for-embeddings",
-        "title": "1. Prepare your Image for Embeddings"
+        "title": "Prepare your Image for Embeddings"
       }
     },
     "level": "h4"
@@ -60195,6 +62171,47 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.multimodal-embeddings-how-to-use-multimodal-embeddings",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/multimodal-embeddings",
+    "pathname": "/v2/docs/multimodal-embeddings",
+    "title": "How to use Multimodal Embeddings",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "vector embeddings, image embeddings, images, multimodal, multimodal embeddings, embeddings, natural language processing",
+    "hash": "#how-to-use-multimodal-embeddings",
+    "hierarchy": {
+      "h0": {
+        "title": "Multimodal Embeddings"
+      },
+      "h3": {
+        "id": "how-to-use-multimodal-embeddings",
+        "title": "How to use Multimodal Embeddings"
+      }
+    },
+    "level": "h3"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.batch-embedding-jobs-chunk:0",
@@ -60424,7 +62441,7 @@
       },
       "h3": {
         "id": "1-upload-your-dataset",
-        "title": "1. Upload your Dataset"
+        "title": "Upload your Dataset"
       }
     },
     "level": "h3"
@@ -60473,7 +62490,7 @@
       },
       "h3": {
         "id": "2-kick-off-the-embed-job",
-        "title": "2. Kick off the Embed Job"
+        "title": "Kick off the Embed Job"
       }
     },
     "level": "h3"
@@ -60527,7 +62544,7 @@
       },
       "h3": {
         "id": "3-save-down-the-results-of-your-embed-job-or-view-the-results-of-your-embed-job",
-        "title": "3. Save down the Results of your Embed Job or View the Results of your Embed Job"
+        "title": "Save down the Results of your Embed Job or View the Results of your Embed Job"
       }
     },
     "level": "h3"
@@ -60874,6 +62891,51 @@
       "h2": {
         "id": "multilingual-reranking",
         "title": "Multilingual Reranking"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking.rerank-overview-get-started",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/overview",
+    "pathname": "/v2/docs/overview",
+    "title": "Get Started",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval"
+      },
+      {
+        "title": "Reranking",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval/reranking"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, reranking models, large language models",
+    "hash": "#get-started",
+    "hierarchy": {
+      "h0": {
+        "title": "Rerank Overview"
+      },
+      "h2": {
+        "id": "get-started",
+        "title": "Get Started"
       }
     },
     "level": "h2"
@@ -61353,6 +63415,51 @@
       "h2": {
         "id": "interpreting-results",
         "title": "Interpreting Results"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking.rerank-best-practices-max-number-of-documents",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reranking-best-practices",
+    "pathname": "/v2/docs/reranking-best-practices",
+    "title": "Max Number of Documents",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval"
+      },
+      {
+        "title": "Reranking",
+        "pathname": "/v2/docs/text-embeddings-vectors-search-retrieval/reranking"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "rerank, natural language processing",
+    "hash": "#max-number-of-documents",
+    "hierarchy": {
+      "h0": {
+        "title": "Rerank Best Practices"
+      },
+      "h2": {
+        "id": "max-number-of-documents",
+        "title": "Max Number of Documents"
       }
     },
     "level": "h2"
@@ -66869,6 +68976,47 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.fine-tuning.fa-qs-troubleshooting-faqs",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/troubleshooting-a-fine-tuned-model",
+    "pathname": "/v2/docs/troubleshooting-a-fine-tuned-model",
+    "title": "FAQs",
+    "breadcrumb": [
+      {
+        "title": "Fine-Tuning",
+        "pathname": "/v2/docs/fine-tuning"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "fine-tuning, fine-tuning language models",
+    "hash": "#faqs",
+    "hierarchy": {
+      "h0": {
+        "title": "FAQs / Troubleshooting"
+      },
+      "h1": {
+        "id": "faqs",
+        "title": "FAQs"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.going-to-production.api-keys-and-rate-limits-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -67911,6 +70059,51 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.elasticsearch-and-cohere-build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/elasticsearch-and-cohere",
+    "pathname": "/v2/docs/elasticsearch-and-cohere",
+    "title": "Build a Hybrid Search Index with Cohere and Elasticsearch",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere integrations, Elasticsearch",
+    "hash": "#build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "hierarchy": {
+      "h0": {
+        "title": "Elasticsearch and Cohere"
+      },
+      "h1": {
+        "id": "build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+        "title": "Build a Hybrid Search Index with Cohere and Elasticsearch"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.mongo-db-and-cohere-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -68558,6 +70751,96 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.redis-and-cohere-building-a-retrieval-pipeline-with-cohere-and-redis",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/redis-and-cohere",
+    "pathname": "/v2/docs/redis-and-cohere",
+    "title": "Building a Retrieval Pipeline with Cohere and Redis",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Redis, Cohere",
+    "hash": "#building-a-retrieval-pipeline-with-cohere-and-redis",
+    "hierarchy": {
+      "h0": {
+        "title": "Redis and Cohere"
+      },
+      "h1": {
+        "id": "building-a-retrieval-pipeline-with-cohere-and-redis",
+        "title": "Building a Retrieval Pipeline with Cohere and Redis"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.redis-and-cohere-redis-filters",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/redis-and-cohere",
+    "pathname": "/v2/docs/redis-and-cohere",
+    "title": "Redis Filters",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Redis, Cohere",
+    "hash": "#redis-filters",
+    "hierarchy": {
+      "h0": {
+        "title": "Redis and Cohere"
+      },
+      "h1": {
+        "id": "redis-filters",
+        "title": "Redis Filters"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.embedding-integrations.haystack-and-cohere-chunk:0",
@@ -70121,6 +72404,51 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.lang-chain.embed-on-lang-chain-cohere-with-langchain-and-bedrock",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/embed-on-langchain",
+    "pathname": "/v2/docs/embed-on-langchain",
+    "title": "Cohere with LangChain and Bedrock",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v2/docs/integrations"
+      },
+      {
+        "title": "LangChain",
+        "pathname": "/docs/cohere-and-langchain"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, vector embedding model",
+    "hash": "#cohere-with-langchain-and-bedrock",
+    "hierarchy": {
+      "h0": {
+        "title": "Embed on LangChain"
+      },
+      "h3": {
+        "id": "cohere-with-langchain-and-bedrock",
+        "title": "Cohere with LangChain and Bedrock"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.docs.docs.integrations.lang-chain.rerank-on-lang-chain-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -71178,6 +73506,47 @@
       "h2": {
         "id": "feature-support",
         "title": "Feature support"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.docs.docs.deployment-options.cohere-sdk-cloud-platform-compatibility-snippets",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/cohere-works-everywhere",
+    "pathname": "/v2/docs/cohere-works-everywhere",
+    "title": "Snippets",
+    "breadcrumb": [
+      {
+        "title": "Deployment Options",
+        "pathname": "/v2/docs/deployment-options"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v2/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, Cohere SDK, large language model SDK",
+    "hash": "#snippets",
+    "hierarchy": {
+      "h0": {
+        "title": "Cohere SDK Cloud Platform Compatibility"
+      },
+      "h2": {
+        "id": "snippets",
+        "title": "Snippets"
       }
     },
     "level": "h2"
@@ -78693,7 +81062,7 @@
       },
       "h3": {
         "id": "1-comprehend-cohere",
-        "title": "1. Comprehend Cohere"
+        "title": "Comprehend Cohere"
       }
     },
     "level": "h3"
@@ -78735,7 +81104,7 @@
       },
       "h3": {
         "id": "2-document-your-application",
-        "title": "2. Document your Application"
+        "title": "Document your Application"
       }
     },
     "level": "h3"
@@ -78777,7 +81146,7 @@
       },
       "h3": {
         "id": "3-understand-and-prevent-disallowed-use-cases",
-        "title": "3. Understand and Prevent Disallowed Use Cases"
+        "title": "Understand and Prevent Disallowed Use Cases"
       }
     },
     "level": "h3"
@@ -79413,6 +81782,47 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.teams-and-roles-role-types",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/reference/teams-and-roles",
+    "pathname": "/v2/reference/teams-and-roles",
+    "title": "Role Types",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "RAG, retrieval, augmented, generation, LLM, connectors, connector, langchain",
+    "hash": "#role-types",
+    "hierarchy": {
+      "h0": {
+        "title": "Teams and Roles"
+      },
+      "h2": {
+        "id": "role-types",
+        "title": "Role Types"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.errors",
     "org_id": "test",
     "domain": "test.com",
@@ -79718,6 +82128,47 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.errors-http-status-codes",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/reference/errors",
+    "pathname": "/v2/reference/errors",
+    "title": "Http status codes",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "RAG, retrieval, augmented, generation, LLM, connectors, connector, langchain",
+    "hash": "#http-status-codes",
+    "hierarchy": {
+      "h0": {
+        "title": "Errors"
+      },
+      "h1": {
+        "id": "http-status-codes",
+        "title": "Http status codes"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-chunk:0",
@@ -80838,6 +83289,129 @@
       "h1": {
         "id": "unsupported-features-in-v2",
         "title": "Unsupported features in v2"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-chat",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/migrating-v1-to-v2",
+    "pathname": "/v2/docs/migrating-v1-to-v2",
+    "title": "Chat",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, text generation, LLMs, generative AI",
+    "hash": "#chat",
+    "hierarchy": {
+      "h0": {
+        "title": "Migrating From API v1 to API v2"
+      },
+      "h1": {
+        "id": "chat",
+        "title": "Chat"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-rag",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/migrating-v1-to-v2",
+    "pathname": "/v2/docs/migrating-v1-to-v2",
+    "title": "RAG",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, text generation, LLMs, generative AI",
+    "hash": "#rag",
+    "hierarchy": {
+      "h0": {
+        "title": "Migrating From API v1 to API v2"
+      },
+      "h1": {
+        "id": "rag",
+        "title": "RAG"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.reference.reference.cohere-api.migrating-from-api-v-1-to-api-v-2-tool-use",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/migrating-v1-to-v2",
+    "pathname": "/v2/docs/migrating-v1-to-v2",
+    "title": "Tool use",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v2/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v2/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, text generation, LLMs, generative AI",
+    "hash": "#tool-use",
+    "hierarchy": {
+      "h0": {
+        "title": "Migrating From API v1 to API v2"
+      },
+      "h1": {
+        "id": "tool-use",
+        "title": "Tool use"
       }
     },
     "level": "h1"
@@ -83774,6 +86348,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.analysis-of-form-10-k-10-q-using-cohere-and-rag-appendix",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/analysis-of-financial-forms",
+    "pathname": "/v2/page/analysis-of-financial-forms",
+    "title": "Appendix",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, AI assistant for finance",
+    "hash": "#appendix",
+    "hierarchy": {
+      "h0": {
+        "title": "Analysis of Form 10-K/10-Q Using Cohere and RAG"
+      },
+      "h1": {
+        "id": "appendix",
+        "title": "Appendix"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.analyzing-hacker-news-with-six-language-understanding-methods-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -85595,6 +88205,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.basic-rag-given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/basic-rag",
+    "pathname": "/v2/page/basic-rag",
+    "title": "Given a user query, retrieve the relevant chunks from the vector database",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents",
+    "hash": "#given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+    "hierarchy": {
+      "h0": {
+        "title": "Basic RAG"
+      },
+      "h2": {
+        "id": "given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+        "title": "Given a user query, retrieve the relevant chunks from the vector database"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.basic-semantic-search-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -85672,7 +88318,7 @@
       },
       "h2": {
         "id": "1-getting-set-up",
-        "title": "1. Getting Set Up"
+        "title": "Getting Set Up"
       }
     },
     "level": "h2"
@@ -85716,7 +88362,7 @@
       },
       "h2": {
         "id": "2-get-the-archive-of-questions",
-        "title": "2. Get The Archive of Questions"
+        "title": "Get The Archive of Questions"
       }
     },
     "level": "h2"
@@ -85768,7 +88414,7 @@
       },
       "h2": {
         "id": "2-embed-the-archive",
-        "title": "2. Embed the archive"
+        "title": "Embed the archive"
       }
     },
     "level": "h2"
@@ -85815,7 +88461,7 @@
       },
       "h2": {
         "id": "3-search-using-an-index-and-nearest-neighbor-search",
-        "title": "3. Search using an index and nearest neighbor search"
+        "title": "Search using an index and nearest neighbor search"
       }
     },
     "level": "h2"
@@ -85961,7 +88607,7 @@
       },
       "h2": {
         "id": "4-visualizing-the-archive",
-        "title": "4. Visualizing the archive"
+        "title": "Visualizing the archive"
       }
     },
     "level": "h2"
@@ -87085,6 +89731,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.chunking-strategies-chunking-strategies-framework",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/chunking-strategies",
+    "pathname": "/v2/page/chunking-strategies",
+    "title": "Chunking strategies framework",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG",
+    "hash": "#chunking-strategies-framework",
+    "hierarchy": {
+      "h0": {
+        "title": "Chunking Strategies"
+      },
+      "h2": {
+        "id": "chunking-strategies-framework",
+        "title": "Chunking strategies framework"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.creating-a-qa-bot-from-technical-documentation-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -87160,7 +89842,7 @@
       },
       "h2": {
         "id": "1-embed-technical-documentation-and-store-as-vector-database",
-        "title": "1. Embed technical documentation and store as vector database"
+        "title": "Embed technical documentation and store as vector database"
       }
     },
     "level": "h2"
@@ -87219,7 +89901,7 @@
       },
       "h2": {
         "id": "2-build-a-retriever-using-coheres-rerank",
-        "title": "2. Build a retriever using Cohere's rerank"
+        "title": "Build a retriever using Cohere's rerank"
       }
     },
     "level": "h2"
@@ -87273,7 +89955,7 @@
       },
       "h2": {
         "id": "3-create-model-answers-for-100-qa-pairs",
-        "title": "3. Create model answers for 100 QA pairs"
+        "title": "Create model answers for 100 QA pairs"
       }
     },
     "level": "h2"
@@ -87317,7 +89999,7 @@
       },
       "h2": {
         "id": "4-evaluate-model-performance",
-        "title": "4. Evaluate model performance"
+        "title": "Evaluate model performance"
       }
     },
     "level": "h2"
@@ -87955,6 +90637,42 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-native-multi-step-cohere-api-notebook-overview",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent-native-api",
+    "pathname": "/v2/page/csv-agent-native-api",
+    "title": "Notebook Overview",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#notebook-overview",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Native Multi-Step Cohere API"
+      },
+      "h1": {
+        "id": "notebook-overview",
+        "title": "Notebook Overview"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-langchain",
     "org_id": "test",
     "domain": "test.com",
@@ -88318,6 +91036,78 @@
       "h1": {
         "id": "sec_step3",
         "title": "QnA over Multiple Tables"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-langchain-notebook-overview",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent",
+    "pathname": "/v2/page/csv-agent",
+    "title": "Notebook Overview",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#notebook-overview",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Langchain"
+      },
+      "h1": {
+        "id": "notebook-overview",
+        "title": "Notebook Overview"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.financial-csv-agent-with-langchain-sec_step2",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent",
+    "pathname": "/v2/page/csv-agent",
+    "title": "QnA over Single Table\" \"",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#sec_step2",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Langchain"
+      },
+      "h1": {
+        "id": "sec_step2",
+        "title": "QnA over Single Table\" \""
       }
     },
     "level": "h1"
@@ -90333,7 +93123,7 @@
       },
       "h2": {
         "id": "out-of-the-box-summarization-with-command-r",
-        "title": "2. Out-of-the-box summarization with Command-R"
+        "title": "Out-of-the-box summarization with Command-R"
       }
     },
     "level": "h2"
@@ -90390,7 +93180,7 @@
       },
       "h1": {
         "id": "introduce-citations-to-the-summary-for-grounding",
-        "title": "3. Introduce citations to the summary for grounding"
+        "title": "Introduce citations to the summary for grounding"
       }
     },
     "level": "h1"
@@ -90434,7 +93224,7 @@
       },
       "h1": {
         "id": "reduce-the-cost-of-summarization-calls",
-        "title": "4. Reduce the cost of summarization calls"
+        "title": "Reduce the cost of summarization calls"
       }
     },
     "level": "h1"
@@ -91986,7 +94776,7 @@
       },
       "h3": {
         "id": "1-generate-potential-conversation-questions",
-        "title": "1. Generate Potential Conversation Questions"
+        "title": "Generate Potential Conversation Questions"
       }
     },
     "level": "h3"
@@ -92035,7 +94825,7 @@
       },
       "h3": {
         "id": "2-classify-questions",
-        "title": "2. Classify Questions"
+        "title": "Classify Questions"
       }
     },
     "level": "h3"
@@ -93781,7 +96571,7 @@
       },
       "h2": {
         "id": "1-get-the-dataset",
-        "title": "1. Get the dataset"
+        "title": "Get the dataset"
       }
     },
     "level": "h2"
@@ -93838,7 +96628,7 @@
       },
       "h2": {
         "id": "2-set-up-the-cohere-client-and-get-the-embeddings-of-the-reviews",
-        "title": "2. Set up the Cohere client and get the embeddings of the reviews"
+        "title": "Set up the Cohere client and get the embeddings of the reviews"
       }
     },
     "level": "h2"
@@ -93885,7 +96675,7 @@
       },
       "h2": {
         "id": "3-train-a-classifier-using-the-training-set",
-        "title": "3. Train a classifier using the training set"
+        "title": "Train a classifier using the training set"
       }
     },
     "level": "h2"
@@ -93932,7 +96722,7 @@
       },
       "h2": {
         "id": "4-evaluate-the-performance-of-the-classifier-on-the-testing-set",
-        "title": "4. Evaluate the performance of the classifier on the testing set"
+        "title": "Evaluate the performance of the classifier on the testing set"
       }
     },
     "level": "h2"
@@ -95300,6 +98090,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v2.uv.page.page.finetuning-on-cohere-s-platform-setup",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/convfinqa-finetuning-wandb",
+    "pathname": "/v2/page/convfinqa-finetuning-wandb",
+    "title": "Setup",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#setup",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on Cohere's Platform"
+      },
+      "h2": {
+        "id": "setup",
+        "title": "Setup"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v2.uv.page.page.deploy-your-finetuned-model-on-aws-marketplace",
     "org_id": "test",
     "domain": "test.com",
@@ -95517,7 +98343,7 @@
       },
       "h2": {
         "id": "1-subscribe-to-the-bring-your-own-finetuning-algorithm",
-        "title": "1. Subscribe to the bring your own finetuning algorithm"
+        "title": "Subscribe to the bring your own finetuning algorithm"
       }
     },
     "level": "h2"
@@ -95572,7 +98398,7 @@
       },
       "h2": {
         "id": "2-preliminary-setup",
-        "title": "2. Preliminary setup"
+        "title": "Preliminary setup"
       }
     },
     "level": "h2"
@@ -95619,7 +98445,7 @@
       },
       "h2": {
         "id": "3-get-the-merged-weights",
-        "title": "3. Get the merged weights"
+        "title": "Get the merged weights"
       }
     },
     "level": "h2"
@@ -95662,7 +98488,7 @@
       },
       "h2": {
         "id": "5-export-the-merged-weights-to-the-tensorrt-llm-inference-engine",
-        "title": "5. Export the merged weights to the TensorRT-LLM inference engine"
+        "title": "Export the merged weights to the TensorRT-LLM inference engine"
       }
     },
     "level": "h2"
@@ -95705,7 +98531,7 @@
       },
       "h2": {
         "id": "6-create-an-endpoint-for-inference-from-the-exported-engine",
-        "title": "6. Create an endpoint for inference from the exported engine"
+        "title": "Create an endpoint for inference from the exported engine"
       }
     },
     "level": "h2"
@@ -95752,7 +98578,7 @@
       },
       "h2": {
         "id": "7-perform-real-time-inference-by-calling-the-endpoint",
-        "title": "7. Perform real-time inference by calling the endpoint"
+        "title": "Perform real-time inference by calling the endpoint"
       }
     },
     "level": "h2"
@@ -95795,7 +98621,7 @@
       },
       "h2": {
         "id": "8-delete-the-endpoint-optional",
-        "title": "8. Delete the endpoint (optional)"
+        "title": "Delete the endpoint (optional)"
       }
     },
     "level": "h2"
@@ -95832,7 +98658,7 @@
       },
       "h2": {
         "id": "9-unsubscribe-to-the-listing-optional",
-        "title": "9. Unsubscribe to the listing (optional)"
+        "title": "Unsubscribe to the listing (optional)"
       }
     },
     "level": "h2"
@@ -96053,7 +98879,7 @@
       },
       "h2": {
         "id": "1-subscribe-to-the-finetune-algorithm",
-        "title": "1. Subscribe to the finetune algorithm"
+        "title": "Subscribe to the finetune algorithm"
       }
     },
     "level": "h2"
@@ -96096,7 +98922,7 @@
       },
       "h2": {
         "id": "2-upload-data-and-finetune-command-r",
-        "title": "2. Upload data and finetune Command-R"
+        "title": "Upload data and finetune Command-R"
       }
     },
     "level": "h2"
@@ -96429,6 +99255,78 @@
       "h2": {
         "id": "unsubscribe-to-the-listing-optional",
         "title": "Unsubscribe to the listing (optional)"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.finetuning-on-aws-sagemaker-3-create-an-endpoint-for-inference-with-the-custom-model",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/finetune-on-sagemaker",
+    "pathname": "/v2/page/finetune-on-sagemaker",
+    "title": "3. Create an endpoint for inference with the custom model",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#3-create-an-endpoint-for-inference-with-the-custom-model",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on AWS Sagemaker"
+      },
+      "h2": {
+        "id": "3-create-an-endpoint-for-inference-with-the-custom-model",
+        "title": "3. Create an endpoint for inference with the custom model"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v2.uv.page.page.finetuning-on-aws-sagemaker-4-clean-up",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/finetune-on-sagemaker",
+    "pathname": "/v2/page/finetune-on-sagemaker",
+    "title": "4. Clean-up",
+    "breadcrumb": [],
+    "version": {
+      "id": "v2 API",
+      "title": "v2 API",
+      "pathname": "/v2"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v2/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#4-clean-up",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on AWS Sagemaker"
+      },
+      "h2": {
+        "id": "4-clean-up",
+        "title": "4. Clean-up"
       }
     },
     "level": "h2"
@@ -97169,6 +100067,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.get-started.developer-playground-using-the-playground",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/playground-overview",
+    "pathname": "/v1/docs/playground-overview",
+    "title": "Using the Playground",
+    "breadcrumb": [
+      {
+        "title": "Get Started",
+        "pathname": "/v1/docs/get-started"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Large language model playground, generative AI",
+    "hash": "#using-the-playground",
+    "hierarchy": {
+      "h0": {
+        "title": "Developer Playground"
+      },
+      "h2": {
+        "id": "using-the-playground",
+        "title": "Using the Playground"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v1.uv.docs.docs.get-started.cohere-fa-qs-chunk:0",
@@ -98295,6 +101234,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.get-started.datasets-managing-datasets-using-the-python-sdk",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/datasets",
+    "pathname": "/v1/docs/datasets",
+    "title": "Managing Datasets using the Python SDK",
+    "breadcrumb": [
+      {
+        "title": "Get Started",
+        "pathname": "/v1/docs/get-started"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "datasets, processing datasets with language models, generative AI",
+    "hash": "#managing-datasets-using-the-python-sdk",
+    "hierarchy": {
+      "h0": {
+        "title": "Datasets"
+      },
+      "h2": {
+        "id": "managing-datasets-using-the-python-sdk",
+        "title": "Managing Datasets using the Python SDK"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v1.uv.docs.docs.get-started.improve-cohere-docs-chunk:0",
@@ -99628,6 +102608,96 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.models.command.command-and-command-light-get-started",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/command-beta",
+    "pathname": "/v1/docs/command-beta",
+    "title": "Get Started",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v1/docs/models"
+      },
+      {
+        "title": "Command",
+        "pathname": "/v1/docs/models/command"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere's command model, generative AI",
+    "hash": "#get-started",
+    "hierarchy": {
+      "h0": {
+        "title": "Command and Command Light"
+      },
+      "h2": {
+        "id": "get-started",
+        "title": "Get Started"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.models.command.command-and-command-light-faq",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/command-beta",
+    "pathname": "/v1/docs/command-beta",
+    "title": "FAQ",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v1/docs/models"
+      },
+      {
+        "title": "Command",
+        "pathname": "/v1/docs/models/command"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere's command model, generative AI",
+    "hash": "#faq",
+    "hierarchy": {
+      "h0": {
+        "title": "Command and Command Light"
+      },
+      "h2": {
+        "id": "faq",
+        "title": "FAQ"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.docs.docs.models.embed-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -99830,6 +102900,47 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.models.embed-frequently-asked-questions",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/cohere-embed",
+    "pathname": "/v1/docs/cohere-embed",
+    "title": "Frequently Asked Questions",
+    "breadcrumb": [
+      {
+        "title": "Models",
+        "pathname": "/v1/docs/models"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, large language models, generative AI, embeddings",
+    "hash": "#frequently-asked-questions",
+    "hierarchy": {
+      "h0": {
+        "title": "Embed Model"
+      },
+      "h2": {
+        "id": "frequently-asked-questions",
+        "title": "Frequently Asked Questions"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v1.uv.docs.docs.models.rerank-chunk:0",
@@ -100769,6 +103880,96 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.streaming-responses-basic-stream-events",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/v1/docs/streaming",
+    "title": "Basic Stream Events",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v1/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#basic-stream-events",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "basic-stream-events",
+        "title": "Basic Stream Events"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.streaming-responses-tool-use-stream-events",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/streaming",
+    "pathname": "/v1/docs/streaming",
+    "title": "Tool Use Stream Events",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v1/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "streaming, generative AI, text generation",
+    "hash": "#tool-use-stream-events",
+    "hierarchy": {
+      "h0": {
+        "title": "Streaming Responses"
+      },
+      "h2": {
+        "id": "stream-events",
+        "title": "Stream Events"
+      },
+      "h3": {
+        "id": "tool-use-stream-events",
+        "title": "Tool Use Stream Events"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.structured-generations-json-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -101270,7 +104471,7 @@
       },
       "h3": {
         "id": "1-pick-the-top-token-greedy-decoding",
-        "title": "1. Pick the top token: greedy decoding"
+        "title": "Pick the top token: greedy decoding"
       }
     },
     "level": "h3"
@@ -101316,7 +104517,7 @@
       },
       "h3": {
         "id": "2-pick-from-amongst-the-top-tokens-top-k",
-        "title": "2. Pick from amongst the top tokens: top-k"
+        "title": "Pick from amongst the top tokens: top-k"
       }
     },
     "level": "h3"
@@ -101362,7 +104563,7 @@
       },
       "h3": {
         "id": "3-pick-from-amongst-the-top-tokens-whose-probabilities-add-up-to-15-top-p",
-        "title": "3. Pick from amongst the top tokens whose probabilities add up to 15%: top-p"
+        "title": "Pick from amongst the top tokens whose probabilities add up to 15%: top-p"
       }
     },
     "level": "h3"
@@ -101895,6 +105096,51 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.retrieval-augmented-generation-rag-step-1-generating-search-queries",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/retrieval-augmented-generation-rag",
+    "pathname": "/v1/docs/retrieval-augmented-generation-rag",
+    "title": "Step 1: Generating search queries",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v1/docs/text-generation"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "retrieval augmented generation, RAG, grounded replies, text generation",
+    "hash": "#step-1-generating-search-queries",
+    "hierarchy": {
+      "h0": {
+        "title": "Retrieval Augmented Generation (RAG)"
+      },
+      "h3": {
+        "id": "three-steps-of-rag",
+        "title": "Three steps of RAG"
+      },
+      "h4": {
+        "id": "step-1-generating-search-queries",
+        "title": "Step 1: Generating search queries"
+      }
+    },
+    "level": "h4"
   },
   {
     "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.rag-connectors.overview-of-rag-connectors-chunk:0",
@@ -103732,6 +106978,94 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents-using-the-chat-api-with-tools",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/multi-step-tool-use",
+    "pathname": "/v1/docs/multi-step-tool-use",
+    "title": "Using the Chat API with Tools",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v1/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#using-the-chat-api-with-tools",
+    "hierarchy": {
+      "h0": {
+        "title": "Multi-step Tool Use (Agents)"
+      },
+      "h2": {
+        "id": "using-the-chat-api-with-tools",
+        "title": "Using the Chat API with Tools"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents-faqs",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/multi-step-tool-use",
+    "pathname": "/v1/docs/multi-step-tool-use",
+    "title": "FAQs",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v1/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#faqs",
+    "hierarchy": {
+      "h0": {
+        "title": "Multi-step Tool Use (Agents)"
+      },
+      "h2": {
+        "id": "faqs",
+        "title": "FAQs"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents.implementing-a-multi-step-agent-with-langchain-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -105401,6 +108735,51 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.tool-use.single-step-tool-use-faq",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/v1/docs/tool-use",
+    "pathname": "/v1/docs/tool-use",
+    "title": "FAQ",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v1/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "natural language processing, Cohere, large language models, tool use with LLMs, generative AI tool use",
+    "hash": "#faq",
+    "hierarchy": {
+      "h0": {
+        "title": "Single-Step Tool Use"
+      },
+      "h2": {
+        "id": "faq",
+        "title": "FAQ"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.tool-use.parameter-types-in-tool-use-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -105690,6 +109069,51 @@
       "h2": {
         "id": "example---python-objects-including-dataclass",
         "title": "Example - Python objects (including dataclass)"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-generation.tool-use.parameter-types-in-tool-use-example--arrays",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/parameter-types-in-tool-use",
+    "pathname": "/v1/docs/parameter-types-in-tool-use",
+    "title": "Example – Arrays",
+    "breadcrumb": [
+      {
+        "title": "Text Generation",
+        "pathname": "/v1/docs/text-generation"
+      },
+      {
+        "title": "Tool Use",
+        "pathname": "/docs/tools"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, AI tool use",
+    "hash": "#example--arrays",
+    "hierarchy": {
+      "h0": {
+        "title": "Parameter Types in Tool Use"
+      },
+      "h2": {
+        "id": "example--arrays",
+        "title": "Example – Arrays"
       }
     },
     "level": "h2"
@@ -107249,7 +110673,7 @@
       },
       "h2": {
         "id": "1-input-the-initial-prompt",
-        "title": "1. Input the initial prompt"
+        "title": "Input the initial prompt"
       }
     },
     "level": "h2"
@@ -107299,7 +110723,7 @@
       },
       "h2": {
         "id": "2-specify-criteria",
-        "title": "2. Specify criteria"
+        "title": "Specify criteria"
       }
     },
     "level": "h2"
@@ -107408,7 +110832,7 @@
       },
       "h2": {
         "id": "3-run-the-optimization",
-        "title": "3. Run the optimization"
+        "title": "Run the optimization"
       }
     },
     "level": "h2"
@@ -109703,7 +113127,7 @@
       },
       "h4": {
         "id": "1-prepare-your-image-for-embeddings",
-        "title": "1. Prepare your Image for Embeddings"
+        "title": "Prepare your Image for Embeddings"
       }
     },
     "level": "h4"
@@ -109756,6 +113180,47 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-embeddings-vectors-search-retrieval.multimodal-embeddings-how-to-use-multimodal-embeddings",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/multimodal-embeddings",
+    "pathname": "/v1/docs/multimodal-embeddings",
+    "title": "How to use Multimodal Embeddings",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v1/docs/text-embeddings-vectors-search-retrieval"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "vector embeddings, image embeddings, images, multimodal, multimodal embeddings, embeddings, natural language processing",
+    "hash": "#how-to-use-multimodal-embeddings",
+    "hierarchy": {
+      "h0": {
+        "title": "Multimodal Embeddings"
+      },
+      "h3": {
+        "id": "how-to-use-multimodal-embeddings",
+        "title": "How to use Multimodal Embeddings"
+      }
+    },
+    "level": "h3"
   },
   {
     "objectID": "test:test.com:root..v1.uv.docs.docs.text-embeddings-vectors-search-retrieval.batch-embedding-jobs-chunk:0",
@@ -109985,7 +113450,7 @@
       },
       "h3": {
         "id": "1-upload-your-dataset",
-        "title": "1. Upload your Dataset"
+        "title": "Upload your Dataset"
       }
     },
     "level": "h3"
@@ -110034,7 +113499,7 @@
       },
       "h3": {
         "id": "2-kick-off-the-embed-job",
-        "title": "2. Kick off the Embed Job"
+        "title": "Kick off the Embed Job"
       }
     },
     "level": "h3"
@@ -110088,7 +113553,7 @@
       },
       "h3": {
         "id": "3-save-down-the-results-of-your-embed-job-or-view-the-results-of-your-embed-job",
-        "title": "3. Save down the Results of your Embed Job or View the Results of your Embed Job"
+        "title": "Save down the Results of your Embed Job or View the Results of your Embed Job"
       }
     },
     "level": "h3"
@@ -110435,6 +113900,51 @@
       "h2": {
         "id": "multilingual-reranking",
         "title": "Multilingual Reranking"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking.rerank-overview-get-started",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/overview",
+    "pathname": "/v1/docs/overview",
+    "title": "Get Started",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v1/docs/text-embeddings-vectors-search-retrieval"
+      },
+      {
+        "title": "Reranking",
+        "pathname": "/v1/docs/text-embeddings-vectors-search-retrieval/reranking"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, reranking models, large language models",
+    "hash": "#get-started",
+    "hierarchy": {
+      "h0": {
+        "title": "Rerank Overview"
+      },
+      "h2": {
+        "id": "get-started",
+        "title": "Get Started"
       }
     },
     "level": "h2"
@@ -110914,6 +114424,51 @@
       "h2": {
         "id": "interpreting-results",
         "title": "Interpreting Results"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking.rerank-best-practices-max-number-of-documents",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reranking-best-practices",
+    "pathname": "/v1/docs/reranking-best-practices",
+    "title": "Max Number of Documents",
+    "breadcrumb": [
+      {
+        "title": "Text Embeddings (Vectors, Search, Retrieval)",
+        "pathname": "/v1/docs/text-embeddings-vectors-search-retrieval"
+      },
+      {
+        "title": "Reranking",
+        "pathname": "/v1/docs/text-embeddings-vectors-search-retrieval/reranking"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "rerank, natural language processing",
+    "hash": "#max-number-of-documents",
+    "hierarchy": {
+      "h0": {
+        "title": "Rerank Best Practices"
+      },
+      "h2": {
+        "id": "max-number-of-documents",
+        "title": "Max Number of Documents"
       }
     },
     "level": "h2"
@@ -116430,6 +119985,47 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.fine-tuning.fa-qs-troubleshooting-faqs",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/troubleshooting-a-fine-tuned-model",
+    "pathname": "/v1/docs/troubleshooting-a-fine-tuned-model",
+    "title": "FAQs",
+    "breadcrumb": [
+      {
+        "title": "Fine-Tuning",
+        "pathname": "/v1/docs/fine-tuning"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "fine-tuning, fine-tuning language models",
+    "hash": "#faqs",
+    "hierarchy": {
+      "h0": {
+        "title": "FAQs / Troubleshooting"
+      },
+      "h1": {
+        "id": "faqs",
+        "title": "FAQs"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.docs.docs.going-to-production.api-keys-and-rate-limits-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -117472,6 +121068,51 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.integrations.embedding-integrations.elasticsearch-and-cohere-build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/elasticsearch-and-cohere",
+    "pathname": "/v1/docs/elasticsearch-and-cohere",
+    "title": "Build a Hybrid Search Index with Cohere and Elasticsearch",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v1/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere integrations, Elasticsearch",
+    "hash": "#build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "hierarchy": {
+      "h0": {
+        "title": "Elasticsearch and Cohere"
+      },
+      "h1": {
+        "id": "build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+        "title": "Build a Hybrid Search Index with Cohere and Elasticsearch"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.docs.docs.integrations.embedding-integrations.mongo-db-and-cohere-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -118119,6 +121760,96 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.integrations.embedding-integrations.redis-and-cohere-building-a-retrieval-pipeline-with-cohere-and-redis",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/redis-and-cohere",
+    "pathname": "/v1/docs/redis-and-cohere",
+    "title": "Building a Retrieval Pipeline with Cohere and Redis",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v1/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Redis, Cohere",
+    "hash": "#building-a-retrieval-pipeline-with-cohere-and-redis",
+    "hierarchy": {
+      "h0": {
+        "title": "Redis and Cohere"
+      },
+      "h1": {
+        "id": "building-a-retrieval-pipeline-with-cohere-and-redis",
+        "title": "Building a Retrieval Pipeline with Cohere and Redis"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.integrations.embedding-integrations.redis-and-cohere-redis-filters",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/redis-and-cohere",
+    "pathname": "/v1/docs/redis-and-cohere",
+    "title": "Redis Filters",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v1/docs/integrations"
+      },
+      {
+        "title": "Embedding Integrations",
+        "pathname": "/docs/integrations"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Redis, Cohere",
+    "hash": "#redis-filters",
+    "hierarchy": {
+      "h0": {
+        "title": "Redis and Cohere"
+      },
+      "h1": {
+        "id": "redis-filters",
+        "title": "Redis Filters"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:root..v1.uv.docs.docs.integrations.embedding-integrations.haystack-and-cohere-chunk:0",
@@ -119682,6 +123413,51 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.integrations.lang-chain.embed-on-lang-chain-cohere-with-langchain-and-bedrock",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/embed-on-langchain",
+    "pathname": "/v1/docs/embed-on-langchain",
+    "title": "Cohere with LangChain and Bedrock",
+    "breadcrumb": [
+      {
+        "title": "Integrations",
+        "pathname": "/v1/docs/integrations"
+      },
+      {
+        "title": "LangChain",
+        "pathname": "/docs/cohere-and-langchain"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, vector embedding model",
+    "hash": "#cohere-with-langchain-and-bedrock",
+    "hierarchy": {
+      "h0": {
+        "title": "Embed on LangChain"
+      },
+      "h3": {
+        "id": "cohere-with-langchain-and-bedrock",
+        "title": "Cohere with LangChain and Bedrock"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.docs.docs.integrations.lang-chain.rerank-on-lang-chain-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -120739,6 +124515,47 @@
       "h2": {
         "id": "feature-support",
         "title": "Feature support"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.docs.docs.deployment-options.cohere-sdk-cloud-platform-compatibility-snippets",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/cohere-works-everywhere",
+    "pathname": "/v1/docs/cohere-works-everywhere",
+    "title": "Snippets",
+    "breadcrumb": [
+      {
+        "title": "Deployment Options",
+        "pathname": "/v1/docs/deployment-options"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Guides and concepts",
+      "pathname": "/v1/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, Cohere SDK, large language model SDK",
+    "hash": "#snippets",
+    "hierarchy": {
+      "h0": {
+        "title": "Cohere SDK Cloud Platform Compatibility"
+      },
+      "h2": {
+        "id": "snippets",
+        "title": "Snippets"
       }
     },
     "level": "h2"
@@ -126182,7 +129999,7 @@
       },
       "h3": {
         "id": "1-comprehend-cohere",
-        "title": "1. Comprehend Cohere"
+        "title": "Comprehend Cohere"
       }
     },
     "level": "h3"
@@ -126224,7 +130041,7 @@
       },
       "h3": {
         "id": "2-document-your-application",
-        "title": "2. Document your Application"
+        "title": "Document your Application"
       }
     },
     "level": "h3"
@@ -126266,7 +130083,7 @@
       },
       "h3": {
         "id": "3-understand-and-prevent-disallowed-use-cases",
-        "title": "3. Understand and Prevent Disallowed Use Cases"
+        "title": "Understand and Prevent Disallowed Use Cases"
       }
     },
     "level": "h3"
@@ -126902,6 +130719,47 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.reference.reference.cohere-api.teams-and-roles-role-types",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/reference/teams-and-roles",
+    "pathname": "/v1/reference/teams-and-roles",
+    "title": "Role Types",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v1/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v1/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "RAG, retrieval, augmented, generation, LLM, connectors, connector, langchain",
+    "hash": "#role-types",
+    "hierarchy": {
+      "h0": {
+        "title": "Teams and Roles"
+      },
+      "h2": {
+        "id": "role-types",
+        "title": "Role Types"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.reference.reference.cohere-api.errors",
     "org_id": "test",
     "domain": "test.com",
@@ -127207,6 +131065,47 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.reference.reference.cohere-api.errors-http-status-codes",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/reference/errors",
+    "pathname": "/v1/reference/errors",
+    "title": "Http status codes",
+    "breadcrumb": [
+      {
+        "title": "Cohere API",
+        "pathname": "/v1/reference/cohere-api"
+      }
+    ],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/v1/reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "RAG, retrieval, augmented, generation, LLM, connectors, connector, langchain",
+    "hash": "#http-status-codes",
+    "hierarchy": {
+      "h0": {
+        "title": "Errors"
+      },
+      "h1": {
+        "id": "http-status-codes",
+        "title": "Http status codes"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:v1.changelog.2024-10-22",
@@ -130140,6 +134039,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.page.page.analysis-of-form-10-k-10-q-using-cohere-and-rag-appendix",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/analysis-of-financial-forms",
+    "pathname": "/v1/page/analysis-of-financial-forms",
+    "title": "Appendix",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, AI assistant for finance",
+    "hash": "#appendix",
+    "hierarchy": {
+      "h0": {
+        "title": "Analysis of Form 10-K/10-Q Using Cohere and RAG"
+      },
+      "h1": {
+        "id": "appendix",
+        "title": "Appendix"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.page.page.analyzing-hacker-news-with-six-language-understanding-methods-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -131961,6 +135896,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.page.page.basic-rag-given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/basic-rag",
+    "pathname": "/v1/page/basic-rag",
+    "title": "Given a user query, retrieve the relevant chunks from the vector database",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents",
+    "hash": "#given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+    "hierarchy": {
+      "h0": {
+        "title": "Basic RAG"
+      },
+      "h2": {
+        "id": "given-a-user-query-retrieve-the-relevant-chunks-from-the-vector-database",
+        "title": "Given a user query, retrieve the relevant chunks from the vector database"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.page.page.basic-semantic-search-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -132038,7 +136009,7 @@
       },
       "h2": {
         "id": "1-getting-set-up",
-        "title": "1. Getting Set Up"
+        "title": "Getting Set Up"
       }
     },
     "level": "h2"
@@ -132082,7 +136053,7 @@
       },
       "h2": {
         "id": "2-get-the-archive-of-questions",
-        "title": "2. Get The Archive of Questions"
+        "title": "Get The Archive of Questions"
       }
     },
     "level": "h2"
@@ -132134,7 +136105,7 @@
       },
       "h2": {
         "id": "2-embed-the-archive",
-        "title": "2. Embed the archive"
+        "title": "Embed the archive"
       }
     },
     "level": "h2"
@@ -132181,7 +136152,7 @@
       },
       "h2": {
         "id": "3-search-using-an-index-and-nearest-neighbor-search",
-        "title": "3. Search using an index and nearest neighbor search"
+        "title": "Search using an index and nearest neighbor search"
       }
     },
     "level": "h2"
@@ -132327,7 +136298,7 @@
       },
       "h2": {
         "id": "4-visualizing-the-archive",
-        "title": "4. Visualizing the archive"
+        "title": "Visualizing the archive"
       }
     },
     "level": "h2"
@@ -133451,6 +137422,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.page.page.chunking-strategies-chunking-strategies-framework",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/chunking-strategies",
+    "pathname": "/v1/page/chunking-strategies",
+    "title": "Chunking strategies framework",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG",
+    "hash": "#chunking-strategies-framework",
+    "hierarchy": {
+      "h0": {
+        "title": "Chunking Strategies"
+      },
+      "h2": {
+        "id": "chunking-strategies-framework",
+        "title": "Chunking strategies framework"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.page.page.creating-a-qa-bot-from-technical-documentation-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -133526,7 +137533,7 @@
       },
       "h2": {
         "id": "1-embed-technical-documentation-and-store-as-vector-database",
-        "title": "1. Embed technical documentation and store as vector database"
+        "title": "Embed technical documentation and store as vector database"
       }
     },
     "level": "h2"
@@ -133585,7 +137592,7 @@
       },
       "h2": {
         "id": "2-build-a-retriever-using-coheres-rerank",
-        "title": "2. Build a retriever using Cohere's rerank"
+        "title": "Build a retriever using Cohere's rerank"
       }
     },
     "level": "h2"
@@ -133639,7 +137646,7 @@
       },
       "h2": {
         "id": "3-create-model-answers-for-100-qa-pairs",
-        "title": "3. Create model answers for 100 QA pairs"
+        "title": "Create model answers for 100 QA pairs"
       }
     },
     "level": "h2"
@@ -133683,7 +137690,7 @@
       },
       "h2": {
         "id": "4-evaluate-model-performance",
-        "title": "4. Evaluate model performance"
+        "title": "Evaluate model performance"
       }
     },
     "level": "h2"
@@ -134321,6 +138328,42 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.page.page.financial-csv-agent-with-native-multi-step-cohere-api-notebook-overview",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent-native-api",
+    "pathname": "/v1/page/csv-agent-native-api",
+    "title": "Notebook Overview",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#notebook-overview",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Native Multi-Step Cohere API"
+      },
+      "h1": {
+        "id": "notebook-overview",
+        "title": "Notebook Overview"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.page.page.financial-csv-agent-with-langchain",
     "org_id": "test",
     "domain": "test.com",
@@ -134684,6 +138727,78 @@
       "h1": {
         "id": "sec_step3",
         "title": "QnA over Multiple Tables"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.page.page.financial-csv-agent-with-langchain-notebook-overview",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent",
+    "pathname": "/v1/page/csv-agent",
+    "title": "Notebook Overview",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#notebook-overview",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Langchain"
+      },
+      "h1": {
+        "id": "notebook-overview",
+        "title": "Notebook Overview"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.page.page.financial-csv-agent-with-langchain-sec_step2",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/csv-agent",
+    "pathname": "/v1/page/csv-agent",
+    "title": "QnA over Single Table\" \"",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, retrieval-augmented generation, RAG, AI agents, CSV",
+    "hash": "#sec_step2",
+    "hierarchy": {
+      "h0": {
+        "title": "Financial CSV Agent with Langchain"
+      },
+      "h1": {
+        "id": "sec_step2",
+        "title": "QnA over Single Table\" \""
       }
     },
     "level": "h1"
@@ -136699,7 +140814,7 @@
       },
       "h2": {
         "id": "out-of-the-box-summarization-with-command-r",
-        "title": "2. Out-of-the-box summarization with Command-R"
+        "title": "Out-of-the-box summarization with Command-R"
       }
     },
     "level": "h2"
@@ -136756,7 +140871,7 @@
       },
       "h1": {
         "id": "introduce-citations-to-the-summary-for-grounding",
-        "title": "3. Introduce citations to the summary for grounding"
+        "title": "Introduce citations to the summary for grounding"
       }
     },
     "level": "h1"
@@ -136800,7 +140915,7 @@
       },
       "h1": {
         "id": "reduce-the-cost-of-summarization-calls",
-        "title": "4. Reduce the cost of summarization calls"
+        "title": "Reduce the cost of summarization calls"
       }
     },
     "level": "h1"
@@ -138352,7 +142467,7 @@
       },
       "h3": {
         "id": "1-generate-potential-conversation-questions",
-        "title": "1. Generate Potential Conversation Questions"
+        "title": "Generate Potential Conversation Questions"
       }
     },
     "level": "h3"
@@ -138401,7 +142516,7 @@
       },
       "h3": {
         "id": "2-classify-questions",
-        "title": "2. Classify Questions"
+        "title": "Classify Questions"
       }
     },
     "level": "h3"
@@ -140147,7 +144262,7 @@
       },
       "h2": {
         "id": "1-get-the-dataset",
-        "title": "1. Get the dataset"
+        "title": "Get the dataset"
       }
     },
     "level": "h2"
@@ -140204,7 +144319,7 @@
       },
       "h2": {
         "id": "2-set-up-the-cohere-client-and-get-the-embeddings-of-the-reviews",
-        "title": "2. Set up the Cohere client and get the embeddings of the reviews"
+        "title": "Set up the Cohere client and get the embeddings of the reviews"
       }
     },
     "level": "h2"
@@ -140251,7 +144366,7 @@
       },
       "h2": {
         "id": "3-train-a-classifier-using-the-training-set",
-        "title": "3. Train a classifier using the training set"
+        "title": "Train a classifier using the training set"
       }
     },
     "level": "h2"
@@ -140298,7 +144413,7 @@
       },
       "h2": {
         "id": "4-evaluate-the-performance-of-the-classifier-on-the-testing-set",
-        "title": "4. Evaluate the performance of the classifier on the testing set"
+        "title": "Evaluate the performance of the classifier on the testing set"
       }
     },
     "level": "h2"
@@ -141666,6 +145781,42 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v1.uv.page.page.finetuning-on-cohere-s-platform-setup",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/convfinqa-finetuning-wandb",
+    "pathname": "/v1/page/convfinqa-finetuning-wandb",
+    "title": "Setup",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#setup",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on Cohere's Platform"
+      },
+      "h2": {
+        "id": "setup",
+        "title": "Setup"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v1.uv.page.page.deploy-your-finetuned-model-on-aws-marketplace",
     "org_id": "test",
     "domain": "test.com",
@@ -141883,7 +146034,7 @@
       },
       "h2": {
         "id": "1-subscribe-to-the-bring-your-own-finetuning-algorithm",
-        "title": "1. Subscribe to the bring your own finetuning algorithm"
+        "title": "Subscribe to the bring your own finetuning algorithm"
       }
     },
     "level": "h2"
@@ -141938,7 +146089,7 @@
       },
       "h2": {
         "id": "2-preliminary-setup",
-        "title": "2. Preliminary setup"
+        "title": "Preliminary setup"
       }
     },
     "level": "h2"
@@ -141985,7 +146136,7 @@
       },
       "h2": {
         "id": "3-get-the-merged-weights",
-        "title": "3. Get the merged weights"
+        "title": "Get the merged weights"
       }
     },
     "level": "h2"
@@ -142028,7 +146179,7 @@
       },
       "h2": {
         "id": "5-export-the-merged-weights-to-the-tensorrt-llm-inference-engine",
-        "title": "5. Export the merged weights to the TensorRT-LLM inference engine"
+        "title": "Export the merged weights to the TensorRT-LLM inference engine"
       }
     },
     "level": "h2"
@@ -142071,7 +146222,7 @@
       },
       "h2": {
         "id": "6-create-an-endpoint-for-inference-from-the-exported-engine",
-        "title": "6. Create an endpoint for inference from the exported engine"
+        "title": "Create an endpoint for inference from the exported engine"
       }
     },
     "level": "h2"
@@ -142118,7 +146269,7 @@
       },
       "h2": {
         "id": "7-perform-real-time-inference-by-calling-the-endpoint",
-        "title": "7. Perform real-time inference by calling the endpoint"
+        "title": "Perform real-time inference by calling the endpoint"
       }
     },
     "level": "h2"
@@ -142161,7 +146312,7 @@
       },
       "h2": {
         "id": "8-delete-the-endpoint-optional",
-        "title": "8. Delete the endpoint (optional)"
+        "title": "Delete the endpoint (optional)"
       }
     },
     "level": "h2"
@@ -142198,7 +146349,7 @@
       },
       "h2": {
         "id": "9-unsubscribe-to-the-listing-optional",
-        "title": "9. Unsubscribe to the listing (optional)"
+        "title": "Unsubscribe to the listing (optional)"
       }
     },
     "level": "h2"
@@ -142419,7 +146570,7 @@
       },
       "h2": {
         "id": "1-subscribe-to-the-finetune-algorithm",
-        "title": "1. Subscribe to the finetune algorithm"
+        "title": "Subscribe to the finetune algorithm"
       }
     },
     "level": "h2"
@@ -142462,7 +146613,7 @@
       },
       "h2": {
         "id": "2-upload-data-and-finetune-command-r",
-        "title": "2. Upload data and finetune Command-R"
+        "title": "Upload data and finetune Command-R"
       }
     },
     "level": "h2"
@@ -142795,6 +146946,78 @@
       "h2": {
         "id": "unsubscribe-to-the-listing-optional",
         "title": "Unsubscribe to the listing (optional)"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.page.page.finetuning-on-aws-sagemaker-3-create-an-endpoint-for-inference-with-the-custom-model",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/finetune-on-sagemaker",
+    "pathname": "/v1/page/finetune-on-sagemaker",
+    "title": "3. Create an endpoint for inference with the custom model",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#3-create-an-endpoint-for-inference-with-the-custom-model",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on AWS Sagemaker"
+      },
+      "h2": {
+        "id": "3-create-an-endpoint-for-inference-with-the-custom-model",
+        "title": "3. Create an endpoint for inference with the custom model"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v1.uv.page.page.finetuning-on-aws-sagemaker-4-clean-up",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/page/finetune-on-sagemaker",
+    "pathname": "/v1/page/finetune-on-sagemaker",
+    "title": "4. Clean-up",
+    "breadcrumb": [],
+    "version": {
+      "id": "v1 API",
+      "title": "v1 API",
+      "pathname": "/v1"
+    },
+    "tab": {
+      "title": "Cookbooks",
+      "pathname": "/v1/page"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "keywords": "Cohere, LLMs, finetuning",
+    "hash": "#4-clean-up",
+    "hierarchy": {
+      "h0": {
+        "title": "Finetuning on AWS Sagemaker"
+      },
+      "h2": {
+        "id": "4-clean-up",
+        "title": "4. Clean-up"
       }
     },
     "level": "h2"

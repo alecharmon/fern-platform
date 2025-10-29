@@ -2188,6 +2188,41 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.documentation.documentation.text-gen-solution.text-gen-type-script-sdk-chat-completions-api",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/text-gen-solution/typescript-sdk",
+    "pathname": "/docs/text-gen-solution/typescript-sdk",
+    "title": "Chat Completions API",
+    "breadcrumb": [
+      {
+        "title": "Text Gen Solution",
+        "pathname": "/docs/documentation/text-gen-solution"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs/documentation"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#chat-completions-api",
+    "hierarchy": {
+      "h0": {
+        "title": "Text Gen TypeScript SDK"
+      },
+      "h2": {
+        "id": "chat-completions-api",
+        "title": "Chat Completions API"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.documentation.documentation.text-gen-solution.using-json-mode-with-text-gen-endpoints-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -4221,6 +4256,45 @@
     "level": "h4"
   },
   {
+    "objectID": "test:test.com:root.uv.documentation.documentation.media-gen-solution.fine-tuning-stable-diffusion.overview-general-fine-tuning-tips",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/media-gen-solution/fine-tuning-stable-diffusion/fine-tuning-stable-diffusion",
+    "pathname": "/docs/media-gen-solution/fine-tuning-stable-diffusion/fine-tuning-stable-diffusion",
+    "title": "General fine-tuning tips",
+    "breadcrumb": [
+      {
+        "title": "Media Gen Solution",
+        "pathname": "/docs/documentation/media-gen-solution"
+      },
+      {
+        "title": "Fine-tuning Stable Diffusion",
+        "pathname": "/docs/documentation/media-gen-solution/fine-tuning-stable-diffusion"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs/documentation"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#general-fine-tuning-tips",
+    "hierarchy": {
+      "h0": {
+        "title": "Fine-tuning Stable Diffusion"
+      },
+      "h3": {
+        "id": "general-fine-tuning-tips",
+        "title": "General fine-tuning tips"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root.uv.documentation.documentation.media-gen-solution.fine-tuning-stable-diffusion.type-script-sdk-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -4372,7 +4446,7 @@
       },
       "h4": {
         "id": "1-creating-image-file-assets",
-        "title": "1) Creating image file assets"
+        "title": "Creating image file assets"
       }
     },
     "level": "h4"
@@ -4419,7 +4493,7 @@
       },
       "h4": {
         "id": "2-get-a-checkpoint-asset-to-use-for-tuning-our-lora",
-        "title": "2) Get a checkpoint asset to use for tuning our LoRA"
+        "title": "Get a checkpoint asset to use for tuning our LoRA"
       }
     },
     "level": "h4"
@@ -4466,7 +4540,7 @@
       },
       "h4": {
         "id": "3-creating-a-tune",
-        "title": "3) Creating a tune"
+        "title": "Creating a tune"
       }
     },
     "level": "h4"
@@ -4513,7 +4587,7 @@
       },
       "h4": {
         "id": "4-run-an-inference-with-the-tuned-lora",
-        "title": "4) Run an inference with the tuned LoRA"
+        "title": "Run an inference with the tuned LoRA"
       }
     },
     "level": "h4"
@@ -5420,6 +5494,76 @@
       "h1": {
         "id": "get-started",
         "title": "Get Started"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.documentation.documentation.private-deployment.octo-stack-key-benefits",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/private-deployment/octostack",
+    "pathname": "/docs/private-deployment/octostack",
+    "title": "Key Benefits",
+    "breadcrumb": [
+      {
+        "title": "Private Deployment",
+        "pathname": "/docs/documentation/private-deployment"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs/documentation"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#key-benefits",
+    "hierarchy": {
+      "h0": {
+        "title": "OctoStack"
+      },
+      "h1": {
+        "id": "key-benefits",
+        "title": "Key Benefits"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.documentation.documentation.private-deployment.octo-stack-configuration--deployment",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/private-deployment/octostack",
+    "pathname": "/docs/private-deployment/octostack",
+    "title": "Configuration & Deployment",
+    "breadcrumb": [
+      {
+        "title": "Private Deployment",
+        "pathname": "/docs/documentation/private-deployment"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs/documentation"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#configuration--deployment",
+    "hierarchy": {
+      "h0": {
+        "title": "OctoStack"
+      },
+      "h1": {
+        "id": "configuration--deployment",
+        "title": "Configuration & Deployment"
       }
     },
     "level": "h1"
@@ -7372,6 +7516,41 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.documentation.documentation.compute-service.create-a-container-and-endpoint-using-the-cli-prerequisites",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/compute-service/create-custom-endpoint-using-the-cli",
+    "pathname": "/docs/compute-service/create-custom-endpoint-using-the-cli",
+    "title": "Prerequisites",
+    "breadcrumb": [
+      {
+        "title": "Compute Service",
+        "pathname": "/docs/documentation/compute-service"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs/documentation"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#prerequisites",
+    "hierarchy": {
+      "h0": {
+        "title": "Create a container and endpoint using the CLI"
+      },
+      "h2": {
+        "id": "prerequisites",
+        "title": "Prerequisites"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.documentation.documentation.compute-service.advanced-build-a-container-from-scratch-in-python-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -7717,6 +7896,41 @@
       }
     },
     "level": "h4"
+  },
+  {
+    "objectID": "test:test.com:root.uv.documentation.documentation.compute-service.advanced-build-a-container-from-scratch-in-python-step-by-step-walkthrough",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/compute-service/advanced-build-a-container-from-scratch-in-python",
+    "pathname": "/docs/compute-service/advanced-build-a-container-from-scratch-in-python",
+    "title": "Step-by-step walkthrough",
+    "breadcrumb": [
+      {
+        "title": "Compute Service",
+        "pathname": "/docs/documentation/compute-service"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs/documentation"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#step-by-step-walkthrough",
+    "hierarchy": {
+      "h0": {
+        "title": "Advanced: build a container from scratch in Python"
+      },
+      "h2": {
+        "id": "step-by-step-walkthrough",
+        "title": "Step-by-step walkthrough"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.documentation.documentation.compute-service.healthcheck-path-in-custom-containers-chunk:0",
@@ -10884,6 +11098,41 @@
       }
     },
     "level": "h4"
+  },
+  {
+    "objectID": "test:test.com:root.uv.api-reference.api-reference.octoai-api.inference-get-inference",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/api-reference/octoai-api/inference",
+    "pathname": "/docs/api-reference/octoai-api/inference",
+    "title": "Get inference",
+    "breadcrumb": [
+      {
+        "title": "OctoAI API",
+        "pathname": "/docs/api-reference/octoai-api"
+      }
+    ],
+    "tab": {
+      "title": "API Reference",
+      "pathname": "/docs/api-reference"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#get-inference",
+    "hierarchy": {
+      "h0": {
+        "title": "Inference"
+      },
+      "h3": {
+        "id": "get-inference",
+        "title": "Get inference"
+      }
+    },
+    "level": "h3"
   },
   {
     "objectID": "test:test.com:root.uv.integrations.integrations.integrations.all-chunk:0",

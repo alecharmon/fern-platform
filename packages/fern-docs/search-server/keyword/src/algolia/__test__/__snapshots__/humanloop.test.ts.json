@@ -2921,6 +2921,50 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.call-prompt-call-an-existing-prompt",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/development/guides/call-prompt",
+    "pathname": "/docs/development/guides/call-prompt",
+    "title": "Call an existing Prompt",
+    "breadcrumb": [
+      {
+        "title": "Prompt Management + AI Engineering",
+        "pathname": "/docs/v5/development"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/development/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#call-an-existing-prompt",
+    "hierarchy": {
+      "h0": {
+        "title": "Call a Prompt"
+      },
+      "h2": {
+        "id": "call-an-existing-prompt",
+        "title": "Call an existing Prompt"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.proxy-model-calls-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -3025,6 +3069,50 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.proxy-model-calls-call-the-llm-with-a-prompt-that-youre-defining-in-code",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/development/guides/proxy-model-calls",
+    "pathname": "/docs/development/guides/proxy-model-calls",
+    "title": "Call the LLM with a prompt that you're defining in code",
+    "breadcrumb": [
+      {
+        "title": "Prompt Management + AI Engineering",
+        "pathname": "/docs/v5/development"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/development/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#call-the-llm-with-a-prompt-that-youre-defining-in-code",
+    "hierarchy": {
+      "h0": {
+        "title": "Proxy Model Calls"
+      },
+      "h2": {
+        "id": "call-the-llm-with-a-prompt-that-youre-defining-in-code",
+        "title": "Call the LLM with a prompt that you're defining in code"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.log-to-a-prompt-chunk:0",
@@ -3461,6 +3549,50 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.reusable-snippets-create-and-use-a-snippet-tool",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/development/guides/reusable-snippets",
+    "pathname": "/docs/development/guides/reusable-snippets",
+    "title": "Create and use a Snippet Tool",
+    "breadcrumb": [
+      {
+        "title": "Prompt Management + AI Engineering",
+        "pathname": "/docs/v5/development"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/development/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-and-use-a-snippet-tool",
+    "hierarchy": {
+      "h0": {
+        "title": "Re-use snippets in Prompts"
+      },
+      "h2": {
+        "id": "create-and-use-a-snippet-tool",
+        "title": "Create and use a Snippet Tool"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.create-deployment-environments-chunk:0",
@@ -6576,6 +6708,94 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.observability.guides.set-up-monitoring-create-an-online-evaluator",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/observability/guides/set-up-monitoring",
+    "pathname": "/docs/observability/guides/set-up-monitoring",
+    "title": "Create an online evaluator",
+    "breadcrumb": [
+      {
+        "title": "Observability",
+        "pathname": "/docs/v5/observability"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/observability/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-an-online-evaluator",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up Monitoring"
+      },
+      "h2": {
+        "id": "create-an-online-evaluator",
+        "title": "Create an online evaluator"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.observability.guides.set-up-monitoring-track-the-performance-of-models",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/observability/guides/set-up-monitoring",
+    "pathname": "/docs/observability/guides/set-up-monitoring",
+    "title": "Track the performance of models",
+    "breadcrumb": [
+      {
+        "title": "Observability",
+        "pathname": "/docs/v5/observability"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/observability/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#track-the-performance-of-models",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up Monitoring"
+      },
+      "h2": {
+        "id": "track-the-performance-of-models",
+        "title": "Track the performance of models"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v5.uv.docs.docs.observability.guides.set-up-webhooks-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -9326,6 +9546,126 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.security-and-compliance-user-authentication-and-access-control",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/security-and-compliance",
+    "pathname": "/docs/reference/security-and-compliance",
+    "title": "User Authentication and Access Control",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#user-authentication-and-access-control",
+    "hierarchy": {
+      "h0": {
+        "title": "Security and Compliance"
+      },
+      "h2": {
+        "id": "user-authentication-and-access-control",
+        "title": "User Authentication and Access Control"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.security-and-compliance-encryption-standards",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/security-and-compliance",
+    "pathname": "/docs/reference/security-and-compliance",
+    "title": "Encryption Standards",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#encryption-standards",
+    "hierarchy": {
+      "h0": {
+        "title": "Security and Compliance"
+      },
+      "h2": {
+        "id": "encryption-standards",
+        "title": "Encryption Standards"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.security-and-compliance-security-certifications",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/security-and-compliance",
+    "pathname": "/docs/reference/security-and-compliance",
+    "title": "Security Certifications",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#security-certifications",
+    "hierarchy": {
+      "h0": {
+        "title": "Security and Compliance"
+      },
+      "h2": {
+        "id": "security-certifications",
+        "title": "Security Certifications"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v5.uv.docs.docs.reference.data-management",
     "org_id": "test",
     "domain": "test.com",
@@ -9683,6 +10023,46 @@
       "h3": {
         "id": "data-portability-and-return",
         "title": "Data Portability and Return"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.data-management-data-encryption-and-security",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/data-management",
+    "pathname": "/docs/reference/data-management",
+    "title": "Data Encryption and Security",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#data-encryption-and-security",
+    "hierarchy": {
+      "h0": {
+        "title": "Data Management"
+      },
+      "h3": {
+        "id": "data-encryption-and-security",
+        "title": "Data Encryption and Security"
       }
     },
     "level": "h3"
@@ -15147,6 +15527,50 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.call-prompt-call-an-existing-prompt",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/development/guides/call-prompt",
+    "pathname": "/docs/v5/development/guides/call-prompt",
+    "title": "Call an existing Prompt",
+    "breadcrumb": [
+      {
+        "title": "Prompt Management + AI Engineering",
+        "pathname": "/docs/v5/development"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/development/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#call-an-existing-prompt",
+    "hierarchy": {
+      "h0": {
+        "title": "Call a Prompt"
+      },
+      "h2": {
+        "id": "call-an-existing-prompt",
+        "title": "Call an existing Prompt"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.proxy-model-calls-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -15251,6 +15675,50 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.proxy-model-calls-call-the-llm-with-a-prompt-that-youre-defining-in-code",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/development/guides/proxy-model-calls",
+    "pathname": "/docs/v5/development/guides/proxy-model-calls",
+    "title": "Call the LLM with a prompt that you're defining in code",
+    "breadcrumb": [
+      {
+        "title": "Prompt Management + AI Engineering",
+        "pathname": "/docs/v5/development"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/development/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#call-the-llm-with-a-prompt-that-youre-defining-in-code",
+    "hierarchy": {
+      "h0": {
+        "title": "Proxy Model Calls"
+      },
+      "h2": {
+        "id": "call-the-llm-with-a-prompt-that-youre-defining-in-code",
+        "title": "Call the LLM with a prompt that you're defining in code"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.log-to-a-prompt-chunk:0",
@@ -15687,6 +16155,50 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.reusable-snippets-create-and-use-a-snippet-tool",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/development/guides/reusable-snippets",
+    "pathname": "/docs/v5/development/guides/reusable-snippets",
+    "title": "Create and use a Snippet Tool",
+    "breadcrumb": [
+      {
+        "title": "Prompt Management + AI Engineering",
+        "pathname": "/docs/v5/development"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/development/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-and-use-a-snippet-tool",
+    "hierarchy": {
+      "h0": {
+        "title": "Re-use snippets in Prompts"
+      },
+      "h2": {
+        "id": "create-and-use-a-snippet-tool",
+        "title": "Create and use a Snippet Tool"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v5.uv.docs.docs.development.guides.create-deployment-environments-chunk:0",
@@ -18802,6 +19314,94 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.observability.guides.set-up-monitoring-create-an-online-evaluator",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/observability/guides/set-up-monitoring",
+    "pathname": "/docs/v5/observability/guides/set-up-monitoring",
+    "title": "Create an online evaluator",
+    "breadcrumb": [
+      {
+        "title": "Observability",
+        "pathname": "/docs/v5/observability"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/observability/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-an-online-evaluator",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up Monitoring"
+      },
+      "h2": {
+        "id": "create-an-online-evaluator",
+        "title": "Create an online evaluator"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.observability.guides.set-up-monitoring-track-the-performance-of-models",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/observability/guides/set-up-monitoring",
+    "pathname": "/docs/v5/observability/guides/set-up-monitoring",
+    "title": "Track the performance of models",
+    "breadcrumb": [
+      {
+        "title": "Observability",
+        "pathname": "/docs/v5/observability"
+      },
+      {
+        "title": "How-To Guides",
+        "pathname": "/docs/v5/observability/guides"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#track-the-performance-of-models",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up Monitoring"
+      },
+      "h2": {
+        "id": "track-the-performance-of-models",
+        "title": "Track the performance of models"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v5.uv.docs.docs.observability.guides.set-up-webhooks-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -21552,6 +22152,126 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.security-and-compliance-user-authentication-and-access-control",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/security-and-compliance",
+    "pathname": "/docs/v5/reference/security-and-compliance",
+    "title": "User Authentication and Access Control",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#user-authentication-and-access-control",
+    "hierarchy": {
+      "h0": {
+        "title": "Security and Compliance"
+      },
+      "h2": {
+        "id": "user-authentication-and-access-control",
+        "title": "User Authentication and Access Control"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.security-and-compliance-encryption-standards",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/security-and-compliance",
+    "pathname": "/docs/v5/reference/security-and-compliance",
+    "title": "Encryption Standards",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#encryption-standards",
+    "hierarchy": {
+      "h0": {
+        "title": "Security and Compliance"
+      },
+      "h2": {
+        "id": "encryption-standards",
+        "title": "Encryption Standards"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.security-and-compliance-security-certifications",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/security-and-compliance",
+    "pathname": "/docs/v5/reference/security-and-compliance",
+    "title": "Security Certifications",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#security-certifications",
+    "hierarchy": {
+      "h0": {
+        "title": "Security and Compliance"
+      },
+      "h2": {
+        "id": "security-certifications",
+        "title": "Security Certifications"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v5.uv.docs.docs.reference.data-management",
     "org_id": "test",
     "domain": "test.com",
@@ -21909,6 +22629,46 @@
       "h3": {
         "id": "data-portability-and-return",
         "title": "Data Portability and Return"
+      }
+    },
+    "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v5.uv.docs.docs.reference.data-management-data-encryption-and-security",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/reference/data-management",
+    "pathname": "/docs/v5/reference/data-management",
+    "title": "Data Encryption and Security",
+    "breadcrumb": [
+      {
+        "title": "Reference",
+        "pathname": "/docs/v5/reference"
+      }
+    ],
+    "version": {
+      "id": "v5.0",
+      "title": "v5.0",
+      "pathname": "/docs/v5"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v5"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#data-encryption-and-security",
+    "hierarchy": {
+      "h0": {
+        "title": "Data Management"
+      },
+      "h3": {
+        "id": "data-encryption-and-security",
+        "title": "Data Encryption and Security"
       }
     },
     "level": "h3"
@@ -28377,6 +29137,50 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.evaluation.evaluate-models-offline-create-an-offline-evaluator",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/evaluation/evaluate-models-offline",
+    "pathname": "/docs/v4/guides/evaluation/evaluate-models-offline",
+    "title": "Create an offline evaluator",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Evaluation and Monitoring",
+        "pathname": "/docs/v4/guides/evaluation"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-an-offline-evaluator",
+    "hierarchy": {
+      "h0": {
+        "title": "Run an evaluation"
+      },
+      "h2": {
+        "id": "create-an-offline-evaluator",
+        "title": "Create an offline evaluator"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v4.uv.docs.docs.guides.evaluation.evaluations-using-api-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -29755,6 +30559,94 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.evaluation.monitoring-create-an-online-evaluator",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/evaluation/monitoring",
+    "pathname": "/docs/v4/guides/evaluation/monitoring",
+    "title": "Create an online evaluator",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Evaluation and Monitoring",
+        "pathname": "/docs/v4/guides/evaluation"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-an-online-evaluator",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up Monitoring"
+      },
+      "h2": {
+        "id": "create-an-online-evaluator",
+        "title": "Create an online evaluator"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.evaluation.monitoring-track-the-performance-of-models",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/evaluation/monitoring",
+    "pathname": "/docs/v4/guides/evaluation/monitoring",
+    "title": "Track the performance of models",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Evaluation and Monitoring",
+        "pathname": "/docs/v4/guides/evaluation"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#track-the-performance-of-models",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up Monitoring"
+      },
+      "h2": {
+        "id": "track-the-performance-of-models",
+        "title": "Track the performance of models"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v4.uv.docs.docs.guides.datasets.overview-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -30587,6 +31479,50 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.tool-calling-create-a-tool",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/tool-calling",
+    "pathname": "/docs/v4/guides/tool-calling",
+    "title": "Create a Tool",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Tools",
+        "pathname": "/docs/v4/guides"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-a-tool",
+    "hierarchy": {
+      "h0": {
+        "title": "Tool Calling in Editor"
+      },
+      "h2": {
+        "id": "create-a-tool",
+        "title": "Create a Tool"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.create-a-tool-with-the-sdk-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -30774,6 +31710,50 @@
       }
     },
     "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.create-a-tool-with-the-sdk-creating-a-tool",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/create-a-tool-with-the-sdk",
+    "pathname": "/docs/v4/guides/create-a-tool-with-the-sdk",
+    "title": "Creating a Tool",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Tools",
+        "pathname": "/docs/v4/guides"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#creating-a-tool",
+    "hierarchy": {
+      "h0": {
+        "title": "Tool Calling with the SDK"
+      },
+      "h1": {
+        "id": "creating-a-tool",
+        "title": "Creating a Tool"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.link-jsonschema-tool-chunk:0",
@@ -30993,6 +31973,50 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.snippet-tool-create-and-use-a-snippet-tool",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/snippet-tool",
+    "pathname": "/docs/v4/guides/snippet-tool",
+    "title": "Create and use a Snippet Tool",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Tools",
+        "pathname": "/docs/v4/guides"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#create-and-use-a-snippet-tool",
+    "hierarchy": {
+      "h0": {
+        "title": "Use the Snippet Tool"
+      },
+      "h2": {
+        "id": "create-and-use-a-snippet-tool",
+        "title": "Create and use a Snippet Tool"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.set-up-semantic-search-chunk:0",
@@ -31553,6 +32577,94 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.set-up-semantic-search-set-up-pinecone",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/set-up-semantic-search",
+    "pathname": "/docs/v4/guides/set-up-semantic-search",
+    "title": "Set up Pinecone",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Tools",
+        "pathname": "/docs/v4/guides"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#set-up-pinecone",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up semantic search (RAG)"
+      },
+      "h1": {
+        "id": "set-up-pinecone",
+        "title": "Set up Pinecone"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.tools.set-up-semantic-search-set-up-humanloop",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/set-up-semantic-search",
+    "pathname": "/docs/v4/guides/set-up-semantic-search",
+    "title": "Set up Humanloop",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      },
+      {
+        "title": "Tools",
+        "pathname": "/docs/v4/guides"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#set-up-humanloop",
+    "hierarchy": {
+      "h0": {
+        "title": "Set up semantic search (RAG)"
+      },
+      "h1": {
+        "id": "set-up-humanloop",
+        "title": "Set up Humanloop"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root..v4.uv.docs.docs.guides.finetune-a-model-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -32102,6 +33214,86 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.deploy-to-an-environment-deploying-to-an-environment",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/deploy-to-an-environment",
+    "pathname": "/docs/v4/guides/deploy-to-an-environment",
+    "title": "Deploying to an environment",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#deploying-to-an-environment",
+    "hierarchy": {
+      "h0": {
+        "title": "Deploy to environments"
+      },
+      "h2": {
+        "id": "deploying-to-an-environment",
+        "title": "Deploying to an environment"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root..v4.uv.docs.docs.guides.deploy-to-an-environment-calling-the-model-in-the-environment",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/v4/guides/deploy-to-an-environment",
+    "pathname": "/docs/v4/guides/deploy-to-an-environment",
+    "title": "Calling the model in the environment",
+    "breadcrumb": [
+      {
+        "title": "Guides",
+        "pathname": "/docs/v4/guides"
+      }
+    ],
+    "version": {
+      "id": "v4.0",
+      "title": "v4.0",
+      "pathname": "/docs/v4"
+    },
+    "tab": {
+      "title": "Docs",
+      "pathname": "/docs/v4"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#calling-the-model-in-the-environment",
+    "hierarchy": {
+      "h0": {
+        "title": "Deploy to environments"
+      },
+      "h2": {
+        "id": "calling-the-model-in-the-environment",
+        "title": "Calling the model in the environment"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root..v4.uv.docs.docs.core-concepts.prompts-chunk:0",

@@ -333,6 +333,41 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.guides.guides.getting-started.what-is-airtop-how-it-works",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/guides/getting-started/what-is-airtop",
+    "pathname": "/guides/getting-started/what-is-airtop",
+    "title": "How it works",
+    "breadcrumb": [
+      {
+        "title": "Getting Started",
+        "pathname": "/guides/getting-started"
+      }
+    ],
+    "tab": {
+      "title": "Guides",
+      "pathname": "/guides"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#how-it-works",
+    "hierarchy": {
+      "h0": {
+        "title": "What is Airtop?"
+      },
+      "h2": {
+        "id": "how-it-works",
+        "title": "How it works"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.guides.guides.getting-started.quick-start-chunk:0",
     "org_id": "test",
     "domain": "test.com",

@@ -442,5 +442,30 @@
     },
     "level": "h2",
     "page_position": 1
+  },
+  {
+    "objectID": "test-build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "org_id": "test",
+    "domain": "test",
+    "canonicalPathname": "/test",
+    "pathname": "/test",
+    "title": "Build a Hybrid Search Index with Cohere and Elasticsearch",
+    "breadcrumb": [],
+    "visible_by": [],
+    "authed": false,
+    "type": "markdown",
+    "keywords": "Cohere integrations, Elasticsearch",
+    "hash": "#build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+    "hierarchy": {
+      "h0": {
+        "title": "Elasticsearch and Cohere"
+      },
+      "h1": {
+        "id": "build-a-hybrid-search-index-with-cohere-and-elasticsearch",
+        "title": "Build a Hybrid Search Index with Cohere and Elasticsearch"
+      }
+    },
+    "level": "h1",
+    "page_position": 1
   }
 ]

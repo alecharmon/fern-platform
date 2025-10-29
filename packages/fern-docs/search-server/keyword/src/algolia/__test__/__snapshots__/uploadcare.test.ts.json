@@ -1282,6 +1282,49 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root.uv.docs.docs.introduction.billing-uploading",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/introduction/billing",
+    "pathname": "/docs/introduction/billing",
+    "title": "Uploading",
+    "breadcrumb": [
+      {
+        "title": "Introduction",
+        "pathname": "/docs/introduction"
+      }
+    ],
+    "tab": {
+      "title": "Guides",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#uploading",
+    "hierarchy": {
+      "h0": {
+        "title": "Uploadcare billing"
+      },
+      "h1": {
+        "id": "billing",
+        "title": "Billing"
+      },
+      "h2": {
+        "id": "operations",
+        "title": "Operations"
+      },
+      "h3": {
+        "id": "uploading",
+        "title": "Uploading"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "test:test.com:root.uv.docs.docs.uploading.uploads",
     "org_id": "test",
     "domain": "test.com",
@@ -2445,6 +2488,45 @@
       "h2": {
         "id": "migrate-files-from-anywhere",
         "title": "Migrate files from anywhere"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.docs.docs.uploading.uploading-files-uploading-basics",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/docs/uploading/uploading-files",
+    "pathname": "/docs/uploading/uploading-files",
+    "title": "Uploading basics",
+    "breadcrumb": [
+      {
+        "title": "Uploading",
+        "pathname": "/docs/uploading"
+      }
+    ],
+    "tab": {
+      "title": "Guides",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#uploading-basics",
+    "hierarchy": {
+      "h0": {
+        "title": "Uploading files"
+      },
+      "h1": {
+        "id": "uploading-files",
+        "title": "Uploading files"
+      },
+      "h2": {
+        "id": "uploading-basics",
+        "title": "Uploading basics"
       }
     },
     "level": "h2"

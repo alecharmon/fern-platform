@@ -429,7 +429,7 @@
       },
       "h2": {
         "id": "userbutton-",
-        "title": "<UserButton />"
+        "title": ""
       }
     },
     "level": "h2"
@@ -473,7 +473,7 @@
       },
       "h2": {
         "id": "signin--and-signup-",
-        "title": "<SignIn /> and <SignUp />"
+        "title": "and"
       }
     },
     "level": "h2"
@@ -2233,6 +2233,42 @@
       "h2": {
         "id": "deleting-a-team",
         "title": "Deleting a team"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.docs.docs.concepts.teams-concepts",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/concepts/orgs-and-teams",
+    "pathname": "/concepts/orgs-and-teams",
+    "icon": "fa-regular fa-users",
+    "title": "Concepts",
+    "breadcrumb": [
+      {
+        "title": "Concepts",
+        "pathname": "/docs/concepts"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#concepts",
+    "hierarchy": {
+      "h0": {
+        "title": "Teams"
+      },
+      "h2": {
+        "id": "concepts",
+        "title": "Concepts"
       }
     },
     "level": "h2"
@@ -4185,6 +4221,78 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.docs.docs.others.self-hosting-local-development",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/others/self-host",
+    "pathname": "/others/self-host",
+    "icon": "fa-regular fa-house-laptop",
+    "title": "Local development",
+    "breadcrumb": [
+      {
+        "title": "Others",
+        "pathname": "/docs/others"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#local-development",
+    "hierarchy": {
+      "h0": {
+        "title": "Self-Hosting"
+      },
+      "h2": {
+        "id": "local-development",
+        "title": "Local development"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.docs.docs.others.self-hosting-production-deployment",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/others/self-host",
+    "pathname": "/others/self-host",
+    "icon": "fa-regular fa-house-laptop",
+    "title": "Production deployment",
+    "breadcrumb": [
+      {
+        "title": "Others",
+        "pathname": "/docs/others"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#production-deployment",
+    "hierarchy": {
+      "h0": {
+        "title": "Self-Hosting"
+      },
+      "h2": {
+        "id": "production-deployment",
+        "title": "Production deployment"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.components.components.components.user-button-chunk:0",
@@ -8177,6 +8285,76 @@
     "level": "h3"
   },
   {
+    "objectID": "test:test.com:root.uv.sdk.sdk.classes.team-user-teamuser",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/sdk/team-user",
+    "pathname": "/sdk/team-user",
+    "title": "TeamUser",
+    "breadcrumb": [
+      {
+        "title": "Classes",
+        "pathname": "/sdk/classes"
+      }
+    ],
+    "tab": {
+      "title": "SDK Reference",
+      "pathname": "/sdk"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#teamuser",
+    "hierarchy": {
+      "h0": {
+        "title": "TeamUser"
+      },
+      "h2": {
+        "id": "teamuser",
+        "title": "TeamUser"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.sdk.sdk.classes.team-user-serverteamuser",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/sdk/team-user",
+    "pathname": "/sdk/team-user",
+    "title": "ServerTeamUser",
+    "breadcrumb": [
+      {
+        "title": "Classes",
+        "pathname": "/sdk/classes"
+      }
+    ],
+    "tab": {
+      "title": "SDK Reference",
+      "pathname": "/sdk"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#serverteamuser",
+    "hierarchy": {
+      "h0": {
+        "title": "TeamUser"
+      },
+      "h2": {
+        "id": "serverteamuser",
+        "title": "ServerTeamUser"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.sdk.sdk.classes.team-profile-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -8273,6 +8451,41 @@
       "h2": {
         "id": "serverteamprofile",
         "title": "ServerTeamProfile"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.sdk.sdk.classes.team-profile-teamprofile",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/sdk/team-profile",
+    "pathname": "/sdk/team-profile",
+    "title": "TeamProfile",
+    "breadcrumb": [
+      {
+        "title": "Classes",
+        "pathname": "/sdk/classes"
+      }
+    ],
+    "tab": {
+      "title": "SDK Reference",
+      "pathname": "/sdk"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#teamprofile",
+    "hierarchy": {
+      "h0": {
+        "title": "TeamProfile"
+      },
+      "h2": {
+        "id": "teamprofile",
+        "title": "TeamProfile"
       }
     },
     "level": "h2"
@@ -8402,6 +8615,41 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.sdk.sdk.classes.project-project",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/sdk/project",
+    "pathname": "/sdk/project",
+    "title": "Project",
+    "breadcrumb": [
+      {
+        "title": "Classes",
+        "pathname": "/sdk/classes"
+      }
+    ],
+    "tab": {
+      "title": "SDK Reference",
+      "pathname": "/sdk"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#project",
+    "hierarchy": {
+      "h0": {
+        "title": "Project"
+      },
+      "h2": {
+        "id": "project",
+        "title": "Project"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.sdk.sdk.classes.contact-channel-chunk:0",
@@ -8687,6 +8935,41 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.sdk.sdk.classes.contact-channel-contactchannel",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/sdk/contact-channel",
+    "pathname": "/sdk/contact-channel",
+    "title": "ContactChannel",
+    "breadcrumb": [
+      {
+        "title": "Classes",
+        "pathname": "/sdk/classes"
+      }
+    ],
+    "tab": {
+      "title": "SDK Reference",
+      "pathname": "/sdk"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#contactchannel",
+    "hierarchy": {
+      "h0": {
+        "title": "ContactChannel"
+      },
+      "h2": {
+        "id": "contactchannel",
+        "title": "ContactChannel"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.sdk.sdk.hooks.use-user-chunk:0",

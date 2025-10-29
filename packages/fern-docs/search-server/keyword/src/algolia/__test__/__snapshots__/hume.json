@@ -3070,6 +3070,45 @@
     "level": "h2"
   },
   {
+    "objectID": "hume:dev.hume.ai:root.uv.docs.docs.empathic-voice-interface-evi.custom-language-model-example-sequence",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/docs/empathic-voice-interface-evi/custom-language-model",
+    "pathname": "/docs/empathic-voice-interface-evi/custom-language-model",
+    "title": "Example Sequence:",
+    "breadcrumb": [
+      {
+        "title": "Empathic Voice Interface (EVI)",
+        "pathname": "/docs/empathic-voice-interface-evi"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#example-sequence",
+    "hierarchy": {
+      "h0": {
+        "title": "Using a custom language model"
+      },
+      "h2": {
+        "id": "streaming-text-to-the-assistant",
+        "title": "Streaming Text to the Assistant"
+      },
+      "h3": {
+        "id": "example-sequence",
+        "title": "Example Sequence:"
+      }
+    },
+    "level": "h3"
+  },
+  {
     "objectID": "hume:dev.hume.ai:root.uv.docs.docs.empathic-voice-interface-evi.faq-chunk:0",
     "org_id": "hume",
     "domain": "dev.hume.ai",
@@ -4620,6 +4659,41 @@
     "level": "h2"
   },
   {
+    "objectID": "hume:dev.hume.ai:root.uv.docs.docs.resources.billing-understanding-your-bill",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/docs/resources/billing",
+    "pathname": "/docs/resources/billing",
+    "title": "Understanding your bill",
+    "breadcrumb": [
+      {
+        "title": "Resources",
+        "pathname": "/docs/resources"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#understanding-your-bill",
+    "hierarchy": {
+      "h0": {
+        "title": "Billing"
+      },
+      "h2": {
+        "id": "understanding-your-bill",
+        "title": "Understanding your bill"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "hume:dev.hume.ai:root.uv.docs.docs.resources.errors",
     "org_id": "hume",
     "domain": "dev.hume.ai",
@@ -5090,6 +5164,41 @@
       "h2": {
         "id": "published-research",
         "title": "Published Research"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.docs.docs.resources.science-modalities",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/docs/resources/science",
+    "pathname": "/docs/resources/science",
+    "title": "Modalities",
+    "breadcrumb": [
+      {
+        "title": "Resources",
+        "pathname": "/docs/resources"
+      }
+    ],
+    "tab": {
+      "title": "Documentation",
+      "pathname": "/docs"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#modalities",
+    "hierarchy": {
+      "h0": {
+        "title": "About the Science"
+      },
+      "h2": {
+        "id": "modalities",
+        "title": "Modalities"
       }
     },
     "level": "h2"
@@ -6829,6 +6938,606 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-10-25-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "October 25, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#10-25-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "10-25-2024",
+        "title": "October 25, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-10-11-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "October 11, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#10-11-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "10-11-2024",
+        "title": "October 11, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-09-27-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "September 27, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#09-27-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "09-27-2024",
+        "title": "September 27, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-09-20-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "September 20, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#09-20-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "09-20-2024",
+        "title": "September 20, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-09-13-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "September 13, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#09-13-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "09-13-2024",
+        "title": "September 13, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-08-08-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "August 8, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#08-08-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "08-08-2024",
+        "title": "August 8, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-08-02-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "August 2, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#08-02-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "08-02-2024",
+        "title": "August 2, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-07-26-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "July 26, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#07-26-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "07-26-2024",
+        "title": "July 26, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-07-18-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "July 18, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#07-18-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "07-18-2024",
+        "title": "July 18, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-07-12-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "July 12, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#07-12-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "07-12-2024",
+        "title": "July 12, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-07-05-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "July 5, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#07-05-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "07-05-2024",
+        "title": "July 5, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-06-28-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "June 28, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#06-28-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "06-28-2024",
+        "title": "June 28, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-06-21-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "June 21, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#06-21-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "06-21-2024",
+        "title": "June 21, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-06-07-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "June 7, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#06-07-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "06-07-2024",
+        "title": "June 7, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-05-31-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "May 31, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#05-31-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "05-31-2024",
+        "title": "May 31, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-05-24-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "May 24, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#05-24-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "05-24-2024",
+        "title": "May 24, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-05-17-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "May 17, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#05-17-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "05-17-2024",
+        "title": "May 17, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-05-10-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "May 10, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#05-10-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "05-10-2024",
+        "title": "May 10, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-05-03-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "May 3, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#05-03-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "05-03-2024",
+        "title": "May 3, 2024"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "hume:dev.hume.ai:root.uv.changelog.changelog.changelog-04-30-2024",
+    "org_id": "hume",
+    "domain": "dev.hume.ai",
+    "canonicalPathname": "/changelog",
+    "pathname": "/changelog",
+    "title": "April 30, 2024",
+    "breadcrumb": [],
+    "tab": {
+      "title": "Changelog",
+      "pathname": "/changelog"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#04-30-2024",
+    "hierarchy": {
+      "h0": {
+        "title": "Changelog"
+      },
+      "h2": {
+        "id": "04-30-2024",
+        "title": "April 30, 2024"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "hume:dev.hume.ai:ef70bbc1-c431-4ffd-b24b-e8c845ed1d5c:endpoint_tools.list-tools",

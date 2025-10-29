@@ -299,7 +299,7 @@
       },
       "h3": {
         "id": "1-navigate-to-the-integrations-page",
-        "title": "1. Navigate to the Integrations Page"
+        "title": "Navigate to the Integrations Page"
       }
     },
     "level": "h3"
@@ -339,7 +339,7 @@
       },
       "h3": {
         "id": "2-select-the-property-management-system",
-        "title": "2. Select the Property Management System"
+        "title": "Select the Property Management System"
       }
     },
     "level": "h3"
@@ -379,7 +379,7 @@
       },
       "h3": {
         "id": "3-add-a-sandbox-customer",
-        "title": "3. Add a \"Sandbox Customer\""
+        "title": "Add a \"Sandbox Customer\""
       }
     },
     "level": "h3"
@@ -419,7 +419,7 @@
       },
       "h3": {
         "id": "4-enter-your-sandbox-credentials",
-        "title": "4. Enter your Sandbox Credentials"
+        "title": "Enter your Sandbox Credentials"
       }
     },
     "level": "h3"
@@ -459,7 +459,7 @@
       },
       "h3": {
         "id": "5-data-access",
-        "title": "5. Data Access"
+        "title": "Data Access"
       }
     },
     "level": "h3"
@@ -499,10 +499,45 @@
       },
       "h3": {
         "id": "6-your-first-data-sync",
-        "title": "6. Your First Data Sync"
+        "title": "Your First Data Sync"
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.how-it-works.how-it-works.getting-started.your-first-integration-steps-screen-recording-above",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/how-it-works/getting-started/your-first-integration",
+    "pathname": "/how-it-works/getting-started/your-first-integration",
+    "title": "Steps (screen recording above)",
+    "breadcrumb": [
+      {
+        "title": "Getting Started",
+        "pathname": "/how-it-works/getting-started"
+      }
+    ],
+    "tab": {
+      "title": "How It Works",
+      "pathname": "/how-it-works"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#steps-screen-recording-above",
+    "hierarchy": {
+      "h0": {
+        "title": "Your First Integration"
+      },
+      "h2": {
+        "id": "steps-screen-recording-above",
+        "title": "Steps (screen recording above)"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.how-it-works.how-it-works.getting-started.system-overview",
@@ -4314,6 +4349,76 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.how-it-works.how-it-works.webhooks.implementation-considerations-webhook-behavior",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/how-it-works/webhooks/implementation-considerations",
+    "pathname": "/how-it-works/webhooks/implementation-considerations",
+    "title": "Webhook Behavior",
+    "breadcrumb": [
+      {
+        "title": "Webhooks",
+        "pathname": "/how-it-works/webhooks"
+      }
+    ],
+    "tab": {
+      "title": "How It Works",
+      "pathname": "/how-it-works"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#webhook-behavior",
+    "hierarchy": {
+      "h0": {
+        "title": "Implementation Considerations"
+      },
+      "h2": {
+        "id": "webhook-behavior",
+        "title": "Webhook Behavior"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.how-it-works.how-it-works.webhooks.implementation-considerations-implementation-considerations",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/how-it-works/webhooks/implementation-considerations",
+    "pathname": "/how-it-works/webhooks/implementation-considerations",
+    "title": "Implementation Considerations",
+    "breadcrumb": [
+      {
+        "title": "Webhooks",
+        "pathname": "/how-it-works/webhooks"
+      }
+    ],
+    "tab": {
+      "title": "How It Works",
+      "pathname": "/how-it-works"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#implementation-considerations",
+    "hierarchy": {
+      "h0": {
+        "title": "Implementation Considerations"
+      },
+      "h2": {
+        "id": "implementation-considerations",
+        "title": "Implementation Considerations"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.how-it-works.how-it-works.webhooks.sync-complete-webhook-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -4528,6 +4633,41 @@
       "h2": {
         "id": "the-first_sync_complete-webhook",
         "title": "The FIRST_SYNC_COMPLETE Webhook"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.how-it-works.how-it-works.webhooks.sync-complete-webhook-example-use-cases",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/how-it-works/webhooks/sync-complete-webhook",
+    "pathname": "/how-it-works/webhooks/sync-complete-webhook",
+    "title": "Example use cases",
+    "breadcrumb": [
+      {
+        "title": "Webhooks",
+        "pathname": "/how-it-works/webhooks"
+      }
+    ],
+    "tab": {
+      "title": "How It Works",
+      "pathname": "/how-it-works"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#example-use-cases",
+    "hierarchy": {
+      "h0": {
+        "title": "Sync Complete Webhook"
+      },
+      "h2": {
+        "id": "example-use-cases",
+        "title": "Example use cases"
       }
     },
     "level": "h2"

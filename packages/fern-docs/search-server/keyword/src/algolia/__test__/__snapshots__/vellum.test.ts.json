@@ -2798,6 +2798,146 @@
     "level": "h1"
   },
   {
+    "objectID": "test:test.com:root.uv.help-center.help-center.workflows.common-data-transforms-string-manipulation",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/workflows/common-data-transforms",
+    "pathname": "/help-center/workflows/common-data-transforms",
+    "title": "String Manipulation",
+    "breadcrumb": [
+      {
+        "title": "Workflows",
+        "pathname": "/help-center/workflows"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#string-manipulation",
+    "hierarchy": {
+      "h0": {
+        "title": "Guide to Data Transformation with Templating Nodes"
+      },
+      "h1": {
+        "id": "string-manipulation",
+        "title": "String Manipulation"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.workflows.common-data-transforms-json-manipulation",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/workflows/common-data-transforms",
+    "pathname": "/help-center/workflows/common-data-transforms",
+    "title": "JSON Manipulation",
+    "breadcrumb": [
+      {
+        "title": "Workflows",
+        "pathname": "/help-center/workflows"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#json-manipulation",
+    "hierarchy": {
+      "h0": {
+        "title": "Guide to Data Transformation with Templating Nodes"
+      },
+      "h1": {
+        "id": "json-manipulation",
+        "title": "JSON Manipulation"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.workflows.common-data-transforms-chat-history-manipulation",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/workflows/common-data-transforms",
+    "pathname": "/help-center/workflows/common-data-transforms",
+    "title": "Chat History Manipulation",
+    "breadcrumb": [
+      {
+        "title": "Workflows",
+        "pathname": "/help-center/workflows"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#chat-history-manipulation",
+    "hierarchy": {
+      "h0": {
+        "title": "Guide to Data Transformation with Templating Nodes"
+      },
+      "h1": {
+        "id": "chat-history-manipulation",
+        "title": "Chat History Manipulation"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.workflows.common-data-transforms-search-result-manipulation",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/workflows/common-data-transforms",
+    "pathname": "/help-center/workflows/common-data-transforms",
+    "title": "Search Result Manipulation",
+    "breadcrumb": [
+      {
+        "title": "Workflows",
+        "pathname": "/help-center/workflows"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#search-result-manipulation",
+    "hierarchy": {
+      "h0": {
+        "title": "Guide to Data Transformation with Templating Nodes"
+      },
+      "h1": {
+        "id": "search-result-manipulation",
+        "title": "Search Result Manipulation"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root.uv.help-center.help-center.workflows.code-execution-node-examples-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -2861,6 +3001,76 @@
       "h1": {
         "id": "code-packages",
         "title": "Code Packages"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.workflows.code-execution-node-examples-arithmetic",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/workflows/code-execution-node-examples",
+    "pathname": "/help-center/workflows/code-execution-node-examples",
+    "title": "Arithmetic",
+    "breadcrumb": [
+      {
+        "title": "Workflows",
+        "pathname": "/help-center/workflows"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#arithmetic",
+    "hierarchy": {
+      "h0": {
+        "title": "Code Execution Node Examples"
+      },
+      "h1": {
+        "id": "arithmetic",
+        "title": "Arithmetic"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.workflows.code-execution-node-examples-json-manipulation",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/workflows/code-execution-node-examples",
+    "pathname": "/help-center/workflows/code-execution-node-examples",
+    "title": "JSON Manipulation",
+    "breadcrumb": [
+      {
+        "title": "Workflows",
+        "pathname": "/help-center/workflows"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#json-manipulation",
+    "hierarchy": {
+      "h0": {
+        "title": "Code Execution Node Examples"
+      },
+      "h1": {
+        "id": "json-manipulation",
+        "title": "JSON Manipulation"
       }
     },
     "level": "h1"
@@ -4594,6 +4804,76 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.help-center.help-center.evaluation.quantitative-evaluation-getting-started",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/evaluation/quantitative-evaluation",
+    "pathname": "/help-center/evaluation/quantitative-evaluation",
+    "title": "Getting Started",
+    "breadcrumb": [
+      {
+        "title": "Evaluation & Test Suites",
+        "pathname": "/help-center/evaluation"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#getting-started",
+    "hierarchy": {
+      "h0": {
+        "title": "Maximize LLM Development Quality with Vellum's Evaluations"
+      },
+      "h1": {
+        "id": "getting-started",
+        "title": "Getting Started"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.evaluation.quantitative-evaluation-advanced-usage",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/evaluation/quantitative-evaluation",
+    "pathname": "/help-center/evaluation/quantitative-evaluation",
+    "title": "Advanced Usage",
+    "breadcrumb": [
+      {
+        "title": "Evaluation & Test Suites",
+        "pathname": "/help-center/evaluation"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#advanced-usage",
+    "hierarchy": {
+      "h0": {
+        "title": "Maximize LLM Development Quality with Vellum's Evaluations"
+      },
+      "h1": {
+        "id": "advanced-usage",
+        "title": "Advanced Usage"
+      }
+    },
+    "level": "h1"
+  },
+  {
     "objectID": "test:test.com:root.uv.help-center.help-center.evaluation.evaluating-rag-pipelines-chunk:0",
     "org_id": "test",
     "domain": "test.com",
@@ -4786,6 +5066,41 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.evaluation.evaluating-rag-pipelines-rag-evaluation-in-vellum",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/evaluation/evaluating-rag-pipelines",
+    "pathname": "/help-center/evaluation/evaluating-rag-pipelines",
+    "title": "RAG Evaluation in Vellum",
+    "breadcrumb": [
+      {
+        "title": "Evaluation & Test Suites",
+        "pathname": "/help-center/evaluation"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#rag-evaluation-in-vellum",
+    "hierarchy": {
+      "h0": {
+        "title": "Evaluating RAG Pipelines"
+      },
+      "h1": {
+        "id": "rag-evaluation-in-vellum",
+        "title": "RAG Evaluation in Vellum"
+      }
+    },
+    "level": "h1"
   },
   {
     "objectID": "test:test.com:root.uv.help-center.help-center.evaluation.online-evaluations-chunk:0",
@@ -5077,6 +5392,76 @@
       "h1": {
         "id": "conclusion",
         "title": "Conclusion"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.evaluation.online-evaluations-getting-started-with-online-evaluations",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/evaluation/online-evaluations",
+    "pathname": "/help-center/evaluation/online-evaluations",
+    "title": "Getting Started with Online Evaluations",
+    "breadcrumb": [
+      {
+        "title": "Evaluation & Test Suites",
+        "pathname": "/help-center/evaluation"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#getting-started-with-online-evaluations",
+    "hierarchy": {
+      "h0": {
+        "title": "Leveraging Online Evaluations for LLM Development with Vellum"
+      },
+      "h1": {
+        "id": "getting-started-with-online-evaluations",
+        "title": "Getting Started with Online Evaluations"
+      }
+    },
+    "level": "h1"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.evaluation.online-evaluations-advanced-usage",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/evaluation/online-evaluations",
+    "pathname": "/help-center/evaluation/online-evaluations",
+    "title": "Advanced Usage",
+    "breadcrumb": [
+      {
+        "title": "Evaluation & Test Suites",
+        "pathname": "/help-center/evaluation"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#advanced-usage",
+    "hierarchy": {
+      "h0": {
+        "title": "Leveraging Online Evaluations for LLM Development with Vellum"
+      },
+      "h1": {
+        "id": "advanced-usage",
+        "title": "Advanced Usage"
       }
     },
     "level": "h1"
@@ -5877,6 +6262,80 @@
     "level": "h2"
   },
   {
+    "objectID": "test:test.com:root.uv.help-center.help-center.metrics.custom-metrics-available-metric-types",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/metrics/custom-metrics",
+    "pathname": "/help-center/metrics/custom-metrics",
+    "title": "Available Metric Types",
+    "breadcrumb": [
+      {
+        "title": "Metrics",
+        "pathname": "/help-center/metrics"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#available-metric-types",
+    "hierarchy": {
+      "h0": {
+        "title": "Create Custom Reusable Metrics for LLM Evaluation"
+      },
+      "h2": {
+        "id": "available-metric-types",
+        "title": "Available Metric Types"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.metrics.custom-metrics-examples",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/metrics/custom-metrics",
+    "pathname": "/help-center/metrics/custom-metrics",
+    "title": "Examples",
+    "breadcrumb": [
+      {
+        "title": "Metrics",
+        "pathname": "/help-center/metrics"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#examples",
+    "hierarchy": {
+      "h0": {
+        "title": "Create Custom Reusable Metrics for LLM Evaluation"
+      },
+      "h1": {
+        "id": "code-execution-metric",
+        "title": "Code Execution Metric"
+      },
+      "h2": {
+        "id": "examples",
+        "title": "Examples"
+      }
+    },
+    "level": "h2"
+  },
+  {
     "objectID": "test:test.com:root.uv.help-center.help-center.deployments.prompt-lifecycle-management",
     "org_id": "test",
     "domain": "test.com",
@@ -6413,7 +6872,7 @@
       },
       "h3": {
         "id": "1-dont-specify-a-release-tag-and-always-use-latest",
-        "title": "1. Don’t Specify a Release Tag and Always Use Latest"
+        "title": "Don’t Specify a Release Tag and Always Use Latest"
       }
     },
     "level": "h3"
@@ -6453,7 +6912,7 @@
       },
       "h3": {
         "id": "2-use-custom-release-tags",
-        "title": "2. Use Custom Release Tags"
+        "title": "Use Custom Release Tags"
       }
     },
     "level": "h3"
@@ -6493,7 +6952,7 @@
       },
       "h3": {
         "id": "3-use-static-release-tags",
-        "title": "3. Use Static Release Tags"
+        "title": "Use Static Release Tags"
       }
     },
     "level": "h3"
@@ -6617,6 +7076,41 @@
       }
     },
     "level": "h3"
+  },
+  {
+    "objectID": "test:test.com:root.uv.help-center.help-center.deployments.managing-releases-three-ways-to-release-prompts-or-workflows",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/help-center/deployments/managing-releases",
+    "pathname": "/help-center/deployments/managing-releases",
+    "title": "Three Ways to Release Prompts or Workflows",
+    "breadcrumb": [
+      {
+        "title": "Deployments",
+        "pathname": "/help-center/deployments"
+      }
+    ],
+    "tab": {
+      "title": "Help Center",
+      "pathname": "/help-center"
+    },
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#three-ways-to-release-prompts-or-workflows",
+    "hierarchy": {
+      "h0": {
+        "title": "Mastering Vellum Deployment – Release Tags Explained"
+      },
+      "h2": {
+        "id": "three-ways-to-release-prompts-or-workflows",
+        "title": "Three Ways to Release Prompts or Workflows"
+      }
+    },
+    "level": "h2"
   },
   {
     "objectID": "test:test.com:root.uv.help-center.help-center.documents.uploading-documents-chunk:0",

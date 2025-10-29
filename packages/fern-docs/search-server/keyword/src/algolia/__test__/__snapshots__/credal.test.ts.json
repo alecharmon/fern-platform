@@ -833,7 +833,7 @@
       },
       "h2": {
         "id": "1-what-is-the-background-prompt",
-        "title": "1. What is the Background Prompt"
+        "title": "What is the Background Prompt"
       }
     },
     "level": "h2"
@@ -1005,7 +1005,7 @@
       },
       "h2": {
         "id": "3-start-with-simple-prompts-and-iterate",
-        "title": "3. Start with Simple Prompts and Iterate"
+        "title": "Start with Simple Prompts and Iterate"
       }
     },
     "level": "h2"
@@ -1045,7 +1045,7 @@
       },
       "h2": {
         "id": "4-clarity-over-vagueness",
-        "title": "4. Clarity Over Vagueness"
+        "title": "Clarity Over Vagueness"
       }
     },
     "level": "h2"
@@ -1085,7 +1085,7 @@
       },
       "h2": {
         "id": "5-say-what-to-do-instead-of-what-not-to-do",
-        "title": "5. Say What to Do Instead of What Not to Do"
+        "title": "Say What to Do Instead of What Not to Do"
       }
     },
     "level": "h2"
@@ -1117,7 +1117,7 @@
       },
       "h2": {
         "id": "6-save-your-work-in-a-suggested-question",
-        "title": "6. Save your work in a “Suggested Question”"
+        "title": "Save your work in a “Suggested Question”"
       }
     },
     "level": "h2"
@@ -1149,7 +1149,7 @@
       },
       "h2": {
         "id": "7-use-the-latest-model",
-        "title": "7. Use the Latest Model"
+        "title": "Use the Latest Model"
       }
     },
     "level": "h2"
@@ -1181,7 +1181,7 @@
       },
       "h2": {
         "id": "8-incorporate-feedback-loops",
-        "title": "8. Incorporate Feedback Loops"
+        "title": "Incorporate Feedback Loops"
       }
     },
     "level": "h2"
@@ -1213,7 +1213,38 @@
       },
       "h2": {
         "id": "9-what-not-to-ask",
-        "title": "9. What not to ask…"
+        "title": "What not to ask…"
+      }
+    },
+    "level": "h2"
+  },
+  {
+    "objectID": "test:test.com:root.uv.getting-started.prompting-2-constructing-a-background-prompt",
+    "org_id": "test",
+    "domain": "test.com",
+    "canonicalPathname": "/getting-started/prompting",
+    "pathname": "/getting-started/prompting",
+    "title": "2. Constructing a Background Prompt",
+    "breadcrumb": [
+      {
+        "title": "Getting Started",
+        "pathname": "/getting-started"
+      }
+    ],
+    "visible_by": [
+      "role/everyone"
+    ],
+    "authed": false,
+    "page_position": 1,
+    "type": "markdown",
+    "hash": "#2-constructing-a-background-prompt",
+    "hierarchy": {
+      "h0": {
+        "title": "Prompting"
+      },
+      "h2": {
+        "id": "2-constructing-a-background-prompt",
+        "title": "2. Constructing a Background Prompt"
       }
     },
     "level": "h2"
