@@ -9,22 +9,43 @@ type Literal = string | number | bigint | boolean | RegExp | null | undefined;
  *
  * @param estree - The estree program to extract the literal from.
  * @returns The literal if there is exactly one, otherwise `undefined`.
+ * If the estree contains JSX elements, extracts and concatenates all text content.
  */
 export function extractSingleLiteral(estree?: Program | null | undefined): Literal {
     if (estree == null) {
         return undefined;
     }
     const literals: Literal[] = [];
+    const textParts: string[] = [];
+    let hasJsxContent = false;
+
     walk(estree, {
         enter: function (node) {
-            // ignore function declarations, arrow functions, and JSX elements
+            // ignore function declarations and arrow functions
+            if (node.type === "FunctionDeclaration" || node.type === "ArrowFunctionExpression") {
+                this.skip();
+            }
+
+            // Track that we have JSX content
             if (
-                node.type === "FunctionDeclaration" ||
-                node.type === "ArrowFunctionExpression" ||
+                node.type === "JSXElement" ||
+                node.type === "JSXFragment" ||
                 node.type === "JSXOpeningElement" ||
                 node.type === "JSXOpeningFragment"
             ) {
-                this.skip();
+                hasJsxContent = true;
+            }
+
+            // Extract text from JSX text nodes
+            if (node.type === "JSXText") {
+                textParts.push(node.value);
+            }
+
+            // Extract literals from JSX expression containers
+            if (node.type === "JSXExpressionContainer" && node.expression.type === "Literal") {
+                if (typeof node.expression.value === "string") {
+                    textParts.push(node.expression.value);
+                }
             }
 
             if (node.type === "Literal") {
@@ -32,6 +53,13 @@ export function extractSingleLiteral(estree?: Program | null | undefined): Liter
             }
         }
     });
+
+    // If we found JSX content and extracted text, return the concatenated text
+    if (hasJsxContent && textParts.length > 0) {
+        return textParts.join("").trim();
+    }
+
+    // Otherwise, return single literal if found
     return literals.length === 1 ? literals[0] : undefined;
 }
 

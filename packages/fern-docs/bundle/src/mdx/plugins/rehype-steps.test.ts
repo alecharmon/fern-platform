@@ -285,7 +285,7 @@ describe("rehype-steps", () => {
 
           Some content within nested step 3
         </Steps>
-        
+
       </Steps>
     `).hast;
 
@@ -312,6 +312,66 @@ describe("rehype-steps", () => {
               Some content within nested step 3
             </Step>
           </StepGroup>
+        </Step>
+      </StepGroup>
+      "
+    `);
+    });
+
+    it("should extract text from step titles with MDX content (backticks)", () => {
+        const tree = toTree(`
+      <Steps>
+        ### Install the \`fern-api\` package
+
+        Run the installation command
+
+        ### Configure \`fern.config.json\`
+
+        Set up your configuration file
+      </Steps>
+    `).hast;
+
+        handleSteps(tree);
+        handleSlug(tree);
+
+        expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
+      "<StepGroup>
+        <Step id="install-the-fern-api-package" title={<>{"Install the "}<code>{"fern-api"}</code>{" package"}</>}>
+          Run the installation command
+        </Step>
+
+        <Step id="configure-fernconfigjson" title={<>{"Configure "}<code>{"fern.config.json"}</code></>}>
+          Set up your configuration file
+        </Step>
+      </StepGroup>
+      "
+    `);
+    });
+
+    it("should extract text from step titles with bold and italic MDX", () => {
+        const tree = toTree(`
+      <Steps>
+        ### **Important**: First step
+
+        This is a critical step
+
+        ### *Optional*: Second step
+
+        This step is optional
+      </Steps>
+    `).hast;
+
+        handleSteps(tree);
+        handleSlug(tree);
+
+        expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
+      "<StepGroup>
+        <Step id="important-first-step" title={<><strong>{"Important"}</strong>{": First step"}</>}>
+          This is a critical step
+        </Step>
+
+        <Step id="optional-second-step" title={<><em>{"Optional"}</em>{": Second step"}</>}>
+          This step is optional
         </Step>
       </StepGroup>
       "
