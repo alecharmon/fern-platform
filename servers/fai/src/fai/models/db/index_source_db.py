@@ -4,9 +4,9 @@ from sqlalchemy import (
     JSON,
     Column,
     DateTime,
-    String,
 )
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import String
 
 from fai.db import Base
 

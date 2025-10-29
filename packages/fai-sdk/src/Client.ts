@@ -18,6 +18,7 @@ import { Index } from "./api/resources/index/client/Client.js";
 import { Mcp } from "./api/resources/mcp/client/Client.js";
 import { Query } from "./api/resources/query/client/Client.js";
 import { Scribe } from "./api/resources/scribe/client/Client.js";
+import { Sdks } from "./api/resources/sdks/client/Client.js";
 import { Settings } from "./api/resources/settings/client/Client.js";
 import { Slack } from "./api/resources/slack/client/Client.js";
 
@@ -60,6 +61,7 @@ export class FernAIClient {
     protected _mcp: Mcp | undefined;
     protected _query: Query | undefined;
     protected _scribe: Scribe | undefined;
+    protected _sdks: Sdks | undefined;
     protected _settings: Settings | undefined;
     protected _slack: Slack | undefined;
 
@@ -127,6 +129,10 @@ export class FernAIClient {
 
     public get scribe(): Scribe {
         return (this._scribe ??= new Scribe(this._options));
+    }
+
+    public get sdks(): Sdks {
+        return (this._sdks ??= new Sdks(this._options));
     }
 
     public get settings(): Settings {

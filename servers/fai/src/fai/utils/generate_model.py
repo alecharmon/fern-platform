@@ -17,6 +17,7 @@ T = TypeVar("T", bound=BaseModel)
 def generate_anthropic_generic(
     response_type: type[T],
     prompt_template: str,
+    model: str = "claude-opus-4-20250514",
     **kwargs: Any,
 ) -> T | None:
     anthropic_client = Anthropic()
@@ -32,7 +33,7 @@ def generate_anthropic_generic(
     while tries < 3:
         try:
             response = anthropic_client.messages.create(
-                model="claude-opus-4-20250514",
+                model=model,
                 max_tokens=1000,
                 messages=[{"role": "user", "content": formatted_prompt}],
                 tools=tools,  # type: ignore
@@ -52,6 +53,7 @@ def generate_anthropic_generic(
 async def generate_anthropic_generic_async(
     response_type: type[T],
     prompt_template: str,
+    model: str = "claude-opus-4-20250514",
     **kwargs: Any,
 ) -> T | None:
     async with AsyncAnthropic() as anthropic_client:
@@ -67,7 +69,7 @@ async def generate_anthropic_generic_async(
         while tries < 3:
             try:
                 response = await anthropic_client.messages.create(
-                    model="claude-opus-4-20250514",
+                    model=model,
                     max_tokens=1000,
                     messages=[{"role": "user", "content": formatted_prompt}],
                     tools=tools,  # type: ignore

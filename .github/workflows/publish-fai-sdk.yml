@@ -29,3 +29,23 @@ jobs:
         run: |
           git_version="$(scripts/fai-sdk-version.sh)"
           fern generate --api fai --group public-sdk --version ${git_version}
+
+  publish_java_sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: Install Fern
+        run: npm install -g fern-api
+
+      - name: Publish FAI SDK
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+        run: |
+          git_version="$(scripts/fai-sdk-version.sh)"
+          fern generate --api fai --group java-sdk --version ${git_version}
