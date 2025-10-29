@@ -1,7 +1,7 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { FernCollapseWithButtonUncontrolled } from "../type-definitions/FernCollapseWithButtonUncontrolled";
 import { PropertyRenderer } from "../type-definitions/ObjectProperty";
 import { WithSeparator } from "../type-definitions/TypeDefinitionDetails";
@@ -18,13 +18,13 @@ function authSchemeToDisplay(auth: ApiDefinition.AuthScheme): AuthSchemeDisplay 
     return visitDiscriminatedUnion(auth)._visit<AuthSchemeDisplay>({
         basicAuth: (basicAuth) => ({
             name: "Authorization",
-            description: basicAuth.description ?? I18N.authTypes.basicAuth,
+            description: basicAuth.description ?? i18n.authTypes.basicAuth,
             availability: undefined,
             typeShorthand: "Basic"
         }),
         bearerAuth: (bearerAuth) => ({
             name: "Authorization",
-            description: bearerAuth.description ?? I18N.authTypes.bearerAuth,
+            description: bearerAuth.description ?? i18n.authTypes.bearerAuth,
             availability: undefined,
             typeShorthand: "Bearer"
         }),
@@ -34,7 +34,7 @@ function authSchemeToDisplay(auth: ApiDefinition.AuthScheme): AuthSchemeDisplay 
                 value.description ??
                 (value.prefix != null
                     ? `Header authentication of the form \`${value.prefix} <token>\``
-                    : I18N.authTypes.apiKey),
+                    : i18n.authTypes.apiKey),
             availability: undefined,
             typeShorthand: value.prefix || "string"
         }),
@@ -77,7 +77,7 @@ export function EndpointAuthSection({ auths }: { auths: ApiDefinition.AuthScheme
     }
 
     return (
-        <EndpointSection title={I18N.apiReference.authentication}>
+        <EndpointSection title={i18n.apiReference.authentication}>
             <FernCollapseWithButtonUncontrolled
                 showText={`Show ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}
                 hideText={`Hide ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}

@@ -2,7 +2,7 @@ import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { noop } from "ts-essentials";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { EndpointDescriptor } from "./EndpointDescriptor";
 
@@ -17,7 +17,7 @@ export const SubpackageEndpointsOverview: React.FC<SubpackageEndpointsOverview.P
     return (
         <div className="border-border-default rounded-3 flex flex-col overflow-hidden border">
             <div className="border-border-default flex h-10 items-center justify-between border-b bg-white/10 px-3 py-1">
-                <div className="text-xs uppercase tracking-wide text-neutral-300">{I18N.apiReference.endpoints}</div>
+                <div className="text-xs uppercase tracking-wide text-neutral-300">{i18n.apiReference.endpoints}</div>
             </div>
             <div className="space-y-1.5 p-3">
                 {subpackage.endpoints.map((e) => (

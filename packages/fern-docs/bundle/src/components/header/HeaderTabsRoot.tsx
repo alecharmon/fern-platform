@@ -2,7 +2,7 @@
 
 import { AbstractHeaderTabsRoot } from "@fern-docs/components/abstract/AbstractHeaderTabsRoot";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { SearchV2Trigger, useIsAskAiEnabled } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 
@@ -10,7 +10,7 @@ export function HeaderTabsRoot({
     children,
     showSearchBar,
     className,
-    placeholder = I18N.search.search
+    placeholder = i18n.search.search
 }: {
     children: React.ReactNode;
     showSearchBar: boolean;

@@ -4,7 +4,7 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import type { FC, ReactNode } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 interface PlaygroundSendRequestButtonProps {
     sendRequest?: () => void;
@@ -21,7 +21,7 @@ export const PlaygroundSendRequestButton: FC<PlaygroundSendRequestButtonProps> =
 }) => {
     return (
         <FernTooltipProvider>
-            <FernTooltip content={disabled ? I18N.playground.cannotSendToLocalhost : undefined}>
+            <FernTooltip content={disabled ? i18n.playground.cannotSendToLocalhost : undefined}>
                 <FernButton
                     className={cn("group relative overflow-hidden font-semibold", {
                         "after:animate-shine after:absolute after:inset-y-0 after:w-8 after:bg-white/50 after:blur after:content-['']":
@@ -35,7 +35,7 @@ export const PlaygroundSendRequestButton: FC<PlaygroundSendRequestButtonProps> =
                     skeleton={!sendRequest}
                     disabled={disabled}
                 >
-                    {sendRequestButtonLabel ?? I18N.buttons.sendRequest}
+                    {sendRequestButtonLabel ?? i18n.buttons.sendRequest}
                 </FernButton>
             </FernTooltip>
         </FernTooltipProvider>

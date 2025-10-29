@@ -10,7 +10,7 @@ import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
 
 import { WebSocketMessagesVirtualized } from "@/components/api-reference/websockets/WebSocketMessagesVirtualized";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { PlaygroundTypeReferenceForm } from "../form/PlaygroundTypeReferenceForm";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
 import type { PlaygroundWebSocketRequestFormState } from "../types";
@@ -95,7 +95,7 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
 
                                     <div className="flex justify-end p-4">
                                         <FernButton
-                                            text={I18N.playground.sendMessage}
+                                            text={i18n.playground.sendMessage}
                                             rightIcon="send"
                                             intent="primary"
                                             onClick={() => {
@@ -113,12 +113,12 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
                 <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
                     <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
                         <span className="text-(color:--grayscale-a11) text-xs uppercase">
-                            {I18N.apiReference.messages}
+                            {i18n.apiReference.messages}
                         </span>
                         <div className="flex items-center gap-2">
                             {messages.length > 0 && (
                                 <FernButton
-                                    text={I18N.buttons.clear}
+                                    text={i18n.buttons.clear}
                                     variant="minimal"
                                     size="small"
                                     onClick={clearMessages}
@@ -143,7 +143,7 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
                                     ></span>
                                 </span>
                                 <span className="font-mono text-sm">
-                                    {connected ? I18N.playground.connected : I18N.playground.notConnected}
+                                    {connected ? i18n.playground.connected : i18n.playground.notConnected}
                                 </span>
                             </span>
                         </div>

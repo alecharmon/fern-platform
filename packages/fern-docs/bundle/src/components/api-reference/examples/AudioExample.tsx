@@ -1,7 +1,7 @@
 import { FernAudioPlayer } from "@fern-docs/components/FernAudioPlayer";
 import type { FC } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { TitledExample } from "./TitledExample";
 
@@ -18,7 +18,7 @@ const AudioExampleInternal: FC<AudioExample.Props> = ({ ...props }) => {
         <TitledExample {...props}>
             <FernAudioPlayer
                 src="https://files.buildwithfern.com/elevenlabs-apiref.mp3"
-                title={I18N.ai.audioByElevenLabs}
+                title={i18n.ai.audioByElevenLabs}
                 className="p-4"
             />
         </TitledExample>

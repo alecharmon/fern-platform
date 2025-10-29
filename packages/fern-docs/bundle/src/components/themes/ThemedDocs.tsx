@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 const THEMES = {
     default: dynamic(() => import("./default/DefaultDocs"), { ssr: true }),
@@ -26,7 +26,7 @@ export function ThemedDocs({
     darkSidebarClassName,
     lightHeaderClassName,
     darkHeaderClassName,
-    searchPlaceholder = I18N.search.search
+    searchPlaceholder = i18n.search.search
 }: {
     theme?: FernTheme;
     announcement?: React.ReactNode;

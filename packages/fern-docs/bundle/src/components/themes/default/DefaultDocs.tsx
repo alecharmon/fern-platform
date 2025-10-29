@@ -5,7 +5,7 @@ import AbstractDefaultDocs from "@fern-docs/components/theming/AbstractDefaultDo
 import type React from "react";
 import { HeaderTabsRoot } from "@/components/header/HeaderTabsRoot";
 import { SearchPanel } from "@/components/search-panel";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { useIsAskAiEnabled } from "@/state/search";
 import { useIsSearchPanelOpen, useIsSearchPanelResizing } from "@/state/search-panel";
 
@@ -25,7 +25,7 @@ export default function DefaultDocs({
     darkHeaderClassName,
     lightSidebarClassName,
     darkSidebarClassName,
-    searchPlaceholder = I18N.search.search
+    searchPlaceholder = i18n.search.search
 }: {
     header: React.ReactNode;
     versionSelect?: React.ReactNode;

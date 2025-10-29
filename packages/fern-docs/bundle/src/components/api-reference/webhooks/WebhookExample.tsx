@@ -4,7 +4,7 @@ import type { APIV1Read } from "@fern-api/fdr-sdk";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 const CodeSnippetExample = dynamic(
     () => import("../examples/CodeSnippetExample").then(({ CodeSnippetExample }) => CodeSnippetExample),
@@ -28,7 +28,7 @@ export const WebhookExample: React.FC<WebhookExample.Props> = ({ example, slug }
                 {example.payload != null && (
                     <CodeSnippetExample
                         className="max-h-full"
-                        title={I18N.apiReference.payload}
+                        title={i18n.apiReference.payload}
                         onClick={(e) => {
                             e.stopPropagation();
                         }}

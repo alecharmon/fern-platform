@@ -3,7 +3,7 @@
 import { FernButton } from "@fern-docs/components/FernButton";
 import { Rss } from "lucide-react";
 import React from "react";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 export function RSSFeedButton() {
     const getRssUrl = () => {
@@ -24,7 +24,7 @@ export function RSSFeedButton() {
             className="fern-rss-feed-button"
             rightIcon={<Rss className="text-(color:--accent-a11) size-3.5" />}
         >
-            {I18N.documentation.subscribeViaRss}
+            {i18n.documentation.subscribeViaRss}
         </FernButton>
     );
 }

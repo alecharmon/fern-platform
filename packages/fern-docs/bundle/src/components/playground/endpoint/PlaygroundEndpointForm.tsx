@@ -4,7 +4,7 @@ import { type EndpointContext, PropertyKey } from "@fern-api/fdr-sdk/api-definit
 import { EMPTY_ARRAY, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { type Dispatch, type FC, type SetStateAction, useCallback, useMemo } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { PlaygroundFileUploadForm } from "../form/PlaygroundFileUploadForm";
 import { PlaygroundObjectForm } from "../form/PlaygroundObjectForm";
@@ -107,7 +107,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
     return (
         <>
             {headers != null && headers.length > 0 && (
-                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={I18N.apiReference.headers}>
+                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.headers}>
                     <PlaygroundObjectPropertiesForm
                         id="header"
                         properties={headers.map((header) => ({
@@ -123,7 +123,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
             )}
 
             {endpoint.pathParameters != null && endpoint.pathParameters.length > 0 && (
-                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={I18N.apiReference.pathParameters}>
+                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.pathParameters}>
                     <PlaygroundObjectPropertiesForm
                         id="path"
                         properties={endpoint.pathParameters ?? EMPTY_ARRAY}
@@ -136,7 +136,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
             )}
 
             {endpoint.queryParameters != null && endpoint.queryParameters.length > 0 && (
-                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={I18N.apiReference.queryParameters}>
+                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.queryParameters}>
                     <PlaygroundObjectPropertiesForm
                         id="query"
                         properties={endpoint.queryParameters ?? EMPTY_ARRAY}
@@ -151,7 +151,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
             {endpoint.requests?.[0]?.body != null &&
                 endpoint.requests?.[0]?.body.type === "object" &&
                 endpoint.protocol?.type === "openrpc" && (
-                    <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={I18N.apiReference.parameters}>
+                    <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.parameters}>
                         <PlaygroundOpenRPCParamsForm
                             id="body"
                             shape={endpoint.requests?.[0]?.body}
@@ -168,7 +168,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                     formData: (formData) => (
                         <PlaygroundEndpointFormSection
                             ignoreHeaders={ignoreHeaders}
-                            title={I18N.playground.multipartForm}
+                            title={i18n.playground.multipartForm}
                         >
                             <PlaygroundEndpointMultipartForm
                                 endpoint={endpoint}
@@ -180,7 +180,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         </PlaygroundEndpointFormSection>
                     ),
                     bytes: (bytes) => (
-                        <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={I18N.apiReference.body}>
+                        <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.body}>
                             <PlaygroundFileUploadForm
                                 id="body"
                                 propertyKey="body"
@@ -199,7 +199,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         return (
                             <PlaygroundEndpointFormSection
                                 ignoreHeaders={ignoreHeaders}
-                                title={I18N.apiReference.bodyParameters}
+                                title={i18n.apiReference.bodyParameters}
                             >
                                 <PlaygroundObjectForm
                                     id="body"

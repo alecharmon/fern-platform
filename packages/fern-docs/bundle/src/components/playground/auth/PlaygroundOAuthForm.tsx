@@ -10,7 +10,7 @@ import { useAtom } from "jotai";
 import { HelpCircle, Key, User } from "lucide-react";
 import { type ReactElement, useState } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { Callout } from "@/mdx/components/callout";
 import { PLAYGROUND_AUTH_STATE_OAUTH_ATOM, usePlaygroundEndpointFormState } from "@/state/playground";
 import { PlaygroundEndpointForm } from "../endpoint";
@@ -59,14 +59,14 @@ export function FoundOAuthReferencedEndpointForm({
         {
             type: "value",
             value: "credentials",
-            label: I18N.auth.credentials,
+            label: i18n.auth.credentials,
             icon: <User />
         },
-        { type: "value", value: "token", label: I18N.auth.bearerToken, icon: <Key /> }
+        { type: "value", value: "token", label: i18n.auth.bearerToken, icon: <Key /> }
     ];
 
     return value.isLoggingIn ? (
-        <li className="-mx-4 flex flex-1 items-center justify-center space-y-2 p-4 pt-8">{I18N.status.loading}</li>
+        <li className="-mx-4 flex flex-1 items-center justify-center space-y-2 p-4 pt-8">{i18n.status.loading}</li>
     ) : (
         <>
             <li className="-mx-4 space-y-2 p-4 pb-2">
@@ -89,7 +89,7 @@ export function FoundOAuthReferencedEndpointForm({
                 <>
                     <li className="-mx-4 space-y-2 p-4">
                         <label className="inline-flex flex-wrap items-baseline">
-                            <span className="font-mono text-sm">{I18N.auth.oauthClientCredentialsLogin}</span>
+                            <span className="font-mono text-sm">{i18n.auth.oauthClientCredentialsLogin}</span>
                         </label>
                         <PlaygroundEndpointForm
                             context={context}
@@ -98,15 +98,15 @@ export function FoundOAuthReferencedEndpointForm({
                             ignoreHeaders={true}
                         />
                     </li>
-                    {displayFailedLogin && <Callout intent="error">{I18N.auth.failedToLoginWithCredentials}</Callout>}
+                    {displayFailedLogin && <Callout intent="error">{i18n.auth.failedToLoginWithCredentials}</Callout>}
                     {value.isLoggedIn && (
                         <li className="-mx-4 space-y-2 p-4 pt-0">
                             <FernTooltipProvider>
                                 <div className="flex min-w-0 flex-1 shrink items-center justify-between gap-2">
                                     <label className="inline-flex items-baseline gap-2 truncate">
                                         <span className="inline-flex font-mono text-sm">
-                                            {I18N.auth.generatedOAuthToken}
-                                            <FernTooltip content={I18N.auth.bearerTokenGenerated}>
+                                            {i18n.auth.generatedOAuthToken}
+                                            <FernTooltip content={i18n.auth.bearerTokenGenerated}>
                                                 <HelpCircle className="text-(color:--grayscale-a11) ml-2 size-4 self-center" />
                                             </FernTooltip>
                                         </span>
@@ -121,14 +121,14 @@ export function FoundOAuthReferencedEndpointForm({
                         </li>
                     )}
                     {value.isLoggedIn && value.accessToken !== value.loggedInStartingToken && (
-                        <Callout intent="warning">{I18N.auth.bearerTokenNoLongerValid}</Callout>
+                        <Callout intent="warning">{i18n.auth.bearerTokenNoLongerValid}</Callout>
                     )}
                 </>
             ) : (
                 <>
                     <li className="-mx-4 space-y-2 p-4">
                         <label className="inline-flex flex-wrap items-baseline">
-                            <span className="font-mono text-sm">{I18N.auth.userSuppliedBearerToken}</span>
+                            <span className="font-mono text-sm">{i18n.auth.userSuppliedBearerToken}</span>
                         </label>
 
                         <PasswordInputGroup
@@ -149,7 +149,7 @@ export function FoundOAuthReferencedEndpointForm({
             <li className="flex justify-end pt-4">
                 {value.selectedInputMethod === "credentials" && (
                     <FernButton
-                        text={value.isLoggedIn ? I18N.buttons.refreshBearerToken : I18N.buttons.fetchBearerToken}
+                        text={value.isLoggedIn ? i18n.buttons.refreshBearerToken : i18n.buttons.fetchBearerToken}
                         intent="primary"
                         onClick={() => {
                             void (async () => {

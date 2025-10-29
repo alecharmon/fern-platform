@@ -11,7 +11,7 @@ import React from "react";
 import { z } from "zod";
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { useIsDarkCode } from "@/state/dark-code";
 import { useIsSearchDialogOpen } from "@/state/search";
 import {
@@ -258,7 +258,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain }: { domain:
                             }
                             return (
                                 <Feedback
-                                    feedbackQuestion={I18N.feedback.wasThisResponseHelpful}
+                                    feedbackQuestion={i18n.feedback.wasThisResponseHelpful}
                                     type="conversational-search"
                                     metadata={() => ({
                                         user: user?.content,

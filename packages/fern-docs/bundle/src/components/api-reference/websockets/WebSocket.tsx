@@ -13,7 +13,7 @@ import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { PlaygroundButton } from "@/components/playground/PlaygroundButton";
 import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKeyboardTrigger";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -115,7 +115,7 @@ export async function WebSocketContent({
                 <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
                     <div className="not-prose grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6">
                         <TitledExample
-                            title={I18N.apiReference.handshake}
+                            title={i18n.apiReference.handshake}
                             tryIt={node != null ? <PlaygroundButtonTray state={node} /> : undefined}
                             disableClipboard={true}
                         >
@@ -124,7 +124,7 @@ export async function WebSocketContent({
                             </FernScrollArea>
                         </TitledExample>
                         {exampleMessages.length > 0 && (
-                            <TitledExample title={I18N.apiReference.messages} className="min-h-0 shrink">
+                            <TitledExample title={i18n.apiReference.messages} className="min-h-0 shrink">
                                 <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
                                     <WebSocketMessages messages={exampleMessages} />
                                 </FernScrollArea>
@@ -141,7 +141,7 @@ export async function WebSocketContent({
                             title={
                                 <span className="flex w-full items-center justify-between">
                                     <span className="inline-flex items-center gap-2">
-                                        {I18N.apiReference.handshake}
+                                        {i18n.apiReference.handshake}
                                         <span className="bg-(color:--grayscale-a3) inline-block rounded-full p-1">
                                             <Wifi
                                                 className="text-(color:--grayscale-a11) size-icon"
@@ -169,7 +169,7 @@ export async function WebSocketContent({
                             <TypeDefinitionAnchorPart part="request">
                                 {headers && headers.length > 0 && (
                                     <TypeDefinitionAnchorPart part="headers">
-                                        <EndpointSection title={I18N.apiReference.headers}>
+                                        <EndpointSection title={i18n.apiReference.headers}>
                                             <WithSeparator>
                                                 {headers.map((parameter) => (
                                                     <ObjectProperty
@@ -185,7 +185,7 @@ export async function WebSocketContent({
                                 )}
                                 {channel.pathParameters && channel.pathParameters.length > 0 && (
                                     <TypeDefinitionAnchorPart part="path">
-                                        <EndpointSection title={I18N.apiReference.pathParameters}>
+                                        <EndpointSection title={i18n.apiReference.pathParameters}>
                                             <WithSeparator>
                                                 {channel.pathParameters.map((parameter) => (
                                                     <ObjectProperty
@@ -201,7 +201,7 @@ export async function WebSocketContent({
                                 )}
                                 {channel.queryParameters && channel.queryParameters.length > 0 && (
                                     <TypeDefinitionAnchorPart part="query">
-                                        <EndpointSection title={I18N.apiReference.queryParameters}>
+                                        <EndpointSection title={i18n.apiReference.queryParameters}>
                                             <WithSeparator>
                                                 {channel.queryParameters.map((parameter) => {
                                                     return (
@@ -225,7 +225,7 @@ export async function WebSocketContent({
                                 <EndpointSection
                                     title={
                                         <span className="inline-flex items-center gap-2">
-                                            {I18N.buttons.send}
+                                            {i18n.buttons.send}
                                             <span className="text-(color:--green-a11) bg-(color:--green-a3) inline-block rounded-full p-1">
                                                 <ArrowUp className="size-icon" />
                                             </span>
@@ -245,7 +245,7 @@ export async function WebSocketContent({
                                 <EndpointSection
                                     title={
                                         <span className="inline-flex items-center gap-2">
-                                            {I18N.playground.receive}
+                                            {i18n.playground.receive}
                                             <span className="text-(color:--accent-a12) bg-(color:--accent-a3) inline-block rounded-full p-1">
                                                 <ArrowDown className="size-icon" />
                                             </span>

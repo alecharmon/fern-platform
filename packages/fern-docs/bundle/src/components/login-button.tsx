@@ -7,7 +7,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isTrailingSlashEnabled } from "@fern-api/docs-utils";
 import { FernButton } from "@fern-docs/components/FernButton";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { LoginButtonClient } from "./login-button-client";
 import { getApiRouteSupplier } from "./util/getApiRouteSupplier";
 
@@ -37,7 +37,7 @@ export async function LoginButton({
     if (disabled) {
         return (
             <FernButton variant="outlined" className={className} disabled>
-                {I18N.auth.login}
+                {i18n.auth.login}
             </FernButton>
         );
     }

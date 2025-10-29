@@ -9,7 +9,7 @@ import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { sortBy } from "es-toolkit/array";
 import { memo, type ReactNode, useCallback, useMemo } from "react";
 import { WebSocketMessages } from "@/components/api-reference/websockets/WebSocketMessages";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
 import { AudioExample } from "../examples/AudioExample";
@@ -65,20 +65,20 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                 case "json":
                 case "filename": {
                     if (endpoint.protocol?.type === "grpc") {
-                        return I18N.apiReference.exampleResponse;
+                        return i18n.apiReference.exampleResponse;
                     }
                     const title =
                         example.exampleCall.name ??
                         ApiDefinition.getMessageForStatus(example.exampleCall.responseStatusCode, endpoint.method) ??
-                        I18N.apiReference.response;
+                        i18n.apiReference.response;
                     return renderResponseTitle(title, example.exampleCall.responseStatusCode);
                 }
                 case "stream":
-                    return I18N.playground.streamedResponse;
+                    return i18n.playground.streamedResponse;
                 case "sse":
-                    return I18N.playground.serverSentEvents;
+                    return i18n.playground.serverSentEvents;
                 default:
-                    return I18N.apiReference.response;
+                    return i18n.apiReference.response;
             }
         },
         [endpoint.method, endpoint.protocol?.type]
@@ -145,7 +145,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
             )}
             {endpoint.protocol?.type === "grpc" ? (
                 <JsonCodeSnippetExample
-                    title={I18N.apiReference.exampleRequest}
+                    title={i18n.apiReference.exampleRequest}
                     onClick={(e) => {
                         e.stopPropagation();
                     }}

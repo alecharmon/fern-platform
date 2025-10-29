@@ -2,7 +2,7 @@
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { renderTypeShorthand } from "@/components/type-shorthand";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { useEndpointContext } from "./EndpointContext";
 
@@ -37,7 +37,7 @@ function getResponseSummary({
 }) {
     switch (response.body.type) {
         case "empty":
-            return I18N.responses.thisEndpointReturnsNothing;
+            return i18n.responses.thisEndpointReturnsNothing;
         case "fileDownload": {
             if (isAudioFileDownloadSpanSummary) {
                 return (
@@ -46,10 +46,10 @@ function getResponseSummary({
                     </span>
                 );
             }
-            return I18N.responses.thisEndpointReturnsFile;
+            return i18n.responses.thisEndpointReturnsFile;
         }
         case "streamingText":
-            return I18N.responses.thisEndpointSendsTextResponses;
+            return i18n.responses.thisEndpointSendsTextResponses;
         case "stream":
             return `This endpoint returns a stream of ${exampleResponseBody?.type === "sse" ? "server sent events" : renderTypeShorthand(response.body.shape, { withArticle: false }, types)}.`;
         default:

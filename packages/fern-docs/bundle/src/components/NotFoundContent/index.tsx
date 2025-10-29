@@ -6,7 +6,7 @@ import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { NotFound404Tracker } from "../analytics/NotFound404Tracker";
 import ReturnHomeButton from "../ReturnHomeButton";
 import { getRouteSuggestions, type RouteSuggestion } from "./get-route-suggestions";
@@ -45,14 +45,14 @@ export default function NotFoundContent() {
             <div className="flex h-[calc(100svh-var(--header-height)-6rem)] w-screen flex-col items-center justify-center gap-6">
                 <GradientExclamation />
                 <div className="flex flex-col text-center gap-2">
-                    <h1>{I18N.errors.pageNotFound}</h1>
+                    <h1>{i18n.errors.pageNotFound}</h1>
                     <p className="text-(color:--grayscale-a9)">
                         We&apos;ve been notified so we can fix this for next time.
                     </p>
                 </div>
 
                 {isLoading && requestedPath && requestedPath !== "/" && (
-                    <div className="text-sm text-(color:--grayscale-a11)">{I18N.errors.findingSimilarPages}</div>
+                    <div className="text-sm text-(color:--grayscale-a11)">{i18n.errors.findingSimilarPages}</div>
                 )}
 
                 {!isLoading && suggestedRoutes.length > 0 && (

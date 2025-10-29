@@ -6,7 +6,7 @@ import { createEndpointContext, createWebSocketContext } from "@fern-api/fdr-sdk
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { ArrowLeft } from "lucide-react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { ApiDefinitionIdProvider } from "@/contexts/ApiDefinitionIdContext";
 
 import { PlaygroundAuthorizationFormCard } from "./auth";
@@ -77,7 +77,7 @@ export function NoEndpointSelected() {
     return (
         <div className="flex size-full flex-col items-center justify-center">
             <ArrowLeft className="t-muted mb-2 size-8" />
-            <h6 className="t-muted">{I18N.playground.selectAnEndpointToGetStarted}</h6>
+            <h6 className="t-muted">{i18n.playground.selectAnEndpointToGetStarted}</h6>
         </div>
     );
 }

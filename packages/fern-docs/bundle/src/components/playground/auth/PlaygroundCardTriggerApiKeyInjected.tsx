@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { type ReactElement, useEffect } from "react";
 import urlJoin from "url-join";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { Callout } from "@/mdx/components/callout";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
@@ -90,13 +90,13 @@ export function PlaygroundCardTriggerApiKeyInjected({
 
     if (apiKey != null && apiKey.trim().length > 0) {
         return (
-            <FernCard className="rounded-3 mb-3 p-4" title={I18N.auth.loginToSendRequest}>
+            <FernCard className="rounded-3 mb-3 p-4" title={i18n.auth.loginToSendRequest}>
                 <FernButton
                     className="pointer-events-none w-full text-left"
                     size="large"
                     intent="success"
                     variant="outlined"
-                    text={I18N.auth.successfullyLoggedIn}
+                    text={i18n.auth.successfullyLoggedIn}
                     icon={<Key />}
                     active={true}
                 />
@@ -107,7 +107,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                     <div className="flex justify-end gap-2">
                         {apiKey !== authState?.bearerAuth?.token && apiKey && (
                             <FernButton
-                                text={I18N.auth.resetTokenToDefault}
+                                text={i18n.auth.resetTokenToDefault}
                                 intent="none"
                                 icon={<Key />}
                                 onClick={handleResetAuth}
@@ -116,7 +116,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                             />
                         )}
                         <FernButton
-                            text={I18N.auth.logout}
+                            text={i18n.auth.logout}
                             intent="none"
                             onClick={() => {
                                 if (!config.authenticated) {
@@ -144,12 +144,12 @@ export function PlaygroundCardTriggerApiKeyInjected({
         <FernCard className="rounded-3 mb-2 p-4">
             {error && <Callout intent="error">{errorDescription ?? error}</Callout>}
 
-            <h5 className="text-(color:--grayscale-a11) m-0">{I18N.auth.loginToSendRequest}</h5>
+            <h5 className="text-(color:--grayscale-a11) m-0">{i18n.auth.loginToSendRequest}</h5>
             <div className="my-5 flex justify-center gap-2">
                 <FernButton
                     size="normal"
                     intent="primary"
-                    text={I18N.auth.login}
+                    text={i18n.auth.login}
                     icon={<User />}
                     onClick={redirectOrOpenAuthForm}
                 />
@@ -158,7 +158,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                     intent="none"
                     variant="outlined"
                     icon={<Key />}
-                    text={I18N.auth.provideTokenManually}
+                    text={i18n.auth.provideTokenManually}
                     onClick={toggleOpen}
                 />
             </div>

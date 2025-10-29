@@ -1,7 +1,7 @@
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { Markdown } from "@/mdx/components/Markdown";
 
-const STATUS_200_TEXT = I18N.responses.return200Status;
+const STATUS_200_TEXT = i18n.responses.return200Status;
 
 export const WebhookResponseSection: React.FC = () => {
     return (

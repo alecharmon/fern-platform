@@ -8,7 +8,7 @@ import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-util
 import { uniq } from "es-toolkit/array";
 import type { ReactNode } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { NullableDropdown } from "./NullableDropdown";
 
 export interface TypeShorthandRootOptions {
@@ -74,7 +74,7 @@ export function renderTypeShorthandRoot({
                 ))}
             {unwrapped.default != null && !hideAllModifiers && (
                 <span>
-                    {I18N.playground.defaultsTo}
+                    {i18n.playground.defaultsTo}
                     <code>{unknownToString(unwrapped.default)}</code>
                 </span>
             )}

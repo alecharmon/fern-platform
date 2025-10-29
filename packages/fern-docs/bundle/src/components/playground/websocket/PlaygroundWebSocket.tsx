@@ -9,7 +9,7 @@ import { Wifi, WifiOff } from "lucide-react";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import urlJoin from "url-join";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { PLAYGROUND_AUTH_STATE_ATOM, usePlaygroundWebsocketFormState } from "@/state/playground";
 
 import { usePlaygroundSettings } from "../../hooks/usePlaygroundSettings";
@@ -59,7 +59,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                 type: "end",
                 data: {
                     type: "json",
-                    data: I18N.ai.endOfSampleSession
+                    data: i18n.ai.endOfSampleSession
                 },
                 origin: "endSample",
                 displayName: undefined
@@ -202,10 +202,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         queryParameters={context.channel.queryParameters}
                         sendRequestButtonLabel={
                             connectedState === "closed"
-                                ? I18N.buttons.connect
+                                ? i18n.buttons.connect
                                 : connectedState === "opening"
-                                  ? I18N.playground.connecting
-                                  : I18N.buttons.disconnect
+                                  ? i18n.playground.connecting
+                                  : i18n.buttons.disconnect
                         }
                         sendRequestIcon={
                             connectedState === "opening" ? null : connectedState === "opened" ? (

@@ -8,7 +8,7 @@ import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTool
 import { Play } from "lucide-react";
 import type { FC } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { usePlaygroundSettings } from "../hooks/usePlaygroundSettings";
 
 export const PlaygroundButton: FC<{
@@ -22,8 +22,8 @@ export const PlaygroundButton: FC<{
             <FernTooltip
                 content={
                     <span>
-                        {I18N.apiReference.customizeAndRunIn}
-                        <span className="text-(color:--accent-a11) font-semibold">{I18N.apiReference.apiExplorer}</span>
+                        {i18n.apiReference.customizeAndRunIn}
+                        <span className="text-(color:--accent-a11) font-semibold">{i18n.apiReference.apiExplorer}</span>
                     </span>
                 }
             >
@@ -31,8 +31,8 @@ export const PlaygroundButton: FC<{
                     id={`playground-button:${state.slug}`}
                     aria-description={
                         settings?.button?.href
-                            ? I18N.apiReference.opensApiExplorerNewTab
-                            : I18N.apiReference.opensApiExplorer
+                            ? i18n.apiReference.opensApiExplorerNewTab
+                            : i18n.apiReference.opensApiExplorer
                     }
                     href={settings?.button?.href ?? conformExplorerRoute(state.slug)}
                     target={settings?.button?.href ? "_blank" : undefined}
@@ -42,7 +42,7 @@ export const PlaygroundButton: FC<{
                     scroll={false}
                 >
                     <Play className="fill-current" />
-                    {I18N.buttons.tryIt}
+                    {i18n.buttons.tryIt}
                 </ButtonLink>
             </FernTooltip>
         </FernTooltipProvider>

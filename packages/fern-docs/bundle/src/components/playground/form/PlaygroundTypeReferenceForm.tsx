@@ -15,7 +15,7 @@ import { FernSwitch } from "@fern-docs/components/FernSwitch";
 import { FernTextarea } from "@fern-docs/components/FernTextarea";
 import { memo, type ReactElement, useCallback, useState } from "react";
 import { withErrorBoundary } from "@/components/error-boundary";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { IdempotentInputGroup } from "../IdempotentInputGroup";
 import { PasswordInputGroup } from "../PasswordInputGroup";
@@ -359,7 +359,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                             <FernDatetimeInput
                                 id={id}
                                 className="w-full"
-                                placeholder={I18N.dataTypes.dateTimeFormat}
+                                placeholder={i18n.dataTypes.dateTimeFormat}
                                 value={typeof value === "string" ? value : undefined}
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
@@ -427,7 +427,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 id={id}
                                 type="date"
                                 className="w-full"
-                                placeholder={I18N.dataTypes.dateFormat}
+                                placeholder={i18n.dataTypes.dateFormat}
                                 value={typeof value === "string" ? value : undefined}
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}

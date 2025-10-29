@@ -5,7 +5,7 @@ import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
 import React from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 type ChipProps = {
     name: string;
@@ -24,7 +24,7 @@ export const Chip = ({ name, description = undefined }: ChipProps) => {
     return (
         <FernTooltip
             open={wasJustCopied ? true : !description ? false : undefined}
-            content={wasJustCopied ? I18N.buttons.copied : description}
+            content={wasJustCopied ? i18n.buttons.copied : description}
         >
             <Badge
                 onClick={() => {

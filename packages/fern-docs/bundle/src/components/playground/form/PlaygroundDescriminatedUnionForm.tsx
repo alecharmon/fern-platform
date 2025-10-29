@@ -9,7 +9,7 @@ import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { memo, useCallback, useMemo } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { castToRecord, getEmptyValueForObjectProperties } from "../utils";
 import { PlaygroundObjectPropertiesForm } from "./PlaygroundObjectPropertyForm";
@@ -102,7 +102,7 @@ export const PlaygroundDiscriminatedUnionForm = memo<PlaygroundDiscriminatedUnio
                             activeVariant != null ? (
                                 <span className="font-mono">{activeVariant.discriminantValue}</span>
                             ) : (
-                                <span className="text-(color:--grayscale-a11)">{I18N.playground.selectAVariant}</span>
+                                <span className="text-(color:--grayscale-a11)">{i18n.playground.selectAVariant}</span>
                             )
                         }
                         rightIcon={<ChevronDown />}

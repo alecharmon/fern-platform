@@ -8,7 +8,7 @@ import { RESET } from "jotai/utils";
 import { ChevronDown } from "lucide-react";
 import { type ReactElement, useEffect, useState } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import {
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_IS_RESETTABLE_ATOM
@@ -50,7 +50,7 @@ export function PlaygroundBearerAuthForm({
             <li className="-mx-4 space-y-2 p-4">
                 <div className="flex flex-row items-center justify-between gap-2">
                     <label className="inline-flex flex-wrap items-baseline">
-                        <span className="font-mono text-sm">{bearerAuth.tokenName ?? I18N.auth.bearerToken}</span>
+                        <span className="font-mono text-sm">{bearerAuth.tokenName ?? i18n.auth.bearerToken}</span>
                     </label>
 
                     {authOptions.length > 0 && (
@@ -89,7 +89,7 @@ export function PlaygroundBearerAuthForm({
     return (
         <li className="-mx-4 space-y-2 p-4">
             <label className="inline-flex flex-wrap items-baseline">
-                <span className="font-mono text-sm">{bearerAuth.tokenName ?? I18N.auth.bearerToken}</span>
+                <span className="font-mono text-sm">{bearerAuth.tokenName ?? i18n.auth.bearerToken}</span>
             </label>
 
             <div>

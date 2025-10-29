@@ -4,7 +4,7 @@ import { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { HttpResponse } from "@fern-api/fdr-sdk/api-definition";
 import React, { useCallback } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
@@ -25,7 +25,7 @@ export function EndpointMultipleResponseSection({ method, responses, types }: En
 
     const getResponseId = useCallback(
         (response: HttpResponse) => {
-            const title = ApiDefinition.getMessageForStatus(response.statusCode, method) ?? I18N.apiReference.response;
+            const title = ApiDefinition.getMessageForStatus(response.statusCode, method) ?? i18n.apiReference.response;
 
             return renderResponseTitle(title, response.statusCode, true);
         },
@@ -38,7 +38,7 @@ export function EndpointMultipleResponseSection({ method, responses, types }: En
 
     return (
         <EndpointSection
-            title={I18N.apiReference.response}
+            title={i18n.apiReference.response}
             description={
                 <MdxServerComponentProseSuspense
                     size="sm"

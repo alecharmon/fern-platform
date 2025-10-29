@@ -6,7 +6,7 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { Plus, X } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { getEmptyValueForType } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";
 
@@ -101,7 +101,7 @@ export const PlaygroundMapForm = memo<PlaygroundMapFormProps>((props) => {
                     <li className="pt-2">
                         <FernButton
                             icon={<Plus />}
-                            text={I18N.buttons.addNewItem}
+                            text={i18n.buttons.addNewItem}
                             onClick={handleAppendItem}
                             variant="outlined"
                             className="w-full"
@@ -112,7 +112,7 @@ export const PlaygroundMapForm = memo<PlaygroundMapFormProps>((props) => {
             {internalState.length === 0 && (
                 <FernButton
                     icon={<Plus />}
-                    text={I18N.buttons.addNewItem}
+                    text={i18n.buttons.addNewItem}
                     onClick={handleAppendItem}
                     variant="outlined"
                     className="w-full"

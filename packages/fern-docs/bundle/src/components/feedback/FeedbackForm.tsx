@@ -14,7 +14,7 @@ import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
 import { type FC, type FormEvent, useCallback, useMemo, useRef, useState } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 const MotionFernRadioGroup = m.create(FernRadioGroup);
 
@@ -43,10 +43,10 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
 
     const legend =
         isHelpful === "yes"
-            ? I18N.feedback.whatDidYouLike
+            ? i18n.feedback.whatDidYouLike
             : isHelpful === "no"
-              ? I18N.feedback.whatWentWrong
-              : I18N.feedback.feedback;
+              ? i18n.feedback.whatWentWrong
+              : i18n.feedback.feedback;
     const feedbackOptions = useMemo<FernDropdown.Option[]>(() => {
         const options = isHelpful === "yes" ? POSITIVE_FEEDBACK : isHelpful === "no" ? NEGATIVE_FEEDBACK : [];
         const transformedOptions: FernDropdown.Option[] = options.map(
@@ -61,7 +61,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
                             ref={textareaRef}
                             // autoFocus={true}
                             className="mt-2 w-full"
-                            placeholder={`(Optional) ${I18N.feedback.tellUsMoreAboutExperience}`}
+                            placeholder={`(Optional) ${i18n.feedback.tellUsMoreAboutExperience}`}
                             onValueChange={setFeedbackMessage}
                             value={feedbackMessage}
                         />
@@ -73,14 +73,14 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
             transformedOptions.push({
                 type: "value",
                 value: "other",
-                label: I18N.feedback.anotherReason,
+                label: i18n.feedback.anotherReason,
                 children: (active) =>
                     active ? (
                         <FernTextarea
                             ref={textareaRef}
                             autoFocus={true}
                             className="mt-2 w-full"
-                            placeholder={I18N.feedback.tellUsMoreAboutExperience}
+                            placeholder={i18n.feedback.tellUsMoreAboutExperience}
                             onValueChange={setFeedbackMessage}
                             value={feedbackMessage}
                         />
@@ -143,7 +143,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
                 <FernTextarea
                     ref={textareaRef}
                     className="mt-2 w-full"
-                    placeholder={I18N.feedback.helpUsImproveDocs}
+                    placeholder={i18n.feedback.helpUsImproveDocs}
                     onValueChange={setFeedbackMessage}
                     value={feedbackMessage}
                 />
@@ -155,7 +155,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
 
                     <div className="mt-4">
                         <FernCheckbox
-                            label={I18N.feedback.yesOkayToFollowUp}
+                            label={i18n.feedback.yesOkayToFollowUp}
                             checked={showEmailInput}
                             onCheckedChange={setShowEmailInput}
                             autoFocus={false}
@@ -182,7 +182,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
                 disabled={feedbackId == null}
                 size={layoutDensity === "verbose" ? "large" : "normal"}
             >
-                {I18N.feedback.feedback}
+                {i18n.feedback.feedback}
             </FernButton>
         </form>
     );
@@ -198,26 +198,26 @@ interface FeedbackItem {
 export const POSITIVE_FEEDBACK: FeedbackItem[] = [
     {
         feedbackId: "accurate",
-        title: I18N.feedbackQuality.accurate,
-        description: I18N.feedbackQuality.accuratelyDescribes,
+        title: i18n.feedbackQuality.accurate,
+        description: i18n.feedbackQuality.accuratelyDescribes,
         satisfied: true
     },
     {
         feedbackId: "solved-my-issue",
-        title: I18N.feedback.solvedMyIssue,
-        description: I18N.feedback.helpedMeResolveIssue,
+        title: i18n.feedback.solvedMyIssue,
+        description: i18n.feedback.helpedMeResolveIssue,
         satisfied: true
     },
     {
         feedbackId: "easy-to-understand",
-        title: I18N.feedbackQuality.easyToUnderstand,
-        description: I18N.feedbackQuality.easyToFollowAndComprehend,
+        title: i18n.feedbackQuality.easyToUnderstand,
+        description: i18n.feedbackQuality.easyToFollowAndComprehend,
         satisfied: true
     },
     {
         feedbackId: "product-adoption",
-        title: I18N.feedback.helpedMeDecideToUse,
-        description: I18N.feedback.convincedMeToAdopt,
+        title: i18n.feedback.helpedMeDecideToUse,
+        description: i18n.feedback.convincedMeToAdopt,
         satisfied: true
     }
 ];
@@ -225,26 +225,26 @@ export const POSITIVE_FEEDBACK: FeedbackItem[] = [
 export const NEGATIVE_FEEDBACK: FeedbackItem[] = [
     {
         feedbackId: "inaccurate",
-        title: I18N.feedbackQuality.inaccurate,
-        description: I18N.feedback.doesntAccuratelyDescribe,
+        title: i18n.feedbackQuality.inaccurate,
+        description: i18n.feedback.doesntAccuratelyDescribe,
         satisfied: false
     },
     {
         feedbackId: "hard-to-follow",
-        title: I18N.feedback.couldntFindWhatLookingFor,
-        description: I18N.feedback.missingImportantInfo,
+        title: i18n.feedback.couldntFindWhatLookingFor,
+        description: i18n.feedback.missingImportantInfo,
         satisfied: true
     },
     {
         feedbackId: "hard-to-understand",
-        title: I18N.feedbackQuality.hardToUnderstand,
-        description: I18N.feedback.tooComplicatedOrUnclear,
+        title: i18n.feedbackQuality.hardToUnderstand,
+        description: i18n.feedback.tooComplicatedOrUnclear,
         satisfied: true
     },
     {
         feedbackId: "code-sample-errors",
-        title: I18N.feedback.codeSampleErrors,
-        description: I18N.feedback.oneOrMoreCodeSamplesIncorrect,
+        title: i18n.feedback.codeSampleErrors,
+        description: i18n.feedback.oneOrMoreCodeSamplesIncorrect,
         satisfied: true
     }
 ];

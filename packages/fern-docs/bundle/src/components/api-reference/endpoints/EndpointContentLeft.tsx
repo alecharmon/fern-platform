@@ -2,7 +2,7 @@ import "server-only";
 
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
@@ -42,7 +42,7 @@ export async function EndpointContentLeft({
                 )}
                 {endpoint.pathParameters && endpoint.pathParameters.length > 0 && (
                     <TypeDefinitionAnchorPart part="path">
-                        <EndpointSection title={I18N.apiReference.pathParameters}>
+                        <EndpointSection title={i18n.apiReference.pathParameters}>
                             <WithSeparator>
                                 {endpoint.pathParameters.map((parameter) => (
                                     <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
@@ -55,7 +55,7 @@ export async function EndpointContentLeft({
                 )}
                 {headers.length > 0 && (
                     <TypeDefinitionAnchorPart part="header">
-                        <EndpointSection title={I18N.apiReference.headers}>
+                        <EndpointSection title={i18n.apiReference.headers}>
                             <WithSeparator>
                                 {headers.map((parameter) => (
                                     <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
@@ -68,7 +68,7 @@ export async function EndpointContentLeft({
                 )}
                 {endpoint.queryParameters && endpoint.queryParameters.length > 0 && (
                     <TypeDefinitionAnchorPart part="query">
-                        <EndpointSection title={I18N.apiReference.queryParameters}>
+                        <EndpointSection title={i18n.apiReference.queryParameters}>
                             <WithSeparator>
                                 {endpoint.queryParameters.map((parameter) => (
                                     <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
@@ -84,7 +84,7 @@ export async function EndpointContentLeft({
                         <EndpointMultipleRequestSection requests={endpoint.requests} types={types} />
                     ) : (
                         <EndpointSection
-                            title={I18N.apiReference.request}
+                            title={i18n.apiReference.request}
                             description={
                                 <MdxServerComponentProseSuspense
                                     size="sm"
@@ -112,7 +112,7 @@ export async function EndpointContentLeft({
                             />
                         ) : (
                             <EndpointSection
-                                title={I18N.apiReference.response}
+                                title={i18n.apiReference.response}
                                 description={
                                     <MdxServerComponentProseSuspense
                                         size="sm"
@@ -132,7 +132,7 @@ export async function EndpointContentLeft({
                     ) : null}
                     {showErrors && endpoint.errors && endpoint.errors.length > 0 && (
                         <TypeDefinitionAnchorPart part="error">
-                            <EndpointSection title={I18N.apiReference.errors} hideSeparator>
+                            <EndpointSection title={i18n.apiReference.errors} hideSeparator>
                                 <EndpointErrorGroup errors={endpoint.errors} types={types} />
                             </EndpointSection>
                         </TypeDefinitionAnchorPart>

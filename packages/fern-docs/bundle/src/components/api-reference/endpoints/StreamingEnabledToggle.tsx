@@ -3,7 +3,7 @@ import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl
 import { Layers2, Radio } from "lucide-react";
 import { type FC, type PropsWithChildren, useCallback } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 export declare namespace StreamingEnabledToggle {
     export interface Props {
@@ -14,11 +14,11 @@ export declare namespace StreamingEnabledToggle {
 }
 
 const OPTIONS: FernDropdown.Option[] = [
-    { type: "value", value: "batch", label: I18N.streamTypes.batch, icon: <Layers2 /> },
+    { type: "value", value: "batch", label: i18n.streamTypes.batch, icon: <Layers2 /> },
     {
         type: "value",
         value: "stream",
-        label: I18N.streamTypes.stream,
+        label: i18n.streamTypes.stream,
         icon: <Radio />
     }
 ];

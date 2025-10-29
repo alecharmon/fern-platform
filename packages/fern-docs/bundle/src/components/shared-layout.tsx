@@ -11,7 +11,7 @@ import React from "react";
 import { Announcement } from "@/components/header/Announcement";
 import { HeaderContent } from "@/components/header/HeaderContent";
 import { ThemedDocs } from "@/components/themes/ThemedDocs";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
@@ -154,7 +154,7 @@ export default async function SharedLayout({
                             )}
                         >
                             <SearchV2Trigger
-                                aria-label={I18N.search.search}
+                                aria-label={i18n.search.search}
                                 className={cn("w-full overflow-hidden")}
                                 isSearchInSidebar={true}
                                 placeholder={settings.searchText}

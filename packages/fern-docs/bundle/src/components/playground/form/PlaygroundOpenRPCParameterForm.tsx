@@ -6,7 +6,7 @@ import { useBooleanState } from "@fern-ui/react-commons";
 import { type FC, memo, useCallback, useEffect, useState } from "react";
 
 import { withErrorBoundary } from "@/components/error-boundary";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { castToArray, isExpandable } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";
@@ -136,5 +136,5 @@ PlaygroundOpenRPCParametersFormInternal.displayName = "PlaygroundOpenRPCParamete
 
 export const PlaygroundOpenRPCParametersForm = withErrorBoundary(
     PlaygroundOpenRPCParametersFormInternal,
-    <div>{I18N.errors.errorRenderingForm}</div>
+    <div>{i18n.errors.errorRenderingForm}</div>
 );

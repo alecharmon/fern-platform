@@ -9,7 +9,7 @@ import type { useBooleanState } from "@fern-ui/react-commons";
 import { useAtom } from "jotai";
 import React, { type ReactElement, useEffect, useState } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { useApiDefinitionIdFromContext } from "@/contexts/ApiDefinitionIdContext";
 import { SELECTED_ENVIRONMENT_ID_ATOM, useSelectedEnvironmentUrlAtom } from "@/state/environment";
 
@@ -121,7 +121,7 @@ export function MaybeEnvironmentDropdown({
                     />
                 </span>
             ) : (
-                <FernTooltip content={<span>{I18N.playground.doubleClickToEdit}</span>}>
+                <FernTooltip content={<span>{i18n.playground.doubleClickToEdit}</span>}>
                     <span className="max-sm:hidden" style={{ pointerEvents: "auto" }}>
                         {options && options.length > 1 ? (
                             <FernDropdown

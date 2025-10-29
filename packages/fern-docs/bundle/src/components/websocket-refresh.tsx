@@ -5,7 +5,7 @@ import { cn } from "@fern-docs/components/cn";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { Loading } from "./Loading";
 
@@ -140,7 +140,7 @@ export function WebSocketRefresh() {
         return (
             <div className="animate-slide-down fixed left-1/2 top-0 z-50 -translate-x-1/2">
                 <div className="rounded-3 border-border-default mt-6 border bg-white px-4 py-2 shadow-lg">
-                    <div className="text-(color:--red-a11) font-medium">{I18N.errors.serverConnectionLost}</div>
+                    <div className="text-(color:--red-a11) font-medium">{i18n.errors.serverConnectionLost}</div>
                 </div>
             </div>
         );
@@ -155,7 +155,7 @@ export function WebSocketRefresh() {
             )}
         >
             <div className="rounded-3 border-border-default mt-6 border bg-white px-4 py-2 shadow-lg">
-                <Loading text={I18N.status.reloading} />
+                <Loading text={i18n.status.reloading} />
             </div>
         </div>
     );

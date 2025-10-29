@@ -8,7 +8,7 @@ import { Search, X } from "lucide-react";
 import React, { useState } from "react";
 
 import { ChipSizeProvider } from "@/components/Chip";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { EnumDefinitionDetails } from "./EnumDefinitionDetails";
 import { FernCollapseWithButton } from "./FernCollapseWithButton";
@@ -30,7 +30,7 @@ export function EnumTypeDefinition({
         <div className="-mx-1 py-1">
             <FernInput
                 type="search"
-                placeholder={I18N.search.searchPlaceholder}
+                placeholder={i18n.search.searchPlaceholder}
                 value={searchInput}
                 onClick={(e) => {
                     e.stopPropagation();

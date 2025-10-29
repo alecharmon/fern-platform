@@ -6,7 +6,7 @@ import { useAtomValue } from "jotai";
 import { Key } from "lucide-react";
 import type { ReactElement } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 import type { PlaygroundAuthState } from "../types";
 import { isMultiAuthToken } from "../utils/parse-auth-options";
@@ -31,11 +31,11 @@ export function PlaygroundCardTriggerManual({
     }
 
     const authButtonCopy = visitDiscriminatedUnion(auth)._visit({
-        bearerAuth: () => I18N.auth.enterBearerToken,
-        basicAuth: () => I18N.auth.enterUsernameAndPassword,
-        header: () => I18N.auth.enterCredentials,
-        oAuth: () => I18N.auth.enterCredentials,
-        _other: () => I18N.auth.enterCredentials
+        bearerAuth: () => i18n.auth.enterBearerToken,
+        basicAuth: () => i18n.auth.enterUsernameAndPassword,
+        header: () => i18n.auth.enterCredentials,
+        oAuth: () => i18n.auth.enterCredentials,
+        _other: () => i18n.auth.enterCredentials
     });
 
     const authed = isAuthed(auth, authState);

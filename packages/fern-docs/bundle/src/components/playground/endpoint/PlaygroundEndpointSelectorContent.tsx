@@ -13,7 +13,7 @@ import { Search, Slash, X } from "lucide-react";
 import { Fragment, forwardRef, useEffect, useRef, useState } from "react";
 
 import { BuiltWithFern } from "@/components/built-with-fern";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import type { ApiGroup } from "../utils/flatten-apis";
 import { PlaygroundEndpointSelectorLeafNode } from "./PlaygroundEndpointSelectorLeafNode";
@@ -106,7 +106,7 @@ export const PlaygroundEndpointSelectorContent = forwardRef<HTMLDivElement, Play
                                     <FernButton icon={<X />} variant="minimal" onClick={() => setFilterValue("")} />
                                 )
                             }
-                            placeholder={I18N.search.searchForEndpoints}
+                            placeholder={i18n.search.searchForEndpoints}
                         />
                     </div>
                     <FernScrollArea

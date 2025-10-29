@@ -3,7 +3,7 @@ import "server-only";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "../endpoints/EndpointRequestSection";
@@ -24,8 +24,8 @@ export async function GrpcContentLeft({ context: { grpc, types } }: { context: G
                     <GrpcSection
                         title={
                             isStreaming(grpc.protocol, "request")
-                                ? I18N.playground.streamRequest
-                                : I18N.apiReference.request
+                                ? i18n.playground.streamRequest
+                                : i18n.apiReference.request
                         }
                         titleOverride={
                             isGrpcTypeAlias(grpc.requests[0], grpc.protocol?.type)
@@ -53,8 +53,8 @@ export async function GrpcContentLeft({ context: { grpc, types } }: { context: G
                         <GrpcSection
                             title={
                                 isStreaming(grpc.protocol, "response")
-                                    ? I18N.playground.streamResponse
-                                    : I18N.apiReference.response
+                                    ? i18n.playground.streamResponse
+                                    : i18n.apiReference.response
                             }
                             titleOverride={
                                 isGrpcTypeAlias(grpc.responses[0], grpc.protocol?.type)

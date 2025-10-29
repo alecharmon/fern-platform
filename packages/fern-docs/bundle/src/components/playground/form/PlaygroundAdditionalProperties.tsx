@@ -6,7 +6,7 @@ import { cn } from "@fern-docs/components/cn";
 import { type ReactElement, useCallback, useMemo } from "react";
 import { noop } from "ts-essentials";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { castToRecord } from "../utils";
 import { WithLabel } from "../WithLabel";
 import { PlaygroundMapForm } from "./PlaygroundMapForm";
@@ -112,12 +112,12 @@ export function PlaygroundAdditionalProperties({
         <div className={cn("mt-8 min-w-0 flex-1 shrink")}>
             <WithLabel
                 property={{
-                    key: ApiDefinition.PropertyKey(I18N.playground.optionalExtraProperties),
+                    key: ApiDefinition.PropertyKey(i18n.playground.optionalExtraProperties),
                     valueShape: ADDITIONAL_PROPERTIES_DEFAULT_SHAPE,
                     description: undefined,
                     availability: undefined
                 }}
-                value={I18N.playground.optionalExtraProperties}
+                value={i18n.playground.optionalExtraProperties}
                 onRemove={noop}
                 types={types}
             >

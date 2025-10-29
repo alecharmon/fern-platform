@@ -3,7 +3,7 @@ import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { compact } from "es-toolkit/array";
 import type { ReactNode } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 import { renderTypeShorthand } from "../../type-shorthand";
 import { PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";
@@ -96,9 +96,9 @@ function renderTypeShorthandFormDataField(
         <span className="fern-api-property-meta">
             <span>{property.type}</span>
             {property.isOptional ? (
-                <span>{I18N.playground.optional}</span>
+                <span>{i18n.playground.optional}</span>
             ) : (
-                <span className="text-(color:--red-a11)">{I18N.playground.required}</span>
+                <span className="text-(color:--red-a11)">{i18n.playground.required}</span>
             )}
         </span>
     );

@@ -8,7 +8,7 @@ import type React from "react";
 import type { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 export function ErrorBoundaryFallback({
     className,
@@ -29,7 +29,7 @@ export function ErrorBoundaryFallback({
             interactive={resetErrorBoundary != null}
             className="m-auto flex w-fit"
         >
-            {I18N.errors.somethingWentWrong}
+            {i18n.errors.somethingWentWrong}
             {resetErrorBoundary != null && <RefreshCcw />}
         </SemanticBadge>
     );
@@ -37,7 +37,7 @@ export function ErrorBoundaryFallback({
         <div className={cn("size-full py-2", className)}>
             {resetErrorBoundary != null ? (
                 <FernTooltipProvider>
-                    <FernTooltip content={I18N.buttons.clickToRefresh}>{errorBadge}</FernTooltip>
+                    <FernTooltip content={i18n.buttons.clickToRefresh}>{errorBadge}</FernTooltip>
                 </FernTooltipProvider>
             ) : (
                 errorBadge

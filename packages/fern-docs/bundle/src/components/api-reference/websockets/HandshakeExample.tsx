@@ -7,7 +7,7 @@ import {
     type WebSocketChannel
 } from "@fern-api/fdr-sdk/api-definition";
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 
 export function HandshakeExample({
     channel,
@@ -23,17 +23,17 @@ export function HandshakeExample({
             <table className="text-body min-w-0 flex-1 shrink table-fixed border-separate border-spacing-x-2 whitespace-normal break-words font-mono text-sm">
                 <tbody>
                     <tr>
-                        <td className="text-left align-top">{I18N.apiReference.url}</td>
+                        <td className="text-left align-top">{i18n.apiReference.url}</td>
                         <td className="text-left align-top">
                             {`${removeTrailingSlash(baseUrl ?? "")}${example?.path ?? toColonEndpointPathLiteral(channel.path)}`}
                         </td>
                     </tr>
                     <tr>
-                        <td className="text-left align-top">{I18N.apiReference.method}</td>
-                        <td className="text-left align-top">{I18N.httpMethods.get}</td>
+                        <td className="text-left align-top">{i18n.apiReference.method}</td>
+                        <td className="text-left align-top">{i18n.httpMethods.get}</td>
                     </tr>
                     <tr>
-                        <td className="text-left align-top">{I18N.apiReference.status}</td>
+                        <td className="text-left align-top">{i18n.apiReference.status}</td>
                         <td className="text-left align-top">101 Switching Protocols</td>
                     </tr>
                 </tbody>

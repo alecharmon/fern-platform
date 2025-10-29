@@ -5,13 +5,13 @@
  * These strings are organized by category to facilitate future translation support.
  *
  * Usage:
- * import { I18N } from '@/constants/i18n';
+ * import { i18n } from '@/constants/i18n';
  *
  * Example:
- * <button>{I18N.buttons.sendRequest}</button>
+ * <button>{i18n.buttons.sendRequest}</button>
  */
 
-export const I18N = {
+export const i18n = {
     auth: {
         login: "Login",
         logout: "Logout",
@@ -300,17 +300,17 @@ export const I18N = {
     }
 } as const;
 
-export type I18NKeys = typeof I18N;
+export type i18nKeys = typeof i18n;
 
 export function getI18nString(path: string): string {
     const keys = path.split(".");
-    let value: any = I18N;
+    let value: any = i18n;
 
     for (const key of keys) {
         if (value && typeof value === "object" && key in value) {
             value = value[key];
         } else {
-            console.warn(`I18N key not found: ${path}`);
+            console.warn(`i18n key not found: ${path}`);
             return path;
         }
     }

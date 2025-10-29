@@ -5,7 +5,7 @@ import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { PlusCircle } from "lucide-react";
 import { type ReactElement, useCallback } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { Markdown } from "@/mdx/components/Markdown";
 
 import { renderTypeShorthandRoot } from "../../type-shorthand";
@@ -263,7 +263,7 @@ export function PlaygroundEndpointMultipartForm({
                                       {
                                           type: "value" as const,
                                           value: ADD_ALL_KEY,
-                                          label: I18N.buttons.addAllOptionalProperties,
+                                          label: i18n.buttons.addAllOptionalProperties,
                                           rightElement: <PlusCircle className="size-icon" />
                                       }
                                   ]

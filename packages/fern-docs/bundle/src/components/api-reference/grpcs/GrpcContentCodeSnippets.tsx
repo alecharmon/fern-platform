@@ -4,7 +4,7 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components/cn";
 import { memo } from "react";
 
-import { I18N } from "@/constants";
+import { i18n } from "@/constants";
 import { JsonCodeSnippetExample } from "../examples/CodeSnippetExample";
 import { useGrpcContext } from "./GrpcContext";
 
@@ -32,7 +32,7 @@ const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props>
             )}
         >
             <JsonCodeSnippetExample
-                title={I18N.apiReference.exampleRequest}
+                title={i18n.apiReference.exampleRequest}
                 onClick={(e) => {
                     e.stopPropagation();
                 }}
@@ -42,7 +42,7 @@ const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props>
             />
 
             <JsonCodeSnippetExample
-                title={I18N.apiReference.exampleResponse}
+                title={i18n.apiReference.exampleResponse}
                 onClick={(e) => {
                     e.stopPropagation();
                 }}
