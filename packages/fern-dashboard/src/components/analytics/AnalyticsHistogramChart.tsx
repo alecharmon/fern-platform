@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis } from "recharts";
 
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
@@ -29,6 +30,27 @@ export function AnalyticsHistogramChart({
     onBarClick,
     selectedBarIndex
 }: AnalyticsHistogramProps) {
+    const [primaryColor, setPrimaryColor] = useState("#10b981");
+
+    useEffect(() => {
+        const updateColors = () => {
+            const color = getComputedStyle(document.documentElement).getPropertyValue("--primary").trim();
+            if (color) {
+                setPrimaryColor(color);
+            }
+        };
+
+        updateColors();
+
+        const observer = new MutationObserver(updateColors);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class", "data-theme", "style"]
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <div
             style={{
@@ -44,14 +66,14 @@ export function AnalyticsHistogramChart({
                         <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop
                                 offset="5%"
-                                stopColor="var(--green-1100)"
+                                stopColor={primaryColor}
                                 stopOpacity={0.4}
                                 className="transition-stop-opacity transition"
                             />
                             <stop
                                 offset="95%"
-                                stopColor="var(--green-1100)"
-                                stopOpacity={0.1}
+                                stopColor={primaryColor}
+                                stopOpacity={0}
                                 className="transition-stop-opacity transition"
                             />
                         </linearGradient>
@@ -59,14 +81,14 @@ export function AnalyticsHistogramChart({
                         <linearGradient id="barGradientHover" x1="0" y1="0" x2="0" y2="1">
                             <stop
                                 offset="5%"
-                                stopColor="var(--green-1100)"
+                                stopColor={primaryColor}
                                 stopOpacity={1.0}
                                 className="transition-stop-opacity transition"
                             />
                             <stop
                                 offset="95%"
-                                stopColor="var(--green-1100)"
-                                stopOpacity={0.5}
+                                stopColor={primaryColor}
+                                stopOpacity={0}
                                 className="transition-stop-opacity transition"
                             />
                         </linearGradient>

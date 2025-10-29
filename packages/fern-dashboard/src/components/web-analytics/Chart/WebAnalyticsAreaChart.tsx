@@ -2,6 +2,7 @@
 
 import dayjs from "dayjs";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface WebAnalyticsAreaChartProps {
@@ -19,6 +20,34 @@ export default function WebAnalyticsAreaChart({
     metric = "pageviews",
     groupBy = 1
 }: WebAnalyticsAreaChartProps) {
+    const [primaryColor, setPrimaryColor] = useState("#10b981");
+    const [primaryColorWithOpacity, setPrimaryColorWithOpacity] = useState("rgba(16, 185, 129, 0.8)");
+
+    useEffect(() => {
+        const updateColors = () => {
+            const color = getComputedStyle(document.documentElement).getPropertyValue("--primary").trim();
+            if (color) {
+                setPrimaryColor(color);
+                const tempDiv = document.createElement("div");
+                tempDiv.style.color = `color-mix(in srgb, ${color} 80%, transparent)`;
+                document.body.appendChild(tempDiv);
+                const computedColor = getComputedStyle(tempDiv).color;
+                document.body.removeChild(tempDiv);
+                setPrimaryColorWithOpacity(computedColor);
+            }
+        };
+
+        updateColors();
+
+        const observer = new MutationObserver(updateColors);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class", "data-theme", "style"]
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
     if (isLoading) {
         return (
             <div className="flex h-[300px] w-full items-center justify-center">
@@ -103,8 +132,8 @@ export default function WebAnalyticsAreaChart({
                 <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorPageViews" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                            <stop offset="5%" stopColor={primaryColor} stopOpacity={0.4} />
+                            <stop offset="95%" stopColor={primaryColor} stopOpacity={0} />
                         </linearGradient>
                     </defs>
                     <CartesianGrid
@@ -135,14 +164,14 @@ export default function WebAnalyticsAreaChart({
                     <Area
                         type="linear"
                         dataKey="value"
-                        stroke="#10b981"
+                        stroke={primaryColorWithOpacity}
                         strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorPageViews)"
                         dot={false}
                         activeDot={{
                             r: 6,
-                            fill: "#10b981",
+                            fill: primaryColor,
                             strokeWidth: 2,
                             stroke: "#fff"
                         }}

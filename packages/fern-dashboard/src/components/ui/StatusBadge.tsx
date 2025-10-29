@@ -21,9 +21,9 @@ const statusConfig: Record<
     }
 > = {
     live: {
-        containerClass: "bg-green-300",
-        dotColor: "bg-green-1100",
-        textColor: "text-green-1100",
+        containerClass: "",
+        dotColor: "",
+        textColor: "",
         label: "Live"
     },
     open: {
@@ -66,6 +66,20 @@ const statusConfig: Record<
 
 export function StatusBadge({ status, className, onClick, afterSlot, hideDot }: StatusBadgeProps) {
     const config = statusConfig[status];
+
+    if (status === "live") {
+        return (
+            <div
+                className={cn("flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5", className)}
+                style={{ backgroundColor: "color-mix(in srgb, var(--primary) 10%, transparent)" }}
+                onClick={onClick}
+            >
+                {!hideDot && <div className="size-2 rounded-full bg-primary" />}
+                <div className="mb-0.5 text-sm leading-none text-primary">{config.label}</div>
+                {afterSlot}
+            </div>
+        );
+    }
 
     return (
         <div

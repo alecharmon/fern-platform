@@ -211,13 +211,10 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                                                 width: `${percentage}%`,
                                                                 borderRadius: "4px",
                                                                 pointerEvents: "none",
-                                                                background: `linear-gradient(to right,
-                                                            transparent 0%,
-                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.1) 30%,
-                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.25) 50%,
-                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.35) 60%,
-                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.35) 70%,
-                                                            rgb(${COLOR_MAP[rowBarVariant]} / 0.5) 80%)`
+                                                                background:
+                                                                    rowBarVariant === "green"
+                                                                        ? `linear-gradient(to right, transparent 0%, color-mix(in srgb, var(--primary) 40%, transparent) 100%)`
+                                                                        : `linear-gradient(to right, transparent 0%, rgb(${COLOR_MAP[rowBarVariant]} / 0.4) 100%)`
                                                             }}
                                                         />
                                                     )}
