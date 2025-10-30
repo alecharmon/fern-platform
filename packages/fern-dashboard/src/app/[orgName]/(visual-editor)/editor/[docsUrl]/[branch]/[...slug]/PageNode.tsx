@@ -99,6 +99,7 @@ export default function PageNode(props: PageNode.Props) {
                     filename={initialPageData.filename}
                     initialHtml={initialPageData.html}
                     initialFrontmatter={initialPageData.frontmatter}
+                    foundNode={found}
                 />
             </CSSProvider>
         </>

@@ -41,7 +41,7 @@ export default function PageSubtitle({ className, filename, initialText }: PageS
     return (
         <div className={cn("flex", className)}>
             <AutoResizingInput
-                className="mx-5 text-base"
+                className="break-words leading-7 text-(color:--grayscale-a11)"
                 name="subtitle"
                 onChange={onChange}
                 disabled={isEditingDisabled}

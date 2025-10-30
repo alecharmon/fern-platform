@@ -37,9 +37,9 @@ export default function PageTitle({ className, filename, initialText }: PageTitl
 
     return (
         <div className={["flex", className].join(" ")}>
-            <h1 className="fern-page-heading mb-3 h-fit w-full font-extrabold">
+            <h1 className="fern-page-heading h-fit w-full font-extrabold">
                 <AutoResizingInput
-                    className="mx-5 font-extrabold"
+                    className="font-extrabold"
                     name="title"
                     onChange={onChange}
                     placeholder="Add a title"

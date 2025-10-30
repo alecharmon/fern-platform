@@ -1,15 +1,14 @@
 import "server-only";
 
 import type { FernNavigation } from "@fern-api/fdr-sdk";
+import { FernBreadcrumbs } from "@fern-docs/components/FernBreadcrumbs";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { ChevronLeft } from "lucide-react";
 import React from "react";
-
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
-import { FernBreadcrumbs } from "./FernBreadcrumbs";
 import { PageActionsDropdown } from "./PageActionsDropdown";
 import { PageFilters } from "./PageFilters";
 import { RSSFeedButton } from "./RSSFeedButton";

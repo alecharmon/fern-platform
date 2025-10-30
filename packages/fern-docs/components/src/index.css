@@ -9,6 +9,7 @@
 @import "./FernScrollArea.scss";
 @import "./FernSegmentedControl.scss";
 @import "./FernHighlight.scss";
+@import "./FernBreadcrumbs.scss";
 @import "./badges/index.scss";
 @import "./kbd.css";
 @import "./accordion.scss";

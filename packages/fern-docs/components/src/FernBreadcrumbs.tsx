@@ -2,9 +2,9 @@
 
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
-import { FernLink } from "@fern-docs/components/FernLink";
 import { ChevronRight } from "lucide-react";
 import { Fragment, type ReactElement } from "react";
+import { FernLink } from "./FernLink";
 
 export interface FernBreadcrumbsProps {
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
