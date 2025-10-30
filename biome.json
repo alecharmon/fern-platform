@@ -321,7 +321,11 @@
         "packages/fai-sdk/**",
         "packages/fdr-lambda-sdk/**",
         "fern/apis/fai/openapi.json",
-        "**/.local-sdk-output/**"
+        "**/.local-sdk-output/**",
+        "servers/fai/**",
+        "servers/fai-discord/**",
+        "servers/fai-lambda/**",
+        "servers/fai-lambda-deploy/**"
       ],
       "linter": {
         "enabled": false

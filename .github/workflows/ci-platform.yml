@@ -17,7 +17,26 @@ env:
   WORKOS_CLIENT_ID: ${{ secrets.WORKOS_CLIENT_ID }}
 
 jobs:
+  check-platform-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      platform_changed: ${{ steps.filter.outputs.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            platform:
+              - '!servers/fai/**'
+              - '!servers/fai-discord/**'
+              - '!servers/fai-lambda/**'
+              - '!servers/fai-lambda-deploy/**'
+              - '!fern/apis/fai/**'
+
   check:
+    needs: check-platform-changes
+    if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +66,8 @@ jobs:
         run: pnpm format:yaml:check
 
   lint:
+    needs: check-platform-changes
+    if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: CLI
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +84,8 @@ jobs:
         run: pnpm check
 
   test:
+    needs: check-platform-changes
+    if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
