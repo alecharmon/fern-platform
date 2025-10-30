@@ -19,10 +19,24 @@
 
     svg.external-link-icon {
       @apply ml-0.5 inline-block size-3.5 text-current opacity-70;
+
+      overflow: visible;
+
+      path:nth-child(1),
+      path:nth-child(2) {
+        transition: transform 0.2s ease;
+      }
     }
 
     &:hover {
       text-decoration-thickness: 2px !important;
+
+      svg.external-link-icon {
+        path:nth-child(1),
+        path:nth-child(2) {
+          transform: translate(2px, -2px);
+        }
+      }
     }
   }
 

@@ -25,6 +25,24 @@
       @apply size-icon text-(color:--grayscale-a9) shrink-0;
     }
 
+    svg.lucide.lucide-external-link {
+      overflow: visible;
+
+      path:nth-child(1),
+      path:nth-child(2) {
+        transition: transform 0.2s ease;
+      }
+    }
+
+    &:hover {
+      svg.lucide.lucide-external-link {
+        path:nth-child(1),
+        path:nth-child(2) {
+          transform: translate(2px, -2px);
+        }
+      }
+    }
+
     &.nested {
       @apply data-[state=active]:max-lg:border-(color:--accent-a6) data-[state=active]:max-lg:-ml-px data-[state=active]:max-lg:border-l lg:py-1.5;
     }
