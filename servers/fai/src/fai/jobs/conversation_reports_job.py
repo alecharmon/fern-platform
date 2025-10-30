@@ -181,7 +181,7 @@ async def process_conversation_reports(
 
     LOGGER.info(f"Found {len(conversations)} conversations to process")
 
-    semaphore = asyncio.Semaphore(16)
+    semaphore = asyncio.Semaphore(10)
 
     async def process_with_semaphore(conv_id: str, domain: str) -> tuple[str, bool, str]:
         async with semaphore:
