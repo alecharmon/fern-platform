@@ -11,6 +11,24 @@ export interface ReadServiceMethods {
         cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
         locals: any;
     }, next: express.NextFunction): void | Promise<void>;
+    getEndpointById(req: express.Request<{
+        apiDefinitionId: FernRegistry.ApiDefinitionId;
+        endpointId: FernRegistry.EndpointId;
+    }, FernRegistry.api.v1.read.EndpointWithContext, never, never>, res: {
+        send: (responseBody: FernRegistry.api.v1.read.EndpointWithContext) => Promise<void>;
+        cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+        locals: any;
+    }, next: express.NextFunction): void | Promise<void>;
+    getEndpointByLocator(req: express.Request<{
+        apiDefinitionId: FernRegistry.ApiDefinitionId;
+    }, FernRegistry.api.v1.read.EndpointWithContext, never, {
+        method: string;
+        path: string;
+    }>, res: {
+        send: (responseBody: FernRegistry.api.v1.read.EndpointWithContext) => Promise<void>;
+        cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+        locals: any;
+    }, next: express.NextFunction): void | Promise<void>;
 }
 export declare class ReadService {
     private readonly methods;

@@ -7,7 +7,8 @@ export { SDKSnippetHolder } from "./db/snippets/SDKSnippetHolder";
 export { migrateDocsDbDefinition } from "./db/upgrade/migrateDocsDbDefinition";
 export {
     convertDbAPIDefinitionsToRead,
-    convertDbAPIDefinitionToRead
+    convertDbAPIDefinitionToRead,
+    transformEndpoint
 } from "./read/convertDbAPIDefinitionToRead";
 export { convertDbDocsConfigToRead } from "./read/convertDbDocsConfigToRead";
 export { convertDocsDefinitionToRead } from "./read/convertDocsDefinitionToRead";

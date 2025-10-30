@@ -33,3 +33,17 @@ export class UnavailableError extends Error {
         this.name = "UnavailableError";
     }
 }
+
+export class ApiDoesNotExistError extends Error {
+    constructor() {
+        super("API definition does not exist");
+        this.name = "ApiDoesNotExistError";
+    }
+}
+
+export class EndpointDoesNotExistError extends Error {
+    constructor() {
+        super("Endpoint does not exist");
+        this.name = "EndpointDoesNotExistError";
+    }
+}

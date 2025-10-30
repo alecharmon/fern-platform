@@ -55,3 +55,13 @@ types:
       name: string
       urlSlug: string
       displayName: optional<string>
+
+  DbEndpointWithContext:
+    docs: |
+      An endpoint definition with its full context for database storage.
+      Uses v1 format types. The lambda will migrate this to latest format when reading.
+      Types are stored separately in the ApiDefinitionTypes table.
+    properties:
+      endpoint: endpoint.DbEndpointDefinition
+      authSchemes: optional<map<rootCommons.AuthSchemeId, readRoot.ApiAuth>>
+      globalHeaders: optional<list<readEndpoint.Header>>

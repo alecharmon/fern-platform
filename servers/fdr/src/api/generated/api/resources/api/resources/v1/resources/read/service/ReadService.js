@@ -54,6 +54,68 @@ export class ReadService {
                 next(error);
             }
         }));
+        this.router.get("/load/:apiDefinitionId/endpoint/:endpointId", (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.methods.getEndpointById(req, {
+                    send: (responseBody) => __awaiter(this, void 0, void 0, function* () {
+                        res.json(responseBody);
+                    }),
+                    cookie: res.cookie.bind(res),
+                    locals: res.locals,
+                }, next);
+                next();
+            }
+            catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "UnauthorizedError":
+                        case "ApiDoesNotExistError":
+                        case "EndpointDoesNotExistError":
+                            break;
+                        default:
+                            console.warn(`Endpoint 'getEndpointById' unexpectedly threw ${error.constructor.name}.` +
+                                ` If this was intentional, please add ${error.constructor.name} to` +
+                                " the endpoint's errors list in your Fern Definition.");
+                    }
+                    yield error.send(res);
+                }
+                else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        }));
+        this.router.get("/load/:apiDefinitionId/endpoint", (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.methods.getEndpointByLocator(req, {
+                    send: (responseBody) => __awaiter(this, void 0, void 0, function* () {
+                        res.json(responseBody);
+                    }),
+                    cookie: res.cookie.bind(res),
+                    locals: res.locals,
+                }, next);
+                next();
+            }
+            catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "UnauthorizedError":
+                        case "ApiDoesNotExistError":
+                        case "EndpointDoesNotExistError":
+                            break;
+                        default:
+                            console.warn(`Endpoint 'getEndpointByLocator' unexpectedly threw ${error.constructor.name}.` +
+                                ` If this was intentional, please add ${error.constructor.name} to` +
+                                " the endpoint's errors list in your Fern Definition.");
+                    }
+                    yield error.send(res);
+                }
+                else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        }));
         return this.router;
     }
 }

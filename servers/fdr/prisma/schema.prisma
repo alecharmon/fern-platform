@@ -32,6 +32,24 @@ model ApiDefinitionsLatest {
   @@id([apiDefinitionId])
 }
 
+model ApiEndpoint {
+  apiDefinitionId String
+  endpointId      String
+  method          HttpMethod
+  path            String
+  endpoint        Bytes
+  createdAt       DateTime @default(now())
+
+  @@id([apiDefinitionId, endpointId])
+  @@index([apiDefinitionId, method, path])
+}
+
+model ApiDefinitionTypes {
+  apiDefinitionId String   @id
+  types           Bytes
+  createdAt       DateTime @default(now())
+}
+
 model DocsRegistrations {
   registrationID String
   orgID          String

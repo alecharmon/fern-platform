@@ -45,5 +45,5 @@ echo "  - FDR server on http://localhost:8080 (run: pnpm fdr:dev)"
 echo "  - Docker infrastructure (PostgreSQL, Redis, S3 Mock)"
 echo ""
 
-# Start FDR Lambda in development mode
-pnpm dev:server
+# Start FDR Lambda in development mode (exec replaces shell to keep logs streaming)
+exec pnpm dev:server

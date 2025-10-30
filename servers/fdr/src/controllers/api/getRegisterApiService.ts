@@ -192,6 +192,27 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
             });
             logOperationTime("createApiDefinition");
 
+            if (
+                transformedApiDefinition != null &&
+                "rootPackage" in transformedApiDefinition &&
+                (transformedApiDefinition.rootPackage.endpoints.length > 0 ||
+                    Object.values(transformedApiDefinition.subpackages).some(
+                        (subpackage) => subpackage.endpoints.length > 0
+                    ))
+            ) {
+                app.logger.info(
+                    `Storing individual endpoints for API Definition id=${apiDefinitionId}`,
+                    REGISTER_API_DEFINITION_META
+                );
+
+                await storeEndpoints({
+                    app,
+                    apiDefinitionId,
+                    apiDefinition: transformedApiDefinition
+                });
+                logOperationTime("storeEndpoints");
+            }
+
             const totalDuration = Date.now() - startTime;
             LOGGER.warn(
                 `API Registration for ${req.body.orgId}:${req.body.apiId} took ${totalDuration}ms`,
@@ -206,6 +227,162 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
             });
         }
     });
+}
+
+async function storeEndpoints({
+    app,
+    apiDefinitionId,
+    apiDefinition
+}: {
+    app: FdrApplication;
+    apiDefinitionId: FdrAPI.ApiDefinitionId;
+    apiDefinition: APIV1Db.DbApiDefinition;
+}): Promise<void> {
+    try {
+        // Store types separately, once per API definition
+        await app.services.db.prisma.apiDefinitionTypes.upsert({
+            where: { apiDefinitionId },
+            create: {
+                apiDefinitionId,
+                types: writeBuffer(apiDefinition.types)
+            },
+            update: {
+                types: writeBuffer(apiDefinition.types)
+            }
+        });
+
+        const endpointData: Array<{
+            apiDefinitionId: string;
+            endpointId: string;
+            method: FdrAPI.HttpMethod;
+            path: string;
+            endpoint: Buffer;
+        }> = [];
+
+        const processEndpoint = (endpoint: APIV1Db.DbEndpointDefinition) => {
+            let pathString = "";
+
+            // The path is an EndpointPath object with a 'parts' array
+            const pathParts = (endpoint.path as any)?.parts;
+
+            if (Array.isArray(pathParts)) {
+                pathString = pathParts
+                    .map((part: any) => {
+                        if (typeof part === "string") {
+                            return part;
+                        }
+                        if (part.type === "literal") {
+                            return part.value;
+                        } else if (part.type === "pathParameter") {
+                            return `{${part.value}}`;
+                        }
+                        return "";
+                    })
+                    .join("");
+            } else if (typeof endpoint.path === "string") {
+                pathString = endpoint.path;
+            }
+
+            const authSchemesMap: Record<FdrAPI.AuthSchemeId, FdrAPI.api.v1.read.ApiAuth> = {};
+            if ("authSchemes" in apiDefinition && apiDefinition.authSchemes != null) {
+                if (endpoint.authV2 != null) {
+                    endpoint.authV2.forEach((authId: string) => {
+                        const authScheme = apiDefinition.authSchemes?.[authId as FdrAPI.AuthSchemeId];
+                        if (authScheme != null) {
+                            authSchemesMap[authId as FdrAPI.AuthSchemeId] = authScheme;
+                        }
+                    });
+                }
+            }
+
+            const endpointWithContext: APIV1Db.DbEndpointWithContext = {
+                endpoint: endpoint,
+                authSchemes: Object.keys(authSchemesMap).length > 0 ? authSchemesMap : undefined,
+                globalHeaders: apiDefinition.globalHeaders ?? undefined
+            };
+
+            app.logger.debug(
+                `Storing endpoint \`${endpoint.id}\` with method ${endpoint.method} and path \`${pathString}\` for apiDefinitionId \`${apiDefinitionId}\``
+            );
+
+            endpointData.push({
+                apiDefinitionId,
+                endpointId: endpoint.id,
+                method: endpoint.method,
+                path: pathString,
+                endpoint: writeBuffer(endpointWithContext)
+            });
+        };
+
+        if ("rootPackage" in apiDefinition) {
+            apiDefinition.rootPackage.endpoints.forEach(processEndpoint);
+
+            Object.values(apiDefinition.subpackages).forEach((subpackage) => {
+                subpackage.endpoints.forEach(processEndpoint);
+            });
+        }
+
+        if (endpointData.length === 0) {
+            return;
+        }
+
+        // Batch insert endpoints using size-based batching to avoid hitting Prisma/Postgres payload limits.
+        // We track the actual buffer sizes and flush when we exceed a threshold.
+        const MAX_BATCH_SIZE_BYTES = 5 * 1024 * 1024; // 5MB per batch (Postgres has ~10MB limit, leave headroom)
+        const MAX_SINGLE_ENDPOINT_BYTES = 8 * 1024 * 1024; // 8MB - warn if a single endpoint exceeds this
+        const MAX_ENDPOINTS_PER_BATCH = 100; // Also cap by count to avoid too many rows
+
+        let currentBatch: typeof endpointData = [];
+        let currentBatchSize = 0;
+
+        for (const endpointRecord of endpointData) {
+            const recordSize = endpointRecord.endpoint.length;
+
+            // Warn if a single endpoint is extremely large
+            if (recordSize > MAX_SINGLE_ENDPOINT_BYTES) {
+                LOGGER.warn(
+                    `Endpoint ${endpointRecord.endpointId} has very large payload: ${(recordSize / 1024 / 1024).toFixed(2)}MB. This may cause issues.`,
+                    REGISTER_API_DEFINITION_META
+                );
+            }
+
+            // Flush batch if adding this endpoint would exceed limits
+            if (
+                currentBatch.length > 0 &&
+                (currentBatchSize + recordSize > MAX_BATCH_SIZE_BYTES || currentBatch.length >= MAX_ENDPOINTS_PER_BATCH)
+            ) {
+                await app.services.db.prisma.apiEndpoint.createMany({
+                    data: currentBatch,
+                    skipDuplicates: true
+                });
+                app.logger.debug(
+                    `Inserted batch of ${currentBatch.length} endpoints (${(currentBatchSize / 1024 / 1024).toFixed(2)}MB)`,
+                    REGISTER_API_DEFINITION_META
+                );
+                currentBatch = [];
+                currentBatchSize = 0;
+            }
+
+            currentBatch.push(endpointRecord);
+            currentBatchSize += recordSize;
+        }
+
+        // Insert remaining endpoints
+        if (currentBatch.length > 0) {
+            await app.services.db.prisma.apiEndpoint.createMany({
+                data: currentBatch,
+                skipDuplicates: true
+            });
+            app.logger.debug(
+                `Inserted final batch of ${currentBatch.length} endpoints (${(currentBatchSize / 1024 / 1024).toFixed(2)}MB)`,
+                REGISTER_API_DEFINITION_META
+            );
+        }
+
+        app.logger.info(`Finished storing endpoints and types for apiDefinitionId \`${apiDefinitionId}\``);
+    } catch (error) {
+        LOGGER.error(`Failed to store endpoints for API Definition ${apiDefinitionId}`, error);
+    }
 }
 
 function getSnippetSdkRequests({

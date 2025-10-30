@@ -2,6 +2,7 @@ export * from "./ApiDefinition";
 export * from "./ApiNavigationConfigRoot";
 export * from "./ApiNavigationConfigItem";
 export * from "./ApiNavigationConfigSubpackage";
+export * from "./EndpointWithContext";
 export * from "./ApiDefinitionPackage";
 export * from "./ApiDefinitionSubpackage";
 export * from "./ApiAuth";

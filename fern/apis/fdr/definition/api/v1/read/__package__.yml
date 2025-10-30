@@ -8,6 +8,8 @@ imports:
   webhook: webhook.yml
   websocket: websocket.yml
   registerRoot: ../register/__package__.yml
+  latestEndpoint: ../../latest/endpoint.yml
+  latestType: ../../latest/type.yml
 
 service:
   base-path: /registry/api
@@ -24,6 +26,38 @@ service:
       errors:
         - rootCommons.UnauthorizedError
         - ApiDoesNotExistError
+
+    getEndpointById:
+      method: GET
+      path: /load/{apiDefinitionId}/endpoint/{endpointId}
+      audiences:
+        - fdr-lambda
+      path-parameters:
+        apiDefinitionId: rootCommons.ApiDefinitionId
+        endpointId: rootCommons.EndpointId
+      response: EndpointWithContext
+      errors:
+        - rootCommons.UnauthorizedError
+        - ApiDoesNotExistError
+        - EndpointDoesNotExistError
+
+    getEndpointByLocator:
+      method: GET
+      path: /load/{apiDefinitionId}/endpoint
+      audiences:
+        - fdr-lambda
+      path-parameters:
+        apiDefinitionId: rootCommons.ApiDefinitionId
+      request:
+        name: GetEndpointByLocatorRequest
+        query-parameters:
+          method: string
+          path: string
+      response: EndpointWithContext
+      errors:
+        - rootCommons.UnauthorizedError
+        - ApiDoesNotExistError
+        - EndpointDoesNotExistError
 
 types:
   ApiDefinition:
@@ -62,6 +96,17 @@ types:
     properties:
       subpackageId: commons.SubpackageId
       items: list<ApiNavigationConfigItem>
+
+  EndpointWithContext:
+    docs: |
+      An endpoint definition with its full context including types, auth schemes, and global headers.
+      This is returned by Lambda endpoints for efficient endpoint retrieval.
+      Uses the latest API definition format (not v1).
+    properties:
+      endpoint: latestEndpoint.EndpointDefinition
+      types: map<rootCommons.TypeId, latestType.TypeDefinition>
+      authSchemes: optional<map<rootCommons.AuthSchemeId, ApiAuth>>
+      globalHeaders: optional<list<latestType.ObjectProperty>>
 
   ApiDefinitionPackage:
     properties:
@@ -136,4 +181,7 @@ types:
 
 errors:
   ApiDoesNotExistError:
+    status-code: 404
+
+  EndpointDoesNotExistError:
     status-code: 404

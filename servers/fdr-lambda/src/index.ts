@@ -1,9 +1,18 @@
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Pool } from "pg";
-import { DomainNotRegisteredError, InvalidUrlError, UnauthorizedError, UserNotInOrgError } from "./errors";
+import {
+    ApiDoesNotExistError,
+    DomainNotRegisteredError,
+    EndpointDoesNotExistError,
+    InvalidUrlError,
+    UnauthorizedError,
+    UserNotInOrgError
+} from "./errors";
 import { ensureDocsInS3 } from "./services/ensureDocsInS3";
 import { getDocsForUrl } from "./services/getDocsForUrl";
+import { getEndpointById } from "./services/getEndpointById";
+import { getEndpointByLocator } from "./services/getEndpointByLocator";
 import { getMetadataForUrl } from "./services/getMetadataForUrl";
 import { checkUserBelongsToOrg } from "./utils/auth";
 import { initializeS3 } from "./utils/s3";
@@ -292,6 +301,111 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
             };
         }
 
+        // Route: GET /registry/api/load/{apiDefinitionId}/endpoint/{endpointId}
+        if (path.startsWith("/registry/api/load/") && path.includes("/endpoint/") && method === "GET") {
+            const pathParts = path.split("/");
+            const apiDefinitionId = pathParts[4];
+            const endpointId = pathParts[6];
+
+            if (!apiDefinitionId || !endpointId) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Missing apiDefinitionId or endpointId",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            const endpointWithContext = await getEndpointById(apiDefinitionId, endpointId, pool);
+
+            if (endpointWithContext == null) {
+                throw new EndpointDoesNotExistError();
+            }
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify(endpointWithContext)
+            };
+        }
+
+        // Route: GET /registry/api/load/{apiDefinitionId}/endpoint?method=X&path=Y
+        if (path.startsWith("/registry/api/load/") && path.includes("/endpoint") && method === "GET") {
+            const pathParts = path.split("/");
+            const apiDefinitionId = pathParts[4];
+            const methodParam = event.queryStringParameters?.method;
+            const pathParam = event.queryStringParameters?.path;
+
+            if (!apiDefinitionId) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Missing apiDefinitionId",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            if (
+                !methodParam ||
+                typeof methodParam !== "string" ||
+                !["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"].includes(methodParam)
+            ) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Invalid or missing method parameter",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            if (!pathParam || typeof pathParam !== "string" || pathParam.length === 0) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Invalid or missing path parameter",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            const endpoint = await getEndpointByLocator(apiDefinitionId, methodParam, pathParam, pool);
+
+            if (endpoint == null) {
+                throw new EndpointDoesNotExistError();
+            }
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify(endpoint)
+            };
+        }
+
         // Default route for testing
         const apiDefinitionsResult = await pool.query('SELECT COUNT(*) FROM "ApiDefinitionsV2"');
         const docsResult = await pool.query('SELECT COUNT(*) FROM "Docs"');
@@ -376,6 +490,38 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 },
                 body: JSON.stringify({
                     error: "UserNotInOrgError",
+                    message: error.message,
+                    requestId: context.awsRequestId
+                })
+            };
+        }
+
+        // Handle ApiDoesNotExistError
+        if (error instanceof ApiDoesNotExistError) {
+            return {
+                statusCode: 404,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify({
+                    error: "ApiDoesNotExistError",
+                    message: error.message,
+                    requestId: context.awsRequestId
+                })
+            };
+        }
+
+        // Handle EndpointDoesNotExistError
+        if (error instanceof EndpointDoesNotExistError) {
+            return {
+                statusCode: 404,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify({
+                    error: "EndpointDoesNotExistError",
                     message: error.message,
                     requestId: context.awsRequestId
                 })

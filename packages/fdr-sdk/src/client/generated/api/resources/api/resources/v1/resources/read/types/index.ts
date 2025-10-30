@@ -2,6 +2,7 @@ export * from "./ApiDefinition.js";
 export * from "./ApiNavigationConfigRoot.js";
 export * from "./ApiNavigationConfigItem.js";
 export * from "./ApiNavigationConfigSubpackage.js";
+export * from "./EndpointWithContext.js";
 export * from "./ApiDefinitionPackage.js";
 export * from "./ApiDefinitionSubpackage.js";
 export * from "./ApiAuth.js";

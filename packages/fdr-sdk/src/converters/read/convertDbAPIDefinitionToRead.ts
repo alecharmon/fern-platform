@@ -60,7 +60,11 @@ function transformSubpackage({
     };
 }
 
-function transformEndpoint({ dbShape }: { dbShape: APIV1Db.DbEndpointDefinition }): APIV1Read.EndpointDefinition {
+export function transformEndpoint({
+    dbShape
+}: {
+    dbShape: APIV1Db.DbEndpointDefinition;
+}): APIV1Read.EndpointDefinition {
     return {
         environments: dbShape.environments ?? [],
         availability: dbShape.availability,

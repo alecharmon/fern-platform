@@ -45,6 +45,12 @@
       "require": "./dist/js/utils/traversers/index.js",
       "default": "./dist/js/utils/traversers/index.mjs"
     },
+    "./converters": {
+      "types": "./dist/types/converters/index.d.ts",
+      "import": "./dist/js/converters/index.mjs",
+      "require": "./dist/js/converters/index.js",
+      "default": "./dist/js/converters/index.mjs"
+    },
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/js/index.mjs",

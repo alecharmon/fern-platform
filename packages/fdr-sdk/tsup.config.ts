@@ -8,7 +8,8 @@ export default defineConfig({
         "docs/index": "src/docs/index.ts",
         "client/FdrClient": "src/client/FdrClient.ts",
         "client/types": "src/client/types.ts",
-        "utils/traversers/index": "src/utils/traversers/index.ts"
+        "utils/traversers/index": "src/utils/traversers/index.ts",
+        "converters/index": "src/converters/index.ts"
     },
     format: ["esm", "cjs"],
     dts: false,

@@ -39,6 +39,20 @@ export function getReadApiService(app: FdrApplication): APIV1ReadService {
             }
             const readApiDefinition = convertDbAPIDefinitionToRead(dbApiDefinition);
             return res.send(readApiDefinition);
+        },
+        getEndpointById: async (req, res) => {
+            // This endpoint is only implemented in the lambda version of the service
+            // The FDR service redirects to the lambda endpoint
+            throw new Error(
+                "getEndpointById endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
+            );
+        },
+        getEndpointByLocator: async (req, res) => {
+            // This endpoint is only implemented in the lambda version of the service
+            // The FDR service redirects to the lambda endpoint
+            throw new Error(
+                "getEndpointByLocator endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
+            );
         }
     });
 }
