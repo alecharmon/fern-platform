@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 import pytest_asyncio
+from fastapi import Request
 from fastapi.testclient import TestClient
 from httpx import (
     ASGITransport,
@@ -113,6 +114,7 @@ def test_client(setup_test_env: Any, test_session: AsyncSession) -> Generator[Te
     from fai.dependencies import (
         ask_ai_enabled,
         get_db,
+        verify_token,
     )
 
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -121,8 +123,12 @@ def test_client(setup_test_env: Any, test_session: AsyncSession) -> Generator[Te
     async def override_ask_ai_enabled(domain: str) -> None:
         return None
 
+    async def override_verify_token(request: Request, domain: str) -> str:
+        return TEST_FERN_TOKEN
+
     fai_app.dependency_overrides[get_db] = override_get_db
     fai_app.dependency_overrides[ask_ai_enabled] = override_ask_ai_enabled
+    fai_app.dependency_overrides[verify_token] = override_verify_token
     _load_routes()
 
     client = TestClient(fai_app)
