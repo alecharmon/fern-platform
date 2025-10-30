@@ -185,10 +185,10 @@ export function SetGithubSourcePopover({
                         )}
                         {showValidation && urlIsValid && appNotInstalled && (
                             <a
-                                href={`https://github.com/apps/fern-bot/installations/new`}
+                                href="https://github.com/apps/fern-api/installations/new"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                                className="text-primary hover:text-primary text-xs hover:underline"
                             >
                                 Install Fern GitHub App →
                             </a>
