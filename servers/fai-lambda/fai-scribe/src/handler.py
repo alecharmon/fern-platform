@@ -1,13 +1,19 @@
 import asyncio
 import json
 import logging
-from datetime import UTC, datetime
+from datetime import (
+    UTC,
+    datetime,
+)
 from typing import Any
 
 import httpx
 from shared.utils.validation import validate_body_param_or_throw
 
-from .utils.agent import SessionInterruptedError, run_editing_session
+from .utils.agent import (
+    SessionInterruptedError,
+    run_editing_session,
+)
 from .utils.git import setup_editing_repo
 
 logger = logging.getLogger()

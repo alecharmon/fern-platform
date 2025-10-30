@@ -1,4 +1,7 @@
-from shared.utils.git import checkout_or_create_branch, clone_repo
+from shared.utils.git import (
+    checkout_or_create_branch,
+    clone_repo,
+)
 
 
 def setup_editing_repo(

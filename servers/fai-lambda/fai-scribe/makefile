@@ -1,7 +1,9 @@
 code-format:
-	poetry run ruff format src/ tests/
+	poetry run black .
+	poetry run isort .
 
 code-cleanup:
+	make code-format
 	poetry run ruff check --fix src/ tests/
 	poetry run ruff format src/ tests/
 

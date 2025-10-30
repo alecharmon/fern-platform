@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/";
 import * as cdk from "aws-cdk-lib";
 import { FaiCodeIndexingStack } from "../scripts/fai-code-indexing-stack";

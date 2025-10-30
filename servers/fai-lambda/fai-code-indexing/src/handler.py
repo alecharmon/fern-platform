@@ -2,7 +2,10 @@ import asyncio
 import json
 import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import (
+    UTC,
+    datetime,
+)
 from typing import Any
 
 from shared.utils.validation import validate_body_param_or_throw
