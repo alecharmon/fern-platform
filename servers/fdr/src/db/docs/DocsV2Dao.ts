@@ -136,8 +136,7 @@ export class DocsV2DaoImpl implements DocsV2Dao {
     }): Promise<void> {
         await this.prisma.docsV2.updateMany({
             where: {
-                domain: url.hostname,
-                path: url.path ?? ""
+                domain: url.getFullUrl()
             },
             data: {
                 githubUrl: metadata.githubUrl
@@ -236,11 +235,9 @@ export class DocsV2DaoImpl implements DocsV2Dao {
     }
 
     public async loadDocsMetadata(url: URL): Promise<LoadDocsMetadata | undefined> {
-        const path = url.pathname === "/" || url.pathname === "" ? "" : url.pathname;
         const docsDomain = await this.prisma.docsV2.findFirst({
             where: {
-                domain: url.hostname,
-                path
+                domain: url.hostname
             },
             orderBy: {
                 updatedTime: "desc"
@@ -275,11 +272,9 @@ export class DocsV2DaoImpl implements DocsV2Dao {
     }
 
     public async loadDocsForURL(url: URL): Promise<WithoutQuestionMarks<LoadDocsDefinitionByUrlResponse> | undefined> {
-        const path = url.pathname === "/" || url.pathname === "" ? "" : url.pathname;
         const docsDomain = await this.prisma.docsV2.findFirst({
             where: {
-                domain: url.hostname,
-                path
+                domain: url.hostname
             },
             orderBy: {
                 updatedTime: "desc" // first item is the latest
@@ -304,11 +299,9 @@ export class DocsV2DaoImpl implements DocsV2Dao {
     }
 
     public async getOrgIdForDocsUrl(url: URL): Promise<FdrAPI.OrgId | undefined> {
-        const path = url.pathname === "/" || url.pathname === "" ? "" : url.pathname;
         const docsDomain = await this.prisma.docsV2.findFirst({
             where: {
-                domain: url.hostname,
-                path
+                domain: url.hostname
             },
             select: {
                 orgID: true
