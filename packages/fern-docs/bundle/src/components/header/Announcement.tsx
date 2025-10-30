@@ -47,7 +47,7 @@ const AnnouncementInternal = React.forwardRef<
             className={cn("bg-(color:--accent) text-(color:--accent-contrast) overflow-hidden", className)}
         >
             <m.div
-                className="width-before-scroll-bar flex min-h-8 items-center px-4 md:px-6 lg:px-8"
+                className="width-before-scroll-bar flex min-h-8 items-center px-4 md:px-6 lg:px-8 [&:has(>div:empty)]:hidden"
                 exit={{ y: "-100%" }}
             >
                 <style jsx global>{`
@@ -55,7 +55,7 @@ const AnnouncementInternal = React.forwardRef<
             --bprogress-color: var(--accent-contrast);
           }
         `}</style>
-                <div className="max-w-page-width mx-auto flex-1 text-center">{children}</div>
+                <div className="max-w-page-width mx-auto flex-1 text-center empty:hidden">{children}</div>
                 <FernButton
                     variant="minimal"
                     className="absolute right-0"
