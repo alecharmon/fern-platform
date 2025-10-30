@@ -20,9 +20,15 @@ export interface GithubNavbarLink {
     id: string | undefined;
 }
 
-export interface DropdownNavbarLink extends BaseNavbarLink {
+export interface DropdownNavbarLink {
     type: "dropdown";
     links: BaseNavbarLink[];
+    text: string | undefined;
+    icon: string | undefined;
+    rightIcon: string | undefined;
+    rounded: boolean | undefined;
+    className: string | undefined;
+    id: string | undefined;
 }
 
 export type NavbarLink = DefaultNavbarLink | GithubNavbarLink | DropdownNavbarLink;
