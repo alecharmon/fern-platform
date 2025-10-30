@@ -59,44 +59,27 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
                 promises.push(
                     (async () => {
                         try {
-                            console.log("[rehype-runnable-endpoint] Fetching endpoint by locator", {
-                                method,
-                                path,
-                                example: props.example
-                            });
-
                             const { endpoint, apiDefinitionId, slugs } = await loader.getEndpointByLocator(
                                 method,
                                 path,
                                 typeof props.example === "string" ? props.example : undefined
                             );
 
-                            console.log("[rehype-runnable-endpoint] Found endpoint definition", {
-                                endpointId: endpoint.id,
-                                apiDefinitionId,
-                                slugs
-                            });
-
                             const { types, globalHeaders, authSchemes } = await loader.getEndpointById(
                                 apiDefinitionId,
                                 endpoint.id
                             );
 
-                            console.log("[rehype-runnable-endpoint] Loaded types, global headers, and auth schemes", {
-                                typesCount: Object.keys(types ?? {}).length,
-                                globalHeadersCount: globalHeaders?.length ?? 0,
-                                authSchemesCount: authSchemes?.length ?? 0
-                            });
+                            const { disableExplorerProxy } = await loader.getSettings();
 
                             node.attributes.push(
                                 unknownToMdxJsxAttribute("endpointDefinition", endpoint),
                                 unknownToMdxJsxAttribute("types", types ?? {}),
                                 unknownToMdxJsxAttribute("globalHeaders", globalHeaders ?? []),
                                 unknownToMdxJsxAttribute("authSchemes", authSchemes ?? []),
-                                unknownToMdxJsxAttribute("endpointSlugs", slugs)
+                                unknownToMdxJsxAttribute("endpointSlugs", slugs),
+                                unknownToMdxJsxAttribute("disableProxy", disableExplorerProxy)
                             );
-
-                            console.log("[rehype-runnable-endpoint] Successfully injected endpoint data");
                         } catch (e) {
                             console.error(
                                 `[rehype-runnable-endpoint] Error loading endpoint for ${method} ${path}${props.example ? ` (example: ${props.example})` : ""}`,

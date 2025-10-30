@@ -63,6 +63,11 @@ interface RunnableEndpointProps {
      * These fields will display their example values but users cannot modify them.
      */
     readonly?: string[];
+
+    /**
+     * @internal Whether to disable the proxy.
+     */
+    disableProxy?: boolean;
 }
 
 export function RunnableEndpoint({
@@ -73,7 +78,8 @@ export function RunnableEndpoint({
     example,
     endpointSlugs,
     className,
-    readonly
+    readonly,
+    disableProxy
 }: RunnableEndpointProps) {
     const endpointSlug = useCurrentSlug(endpointSlugs);
 
@@ -91,6 +97,7 @@ export function RunnableEndpoint({
             endpointSlug={endpointSlug}
             className={className}
             readonly={readonly}
+            disableProxy={disableProxy}
         />
     );
 }
@@ -118,7 +125,8 @@ function RunnableEndpointInternal({
     example,
     endpointSlug,
     className,
-    readonly
+    readonly,
+    disableProxy
 }: {
     endpoint: EndpointDefinition;
     types: Record<string, TypeDefinition>;
@@ -128,6 +136,7 @@ function RunnableEndpointInternal({
     endpointSlug?: string;
     className?: string;
     readonly?: string[];
+    disableProxy?: boolean;
 }) {
     const [formExpanded, setFormExpanded] = useState(true);
     const [responseExpanded, setResponseExpanded] = useState(true);
@@ -159,7 +168,8 @@ function RunnableEndpointInternal({
         endpoint,
         formState,
         baseUrl,
-        authSchemes
+        authSchemes,
+        disableProxy
     });
 
     // Combine all headers (global + endpoint-specific)

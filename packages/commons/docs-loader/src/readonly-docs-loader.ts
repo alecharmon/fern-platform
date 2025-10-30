@@ -603,7 +603,8 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
             hide404Page: settings?.hide404Page ?? false,
             httpSnippets: settings?.httpSnippets ?? true,
             searchText: settings?.searchText ?? "Search",
-            useJavascriptAsTypescript: settings?.useJavascriptAsTypescript ?? false
+            useJavascriptAsTypescript: settings?.useJavascriptAsTypescript ?? false,
+            disableExplorerProxy: settings?.disableExplorerProxy ?? false
         };
     });
 

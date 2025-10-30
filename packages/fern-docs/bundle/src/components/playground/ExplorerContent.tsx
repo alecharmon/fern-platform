@@ -20,6 +20,7 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
 
     let api: ApiDefinition.ApiDefinition | undefined;
     let dynamicIRsByLanguage: DynamicIRsByLanguage | undefined = {};
+    let disableProxy: boolean | undefined = undefined;
 
     try {
         api = await loader.getPrunedApi(node.apiDefinitionId, createPruneKey(node));
@@ -39,6 +40,13 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
         console.error(`[explorer-content:getDynamicIr] ${JSON.stringify(error)}`);
     }
 
+    try {
+        const { disableExplorerProxy } = await loader.getSettings();
+        disableProxy = disableExplorerProxy;
+    } catch (error) {
+        console.error(`[explorer-content:getSettings] ${JSON.stringify(error)}`);
+    }
+
     if (node.type === "endpoint") {
         const context = createEndpointContext(node, api);
         if (!context) return null;
@@ -51,7 +59,12 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
         );
         return (
             <ApiDefinitionIdProvider value={node.apiDefinitionId}>
-                <PlaygroundEndpoint context={context} authForm={authForm} dynamicIRsByLanguage={dynamicIRsByLanguage} />
+                <PlaygroundEndpoint
+                    context={context}
+                    authForm={authForm}
+                    dynamicIRsByLanguage={dynamicIRsByLanguage}
+                    disableProxy={disableProxy}
+                />
             </ApiDefinitionIdProvider>
         );
     } else if (node.type === "webSocket") {

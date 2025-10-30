@@ -33,4 +33,5 @@ export interface FernSettingsConfig {
     defaultSearchFilters: boolean | undefined;
     httpSnippets: HttpSnippetsConfig | undefined;
     hide404Page: boolean | undefined;
+    disableExplorerProxy: boolean | undefined;
 }

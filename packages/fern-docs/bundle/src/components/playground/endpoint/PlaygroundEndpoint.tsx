@@ -35,15 +35,19 @@ import { PlaygroundEndpointPath } from "./PlaygroundEndpointPath";
 export const PlaygroundEndpoint = ({
     context,
     authForm,
-    dynamicIRsByLanguage
+    dynamicIRsByLanguage,
+    disableProxy
 }: {
     context: EndpointContext;
     authForm: React.ReactNode;
     dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
+    disableProxy: boolean | undefined;
 }) => {
     const resolvedPlaygroundState = useResolvedPlaygroundState();
     const { node, endpoint, auths } = context;
     const auth = auths[0];
+
+    const isDisableProxy = disableProxy || isLocal();
 
     const [formState, setFormState] = usePlaygroundEndpointFormState(context);
 
@@ -125,7 +129,7 @@ export const PlaygroundEndpoint = ({
                 })
             };
             if (endpoint.responses?.[0]?.body.type === "stream") {
-                const [res, stream] = await executeProxyStream(req, isLocal());
+                const [res, stream] = await executeProxyStream(req, isDisableProxy);
 
                 const time = Date.now();
 
@@ -188,7 +192,7 @@ export const PlaygroundEndpoint = ({
                     );
                 }
             } else {
-                const res = await executeProxyRest(req, isLocal());
+                const res = await executeProxyRest(req, isDisableProxy);
                 setResponse(loaded(res));
                 if (res.type !== "stream") {
                     track("api_playground_request_received", {
@@ -214,7 +218,7 @@ export const PlaygroundEndpoint = ({
             );
             setResponse(failed(e));
         }
-    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue]);
+    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue, isDisableProxy]);
 
     const settings = usePlaygroundSettings();
 
