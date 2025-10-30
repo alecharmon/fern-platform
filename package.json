@@ -36,6 +36,7 @@
     "fdr-lambda:dev": "bash scripts/start-local-fdr-lambda.sh",
     "fdr-lambda:generate": "pnpm fern generate --api fdr --group fdr-lambda --local && pnpm turbo --filter=@fern-api/fdr-lambda-sdk compile",
     "fdr:link-to-cli": "bash scripts/link-fdr-sdk-to-cli.sh",
+    "fdr:reset": "pnpm --filter=@fern-platform/fdr db:reset:local",
     "fdr:stop": "bash scripts/stop-local-fdr.sh",
     "fdr:unlink-from-cli": "bash scripts/unlink-fdr-sdk-from-cli.sh",
     "format": "pnpm lint:biome:fix && pnpm check:fix && pnpm format:yaml:fix",

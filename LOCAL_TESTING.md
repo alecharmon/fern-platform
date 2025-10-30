@@ -8,6 +8,7 @@ Quick guide for testing FDR server changes locally with the CLI and frontend. Th
 | `pnpm fdr:dev -- debug` | Start FDR server with debug logging |
 | `pnpm fdr-lambda:dev` | Start FDR Lambda server (port 8081) |
 | `pnpm fdr:stop` | Stop FDR server and infrastructure |
+| `pnpm fdr:reset` | Reset Prisma database (drops all tables and re-runs migrations) |
 | `pnpm fdr:link-to-cli` | Link local FDR SDKs to CLI for testing |
 | `pnpm fdr:unlink-from-cli` | Unlink and restore published SDK versions |
 | `pnpm fdr:generate` | Regenerate FDR SDK from API definition |
@@ -68,8 +69,9 @@ This will:
 
 # 2. Make changes to FDR code
 
-# 3. Rebuild SDK (if needed)
+# 3. Rebuild SDK and/or FDR (if needed)
 pnpm turbo --filter=@fern-api/fdr-sdk compile
+pnpm --filter=@fern-platform/fdr compile
 
 # 4. Test in CLI -- use build.local.cjs -- this compiles with FDR set to localhost
 cd ../fern && pnpm fern-local:build
@@ -134,11 +136,24 @@ NEXT_PUBLIC_IS_LOCAL=1
 
 And then you'll need to point the `/api/fern-docs/preview?host=` to your preview URL that was uploaded to your local FDR
 
+## 🎨 Dashboard Setup
+
+To connect the dashboard to local FDR, add to `packages/fern-dashboard/.env.local`:
+
+```bash
+FDR_SERVER_URL="http://localhost:8080"
+```
+
+**Note:** You'll also need to seed test docs data in your local FDR database for the dashboard to work properly. See the "Seeding Test Data for Dashboard" section below for details.
+
 ## 🧹 Clean Up
 
 ```bash
 # Stop FDR infrastructure
 pnpm fdr:stop
+
+# (optional) Reset database state (drops all tables and re-runs migrations)
+pnpm fdr:reset
 
 # Unlink SDK from CLI
 pnpm fdr:unlink-from-cli
@@ -156,3 +171,39 @@ You may need to change loadWithUrl.ts to include `domainWithoutStaging`
 ```
 
 You may need to set `            OVERRIDE_FDR_ORIGIN: "http://localhost:8080",` in build.local.cjs
+
+
+## 🎨 Seeding Test Data for Dashboard
+
+When testing the dashboard locally, you need docs sites registered in your local FDR database.
+
+### Seed Test Docs
+
+Use the seed script to create test docs data:
+
+```bash
+cd servers/fdr
+
+# Using default values (sarahs-editor-test-site.docs.buildwithfern.com/subdomain3)
+DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public" pnpm tsx scripts/seed-test-docs.ts
+
+# With custom domain, path, and org ID
+DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public" pnpm tsx scripts/seed-test-docs.ts example.docs.buildwithfern.com /api-reference my-org
+
+# For root path (no subpath)
+DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public" pnpm tsx scripts/seed-test-docs.ts example.docs.buildwithfern.com root my-org
+```
+
+**Arguments:**
+- `domain` - The docs domain (e.g., `example.docs.buildwithfern.com`)
+- `path` - The path (e.g., `/subdomain` or `root` for root). Use `root` for empty path.
+- `orgId` - The organization ID (e.g., `my-org`)
+
+**To match your Fern project**: Use values from your `fern/docs.yml` (`instances[0].url`) and `fern/fern.config.json` (`organization`).
+
+### Verify Seeded Data
+
+```bash
+cd servers/fdr
+DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public" pnpm tsx scripts/verify-test-docs.ts
+```

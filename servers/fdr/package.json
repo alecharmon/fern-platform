@@ -16,6 +16,7 @@
     "db:migrate:dev": "dotenv -e .env.dev -- prisma migrate deploy",
     "db:migrate:local": "dotenv -e .env.migrate -- prisma migrate dev",
     "db:migrate:prod": "dotenv -e .env.prod -- prisma migrate deploy",
+    "db:reset:local": "dotenv -e .env.migrate -- prisma migrate reset --force",
     "dev": "tsx src/server.ts --watch",
     "devjs": "node --experimental-specifier-resolution=node dist/server.js",
     "docker:dev": "dotenv -e .env.dev -- ./create_docker.sh",
