@@ -135,7 +135,7 @@ export default function ChangelogPageClient({
         }
 
         return {
-            title: i18n.changelog.olderPosts,
+            title: i18n.navigation.olderPosts,
             href: `#page-${page + 1}`,
             shallow: true,
             onClick: () => {
