@@ -56,7 +56,10 @@ export function VisualEditorSectionClient({
         );
         return (
             <Card className="flex flex-col">
-                <VisualEditorHeader />
+                <div className="flex items-center justify-between">
+                    <VisualEditorHeader />
+                    <GoToEditorButton docsUrl={docsUrl} session={session} />
+                </div>
                 <div className="flex flex-col gap-3">
                     {loadingRow}
                     <hr className="border-border" />
