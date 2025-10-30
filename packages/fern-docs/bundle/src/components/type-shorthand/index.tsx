@@ -113,6 +113,8 @@ function toPrimitiveTypeLabelsNumeric(
 
     if (minimum != null && maximum != null && minimum === maximum) {
         labels.push(`=${numberToString(minimum, isDouble)}`);
+    } else if (minimum != null && maximum != null) {
+        labels.push(`${numberToString(minimum, isDouble)}-${numberToString(maximum, isDouble)}`);
     } else {
         if (minimum != null) {
             labels.push(`>=${numberToString(minimum, isDouble)}`);
@@ -145,6 +147,8 @@ function toPrimitiveTypeLabelsString({
 
     if (minLength != null && maxLength != null && minLength === maxLength) {
         labels.push(`=${numberToString(minLength)} character${minLength === 1 ? "" : "s"}`);
+    } else if (minLength != null && maxLength != null) {
+        labels.push(`${numberToString(minLength)}-${numberToString(maxLength)} characters`);
     } else {
         if (minLength != null) {
             labels.push(`>=${numberToString(minLength)} character${minLength === 1 ? "" : "s"}`);
