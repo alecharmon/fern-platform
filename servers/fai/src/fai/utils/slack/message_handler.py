@@ -31,11 +31,21 @@ from fai.utils.generate.message_classification import (
     MessageClassification,
 )
 from fai.utils.generate_model import generate_anthropic_generic_async
-from fai.utils.slack.client import add_reaction
+from fai.utils.github_utils import get_repo_from_docs_domain
+from fai.utils.slack.client import (
+    add_reaction,
+    send_slack_message,
+)
 from fai.utils.slack.edit_detection import detect_edit_flag
 from fai.utils.slack.edit_handler import (
+    create_editing_session,
+    get_editing_session_status,
     get_or_create_editing_session_for_thread,
+    interrupt_editing_session,
     invoke_editing_lambda,
+    mark_session_as_active,
+    store_editing_session_for_thread,
+    wait_for_interruption,
 )
 from fai.utils.slack.lambda_invoke import invoke_fai_lambda_for_docs_update
 from fai.utils.slack.postprocessing import SlackifyMarkdown
@@ -363,9 +373,147 @@ async def handle_slack_message(
             except Exception as e:
                 LOGGER.warning(f"Failed to add reaction: {e}")
 
+        is_new_session = False
         existing_editing_id = await get_or_create_editing_session_for_thread(
             context.team_id, context.channel, context.thread_ts
         )
+
+        if existing_editing_id:
+            LOGGER.info(f"Found existing editing session {existing_editing_id} for thread {context.thread_ts}")
+
+            session_status = await get_editing_session_status(existing_editing_id)
+            LOGGER.info(f"Existing session {existing_editing_id} status: {session_status}")
+
+            if session_status and session_status.value == "interrupted":
+                LOGGER.warning(
+                    f"Session {existing_editing_id} is already being interrupted by another request. "
+                    "Not proceeding to avoid race condition."
+                )
+                error_text = (
+                    "⏳ Previous edit session is currently being interrupted by another request. "
+                    "Please wait a moment and try again."
+                )
+                return SlackMessageResponse(
+                    response_text=error_text,
+                    channel=context.channel,
+                    thread_ts=context.thread_ts,
+                    bot_token=integration.slack_bot_token,
+                    query_id=None,
+                    user_id=context.user,
+                )
+            elif session_status and session_status.value in ["active", "waiting"]:
+                LOGGER.info(f"Interrupting {session_status.value} session {existing_editing_id} for new edit request")
+
+                interrupt_success = await interrupt_editing_session(existing_editing_id)
+
+                if interrupt_success:
+                    LOGGER.info(f"Waiting for session {existing_editing_id} interruption to complete")
+                    wait_success = await wait_for_interruption(existing_editing_id)
+
+                    if wait_success:
+                        if integration.slack_bot_token:
+                            interruption_msg = "⚠️ Interrupted previous edit session to process new request"
+                            try:
+                                await send_slack_message(
+                                    channel=context.channel,
+                                    text=interruption_msg,
+                                    bot_token=integration.slack_bot_token,
+                                    thread_ts=context.thread_ts,
+                                )
+                                LOGGER.info(f"Posted interruption message to thread {context.thread_ts}")
+                            except Exception as e:
+                                LOGGER.error(f"Failed to post interruption message: {e}", exc_info=True)
+                    else:
+                        LOGGER.error(
+                            f"Timeout waiting for interruption of session {existing_editing_id}. "
+                            "Not proceeding with new request to avoid duplicate processing."
+                        )
+                        error_text = (
+                            "⏳ Previous edit session is still processing and couldn't be interrupted "
+                            "within 30 seconds. Please wait a moment and try again."
+                        )
+                        return SlackMessageResponse(
+                            response_text=error_text,
+                            channel=context.channel,
+                            thread_ts=context.thread_ts,
+                            bot_token=integration.slack_bot_token,
+                            query_id=None,
+                            user_id=context.user,
+                        )
+                elif session_status.value == "waiting":
+                    LOGGER.info(f"Session {existing_editing_id} is WAITING and ready to resume")
+                else:
+                    LOGGER.error(f"Failed to interrupt session {existing_editing_id}. Cannot proceed safely.")
+                    error_text = "❌ Failed to interrupt the previous edit session. Please try again."
+                    return SlackMessageResponse(
+                        response_text=error_text,
+                        channel=context.channel,
+                        thread_ts=context.thread_ts,
+                        bot_token=integration.slack_bot_token,
+                        query_id=None,
+                        user_id=context.user,
+                    )
+            else:
+                status_str = session_status.value if session_status else "unknown"
+                LOGGER.error(f"Unexpected session status: {status_str} for session {existing_editing_id}")
+                error_text = "❌ Session is in an unexpected state. Please try again."
+                return SlackMessageResponse(
+                    response_text=error_text,
+                    channel=context.channel,
+                    thread_ts=context.thread_ts,
+                    bot_token=integration.slack_bot_token,
+                    query_id=None,
+                    user_id=context.user,
+                )
+        else:
+            LOGGER.info(f"No existing session found for thread {context.thread_ts}, creating new session")
+
+            repository = await get_repo_from_docs_domain(domain_to_use)
+            if not repository:
+                error_text = (
+                    "Sorry, I couldn't determine the repository for this domain. "
+                    "Please ensure the domain is configured correctly."
+                )
+                return SlackMessageResponse(
+                    response_text=error_text,
+                    channel=context.channel,
+                    thread_ts=context.thread_ts,
+                    bot_token=integration.slack_bot_token,
+                    query_id=None,
+                    user_id=context.user,
+                )
+
+            is_new_session = True
+            existing_editing_id = await create_editing_session(repository, base_branch="main")
+
+            if not existing_editing_id:
+                error_text = "Sorry, I couldn't create an editing session. Please try again."
+                return SlackMessageResponse(
+                    response_text=error_text,
+                    channel=context.channel,
+                    thread_ts=context.thread_ts,
+                    bot_token=integration.slack_bot_token,
+                    query_id=None,
+                    user_id=context.user,
+                )
+
+            try:
+                await store_editing_session_for_thread(
+                    context.team_id, context.channel, context.thread_ts, existing_editing_id
+                )
+                LOGGER.info(
+                    f"Stored editing session {existing_editing_id} mapping for thread {context.thread_ts} "
+                    "before Lambda invocation"
+                )
+            except Exception as e:
+                LOGGER.error(f"Failed to store editing session mapping: {e}", exc_info=True)
+
+        if existing_editing_id:
+            mark_success = await mark_session_as_active(existing_editing_id)
+            if not mark_success:
+                LOGGER.warning(
+                    f"Failed to mark session {existing_editing_id} as ACTIVE, but proceeding with Lambda invocation"
+                )
 
         result = await invoke_editing_lambda(
             prompt=context.text,
@@ -378,9 +526,9 @@ async def handle_slack_message(
         )
 
         if result:
-            response_text = f"✏️ Starting edit session for repository `{result['repository']}`..."
-            if existing_editing_id:
-                response_text += "\n_Resuming existing session_"
+            action = "Starting" if is_new_session else "Resuming"
+            response_text = f"✏️ {action} edit session for repository `{result['repository']}`..."
+            response_text += "\n_Session ready_"
 
             return SlackMessageResponse(
                 response_text=response_text,

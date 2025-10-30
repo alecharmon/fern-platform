@@ -44,6 +44,31 @@ async def update_session_status(editing_id: str, status: str) -> bool:
         return False
 
 
+async def update_session_metadata(editing_id: str, session_id: str | None = None, pr_url: str | None = None) -> bool:
+    """Update session metadata (session_id and/or pr_url) immediately when available."""
+    try:
+        payload = {}
+        if session_id is not None:
+            payload["session_id"] = session_id
+        if pr_url is not None:
+            payload["pr_url"] = pr_url
+
+        if not payload:
+            return True
+
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.put(f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}", json=payload)
+            if response.status_code == 200:
+                LOGGER.info(f"Updated session {editing_id} metadata: {payload}")
+                return True
+            else:
+                LOGGER.warning(f"Failed to update session metadata: {response.status_code}")
+                return False
+    except Exception as e:
+        LOGGER.warning(f"Error updating session metadata: {e}")
+        return False
+
+
 async def check_if_interrupted(editing_id: str) -> bool:
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
@@ -73,6 +98,11 @@ async def run_editing_session(
 
     await update_session_status(editing_id, "active")
 
+    if await check_if_interrupted(editing_id):
+        LOGGER.warning(f"Session interrupted before starting: {editing_id}")
+        await update_session_status(editing_id, "waiting")
+        raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
+
     if existing_pr_url:
         full_prompt = f"""{user_prompt}
 
@@ -94,6 +124,11 @@ After making the changes:
 6. Output the PR URL on a line starting with "PR_URL: "
 """
 
+    if resume_session_id:
+        LOGGER.info(f"Resuming Claude session: {resume_session_id}")
+    else:
+        LOGGER.info("Starting new Claude session (no resume_session_id)")
+
     options = ClaudeAgentOptions(
         allowed_tools=["Read", "Write", "Bash", "Glob", "Grep", "Edit"],
         permission_mode="acceptEdits",
@@ -110,6 +145,14 @@ After making the changes:
         await client.query(full_prompt)
 
         async for message in client.receive_response():
+            if hasattr(message, "subtype") and message.subtype == "init":
+                if hasattr(message, "data") and isinstance(message.data, dict):
+                    init_session_id = message.data.get("session_id")
+                    if init_session_id and session_id is None:
+                        session_id = init_session_id
+                        LOGGER.info(f"Captured session_id from init message: {session_id}")
+                        await update_session_metadata(editing_id, session_id=session_id)
+
             if await check_if_interrupted(editing_id):
                 LOGGER.warning(f"Session interrupted: {editing_id}")
                 await update_session_status(editing_id, "waiting")
@@ -127,6 +170,7 @@ After making the changes:
                                     if match:
                                         pr_url = match.group(0)
                                         LOGGER.info(f"Extracted PR URL: {pr_url}")
+                                        await update_session_metadata(editing_id, pr_url=pr_url)
                                     else:
                                         LOGGER.warning(f"Invalid PR URL format: {extracted_text}")
                     if isinstance(block, ToolUseBlock):
@@ -138,7 +182,6 @@ After making the changes:
                 LOGGER.info(f"Turns used: {message.num_turns}")
                 if message.total_cost_usd:
                     LOGGER.info(f"Cost: ${message.total_cost_usd}")
-
     if session_id is None:
         raise RuntimeError("Failed to obtain session ID from Claude")
 

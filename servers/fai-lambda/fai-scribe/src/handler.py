@@ -15,7 +15,9 @@ from .settings import (
 )
 from .utils.agent import (
     SessionInterruptedError,
+    check_if_interrupted,
     run_editing_session,
+    update_session_status,
 )
 from .utils.git import setup_editing_repo
 
@@ -44,6 +46,8 @@ async def handle_editing_request(
             session_data = response.json()
             session = session_data["editing_session"]
             LOGGER.info(f"Resuming editing session: {editing_id}")
+            LOGGER.info(f"Existing Claude session_id: {session.get('session_id')}")
+            LOGGER.info(f"Existing PR URL: {session.get('pr_url')}")
             is_new_session = False
         else:
             LOGGER.info(f"Creating new editing session for repository: {repository}")
@@ -73,6 +77,11 @@ async def handle_editing_request(
         )
         LOGGER.info(f"Repository ready at: {repo_path}")
 
+        if await check_if_interrupted(editing_id):
+            LOGGER.warning(f"Session interrupted after git operations: {editing_id}")
+            await update_session_status(editing_id, "waiting")
+            raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
+
         try:
             session_id, pr_url = await run_editing_session(
                 repo_path=repo_path,
@@ -85,7 +94,6 @@ async def handle_editing_request(
             )
 
             LOGGER.info(f"Updating editing session: {editing_id}")
-            LOGGER.info(f"Session ID: {session_id}")
             LOGGER.info(f"PR URL: {pr_url}")
             response = await client.put(
                 f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}",
@@ -146,7 +154,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             )
         )
 
-        if callback_url:
+        if callback_url and result.get("status") != "interrupted":
             try:
                 callback_data = {
                     "editing_id": result["editing_id"],
@@ -156,6 +164,8 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                 LOGGER.info(f"Successfully posted callback to {callback_url}")
             except Exception as callback_error:
                 LOGGER.error(f"Failed to post callback: {str(callback_error)}", exc_info=True)
+        elif result.get("status") == "interrupted":
+            LOGGER.info(f"Skipping callback for interrupted session: {editing_id}")
 
         response_body = {
             "message": "Editing session completed successfully",

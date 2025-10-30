@@ -1,12 +1,15 @@
+import asyncio
 import json
 import logging
 
 import aioboto3
+import httpx
 from botocore.exceptions import ClientError
 from sqlalchemy import select
 
 from fai.db import async_session_maker
 from fai.models.db.slack_editing_session_db import SlackEditingSessionDb
+from fai.models.types.editing_session_types import EditingSessionStatus
 from fai.settings import (
     CONFIG,
     VARIABLES,
@@ -66,6 +69,132 @@ async def store_editing_session_for_thread(team_id: str, channel_id: str, thread
             logger.info(f"Stored new editing session {editing_id} for thread {thread_ts}")
 
         await session.commit()
+
+
+async def get_editing_session_status(editing_id: str) -> EditingSessionStatus | None:
+    """Get the current status of an editing session."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(f"{CONFIG.FAI_SERVER_URL}/editing-sessions/{editing_id}")
+
+            if response.status_code == 404:
+                logger.warning(f"Editing session not found: {editing_id}")
+                return None
+            elif response.status_code != 200:
+                logger.error(f"Failed to fetch editing session: {response.status_code} - {response.text}")
+                return None
+
+            session_data = response.json()
+            status_str = session_data["editing_session"]["status"]
+            return EditingSessionStatus(status_str)
+
+    except Exception as e:
+        logger.error(f"Error fetching editing session status: {e}", exc_info=True)
+        return None
+
+
+async def interrupt_editing_session(editing_id: str) -> bool:
+    """Interrupt an active editing session. Returns True if successful."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(f"{CONFIG.FAI_SERVER_URL}/editing-sessions/{editing_id}/interrupt")
+
+            if response.status_code == 200:
+                logger.info(f"Successfully interrupted editing session: {editing_id}")
+                return True
+            elif response.status_code == 400:
+                logger.warning(f"Cannot interrupt session {editing_id} (not in ACTIVE state)")
+                return False
+            elif response.status_code == 404:
+                logger.warning(f"Editing session not found for interruption: {editing_id}")
+                return False
+            else:
+                logger.error(f"Failed to interrupt editing session: {response.status_code} - {response.text}")
+                return False
+
+    except Exception as e:
+        logger.error(f"Error interrupting editing session: {e}", exc_info=True)
+        return False
+
+
+async def wait_for_interruption(editing_id: str, max_wait_seconds: int = 30, poll_interval: float = 0.5) -> bool:
+    """
+    Wait for an editing session to transition out of INTERRUPTED status.
+    Returns True if session is ready (WAITING), False if timeout or error.
+    Polls every poll_interval seconds for up to max_wait_seconds.
+    """
+    logger.info(f"Waiting for session {editing_id} to complete interruption (max {max_wait_seconds}s)")
+    start_time = asyncio.get_event_loop().time()
+
+    while True:
+        elapsed = asyncio.get_event_loop().time() - start_time
+        if elapsed >= max_wait_seconds:
+            logger.warning(f"Timeout waiting for session {editing_id} interruption to complete")
+            return False
+
+        status = await get_editing_session_status(editing_id)
+
+        if status is None:
+            logger.error(f"Failed to get status for session {editing_id} during interruption wait")
+            return False
+
+        if status == EditingSessionStatus.WAITING:
+            logger.info(f"Session {editing_id} is now WAITING after interruption")
+            return True
+
+        if status in [EditingSessionStatus.INTERRUPTED, EditingSessionStatus.ACTIVE]:
+            logger.debug(f"Session {editing_id} still in {status} state, waiting...")
+            await asyncio.sleep(poll_interval)
+        else:
+            logger.warning(f"Unexpected status {status} for session {editing_id} during interruption wait")
+            return False
+
+
+async def create_editing_session(repository: str, base_branch: str = "main") -> str | None:
+    """Create a new editing session and return the editing_id."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                f"{CONFIG.FAI_SERVER_URL}/editing-sessions",
+                json={
+                    "repository": repository,
+                    "base_branch": base_branch,
+                },
+            )
+
+            if response.status_code != 201:
+                logger.error(f"Failed to create editing session: {response.status_code} - {response.text}")
+                return None
+
+            session_data = response.json()
+            editing_id = session_data["editing_session"]["id"]
+            logger.info(f"Created new editing session: {editing_id} for repository: {repository}")
+            return editing_id
+
+    except Exception as e:
+        logger.error(f"Error creating editing session: {e}", exc_info=True)
+        return None
+
+
+async def mark_session_as_active(editing_id: str) -> bool:
+    """Mark an editing session as ACTIVE before Lambda invocation."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.put(
+                f"{CONFIG.FAI_SERVER_URL}/editing-sessions/{editing_id}",
+                json={"status": "active"},
+            )
+
+            if response.status_code != 200:
+                logger.error(f"Failed to mark session as active: {response.status_code} - {response.text}")
+                return False
+
+            logger.info(f"Marked editing session {editing_id} as ACTIVE")
+            return True
+
+    except Exception as e:
+        logger.error(f"Error marking session as active: {e}", exc_info=True)
+        return False
 
 
 async def invoke_editing_lambda(

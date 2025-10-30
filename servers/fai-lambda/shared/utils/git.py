@@ -70,8 +70,8 @@ def checkout_or_create_branch(
     Args:
         repo_path: Path to the git repository
         branch_name: Name of the branch to checkout/create
-        base_branch: Base branch to create from (required if create_new is True)
-        create_new: Whether to create a new branch
+        base_branch: Base branch to create from (used if branch doesn't exist)
+        create_new: Whether to create a new branch (if True, will error if branch exists)
     """
     if create_new:
         if not base_branch:
@@ -89,15 +89,58 @@ def checkout_or_create_branch(
             logger.error(f"Failed to create branch: {e.stderr}")
             raise RuntimeError(f"Failed to create branch {branch_name}: {e.stderr}")
     else:
-        logger.info(f"Checking out existing branch '{branch_name}'")
+        logger.info(f"Checking out branch '{branch_name}'")
+
+        result = subprocess.run(
+            ["git", "checkout", branch_name],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode == 0:
+            logger.info(f"Successfully checked out local branch '{branch_name}'")
+            return
+
+        logger.info(f"Local branch not found, trying to fetch from origin")
+        fetch_result = subprocess.run(
+            ["git", "fetch", "origin", f"{branch_name}:{branch_name}"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+        )
+
+        if fetch_result.returncode == 0:
+            checkout_result = subprocess.run(
+                ["git", "checkout", branch_name],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+            )
+            if checkout_result.returncode == 0:
+                logger.info(f"Successfully checked out remote branch '{branch_name}'")
+                return
+
+        if not base_branch:
+            logger.error(f"Branch '{branch_name}' not found and no base_branch provided")
+            raise RuntimeError(
+                f"Branch {branch_name} does not exist and base_branch is required to create it. "
+                f"Local error: {result.stderr}. Fetch error: {fetch_result.stderr}"
+            )
+
+        logger.info(
+            f"Branch '{branch_name}' does not exist anywhere, creating from '{base_branch}' "
+            "(likely recovering from interrupted session)"
+        )
         try:
             subprocess.run(
-                ["git", "checkout", branch_name],
+                ["git", "checkout", "-b", branch_name, f"origin/{base_branch}"],
                 cwd=repo_path,
                 check=True,
                 capture_output=True,
                 text=True,
             )
+            logger.info(f"Successfully created branch '{branch_name}' from '{base_branch}'")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to checkout branch: {e.stderr}")
-            raise RuntimeError(f"Failed to checkout branch {branch_name}: {e.stderr}")
+            logger.error(f"Failed to create branch from base: {e.stderr}")
+            raise RuntimeError(f"Failed to create branch {branch_name} from {base_branch}: {e.stderr}")
