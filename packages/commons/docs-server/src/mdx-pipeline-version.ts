@@ -15,4 +15,4 @@
  * // When updating MDX bundler or plugins:
  * export const MDX_PIPELINE_VERSION = "42";
  */
-export const MDX_PIPELINE_VERSION = "6";
+export const MDX_PIPELINE_VERSION = "7";
