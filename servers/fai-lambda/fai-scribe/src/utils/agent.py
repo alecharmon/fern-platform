@@ -1,5 +1,3 @@
-import logging
-import os
 import re
 
 import httpx
@@ -14,13 +12,13 @@ from claude_agent_sdk import (
 from shared.utils.agent import setup_persistent_claude_storage
 from shared.utils.git import configure_git_auth
 
+from ..settings import (
+    LOGGER,
+    SETTINGS,
+)
 from .system_prompts import EDITING_SYSTEM_PROMPT
 
-logger = logging.getLogger()
-
 GITHUB_PR_URL_PATTERN = re.compile(r"(?:https?://)?(?:www\.)?github\.com/([^/]+)/([^/]+)/pull/(\d+)", re.IGNORECASE)
-
-FAI_API_URL = os.environ.get("FAI_API_URL", "https://fai.buildwithfern.com")
 
 
 class SessionInterruptedError(Exception):
@@ -32,30 +30,32 @@ class SessionInterruptedError(Exception):
 async def update_session_status(editing_id: str, status: str) -> bool:
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.put(f"{FAI_API_URL}/editing-sessions/{editing_id}", json={"status": status})
+            response = await client.put(
+                f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}", json={"status": status}
+            )
             if response.status_code == 200:
-                logger.info(f"Updated session {editing_id} status to {status}")
+                LOGGER.info(f"Updated session {editing_id} status to {status}")
                 return True
             else:
-                logger.warning(f"Failed to update session status: {response.status_code}")
+                LOGGER.warning(f"Failed to update session status: {response.status_code}")
                 return False
     except Exception as e:
-        logger.warning(f"Error updating session status: {e}")
+        LOGGER.warning(f"Error updating session status: {e}")
         return False
 
 
 async def check_if_interrupted(editing_id: str) -> bool:
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(f"{FAI_API_URL}/editing-sessions/{editing_id}")
+            response = await client.get(f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}")
             if response.status_code == 200:
                 session_data = response.json()
                 return session_data["editing_session"]["status"] == "interrupted"
             else:
-                logger.warning(f"Failed to check interrupted status: {response.status_code}")
+                LOGGER.warning(f"Failed to check interrupted status: {response.status_code}")
                 return False
     except Exception as e:
-        logger.warning(f"Error checking interrupted status: {e}")
+        LOGGER.warning(f"Error checking interrupted status: {e}")
         return False
 
 
@@ -111,14 +111,14 @@ After making the changes:
 
         async for message in client.receive_response():
             if await check_if_interrupted(editing_id):
-                logger.warning(f"Session interrupted: {editing_id}")
+                LOGGER.warning(f"Session interrupted: {editing_id}")
                 await update_session_status(editing_id, "waiting")
                 raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
 
             if isinstance(message, AssistantMessage):
                 for block in message.content:
                     if isinstance(block, TextBlock):
-                        logger.info(f"Claude: {block.text}")
+                        LOGGER.info(f"Claude: {block.text}")
                         for line in block.text.split("\n"):
                             if "PR_URL:" in line:
                                 extracted_text = line.split("PR_URL:", 1)[1].strip()
@@ -126,18 +126,18 @@ After making the changes:
                                     match = GITHUB_PR_URL_PATTERN.search(extracted_text)
                                     if match:
                                         pr_url = match.group(0)
-                                        logger.info(f"Extracted PR URL: {pr_url}")
+                                        LOGGER.info(f"Extracted PR URL: {pr_url}")
                                     else:
-                                        logger.warning(f"Invalid PR URL format: {extracted_text}")
+                                        LOGGER.warning(f"Invalid PR URL format: {extracted_text}")
                     if isinstance(block, ToolUseBlock):
-                        logger.info(f"Using tool: {block.name}")
+                        LOGGER.info(f"Using tool: {block.name}")
 
             if isinstance(message, ResultMessage):
                 session_id = message.session_id
-                logger.info(f"Session ID: {session_id}")
-                logger.info(f"Turns used: {message.num_turns}")
+                LOGGER.info(f"Session ID: {session_id}")
+                LOGGER.info(f"Turns used: {message.num_turns}")
                 if message.total_cost_usd:
-                    logger.info(f"Cost: ${message.total_cost_usd}")
+                    LOGGER.info(f"Cost: ${message.total_cost_usd}")
 
     if session_id is None:
         raise RuntimeError("Failed to obtain session ID from Claude")

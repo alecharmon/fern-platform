@@ -1,6 +1,5 @@
 import asyncio
 import json
-import logging
 from datetime import (
     UTC,
     datetime,
@@ -10,16 +9,15 @@ from typing import Any
 import httpx
 from shared.utils.validation import validate_body_param_or_throw
 
+from .settings import (
+    LOGGER,
+    SETTINGS,
+)
 from .utils.agent import (
     SessionInterruptedError,
     run_editing_session,
 )
 from .utils.git import setup_editing_repo
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-FAI_API_URL = "https://fai.buildwithfern.com"
 
 
 async def _post_callback(url: str, data: dict[str, Any]) -> None:
@@ -35,8 +33,8 @@ async def handle_editing_request(
 ) -> dict[str, Any]:
     async with httpx.AsyncClient(timeout=30.0) as client:
         if editing_id:
-            logger.info(f"Fetching existing editing session: {editing_id}")
-            response = await client.get(f"{FAI_API_URL}/editing-sessions/{editing_id}")
+            LOGGER.info(f"Fetching existing editing session: {editing_id}")
+            response = await client.get(f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}")
 
             if response.status_code == 404:
                 raise ValueError(f"Editing session not found: {editing_id}")
@@ -45,12 +43,12 @@ async def handle_editing_request(
 
             session_data = response.json()
             session = session_data["editing_session"]
-            logger.info(f"Resuming editing session: {editing_id}")
+            LOGGER.info(f"Resuming editing session: {editing_id}")
             is_new_session = False
         else:
-            logger.info(f"Creating new editing session for repository: {repository}")
+            LOGGER.info(f"Creating new editing session for repository: {repository}")
             response = await client.post(
-                f"{FAI_API_URL}/editing-sessions",
+                f"{SETTINGS.FAI_API_URL}/editing-sessions",
                 json={
                     "repository": repository,
                     "base_branch": base_branch,
@@ -63,7 +61,7 @@ async def handle_editing_request(
             session_data = response.json()
             session = session_data["editing_session"]
             editing_id = session["id"]
-            logger.info(f"Created new editing session: {editing_id}")
+            LOGGER.info(f"Created new editing session: {editing_id}")
             is_new_session = True
 
         repo_path = setup_editing_repo(
@@ -73,7 +71,7 @@ async def handle_editing_request(
             is_new_session=is_new_session,
             editing_id=editing_id,
         )
-        logger.info(f"Repository ready at: {repo_path}")
+        LOGGER.info(f"Repository ready at: {repo_path}")
 
         try:
             session_id, pr_url = await run_editing_session(
@@ -86,11 +84,11 @@ async def handle_editing_request(
                 existing_pr_url=session.get("pr_url"),
             )
 
-            logger.info(f"Updating editing session: {editing_id}")
-            logger.info(f"Session ID: {session_id}")
-            logger.info(f"PR URL: {pr_url}")
+            LOGGER.info(f"Updating editing session: {editing_id}")
+            LOGGER.info(f"Session ID: {session_id}")
+            LOGGER.info(f"PR URL: {pr_url}")
             response = await client.put(
-                f"{FAI_API_URL}/editing-sessions/{editing_id}",
+                f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}",
                 json={
                     "session_id": session_id,
                     "pr_url": pr_url,
@@ -98,9 +96,9 @@ async def handle_editing_request(
             )
 
             if response.status_code != 200:
-                logger.error(f"Failed to update editing session: {response.status_code} - {response.text}")
+                LOGGER.error(f"Failed to update editing session: {response.status_code} - {response.text}")
             else:
-                logger.info(f"Successfully updated editing session: {editing_id}")
+                LOGGER.info(f"Successfully updated editing session: {editing_id}")
 
             return {
                 "editing_id": editing_id,
@@ -111,7 +109,7 @@ async def handle_editing_request(
             }
 
         except SessionInterruptedError:
-            logger.warning(f"Editing session interrupted: {editing_id}")
+            LOGGER.warning(f"Editing session interrupted: {editing_id}")
             return {
                 "editing_id": editing_id,
                 "session_id": None,
@@ -121,13 +119,13 @@ async def handle_editing_request(
             }
 
         except Exception as e:
-            logger.error(f"Error during editing session: {str(e)}", exc_info=True)
+            LOGGER.error(f"Error during editing session: {str(e)}", exc_info=True)
             raise
 
 
 def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    logger.info(f"Event: {json.dumps(event)}")
-    logger.info(f"Context: {context}")
+    LOGGER.info(f"Event: {json.dumps(event)}")
+    LOGGER.info(f"Context: {context}")
 
     try:
         body = json.loads(event.get("body", "{}"))
@@ -155,9 +153,9 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                     "pr_url": result.get("pr_url"),
                 }
                 asyncio.run(_post_callback(callback_url, callback_data))
-                logger.info(f"Successfully posted callback to {callback_url}")
+                LOGGER.info(f"Successfully posted callback to {callback_url}")
             except Exception as callback_error:
-                logger.error(f"Failed to post callback: {str(callback_error)}", exc_info=True)
+                LOGGER.error(f"Failed to post callback: {str(callback_error)}", exc_info=True)
 
         response_body = {
             "message": "Editing session completed successfully",
@@ -176,7 +174,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         }
 
     except Exception as e:
-        logger.error(f"Error processing request: {str(e)}", exc_info=True)
+        LOGGER.error(f"Error processing request: {str(e)}", exc_info=True)
 
         return {
             "statusCode": 500,
