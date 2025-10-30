@@ -45,6 +45,17 @@ export const middleware: NextMiddleware = async (request) => {
         });
     }
 
+    const secFetchDest = request.headers.get("sec-fetch-dest");
+    if (secFetchDest && secFetchDest !== "document") {
+        return NextResponse.next();
+    }
+
+    if (pathname.includes("/static/chunks/")) {
+        return NextResponse.next();
+    }
+
+    const acceptHeader = request.headers.get("accept");
+
     const headers = new Headers(request.headers);
     headers.set(HEADER_X_FERN_HOST, domain);
     headers.set("x-fern-requested-path", pathname);
@@ -222,7 +233,6 @@ export const middleware: NextMiddleware = async (request) => {
      * Content negotiation: If Accept header contains text/plain or text/markdown,
      * serve the llms.txt version instead
      */
-    const acceptHeader = request.headers.get("accept");
     if (acceptHeader && (acceptHeader.includes("text/plain") || acceptHeader.includes("text/markdown"))) {
         const slug = removeLeadingSlash(pathname);
         return rewrite(withDomain("/api/fern-docs/llms.txt"), { slug });
