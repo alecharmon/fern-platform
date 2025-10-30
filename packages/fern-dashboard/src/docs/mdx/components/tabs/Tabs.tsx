@@ -253,7 +253,7 @@ export function TabGroup({ children }: { toc?: boolean; children?: ReactNode }) 
                         </div>
                     )}
                 </RadixTabs.List>
-                {isWithinEditor ? <div className="mb-6">{children}</div> : <>{children}</>}
+                {isWithinEditor ? <div className="mb-6 -ml-8 -mt-4">{children}</div> : <>{children}</>}
             </RadixTabs.Root>
         </TabsContext.Provider>
     );
@@ -317,14 +317,7 @@ export function Tab({
     }, [tabId, title, language, toc, registerTab, unregisterTab, editorComponentValues]);
 
     return (
-        <RadixTabs.Content
-            value={tabId}
-            className={cn(
-                "border:content-[''] before:mb-4 before:block",
-                "[&_.react-renderer]:px-0",
-                "[&_.react-renderer>[data-node-view-wrapper]]:px-0"
-            )}
-        >
+        <RadixTabs.Content value={tabId} className={cn("border:content-[''] before:mb-4 before:block")}>
             {children}
         </RadixTabs.Content>
     );
