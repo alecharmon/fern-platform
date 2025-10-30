@@ -28,7 +28,6 @@ export const REVALIDATE_SECONDS = 60 * 60 * 24 * 6;
  */
 export const FERN_DOCS_PREVIEW_DOMAINS = [
     BUILDWITHFERN_COM,
-    "ferndocs.com",
     "ferndocs.dev",
     "buildwithfern.dev",
     "vercel.app" // special case for Vercel preview deployments
