@@ -7,7 +7,10 @@ from sqlalchemy import select
 
 from fai.db import async_session_maker
 from fai.models.db.slack_editing_session_db import SlackEditingSessionDb
-from fai.settings import VARIABLES
+from fai.settings import (
+    CONFIG,
+    VARIABLES,
+)
 from fai.utils.github_utils import get_repo_from_docs_domain
 
 logger = logging.getLogger(__name__)
@@ -103,7 +106,7 @@ async def invoke_editing_lambda(
 
             if team_id and channel_id and thread_ts:
                 callback_url = (
-                    f"https://fai.buildwithfern.com/scribe/callback/slack/edit/" f"{team_id}/{channel_id}/{thread_ts}"
+                    f"{CONFIG.FAI_SERVER_URL}/scribe/callback/slack/edit/" f"{team_id}/{channel_id}/{thread_ts}"
                 )
                 body_payload["callback_url"] = callback_url
                 logger.info(f"Including callback URL in Lambda invocation: {callback_url}")

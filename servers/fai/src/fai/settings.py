@@ -53,6 +53,7 @@ class Config:
     EMBEDDING_BATCH_SIZE: int = 100
     INSIGHTS_MAX_EXAMPLES: int = 25
     TURBOPUFFER_DEFAULT_REGION: str = "gcp-us-east4"
+    FAI_SERVER_URL: str = os.environ.get("FAI_SERVER_URL") or "https://fai.buildwithfern.com"
     DEFAULT_EMBEDDING_MODEL: EmbeddingModel = EmbeddingModels.TEXT_EMBEDDING_3_LARGE.value
 
 

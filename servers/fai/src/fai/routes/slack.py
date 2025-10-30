@@ -730,11 +730,8 @@ async def handle_app_mention(event: dict[str, Any], team_id: str, background_tas
 
         bot_message_ts = msg_response.get("ts") if success else None
 
-        if success and response.user_id and bot_message_ts:
+        if success and response.user_id and bot_message_ts and response.query_id:
             feedback_thread_ts = response.thread_ts
-
-            if not response.query_id:
-                LOGGER.warning(f"No query_id for feedback, but still sending feedback request for message {message_ts}")
 
             LOGGER.info(
                 f"Sending feedback ephemeral - thread_ts: {feedback_thread_ts}, "
@@ -752,7 +749,7 @@ async def handle_app_mention(event: dict[str, Any], team_id: str, background_tas
                 channel=response.channel,
                 user=response.user_id,
                 bot_token=response.bot_token,
-                query_id=response.query_id or "unknown",
+                query_id=response.query_id,
                 message_ts=bot_message_ts,
                 team_id=team_id,
                 thread_ts=feedback_thread_ts,
@@ -1237,11 +1234,8 @@ async def handle_message(event: dict[str, Any], team_id: str, background_tasks: 
 
         bot_message_ts = msg_response.get("ts") if success else None
 
-        if success and response.user_id and bot_message_ts:
+        if success and response.user_id and bot_message_ts and response.query_id:
             feedback_thread_ts = response.thread_ts
-
-            if not response.query_id:
-                LOGGER.warning(f"No query_id for feedback, but still sending feedback request for message {message_ts}")
 
             LOGGER.info(
                 f"Sending feedback ephemeral - thread_ts: {feedback_thread_ts}, "
@@ -1259,7 +1253,7 @@ async def handle_message(event: dict[str, Any], team_id: str, background_tasks: 
                 channel=response.channel,
                 user=response.user_id,
                 bot_token=response.bot_token,
-                query_id=response.query_id or "unknown",
+                query_id=response.query_id,
                 message_ts=bot_message_ts,
                 team_id=team_id,
                 thread_ts=feedback_thread_ts,

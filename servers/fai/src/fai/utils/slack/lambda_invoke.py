@@ -4,7 +4,10 @@ import logging
 import aioboto3
 from botocore.exceptions import ClientError
 
-from fai.settings import VARIABLES
+from fai.settings import (
+    CONFIG,
+    VARIABLES,
+)
 from fai.utils.github_utils import get_repo_from_docs_domain
 
 logger = logging.getLogger(__name__)
@@ -56,7 +59,7 @@ async def invoke_fai_lambda_for_docs_update(
             }
 
             if team_id and channel_id and thread_ts:
-                callback_url = f"https://fai.buildwithfern.com/scribe/callback/slack/{team_id}/{channel_id}/{thread_ts}"
+                callback_url = f"{CONFIG.FAI_SERVER_URL}/scribe/callback/slack/{team_id}/{channel_id}/{thread_ts}"
                 body_payload["callback_url"] = callback_url
                 logger.info(f"Including callback URL in Lambda invocation: {callback_url}")
 
