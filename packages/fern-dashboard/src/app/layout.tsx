@@ -12,6 +12,7 @@ import { AnimatedNoiseProvider } from "@/providers/AnimatedNoiseProvider";
 import { PostHogProvider } from "@/providers/PosthogProvider";
 import { ProgressProvider } from "@/providers/ProgressProvider";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
+import { SentryUserProvider } from "@/providers/SentryUserProvider";
 import { cn } from "@/utils/utils";
 
 import { gtPlanar } from "./fonts";
@@ -52,9 +53,11 @@ export default async function RootLayout({
                     <SpeedInsights debug={false} />
 
                     <ReactQueryProvider>
-                        <PostHogProvider session={session}>
-                            <ProgressProvider>{children}</ProgressProvider>
-                        </PostHogProvider>
+                        <SentryUserProvider session={session}>
+                            <PostHogProvider session={session}>
+                                <ProgressProvider>{children}</ProgressProvider>
+                            </PostHogProvider>
+                        </SentryUserProvider>
                     </ReactQueryProvider>
                 </AnimatedNoiseProvider>
                 <Toaster
