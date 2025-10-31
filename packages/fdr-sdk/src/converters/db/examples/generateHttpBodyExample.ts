@@ -383,7 +383,9 @@ function getAllObjectProperties(
                 type = resolveAlias(type.shape.value.value, resolveTypeById);
             }
             if (type.shape.type !== "object") {
-                throw new Error("Object extends non-object " + typeId);
+                // Skip non-object types in extends (e.g., primitives or aliases to primitives)
+                // This can occur when converting from OpenAPI where allOf might include non-objects
+                return [];
             }
             return getAllObjectProperties(type.shape, resolveTypeById);
         })
