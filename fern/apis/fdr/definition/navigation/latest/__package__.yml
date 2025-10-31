@@ -24,6 +24,13 @@ types:
       - UnversionedNode
       - ProductGroupNode
 
+  ProductNode:
+    discriminated: false
+    docs: A product can either be internal (with navigation structure) or external (linking to an external URL)
+    union:
+      - InternalProductNode
+      - ExternalProductNode
+
   ProductChild:
     discriminated: false
     union:
@@ -164,7 +171,7 @@ types:
       child: RootChild
       roles: optional<list<commons.RoleId>>
 
-  ProductNode:
+  InternalProductNode:
     extends:
       - WithNodeMetadata
       - WithRedirect
@@ -179,6 +186,35 @@ types:
       image:
         type: optional<commons.FileId>
         docs: A URL to an image that will be displayed in the sidebar. Takes precedence over `icon` if both are provided.
+
+  ExternalProductNode:
+    extends:
+      - WithNodeId
+      - WithPermissions
+      - WithFeatureFlags
+    properties:
+      type: literal<"productLink">
+      default: boolean
+      productId: ProductId
+      title:
+        type: string
+        docs: The title that will be displayed in the sidebar for this external product
+      href:
+        type: commons.Url
+        docs: External URL that this product links to
+      subtitle:
+        type: string
+        docs: Couple words for what the product is
+      icon: optional<string>
+      image:
+        type: optional<commons.FileId>
+        docs: A URL to an image that will be displayed in the sidebar. Takes precedence over `icon` if both are provided.
+      hidden:
+        type: optional<boolean>
+        docs: If true, this product will not be displayed in the product switcher
+      authed:
+        type: optional<boolean>
+        docs: If true, this product is only visible to authenticated users
 
   VersionNode:
     extends:

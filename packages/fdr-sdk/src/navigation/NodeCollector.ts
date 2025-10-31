@@ -83,7 +83,9 @@ export class NodeCollector {
                 // if the node is the default version OF a product, we want to prune using the product slug, not the root slug.
                 const productNode = parents.find(isProductNode);
                 const copy = JSON.parse(JSON.stringify(node)) as FernNavigation.VersionNode;
-                this.defaultVersion = pruneVersionNode(copy, productNode?.slug ?? rootNode.slug, node.slug);
+                // External product nodes (productLink) don't have slugs, so we use the root slug in that case
+                const pruneSlug = productNode?.type === "product" ? productNode.slug : rootNode.slug;
+                this.defaultVersion = pruneVersionNode(copy, pruneSlug, node.slug);
                 FernNavigation.traverseDF(this.defaultVersion, (node, innerParents) => {
                     this.visitNode(node, [...parents, ...innerParents], true);
                 });

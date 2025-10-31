@@ -75,7 +75,8 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
 
         // the 404 behavior should be product-aware
         for (const productNode of collector.getProductNodes()) {
-            if (slug.startsWith(productNode.slug)) {
+            // External product links don't have slugs, so skip them
+            if (productNode.type === "product" && slug.startsWith(productNode.slug)) {
                 maybeProductOrVersionNode = productNode;
                 foundProductNode = true;
                 break;
@@ -95,7 +96,13 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
 
         return {
             type: "notFound",
-            redirect: maybeProductOrVersionNode.pointsTo,
+            // External product links don't have pointsTo, only internal products and versions do
+            redirect:
+                maybeProductOrVersionNode.type === "root" ||
+                maybeProductOrVersionNode.type === "product" ||
+                maybeProductOrVersionNode.type === "version"
+                    ? maybeProductOrVersionNode.pointsTo
+                    : undefined,
             authed: maybeProductOrVersionNode.authed
         };
     }
@@ -155,7 +162,9 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
         });
         const currentTab =
             currentTabNode?.type === "tab" || currentTabNode?.type === "changelog" ? currentTabNode : undefined;
-        const slugPrefix = currentProduct?.slug ?? currentVersion?.slug ?? root.slug;
+        // External product links don't have slugs, so fall back to version or root slug
+        const slugPrefix =
+            (currentProduct?.type === "product" ? currentProduct.slug : undefined) ?? currentVersion?.slug ?? root.slug;
         const unversionedSlug = FernNavigation.Slug(
             found.node.slug.replace(new RegExp(`^${escapeRegExp(slugPrefix)}/`), "")
         );

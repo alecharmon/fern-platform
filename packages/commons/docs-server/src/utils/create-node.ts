@@ -4,6 +4,7 @@ import {
     type ApiReferenceNode,
     EndpointId,
     type EndpointNode,
+    type InternalProductNode,
     type NavigationChild,
     NodeId,
     PageId,
@@ -219,7 +220,7 @@ export function createProductNode(
     title: string,
     versioned: boolean = false,
     child?: VersionedNode | UnversionedNode
-): ProductNode {
+): InternalProductNode {
     const nodeChild =
         child ??
         (versioned

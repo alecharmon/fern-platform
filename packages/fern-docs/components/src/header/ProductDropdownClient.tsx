@@ -13,7 +13,8 @@ export interface ProductDropdownItem {
     productId: string;
     title: string;
     subtitle?: string;
-    slug: string;
+    slug?: string;
+    href?: string;
     defaultSlug?: string;
     icon?: React.ReactNode;
     image?: React.ReactNode;
@@ -45,23 +46,29 @@ export function ProductDropdownClient({
     return (
         <FernDropdown
             value={currentProductId}
-            options={products.map(({ icon, image, productId, title, slug, subtitle, defaultSlug }) => ({
-                type: "product",
-                id: productId,
-                title,
-                subtitle,
-                value: productId,
-                href: slugToHref(
-                    pickProductSlug({
-                        currentProductSlug,
-                        defaultSlug,
-                        slug
-                    })
-                ),
-                dense: !isDesktop || useDenseLayout,
-                icon,
-                image
-            }))}
+            options={products.map(({ icon, image, productId, title, slug, subtitle, defaultSlug, href }) => {
+                const productHref =
+                    href ??
+                    slugToHref(
+                        pickProductSlug({
+                            currentProductSlug,
+                            defaultSlug,
+                            slug: slug ?? ""
+                        })
+                    );
+
+                return {
+                    type: "product",
+                    id: productId,
+                    title,
+                    subtitle,
+                    value: productId,
+                    href: productHref,
+                    dense: !isDesktop || useDenseLayout,
+                    icon,
+                    image
+                };
+            })}
             contentProps={{
                 "data-testid": "product-dropdown-content"
             }}

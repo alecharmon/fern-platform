@@ -29,6 +29,7 @@ export function getApiReferenceId(
         changelogMonth: RETURN_UNDEFINED,
         changelogEntry: RETURN_UNDEFINED,
         product: RETURN_UNDEFINED,
+        productLink: RETURN_UNDEFINED,
         productgroup: RETURN_UNDEFINED,
 
         // api nodes

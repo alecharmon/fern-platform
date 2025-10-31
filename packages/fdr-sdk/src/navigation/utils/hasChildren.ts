@@ -20,6 +20,8 @@ export function hasChildren(node: NavigationNodeParent): boolean {
             return node.children.length > 0 || node.landingPage != null;
         case "product":
             return true;
+        case "productLink":
+            return false;
         case "root":
             return true;
         case "unversioned":

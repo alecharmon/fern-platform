@@ -24,6 +24,8 @@ export function getChildren(node: NavigationNode): readonly NavigationNode[] {
         case "root":
         case "tab":
             return [node.child];
+        case "productLink":
+            return [];
         case "variant":
             return node.children;
         case "apiReference":

@@ -49,7 +49,8 @@ export async function VersionDropdown({
     // Handle case where root is a productgroup and the current product is versioned OR the root is versioned
     if (root.child.type === "productgroup") {
         // If we have a current product (either from parents or fallback), use its versions
-        if (currentProduct?.child.type === "versioned") {
+        // External products don't have versions, so only check internal products
+        if (currentProduct?.type === "product" && currentProduct.child.type === "versioned") {
             versions = currentProduct.child.children;
         }
     } else if (root.child.type === "versioned") {
@@ -77,7 +78,11 @@ export async function VersionDropdown({
             title: version.title,
             slug,
             defaultSlug: version.default
-                ? FernNavigation.toDefaultSlug(slug, currentProduct?.slug ?? root.slug, version.slug)
+                ? FernNavigation.toDefaultSlug(
+                      slug,
+                      currentProduct?.type === "product" ? currentProduct.slug : root.slug,
+                      version.slug
+                  )
                 : undefined,
             icon: version.icon ? <FaIconServer icon={version.icon} /> : undefined,
             authed: version.authed,

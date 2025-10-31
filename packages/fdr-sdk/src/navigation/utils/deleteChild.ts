@@ -71,6 +71,7 @@ export function mutableDeleteChild(
             parent.landingPage = parent.landingPage?.id === node.id ? undefined : parent.landingPage;
             break;
         case "product":
+        case "productLink":
         case "root":
             return "should-delete-parent";
         case "unversioned":

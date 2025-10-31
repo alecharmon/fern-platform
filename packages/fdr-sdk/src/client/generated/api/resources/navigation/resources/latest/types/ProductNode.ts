@@ -4,15 +4,9 @@
 
 import * as FernRegistry from "../../../../../index.js";
 
-export interface ProductNode
-    extends FernRegistry.navigation.latest.WithNodeMetadata,
-        FernRegistry.navigation.latest.WithRedirect {
-    type: "product";
-    default: boolean;
-    productId: FernRegistry.navigation.latest.ProductId;
-    child: FernRegistry.navigation.latest.ProductChild;
-    /** Couple words for what the product is */
-    subtitle: string;
-    /** A URL to an image that will be displayed in the sidebar. Takes precedence over `icon` if both are provided. */
-    image: FernRegistry.FileId | undefined;
-}
+/**
+ * A product can either be internal (with navigation structure) or external (linking to an external URL)
+ */
+export type ProductNode =
+    | FernRegistry.navigation.latest.InternalProductNode
+    | FernRegistry.navigation.latest.ExternalProductNode;

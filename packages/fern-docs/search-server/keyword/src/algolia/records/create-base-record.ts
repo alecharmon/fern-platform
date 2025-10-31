@@ -58,7 +58,11 @@ export function createBaseRecord({
             ? {
                   id: productNode.productId,
                   title: productNode.title,
-                  pathname: `/${productNode.canonicalSlug ?? productNode.slug}`
+                  // external products use href, internal products use slug
+                  pathname:
+                      productNode.type === "productLink"
+                          ? productNode.href
+                          : `/${productNode.canonicalSlug ?? productNode.slug}`
               }
             : undefined,
         version: versionNode

@@ -39,13 +39,14 @@ export async function ProductDropdown({
     const resolveFileSrc = createFileResolver(files);
 
     const productOptions = products?.map((product: FernNavigation.ProductNode): ProductDropdownItem => {
-        const slug = product.slug ?? product.pointsTo;
+        // external products (productLink) use href, internal products (product) use slug
+        const slug = product.type === "productLink" ? product.href : (product.slug ?? product.pointsTo);
         const image = resolveFileSrc(product.image);
         return {
             productId: product.productId,
             title: product.title,
             slug,
-            defaultSlug: product.default ? slug : undefined,
+            defaultSlug: product.default && product.type === "product" ? slug : undefined,
             icon: processIcon(product),
             subtitle: product.subtitle,
             default: product.default,

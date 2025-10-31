@@ -33,6 +33,7 @@ export function followRedirect(
         case "changelogYear": // note: changelog month nodes don't exist yet as pages
         case "endpointPair":
         case "product":
+        case "productLink":
         case "root":
         case "section":
         case "sidebarRoot":

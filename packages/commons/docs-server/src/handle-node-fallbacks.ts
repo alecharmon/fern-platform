@@ -27,7 +27,7 @@ export const getFallbackProduct = (
     const productNodes = collector.getProductNodes();
 
     const productWithMatchingSlug = productNodes.find(
-        (p) => slugjoin(slug).startsWith(slugjoin(p.slug) + "/") // add a trailing slash to ensure exact match (e.g. /docssss/1 should not match /docs/)
+        (p) => p.type === "product" && slugjoin(slug).startsWith(slugjoin(p.slug) + "/") // add a trailing slash to ensure exact match (e.g. /docssss/1 should not match /docs/)
     );
     if (productWithMatchingSlug) {
         return productWithMatchingSlug;
@@ -58,7 +58,7 @@ export const getFallbackVersion = (
 
     // 2. Find the matching version or default version for the fallback product, if one exists
     const fallbackProduct = getFallbackProduct(foundNode, root, slug);
-    if (fallbackProduct) {
+    if (fallbackProduct && fallbackProduct.type === "product") {
         if (fallbackProduct.child.type === "versioned") {
             const versionWithMatchingSlug = fallbackProduct.child.children.find((p) =>
                 slugjoin(slug).startsWith(slugjoin(p.slug))
@@ -104,7 +104,7 @@ const getTabsInternal = (
         const product = getFallbackProduct(foundNode, root, slug);
         const version = getFallbackVersion(foundNode, root, slug);
 
-        if (product) {
+        if (product && product.type === "product") {
             switch (product.child.type) {
                 case "unversioned":
                     if (isTabbedNode(product.child.child)) {
@@ -175,19 +175,21 @@ export const getProducts = (
 
     return (
         products?.filter((product) => {
-            if (product.type !== "product") {
-                return true;
-            }
-
+            // Both internal and external products have authed property
             if (product.authed) {
                 return false;
             }
 
-            if (!product.viewers || product.viewers.length === 0 || product.viewers.includes(RoleId("everyone"))) {
-                return true;
+            // Only internal products have viewers property
+            if (product.type === "product") {
+                if (!product.viewers || product.viewers.length === 0 || product.viewers.includes(RoleId("everyone"))) {
+                    return true;
+                }
+                return product.viewers.some((viewerRole: RoleId) => roles.includes(viewerRole as string));
             }
 
-            return product.viewers.some((viewerRole: RoleId) => roles.includes(viewerRole as string));
+            // External products (productLink) don't have viewers, so include them if not authed
+            return true;
         }) ?? null
     );
 };
