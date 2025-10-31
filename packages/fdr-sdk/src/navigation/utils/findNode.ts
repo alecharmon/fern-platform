@@ -8,6 +8,7 @@ import { isProductNode } from "../versions/latest/isProductNode";
 import { isSidebarRootNode } from "../versions/latest/isSidebarRootNode";
 import { isTabbedNode } from "../versions/latest/isTabbedNode";
 import { isUnversionedNode } from "../versions/latest/isUnversionedNode";
+import { isVariantNode } from "../versions/latest/isVariantNode";
 import { isVersionNode } from "../versions/latest/isVersionNode";
 import { createBreadcrumb } from "./createBreadcrumb";
 
@@ -32,6 +33,12 @@ export declare namespace Node {
          * This is true if the current version is the default version node (without the version slug prefix)
          */
         isCurrentVersionDefault: boolean;
+        variants: readonly FernNavigation.VariantNode[];
+        currentVariant: FernNavigation.VariantNode | undefined;
+        /**
+         * This is true if the current variant is the default variant node (without the variant slug prefix)
+         */
+        isCurrentVariantDefault: boolean;
         currentTab: FernNavigation.TabNode | FernNavigation.ChangelogNode | undefined;
         tabs: readonly FernNavigation.TabChild[];
         sidebar: FernNavigation.SidebarRootNode | undefined;
@@ -115,6 +122,8 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
     const unversionedNode = found.parents.find(isUnversionedNode);
     const versionChild = (currentVersion ?? unversionedNode)?.child;
 
+    const currentVariant = found.parents.find(isVariantNode);
+
     if (!sidebar && currentVersion != null) {
         if (isSidebarRootNode(currentVersion.child)) {
             sidebar = currentVersion.child;
@@ -160,11 +169,27 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
             }
             return node;
         });
+
+        const variants = collector.getVariantNodes().map((node) => {
+            if (node.default) {
+                // if we're currently viewing the default variant, we may be viewing the non-pruned variant
+                if (node.id === currentVariant?.id) {
+                    return currentVariant;
+                }
+                // otherwise, we should always use the pruned variant node
+                return collector.defaultVariantNode ?? node;
+            }
+            return node;
+        });
+
         const currentTab =
             currentTabNode?.type === "tab" || currentTabNode?.type === "changelog" ? currentTabNode : undefined;
         // External product links don't have slugs, so fall back to version or root slug
         const slugPrefix =
-            (currentProduct?.type === "product" ? currentProduct.slug : undefined) ?? currentVersion?.slug ?? root.slug;
+            currentVariant?.slug ??
+            (currentProduct?.type === "product" ? currentProduct.slug : undefined) ??
+            currentVersion?.slug ??
+            root.slug;
         const unversionedSlug = FernNavigation.Slug(
             found.node.slug.replace(new RegExp(`^${escapeRegExp(slugPrefix)}/`), "")
         );
@@ -181,7 +206,9 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
             currentVersion,
             isCurrentProductDefault: currentProduct?.default ? currentProduct === collector.defaultProductNode : false,
             isCurrentVersionDefault: currentVersion?.default ? currentVersion === collector.defaultVersionNode : false,
-
+            variants, // this is used to render the variant switcher
+            currentVariant,
+            isCurrentVariantDefault: currentVariant?.default ? currentVariant === collector.defaultVariantNode : false,
             currentTab,
             sidebar,
             apiReference,
@@ -203,10 +230,41 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
         return { type: "redirect", redirect: found.node.pointsTo };
     }
 
+    // Special handling for variant nodes without pointsTo - find the first page in their children
+    if (found.node.type === "variant" && (found.node.pointsTo == null || found.node.pointsTo === undefined)) {
+        const firstPage = findFirstPageInNode(found.node);
+        if (firstPage != null) {
+            return { type: "redirect", redirect: firstPage };
+        }
+    }
+
     // if the node does not have a redirect, return a 404
     return {
         type: "notFound",
         redirect: currentVersion?.pointsTo ?? root.pointsTo,
         authed: found.node.authed
     };
+}
+
+/**
+ * Recursively searches for the first page node within a given node's children
+ */
+function findFirstPageInNode(node: FernNavigation.NavigationNode): FernNavigation.Slug | undefined {
+    if (FernNavigation.isPage(node)) {
+        return (node as any).slug;
+    }
+
+    const children = FernNavigation.getChildren(node);
+    if (children == null) {
+        return undefined;
+    }
+
+    for (const child of children) {
+        const firstPage = findFirstPageInNode(child);
+        if (firstPage != null) {
+            return firstPage;
+        }
+    }
+
+    return undefined;
 }

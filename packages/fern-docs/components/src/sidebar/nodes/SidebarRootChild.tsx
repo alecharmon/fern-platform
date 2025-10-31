@@ -6,6 +6,7 @@ import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarGroupNode } from "./SidebarGroupNode";
 import { SidebarRootApiPackageNode } from "./SidebarRootApiPackageNode";
 import { SidebarRootSectionNode } from "./SidebarRootSectionNode";
+import { SidebarVariantedNode } from "./SidebarVariantedNode";
 
 export function SidebarRootChild({
     node,
@@ -37,7 +38,7 @@ export function SidebarRootChild({
                 />
             );
         case "varianted":
-            throw new Error("unsupported type: varianted");
+            return <SidebarVariantedNode node={node} depth={0} renderOptions={renderOptions} />;
         default:
             throw new UnreachableCaseError(node);
     }

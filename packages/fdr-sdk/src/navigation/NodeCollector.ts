@@ -3,7 +3,7 @@ import { once } from "es-toolkit/function";
 
 import { FernNavigation } from "./..";
 import { pruneVersionNode } from "./utils/pruneVersionNode";
-import { isProductNode, type NavigationNodeWithMetadata } from "./versions";
+import { isProductNode, isVersionNode, type NavigationNodeWithMetadata } from "./versions";
 
 interface NavigationNodeWithMetadataAndParents {
     node: FernNavigation.NavigationNodeWithMetadata;
@@ -65,6 +65,9 @@ export class NodeCollector {
     private productNodes: FernNavigation.ProductNode[] = [];
     private defaultProduct: FernNavigation.ProductNode | undefined;
 
+    private variantNodes: FernNavigation.VariantNode[] = [];
+    private defaultVariant: FernNavigation.VariantNode | undefined;
+
     constructor(rootNode: FernNavigation.NavigationNode | undefined) {
         if (rootNode == null) {
             return;
@@ -77,6 +80,11 @@ export class NodeCollector {
             // if the node is the default version, make a copy of it and "prune" the version slug from all children nodes
             if (node.type === "version") {
                 this.versionNodes.push(node);
+            }
+
+            // collect variant nodes
+            if (node.type === "variant") {
+                this.variantNodes.push(node);
             }
 
             if (node.type === "version" && node.default && rootNode.type === "root") {
@@ -153,6 +161,10 @@ export class NodeCollector {
 
     get defaultProductNode(): FernNavigation.ProductNode | undefined {
         return this.defaultProduct;
+    }
+
+    get defaultVariantNode(): FernNavigation.VariantNode | undefined {
+        return this.defaultVariant;
     }
 
     public get(id: FernNavigation.NodeId): FernNavigation.NavigationNode | undefined {
@@ -242,6 +254,10 @@ export class NodeCollector {
 
     public getVersionNodes = (): FernNavigation.VersionNode[] => {
         return this.versionNodes;
+    };
+
+    public getVariantNodes = (): FernNavigation.VariantNode[] => {
+        return this.variantNodes;
     };
 
     public getNodesInOrder = (): FernNavigation.NavigationNode[] => {

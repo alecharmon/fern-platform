@@ -284,6 +284,7 @@ export function createFoundNode(
 ): FernNavigation.utils.Node.Found {
     const currentProduct = parents.find(FernNavigation.isProductNode);
     const currentVersion = parents.find(FernNavigation.isVersionNode);
+    const currentVariant = parents.find(FernNavigation.isVariantNode);
 
     return {
         type: "found",
@@ -297,6 +298,9 @@ export function createFoundNode(
         versions: currentVersion ? [currentVersion] : [],
         currentVersion,
         isCurrentVersionDefault: false,
+        variants: currentVariant ? [currentVariant] : [],
+        currentVariant,
+        isCurrentVariantDefault: false,
         currentTab: undefined,
         tabs: [],
         sidebar: undefined,

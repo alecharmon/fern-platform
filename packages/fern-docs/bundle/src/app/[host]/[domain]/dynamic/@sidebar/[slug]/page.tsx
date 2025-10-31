@@ -73,7 +73,14 @@ export default async function SidebarPage({
             {isSingleOverviewPage && !isSidebarFixed ? (
                 <HiddenSidebar />
             ) : (
-                <SidebarRootNode root={found.sidebar} visibleNodeIds={visibleNodeIds} loader={loader} />
+                <SidebarRootNode
+                    root={found.sidebar}
+                    visibleNodeIds={visibleNodeIds}
+                    loader={loader}
+                    renderOptions={{
+                        currentVariantId: found.currentVariant?.variantId
+                    }}
+                />
             )}
         </>
     );

@@ -91,6 +91,7 @@ export default function PageNode(props: PageNode.Props) {
                 productSlug={found.currentProduct?.slug}
                 versionId={found.currentVersion?.versionId}
                 versionSlug={found.currentVersion?.slug}
+                variantId={found.currentVariant?.variantId}
                 versionIsDefault={found.isCurrentVersionDefault}
                 productIsDefault={found.isCurrentProductDefault}
             />

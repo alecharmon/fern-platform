@@ -8,6 +8,8 @@ export * from "./isProductNode";
 export * from "./isSidebarRootNode";
 export * from "./isTabbedNode";
 export * from "./isUnversionedNode";
+export * from "./isVariantedNode";
+export * from "./isVariantNode";
 export * from "./isVersionNode";
 export * from "./NavigationNode";
 export * from "./NavigationNodeApiLeaf";

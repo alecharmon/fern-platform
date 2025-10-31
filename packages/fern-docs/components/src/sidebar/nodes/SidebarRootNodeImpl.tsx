@@ -26,6 +26,7 @@ export function SidebarRootNodeImpl({
     const forceClientRender = renderOptions?.forceClientRender ?? false;
     const wrapSectionNode = renderOptions?.wrapSectionNode;
     const wrapPageNode = renderOptions?.wrapPageNode;
+    const currentVariantId = renderOptions?.currentVariantId;
 
     const node = withPrunedNavigation(root, {
         visibleNodeIds: visibleNodeIds,
@@ -81,7 +82,7 @@ export function SidebarRootNodeImpl({
                         <li key={child.id}>
                             <SidebarRootChild
                                 node={child}
-                                renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode }}
+                                renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode, currentVariantId }}
                             />
                         </li>
                     ))}

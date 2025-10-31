@@ -292,8 +292,9 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
                 productSlug={found.currentProduct?.slug}
                 versionId={found.currentVersion?.versionId}
                 versionSlug={found.currentVersion?.slug}
+                variantId={found.currentVariant?.variantId}
                 versionIsDefault={found.isCurrentVersionDefault}
-                productIsDefault={found.isCurrentProductIsDefault}
+                productIsDefault={found.isCurrentProductDefault}
             />
             <DocsMainContent
                 loader={loader}

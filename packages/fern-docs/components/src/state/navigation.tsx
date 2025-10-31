@@ -68,6 +68,7 @@ const currentProductIdAtom = atom<FernNavigation.ProductId | undefined>(undefine
 const currentVersionIdAtom = atom<FernNavigation.VersionId | undefined>(undefined);
 const currentProductSlugAtom = atom<FernNavigation.Slug | undefined>(undefined);
 const currentVersionSlugAtom = atom<FernNavigation.Slug | undefined>(undefined);
+const currentVariantIdAtom = atom<FernNavigation.VariantId | undefined>(undefined);
 
 // if true, the current version is the default version
 const currentVersionIsDefaultAtom = atom<boolean>(false);
@@ -107,6 +108,10 @@ export function useCurrentVersionIsDefault() {
     return useAtomValue(currentVersionIsDefaultAtom);
 }
 
+export function useCurrentVariantId() {
+    return useAtomValue(currentVariantIdAtom);
+}
+
 export function SetCurrentNavigationNode({
     sidebarRootNodeId,
     nodeId,
@@ -115,6 +120,7 @@ export function SetCurrentNavigationNode({
     productSlug,
     versionId,
     versionSlug,
+    variantId,
     versionIsDefault,
     productIsDefault
 }: {
@@ -125,6 +131,7 @@ export function SetCurrentNavigationNode({
     productSlug?: FernNavigation.Slug;
     versionId?: FernNavigation.VersionId;
     versionSlug?: FernNavigation.Slug;
+    variantId?: FernNavigation.VariantId;
     versionIsDefault?: boolean;
     productIsDefault?: boolean;
 }) {
@@ -137,6 +144,7 @@ export function SetCurrentNavigationNode({
     const setCurrentProductSlug = useSetAtom(currentProductSlugAtom);
     const setCurrentVersionId = useSetAtom(currentVersionIdAtom);
     const setCurrentVersionSlug = useSetAtom(currentVersionSlugAtom);
+    const setCurrentVariantId = useSetAtom(currentVariantIdAtom);
     const setCurrentVersionIsDefault = useSetAtom(currentVersionIsDefaultAtom);
     const setCurrentProductIsDefault = useSetAtom(currentProductIsDefaultAtom);
     useIsomorphicLayoutEffect(() => {
@@ -147,6 +155,7 @@ export function SetCurrentNavigationNode({
         setCurrentTabId(tabId);
         setCurrentVersionId(versionId);
         setCurrentVersionSlug(versionSlug);
+        setCurrentVariantId(variantId);
         setCurrentVersionIsDefault(versionIsDefault ?? false);
         setCurrentProductIsDefault(productIsDefault ?? false);
     }, [
@@ -157,6 +166,7 @@ export function SetCurrentNavigationNode({
         productSlug,
         versionId,
         versionSlug,
+        variantId,
         versionIsDefault,
         productIsDefault
     ]);

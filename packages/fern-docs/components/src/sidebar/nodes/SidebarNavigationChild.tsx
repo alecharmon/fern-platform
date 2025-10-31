@@ -11,6 +11,7 @@ import { SidebarChangelogNode } from "./SidebarChangelogNode";
 import { SidebarLinkNode } from "./SidebarLinkNode";
 import { SidebarPageNode } from "./SidebarPageNode";
 import { SidebarSectionNode } from "./SidebarSectionNode";
+import { SidebarVariantedNode } from "./SidebarVariantedNode";
 
 interface SidebarNavigationChildProps {
     node: FernNavigation.NavigationChild;
@@ -82,7 +83,7 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                 />
             );
         case "varianted":
-            throw new Error("unsupported type: varianted");
+            return <SidebarVariantedNode node={node} depth={depth} renderOptions={renderOptions} />;
         default:
             throw new UnreachableCaseError(node);
     }

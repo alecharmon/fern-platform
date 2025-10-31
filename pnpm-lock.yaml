@@ -1994,6 +1994,9 @@ importers:
       depcheck:
         specifier: 'catalog:'
         version: 1.4.7
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       express:
         specifier: ^5.1.0
         version: 5.1.0

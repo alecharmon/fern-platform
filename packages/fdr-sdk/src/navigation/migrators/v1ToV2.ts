@@ -192,13 +192,21 @@ export class FernNavigationV1ToLatest {
         node: FernNavigation.V1.VariantNode,
         parents: FernNavigation.V1.NavigationNode[]
     ): FernNavigation.VariantNode => {
+        const children = node.children.map((child) => this.#variantChild(child, [...parents, node]));
+
+        // If pointsTo is not set, find the first page in the variant's children
+        let pointsTo: FernNavigation.Slug | undefined = node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined;
+        if (pointsTo == null) {
+            pointsTo = this.#findFirstPageSlugInChildren(children);
+        }
+
         const latest: FernNavigation.VariantNode = {
             type: "variant",
             default: node.default,
             variantId: FernNavigation.VariantId(node.variantId),
             subtitle: node.subtitle,
             image: node.image,
-            children: node.children.map((child) => this.#variantChild(child, [...parents, node])),
+            children,
             title: node.title,
             slug: FernNavigation.Slug(node.slug),
             canonicalSlug: undefined,
@@ -206,7 +214,7 @@ export class FernNavigationV1ToLatest {
             hidden: node.hidden,
             authed: node.authed,
             id: FernNavigation.NodeId(node.id),
-            pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
+            pointsTo,
             viewers: node.viewers,
             orphaned: node.orphaned,
             featureFlags: node.featureFlags
@@ -801,6 +809,28 @@ export class FernNavigationV1ToLatest {
             webhook: (value) => this.webhook(value, parents),
             grpc: (value) => this.grpc(value, parents)
         });
+    };
+
+    /**
+     * Recursively searches for the first page node within a list of children
+     */
+    #findFirstPageSlugInChildren = (
+        children: readonly FernNavigation.NavigationNode[]
+    ): FernNavigation.Slug | undefined => {
+        for (const child of children) {
+            if (FernNavigation.isPage(child)) {
+                return child.slug;
+            }
+
+            const childChildren = FernNavigation.getChildren(child);
+            if (childChildren != null && childChildren.length > 0) {
+                const firstPage = this.#findFirstPageSlugInChildren(childChildren);
+                if (firstPage != null) {
+                    return firstPage;
+                }
+            }
+        }
+        return undefined;
     };
 
     #availability(v1: FernNavigation.V1.NavigationV1Availability | undefined): FernNavigation.Availability | undefined {
