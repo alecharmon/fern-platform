@@ -113,6 +113,7 @@
   --yellow-1200: #403c23;
 
   --fern-green-300: #dbfdd3;
+  --fern-border: var(--gray-500);
 }
 
 .dark {
@@ -213,6 +214,8 @@
   --yellow-1000: #ece4ab;
   --yellow-1100: #ebe196;
   --yellow-1200: #f6eeb4;
+
+  --fern-border: var(--gray-300);
 }
 
 @theme inline {
