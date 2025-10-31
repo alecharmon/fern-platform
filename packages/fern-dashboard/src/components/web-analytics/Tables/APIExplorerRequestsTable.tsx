@@ -48,7 +48,7 @@ export default function APIExplorerRequestsTable({
             key: "endpoint",
             label: "",
             width: "auto",
-            render: (item: { method: string; endpoint: string; name: string }, _index: number) => {
+            render: (item: { host: string; method: string; endpoint: string; name: string }, _index: number) => {
                 const methodColor = METHOD_COLORS[item.method] || "blue";
 
                 // Map to specific hex colors
@@ -69,7 +69,7 @@ export default function APIExplorerRequestsTable({
                         >
                             {item.method}
                         </span>
-                        <span className="relative z-10 truncate">{item.endpoint}</span>
+                        <span className="relative z-10 truncate">{item.name || item.endpoint}</span>
                     </div>
                 );
             }
@@ -96,7 +96,7 @@ export default function APIExplorerRequestsTable({
             isLoading={isLoading}
             error={error}
             columns={columns}
-            getItemKey={(item) => `${item.method}-${item.endpoint}`}
+            getItemKey={(item) => `${item.method}-${item.endpoint}-${item.name}`}
             showGradient={true}
             gradientKey="count"
             onSort={handleSort}

@@ -53,7 +53,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         ${whereClause}
     `;
 
@@ -118,7 +118,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         ${whereClause}
       ${groupByClause}
       ORDER BY date
@@ -184,7 +184,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         ${whereClause}
       ${groupByClause}
       ORDER BY date
@@ -237,7 +237,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         ${whereClause}
       GROUP BY properties.$pathname
       ORDER BY ${orderBy} ${order.toUpperCase()}
@@ -276,7 +276,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         AND properties.$geoip_country_code IS NOT NULL
         AND properties.$geoip_country_code != ''
         ${whereClause}
@@ -449,7 +449,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         ${whereClause}
       GROUP BY channel
       ORDER BY ${orderBy} ${order.toUpperCase()}
@@ -495,7 +495,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         AND properties.$referring_domain IS NOT NULL
         AND properties.$referring_domain != ''
         AND properties.$referring_domain != '$direct'
@@ -550,7 +550,7 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = '$pageview'
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         AND properties.$device_type IS NOT NULL
         AND properties.$device_type != ''
         -- Filter out malicious SQL injection attempts (case-insensitive)
@@ -698,7 +698,7 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = 'not_found'
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         AND properties.pathname IS NOT NULL
         AND properties.pathname != ''
         ${whereClause}
@@ -726,7 +726,9 @@ export class AnalyticsService {
         const { whereClause } = this.buildDateAndFilterClause(options);
 
         // Build host filter - if provided, filter by specific host, otherwise use baseSiteUrl
-        const hostFilter = host ? `properties.$host = '${host}'` : `properties.$host = '${this.config.baseSiteUrl}'`;
+        const hostFilter = host
+            ? `properties.$host = '${host}'`
+            : `(properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')`;
 
         const query = `
       SELECT
@@ -734,7 +736,8 @@ export class AnalyticsService {
         properties.method as method,
         properties.endpointRoute as endpoint,
         properties.endpointName as name,
-        COUNT(*) as count
+        COUNT(*) as count,
+        any(properties.$current_url) as currentUrl
       FROM events
       WHERE
         event = 'api_playground_request_sent'
@@ -752,7 +755,7 @@ export class AnalyticsService {
       LIMIT ${limit}
     `;
 
-        const response = await this.client.query<[string, string, string, string, number]>(query, {
+        const response = await this.client.query<[string, string, string, string, number, string]>(query, {
             name: `api-explorer-requests-${this.getQueryNameSuffix(options)}-${host || this.config.baseSiteUrl}`
         });
 
@@ -761,7 +764,8 @@ export class AnalyticsService {
             method: row[1] || "",
             endpoint: row[2] || "",
             name: row[3] || "",
-            count: row[4]
+            count: row[4],
+            currentUrl: row[5] || ""
         }));
     }
 
@@ -816,7 +820,7 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = 'feedback_submitted'
-        AND properties.$host = '${this.config.baseSiteUrl}'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         ${whereClause}
       ORDER BY timestamp DESC
       LIMIT ${limit}

@@ -80,6 +80,7 @@ export interface APIExplorerEndpoint {
     endpoint: string;
     name: string;
     count: number;
+    currentUrl: string;
 }
 
 export interface APIExplorerOptions extends AnalyticsQueryOptions {
