@@ -717,6 +717,19 @@ why? who knows. thanks monaco:)
   }
 }
 
+/* Icon animations: Incidents */
+.group:hover .alert,
+.hover-animating .alert {
+  animation: alert-shake-x 0.5s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .alert,
+  .hover-animating .alert {
+    animation: none;
+  }
+}
+
 /* PR Title scroll animation */
 @keyframes scroll-text {
   0% {
