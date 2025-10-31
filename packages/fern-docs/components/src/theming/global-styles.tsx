@@ -15,6 +15,7 @@ export function GlobalStyles({
     dark,
     fonts,
     inlineCss = [],
+    inlineCssScopeSelector,
     scopeSelector = ":root",
     lightSelector = ".light, :root",
     darkSelector = ".dark"
@@ -25,6 +26,7 @@ export function GlobalStyles({
     dark?: FernColorTheme;
     fonts: FernFonts;
     inlineCss?: string[];
+    inlineCssScopeSelector?: string;
     scopeSelector?: string;
     lightSelector?: string;
     darkSelector?: string;
@@ -269,8 +271,13 @@ export function GlobalStyles({
 
         ${fonts.additionalCss}
 
-        ${inlineCss.join("\n")}
-      `}
+        ${
+            inlineCssScopeSelector
+                ? `${inlineCssScopeSelector} {
+                ${inlineCss.join("\n")}
+            }`
+                : `${inlineCss.join("\n")}`
+        } `}
         </style>
     );
 }
