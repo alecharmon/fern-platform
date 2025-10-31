@@ -3,6 +3,7 @@ import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as efs from "aws-cdk-lib/aws-efs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
@@ -46,10 +47,44 @@ export class FaiCodeIndexingStack extends Stack {
             }
         });
 
+        const efsSecurityGroup = new ec2.SecurityGroup(this, "efs-security-group", {
+            vpc,
+            description: "Security group for EFS file system",
+            allowAllOutbound: false
+        });
+
         const lambdaSecurityGroup = new ec2.SecurityGroup(this, "lambda-security-group", {
             vpc,
             description: `Security group for ${lambdaName} Lambda function`,
             allowAllOutbound: true
+        });
+
+        efsSecurityGroup.addIngressRule(lambdaSecurityGroup, ec2.Port.tcp(2049), "Allow NFS access from Lambda");
+
+        const fileSystem = new efs.FileSystem(this, "claude-session-storage", {
+            vpc,
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+            },
+            securityGroup: efsSecurityGroup,
+            encrypted: true,
+            lifecyclePolicy: efs.LifecyclePolicy.AFTER_7_DAYS,
+            performanceMode: efs.PerformanceMode.GENERAL_PURPOSE,
+            throughputMode: efs.ThroughputMode.BURSTING,
+            removalPolicy: RemovalPolicy.RETAIN
+        });
+
+        const accessPoint = fileSystem.addAccessPoint("lambda-access-point", {
+            path: "/claude-sessions",
+            createAcl: {
+                ownerUid: "1001",
+                ownerGid: "1001",
+                permissions: "755"
+            },
+            posixUser: {
+                uid: "1001",
+                gid: "1001"
+            }
         });
 
         const functionName = `${lambdaName}-${environmentType.toLowerCase()}`;
@@ -71,8 +106,10 @@ export class FaiCodeIndexingStack extends Stack {
                 ENVIRONMENT_TYPE: environmentType,
                 FERN_TOKEN: getEnvironmentVariableOrThrow("FERN_TOKEN"),
                 GITHUB_TOKEN: getEnvironmentVariableOrThrow("SCRIBE_GITHUB_TOKEN"),
-                ANTHROPIC_API_KEY: getEnvironmentVariableOrThrow("ANTHROPIC_API_KEY")
-            }
+                ANTHROPIC_API_KEY: getEnvironmentVariableOrThrow("ANTHROPIC_API_KEY"),
+                HOME: "/mnt/efs"
+            },
+            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, "/mnt/efs")
         });
 
         const apiName = `${lambdaName}-${environmentType.toLowerCase()}`;
@@ -129,6 +166,16 @@ export class FaiCodeIndexingStack extends Stack {
         new CfnOutput(this, "LambdaFunctionName", {
             value: lambdaFunction.functionName,
             description: "Lambda Function Name"
+        });
+
+        new CfnOutput(this, "EfsFileSystemId", {
+            value: fileSystem.fileSystemId,
+            description: "EFS File System ID"
+        });
+
+        new CfnOutput(this, "EfsAccessPointId", {
+            value: accessPoint.accessPointId,
+            description: "EFS Access Point ID"
         });
     }
 }
