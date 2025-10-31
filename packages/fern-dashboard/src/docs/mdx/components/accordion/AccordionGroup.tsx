@@ -55,6 +55,7 @@ export function AccordionGroup({ children }: AccordionGroupProps) {
     const anchor = useCurrentAnchor();
     const [updatedUrl, setUpdatedUrl] = useState<string | null>(null);
     const [isProgrammaticUpdate, setIsProgrammaticUpdate] = useState(false);
+    const popoverRef = useRef<HTMLDivElement>(null);
 
     const registerAccordion = useCallback((accordion: AccordionData) => {
         setAccordions((prevAccordions) => {
@@ -152,9 +153,12 @@ export function AccordionGroup({ children }: AccordionGroupProps) {
     const { isWithinEditor } = useEditorComponent();
     const { appendChildrenMdx } = useEditorComponentChildren();
 
-    return (
-        <>
-            <AccordionContext.Provider value={contextValue}>
+    const accordionGroupContent = (
+        <AccordionContext.Provider value={contextValue}>
+            <div ref={popoverRef} className="relative">
+                {isWithinEditor && (
+                    <EditorComponentPopoverButton className="absolute -right-8 top-2 z-10 h-auto w-auto px-2" />
+                )}
                 <AccordionComponent.Accordion
                     type="multiple"
                     value={activeTabs}
@@ -177,8 +181,18 @@ export function AccordionGroup({ children }: AccordionGroupProps) {
                         </div>
                     )}
                 </AccordionComponent.Accordion>
-            </AccordionContext.Provider>
-        </>
+            </div>
+        </AccordionContext.Provider>
+    );
+
+    if (!isWithinEditor) {
+        return accordionGroupContent;
+    }
+
+    return (
+        <EditorComponentPopoverProvider attributes={{}} targetRef={popoverRef} hoverSlopThreshold={48}>
+            {accordionGroupContent}
+        </EditorComponentPopoverProvider>
     );
 }
 
@@ -214,8 +228,9 @@ function AccordionItem({
     nestedHeaders,
     registerAccordion,
     unregisterAccordion,
-    accordions
-}: AccordionProps & AccordionContextType) {
+    accordions,
+    isInGroup = false
+}: AccordionProps & AccordionContextType & { isInGroup?: boolean }) {
     const uniqueId = React.useId();
     const accordionId = id || `accordion-${uniqueId}`;
 
@@ -251,7 +266,7 @@ function AccordionItem({
                 {isWithinEditor && (
                     <EditorComponentPopoverButton
                         className="absolute right-2 top-2 h-auto w-auto px-2"
-                        disableDelete={accordions.length === 1}
+                        disableDelete={isInGroup && accordions.length === 1}
                     />
                 )}
             </AccordionComponent.AccordionTrigger>
@@ -292,10 +307,11 @@ export function Accordion(props: AccordionProps) {
                         console.error("[unregisterAccordion] AccordionItem is not within an AccordionContext");
                     }}
                     accordions={[{ id: props.id || "", title: props.title || "" }]}
+                    isInGroup={false}
                 />
             </AccordionComponent.Accordion>
         );
     }
 
-    return <AccordionItem {...props} {...accordionContext} />;
+    return <AccordionItem {...props} {...accordionContext} isInGroup={true} />;
 }

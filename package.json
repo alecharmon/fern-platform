@@ -40,6 +40,7 @@
     "fdr:stop": "bash scripts/stop-local-fdr.sh",
     "fdr:unlink-from-cli": "bash scripts/unlink-fdr-sdk-from-cli.sh",
     "format": "pnpm lint:biome:fix && pnpm check:fix && pnpm format:yaml:fix",
+    "format:check": "pnpm format:yaml:check",
     "format:package-json": "sort-package-json \"generators/**/package.json\" \"packages/**/package.json\" --ignore \"**/dist\" --ignore \"**lib\" --ignore \"**/node_modules\"",
     "format:yaml:check": "prettier --check \"**/*.{yml,yaml}\"",
     "format:yaml:fix": "prettier --write \"**/*.{yml,yaml}\"",
