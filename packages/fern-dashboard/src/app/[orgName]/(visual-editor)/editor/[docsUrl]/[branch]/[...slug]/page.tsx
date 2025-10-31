@@ -6,8 +6,8 @@ import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/Ab
 import {
     constructEditorSlug,
     getEditorRedirectSlug,
-    getSerializableFoundNode,
-    ROOT_SLUG_ALIAS
+    getRootAliasAwareNavigationSlug,
+    getSerializableFoundNode
 } from "@fern-docs/components/navigation";
 import { getFrontmatter } from "@fern-docs/mdx";
 
@@ -50,11 +50,8 @@ export default async function Page({
         branchName: branch
     });
 
-    const requestedSlug = slugjoin(slug);
     const root = await loader.getRoot();
-
-    // If requested slug == ROOT_SLUG_ALIAS ("root"), use slug from the root node instead
-    const navigationSlug = requestedSlug === ROOT_SLUG_ALIAS ? root.slug : requestedSlug;
+    const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
     const navigationNode = FernNavigation.utils.findNode(root, navigationSlug);
 
     // Handle notFound case first - treat as potential client page instead of redirecting

@@ -91,3 +91,19 @@ function findFirstPageNode(
     }
     return undefined;
 }
+
+/**
+ * Returns the navigation slug to use for the requested slug, taking into account the root alias. This
+ * is used within the Editor to ensure that first land into editor (which uses a root alias) calculates
+ * the correct navigation slug to use.
+ *
+ * @param requestedSlug - The slug to find the navigation node for
+ * @param root - The root node of the navigation tree
+ * @returns The navigation slug to use for the requested slug, taking into account the root alias
+ */
+export function getRootAliasAwareNavigationSlug(
+    requestedSlug: string,
+    root: FernNavigation.RootNode
+): FernNavigation.Slug {
+    return requestedSlug === ROOT_SLUG_ALIAS ? root.slug : FernNavigation.Slug(requestedSlug);
+}

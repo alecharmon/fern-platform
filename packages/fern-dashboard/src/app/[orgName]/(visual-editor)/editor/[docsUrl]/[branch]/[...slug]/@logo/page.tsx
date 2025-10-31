@@ -3,8 +3,8 @@ import { withLogo } from "@fern-api/docs-server/withLogo";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { getPageId, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { AbstractLogo } from "@fern-docs/components/abstract/logo";
+import { getRootAliasAwareNavigationSlug } from "@fern-docs/components/navigation";
 import { getFrontmatter } from "@fern-docs/mdx";
-
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
@@ -34,7 +34,8 @@ export default async function LogoPage({
     ]);
 
     const resolveFileSrc = createFileResolver(files);
-    const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
+    const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
+    const foundNode = FernNavigation.utils.findNode(root, navigationSlug);
 
     let frontmatter = null;
     if (foundNode.type === "found") {

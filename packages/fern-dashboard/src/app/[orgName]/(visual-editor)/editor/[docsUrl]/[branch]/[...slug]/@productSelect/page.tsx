@@ -4,6 +4,7 @@ import { getFallbackProduct } from "@fern-api/docs-server/handle-node-fallbacks"
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { ProductDropdown } from "@fern-docs/components/header/ProductDropdown";
+import { getRootAliasAwareNavigationSlug } from "@fern-docs/components/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
@@ -34,9 +35,10 @@ export default async function ProductSelectPage({
     ]);
     const useDenseLayout = layout.isHeaderDisabled;
 
-    const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
+    const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
+    const foundNode = FernNavigation.utils.findNode(root, navigationSlug);
 
-    const fallbackProduct = getFallbackProduct(foundNode, root, slug);
+    const fallbackProduct = getFallbackProduct(foundNode, root, navigationSlug);
     if (fallbackProduct == null) {
         return null;
     }

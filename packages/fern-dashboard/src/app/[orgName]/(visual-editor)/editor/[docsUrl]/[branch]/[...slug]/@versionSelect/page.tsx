@@ -4,6 +4,7 @@ import { getFallbackProduct, getFallbackVersion } from "@fern-api/docs-server/ha
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { VersionDropdown } from "@fern-docs/components/header/VersionDropdown";
+import { getRootAliasAwareNavigationSlug } from "@fern-docs/components/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
@@ -34,7 +35,8 @@ export default async function VersionSelectPage({
     ]);
     const useDenseLayout = layout.isHeaderDisabled;
 
-    const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
+    const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
+    const foundNode = FernNavigation.utils.findNode(root, navigationSlug);
     const collector = FernNavigation.NodeCollector.collect(root);
     const versionNodes = collector.getVersionNodes();
 

@@ -13,6 +13,11 @@ export {
     getAllSectionsFromSidebarRootNode,
     getClientPageDefaultFilename
 } from "./pageUtils";
-export { constructEditorSlug, getEditorRedirectSlug, ROOT_SLUG_ALIAS } from "./routingUtils";
+export {
+    constructEditorSlug,
+    getEditorRedirectSlug,
+    getRootAliasAwareNavigationSlug,
+    ROOT_SLUG_ALIAS
+} from "./routingUtils";
 export * from "./types";
 export * from "./useDerivedFoundNode";
