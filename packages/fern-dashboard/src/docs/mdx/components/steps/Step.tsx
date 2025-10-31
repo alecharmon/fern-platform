@@ -105,6 +105,7 @@ export function Step({ children, className, title, id, toc = false, ...props }: 
                 <div className="relative">
                     <EditorComponentPopoverButton
                         className="absolute right-2 top-0"
+                        componentName="Step"
                         disableDelete={steps.length === 1}
                     />
                     {stepContent}

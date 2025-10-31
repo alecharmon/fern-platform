@@ -109,7 +109,7 @@ export const Image = forwardRef<
 
     const wrappedImageContent = isWithinEditor ? (
         <div ref={imageRef} className="relative w-full">
-            <EditorComponentPopoverButton className="absolute -right-[38px] z-10" />
+            <EditorComponentPopoverButton className="absolute -right-[38px] z-10" componentName="Image" />
             {imageContent}
         </div>
     ) : (

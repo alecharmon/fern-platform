@@ -109,7 +109,12 @@ function EndpointResponseSnippetInternal({
     const snippetContent = (
         <div ref={snippetRef} className={className}>
             <div className="bg-card-background border-card-border rounded-3 shadow-card-grayscale relative flex flex-col overflow-hidden border">
-                {isWithinEditor && <EditorComponentPopoverButton className="absolute right-2 top-0.5 z-10" />}
+                {isWithinEditor && (
+                    <EditorComponentPopoverButton
+                        className="absolute right-2 top-0.5 z-10"
+                        componentName="Endpoint Response Snippet"
+                    />
+                )}
                 <div className="border-card-border rounded-t-inherit flex min-h-10 items-center justify-between border-b px-2">
                     <div className="text-(color:--grayscale-a11) px-1 text-sm">Response</div>
                 </div>

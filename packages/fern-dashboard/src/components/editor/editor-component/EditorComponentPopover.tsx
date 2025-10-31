@@ -375,8 +375,10 @@ function ControlRenderer({
 // Button component
 export function EditorComponentPopoverButton<T extends AttributeConfig>({
     className,
-    disableDelete
+    disableDelete,
+    componentName
 }: {
+    componentName?: string;
     className?: string;
     disableDelete?: boolean;
 }) {
@@ -420,6 +422,9 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
         setIsOpen(false);
     };
 
+    const hasAttributes = Object.keys(attributes).length > 0;
+    const showDividerUnderComponentName = componentName && hasAttributes;
+
     return (
         <Popover.Root
             open={isOpen}
@@ -448,19 +453,30 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
                     )}
                     sideOffset={5}
                 >
-                    <div className="flex-1 space-y-3 overflow-y-auto p-4">
-                        {(Object.entries(attributes) as [keyof T, T[keyof T]][]).map(([name, control]) => (
-                            <ControlRenderer
-                                key={name as string}
-                                name={name as string}
-                                control={control}
-                                value={tempValues[name]}
-                                onChange={(value) => setTempValues((prev) => ({ ...prev, [name]: value }))}
-                            />
-                        ))}
-                    </div>
+                    {componentName && <div className="editor-component-title p-3 pb-1.5">{componentName}</div>}
+                    {showDividerUnderComponentName && <div className="border-border-default border-t" />}
+                    {hasAttributes && (
+                        <div className="flex-1 space-y-3 overflow-y-auto p-3 pt-2">
+                            {(Object.entries(attributes) as [keyof T, T[keyof T]][]).map(([name, control]) => (
+                                <ControlRenderer
+                                    key={name as string}
+                                    name={name as string}
+                                    control={control}
+                                    value={tempValues[name]}
+                                    onChange={(value) => setTempValues((prev) => ({ ...prev, [name]: value }))}
+                                />
+                            ))}
+                        </div>
+                    )}
 
-                    <div className="bg-popover border-border-default flex shrink-0 justify-between rounded-b-lg border-t p-2">
+                    <div
+                        className={cn(
+                            "bg-popover border-border-default flex shrink-0 justify-between rounded-b-lg border-t p-2",
+                            {
+                                "justify-end": disableDelete
+                            }
+                        )}
+                    >
                         {!disableDelete && (
                             <Button
                                 variant="ghost"
@@ -472,7 +488,7 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
                             </Button>
                         )}
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 self-end">
                             <Button variant="ghost" size="sm" onClick={handleCancelPressed}>
                                 Cancel
                             </Button>

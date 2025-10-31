@@ -42,7 +42,9 @@ export const Callout: FC<PropsWithChildren<Callout.Props>> = ({ intent: intentRa
 
     const calloutContent = (
         <div ref={calloutRef} data-intent={intent} className="fern-callout relative">
-            {isWithinEditor && <EditorComponentPopoverButton className="absolute right-2 top-2" />}
+            {isWithinEditor && (
+                <EditorComponentPopoverButton className="absolute right-2 top-2" componentName="Callout" />
+            )}
             <div className="flex items-start space-x-4">
                 <div className="[&_svg]:size-icon-md mt-0.5 w-4">
                     {typeof icon === "string" ? (

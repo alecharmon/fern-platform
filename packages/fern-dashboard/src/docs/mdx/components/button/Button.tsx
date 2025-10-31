@@ -64,7 +64,9 @@ export function Button({
 
     const buttonContent = (
         <div ref={buttonRef} className="relative inline-block">
-            {isWithinEditor && <EditorComponentPopoverButton className="absolute -right-[38px] top-0" />}
+            {isWithinEditor && (
+                <EditorComponentPopoverButton className="absolute -right-[38px] top-0" componentName="Button" />
+            )}
             {href != null ? (
                 <DisableFernAnchor>
                     <FernLinkButton

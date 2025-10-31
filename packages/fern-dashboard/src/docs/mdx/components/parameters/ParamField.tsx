@@ -46,7 +46,12 @@ export const ParamField: React.FC<
 
     const paramField = (
         <div className="fern-api-property border-border-default relative border-b" ref={popoverRef}>
-            {isWithinEditor && <EditorComponentPopoverButton className="absolute right-0 top-0 mr-2 mt-2" />}
+            {isWithinEditor && (
+                <EditorComponentPopoverButton
+                    className="absolute right-0 top-0 mr-2 mt-2"
+                    componentName="Param Field"
+                />
+            )}
             <div className="fern-api-property-header">
                 {toc && !isWithinEditor ? (
                     <FernAnchor href={`#${id}`} asChild>

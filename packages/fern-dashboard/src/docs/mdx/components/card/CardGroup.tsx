@@ -50,7 +50,9 @@ function CardGroupContent({
                 "grid-cols-1 sm:grid-cols-2 xl:grid-cols-6": cols >= 6
             })}
         >
-            {isWithinEditor && <EditorComponentPopoverButton className="absolute -right-10 top-0" />}
+            {isWithinEditor && (
+                <EditorComponentPopoverButton className="absolute -right-10 top-0" componentName="Card Group" />
+            )}
             {children}
         </div>
     );

@@ -105,6 +105,7 @@ function TabHeader({ id, title, tabs }: { id: string; title: string; tabs: TabDa
                 <EditorComponentPopoverButton
                     className="absolute -right-2.5 top-1/2 -translate-y-1/2 px-1 group-hover:bg-gray-400/50"
                     disableDelete={tabs.length === 1}
+                    componentName="Tab"
                 />
             </div>
         </EditorComponentPopoverProvider>

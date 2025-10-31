@@ -69,7 +69,7 @@ export const Card: React.FC<Card.Props> = ({
     const content = (
         <div ref={popoverRef} className="relative">
             <div className="absolute -right-4 -top-4 flex items-center gap-1">
-                {isWithinEditor && <EditorComponentPopoverButton className="h-full" />}
+                {isWithinEditor && <EditorComponentPopoverButton className="h-full" componentName="Card" />}
                 {badge != null && <Badge intent="primary">{badge}</Badge>}
             </div>
             <div

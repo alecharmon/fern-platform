@@ -751,3 +751,7 @@ code:not(.code-block) {
 [data-resize-handle-state] {
   cursor: ew-resize !important;
 }
+
+.editor-component-title {
+  @apply text-xs font-medium uppercase tracking-wide text-gray-900;
+}

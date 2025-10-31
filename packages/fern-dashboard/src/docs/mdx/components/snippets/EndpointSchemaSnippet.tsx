@@ -114,7 +114,12 @@ function EndpointSchemaSnippetInternal({
     const snippetContent = (
         <div ref={snippetRef} className={className}>
             <div className="bg-card-background border-card-border rounded-3 shadow-card-grayscale relative flex flex-col overflow-hidden border">
-                {isWithinEditor && <EditorComponentPopoverButton className="absolute right-2 top-0.5 z-10" />}
+                {isWithinEditor && (
+                    <EditorComponentPopoverButton
+                        className="absolute right-2 top-0.5 z-10"
+                        componentName="Endpoint Schema Snippet"
+                    />
+                )}
                 <TypeDefinitionRoot types={types} slug={currentSlug}>
                     <TypeDefinitionSlotsServer types={types}>
                         <div className="space-y-4 p-4">

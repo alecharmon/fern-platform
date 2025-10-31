@@ -30,7 +30,9 @@ export function Embed({ src, type, ...props }: Embed.Props) {
 
     const embedContent = (
         <div ref={embedRef} className="relative w-full">
-            {isWithinEditor && <EditorComponentPopoverButton className="absolute -right-[38px] z-10" />}
+            {isWithinEditor && (
+                <EditorComponentPopoverButton className="absolute -right-[38px] z-10" componentName="Embed" />
+            )}
 
             {!src || src.trim() === "" ? (
                 // Placeholder when no src is provided

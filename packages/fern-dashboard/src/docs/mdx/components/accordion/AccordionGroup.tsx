@@ -157,7 +157,10 @@ export function AccordionGroup({ children }: AccordionGroupProps) {
         <AccordionContext.Provider value={contextValue}>
             <div ref={popoverRef} className="relative">
                 {isWithinEditor && (
-                    <EditorComponentPopoverButton className="absolute -right-8 top-2 z-10 h-auto w-auto px-2" />
+                    <EditorComponentPopoverButton
+                        className="absolute -right-8 top-2 z-10 h-auto w-auto px-2"
+                        componentName="Accordion Group"
+                    />
                 )}
                 <AccordionComponent.Accordion
                     type="multiple"
@@ -266,6 +269,7 @@ function AccordionItem({
                 {isWithinEditor && (
                     <EditorComponentPopoverButton
                         className="absolute right-2 top-2 h-auto w-auto px-2"
+                        componentName="Accordion"
                         disableDelete={isInGroup && accordions.length === 1}
                     />
                 )}

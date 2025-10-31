@@ -149,7 +149,7 @@ export function StepGroup({ children, className, toc = false, ...props }: StepGr
                     openPopoverIfNewlyCreated={false}
                 >
                     <div className="relative">
-                        <EditorComponentPopoverButton className="absolute -right-8 -top-2" />
+                        <EditorComponentPopoverButton className="absolute -right-8 -top-2" componentName="Steps" />
                         {stepGroupContent}
                     </div>
                 </EditorComponentPopoverProvider>
