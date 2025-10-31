@@ -29,6 +29,8 @@ export declare namespace PageNode {
     };
 }
 
+const SUPPORTED_NODE_TYPES = new Set(["page", "section", "landingPage"]);
+
 export default function PageNode(props: PageNode.Props) {
     const { pageDataDeps, fallbackFoundNode, cssConfig, serializableRootNode } = props;
 
@@ -69,9 +71,7 @@ export default function PageNode(props: PageNode.Props) {
     // foundNode from useDerivedFoundNode already includes fallbackFoundNode merge logic
     const found = foundNode;
 
-    const isUnsupportedNodeType = foundNode.node.type !== "page" && foundNode.node.type !== "section";
-
-    if (isUnsupportedNodeType) {
+    if (!SUPPORTED_NODE_TYPES.has(foundNode.node.type)) {
         return (
             <UnsupportedContent>
                 This page type is not visible in Fern Editor: &ldquo;
