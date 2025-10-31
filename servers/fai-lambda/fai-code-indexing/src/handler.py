@@ -14,7 +14,7 @@ from shared.utils.validation import validate_body_param_or_throw
 
 from .operations import (
     run_code_search_tool_call,
-    setup_repo_for_domain,
+    setup_repos_for_domain,
 )
 
 logger = logging.getLogger()
@@ -32,9 +32,10 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         event_type: Literal["codeSearch", "indexRepo"] = validate_body_param_or_throw(body, "eventType")
 
         if event_type == "indexRepo":
-            repo_url = validate_body_param_or_throw(body, "repoUrl")
-            asyncio.run(setup_repo_for_domain(domain=domain, repo_url=repo_url))
-            message = "Repository indexed successfully"
+            repo_urls = validate_body_param_or_throw(body, "repoUrls", list[str])
+            asyncio.run(setup_repos_for_domain(domain=domain, repo_urls=repo_urls))
+
+            message = f"Successfully indexed {len(repo_urls)} repositories"
         elif event_type == "codeSearch":
             asyncio.run(run_code_search_tool_call(domain=domain))
             message = "Code search completed successfully"

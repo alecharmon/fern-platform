@@ -7,12 +7,12 @@ from fai.models.db.index_source_db import IndexSourceStatus
 
 
 class IndexGithubRequest(BaseModel):
-    repo_url: str = Field(description="GitHub repository URL to index")
+    repo_urls: list[str] = Field(description="GitHub repository URLs to index")
 
 
 class IndexGithubResponse(BaseModel):
     job_id: str = Field(description="Job ID for tracking indexing progress")
-    repo_url: str = Field(description="GitHub repository URL being indexed")
+    repo_urls: list[str] = Field(description="GitHub repository URLs being indexed")
 
 
 class GithubIndexStatusResponse(BaseModel):

@@ -7,20 +7,20 @@ from .analysis import analyze_repositories_for_domain
 logger = logging.getLogger()
 
 
-async def setup_repo_for_domain(domain: str, repo_url: str) -> SetupRepoResult:
-    """Set up a repository for a domain by cloning and indexing it.
+async def setup_repos_for_domain(domain: str, repo_urls: list[str]) -> SetupRepoResult:
+    """Set up repositories for a domain by cloning and indexing them.
 
     Args:
-        domain: The domain to associate the repository with
-        repo_url: The GitHub repository URL to clone and index
+        domain: The domain to associate the repositories with
+        repo_urls: List of GitHub repository URLs to clone and index
 
     Returns:
         Dictionary with setup results
     """
-    logger.info(f"Setting up repository for domain: {domain}, repo: {repo_url}")
+    logger.info(f"Setting up repositories for domain: {domain}, repos: {repo_urls}")
 
-    repo_path = clone_repo_to_domain(domain=domain, repo_url=repo_url)
-    logger.info(f"Repository cloned to: {repo_path}")
+    for repo_url in repo_urls:
+        await clone_repo_to_domain(domain=domain, repo_url=repo_url)
 
     analysis_result = await analyze_repositories_for_domain(domain=domain)
     logger.info(f"Analysis completed for domain {domain} repositories")

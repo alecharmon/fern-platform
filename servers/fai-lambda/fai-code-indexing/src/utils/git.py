@@ -1,12 +1,12 @@
+import asyncio
 import logging
 import os
-import subprocess
 from pathlib import Path
 
 logger = logging.getLogger()
 
 
-def clone_repo_to_domain(domain: str, repo_url: str) -> str:
+async def clone_repo_to_domain(domain: str, repo_url: str) -> str:
     """Clone a GitHub repository into EFS under a domain folder.
 
     Args:
@@ -33,40 +33,69 @@ def clone_repo_to_domain(domain: str, repo_url: str) -> str:
     if repo_path.exists():
         logger.info(f"Repository already exists at {repo_path}, pulling latest changes")
         try:
-            subprocess.run(
-                ["git", "config", "--global", "--add", "safe.directory", str(repo_path)],
-                capture_output=True,
-                text=True,
+            config_process = await asyncio.create_subprocess_exec(
+                "git",
+                "config",
+                "--global",
+                "--add",
+                "safe.directory",
+                str(repo_path),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            subprocess.run(
-                ["git", "-C", str(repo_path), "fetch", "origin"],
-                check=True,
-                capture_output=True,
-                text=True,
+            _, _ = await config_process.communicate()
+
+            process = await asyncio.create_subprocess_exec(
+                "git",
+                "-C",
+                str(repo_path),
+                "fetch",
+                "origin",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            subprocess.run(
-                ["git", "-C", str(repo_path), "pull", "origin"],
-                check=True,
-                capture_output=True,
-                text=True,
+            _, stderr = await process.communicate()
+            if process.returncode != 0:
+                raise RuntimeError(f"Failed to fetch: {stderr.decode()}")
+
+            process = await asyncio.create_subprocess_exec(
+                "git",
+                "-C",
+                str(repo_path),
+                "pull",
+                "origin",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            _, stderr = await process.communicate()
+            if process.returncode != 0:
+                raise RuntimeError(f"Failed to pull: {stderr.decode()}")
+
             logger.info(f"Successfully pulled latest changes at {repo_path}")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to pull repository: {e.stderr}")
-            raise RuntimeError(f"Failed to pull latest changes: {e.stderr}")
+        except Exception as e:
+            logger.error(f"Failed to pull repository: {e}")
+            raise RuntimeError(f"Failed to pull latest changes: {e}")
     else:
         clone_url = f"https://x-access-token:{github_token}@github.com/{repo_identifier}.git"
 
         logger.info(f"Cloning {repo_identifier} into {repo_path} (shallow)")
         try:
-            subprocess.run(
-                ["git", "clone", "--depth", "1", clone_url, str(repo_path)],
-                check=True,
-                capture_output=True,
-                text=True,
+            process = await asyncio.create_subprocess_exec(
+                "git",
+                "clone",
+                "--depth",
+                "1",
+                clone_url,
+                str(repo_path),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to clone repository: {e.stderr}")
-            raise RuntimeError(f"Failed to clone {repo_identifier}: {e.stderr}")
+            _, stderr = await process.communicate()
+            if process.returncode != 0:
+                raise RuntimeError(f"Failed to clone {repo_identifier}: {stderr.decode()}")
+            logger.info(f"Repository cloned to: {repo_path}")
+        except Exception as e:
+            logger.error(f"Failed to clone repository: {e}")
+            raise RuntimeError(f"Failed to clone {repo_identifier}: {e}")
 
     return str(repo_path)
