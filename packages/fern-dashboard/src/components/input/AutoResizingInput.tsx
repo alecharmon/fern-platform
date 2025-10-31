@@ -16,15 +16,18 @@ export function AutoResizingInput({
     useEffect(() => {
         const textarea = textareaRef.current;
         if (textarea) {
-            textarea.style.height = "auto";
-            textarea.style.height = `${textarea.scrollHeight}px`;
+            // Reset height to get accurate scrollHeight measurement
+            textarea.style.height = "0";
+            // Set height based on scrollHeight
+            const newHeight = textarea.scrollHeight;
+            textarea.style.height = `${newHeight}px`;
         }
     }, [value]);
 
     return (
         <textarea
             ref={textareaRef}
-            className={cn("w-full flex-1 resize-none overflow-hidden focus:outline-none", className)}
+            className={cn("w-full flex-1 resize-none overflow-hidden focus:outline-none leading-none", className)}
             name={name}
             onChange={onChange}
             placeholder={placeholder}
