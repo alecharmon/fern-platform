@@ -178,7 +178,7 @@ function SelectControlComponent({
                 <SelectTrigger className="w-full">
                     <SelectValue placeholder={`Select ${name}`} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-border">
                     {control.options.map((option: string) => (
                         <SelectItem key={option} value={option}>
                             {option}
