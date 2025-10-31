@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.INFO)
 
 
 class Settings:

@@ -55,7 +55,7 @@ async def create_editing_session(
             base_branch=request.base_branch,
             working_branch=working_branch,
             pr_url=None,
-            status=EditingSessionStatus.WAITING,
+            status=EditingSessionStatus.STARTUP,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
         )

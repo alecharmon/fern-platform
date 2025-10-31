@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from datetime import (
     UTC,
@@ -43,7 +44,6 @@ from fai.utils.slack.edit_handler import (
     get_or_create_editing_session_for_thread,
     interrupt_editing_session,
     invoke_editing_lambda,
-    mark_session_as_active,
     store_editing_session_for_thread,
     wait_for_interruption,
 )
@@ -401,7 +401,50 @@ async def handle_slack_message(
                     query_id=None,
                     user_id=context.user,
                 )
-            elif session_status and session_status.value in ["active", "waiting"]:
+            elif session_status and session_status.value == "startup":
+                LOGGER.info(f"Session {existing_editing_id} is in STARTUP state, waiting for it to become ACTIVE")
+                max_wait: int = 30
+                poll_interval: float = 0.5
+                elapsed: float = 0
+
+                while elapsed < max_wait:
+                    await asyncio.sleep(poll_interval)
+                    elapsed += poll_interval
+
+                    session_status = await get_editing_session_status(existing_editing_id)
+                    if session_status and session_status.value in ["active", "waiting"]:
+                        LOGGER.info(
+                            f"Session {existing_editing_id} transitioned to {session_status.value}, "
+                            f"proceeding with interruption"
+                        )
+                        break
+                    elif session_status and session_status.value not in ["startup", "active", "waiting"]:
+                        LOGGER.warning(
+                            f"Session {existing_editing_id} in unexpected state {session_status.value}, aborting"
+                        )
+                        error_text = "❌ Session is in an unexpected state. Please try again."
+                        return SlackMessageResponse(
+                            response_text=error_text,
+                            channel=context.channel,
+                            thread_ts=context.thread_ts,
+                            bot_token=integration.slack_bot_token,
+                            query_id=None,
+                            user_id=context.user,
+                        )
+
+                if not session_status or session_status.value not in ["active", "waiting"]:
+                    LOGGER.warning(f"Timeout waiting for session {existing_editing_id} to become ACTIVE/WAITING")
+                    error_text = "⏳ Previous edit session is still starting up. Please wait a moment and try again."
+                    return SlackMessageResponse(
+                        response_text=error_text,
+                        channel=context.channel,
+                        thread_ts=context.thread_ts,
+                        bot_token=integration.slack_bot_token,
+                        query_id=None,
+                        user_id=context.user,
+                    )
+
+            if session_status and session_status.value in ["active", "waiting"]:
                 LOGGER.info(f"Interrupting {session_status.value} session {existing_editing_id} for new edit request")
 
                 interrupt_success = await interrupt_editing_session(existing_editing_id)
@@ -507,13 +550,6 @@ async def handle_slack_message(
                 )
             except Exception as e:
                 LOGGER.error(f"Failed to store editing session mapping: {e}", exc_info=True)
-
-        if existing_editing_id:
-            mark_success = await mark_session_as_active(existing_editing_id)
-            if not mark_success:
-                LOGGER.warning(
-                    f"Failed to mark session {existing_editing_id} as ACTIVE, but proceeding with Lambda invocation"
-                )
 
         result = await invoke_editing_lambda(
             prompt=context.text,

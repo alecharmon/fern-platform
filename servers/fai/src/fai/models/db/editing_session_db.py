@@ -31,7 +31,7 @@ class EditingSessionDb(Base):
     id = Column(String, primary_key=True)
 
     session_id = Column(String, nullable=True)
-    status = Column(Enum(EditingSessionStatus), nullable=False, default=EditingSessionStatus.WAITING)
+    status = Column(Enum(EditingSessionStatus), nullable=False, default=EditingSessionStatus.STARTUP)
 
     # Repository information
     repository = Column(String, nullable=False)

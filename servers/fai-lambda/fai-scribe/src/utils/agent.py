@@ -96,13 +96,6 @@ async def run_editing_session(
     setup_persistent_claude_storage(repo_path)
     configure_git_auth(repo_path)
 
-    await update_session_status(editing_id, "active")
-
-    if await check_if_interrupted(editing_id):
-        LOGGER.warning(f"Session interrupted before starting: {editing_id}")
-        await update_session_status(editing_id, "waiting")
-        raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
-
     if existing_pr_url:
         full_prompt = f"""{user_prompt}
 
@@ -144,6 +137,10 @@ After making the changes:
     async with ClaudeSDKClient(options=options) as client:
         await client.query(full_prompt)
 
+        if resume_session_id:
+            await update_session_status(editing_id, "active")
+            LOGGER.info(f"Transitioned resumed session {editing_id} from STARTUP to ACTIVE")
+
         async for message in client.receive_response():
             if hasattr(message, "subtype") and message.subtype == "init":
                 if hasattr(message, "data") and isinstance(message.data, dict):
@@ -152,10 +149,13 @@ After making the changes:
                         session_id = init_session_id
                         LOGGER.info(f"Captured session_id from init message: {session_id}")
                         await update_session_metadata(editing_id, session_id=session_id)
+                        await update_session_status(editing_id, "active")
+                        LOGGER.info(f"Transitioned new session {editing_id} from STARTUP to ACTIVE")
 
             if await check_if_interrupted(editing_id):
                 LOGGER.warning(f"Session interrupted: {editing_id}")
-                await update_session_status(editing_id, "waiting")
+                if session_id is not None:
+                    await update_session_status(editing_id, "waiting")
                 raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
 
             if isinstance(message, AssistantMessage):

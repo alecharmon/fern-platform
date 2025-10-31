@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class EditingSessionStatus(str, Enum):
     """Status of an editing session."""
 
+    STARTUP = "startup"
     WAITING = "waiting"
     ACTIVE = "active"
     INTERRUPTED = "interrupted"

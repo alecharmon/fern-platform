@@ -15,9 +15,7 @@ from .settings import (
 )
 from .utils.agent import (
     SessionInterruptedError,
-    check_if_interrupted,
     run_editing_session,
-    update_session_status,
 )
 from .utils.git import setup_editing_repo
 
@@ -76,11 +74,6 @@ async def handle_editing_request(
             editing_id=editing_id,
         )
         LOGGER.info(f"Repository ready at: {repo_path}")
-
-        if await check_if_interrupted(editing_id):
-            LOGGER.warning(f"Session interrupted after git operations: {editing_id}")
-            await update_session_status(editing_id, "waiting")
-            raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
 
         try:
             session_id, pr_url = await run_editing_session(

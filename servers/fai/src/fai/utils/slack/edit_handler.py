@@ -96,6 +96,30 @@ async def get_editing_session_status(editing_id: str) -> EditingSessionStatus | 
 async def interrupt_editing_session(editing_id: str) -> bool:
     """Interrupt an active editing session. Returns True if successful."""
     try:
+        status = await get_editing_session_status(editing_id)
+
+        if status == EditingSessionStatus.STARTUP:
+            logger.info(f"Session {editing_id} is in STARTUP state, waiting for it to become ACTIVE")
+            max_wait: int = 30
+            poll_interval: float = 0.5
+            elapsed: float = 0
+
+            while elapsed < max_wait:
+                await asyncio.sleep(poll_interval)
+                elapsed += poll_interval
+
+                status = await get_editing_session_status(editing_id)
+                if status == EditingSessionStatus.ACTIVE:
+                    logger.info(f"Session {editing_id} transitioned to ACTIVE, proceeding with interruption")
+                    break
+                elif status not in [EditingSessionStatus.STARTUP, EditingSessionStatus.ACTIVE]:
+                    logger.warning(f"Session {editing_id} in unexpected state {status}, aborting interruption")
+                    return False
+
+            if status != EditingSessionStatus.ACTIVE:
+                logger.warning(f"Timeout waiting for session {editing_id} to become ACTIVE")
+                return False
+
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(f"{CONFIG.FAI_SERVER_URL}/editing-sessions/{editing_id}/interrupt")
 
@@ -174,27 +198,6 @@ async def create_editing_session(repository: str, base_branch: str = "main") -> 
     except Exception as e:
         logger.error(f"Error creating editing session: {e}", exc_info=True)
         return None
-
-
-async def mark_session_as_active(editing_id: str) -> bool:
-    """Mark an editing session as ACTIVE before Lambda invocation."""
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.put(
-                f"{CONFIG.FAI_SERVER_URL}/editing-sessions/{editing_id}",
-                json={"status": "active"},
-            )
-
-            if response.status_code != 200:
-                logger.error(f"Failed to mark session as active: {response.status_code} - {response.text}")
-                return False
-
-            logger.info(f"Marked editing session {editing_id} as ACTIVE")
-            return True
-
-    except Exception as e:
-        logger.error(f"Error marking session as active: {e}", exc_info=True)
-        return False
 
 
 async def invoke_editing_lambda(
