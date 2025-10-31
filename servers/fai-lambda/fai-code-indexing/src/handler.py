@@ -35,16 +35,23 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             repo_urls = validate_body_param_or_throw(body, "repoUrls", list[str])
             asyncio.run(setup_repos_for_domain(domain=domain, repo_urls=repo_urls))
 
-            message = f"Successfully indexed {len(repo_urls)} repositories"
-        elif event_type == "codeSearch":
-            asyncio.run(run_code_search_tool_call(domain=domain))
-            message = "Code search completed successfully"
+            response_body = {
+                "message": f"Successfully indexed {len(repo_urls)} repositories",
+                "timestamp": datetime.now(UTC).isoformat(),
+                "requestId": context.aws_request_id,
+            }
 
-        response_body = {
-            "message": message,
-            "timestamp": datetime.now(UTC).isoformat(),
-            "requestId": context.aws_request_id,
-        }
+        elif event_type == "codeSearch":
+            question = validate_body_param_or_throw(body, "question")
+            session_id = body.get("sessionId")
+            result = asyncio.run(run_code_search_tool_call(domain=domain, question=question, session_id=session_id))
+
+            response_body = {
+                "message": "Code search completed successfully",
+                "timestamp": datetime.now(UTC).isoformat(),
+                "requestId": context.aws_request_id,
+                "answer": result.get("answer", None),
+            }
 
         return {
             "statusCode": 200,
