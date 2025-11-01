@@ -12,6 +12,8 @@ import { useBranch } from "@/providers/BranchContext";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useCommitToGitHubMutation } from "@/state/useCommitToGitHubMutation";
+import { useCreateBranchMutation } from "@/state/useCreateBranchMutation";
+import type { DocsUrl } from "@/utils/types";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { DashboardTooltip } from "./DashboardTooltip";
@@ -39,6 +41,7 @@ export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitBu
     const { files, handleCommitSuccess } = useNavigation();
 
     const commitMutation = useCommitToGitHubMutation();
+    const createBranchMutation = useCreateBranchMutation();
 
     // Track if this is the first commit in this session
     const hasCommittedRef = useRef(false);
@@ -67,7 +70,7 @@ export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitBu
         }
 
         try {
-            const response = await commitMutation.mutateAsync({
+            let response = await commitMutation.mutateAsync({
                 orgName,
                 owner,
                 repo,
@@ -76,6 +79,41 @@ export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitBu
                 message: DEFAULT_COMMIT_MESSAGE,
                 files: files.forCommit
             });
+
+            // If commit fails because branch doesn't exist, try creating it first
+            if (!response.success && response.error.type === "FAILED_TO_GET_BRANCH_SHA") {
+                if (!baseBranch) {
+                    ErrorNoBaseBranchToast();
+                    return;
+                }
+
+                // Try to create the branch
+                const branchResult = await createBranchMutation.mutateAsync({
+                    orgName,
+                    site: site as DocsUrl,
+                    owner,
+                    repo,
+                    branch,
+                    baseBranch
+                });
+
+                if (branchResult.success) {
+                    // Retry the commit now that branch exists
+                    response = await commitMutation.mutateAsync({
+                        orgName,
+                        owner,
+                        repo,
+                        site,
+                        branch,
+                        message: DEFAULT_COMMIT_MESSAGE,
+                        files: files.forCommit
+                    });
+                } else {
+                    console.error("[CommitButton] Failed to create branch:", branchResult.error);
+                    ErrorCommitToast();
+                    return;
+                }
+            }
 
             if (response.success) {
                 SuccessfulCommitToast();
@@ -115,7 +153,7 @@ export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitBu
             }
         } catch (error) {
             ErrorCommitToast();
-            console.error("Error committing changes:", error);
+            console.error("[CommitButton] Error committing changes:", error);
             // TODO: Move error reporting into toasts handlers
             Sentry.captureException(error);
         }
@@ -134,6 +172,7 @@ export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitBu
         files.hasChangesToCommit,
         handleCommitSuccess,
         commitMutation,
+        createBranchMutation,
         onShowCelebrationModal,
         onFirstCommit
     ]);

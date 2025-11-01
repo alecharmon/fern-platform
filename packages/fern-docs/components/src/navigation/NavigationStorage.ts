@@ -4,6 +4,29 @@ import { createEmptyNavigationSnapshot, NAVIGATION_SNAPSHOT_SCHEMA_VERSION, type
 
 export const NAVIGATION_STORAGE_KEY = "fern-navigation-storage:";
 
+/**
+ * NavigationStorage provides persistence for navigation state across page reloads.
+ *
+ * IMPORTANT: Potential race condition issue with async storage writes
+ * ---------------------------------------------------------------
+ * The `setStore` method is called frequently during editing operations (page creation,
+ * section renames, deletions, etc.). Since storage operations can be async (especially
+ * with BufferedStorage backed by IndexedDB), rapid consecutive updates may result in
+ * writes completing out of order.
+ *
+ * Example scenario:
+ * 1. User renames section "A" -> "B" (triggers write #1)
+ * 2. User immediately renames "B" -> "C" (triggers write #2)
+ * 3. If write #2 completes before write #1, final state could be "B" instead of "C"
+ *
+ * Potential solutions to investigate:
+ * - Implement a write queue to ensure sequential completion
+ * - Debounce storage writes (but maintain responsiveness)
+ * - Use version/timestamp to detect and discard stale writes
+ * - Switch to synchronous storage with async background persistence
+ *
+ * Currently this is a known limitation but has not caused reported issues in practice.
+ */
 export class NavigationStorage {
     constructor(private readonly _storage: Storage | BufferedStorage) {}
 
@@ -42,21 +65,49 @@ export class NavigationStorage {
             return null;
         }
 
-        const parsed = JSON.parse(serialized) as NavigationSnapshot;
-        const currentSchemaVersion = parsed.schemaVersion ?? 0;
+        const parsed = JSON.parse(serialized);
+        const currentSchemaVersion: number = parsed.schemaVersion ?? 0;
 
         // Run migrations if needed
         if (currentSchemaVersion < NAVIGATION_SNAPSHOT_SCHEMA_VERSION) {
             // Create backup before migrating
             this._storage.set(`backup:v${currentSchemaVersion}:${branchName}`, serialized);
-            return runMigrations(branchName, parsed, currentSchemaVersion);
+
+            // Deserialize schema-specific fields before migration
+            const dataToMigrate: any = { ...parsed };
+
+            // V0 → V1: committedFiles is a Set (serialized as array)
+            if (currentSchemaVersion === 0 && Array.isArray(parsed.committedFiles)) {
+                dataToMigrate.committedFiles = new Set(parsed.committedFiles);
+            }
+
+            // V1 → V2: docsYmlChanges is a Map (serialized as array)
+            if (currentSchemaVersion === 1 && Array.isArray(parsed.docsYmlChanges)) {
+                dataToMigrate.docsYmlChanges = new Map(parsed.docsYmlChanges);
+            }
+
+            const migrated = runMigrations(branchName, dataToMigrate, currentSchemaVersion);
+            // Persist migrated data back to storage
+            this.setStore(branchName, migrated.metadata.orgName, migrated.metadata.docsUrl, migrated);
+            return migrated;
         }
 
+        // Current version - deserialize Maps and Sets
         return {
-            ...parsed,
-            // Convert docsYmlChanges array back to Map after JSON parsing
-            // The parsed.docsYmlChanges should be an array of [key, value] tuples
-            docsYmlChanges: new Map(Array.isArray(parsed.docsYmlChanges) ? parsed.docsYmlChanges : [])
+            ...(parsed as NavigationSnapshot),
+            // Deserialize: Array of [key, value] tuples → Map
+            navigationChanges: new Map(Array.isArray(parsed.navigationChanges) ? parsed.navigationChanges : []),
+            // Deserialize: Array of entries → Map for multi-file, or keep as string | null for single-file
+            docsYmlBaseContent:
+                Array.isArray(parsed.docsYmlBaseContent) &&
+                (parsed.docsYmlBaseContent.length === 0 || Array.isArray(parsed.docsYmlBaseContent[0]))
+                    ? new Map(parsed.docsYmlBaseContent as [string, string][])
+                    : parsed.docsYmlBaseContent,
+            // Deserialize: Array of entries → Map
+            slugToDocsYmlFilePath:
+                parsed.slugToDocsYmlFilePath != null && Array.isArray(parsed.slugToDocsYmlFilePath)
+                    ? new Map(parsed.slugToDocsYmlFilePath as [string, string][])
+                    : parsed.slugToDocsYmlFilePath
         };
     }
 
@@ -68,8 +119,18 @@ export class NavigationStorage {
                 orgName,
                 docsUrl
             },
-            // Convert Map to Array for JSON serialization
-            docsYmlChanges: Array.from(data.docsYmlChanges || new Map())
+            // Serialize: Map → Array of [key, value] tuples for JSON
+            navigationChanges: Array.from(data.navigationChanges || new Map()),
+            // Serialize: Map → Array for multi-file, or keep as string | null for single-file
+            docsYmlBaseContent:
+                data.docsYmlBaseContent instanceof Map
+                    ? Array.from(data.docsYmlBaseContent.entries())
+                    : data.docsYmlBaseContent,
+            // Serialize: Map → Array of entries for JSON
+            slugToDocsYmlFilePath:
+                data.slugToDocsYmlFilePath instanceof Map
+                    ? Array.from(data.slugToDocsYmlFilePath.entries())
+                    : data.slugToDocsYmlFilePath
         };
         this._storage.set(branchName, JSON.stringify(serializable));
     }

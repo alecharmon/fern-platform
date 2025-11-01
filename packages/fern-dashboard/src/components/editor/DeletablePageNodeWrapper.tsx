@@ -1,38 +1,24 @@
 "use client";
 
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { Button } from "@fern-docs/components/FernButtonV2";
 import { constructEditorSlug, ROOT_SLUG_ALIAS, useNavigation } from "@fern-docs/components/navigation";
-import { useIsSelectedSidebarNode } from "@fern-docs/components/state/navigation";
 import * as Popover from "@radix-ui/react-popover";
 import { MinusCircleIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { UI_MESSAGES } from "@/utils/messages";
 import type { EncodedDocsUrl } from "@/utils/types";
-import { DashboardTooltip } from "./DashboardTooltip";
 
 interface DeletablePageNodeWrapperProps {
     node: FernNavigation.NavigationNodeWithMarkdown;
     component: ReactNode;
-    icon: React.ReactNode;
-    depth: number;
-    className?: string;
 }
 
-export function DeletablePageNodeWrapper({
-    node,
-    component,
-    icon,
-    depth,
-    className
-}: DeletablePageNodeWrapperProps): ReactNode {
-    const ref = useRef<HTMLAnchorElement>(null);
+export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeWrapperProps): ReactNode {
     const params = useParams();
     const router = useRouter();
     const navigation = useNavigation();
-    const selected = useIsSelectedSidebarNode(node.id);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Get page entry from registry to determine if it's a client page
@@ -42,24 +28,16 @@ export function DeletablePageNodeWrapper({
 
     const isClientPage = pageEntry?.pageData.source === "client";
 
-    // LIMITATION: Page deletion is not supported for multi-product or multi-version docs
-    // These docs have separate docs.yml files for each product/version, and we would need to
-    // determine which specific file to modify. This is a complex operation that's not yet supported.
-    const canEditNavigation = navigation.canDirectlyEditDocsYmlNavigation;
-    const deleteDisabledTooltip = !canEditNavigation
-        ? UI_MESSAGES.NAVIGATION_EDITS_NOT_SUPPORTED_MULTI_DOCS_YML
-        : undefined;
-
     // Get filename for this page (used for deletion tracking)
     const filename = pageEntry?.pageData.filename || ("pageId" in node ? node.pageId : null);
 
-    // Check if page is marked for deletion either in registry or in docsYmlChanges
+    // Check if page is marked for deletion either in registry or in navigationChanges
     const isMarkedForDeletion = pageEntry?.isMarkedForDeletion ?? false;
 
-    // For server pages not in registry, check docsYmlChanges
+    // For server pages not in registry, check navigationChanges
     const isMarkedForDeletionInDocsYml =
-        filename && navigation.docsYmlChanges
-            ? Array.from(navigation.docsYmlChanges.entries()).some(
+        filename && navigation.navigationChanges
+            ? Array.from(navigation.navigationChanges.entries()).some(
                   ([changeFilename, change]) => changeFilename === filename && change.type === "remove_page"
               )
             : false;
@@ -86,7 +64,7 @@ export function DeletablePageNodeWrapper({
 
     const handleConfirmedDelete = () => {
         if (!params || !filename) {
-            console.error("Cannot delete page: no filename available");
+            console.error("[DeletablePageNodeWrapper] Cannot delete page: no filename available");
             return;
         }
 
@@ -103,7 +81,7 @@ export function DeletablePageNodeWrapper({
             const foundNode = pageEntry.pageData.foundNode;
             if (foundNode.currentTab && "slug" in foundNode.currentTab) {
                 redirectTarget = foundNode.currentTab.slug;
-            } else if (foundNode.currentProduct) {
+            } else if (foundNode.currentProduct && FernNavigation.isInternalProductNode(foundNode.currentProduct)) {
                 redirectTarget = foundNode.currentProduct.slug;
             } else if (foundNode.parents.length > 0) {
                 // Go to the immediate parent section/group
@@ -123,7 +101,7 @@ export function DeletablePageNodeWrapper({
 
         const redirectUrl = constructEditorSlug({
             orgName: String(params.orgName) as Auth0OrgName,
-            docsUrl: encodeURIComponent(String(params.docsUrl)) as EncodedDocsUrl,
+            docsUrl: String(params.docsUrl) as EncodedDocsUrl, // NOTE: params.docsUrl should already be encoded
             branchName: String(params.branch),
             slug: redirectTarget
         });
@@ -134,25 +112,16 @@ export function DeletablePageNodeWrapper({
     // Render delete confirmation popover
     const renderDeleteConfirmation = () => {
         return (
-            <Popover.Root open={showDeleteConfirm && canEditNavigation} onOpenChange={setShowDeleteConfirm}>
-                <DashboardTooltip content={deleteDisabledTooltip} side="right" hideInnerSpan>
-                    <Popover.Trigger asChild>
-                        <button
-                            className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-red-600 opacity-0 transition-opacity duration-200 hover:bg-red-50 hover:text-red-700 group-hover/deletable:opacity-100 data-[state=open]:opacity-100 dark:text-red-400 dark:hover:bg-red-950/20 dark:hover:text-red-300 disabled:cursor-not-allowed disabled:group-hover/deletable:opacity-50 disabled:hover:bg-transparent"
-                            title="Mark for deletion"
-                            aria-label="Mark for deletion"
-                            disabled={!canEditNavigation}
-                            onClick={(e) => {
-                                if (!canEditNavigation) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                }
-                            }}
-                        >
-                            <MinusCircleIcon className="size-4" />
-                        </button>
-                    </Popover.Trigger>
-                </DashboardTooltip>
+            <Popover.Root open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                <Popover.Trigger asChild>
+                    <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-red-600 opacity-0 transition-opacity duration-200 hover:bg-red-50 hover:text-red-700 group-hover/deletable:opacity-100 data-[state=open]:opacity-100 dark:text-red-400 dark:hover:bg-red-950/20 dark:hover:text-red-300 disabled:cursor-not-allowed disabled:group-hover/deletable:opacity-50 disabled:hover:bg-transparent"
+                        title="Mark for deletion"
+                        aria-label="Mark for deletion"
+                    >
+                        <MinusCircleIcon className="size-4" />
+                    </button>
+                </Popover.Trigger>
 
                 <Popover.Portal>
                     <Popover.Content

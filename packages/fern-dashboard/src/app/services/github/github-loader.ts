@@ -2,15 +2,15 @@ import "server-only";
 
 import type {
     FernProject,
+    GetDocsYmlAndReferencesResult,
     GetDocsYmlResult,
     GetFernConfigJsonResult,
     GetFernProjectResult,
-    GitLoader,
-    UpdateDocsYmlResult
+    GitLoader
 } from "@fern-api/docs-loader";
 import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
-import { revalidateTag, unstable_cache } from "next/cache";
+import { unstable_cache } from "next/cache";
 import pLimit from "p-limit";
 import z from "zod";
 
@@ -23,11 +23,14 @@ interface DocsYmlConfig {
         url: string;
         ["custom-domain"]?: string;
     }[];
-}
-
-interface CachedFileContent {
-    content: string;
-    etag: string;
+    products?: {
+        path?: string;
+        [key: string]: any;
+    }[];
+    versions?: {
+        path?: string;
+        [key: string]: any;
+    }[];
 }
 
 /**
@@ -36,7 +39,7 @@ interface CachedFileContent {
 export class GitHubLoader implements GitLoader {
     private getOctokitInstance: () => Promise<Octokit | null>;
     private octokit: Octokit | null = null;
-    private inFlightRequests: Map<string, Promise<any>> = new Map();
+    private inFlightRequests: Map<string, Promise<any>> = new Map<string, Promise<any>>();
     private concurrencyLimit = pLimit(8); // Bounded concurrency for parallel file fetching
 
     constructor(githubUrl: string) {
@@ -184,6 +187,39 @@ export class GitHubLoader implements GitLoader {
                 });
         } catch (error) {
             console.error("Failed to parse YAML content:", error);
+            return [];
+        }
+    }
+
+    /**
+     * Extracts all referenced yml file paths from products and versions
+     */
+    private extractReferencedYmlPaths(yamlContent: string): string[] {
+        try {
+            const config = yaml.load(yamlContent) as DocsYmlConfig;
+            const paths: string[] = [];
+
+            // Extract paths from products
+            if (config?.products && Array.isArray(config.products)) {
+                for (const product of config.products) {
+                    if (product?.path && typeof product.path === "string") {
+                        paths.push(product.path);
+                    }
+                }
+            }
+
+            // Extract paths from versions
+            if (config?.versions && Array.isArray(config.versions)) {
+                for (const version of config.versions) {
+                    if (version?.path && typeof version.path === "string") {
+                        paths.push(version.path);
+                    }
+                }
+            }
+
+            return paths;
+        } catch (error) {
+            console.error("Failed to parse YAML content for file references:", error);
             return [];
         }
     }
@@ -380,59 +416,76 @@ export class GitHubLoader implements GitLoader {
 
         return {
             type: "ok",
-            result: content
+            result: content,
+            metadata: {
+                path: projectResult.result.project.docsYmlPath,
+                defaultBranch: projectResult.result.defaultBranch
+            }
         };
     }
 
-    async updateDocsYml(
+    async getDocsYmlAndReferences(
         owner: string,
         repo: string,
         site: string,
-        content: string,
-        ref: string = "main"
-    ): Promise<UpdateDocsYmlResult> {
-        const projectResult = await this.getFernProjectBySite(owner, repo, site);
-        if (projectResult.type === "error") {
+        ref: string = "main",
+        preferDefaultBranch: boolean = false
+    ): Promise<GetDocsYmlAndReferencesResult> {
+        const mainDocsYmlContent = await this.getDocsYml(owner, repo, site, ref, preferDefaultBranch);
+        if (mainDocsYmlContent.type === "error") {
             return {
                 type: "error",
-                error: projectResult.error
-            };
-        }
-        const octokit = await this.getOctokit();
-        if (!octokit) {
-            throw new Error("Failed to get Octokit instance");
-        }
-
-        // Get the current file to obtain its SHA
-        const currentFile = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-            owner,
-            repo,
-            path: projectResult.result.project.docsYmlPath,
-            ref
-        });
-
-        if (!("sha" in currentFile.data)) {
-            return {
-                type: "error",
-                error: { type: "DOCS_YML_MISSING" }
+                error: mainDocsYmlContent.error
             };
         }
 
-        // Update the file
-        await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-            owner,
-            repo,
-            path: projectResult.result.project.docsYmlPath,
-            message: "Update docs.yml - add new page via fern editor",
-            content: Buffer.from(content, "utf8").toString("base64"),
-            sha: currentFile.data.sha,
-            branch: ref
+        const docsYmlMap = new Map<string, string>();
+
+        // We consider the main docs.yml to be at the root (referenced files will be relative to it)
+        docsYmlMap.set("docs.yml", mainDocsYmlContent.result);
+
+        // Extract referenced yml file paths
+        const referencedPaths = this.extractReferencedYmlPaths(mainDocsYmlContent.result);
+
+        // If no referenced files, return map with just the main docs.yml
+        if (referencedPaths.length === 0) {
+            return {
+                type: "ok",
+                result: docsYmlMap
+            };
+        }
+
+        // Get the full path and directory of the main docs.yml file so we can resolve referenced file paths
+        const mainDocsYmlPath = mainDocsYmlContent.metadata.path;
+        const docsYmlDir = mainDocsYmlPath.substring(0, mainDocsYmlPath.lastIndexOf("/"));
+
+        // Use the default branch from the repository if requested
+        const targetRef = preferDefaultBranch ? mainDocsYmlContent.metadata.defaultBranch : ref;
+
+        const referencedFilePromises = referencedPaths.map(async (relativePath) => {
+            if (relativePath.startsWith("../")) {
+                throw new Error(`docs.yml does not allow referencing files outside of its directory: ${relativePath}`);
+            }
+            // Normalize the relative path (remove ./ prefix if present)
+            const normalizedPath = relativePath.startsWith("./") ? relativePath.substring(2) : relativePath;
+            // Construct absolute path (docs.yml location is considered the root directory)
+            const absolutePath = docsYmlDir ? `${docsYmlDir}/${normalizedPath}` : normalizedPath;
+
+            const fileContent = await this.getFileContent(owner, repo, targetRef, absolutePath);
+            if (fileContent) {
+                // Store with the relative path as key (normalized)
+                docsYmlMap.set(normalizedPath, fileContent);
+            } else {
+                console.warn(`Failed to load referenced yml file: ${absolutePath}`);
+            }
         });
 
-        const tag = `github-file:${owner}/${repo}:${projectResult.result.project.docsYmlPath}`;
-        revalidateTag(tag);
+        await Promise.all(referencedFilePromises);
 
-        return { type: "ok" };
+        return {
+            type: "ok",
+            result: docsYmlMap
+        };
     }
 
     async getFernConfigJson(owner: string, repo: string, site: string): Promise<GetFernConfigJsonResult> {

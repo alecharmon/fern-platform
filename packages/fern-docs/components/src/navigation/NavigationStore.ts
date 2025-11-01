@@ -1,6 +1,5 @@
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type ChangedNodes, type Frontmatter, htmlToMdx, mdxToHtml } from "@fern-docs/mdx";
-import yaml from "js-yaml";
 import {
     computeStateHash,
     type FilenameToContent,
@@ -10,18 +9,20 @@ import {
 } from "./commitUtils";
 import { createNavigationBufferedIndexedDBStorage, type NavigationStorage } from "./NavigationStorage";
 import {
+    findPageByPageId,
     findSectionById,
     findSectionTitleById,
     injectPageIntoSection,
     updateSectionTitle
 } from "./navigationTreeUtils";
-import { resolvePageData } from "./pageUtils";
+import { extractDocsYmlFilePathFromFoundNode, resolvePageData } from "./pageUtils";
 import type {
     ClientPageDataWriteDependencies,
     DeletionToastCallback,
     DocsYmlBaseContent,
-    DocsYmlChange,
-    DocsYmlChanges,
+    DocsYmlFilePath,
+    NavigationChange,
+    NavigationSlug,
     NavigationSnapshot,
     NestedEditorUpdateEvent,
     PageData,
@@ -33,8 +34,8 @@ import type {
     ResolvedPageData,
     SerializableFoundNode
 } from "./types";
-import { createEmptyNavigationSnapshot } from "./types";
-import { buildDocsYmlFromChanges } from "./ymlUtils";
+import { buildSlugToDocsYmlFilePath, createEmptyNavigationSnapshot, NAVIGATION_SNAPSHOT_SCHEMA_VERSION } from "./types";
+import { buildDocsYmlContentFromChanges, isYmlFilePath } from "./ymlUtils";
 
 export class NavigationStore {
     private _branchName: string;
@@ -45,7 +46,8 @@ export class NavigationStore {
 
     private _pageRegistry: PageRegistry;
     private _docsYmlBaseContent: DocsYmlBaseContent;
-    private _docsYmlChanges: DocsYmlChanges;
+    private _navigationChanges: Map<PageFilename, NavigationChange>;
+    private _slugToDocsYmlFilePath?: Map<NavigationSlug, DocsYmlFilePath>;
     private _rootNode?: FernNavigation.RootNode;
     private _lastCommittedHash?: string;
     private _version: number;
@@ -67,7 +69,7 @@ export class NavigationStore {
 
         this._pageRegistry = this._latestSnapshot.pageRegistry;
         this._docsYmlBaseContent = this._latestSnapshot.docsYmlBaseContent;
-        this._docsYmlChanges = this._latestSnapshot.docsYmlChanges;
+        this._navigationChanges = this._latestSnapshot.navigationChanges;
         this._rootNode = this._latestSnapshot.rootNode;
         this._lastCommittedHash = this._latestSnapshot.lastCommittedHash;
         this._version = this._latestSnapshot.version;
@@ -106,14 +108,6 @@ export class NavigationStore {
         return this._rootNode;
     }
 
-    /**
-     * Returns whether the current docs structure supports direct docs.yml navigation editing.
-     * Returns false for multi-product or multi-version documentation.
-     */
-    get canDirectlyEditDocsYmlNavigation(): boolean {
-        return this._canDirectlyEditDocsYmlNavigation();
-    }
-
     /** Returns all changed, deleted, and commit-ready files */
     get files(): {
         changed: FilenameToContent;
@@ -135,25 +129,29 @@ export class NavigationStore {
             }
         });
 
-        this._docsYmlChanges.forEach((change, filename) => {
+        this._navigationChanges.forEach((change, filename) => {
             if (change.type === "remove_page" && !change.committed && !deletedFiles.includes(filename)) {
                 deletedFiles.push(filename);
             }
         });
 
         // Only count uncommitted changes
-        const uncommittedChangesCount = Array.from(this._docsYmlChanges.values()).filter(
+        const uncommittedChangesCount = Array.from(this._navigationChanges.values()).filter(
             (change) => !change.committed
         ).length;
 
         if (uncommittedChangesCount > 0) {
             try {
-                const docsYmlContent = buildDocsYmlFromChanges(this._latestSnapshot);
-                changedFiles["docs.yml"] = docsYmlContent;
+                const docsYmlChangedContent = buildDocsYmlContentFromChanges(this._latestSnapshot);
+
+                // buildDocsYmlContentFromChanges returns only CHANGED files
+                for (const [filePath, content] of docsYmlChangedContent.entries()) {
+                    changedFiles[filePath] = content;
+                }
             } catch (error) {
                 console.error("Failed to generate docs.yml:", error);
-                // For multi-product docs, changes are tracked but docs.yml generation is not supported
-                // The changes will remain uncommitted until this feature is implemented
+                // Don't throw - changes are tracked but docs.yml generation failed
+                // This may happen when base content is not yet loaded
             }
         }
 
@@ -169,9 +167,15 @@ export class NavigationStore {
     // --------------------------------------------------------------------------
 
     /** Lazily initializes storage, accounting for multiple concurrent hydration attempts */
-    async hydrate(options?: { storage?: NavigationStorage; initialDocsYmlContent?: string | null }): Promise<void> {
-        // If already hydrated, return immediately
+    async hydrate(options?: {
+        storage?: NavigationStorage;
+        latestDocsYmlAndReferences?: Map<string, string> | null;
+    }): Promise<void> {
         if (this._hydrated) {
+            // If already hydrated, update docsYmlBaseContent and slugToDocsYmlFilePath if provided
+            if (options?.latestDocsYmlAndReferences !== undefined) {
+                this._updateDocsYmlBaseContent(options.latestDocsYmlAndReferences);
+            }
             return;
         }
 
@@ -192,7 +196,7 @@ export class NavigationStore {
     /** Initialize the store from storage */
     private async _doHydrate(options?: {
         storage?: NavigationStorage;
-        initialDocsYmlContent?: string | null;
+        latestDocsYmlAndReferences?: Map<string, string> | null;
     }): Promise<void> {
         this._storage = options?.storage || createNavigationBufferedIndexedDBStorage();
 
@@ -204,11 +208,50 @@ export class NavigationStore {
 
         this._latestSnapshot = storedSnapshot;
         this._pageRegistry = storedSnapshot.pageRegistry;
-        this._docsYmlBaseContent = storedSnapshot.docsYmlBaseContent ?? options?.initialDocsYmlContent ?? null;
-        this._docsYmlChanges = storedSnapshot.docsYmlChanges;
+
+        // Merge strategy: prefer stored entries (they may have uncommitted changes),
+        // use fresh data to fill missing entries (e.g., after migration or when new referenced files are added)
+        // NOTE: because old version of NavigationSnapshot did not support multiple files, we need to make a
+        // best effort to merge the content. However, because the latestDocsYmlAndReferences may be newer than the
+        // stored content (fetched from the default branch), there may be inconsistencies.
+        if (storedSnapshot.docsYmlBaseContent && options?.latestDocsYmlAndReferences) {
+            // Start with stored content (source of truth for committed/uncommitted state)
+            const merged = new Map(storedSnapshot.docsYmlBaseContent);
+            // Add missing entries from fresh data
+            for (const [key, value] of options.latestDocsYmlAndReferences) {
+                if (!merged.has(key)) {
+                    merged.set(key, value);
+                }
+            }
+            this._docsYmlBaseContent = merged;
+        } else {
+            // Fallback: use whichever is available
+            this._docsYmlBaseContent = options?.latestDocsYmlAndReferences ?? storedSnapshot.docsYmlBaseContent ?? null;
+        }
+
+        // Always rebuild the slug map from the resolved content
+        this._slugToDocsYmlFilePath = buildSlugToDocsYmlFilePath(this._docsYmlBaseContent);
+
+        this._navigationChanges = storedSnapshot.navigationChanges;
         this._rootNode = storedSnapshot.rootNode;
         this._lastCommittedHash = storedSnapshot.lastCommittedHash;
         this._version = storedSnapshot.version;
+
+        // Validate that navigation changes reference files that exist
+        if (this._docsYmlBaseContent && this._navigationChanges.size > 0) {
+            const missingFiles = new Set<string>();
+            for (const change of this._navigationChanges.values()) {
+                if (!this._docsYmlBaseContent.has(change.docsYmlFilePath)) {
+                    missingFiles.add(change.docsYmlFilePath);
+                }
+            }
+
+            if (missingFiles.size > 0) {
+                console.error("[NavigationStore] Hydration error: Missing referenced files:", Array.from(missingFiles));
+                console.error("[NavigationStore] Available files:", Array.from(this._docsYmlBaseContent.keys()));
+            }
+        }
+
         this._hydrated = true;
 
         this._setStorageAndNotify();
@@ -225,73 +268,8 @@ export class NavigationStore {
         this._setStorageAndNotify();
     }
 
-    /**
-     * Checks if the current docs structure supports direct docs.yml navigation editing.
-     *
-     * Returns false for:
-     * - Multi-product docs: Have a `products` array where each product references its own docs.yml
-     * - Multi-version docs: Have a `versions` array where each version may have separate navigation
-     *
-     * Example multi-product structure:
-     * ```yaml
-     * products:
-     *   - id: sdks
-     *     docs: path/to/sdks-docs.yml
-     *   - id: docs
-     *     docs: path/to/docs-docs.yml
-     * ```
-     *
-     * Example multi-version structure:
-     * ```yaml
-     * versions:
-     *   - version: v1
-     *     navigation: [...]
-     *   - version: v2
-     *     navigation: [...]
-     * ```
-     *
-     * In these cases, navigation editing requires modifying individual product/version docs.yml files,
-     * which is not yet supported.
-     */
-    private _canDirectlyEditDocsYmlNavigation(): boolean {
-        if (!this._docsYmlBaseContent) {
-            return true; // If no base content, assume it's editable (will fail gracefully later)
-        }
-        try {
-            const parsedContent = yaml.load(this._docsYmlBaseContent) as any;
-
-            // Check for multi-product structure
-            if (parsedContent.products && Array.isArray(parsedContent.products)) {
-                return false;
-            }
-
-            // Check for multi-version structure
-            if (parsedContent.versions && Array.isArray(parsedContent.versions)) {
-                return false;
-            }
-
-            return true;
-        } catch (error) {
-            console.error("Failed to parse docsYmlBaseContent:", error);
-            return false;
-        }
-    }
-
     /** Renames a section and tracks the change in docs.yml */
     renameSection(sectionId: FernNavigation.NodeId, newTitle: string): void {
-        // LIMITATION: Navigation editing is not supported for multi-product or multi-version docs
-        // These docs structures have separate docs.yml files for each product/version.
-        // To support navigation editing in these cases, we would need to:
-        // 1. Determine which product/version docs.yml file contains the item being modified
-        // 2. Load that specific docs.yml file
-        // 3. Apply the operation to that file
-        // 4. Track changes separately per docs.yml file
-        //
-        // For now, we disable navigation editing for multi-product/multi-version docs entirely.
-        if (!this._canDirectlyEditDocsYmlNavigation()) {
-            throw new Error("renameSection is not yet supported for multi-product or multi-version documentation.");
-        }
-
         if (!this._rootNode) {
             console.warn("Cannot rename section: rootNode not available");
             return;
@@ -305,7 +283,7 @@ export class NavigationStore {
             return;
         }
 
-        const { section: sectionNode, tabSlug } = searchResult;
+        const { section: sectionNode, tabSlug, product, version } = searchResult;
         const oldTitle = sectionNode.title;
 
         // Update the section title in rootNode
@@ -313,15 +291,32 @@ export class NavigationStore {
         this._rootNode = updatedRootNode;
 
         // Create a new Map to trigger React re-renders
-        this._docsYmlChanges = new Map(this._docsYmlChanges);
+        this._navigationChanges = new Map(this._navigationChanges);
+
+        // Determine which file this section belongs to using the section's context
+        // Build a minimal SerializableFoundNode to use with extractDocsYmlFilePathFromFoundNode
+        const contextForExtraction: SerializableFoundNode = {
+            type: "found",
+            node: sectionNode as any, // Use section as placeholder - we only need the context
+            parents: [],
+            sidebar: undefined,
+            tabs: [],
+            currentTab: tabSlug ? ({ slug: tabSlug } as any) : undefined,
+            currentVersion: version,
+            currentProduct: product,
+            isCurrentVersionDefault: false,
+            isCurrentProductDefault: false
+        };
+
+        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(contextForExtraction, this._slugToDocsYmlFilePath);
 
         // Update all existing add_page changes that reference the old section title
         // This ensures new pages added to a renamed section use the correct section title in docs.yml
-        this._docsYmlChanges.forEach((change, key) => {
+        this._navigationChanges.forEach((change, key) => {
             if (change.type === "add_page" && change.sectionTitle === oldTitle) {
                 // Check if the tab matches (or both are undefined for root navigation)
                 if (change.tabSlug === tabSlug) {
-                    this._docsYmlChanges.set(key, {
+                    this._navigationChanges.set(key, {
                         ...change,
                         sectionTitle: newTitle
                     });
@@ -331,12 +326,23 @@ export class NavigationStore {
 
         // Track the rename change in docs.yml
         const changeKey = `section-rename-${sectionId}`;
-        this._docsYmlChanges.set(changeKey, {
+
+        // Check if there's already a rename for this section
+        // If so, preserve the original oldTitle to collapse multiple renames into one
+        // e.g., "SECTION 0" -> "SECTION 1" -> "SECTION 2" becomes "SECTION 0" -> "SECTION 2"
+        const existingRename = this._navigationChanges.get(changeKey);
+        const actualOldTitle =
+            existingRename?.type === "rename_section"
+                ? existingRename.oldTitle // Keep the original old title
+                : oldTitle; // First rename, use current old title
+
+        this._navigationChanges.set(changeKey, {
             type: "rename_section",
             sectionId,
-            oldTitle,
+            oldTitle: actualOldTitle,
             newTitle,
             tabSlug,
+            docsYmlFilePath,
             createdAt: Date.now()
         });
 
@@ -375,11 +381,6 @@ export class NavigationStore {
 
     /** Creates a new client page */
     createClientPage(filename: PageFilename, deps: ClientPageDataWriteDependencies): void {
-        // Check if navigation editing is supported
-        if (!this._canDirectlyEditDocsYmlNavigation()) {
-            throw new Error("createClientPage is not yet supported for multi-product or multi-version documentation.");
-        }
-
         const { html, frontmatter } = mdxToHtml(deps.initialMdx);
         const title = String(frontmatter?.title ?? "");
         const slug = FernNavigation.Slug(String(frontmatter?.slug ?? ""));
@@ -428,19 +429,35 @@ export class NavigationStore {
             initialMdx: deps.initialMdx
         });
 
+        // Extract the docs file path from navigation context
+        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(deps.baseFoundNode, this._slugToDocsYmlFilePath);
+
+        // Calculate insertion index from RootNode order before injecting
+        const insertionIndex =
+            this._rootNode && targetSectionId ? this._calculateInsertionIndex(targetSectionId) : undefined;
+
         // Create a new Map to trigger React re-renders (useSyncExternalStore uses shallow comparison)
-        this._docsYmlChanges = new Map(this._docsYmlChanges);
-        this._docsYmlChanges.set(filename, {
+        this._navigationChanges = new Map(this._navigationChanges);
+        this._navigationChanges.set(filename, {
             type: "add_page",
             sectionTitle: this._extractSectionTitleFromRootNode(targetSectionId),
             tabSlug: this._extractTabSlug(deps.baseFoundNode),
             pageEntry: { page: title, path: filename },
+            insertionMode: "atIndex",
+            insertionIndex,
+            docsYmlFilePath,
             createdAt: Date.now()
         });
 
         // Inject the new page into the RootNode at the correct location
         if (this._rootNode && targetSectionId) {
-            this._rootNode = injectPageIntoSection(this._rootNode, newPageNode, targetSectionId);
+            this._rootNode = injectPageIntoSection(
+                this._rootNode,
+                newPageNode,
+                targetSectionId,
+                "atIndex",
+                insertionIndex
+            );
         }
 
         this._setStorageAndNotify();
@@ -495,8 +512,8 @@ export class NavigationStore {
 
         // Remove from docs.yml changes if it was tracked there
         // Create a new Map to trigger React re-renders
-        this._docsYmlChanges = new Map(this._docsYmlChanges);
-        this._docsYmlChanges.delete(filename);
+        this._navigationChanges = new Map(this._navigationChanges);
+        this._navigationChanges.delete(filename);
 
         // Restore the page to its initial state in a single update
         // This will recompute HTML and frontmatter from the initial MDX
@@ -518,27 +535,33 @@ export class NavigationStore {
 
     /** Marks a page for deletion and tracks in docs.yml changes */
     markPageForDeletion(filename: PageFilename, pageTitle?: string): void {
-        // Check if navigation editing is supported
-        if (!this._canDirectlyEditDocsYmlNavigation()) {
-            throw new Error(
-                "markPageForDeletion is not yet supported for multi-product or multi-version documentation."
-            );
-        }
-
         const entry = this._pageRegistry[filename];
 
         if (entry) {
             this._updatePageEntry(filename, { isMarkedForDeletion: true });
+
+            // Extract the docs file path from navigation context
+            const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                entry.pageData.foundNode,
+                this._slugToDocsYmlFilePath
+            );
+
+            // Convert filename to be relative to the yml file's directory
+            const relativePath = this._makePathRelativeToYmlFile(filename, docsYmlFilePath);
+
             // Create a new Map to trigger React re-renders
-            this._docsYmlChanges = new Map(this._docsYmlChanges);
-            this._docsYmlChanges.set(filename, {
+            this._navigationChanges = new Map(this._navigationChanges);
+            this._navigationChanges.set(filename, {
                 type: "remove_page",
                 pageEntry: {
                     page: entry.pageData.foundNode.node.title,
-                    path: filename
+                    path: relativePath
                 },
+                docsYmlFilePath,
                 createdAt: Date.now()
             });
+
+            this._setStorageAndNotify();
 
             // Show deletion toast with undo functionality
             if (this._deletionToastCallback) {
@@ -547,11 +570,44 @@ export class NavigationStore {
                 );
             }
         } else if (pageTitle) {
+            // For server pages not in registry, find the page in rootNode to determine correct yml file
+            let docsYmlFilePath = "docs.yml"; // Default fallback
+
+            if (this._rootNode) {
+                const pageId = FernNavigation.PageId(filename);
+                const pageSearchResult = findPageByPageId(this._rootNode, pageId);
+
+                if (pageSearchResult) {
+                    // Build a minimal SerializableFoundNode to extract the docs yml file path
+                    const contextForExtraction: SerializableFoundNode = {
+                        type: "found",
+                        node: pageSearchResult.page,
+                        parents: [],
+                        sidebar: undefined,
+                        tabs: [],
+                        currentTab: pageSearchResult.tabSlug ? ({ slug: pageSearchResult.tabSlug } as any) : undefined,
+                        currentVersion: pageSearchResult.version,
+                        currentProduct: pageSearchResult.product,
+                        isCurrentVersionDefault: false,
+                        isCurrentProductDefault: false
+                    };
+
+                    docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                        contextForExtraction,
+                        this._slugToDocsYmlFilePath
+                    );
+                }
+            }
+
+            // Convert filename to be relative to the yml file's directory
+            const relativePath = this._makePathRelativeToYmlFile(filename, docsYmlFilePath);
+
             // Create a new Map to trigger React re-renders
-            this._docsYmlChanges = new Map(this._docsYmlChanges);
-            this._docsYmlChanges.set(filename, {
+            this._navigationChanges = new Map(this._navigationChanges);
+            this._navigationChanges.set(filename, {
                 type: "remove_page",
-                pageEntry: { page: pageTitle, path: filename },
+                pageEntry: { page: pageTitle, path: relativePath },
+                docsYmlFilePath,
                 createdAt: Date.now()
             });
             this._setStorageAndNotify();
@@ -576,30 +632,45 @@ export class NavigationStore {
             if (entry.pageData.source === "client") {
                 // Restore client page as an "add_page" change
                 const title = entry.pageData.foundNode.node.title;
+                const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                    entry.pageData.foundNode,
+                    this._slugToDocsYmlFilePath
+                );
+
+                // Calculate insertion index from RootNode order
+                // Exclude this page from the count since it's still in the rootNode (deletion doesn't remove it)
+                const pageId = (entry.pageData.foundNode.node as FernNavigation.PageNode).pageId;
+                const insertionIndex =
+                    this._rootNode && entry.parentSectionId
+                        ? this._calculateInsertionIndex(entry.parentSectionId, pageId)
+                        : undefined;
 
                 // Create a new Map to trigger React re-renders
-                this._docsYmlChanges = new Map(this._docsYmlChanges);
-                this._docsYmlChanges.set(filename, {
+                this._navigationChanges = new Map(this._navigationChanges);
+                this._navigationChanges.set(filename, {
                     type: "add_page",
                     sectionTitle: this._extractSectionTitleFromRootNode(entry.parentSectionId),
                     tabSlug: this._extractTabSlug(entry.pageData.foundNode),
                     pageEntry: { page: title, path: filename },
+                    insertionMode: "atIndex",
+                    insertionIndex,
+                    docsYmlFilePath,
                     createdAt: Date.now()
                 });
             } else {
                 // For server pages, just remove the deletion change
                 // Create a new Map to trigger React re-renders
-                this._docsYmlChanges = new Map(this._docsYmlChanges);
-                this._docsYmlChanges.delete(filename);
+                this._navigationChanges = new Map(this._navigationChanges);
+                this._navigationChanges.delete(filename);
             }
 
             this._setStorageAndNotify();
-        } else if (this._docsYmlChanges.has(filename)) {
+        } else if (this._navigationChanges.has(filename)) {
             // Handle server pages that are not in the registry but have deletion changes
             // This occurs when markPageForDeletion was called with only pageTitle (server pages not in registry)
             // Create a new Map to trigger React re-renders
-            this._docsYmlChanges = new Map(this._docsYmlChanges);
-            this._docsYmlChanges.delete(filename);
+            this._navigationChanges = new Map(this._navigationChanges);
+            this._navigationChanges.delete(filename);
             this._setStorageAndNotify();
         }
     }
@@ -623,18 +694,53 @@ export class NavigationStore {
 
         this._pageRegistry = newRegistry;
 
-        if (this.files.changed["docs.yml"]) {
-            this._docsYmlBaseContent = this.files.changed["docs.yml"];
+        // IMPORTANT: Capture yml file changes BEFORE marking them as committed
+        // Otherwise, the files getter will skip yml generation because uncommittedChangesCount === 0
+        const committedYmlFiles: Record<string, string> = {};
+        if (this._docsYmlBaseContent && this._navigationChanges.size > 0) {
+            try {
+                const docsYmlChangedContent = buildDocsYmlContentFromChanges(this._latestSnapshot);
+
+                // Collect yml files that have uncommitted changes
+                const filesWithUncommittedChanges = new Set<string>();
+                for (const change of this._navigationChanges.values()) {
+                    if (!change.committed) {
+                        filesWithUncommittedChanges.add(change.docsYmlFilePath);
+                    }
+                }
+
+                // Capture the yml content for files that will be committed
+                for (const filePath of filesWithUncommittedChanges) {
+                    const content = docsYmlChangedContent.get(filePath);
+                    if (content && isYmlFilePath(filePath)) {
+                        committedYmlFiles[filePath] = content;
+                    }
+                }
+            } catch (error) {
+                console.error("[handleCommitSuccess] Failed to build yml files before commit:", error);
+            }
         }
 
-        const deletionMarkers = new Map<string, DocsYmlChange>();
-        this._docsYmlChanges.forEach((change, filename) => {
+        // Mark changes as committed
+        const deletionMarkers = new Map<string, NavigationChange>();
+        this._navigationChanges.forEach((change, filename) => {
             if (change.type === "remove_page") {
                 deletionMarkers.set(filename, { ...change, committed: true });
             }
         });
         // Create a new Map with only deletion markers to trigger React re-renders
-        this._docsYmlChanges = deletionMarkers;
+        this._navigationChanges = deletionMarkers;
+
+        // Update docsYmlBaseContent with the committed yml changes
+        if (this._docsYmlBaseContent && Object.keys(committedYmlFiles).length > 0) {
+            Object.entries(committedYmlFiles).forEach(([filePath, content]) => {
+                if (this._docsYmlBaseContent) {
+                    this._docsYmlBaseContent.set(filePath, content);
+                }
+            });
+            // Rebuild the slug-to-file-path map with the updated content
+            this._slugToDocsYmlFilePath = buildSlugToDocsYmlFilePath(this._docsYmlBaseContent);
+        }
 
         // TODO: is this the right place to compute the hash?
         this._lastCommittedHash = computeStateHash(this.files.changed);
@@ -681,7 +787,7 @@ export class NavigationStore {
     getServerSnapshot(): NavigationSnapshot {
         if (!this._serverSnapshot) {
             this._serverSnapshot = {
-                schemaVersion: 1,
+                schemaVersion: NAVIGATION_SNAPSHOT_SCHEMA_VERSION,
                 branchName: this._branchName,
                 metadata: {
                     orgName: this._orgName,
@@ -689,7 +795,7 @@ export class NavigationStore {
                 },
                 pageRegistry: {},
                 docsYmlBaseContent: null,
-                docsYmlChanges: new Map(),
+                navigationChanges: new Map(),
                 version: 0
             };
         }
@@ -714,13 +820,38 @@ export class NavigationStore {
         this._listeners.forEach((listener) => listener());
     }
 
+    /** Updates docsYmlBaseContent and rebuilds slugToDocsYmlFilePath */
+    private _updateDocsYmlBaseContent(content: string | Map<string, string> | null): void {
+        // Convert string to Map if needed
+        let normalizedContent = content;
+        if (typeof normalizedContent === "string") {
+            normalizedContent = new Map([["docs.yml", normalizedContent]]);
+        }
+
+        // Only update if the content actually changed
+        const hasChanged =
+            this._docsYmlBaseContent !== normalizedContent &&
+            JSON.stringify(
+                this._docsYmlBaseContent instanceof Map ? Array.from(this._docsYmlBaseContent.entries()) : null
+            ) !== JSON.stringify(normalizedContent instanceof Map ? Array.from(normalizedContent.entries()) : null);
+
+        if (!hasChanged) {
+            return;
+        }
+
+        this._docsYmlBaseContent = normalizedContent;
+        this._slugToDocsYmlFilePath = buildSlugToDocsYmlFilePath(normalizedContent);
+
+        this._setStorageAndNotify();
+    }
+
     /** Updates storage snapshot and notifies listeners */
     private _setStorageAndNotify(): void {
         this._requireHydratedFromStorage();
 
         this._version++;
         const snapshot: NavigationSnapshot = {
-            schemaVersion: 1,
+            schemaVersion: NAVIGATION_SNAPSHOT_SCHEMA_VERSION,
             branchName: this._branchName,
             metadata: {
                 orgName: this._orgName,
@@ -728,10 +859,11 @@ export class NavigationStore {
             },
             pageRegistry: this._pageRegistry,
             docsYmlBaseContent: this._docsYmlBaseContent,
-            docsYmlChanges: this._docsYmlChanges,
+            navigationChanges: this._navigationChanges,
             rootNode: this._rootNode,
             lastCommittedHash: this._lastCommittedHash,
-            version: this._version
+            version: this._version,
+            slugToDocsYmlFilePath: this._slugToDocsYmlFilePath
         };
 
         // Persist to storage (guaranteed to exist after hydration)
@@ -804,8 +936,54 @@ export class NavigationStore {
         return findSectionTitleById(this._rootNode, sectionId);
     }
 
+    /**
+     * Converts an absolute file path to be relative to the yml file's directory
+     * @todo unify logic with github-loader.ts, we do something similar there
+     * */
+    private _makePathRelativeToYmlFile(absolutePath: string, ymlFilePath: string): string {
+        // Get the directory of the yml file
+        // e.g., "products/docs/docs.yml" -> "products/docs/"
+        const ymlDir = ymlFilePath.substring(0, ymlFilePath.lastIndexOf("/") + 1);
+
+        // If the absolute path starts with the yml directory, make it relative
+        if (absolutePath.startsWith(ymlDir)) {
+            const relativePath = absolutePath.substring(ymlDir.length);
+            // Add "./" prefix to match yml convention
+            return `./${relativePath}`;
+        }
+
+        // If paths don't share a common directory, return the path as-is with "./" prefix
+        // This handles edge cases where the page might be outside the expected structure
+        return `./${absolutePath}`;
+    }
+
     /** Extracts the tab slug from found node */
     private _extractTabSlug(foundNode: SerializableFoundNode): string | undefined {
         return foundNode.currentTab?.slug;
+    }
+
+    /** Calculates the insertion index for a new page within a section (appends after all children) */
+    private _calculateInsertionIndex(
+        sectionId: FernNavigation.NodeId,
+        excludePageId?: FernNavigation.PageId
+    ): number | undefined {
+        if (!this._rootNode) {
+            return undefined;
+        }
+
+        const section = findSectionById(this._rootNode, sectionId);
+        if (!section) {
+            return undefined;
+        }
+
+        // Count all children, but exclude the specified page if it's already in the tree
+        // (This happens when unmarking a client page for deletion - it's still in rootNode)
+        if (excludePageId) {
+            return section.section.children.filter(
+                (child) => !(child.type === "page" && (child as FernNavigation.PageNode).pageId === excludePageId)
+            ).length;
+        }
+
+        return section.section.children.length;
     }
 }

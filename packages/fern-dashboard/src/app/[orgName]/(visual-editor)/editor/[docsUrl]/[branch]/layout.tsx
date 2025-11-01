@@ -62,17 +62,17 @@ export default async function EditorLayout({
     const githubLoader = new GitHubLoader(githubUrl);
 
     // Use the repo's default branch by passing preferDefaultBranch=true
-    const docsYmlResult = await githubLoader.getDocsYml(
+    const docsYmlAndReferences = await githubLoader.getDocsYmlAndReferences(
         sourceRepo.owner,
         sourceRepo.repo,
         docsUrl,
         branch, // fallback branch if default branch logic fails
         true // preferDefaultBranch = true
     );
-    const initialDocsYmlContent = docsYmlResult.type === "ok" ? docsYmlResult.result : null;
+    const latestDocsYmlAndReferences = docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.result : null;
 
-    if (docsYmlResult.type !== "ok") {
-        console.error(docsYmlResult.error);
+    if (docsYmlAndReferences.type !== "ok") {
+        console.error(docsYmlAndReferences.error);
     }
 
     return (
@@ -93,7 +93,7 @@ export default async function EditorLayout({
                                 branchName={branch}
                                 orgName={orgName}
                                 docsUrl={docsUrl}
-                                initialDocsYmlContent={initialDocsYmlContent}
+                                latestDocsYmlAndReferences={latestDocsYmlAndReferences}
                             >
                                 <CurrentPageProvider>
                                     <ClientMDXProvider>

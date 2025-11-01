@@ -1,6 +1,6 @@
 "use client";
 
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import {
     type ClientPageDataDependencies,
     type ResolvedPageData,
@@ -88,7 +88,11 @@ export default function PageNode(props: PageNode.Props) {
                 sidebarRootNodeId={found.sidebar?.id}
                 tabId={found.currentTab?.id}
                 productId={found.currentProduct?.productId}
-                productSlug={found.currentProduct?.slug}
+                productSlug={
+                    found.currentProduct && FernNavigation.isInternalProductNode(found.currentProduct)
+                        ? found.currentProduct.slug
+                        : undefined
+                }
                 versionId={found.currentVersion?.versionId}
                 versionSlug={found.currentVersion?.slug}
                 variantId={found.currentVariant?.variantId}

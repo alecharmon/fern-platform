@@ -1,5 +1,6 @@
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { Frontmatter } from "@fern-docs/mdx";
+import yaml from "js-yaml";
 
 // NAVIGATION
 // ----------------------------------------------------------------------------
@@ -136,10 +137,95 @@ export function getPagesMarkedForDeletion(pageRegistry: PageRegistry): Set<PageF
 // DOCS.YML
 // ----------------------------------------------------------------------------
 
-/** Base content of docs.yml */
-export type DocsYmlBaseContent = string | null;
+/**
+ * File path used as a key for docs.yml file content.
+ *
+ * Path convention (established by GitHubLoader.getDocsYml):
+ * - Main docs.yml file: Always keyed as "docs.yml" (not "fern/docs.yml")
+ * - Referenced files: Normalized relative paths without "./" prefix (e.g., "versions/v2.yml", "platform/platform.yml")
+ *
+ * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
+ */
+export type DocsYmlFilePath = string;
 
-/** Expected structure of a parsed docs.yml */
+/** Base content of docs.yml - a map of file paths to content */
+export type DocsYmlBaseContent = Map<DocsYmlFilePath, string> | null;
+
+/** Slug of a navigation node for product or version (e.g. "platform", "v2") */
+export type NavigationSlug = string;
+
+/**
+ * Builds a mapping from product or version slug to file path by parsing the main docs.yml content.
+ * This is used to determine which file contains the navigation to modify when making navigation changes
+ */
+export function buildSlugToDocsYmlFilePath(docsYmlContent: DocsYmlBaseContent): Map<NavigationSlug, DocsYmlFilePath> {
+    const map = new Map<NavigationSlug, DocsYmlFilePath>();
+
+    if (docsYmlContent == null) {
+        return map;
+    }
+
+    const mainContent = docsYmlContent.get("docs.yml");
+    if (!mainContent) {
+        return map;
+    }
+
+    try {
+        const config = yaml.load(mainContent) as any;
+
+        // Parse products array
+        if (config?.products && Array.isArray(config.products)) {
+            for (const product of config.products) {
+                if (
+                    product?.slug &&
+                    product?.path &&
+                    typeof product.slug === "string" &&
+                    typeof product.path === "string"
+                ) {
+                    // Normalize path (remove ./ prefix)
+                    const normalizedPath = product.path.startsWith("./") ? product.path.substring(2) : product.path;
+                    map.set(product.slug, normalizedPath);
+                }
+            }
+        }
+
+        // Parse versions array
+        if (config?.versions && Array.isArray(config.versions)) {
+            for (const version of config.versions) {
+                if (
+                    version?.slug &&
+                    version?.path &&
+                    typeof version.slug === "string" &&
+                    typeof version.path === "string"
+                ) {
+                    // Normalize path (remove ./ prefix)
+                    const normalizedPath = version.path.startsWith("./") ? version.path.substring(2) : version.path;
+                    map.set(version.slug, normalizedPath);
+                }
+            }
+        }
+
+        // Parse tabs array
+        if (config?.tabs && Array.isArray(config.tabs)) {
+            for (const tab of config.tabs) {
+                if (tab?.slug && tab?.path && typeof tab.slug === "string" && typeof tab.path === "string") {
+                    // Normalize path (remove ./ prefix)
+                    const normalizedPath = tab.path.startsWith("./") ? tab.path.substring(2) : tab.path;
+                    map.set(tab.slug, normalizedPath);
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Failed to build slug to file path map:", error);
+    }
+
+    return map;
+}
+
+/**
+ * Expected structure of a parsed docs.yml
+ * @todo this needs to be updated to factor in multi-file configs
+ */
 export interface DocsYmlConfig {
     navigation?: YmlNavigationItem[];
 }
@@ -172,16 +258,42 @@ export interface YmlPageItem extends YmlNavigationItem {
     path: string;
 }
 
-/** Tracked docs.yml configuration change */
-export type DocsYmlChange =
+/** Insertion mode for adding pages */
+export type InsertionMode = "atIndex" | "prepend" | "append";
+
+/** Tracked navigation change - applies to both RootNode and YAML */
+export type NavigationChange =
     | {
-          type: "add_page" | "remove_page";
+          type: "add_page";
+          sectionTitle?: string | null;
+          tabSlug?: string;
+          pageEntry: { page: string; path: string };
+          insertionMode: InsertionMode;
+          insertionIndex?: number;
+          createdAt: number;
+          /** Whether this change has been committed */
+          committed?: boolean;
+          /**
+           * The docs.yml file path where this change should be applied.
+           * Uses normalized relative paths (see DocsYmlFilePath for convention).
+           * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
+           */
+          docsYmlFilePath: DocsYmlFilePath;
+      }
+    | {
+          type: "remove_page";
           sectionTitle?: string | null;
           tabSlug?: string;
           pageEntry: { page: string; path: string };
           createdAt: number;
           /** Whether this change has been committed */
           committed?: boolean;
+          /**
+           * The docs.yml file path where this change should be applied.
+           * Uses normalized relative paths (see DocsYmlFilePath for convention).
+           * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
+           */
+          docsYmlFilePath: DocsYmlFilePath;
       }
     | {
           type: "rename_section";
@@ -192,10 +304,13 @@ export type DocsYmlChange =
           createdAt: number;
           /** Whether this change has been committed */
           committed?: boolean;
+          /**
+           * The docs.yml file path where this change should be applied.
+           * Uses normalized relative paths (see DocsYmlFilePath for convention).
+           * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
+           */
+          docsYmlFilePath: DocsYmlFilePath;
       };
-
-/** Tracked docs.yml configuration changes by filename */
-export type DocsYmlChanges = Map<PageFilename, DocsYmlChange>;
 
 // DOCS.YML > VALIDATION
 // ----------------------------------------------------------------------------
@@ -281,14 +396,18 @@ function _isObject(value: unknown, throwIfNotValid?: boolean): value is Record<s
  *
  * IMPORTANT: When modifying NavigationSnapshot structure:
  * 1. Check if changes are backwards-compatible (optional fields, union additions)
- * 2. If breaking changes: increment version and add migration in migrations.ts
- * 3. If backwards-compatible: keep version unchanged (no migration needed)
+ * 2. If breaking changes: copy previous schema to migrations.types.ts, manually flatten type, increment schemaVersion, add migration to migrations.ts
+ * 3. If backwards-compatible: keep version unchanged (no migration needed, prefer fewer migrations where possible)
  */
-export const NAVIGATION_SNAPSHOT_SCHEMA_VERSION = 1;
+export const NAVIGATION_SNAPSHOT_SCHEMA_VERSION = 2;
 
-/** Snapshot of NavigationStore data stored in NavigationStorage */
+/**
+ * Current snapshot of NavigationStore data to be stored in NavigationStorage.
+ * Previous schema versions are defined in migrations.types.ts
+ * @see NAVIGATION_SNAPSHOT_SCHEMA_VERSION
+ */
 export interface NavigationSnapshot {
-    schemaVersion: number;
+    schemaVersion: typeof NAVIGATION_SNAPSHOT_SCHEMA_VERSION;
     branchName: string;
     metadata: {
         docsUrl: string;
@@ -296,11 +415,16 @@ export interface NavigationSnapshot {
     };
     pageRegistry: PageRegistry;
     docsYmlBaseContent: DocsYmlBaseContent;
-    docsYmlChanges: DocsYmlChanges;
+    /** Map of product or version slug to file path (for multi-file docs.yml structures) */
+    slugToDocsYmlFilePath?: Map<NavigationSlug, DocsYmlFilePath>;
+    /** Map of filename to navigation changes */
+    navigationChanges: Map<PageFilename, NavigationChange>;
+    /** Hash of the last committed version of the snapshot */
     lastCommittedHash?: string;
-    version: number;
-    /** Root navigation node - single source of truth for navigation structure */
+    /** Root navigation node - single source of truth for navigation components e.g. sidebar */
     rootNode?: FernNavigation.RootNode;
+    /** Version of the snapshot – should be incremented when snapshot is saved */
+    version: number;
 }
 
 export function createEmptyNavigationSnapshot(
@@ -317,7 +441,8 @@ export function createEmptyNavigationSnapshot(
         },
         pageRegistry: {},
         docsYmlBaseContent: null,
-        docsYmlChanges: new Map(),
+        slugToDocsYmlFilePath: new Map(),
+        navigationChanges: new Map(),
         lastCommittedHash: undefined,
         version: 0,
         rootNode: undefined
@@ -330,8 +455,8 @@ export function getHasUncommittedChanges(navigationStoreData: NavigationSnapshot
         return true;
     }
 
-    // Check for uncommitted changes in docsYmlChanges (filter out committed deletions)
-    for (const change of navigationStoreData.docsYmlChanges.values()) {
+    // Check for uncommitted changes in navigationChanges (filter out committed deletions)
+    for (const change of navigationStoreData.navigationChanges.values()) {
         if (!change.committed) {
             return true;
         }

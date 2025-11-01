@@ -28,9 +28,12 @@ type CreateBranchResult =
 export function useCreateBranchMutation(): UseMutationResult<CreateBranchResult, Error, CreateBranchParams> {
     return useMutation({
         mutationFn: async (params: CreateBranchParams) => {
-            return createBranchIfNotExists(params);
+            return await createBranchIfNotExists(params);
         },
         retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        onError: (error, variables) => {
+            console.error("[useCreateBranchMutation] Failed to create branch:", error, variables.branch);
+        }
     });
 }

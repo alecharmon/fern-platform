@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "@bprogress/next/app";
-import { constructEditorSlug, useNavigation } from "@fern-docs/components/navigation";
+import { constructEditorSlug, isYmlFilePath, useNavigation } from "@fern-docs/components/navigation";
 import { diffLines } from "diff";
 import { ChevronDownIcon, ChevronRightIcon, CodeIcon, FileIcon, Undo2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -13,36 +13,58 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { DashboardTooltip } from "./DashboardTooltip";
 
 export function FilesDropdown() {
-    const { branchName, metadata, files, registeredPages, docsYmlChanges, resetPage, unmarkPageForDeletion } =
+    const { branchName, metadata, files, registeredPages, navigationChanges, resetPage, unmarkPageForDeletion } =
         useNavigation();
     const router = useRouter();
     const [resetPopoverOpen, setResetPopoverOpen] = useState<string | null>(null);
-    const [expandedDocsYml, setExpandedDocsYml] = useState(true);
+    const [expandedYmlFiles, setExpandedYmlFiles] = useState<Set<string>>(new Set(["docs.yml"]));
 
-    const filteredDocsYmlChanges = useMemo(
-        () => Array.from(docsYmlChanges.values()).filter((change) => !change.committed),
-        [docsYmlChanges]
+    const filteredNavigationChanges = useMemo(
+        () => Array.from(navigationChanges.values()).filter((change) => !change.committed),
+        [navigationChanges]
     );
+
+    // Group changes by yml file
+    const changesByYmlFile = useMemo(() => {
+        const grouped = new Map<string, typeof filteredNavigationChanges>();
+        for (const change of filteredNavigationChanges) {
+            const filePath = change.docsYmlFilePath;
+            const fileChanges = grouped.get(filePath) ?? [];
+            fileChanges.push(change);
+            grouped.set(filePath, fileChanges);
+        }
+        return grouped;
+    }, [filteredNavigationChanges]);
 
     const allChangedFiles = useMemo(() => {
         const changedFilesList = Object.keys(files.changed);
         // files.deleted now only contains uncommitted deletions (committed ones are filtered out in NavigationStore)
         const allFiles = [...changedFilesList, ...files.deleted];
 
-        // Move docs.yml to the end of the list
-        const docsYmlIndex = allFiles.indexOf("docs.yml");
-        if (docsYmlIndex !== -1) {
-            allFiles.splice(docsYmlIndex, 1);
-            allFiles.push("docs.yml");
-        }
+        // Separate yml files from other files
+        const ymlFiles = allFiles.filter((f) => isYmlFilePath(f));
+        const otherFiles = allFiles.filter((f) => !isYmlFilePath(f));
 
-        // Only include docs.yml if there are uncommitted changes
-        return allFiles.filter((filename) => filename !== "docs.yml" || filteredDocsYmlChanges.length > 0);
-    }, [files.changed, files.deleted, filteredDocsYmlChanges]);
+        // Sort yml files, putting docs.yml first
+        ymlFiles.sort((a, b) => {
+            if (a === "docs.yml") return -1;
+            if (b === "docs.yml") return 1;
+            return a.localeCompare(b);
+        });
+
+        // Return other files first, then yml files at the end
+        return [...otherFiles, ...ymlFiles].filter((filename) => {
+            // Only include yml files if they have uncommitted changes
+            if (isYmlFilePath(filename)) {
+                return changesByYmlFile.has(filename);
+            }
+            return true;
+        });
+    }, [files.changed, files.deleted, changesByYmlFile]);
 
     const changedFilesCount = allChangedFiles.length;
 
-    // Calculate diff stats for each file
+    // Calculate diff stats for each file (skip yml files as they use specialized UI)
     const fileDiffStats = useMemo(() => {
         const stats: Record<string, { added: number; removed: number; isDeleted: boolean }> = {};
 
@@ -52,6 +74,9 @@ export function FilesDropdown() {
 
             if (isDeleted) {
                 stats[filename] = { added: 0, removed: 0, isDeleted: true };
+            } else if (isYmlFilePath(filename)) {
+                // Skip diff calculation for yml files - they use specialized UI
+                stats[filename] = { added: 0, removed: 0, isDeleted: false };
             } else {
                 // For changed files, calculate diff
                 const initial = pageEntry?.initialMdx ?? "";
@@ -92,11 +117,23 @@ export function FilesDropdown() {
     };
 
     const isClickable = (filename: string) => {
-        return filename !== "docs.yml";
+        return !isYmlFilePath(filename);
+    };
+
+    const toggleYmlExpanded = (filename: string) => {
+        setExpandedYmlFiles((prev) => {
+            const next = new Set(prev);
+            if (next.has(filename)) {
+                next.delete(filename);
+            } else {
+                next.add(filename);
+            }
+            return next;
+        });
     };
 
     const handleFileClick = (filename: string) => {
-        // Skip navigation for docs.yml
+        // Skip navigation for yml files
         if (!isClickable(filename)) {
             return;
         }
@@ -126,7 +163,7 @@ export function FilesDropdown() {
     };
 
     const getFileIcon = (filename: string) => {
-        if (filename === "docs.yml") {
+        if (isYmlFilePath(filename)) {
             return <CodeIcon className="size-3 text-inherit" />;
         }
         // Default to file icon
@@ -144,7 +181,7 @@ export function FilesDropdown() {
         return filename;
     };
 
-    const getDocsYmlChangeLabel = (change: typeof docsYmlChanges extends Map<any, infer T> ? T : never) => {
+    const getDocsYmlChangeLabel = (change: typeof navigationChanges extends Map<any, infer T> ? T : never) => {
         if (change.type === "add_page") {
             return `Page created: "${change.pageEntry.page}"`;
         }
@@ -187,7 +224,9 @@ export function FilesDropdown() {
                         <div className="max-h-[320px] overflow-y-auto">
                             {allChangedFiles.map((filename) => {
                                 const stats = fileDiffStats[filename] ?? { added: 0, removed: 0, isDeleted: false };
-                                const isDocsYml = filename === "docs.yml";
+                                const isYml = isYmlFilePath(filename);
+                                const isExpanded = expandedYmlFiles.has(filename);
+                                const ymlChanges = isYml ? (changesByYmlFile.get(filename) ?? []) : [];
 
                                 return (
                                     <div key={filename}>
@@ -198,16 +237,16 @@ export function FilesDropdown() {
                                             <div
                                                 className="flex min-w-0 flex-1 items-center gap-2 ml-1 cursor-pointer"
                                                 onClick={() => {
-                                                    if (isDocsYml) {
-                                                        setExpandedDocsYml(!expandedDocsYml);
+                                                    if (isYml) {
+                                                        toggleYmlExpanded(filename);
                                                     } else {
                                                         handleFileClick(filename);
                                                     }
                                                 }}
                                             >
-                                                {isDocsYml && (
+                                                {isYml && (
                                                     <ChevronRightIcon
-                                                        className={`size-3 transition-transform ${expandedDocsYml ? "rotate-90" : ""}`}
+                                                        className={`size-3 transition-transform ${isExpanded ? "rotate-90" : ""}`}
                                                     />
                                                 )}
                                                 <div className="shrink-0">{getFileIcon(filename)}</div>
@@ -218,10 +257,10 @@ export function FilesDropdown() {
                                             <div className="flex items-center gap-1 shrink-0">
                                                 {stats.isDeleted ? (
                                                     <span className="text-xs text-red-600 font-medium">Deleted</span>
-                                                ) : isDocsYml ? (
+                                                ) : isYml ? (
                                                     <span className="text-xs text-muted-foreground">
-                                                        {filteredDocsYmlChanges.length}{" "}
-                                                        {filteredDocsYmlChanges.length === 1 ? "change" : "changes"}
+                                                        {ymlChanges.length}{" "}
+                                                        {ymlChanges.length === 1 ? "change" : "changes"}
                                                     </span>
                                                 ) : (
                                                     <>
@@ -238,7 +277,7 @@ export function FilesDropdown() {
                                                     </>
                                                 )}
                                             </div>
-                                            {!isDocsYml && (
+                                            {!isYml && (
                                                 <Popover
                                                     open={resetPopoverOpen === filename}
                                                     onOpenChange={(open) => {
@@ -304,15 +343,15 @@ export function FilesDropdown() {
                                             )}
                                         </DropdownMenuItem>
 
-                                        {/* Nested docs.yml changes */}
-                                        {isDocsYml && expandedDocsYml && (
+                                        {/* Nested yml changes */}
+                                        {isYml && isExpanded && (
                                             <div className="ml-6 border-l border-gray-400 pl-2 py-1">
-                                                {filteredDocsYmlChanges.length === 0 ? (
+                                                {ymlChanges.length === 0 ? (
                                                     <div className="text-xs text-muted-foreground py-1 px-2 italic">
                                                         No changes
                                                     </div>
                                                 ) : (
-                                                    filteredDocsYmlChanges.map((change, idx) => {
+                                                    ymlChanges.map((change, idx) => {
                                                         // Generate a stable key based on change content
                                                         const changeKey =
                                                             change.type === "add_page"

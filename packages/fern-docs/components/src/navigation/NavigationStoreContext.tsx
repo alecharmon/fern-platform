@@ -16,7 +16,7 @@ export interface NavigationStoreProviderProps {
     branchName: string;
     orgName: string;
     docsUrl: string;
-    initialDocsYmlContent: string | null;
+    latestDocsYmlAndReferences: Map<string, string> | null;
     deletionToastCallback?: DeletionToastCallback;
 }
 
@@ -25,7 +25,7 @@ export function NavigationStoreProvider({
     branchName,
     orgName,
     docsUrl,
-    initialDocsYmlContent,
+    latestDocsYmlAndReferences,
     deletionToastCallback
 }: NavigationStoreProviderProps) {
     const storeRef = useRef<NavigationStore>(new NavigationStore(branchName, orgName, docsUrl));
@@ -40,8 +40,8 @@ export function NavigationStoreProvider({
     }
 
     useEffect(() => {
-        void storeRef.current.hydrate({ initialDocsYmlContent });
-    }, [initialDocsYmlContent]);
+        void storeRef.current.hydrate({ latestDocsYmlAndReferences });
+    }, [latestDocsYmlAndReferences]);
 
     useEffect(() => {
         if (deletionToastCallback) {
@@ -70,7 +70,6 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     rootNode: NavigationStore["rootNode"];
     registeredPages: NavigationStore["registeredPages"];
     files: NavigationStore["files"];
-    canDirectlyEditDocsYmlNavigation: NavigationStore["canDirectlyEditDocsYmlNavigation"];
     resolveInitialPageData: NavigationStore["resolveInitialPageData"];
     registerPage: NavigationStore["registerPage"];
     createClientPage: NavigationStore["createClientPage"];
@@ -98,7 +97,6 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         rootNode: store.rootNode,
         registeredPages: store.registeredPages,
         files: store.files,
-        canDirectlyEditDocsYmlNavigation: store.canDirectlyEditDocsYmlNavigation,
         resolveInitialPageData: store.resolveInitialPageData.bind(store),
         registerPage: store.registerPage.bind(store),
         createClientPage: store.createClientPage.bind(store),

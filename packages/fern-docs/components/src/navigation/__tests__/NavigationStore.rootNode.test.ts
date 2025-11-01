@@ -196,7 +196,7 @@ describe("NavigationStore - rootNode management", () => {
         });
 
         const snapshot1 = store.getSnapshot();
-        const change1 = snapshot1.docsYmlChanges.get(filename);
+        const change1 = snapshot1.navigationChanges.get(filename);
         expect(change1?.type).toBe("add_page");
         expect(change1?.type === "add_page" && change1.sectionTitle).toBe("Test Section");
 
@@ -204,9 +204,27 @@ describe("NavigationStore - rootNode management", () => {
         store.renameSection("test-section" as FernNavigation.NodeId, "Renamed Section");
 
         const snapshot2 = store.getSnapshot();
-        const change2 = snapshot2.docsYmlChanges.get(filename);
+        const change2 = snapshot2.navigationChanges.get(filename);
         expect(change2?.type).toBe("add_page");
         expect(change2?.type === "add_page" && change2.sectionTitle).toBe("Renamed Section");
+    });
+
+    it("should collapse multiple consecutive section renames into a single change", () => {
+        const rootNode = createTestRootNode();
+        store.setRootNode(rootNode);
+
+        // Rename the section multiple times
+        store.renameSection("test-section" as FernNavigation.NodeId, "First Rename");
+        store.renameSection("test-section" as FernNavigation.NodeId, "Second Rename");
+        store.renameSection("test-section" as FernNavigation.NodeId, "Third Rename");
+
+        const snapshot = store.getSnapshot();
+        const renameChange = snapshot.navigationChanges.get("section-rename-test-section");
+
+        // Should have a single rename change with original oldTitle and final newTitle
+        expect(renameChange?.type).toBe("rename_section");
+        expect(renameChange?.type === "rename_section" && renameChange.oldTitle).toBe("Test Section");
+        expect(renameChange?.type === "rename_section" && renameChange.newTitle).toBe("Third Rename");
     });
 
     it("should maintain correct order for pages added to section", () => {
@@ -272,8 +290,8 @@ describe("NavigationStore - rootNode management", () => {
         });
 
         const snapshot = store.getSnapshot();
-        const change1 = snapshot.docsYmlChanges.get(filename1);
-        const change2 = snapshot.docsYmlChanges.get(filename2);
+        const change1 = snapshot.navigationChanges.get(filename1);
+        const change2 = snapshot.navigationChanges.get(filename2);
 
         // Both should be tracked as add_page changes
         expect(change1?.type).toBe("add_page");
@@ -287,5 +305,260 @@ describe("NavigationStore - rootNode management", () => {
         expect(section.children).toHaveLength(2);
         expect((section.children[0] as FernNavigation.PageNode).title).toBe("Page 1");
         expect((section.children[1] as FernNavigation.PageNode).title).toBe("Page 2");
+    });
+
+    it("should correctly determine docsYmlFilePath for server pages in products when marking for deletion", async () => {
+        // Create a multi-product root node
+        // Using 'as any' to bypass type checking for product-related node types
+        const productRootNode = {
+            type: "root",
+            id: "root" as FernNavigation.NodeId,
+            version: "v2",
+            title: "Root",
+            slug: "root" as FernNavigation.Slug,
+            canonicalSlug: undefined,
+            icon: undefined,
+            hidden: undefined,
+            authed: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            pointsTo: undefined,
+            roles: undefined,
+            child: {
+                type: "unversioned",
+                id: "unversioned" as FernNavigation.NodeId,
+                landingPage: undefined,
+                child: {
+                    type: "productgroup" as any,
+                    id: "productgroup" as FernNavigation.NodeId,
+                    landingPage: undefined,
+                    children: [
+                        {
+                            type: "product" as any,
+                            id: "product-a" as FernNavigation.NodeId,
+                            title: "Product A",
+                            slug: "product-a" as FernNavigation.Slug,
+                            version: undefined,
+                            canonicalSlug: undefined,
+                            icon: undefined,
+                            hidden: undefined,
+                            authed: undefined,
+                            viewers: undefined,
+                            orphaned: undefined,
+                            pointsTo: undefined,
+                            featureFlags: undefined,
+                            child: {
+                                type: "unversioned" as any,
+                                id: "product-a-unversioned" as FernNavigation.NodeId,
+                                child: {
+                                    type: "sidebarRoot",
+                                    id: "product-a-sidebar" as FernNavigation.NodeId,
+                                    children: [
+                                        {
+                                            type: "page",
+                                            id: "product-a-page" as FernNavigation.NodeId,
+                                            pageId: "product-a-page.mdx" as FernNavigation.PageId,
+                                            title: "Product A Page",
+                                            slug: "product-a-page" as FernNavigation.Slug,
+                                            canonicalSlug: undefined,
+                                            icon: undefined,
+                                            hidden: undefined,
+                                            authed: undefined,
+                                            viewers: undefined,
+                                            orphaned: undefined,
+                                            featureFlags: undefined,
+                                            noindex: undefined,
+                                            availability: undefined
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        } as any as FernNavigation.RootNode;
+
+        // Create a new store with the multi-product structure and slug map
+        const productStore = new NavigationStore("test-branch", "test-org", "https://test.com");
+
+        await productStore.hydrate({
+            storage: _createNavigationMemoryStorage(),
+            latestDocsYmlAndReferences: new Map([
+                [
+                    "docs.yml",
+                    `products:
+  - id: product-a
+    slug: product-a
+    path: product-a/docs.yml
+navigation:
+  - page: Root Page
+    path: root.mdx`
+                ],
+                ["product-a/docs.yml", "navigation:\n  - page: Product A Page\n    path: product-a-page.mdx"]
+            ])
+        });
+
+        productStore.setRootNode(productRootNode);
+
+        // Mark a server page for deletion (not in registry)
+        const filename = "product-a-page.mdx";
+        productStore.markPageForDeletion(filename, "Product A Page");
+
+        // Verify the change was tracked with the correct yml file path
+        const snapshot = productStore.getSnapshot();
+        const change = snapshot.navigationChanges.get(filename);
+
+        expect(change?.type).toBe("remove_page");
+        expect(change?.type === "remove_page" && change.docsYmlFilePath).toBe("product-a/docs.yml");
+
+        // Verify that the yml file is actually modified
+        const files = productStore.files;
+        console.log("[Test] Changed files:", Object.keys(files.changed));
+        console.log("[Test] product-a/docs.yml content:", files.changed["product-a/docs.yml"]);
+
+        // The page should be removed from the product yml file
+        expect(files.changed["product-a/docs.yml"]).toBeDefined();
+        expect(files.changed["product-a/docs.yml"]).not.toContain("product-a-page.mdx");
+    });
+
+    it("should preserve yml changes after commit (full dashboard flow)", async () => {
+        // Setup: Create a multi-product root node with a page to delete
+        const productRootNode = {
+            type: "root",
+            id: "root" as FernNavigation.NodeId,
+            version: "v2",
+            title: "Root",
+            slug: "root" as FernNavigation.Slug,
+            canonicalSlug: undefined,
+            icon: undefined,
+            hidden: undefined,
+            authed: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            pointsTo: undefined,
+            roles: undefined,
+            child: {
+                type: "unversioned",
+                id: "unversioned" as FernNavigation.NodeId,
+                landingPage: undefined,
+                child: {
+                    type: "productgroup" as any,
+                    id: "productgroup" as FernNavigation.NodeId,
+                    landingPage: undefined,
+                    children: [
+                        {
+                            type: "product" as any,
+                            id: "product-a" as FernNavigation.NodeId,
+                            title: "Product A",
+                            slug: "product-a" as FernNavigation.Slug,
+                            version: undefined,
+                            canonicalSlug: undefined,
+                            icon: undefined,
+                            hidden: undefined,
+                            authed: undefined,
+                            viewers: undefined,
+                            orphaned: undefined,
+                            pointsTo: undefined,
+                            featureFlags: undefined,
+                            child: {
+                                type: "unversioned" as any,
+                                id: "product-a-unversioned" as FernNavigation.NodeId,
+                                child: {
+                                    type: "sidebarRoot",
+                                    id: "product-a-sidebar" as FernNavigation.NodeId,
+                                    children: [
+                                        {
+                                            type: "page",
+                                            id: "product-a-page" as FernNavigation.NodeId,
+                                            pageId: "product-a-page.mdx" as FernNavigation.PageId,
+                                            title: "Product A Page",
+                                            slug: "product-a-page" as FernNavigation.Slug,
+                                            canonicalSlug: undefined,
+                                            icon: undefined,
+                                            hidden: undefined,
+                                            authed: undefined,
+                                            viewers: undefined,
+                                            orphaned: undefined,
+                                            featureFlags: undefined,
+                                            noindex: undefined,
+                                            availability: undefined
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        } as any as FernNavigation.RootNode;
+
+        const productStore = new NavigationStore("test-branch", "test-org", "https://test.com");
+
+        // Step 1: Hydrate with initial yml content (simulates page load)
+        const initialYmlContent = new Map([
+            [
+                "docs.yml",
+                `products:
+  - id: product-a
+    slug: product-a
+    path: product-a/docs.yml
+navigation:
+  - page: Root Page
+    path: root.mdx`
+            ],
+            ["product-a/docs.yml", "navigation:\n  - page: Product A Page\n    path: product-a-page.mdx"]
+        ]);
+
+        await productStore.hydrate({
+            storage: _createNavigationMemoryStorage(),
+            latestDocsYmlAndReferences: initialYmlContent
+        });
+
+        productStore.setRootNode(productRootNode);
+
+        // Step 2: Delete a page (simulates user clicking delete)
+        const filename = "product-a-page.mdx";
+        productStore.markPageForDeletion(filename, "Product A Page");
+
+        // Step 3: Get files for commit (simulates CommitButton getting files)
+        const filesBeforeCommit = productStore.files;
+        console.log("[Test] Files to commit:", Object.keys(filesBeforeCommit.changed));
+        console.log("[Test] product-a/docs.yml before commit:", filesBeforeCommit.changed["product-a/docs.yml"]);
+
+        // Verify the yml file has the page removed BEFORE commit
+        expect(filesBeforeCommit.changed["product-a/docs.yml"]).toBeDefined();
+        expect(filesBeforeCommit.changed["product-a/docs.yml"]).not.toContain("product-a-page.mdx");
+
+        // Step 4: Simulate successful commit (simulates CommitButton calling handleCommitSuccess)
+        productStore.handleCommitSuccess();
+
+        // Step 5: Check the yml content in the store's Map AFTER commit
+        const snapshot = productStore.getSnapshot();
+        console.log(
+            "[Test] docsYmlBaseContent keys after commit:",
+            snapshot.docsYmlBaseContent ? Array.from(snapshot.docsYmlBaseContent.keys()) : "null"
+        );
+
+        if (snapshot.docsYmlBaseContent) {
+            const productYmlAfterCommit = snapshot.docsYmlBaseContent.get("product-a/docs.yml");
+            console.log("[Test] product-a/docs.yml content after commit:", productYmlAfterCommit);
+
+            // CRITICAL: The yml Map should have the updated content (without the deleted page)
+            expect(productYmlAfterCommit).toBeDefined();
+            expect(productYmlAfterCommit).not.toContain("product-a-page.mdx");
+            expect(productYmlAfterCommit).toContain("navigation:");
+        } else {
+            throw new Error("docsYmlBaseContent is null after commit");
+        }
+
+        // Step 6: Simulate getting files again after commit (simulates next interaction)
+        const filesAfterCommit = productStore.files;
+        console.log("[Test] Files after commit:", Object.keys(filesAfterCommit.changed));
+
+        // After commit, there should be no uncommitted changes
+        expect(filesAfterCommit.hasChangesToCommit).toBe(false);
     });
 });

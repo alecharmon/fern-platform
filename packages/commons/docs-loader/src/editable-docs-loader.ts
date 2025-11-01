@@ -117,15 +117,20 @@ interface DocsYmlError {
 interface GetDocsYmlSuccess {
     type: "ok";
     result: string;
+    metadata: {
+        path: string;
+        defaultBranch: string;
+    };
 }
 
 export type GetDocsYmlResult = GetDocsYmlSuccess | DocsYmlError;
 
-interface UpdateDocsYmlSuccess {
+interface GetDocsYmlAndReferencesSuccess {
     type: "ok";
+    result: Map<string, string>;
 }
 
-export type UpdateDocsYmlResult = UpdateDocsYmlSuccess | DocsYmlError;
+export type GetDocsYmlAndReferencesResult = GetDocsYmlAndReferencesSuccess | DocsYmlError;
 
 export type FernConfigJsonErrors =
     | GetFernProjectErrors
@@ -157,18 +162,17 @@ export interface FernProject {
 }
 
 /**
- * The GitLoader is used to get and update docs.yml from a remote git repository.
+ * The GitLoader is used to get docs.yml and other files from a remote git repository.
  */
 export interface GitLoader {
     getFernProjectBySite(owner: string, repo: string, site: string): Promise<GetFernProjectResult>;
     getDocsYml(owner: string, repo: string, site: string, ref?: string): Promise<GetDocsYmlResult>;
-    updateDocsYml(
+    getDocsYmlAndReferences(
         owner: string,
         repo: string,
         site: string,
-        content: string,
         ref?: string
-    ): Promise<UpdateDocsYmlResult>;
+    ): Promise<GetDocsYmlAndReferencesResult>;
     getFernConfigJson(owner: string, repo: string, site: string): Promise<GetFernConfigJsonResult>;
 }
 

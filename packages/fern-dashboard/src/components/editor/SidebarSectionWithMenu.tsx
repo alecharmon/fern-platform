@@ -6,8 +6,6 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { MoreVertical, Pencil } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { UI_MESSAGES } from "@/utils/messages";
-import { DashboardTooltip } from "./DashboardTooltip";
 import { RenameSectionDialog } from "./RenameSectionDialog";
 
 export interface SidebarSectionWithMenuProps {
@@ -20,14 +18,6 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
     const [showRenameDialog, setShowRenameDialog] = useState(false);
     const [_showDeleteDialog, _setShowDeleteDialog] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-
-    // LIMITATION: Section renaming is not supported for multi-product or multi-version docs
-    // These docs have separate docs.yml files for each product/version, and we would need to
-    // determine which specific file to modify. This is a complex operation that's not yet supported.
-    const isRenameDisabled = !navigation.canDirectlyEditDocsYmlNavigation;
-    const renameDisabledTooltip = isRenameDisabled
-        ? UI_MESSAGES.NAVIGATION_EDITS_NOT_SUPPORTED_MULTI_DOCS_YML
-        : undefined;
 
     const handleRenameConfirm = (newTitle: string) => {
         try {
@@ -50,10 +40,6 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
                             className="absolute right-[5px] top-[5px] cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover:opacity-100 data-[state=open]:opacity-100"
                             title="Section options"
                             aria-label="Section options"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                            }}
                         >
                             <MoreVertical className="size-4" />
                         </button>
@@ -66,21 +52,16 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
                             align="start"
                             sideOffset={8}
                         >
-                            <DashboardTooltip content={renameDisabledTooltip} side="top">
-                                <DropdownMenu.Item
-                                    className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-100 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
-                                    disabled={isRenameDisabled}
-                                    onSelect={() => {
-                                        if (!isRenameDisabled) {
-                                            setShowRenameDialog(true);
-                                            setDropdownOpen(false);
-                                        }
-                                    }}
-                                >
-                                    <Pencil className="size-4" />
-                                    <span>Rename</span>
-                                </DropdownMenu.Item>
-                            </DashboardTooltip>
+                            <DropdownMenu.Item
+                                className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-100 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
+                                onSelect={() => {
+                                    setShowRenameDialog(true);
+                                    setDropdownOpen(false);
+                                }}
+                            >
+                                <Pencil className="size-4" />
+                                <span>Rename</span>
+                            </DropdownMenu.Item>
                         </DropdownMenu.Content>
                     </DropdownMenu.Portal>
                 </DropdownMenu.Root>

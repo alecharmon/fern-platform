@@ -32,7 +32,7 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
 
         // Validate branch name format before initializing
         if (!isValidBranchNameFormat(branch)) {
-            console.error("Invalid branch name format:", branch);
+            console.error("[BranchInitializer] Invalid branch name format:", branch);
             setBranchFailed(true);
             setBranchFailureReason("Editor disabled due to invalid branch name");
             return;
@@ -49,13 +49,13 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
             })
             .then((result) => {
                 if (!result.success) {
-                    console.error("Failed to create branch:", result.error);
+                    console.error("[BranchInitializer] Failed to create branch:", result.error);
                     setBranchFailed(true);
                     setBranchFailureReason(result.error);
                 }
             })
             .catch((error) => {
-                console.error("Error creating branch:", {
+                console.error("[BranchInitializer] Error during branch creation:", {
                     error,
                     orgName,
                     owner,

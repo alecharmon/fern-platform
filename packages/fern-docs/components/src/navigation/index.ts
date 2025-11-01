@@ -9,6 +9,7 @@ export * from "./NavigationStore";
 export * from "./NavigationStoreContext";
 export {
     createMdxFrontmatter,
+    extractDocsYmlFilePathFromFoundNode,
     extractLiveSidebarFromRootNode,
     getAllSectionsFromSidebarRootNode,
     getClientPageDefaultFilename
@@ -21,3 +22,4 @@ export {
 } from "./routingUtils";
 export * from "./types";
 export * from "./useDerivedFoundNode";
+export { isYmlFilePath } from "./ymlUtils";

@@ -1,13 +1,16 @@
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { mdxToHtml } from "@fern-docs/mdx";
 
 import type {
     ClientPageDataDependencies,
+    DocsYmlFilePath,
+    NavigationSlug,
     NavigationSnapshot,
     PageDataDependencies,
     ResolvedPageData,
     SectionAncestorMetadata,
     SectionNodeWithTraversalContext,
+    SerializableFoundNode,
     ServerPageDataDependencies
 } from "./types";
 
@@ -58,6 +61,95 @@ export function extractLiveSidebarFromRootNode(
     }
 
     return undefined;
+}
+
+/**
+ * Extracts the docs.yml file path from navigation context.
+ * For multi-version docs, this determines which version file the navigation belongs to.
+ * For multi-product docs, this determines which product file the navigation belongs to
+ *
+ * @param foundNode - The navigation context with version/product information
+ * @returns The file path for the docs.yml file (e.g., "docs.yml", "versions/v2.yml")
+ */
+export function extractDocsYmlFilePathFromFoundNode(
+    foundNode: SerializableFoundNode,
+    slugToDocsYmlFilePath?: Map<NavigationSlug, DocsYmlFilePath>
+): DocsYmlFilePath {
+    // If no mapping is provided or it's not a Map, default to "docs.yml"
+    if (!slugToDocsYmlFilePath || !(slugToDocsYmlFilePath instanceof Map) || slugToDocsYmlFilePath.size === 0) {
+        console.warn(
+            "[extractDocsYmlFilePathFromFoundNode] Invalid or empty slugToDocsYmlFilePath. " +
+                "This usually means docsYmlBaseContent wasn't loaded yet. " +
+                "Context:",
+            {
+                slugToDocsYmlFilePath,
+                isMap: slugToDocsYmlFilePath instanceof Map,
+                size: slugToDocsYmlFilePath instanceof Map ? slugToDocsYmlFilePath.size : "N/A",
+                hasCurrentVersion: !!foundNode.currentVersion,
+                hasCurrentProduct: !!foundNode.currentProduct,
+                hasCurrentTab: !!foundNode.currentTab,
+                currentVersionSlug: foundNode.currentVersion?.slug,
+                currentProductSlug:
+                    foundNode.currentProduct && FernNavigation.isInternalProductNode(foundNode.currentProduct)
+                        ? foundNode.currentProduct.slug
+                        : undefined,
+                currentTabSlug: foundNode.currentTab?.slug
+            }
+        );
+        return "docs.yml";
+    }
+
+    // Check if we're in a versioned or tabbed context
+    // Priority: currentVersion > currentProduct > currentTab
+
+    // 1. Check for version context (most common for multi-file docs)
+    if (foundNode.currentVersion) {
+        const versionSlug = foundNode.currentVersion.slug;
+        const filePath = slugToDocsYmlFilePath.get(versionSlug);
+        if (filePath) {
+            return filePath;
+        }
+    }
+
+    // 2. Check for product context (for multi-product docs)
+    // Only internal products have slug property; external products link to external URLs
+    if (foundNode.currentProduct && FernNavigation.isInternalProductNode(foundNode.currentProduct)) {
+        const productSlug = foundNode.currentProduct.slug;
+
+        // Try exact match first
+        let filePath = slugToDocsYmlFilePath.get(productSlug);
+        if (filePath) {
+            return filePath;
+        }
+
+        // If the slug contains a slash (e.g., "learn/docs"), try the last segment
+        if (productSlug.includes("/")) {
+            const lastSegment = productSlug.split("/").pop();
+            if (lastSegment) {
+                filePath = slugToDocsYmlFilePath.get(lastSegment);
+                if (filePath) {
+                    return filePath;
+                }
+            }
+        }
+
+        console.warn(
+            `[extractDocsYmlFilePathFromFoundNode] No file path found for product slug: "${productSlug}". Available slugs:`,
+            Array.from(slugToDocsYmlFilePath.keys())
+        );
+    }
+
+    // 3. Check for tab context (for tabbed docs with file references)
+    if (foundNode.currentTab) {
+        const tabSlug = foundNode.currentTab.slug;
+        const filePath = slugToDocsYmlFilePath.get(tabSlug);
+        if (filePath) {
+            return filePath;
+        }
+    }
+
+    // Default to main docs.yml if no match found
+    return "docs.yml";
 }
 
 // SECTIONS

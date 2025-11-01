@@ -105,6 +105,7 @@ export default async function createBranchIfNotExists(request: {
             response
         };
     } catch (error) {
+        console.error("[createBranchIfNotExists] Failed to create branch:", error);
         return {
             success: false,
             error: `Unknown error occurred: ${error}` // TODO: Add error message

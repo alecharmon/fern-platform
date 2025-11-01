@@ -2,7 +2,7 @@
 
 import type { DangerousTransmittableDocsLoaderData } from "@fern-api/docs-loader";
 import { getIsSidebarFixed, getIsSingleOverviewPage } from "@fern-api/docs-utils";
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import {
     type ClientPageDataDependencies,
     type ResolvedPageData,
@@ -88,7 +88,11 @@ export default function PageSidebar({
                     sidebarRootNodeId={found.sidebar?.id}
                     tabId={found.currentTab?.id}
                     productId={found.currentProduct?.productId}
-                    productSlug={found.currentProduct?.slug}
+                    productSlug={
+                        found.currentProduct && FernNavigation.isInternalProductNode(found.currentProduct)
+                            ? found.currentProduct.slug
+                            : undefined
+                    }
                     versionId={found.currentVersion?.versionId}
                     versionSlug={found.currentVersion?.slug}
                     variantId={found.currentVariant?.variantId}
@@ -114,12 +118,7 @@ export default function PageSidebar({
                         renderOptions={{
                             forceClientRender: true,
                             wrapPageNode: (node, component) => (
-                                <DeletablePageNodeWrapper
-                                    node={node}
-                                    component={component}
-                                    icon={undefined}
-                                    depth={0}
-                                />
+                                <DeletablePageNodeWrapper node={node} component={component} />
                             ),
                             wrapSectionNode: (node, trigger) => <SidebarSectionWithMenu node={node} trigger={trigger} />
                         }}

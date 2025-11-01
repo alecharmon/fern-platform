@@ -9,7 +9,7 @@ export interface ClientNavigationProviderProps {
     branchName: string;
     orgName: string;
     docsUrl: string;
-    initialDocsYmlContent: string | null;
+    latestDocsYmlAndReferences: Map<string, string> | null;
 }
 
 export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
@@ -22,7 +22,7 @@ export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
             branchName={props.branchName}
             orgName={props.orgName}
             docsUrl={props.docsUrl}
-            initialDocsYmlContent={props.initialDocsYmlContent}
+            latestDocsYmlAndReferences={props.latestDocsYmlAndReferences}
             deletionToastCallback={deletionToastCallback}
         >
             {props.children}
