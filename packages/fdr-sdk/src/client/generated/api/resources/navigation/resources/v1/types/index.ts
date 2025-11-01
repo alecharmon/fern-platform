@@ -22,6 +22,8 @@ export * from "./EndpointPairNode.js";
 export * from "./LinkNode.js";
 export * from "./RootNode.js";
 export * from "./ProductNode.js";
+export * from "./InternalProductNode.js";
+export * from "./ExternalProductNode.js";
 export * from "./VersionNode.js";
 export * from "./VariantNode.js";
 export * from "./TabNode.js";

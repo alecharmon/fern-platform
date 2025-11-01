@@ -30,6 +30,7 @@ export function followRedirect(
         apiReference: (node) => (node.overviewPageId != null ? node.slug : followRedirects(node.children)),
 
         product: (node) => followRedirect(node.child),
+        productLink: () => undefined,
         productgroup: (node) => followRedirect(node.landingPage ?? node.children.filter((node) => !node.hidden)[0]),
         // version is a special case where it should only consider it's first child (the first version)
         versioned: (node) => followRedirect(node.children.filter((node) => !node.hidden)[0]),

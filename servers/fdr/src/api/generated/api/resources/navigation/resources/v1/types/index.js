@@ -22,6 +22,8 @@ export * from "./EndpointPairNode";
 export * from "./LinkNode";
 export * from "./RootNode";
 export * from "./ProductNode";
+export * from "./InternalProductNode";
+export * from "./ExternalProductNode";
 export * from "./VersionNode";
 export * from "./VariantNode";
 export * from "./TabNode";

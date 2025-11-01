@@ -327,8 +327,18 @@ export class FernNavigationV1ToLatest {
         node: FernNavigation.V1.ProductNode,
         parents: FernNavigation.V1.NavigationNode[]
     ): FernNavigation.ProductNode => {
+        return visitDiscriminatedUnion(node)._visit<FernNavigation.ProductNode>({
+            product: (internalNode) => this.internalProduct(internalNode, parents),
+            productLink: (externalNode) => this.externalProduct(externalNode)
+        });
+    };
+
+    public internalProduct = (
+        node: FernNavigation.V1.InternalProductNode,
+        parents: FernNavigation.V1.NavigationNode[]
+    ): FernNavigation.InternalProductNode => {
         this.#currentProductSlug = node.slug;
-        const latest: FernNavigation.ProductNode = {
+        const latest: FernNavigation.InternalProductNode = {
             type: "product",
             id: FernNavigation.NodeId(node.id),
             title: node.title,
@@ -349,6 +359,26 @@ export class FernNavigationV1ToLatest {
             viewers: node.viewers,
             orphaned: node.orphaned,
             featureFlags: node.featureFlags
+        };
+        return latest;
+    };
+
+    public externalProduct = (node: FernNavigation.V1.ExternalProductNode): FernNavigation.ExternalProductNode => {
+        const latest: FernNavigation.ExternalProductNode = {
+            type: "productLink",
+            id: FernNavigation.NodeId(node.id),
+            title: node.title,
+            href: node.href,
+            default: node.default,
+            productId: FernNavigation.ProductId(node.productId),
+            subtitle: node.subtitle,
+            icon: node.icon,
+            image: node.image,
+            hidden: node.hidden,
+            authed: node.authed,
+            viewers: node.viewers,
+            orphaned: node.orphaned,
+            featureFlags: undefined
         };
         return latest;
     };
