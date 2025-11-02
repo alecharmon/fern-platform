@@ -25,17 +25,17 @@ import {
 } from "@fern-api/fdr-sdk/api-definition";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
-import { getEnv, waitUntil } from "@vercel/functions";
+import { getEnv, invalidateByTag, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
 import { mapValues } from "es-toolkit/object";
 import { escapeRegExp } from "es-toolkit/string";
-import { invalidateByTag } from "@vercel/functions";
 import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex, queueTurbopufferReindex } from "@/server/queue-reindex";
 import { ResilientQueue } from "@/utils/resilient-queue";
 import { createSafeStreamController } from "@/utils/safe-stream-controller";
+import { revalidatePath } from "next/cache";
 
 // Custom error type for intentional revalidation failures
 class RevalidationError extends Error {
