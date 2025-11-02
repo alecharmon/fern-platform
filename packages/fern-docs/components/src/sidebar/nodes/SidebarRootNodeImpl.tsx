@@ -82,7 +82,13 @@ export function SidebarRootNodeImpl({
                         <li key={child.id}>
                             <SidebarRootChild
                                 node={child}
-                                renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode, currentVariantId }}
+                                renderOptions={{
+                                    forceClientRender,
+                                    wrapSectionNode,
+                                    wrapPageNode,
+                                    currentVariantId,
+                                    files: renderOptions?.files
+                                }}
                             />
                         </li>
                     ))}

@@ -1,16 +1,18 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { cn } from "../cn";
 import { FernLinkButton } from "../FernLinkButton";
 import { FernLinkDropdown } from "../FernLinkDropdown";
-import { FaIconServer } from "../fa-icon-server";
 import type { NavbarLink, NavbarLink as NavbarLinkType } from "../types/navbar-link";
 import { GitHubWidget } from "./GitHubWidget";
+import { processNavbarIcon } from "./processNavbarIcon";
 import { WithReturnTo } from "./WithReturnTo";
 
 export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
     const config = await loader.getConfig();
+    const files = await loader.getFiles();
 
     const navbarLinks: NavbarLink[] = [];
 
@@ -60,7 +62,7 @@ export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
     return (
         <>
             {navbarLinks.map((navbarLink, idx) => (
-                <HeaderNavbarLink key={navbarLink.id ?? idx} navbarLink={navbarLink} />
+                <HeaderNavbarLink key={navbarLink.id ?? idx} navbarLink={navbarLink} files={files} />
             ))}
         </>
     );
@@ -70,7 +72,7 @@ const getGitHubRepo = (url: string): string | null => {
     return url.match(/^https:\/\/(www\.)?github\.com\/([\w-]+\/[\w-]+)\/?$/)?.[2] ?? null;
 };
 
-function HeaderNavbarLink({ navbarLink }: { navbarLink: NavbarLinkType }) {
+function HeaderNavbarLink({ navbarLink, files }: { navbarLink: NavbarLinkType; files?: Record<string, FileData> }) {
     if (navbarLink.type === "github") {
         const repo = getGitHubRepo(navbarLink.href);
         return repo && <GitHubWidget repo={repo} className={navbarLink.className} id={navbarLink.id} />;
@@ -84,8 +86,8 @@ function HeaderNavbarLink({ navbarLink }: { navbarLink: NavbarLinkType }) {
                     label: link.text,
                     value: link.href,
                     href: link.href,
-                    icon: link.icon && <FaIconServer icon={link.icon} />,
-                    rightElement: link.rightIcon && <FaIconServer icon={link.rightIcon} />
+                    icon: processNavbarIcon({ icon: link.icon, files }),
+                    rightElement: processNavbarIcon({ icon: link.rightIcon, files })
                 }))}
                 side="bottom"
                 align="start"
@@ -97,10 +99,10 @@ function HeaderNavbarLink({ navbarLink }: { navbarLink: NavbarLinkType }) {
                         "fern-button minimal normal group flex h-9 cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
                     )}
                 >
-                    {navbarLink.icon && <FaIconServer icon={navbarLink.icon} />}
+                    {processNavbarIcon({ icon: navbarLink.icon, files })}
                     {navbarLink.text && <span className="fern-button-text">{navbarLink.text}</span>}
                     {navbarLink.rightIcon ? (
-                        <FaIconServer icon={navbarLink.rightIcon} />
+                        processNavbarIcon({ icon: navbarLink.rightIcon, files })
                     ) : (
                         <ChevronDown className="size-icon duration-200 group-data-[state=open]:rotate-180" />
                     )}
@@ -114,13 +116,13 @@ function HeaderNavbarLink({ navbarLink }: { navbarLink: NavbarLinkType }) {
             id={navbarLink.id}
             className={cn("group cursor-pointer", navbarLink.className)}
             href={navbarLink.href}
-            icon={navbarLink.icon && <FaIconServer icon={navbarLink.icon} />}
+            icon={processNavbarIcon({ icon: navbarLink.icon, files })}
             intent={navbarLink.type === "primary" || navbarLink.type === "filled" ? "primary" : "none"}
             rightIcon={
                 navbarLink.rightIcon === "arrow-right" ? (
                     <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
                 ) : (
-                    navbarLink.rightIcon && <FaIconServer icon={navbarLink.rightIcon} />
+                    processNavbarIcon({ icon: navbarLink.rightIcon, files })
                 )
             }
             variant={

@@ -63,11 +63,13 @@ export default async function SidebarPage({
 
     const tabs = getTabs(found, root, slug, showHiddenNodes, authState.authed ? (authState.user.roles ?? []) : []);
 
+    const files = await loader.getFiles();
+
     return (
         <>
             {tabs && tabs.length > 0 && (
                 <SidebarTabsRoot loader={loader}>
-                    <SidebarTabsList tabs={tabs} />
+                    <SidebarTabsList tabs={tabs} files={files} />
                 </SidebarTabsRoot>
             )}
             {isSingleOverviewPage && !isSidebarFixed ? (
@@ -78,7 +80,8 @@ export default async function SidebarPage({
                     visibleNodeIds={visibleNodeIds}
                     loader={loader}
                     renderOptions={{
-                        currentVariantId: found.currentVariant?.variantId
+                        currentVariantId: found.currentVariant?.variantId,
+                        files
                     }}
                 />
             )}

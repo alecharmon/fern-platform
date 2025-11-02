@@ -20,12 +20,13 @@ interface SidebarApiPackageChild {
 
 export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: SidebarApiPackageChild): ReactNode {
     const forceClientRender = renderOptions.forceClientRender ?? false;
+    const files = renderOptions.files;
 
     switch (node.type) {
         case "page":
             return (
                 <SidebarPageNode
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files })}
                     node={node}
                     depth={depth}
                     shallow={shallow}
@@ -33,7 +34,7 @@ export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: 
                 />
             );
         case "link":
-            return <SidebarLinkNode icon={processIcon(node, undefined, forceClientRender)} node={node} depth={depth} />;
+            return <SidebarLinkNode icon={processIcon({ node, forceClientRender, files })} node={node} depth={depth} />;
         case "endpoint":
         case "webSocket":
         case "webhook":
@@ -53,7 +54,7 @@ export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: 
                 <SidebarApiPackageNode
                     node={node}
                     depth={depth}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files })}
                     renderOptions={renderOptions}
                 >
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
@@ -72,7 +73,7 @@ export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: 
                 <SidebarChangelogNode
                     node={node}
                     depth={depth}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files })}
                 />
             );
         default:

@@ -1,12 +1,13 @@
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { ReactNode } from "react";
-
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarNavigationChild } from "./SidebarNavigationChild";
 
 interface SidebarGroupNodeProps {
     node: FernNavigation.SidebarGroupNode;
     renderOptions: SidebarRenderOptions;
+    files?: Record<string, FileData>;
 }
 
 export function SidebarGroupNode({ node, renderOptions }: SidebarGroupNodeProps): ReactNode {

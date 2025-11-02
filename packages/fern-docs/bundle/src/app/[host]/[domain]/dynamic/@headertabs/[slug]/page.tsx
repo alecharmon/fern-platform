@@ -41,5 +41,7 @@ export default async function HeaderTabsPage({
         return null;
     }
 
-    return <HeaderTabsList tabs={tabs} />;
+    const files = await loader.getFiles();
+
+    return <HeaderTabsList tabs={tabs} files={files} />;
 }

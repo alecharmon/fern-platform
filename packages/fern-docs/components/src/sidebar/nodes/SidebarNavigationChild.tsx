@@ -1,7 +1,7 @@
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { ReactNode } from "react";
 import { UnreachableCaseError } from "ts-essentials";
-
 import { cn } from "../../cn";
 import { processIcon } from "../../processIcon";
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
@@ -18,6 +18,7 @@ interface SidebarNavigationChildProps {
     depth: number;
     root?: boolean;
     renderOptions: SidebarRenderOptions;
+    files?: Record<string, FileData>;
 }
 
 export function SidebarNavigationChild({ node, depth, root, renderOptions }: SidebarNavigationChildProps): ReactNode {
@@ -28,7 +29,7 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                 <SidebarApiPackageNode
                     node={node}
                     depth={depth}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     renderOptions={renderOptions}
                 >
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
@@ -46,7 +47,7 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
             return (
                 <SidebarSectionNode
                     node={node}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     depth={depth}
                     className={cn({
                         "!text-body font-semibold": root
@@ -68,18 +69,24 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                 <SidebarPageNode
                     node={node}
                     depth={depth}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     renderOptions={renderOptions}
                 />
             );
         case "link":
-            return <SidebarLinkNode node={node} depth={depth} icon={processIcon(node, undefined, forceClientRender)} />;
+            return (
+                <SidebarLinkNode
+                    node={node}
+                    depth={depth}
+                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
+                />
+            );
         case "changelog":
             return (
                 <SidebarChangelogNode
                     node={node}
                     depth={depth}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                 />
             );
         case "varianted":

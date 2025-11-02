@@ -1,4 +1,5 @@
 import { slugToHref } from "@fern-api/docs-utils";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { hasRedirect, type TabChild } from "@fern-api/fdr-sdk/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Lock } from "lucide-react";
@@ -10,11 +11,13 @@ import { processIcon } from "../processIcon";
 export function SidebarTabsList({
     tabs,
     children,
-    forceClientRender
+    forceClientRender,
+    files
 }: {
     tabs: readonly TabChild[];
     children?: React.ReactNode;
     forceClientRender?: boolean;
+    files?: Record<string, FileData>;
 }) {
     return (
         <Tabs.TabsList className="-my-2">
@@ -45,7 +48,7 @@ export function SidebarTabsList({
                                 {tab.type !== "link" && tab.authed ? (
                                     <Lock />
                                 ) : (
-                                    processIcon(tab, "book", forceClientRender)
+                                    processIcon({ node: tab, fallback: "book", forceClientRender, files })
                                 )}
                             </span>
                             <span className="truncate font-medium group-data-[state=active]:font-semibold">

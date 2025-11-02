@@ -1,6 +1,6 @@
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { ReactNode } from "react";
-
 import { WithFeatureFlags } from "../../feature-flags/WithFeatureFlags";
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarNavigationChild } from "./SidebarNavigationChild";
@@ -12,13 +12,15 @@ interface SidebarRootSectionNodeProps {
     icon: React.ReactNode;
     className?: string;
     renderOptions: SidebarRenderOptions;
+    files?: Record<string, FileData>;
 }
 
 export function SidebarRootSectionNode({
     node,
     icon,
     className,
-    renderOptions
+    renderOptions,
+    files
 }: SidebarRootSectionNodeProps): ReactNode {
     // If the node has no children, it is a page node.
     if (node.children.length === 0 && FernNavigation.hasMarkdown(node)) {
@@ -38,7 +40,7 @@ export function SidebarRootSectionNode({
             <ul className="fern-sidebar-group">
                 {node.children.map((child) => (
                     <li key={child.id}>
-                        <SidebarNavigationChild node={child} depth={1} renderOptions={renderOptions} />
+                        <SidebarNavigationChild node={child} depth={1} renderOptions={renderOptions} files={files} />
                     </li>
                 ))}
             </ul>

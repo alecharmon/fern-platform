@@ -62,11 +62,10 @@ export async function SidebarRootNode({
     const authState = await loader.getAuthState();
     const edgeFlags = await loader.getEdgeFlags();
 
-    // Resolve variant images on the server
+    // Resolve variant images on the server and get files for icons
     let variantImages: Record<FernNavigation.VariantId, React.ReactNode> = {};
-    if (root) {
-        const files = await loader.getFiles();
-        const resolveFileSrc = createFileResolver(files);
+    if (root && renderOptions?.files) {
+        const resolveFileSrc = createFileResolver(renderOptions?.files);
 
         // Collect all variant nodes from the sidebar tree
         const allVariants = collectVariantNodesFromRoot(root);
@@ -101,7 +100,8 @@ export async function SidebarRootNode({
             edgeFlags={edgeFlags}
             renderOptions={{
                 ...renderOptions,
-                variantImages
+                variantImages,
+                files: renderOptions?.files
             }}
         />
     );

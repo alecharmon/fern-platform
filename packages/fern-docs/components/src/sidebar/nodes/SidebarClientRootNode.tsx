@@ -24,6 +24,7 @@ export function SidebarClientRootNode({
     const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
     const authState = loader.getAuthState();
     const edgeFlags = loader.getEdgeFlags();
+    const files = loader.getFiles();
 
     return (
         <SidebarRootNodeImpl
@@ -31,7 +32,7 @@ export function SidebarClientRootNode({
             visibleNodeIds={visibleNodeIds}
             authState={authState}
             edgeFlags={edgeFlags}
-            renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode }}
+            renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode, files }}
         />
     );
 }

@@ -19,6 +19,10 @@
     svg {
       @apply block h-[50%] w-[50%] transition-all duration-300 ease-in-out;
     }
+    
+    .fern-file-icon {
+      @apply block h-[50%] w-[50%] transition-all duration-300 ease-in-out;
+    }
   }
 
   &.dense .fern-selection-item-icon {
@@ -33,6 +37,10 @@
     @apply text-(color:--accent) bg-(color:--grayscale-a3);
 
     svg {
+      @apply scale-120;
+    }
+    
+    .fern-file-icon {
       @apply scale-120;
     }
   }

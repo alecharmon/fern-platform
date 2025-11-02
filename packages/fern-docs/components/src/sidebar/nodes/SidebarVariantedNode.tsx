@@ -46,7 +46,9 @@ export function SidebarVariantedNode({ node, depth, renderOptions }: SidebarVari
     }
 
     // Prepare the icon/image for the trigger
-    const triggerIcon = currentVariant.icon ? processIcon(currentVariant, undefined, forceClientRender) : undefined;
+    const triggerIcon = currentVariant.icon
+        ? processIcon({ node: currentVariant, forceClientRender, files: renderOptions.files })
+        : undefined;
 
     // Get pre-resolved image from renderOptions (resolved on server)
     const triggerImage = renderOptions.variantImages?.[currentVariant.variantId];
@@ -83,7 +85,7 @@ export function SidebarVariantedNode({ node, depth, renderOptions }: SidebarVari
                                     const href = slugToHref(variant.pointsTo ?? variant.slug);
                                     // Process icon properly by passing the full variant object
                                     const icon = variant.icon
-                                        ? processIcon(variant, undefined, forceClientRender)
+                                        ? processIcon({ node: variant, forceClientRender, files: renderOptions.files })
                                         : undefined;
                                     // Get pre-resolved image from renderOptions (resolved on server)
                                     const image = renderOptions.variantImages?.[variant.variantId];

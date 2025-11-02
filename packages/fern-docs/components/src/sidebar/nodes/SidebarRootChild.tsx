@@ -25,7 +25,7 @@ export function SidebarRootChild({
             return (
                 <SidebarRootApiPackageNode
                     node={node}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     renderOptions={renderOptions}
                 />
             );
@@ -33,7 +33,7 @@ export function SidebarRootChild({
             return (
                 <SidebarRootSectionNode
                     node={node}
-                    icon={processIcon(node, undefined, forceClientRender)}
+                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     renderOptions={renderOptions}
                 />
             );

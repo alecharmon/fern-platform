@@ -1,3 +1,4 @@
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { ReactNode } from "react";
 
@@ -13,4 +14,6 @@ export interface SidebarRenderOptions {
     currentVariantId?: FernNavigation.VariantId;
     /** Pre-resolved variant images (FileIds resolved to ReactNodes on the server) */
     variantImages?: Record<FernNavigation.VariantId, ReactNode>;
+    /** Files data for resolving file: prefixed icons */
+    files?: Record<string, FileData>;
 }
