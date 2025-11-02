@@ -3,7 +3,7 @@
 import { useResizeObserver } from "@fern-ui/react-commons";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Check, Info } from "lucide-react";
+import { Check, Info, Search } from "lucide-react";
 import {
     type ComponentProps,
     cloneElement,
@@ -84,6 +84,7 @@ export declare namespace FernDropdown {
         };
         triggerAsChild?: boolean;
         radioGroupProps?: ComponentProps<typeof DropdownMenu.RadioGroup>;
+        searchable?: boolean;
     }
 }
 
@@ -105,19 +106,33 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
             onClick,
             contentProps,
             triggerAsChild = true,
-            radioGroupProps = {}
+            radioGroupProps = {},
+            searchable = false
         },
         ref
     ): ReactElement => {
         const [isOpen, setOpen] = useState(defaultOpen);
+        const [searchTerm, setSearchTerm] = useState("");
+        const searchInputRef = useRef<HTMLInputElement>(null);
+
         const handleOpenChange = useCallback(
             (toOpen: boolean) => {
                 setOpen(toOpen);
-                if (toOpen && onOpen != null) {
-                    onOpen();
+                if (toOpen) {
+                    if (onOpen != null) {
+                        onOpen();
+                    }
+                    // Reset search when opening
+                    setSearchTerm("");
+                    // Focus search input when opening if searchable
+                    if (searchable) {
+                        setTimeout(() => {
+                            searchInputRef.current?.focus();
+                        }, 0);
+                    }
                 }
             },
-            [onOpen]
+            [onOpen, searchable]
         );
 
         const isValueSelected = useCallback(
@@ -126,81 +141,142 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
             },
             [value]
         );
-        const renderDropdownContent = () => (
-            <DropdownMenu.Content
-                sideOffset={4}
-                collisionPadding={4}
-                side={side}
-                align={align}
-                hideWhenDetached
-                {...contentProps}
-                className={cn("fern-dropdown [&_svg]:size-icon", contentProps?.className)}
-            >
-                <FernTooltipProvider>
-                    <FernScrollArea rootClassName="min-h-0 shrink" className="p-1" scrollbars="vertical">
-                        {Array.isArray(value) ? (
-                            <div onClick={onClick}>
-                                {options.map((option, idx) =>
-                                    option.type === "value" ? (
-                                        <FernDropdownItemMultiSelect
-                                            key={option.value}
-                                            option={option}
-                                            isSelected={isValueSelected(option.value)}
-                                            onToggle={
-                                                onValueChange ??
-                                                (() => {
-                                                    void 0;
-                                                })
-                                            }
-                                            dropdownMenuElement={dropdownMenuElement}
-                                            container={container}
-                                        />
-                                    ) : option.type === "separator" ? (
-                                        <DropdownMenu.Separator
-                                            key={idx}
-                                            className="bg-border-default mx-2 my-1 h-px"
-                                        />
-                                    ) : null
-                                )}
+
+        // filter options based on search term
+        const filteredOptions = useCallback(() => {
+            if (!searchable || !searchTerm.trim()) {
+                return options;
+            }
+
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            return options.filter((option) => {
+                if (option.type === "separator") {
+                    return true; // Always include separators
+                }
+                if (option.type === "auth") {
+                    return (
+                        option.key.toLowerCase().includes(lowerSearchTerm) ||
+                        option.value.toLowerCase().includes(lowerSearchTerm)
+                    );
+                }
+                if (option.type === "product") {
+                    return (
+                        option.title.toLowerCase().includes(lowerSearchTerm) ||
+                        (option.subtitle?.toLowerCase().includes(lowerSearchTerm) ?? false) ||
+                        option.value.toLowerCase().includes(lowerSearchTerm)
+                    );
+                }
+                if (option.type === "value") {
+                    const labelText = typeof option.label === "string" ? option.label : option.value;
+                    const helperText = typeof option.helperText === "string" ? option.helperText : "";
+                    return (
+                        labelText.toLowerCase().includes(lowerSearchTerm) ||
+                        helperText.toLowerCase().includes(lowerSearchTerm) ||
+                        option.value.toLowerCase().includes(lowerSearchTerm)
+                    );
+                }
+                return false;
+            });
+        }, [searchable, searchTerm, options]);
+
+        const renderDropdownContent = () => {
+            const optionsToRender = filteredOptions();
+
+            return (
+                <DropdownMenu.Content
+                    sideOffset={4}
+                    collisionPadding={4}
+                    side={side}
+                    align={align}
+                    hideWhenDetached
+                    {...contentProps}
+                    className={cn("fern-dropdown [&_svg]:size-icon", contentProps?.className)}
+                >
+                    <FernTooltipProvider>
+                        {searchable && (
+                            <div className="border-border-default border-b p-2">
+                                <div className="relative flex items-center">
+                                    <Search className="text-text-muted absolute left-2 size-4" />
+                                    <input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        placeholder="Search..."
+                                        className="bg-background-default text-text-primary placeholder:text-text-muted w-full rounded border-none py-1.5 pl-8 pr-2 text-sm outline-none"
+                                        onKeyDown={(e) => {
+                                            // Prevent dropdown from closing on key events
+                                            e.stopPropagation();
+                                        }}
+                                    />
+                                </div>
                             </div>
-                        ) : (
-                            <DropdownMenu.RadioGroup
-                                value={value}
-                                onValueChange={onValueChange}
-                                onClick={onClick}
-                                {...radioGroupProps}
-                            >
-                                {options.map((option, idx) =>
-                                    option.type === "value" ? (
-                                        <FernDropdownItemValue
-                                            key={option.value}
-                                            option={option}
-                                            value={value}
-                                            dropdownMenuElement={dropdownMenuElement}
-                                            container={container}
-                                        />
-                                    ) : option.type === "product" ? (
-                                        <FernProductItem key={option.id} option={option} dense={option.dense} />
-                                    ) : option.type === "auth" ? (
-                                        <FernDropdownItemAuth key={option.key} option={option} />
-                                    ) : option.type === "separator" ? (
-                                        <DropdownMenu.Separator
-                                            key={idx}
-                                            className="bg-border-default mx-2 my-1 h-px"
-                                        />
-                                    ) : (
-                                        <DropdownMenu.Separator
-                                            key={idx}
-                                            className="bg-border-default mx-2 my-1 h-px"
-                                        />
-                                    )
-                                )}
-                            </DropdownMenu.RadioGroup>
                         )}
-                    </FernScrollArea>
-                </FernTooltipProvider>
-            </DropdownMenu.Content>
-        );
+                        <FernScrollArea rootClassName="min-h-0 shrink" className="p-1" scrollbars="vertical">
+                            {Array.isArray(value) ? (
+                                <div onClick={onClick}>
+                                    {optionsToRender.map((option, idx) =>
+                                        option.type === "value" ? (
+                                            <FernDropdownItemMultiSelect
+                                                key={option.value}
+                                                option={option}
+                                                isSelected={isValueSelected(option.value)}
+                                                onToggle={
+                                                    onValueChange ??
+                                                    (() => {
+                                                        void 0;
+                                                    })
+                                                }
+                                                dropdownMenuElement={dropdownMenuElement}
+                                                container={container}
+                                            />
+                                        ) : option.type === "separator" ? (
+                                            <DropdownMenu.Separator
+                                                key={idx}
+                                                className="bg-border-default mx-2 my-1 h-px"
+                                            />
+                                        ) : null
+                                    )}
+                                </div>
+                            ) : (
+                                <DropdownMenu.RadioGroup
+                                    value={value}
+                                    onValueChange={onValueChange}
+                                    onClick={onClick}
+                                    {...radioGroupProps}
+                                >
+                                    {optionsToRender.map((option, idx) =>
+                                        option.type === "value" ? (
+                                            <FernDropdownItemValue
+                                                key={option.value}
+                                                option={option}
+                                                value={value}
+                                                dropdownMenuElement={dropdownMenuElement}
+                                                container={container}
+                                            />
+                                        ) : option.type === "product" ? (
+                                            <FernProductItem key={option.id} option={option} dense={option.dense} />
+                                        ) : option.type === "auth" ? (
+                                            <FernDropdownItemAuth key={option.key} option={option} />
+                                        ) : option.type === "separator" ? (
+                                            <DropdownMenu.Separator
+                                                key={idx}
+                                                className="bg-border-default mx-2 my-1 h-px"
+                                            />
+                                        ) : (
+                                            <DropdownMenu.Separator
+                                                key={idx}
+                                                className="bg-border-default mx-2 my-1 h-px"
+                                            />
+                                        )
+                                    )}
+                                </DropdownMenu.RadioGroup>
+                            )}
+                        </FernScrollArea>
+                    </FernTooltipProvider>
+                </DropdownMenu.Content>
+            );
+        };
 
         return (
             <DropdownMenu.Root onOpenChange={handleOpenChange} open={isOpen} modal={false} defaultOpen={defaultOpen}>

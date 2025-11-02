@@ -56,8 +56,8 @@ export async function ProductDropdown({
                     src={image?.src}
                     alt={product.title}
                     objectFit="cover"
-                    width={image.width || undefined}
-                    height={image.height || undefined}
+                    width={image.width || 32}
+                    height={image.height || 32}
                 />
             ) : undefined
         };
