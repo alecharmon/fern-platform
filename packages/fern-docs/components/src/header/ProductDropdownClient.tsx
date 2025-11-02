@@ -79,7 +79,7 @@ export function ProductDropdownClient({
             radioGroupProps={{
                 className: "fern-product-selector-radio-group"
             }}
-            searchable={products.length > 10}
+            searchable={products.length > 12}
         >
             <div
                 className={cn("product-dropdown-trigger hidden h-9", {
