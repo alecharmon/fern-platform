@@ -234,6 +234,7 @@ types:
     properties:
       searchText: optional<string>
       disableSearch: optional<boolean>
+      disableAnalytics: optional<boolean>
       darkModeCode: optional<boolean>
       defaultSearchFilters: optional<boolean>
       httpSnippets: optional<HttpSnippetsConfig>

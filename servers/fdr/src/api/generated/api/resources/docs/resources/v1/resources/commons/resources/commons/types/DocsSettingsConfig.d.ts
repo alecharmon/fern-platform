@@ -5,6 +5,7 @@ import * as FernRegistry from "../../../../../../../../../index";
 export interface DocsSettingsConfig {
     searchText: string | undefined;
     disableSearch: boolean | undefined;
+    disableAnalytics: boolean | undefined;
     darkModeCode: boolean | undefined;
     defaultSearchFilters: boolean | undefined;
     httpSnippets: FernRegistry.docs.v1.commons.HttpSnippetsConfig | undefined;

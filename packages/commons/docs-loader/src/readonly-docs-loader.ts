@@ -600,6 +600,7 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
             darkModeCode: settings?.darkModeCode ?? false,
             defaultSearchFilters: settings?.defaultSearchFilters ?? false,
             disableSearch: settings?.disableSearch ?? false,
+            disableAnalytics: settings?.disableAnalytics ?? false,
             hide404Page: settings?.hide404Page ?? false,
             httpSnippets: settings?.httpSnippets ?? true,
             searchText: settings?.searchText ?? "Search",

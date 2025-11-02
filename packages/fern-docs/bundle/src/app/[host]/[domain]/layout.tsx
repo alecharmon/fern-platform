@@ -96,7 +96,7 @@ export default async function Layout({
             <RootNodeProvider sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}>
                 <Domain value={domain} />
                 <SetBasePath value={basePath || "/"} />
-                {!isSelfHosted() && (
+                {!isSelfHosted() && !settings.disableAnalytics && (
                     <>
                         <Script
                             data-endpoint={`${basePath ?? ""}/_vercel/insights`}
@@ -133,10 +133,12 @@ export default async function Layout({
                 />
                 <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>{children}</FeatureFlagProvider>
                 <React.Suspense fallback={null}>
-                    {!isLocalEnvironment && !settings.disableSearch && <SearchV2 domain={domain} />}
+                    {!isLocalEnvironment && !settings.disableSearch && (
+                        <SearchV2 domain={domain} disableAnalytics={settings.disableAnalytics} />
+                    )}
                 </React.Suspense>
                 {jsConfig != null && <JavascriptProvider config={jsConfig} />}
-                {VERCEL_ENV === "production" && (
+                {VERCEL_ENV === "production" && !settings.disableAnalytics && (
                     <CustomerAnalytics
                         config={mergeCustomerAnalytics(deprecated_customerAnalytics, config.analyticsConfig)}
                     />

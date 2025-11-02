@@ -66,7 +66,13 @@ export function useQueryId() {
     };
 }
 
-export const SearchV2 = React.memo(function SearchV2({ domain }: { domain: string }) {
+export const SearchV2 = React.memo(function SearchV2({
+    domain,
+    disableAnalytics
+}: {
+    domain: string;
+    disableAnalytics?: boolean;
+}) {
     const currentVersion = useCurrentVersionId();
 
     const isDarkCodeEnabled = useIsDarkCode();
@@ -183,7 +189,7 @@ export const SearchV2 = React.memo(function SearchV2({ domain }: { domain: strin
             fetchFacets={facetFetcher}
             authenticatedUserToken={user?.email}
             initialFilters={shouldApplyVersionFilter ? { "version.title": currentVersion } : undefined}
-            analyticsTags={["search-v2-dialog"]}
+            analyticsTags={disableAnalytics ? [] : ["search-v2-dialog"]}
         >
             <DesktopSearchDialog open={open} onOpenChange={setOpen}>
                 {isAskAiEnabled ? (
