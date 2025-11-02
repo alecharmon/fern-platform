@@ -29,7 +29,7 @@ import { getEnv, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
 import { mapValues } from "es-toolkit/object";
 import { escapeRegExp } from "es-toolkit/string";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { invalidateByTag } from '@vercel/functions';
 import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
@@ -63,10 +63,7 @@ export async function GET(
     const start = performance.now();
 
     const { host, domain } = await props.params;
-    revalidateTag(domain);
-
-    // delay to ensure invalidation propagates before cache is accessed
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await invalidateByTag(domain);
 
     const stream = new ReadableStream({
         async start(controller) {
