@@ -29,13 +29,13 @@ import { getEnv, invalidateByTag, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
 import { mapValues } from "es-toolkit/object";
 import { escapeRegExp } from "es-toolkit/string";
+import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex, queueTurbopufferReindex } from "@/server/queue-reindex";
 import { ResilientQueue } from "@/utils/resilient-queue";
 import { createSafeStreamController } from "@/utils/safe-stream-controller";
-import { revalidatePath } from "next/cache";
 
 // Custom error type for intentional revalidation failures
 class RevalidationError extends Error {
