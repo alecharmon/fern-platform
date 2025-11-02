@@ -71,8 +71,11 @@ export const middleware: NextMiddleware = async (request) => {
         });
     };
 
+    // todo: set language based on headers
+    const lang = "en";
+
     // this mutation is reversed in `useCurrentPathname` hook. if this changes, please update that hook.
-    const withDomain = (pathname: string) => `/${host}/${domain}${conformTrailingSlash(pathname)}`;
+    const withDomain = (pathname: string) => `/${host}/${domain}/${lang}${conformTrailingSlash(pathname)}`;
 
     const withoutBasepath = (splitter: string | RegExp) => {
         const [basepath, newPathname] = splitPathname(pathname, splitter);

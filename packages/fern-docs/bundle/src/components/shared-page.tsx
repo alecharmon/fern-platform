@@ -22,7 +22,7 @@ import FeedbackPopover from "@/components/feedback/FeedbackPopover";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 
-import { DocsMainContent } from "../app/[host]/[domain]/main";
+import { DocsMainContent } from "../app/[host]/[domain]/[lang]/main";
 
 export default async function SharedPage({ loader, slug }: { loader: DocsLoader; slug: Slug }) {
     if (slug.endsWith(".js")) {
