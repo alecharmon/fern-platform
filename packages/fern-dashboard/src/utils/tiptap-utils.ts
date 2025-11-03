@@ -98,13 +98,20 @@ export const isNodeInSchema = (nodeName: string, editor: Editor | null): boolean
  * @returns boolean indicating if the focus was moved
  */
 export function focusNextNode(editor: Editor) {
+    if (editor.isDestroyed) return false;
+
     const { state, view } = editor;
     const { doc, selection } = state;
 
     const nextSel = Selection.findFrom(selection.$to, 1, true);
     if (nextSel) {
-        view.dispatch(state.tr.setSelection(nextSel).scrollIntoView());
-        return true;
+        try {
+            view.dispatch(state.tr.setSelection(nextSel).scrollIntoView());
+            return true;
+        } catch (error) {
+            console.warn("Failed to set selection to next node:", error);
+            return false;
+        }
     }
 
     const paragraphType = state.schema.nodes.paragraph;
@@ -117,11 +124,15 @@ export function focusNextNode(editor: Editor) {
     const para = paragraphType.create();
     let tr = state.tr.insert(end, para);
 
-    // Place the selection inside the new paragraph
-    const $inside = tr.doc.resolve(end + 1);
-    tr = tr.setSelection(TextSelection.near($inside)).scrollIntoView();
-    view.dispatch(tr);
-    return true;
+    try {
+        const $inside = tr.doc.resolve(end + 1);
+        tr = tr.setSelection(TextSelection.near($inside)).scrollIntoView();
+        view.dispatch(tr);
+        return true;
+    } catch (error) {
+        console.warn("Failed to create and select new paragraph:", error);
+        return false;
+    }
 }
 
 /**

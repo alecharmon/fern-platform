@@ -88,13 +88,18 @@ export function createCodeBlockComponent() {
             (e: React.MouseEvent) => {
                 e.preventDefault();
                 const pos = props.getPos();
-                if (typeof pos === "number") {
-                    props.editor
-                        .chain()
-                        .focus()
-                        .setTextSelection(pos + 1)
-                        .run();
+
+                if (props.editor.isDestroyed) return;
+                if (typeof pos !== "number") return;
+
+                const docSize = props.editor.state.doc.content.size;
+                const targetPos = Math.min(Math.max(pos + 1, 0), docSize);
+
+                try {
+                    props.editor.chain().focus().setTextSelection(targetPos).run();
                     setLocalFocus(true);
+                } catch (error) {
+                    console.warn("Failed to set selection in code block:", error);
                 }
             },
             [props.getPos, props.editor]

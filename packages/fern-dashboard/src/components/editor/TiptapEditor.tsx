@@ -96,21 +96,33 @@ const extensions = [
         addKeyboardShortcuts() {
             return {
                 "Mod-a": ({ editor }) => {
+                    if (editor.isDestroyed) return false;
+
                     // If we're inside a table cell, override the default to only select the cell content
                     // AI generated:
-                    const { selection } = editor.state;
+                    const { selection, doc } = editor.state;
                     const { $from } = selection;
+                    const docSize = doc.content.size;
 
                     for (let d = $from.depth; d > 0; d--) {
                         const node = $from.node(d);
                         if (node.type.name === "tableCell" || node.type.name === "tableHeader") {
                             const cellStart = $from.before(d) + 1;
                             const cellEnd = $from.after(d) - 1;
-                            editor.commands.setTextSelection({
-                                from: cellStart,
-                                to: cellEnd
-                            });
-                            return true;
+
+                            const from = Math.min(Math.max(cellStart, 0), docSize);
+                            const to = Math.min(Math.max(cellEnd, 0), docSize);
+
+                            if (from <= to) {
+                                try {
+                                    editor.commands.setTextSelection({ from, to });
+                                    return true;
+                                } catch (error) {
+                                    console.warn("Failed to set selection in table cell:", error);
+                                    return false;
+                                }
+                            }
+                            return false;
                         }
                     }
 
@@ -225,7 +237,6 @@ export default function TiptapEditor({
             editorContainerProps={{
                 className: cn(className, "relative")
             }}
-            immediatelyRender={false}
             onCreate={onCreate}
             onUpdate={handleUpdate}
             onFocus={({ editor }) => {
