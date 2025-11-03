@@ -4,34 +4,31 @@ import { createMcpHandler } from "mcp-handler";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-// Accepts host and domain, returns a handler
-async function createHandler(host: string, domain: string) {
-    const metadata = await getMetadata({
+type McpHandler = ReturnType<typeof createMcpHandler> extends Promise<infer U>
+    ? U
+    : ReturnType<typeof createMcpHandler>;
+
+async function createHandler(host: string, domain: string): Promise<McpHandler> {
+    await getMetadata({
         kvTtl: 0,
         forceRevalidate: false,
         cacheKeySuffix: ""
     })(domain);
 
-    return createMcpHandler(
+    const mcpHandler = await createMcpHandler(
         async (server) => {
             server.tool(
-                `Search-${metadata.org}-Docs`,
+                "searchDocs",
                 "Search the documentation for relevant information.",
                 {
                     query: z.string().describe("The search query to run against the docs")
                 },
                 async ({ query }) => {
-                    // Use host and domain from the closure
                     try {
-                        console.log(`[MCP] SearchDocs called with query:`, query, `host:`, host, `domain:`, domain);
-
                         const url = `http://${domain}/api/fern-docs/search/v2/chat`;
 
                         const algoliaSearchKey = await fetch(`http://${domain}/api/fern-docs/search/v2/key`);
                         if (!algoliaSearchKey.ok) {
-                            console.error(
-                                `[MCP] Failed to fetch Algolia search key: ${algoliaSearchKey.status} ${algoliaSearchKey.statusText}`
-                            );
                             return {
                                 content: [
                                     {
@@ -42,7 +39,7 @@ async function createHandler(host: string, domain: string) {
                             };
                         }
                         const algoliaSearchKeyJson = await algoliaSearchKey.json();
-                        // Build the body to respect the required structure, but use the incoming query as the latest user message
+
                         const body = JSON.stringify({
                             algoliaSearchKey: algoliaSearchKeyJson?.apiKey ?? "",
                             url: "MCP",
@@ -66,8 +63,6 @@ async function createHandler(host: string, domain: string) {
                             trigger: "submit-user-message"
                         });
 
-                        console.log(`[MCP] Fetching: ${url} with body: ${body}`);
-
                         const res = await fetch(url, {
                             method: "POST",
                             headers: {
@@ -77,7 +72,6 @@ async function createHandler(host: string, domain: string) {
                         });
 
                         if (!res.ok) {
-                            console.error(`[MCP] SearchDocs fetch failed: ${res.status} ${res.statusText}`);
                             return {
                                 content: [
                                     {
@@ -92,8 +86,6 @@ async function createHandler(host: string, domain: string) {
                             throw new Error("[MCP] Upstream response has no body for SSE stream");
                         }
 
-                        // Parse the SSE stream and extract the final message
-                        // Simple stream collector: iterate over each message and concat
                         let answer = "";
                         const reader = res.body.getReader();
                         const decoder = new TextDecoder();
@@ -112,7 +104,6 @@ async function createHandler(host: string, domain: string) {
                             ]
                         };
                     } catch (error) {
-                        console.error(`[MCP] SearchDocs encountered an error:`, error);
                         return {
                             content: [
                                 {
@@ -135,25 +126,21 @@ async function createHandler(host: string, domain: string) {
             }
         },
         {
-            basePath: "",
+            streamableHttpEndpoint: "/_mcp/server",
             verboseLogs: true,
             maxDuration: 60,
-            disableSse: false
+            disableSse: true
         }
     );
+    return mcpHandler;
 }
 
-/**
- * Helper function to check if the request is authenticated.
- * Accepts a NextRequest and returns a boolean indicating auth state.
- */
 async function isAuthed(req: NextRequest): Promise<boolean> {
     const { getAuthState } = await createGetAuthStateEdge(req);
     const authState = await getAuthState(req.nextUrl.pathname);
     return !!authState.ok;
 }
 
-// Next.js route handlers for GET, POST, DELETE
 export async function GET(request: NextRequest, { params }: { params: Promise<{ host: string; domain: string }> }) {
     const { host, domain } = await params;
 
@@ -182,14 +169,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return handler(request);
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ host: string; domain: string }> }) {
+export async function POST(request: NextRequest, props: { params: Promise<{ host: string; domain: string }> }) {
+    const { host, domain } = await props.params;
     const authed = await isAuthed(request);
     if (!authed) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { host, domain } = await params;
     const handler = await createHandler(host, domain);
-    return handler(request);
+    const response = await handler(request);
+    return response;
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ host: string; domain: string }> }) {
