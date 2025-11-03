@@ -176,7 +176,7 @@ export const middleware: NextMiddleware = async (request) => {
      * Rewrite mcp
      */
     if (pathname.endsWith("/_mcp/server")) {
-        return rewrite(withDomain("/api/fern-docs/mcp"));
+        return rewrite(withDomain("/fern-docs/mcp"));
     }
 
     /**
