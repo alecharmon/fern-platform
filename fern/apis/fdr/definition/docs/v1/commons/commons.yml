@@ -241,6 +241,7 @@ types:
       hide404Page: optional<boolean>
       useJavascriptAsTypescript: optional<boolean>
       disableExplorerProxy: optional<boolean>
+      language: optional<Language>
       
   HttpSnippetsConfig:
     discriminated: false

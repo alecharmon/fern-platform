@@ -26,6 +26,23 @@ export const HttpSnippetLanguage = {
 
 export type HttpSnippetsConfig = boolean | HttpSnippetLanguage[];
 
+export type Language =
+    | "en"
+    | "es"
+    | "fr"
+    | "de"
+    | "it"
+    | "pt"
+    | "ja"
+    | "zh"
+    | "ko"
+    | "el"
+    | "no"
+    | "pl"
+    | "ru"
+    | "sv"
+    | "tr";
+
 export interface FernSettingsConfig {
     searchText: string | undefined;
     disableSearch: boolean | undefined;
@@ -35,4 +52,5 @@ export interface FernSettingsConfig {
     httpSnippets: HttpSnippetsConfig | undefined;
     hide404Page: boolean | undefined;
     disableExplorerProxy: boolean | undefined;
+    language: Language | undefined;
 }

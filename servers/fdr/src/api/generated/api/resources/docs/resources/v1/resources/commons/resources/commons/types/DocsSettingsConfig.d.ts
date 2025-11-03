@@ -12,4 +12,5 @@ export interface DocsSettingsConfig {
     hide404Page: boolean | undefined;
     useJavascriptAsTypescript: boolean | undefined;
     disableExplorerProxy: boolean | undefined;
+    language: FernRegistry.docs.v1.commons.Language | undefined;
 }
