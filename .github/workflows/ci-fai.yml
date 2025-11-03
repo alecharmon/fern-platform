@@ -145,6 +145,7 @@ jobs:
       COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
       POSTGRES_DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/mydatabase
       ASK_FERN_SLACK_BOT_TOKEN: ${{ secrets.ASK_FERN_SLACK_BOT_TOKEN }}
+      FERNIE_SLACK_BOT_TOKEN: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
       KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
@@ -171,6 +172,7 @@ jobs:
           echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
           echo "FERN_TOKEN=${{ env.FERN_TOKEN }}" >> .env
           echo "ASK_FERN_SLACK_BOT_TOKEN=${{ env.ASK_FERN_SLACK_BOT_TOKEN }}" >> .env
+          echo "FERNIE_SLACK_BOT_TOKEN=${{ env.FERNIE_SLACK_BOT_TOKEN }}" >> .env
           echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
           echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env
           echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env

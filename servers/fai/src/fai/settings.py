@@ -22,6 +22,8 @@ class Variables:
     IS_LOCAL: bool = os.environ.get("IS_LOCAL", "false").lower() == "true"
 
     ASK_FERN_SLACK_BOT_TOKEN: str | None = os.environ.get("ASK_FERN_SLACK_BOT_TOKEN")
+    FERNIE_SLACK_BOT_TOKEN: str | None = os.environ.get("FERNIE_SLACK_BOT_TOKEN")
+
     SLACK_CLIENT_ID: str | None = os.environ.get("SLACK_CLIENT_ID")
     SLACK_CLIENT_SECRET: str | None = os.environ.get("SLACK_CLIENT_SECRET")
     SLACK_SIGNING_SECRET: str | None = os.environ.get("SLACK_SIGNING_SECRET")

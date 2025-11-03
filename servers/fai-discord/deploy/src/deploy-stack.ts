@@ -22,6 +22,7 @@ export interface FaiDiscordEnvVariables {
     SLACK_CLIENT_SECRET: string;
     SLACK_SIGNING_SECRET: string;
     ASK_FERN_SLACK_BOT_TOKEN: string;
+    FERNIE_SLACK_BOT_TOKEN: string;
     FAI_LAMBDA_FUNCTION_NAME: string;
     DISCORD_BOT_TOKEN: string;
     DISCORD_OAUTH_URL: string;
@@ -29,6 +30,7 @@ export interface FaiDiscordEnvVariables {
     KV_REST_API_READ_ONLY_TOKEN: string;
     KV_REST_API_URL: string;
     FERN_TOKEN: string;
+    VENUS_URL: string;
     [key: string]: string;
 }
 

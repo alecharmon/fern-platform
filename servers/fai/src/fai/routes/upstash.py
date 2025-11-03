@@ -44,7 +44,7 @@ async def qstash_failure_callback(body: QStashFailureCallback) -> QStashFailureC
         success = await send_slack_message(
             channel="search-notifs",
             text=slack_message,
-            bot_token=VARIABLES.ASK_FERN_SLACK_BOT_TOKEN,
+            bot_token=VARIABLES.FERNIE_SLACK_BOT_TOKEN,
         )
 
         return JSONResponse(

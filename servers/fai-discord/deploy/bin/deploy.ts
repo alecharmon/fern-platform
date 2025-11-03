@@ -37,13 +37,15 @@ async function main() {
                         SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
                         SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
                         ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
+                        FERNIE_SLACK_BOT_TOKEN: getEnvVarOrThrow("FERNIE_SLACK_BOT_TOKEN"),
                         FAI_LAMBDA_FUNCTION_NAME: getEnvVarOrThrow("FAI_LAMBDA_FUNCTION_NAME"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
-                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
+                        VENUS_URL: getEnvVarOrThrow("VENUS_URL")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -71,13 +73,15 @@ async function main() {
                         SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
                         SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
                         ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
+                        FERNIE_SLACK_BOT_TOKEN: getEnvVarOrThrow("FERNIE_SLACK_BOT_TOKEN"),
                         FAI_LAMBDA_FUNCTION_NAME: getEnvVarOrThrow("FAI_LAMBDA_FUNCTION_NAME"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
-                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
+                        VENUS_URL: getEnvVarOrThrow("VENUS_URL")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -105,13 +109,15 @@ async function main() {
                         SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
                         SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
                         ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
+                        FERNIE_SLACK_BOT_TOKEN: getEnvVarOrThrow("FERNIE_SLACK_BOT_TOKEN"),
                         FAI_LAMBDA_FUNCTION_NAME: getEnvVarOrThrow("FAI_LAMBDA_FUNCTION_NAME"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
                         DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
                         KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
                         KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
-                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
+                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
+                        VENUS_URL: getEnvVarOrThrow("VENUS_URL")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }

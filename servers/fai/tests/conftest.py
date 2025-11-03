@@ -35,6 +35,7 @@ TEST_SLACK_SIGNING_SECRET = "test-slack-signing-secret"
 TEST_DISCORD_BOT_TOKEN = "test-discord-bot-token"
 TEST_DISCORD_OAUTH_URL = "test-discord-oauth-url"
 TEST_ASK_FERN_SLACK_BOT_TOKEN = "test-ask-fern-slack-bot-token"
+TEST_FERNIE_SLACK_BOT_TOKEN = "test-fernie-slack-bot-token"
 TEST_FAI_LAMBDA_FUNCTION_NAME = "test-fai-lambda-function"
 TEST_KV_REST_API_TOKEN = "test-kv-token"
 TEST_KV_REST_API_READ_ONLY_TOKEN = "test-kv-readonly-token"
@@ -97,6 +98,7 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["SLACK_CLIENT_SECRET"] = TEST_SLACK_CLIENT_SECRET
     os.environ["SLACK_SIGNING_SECRET"] = TEST_SLACK_SIGNING_SECRET
     os.environ["ASK_FERN_SLACK_BOT_TOKEN"] = TEST_ASK_FERN_SLACK_BOT_TOKEN
+    os.environ["FERNIE_SLACK_BOT_TOKEN"] = TEST_FERNIE_SLACK_BOT_TOKEN
     os.environ["FAI_LAMBDA_FUNCTION_NAME"] = TEST_FAI_LAMBDA_FUNCTION_NAME
     os.environ["KV_REST_API_TOKEN"] = TEST_KV_REST_API_TOKEN
     os.environ["KV_REST_API_READ_ONLY_TOKEN"] = TEST_KV_REST_API_READ_ONLY_TOKEN
