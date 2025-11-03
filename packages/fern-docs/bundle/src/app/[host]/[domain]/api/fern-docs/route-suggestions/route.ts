@@ -1,11 +1,8 @@
-"use server";
-
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { getDocsHostApp } from "@fern-api/docs-server/xfernhost/app";
-import { HEADER_X_FERN_HOST, slugToHref } from "@fern-api/docs-utils";
+import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
-import { headers } from "next/headers";
-import { findSimilarPaths } from "../../utils/path-similarity";
+import { type NextRequest, NextResponse } from "next/server";
+import { findSimilarPaths } from "@/utils/path-similarity";
 
 export interface RouteSuggestion {
     slug: string;
@@ -43,32 +40,25 @@ function generateSubtitle(
     return breadcrumbParts.length > 0 ? breadcrumbParts.join(" › ") : undefined;
 }
 
-export async function getRouteSuggestions(requestedPath: string): Promise<RouteSuggestion[]> {
+export async function GET(
+    req: NextRequest,
+    props: { params: Promise<{ host: string; domain: string }> }
+): Promise<NextResponse<RouteSuggestion[]>> {
+    const { host, domain } = await props.params;
+    const { searchParams } = req.nextUrl;
+    const requestedPath = searchParams.get("path");
+
     if (!requestedPath || requestedPath === "/") {
-        return [];
+        return NextResponse.json([]);
     }
 
     try {
-        const headersList = await headers();
-        const domain = headersList.get(HEADER_X_FERN_HOST);
-        const host = await getDocsHostApp();
-
-        if (!domain) {
-            console.error("[getRouteSuggestions] Missing domain header");
-            return [];
-        }
-
-        if (!host) {
-            console.error("[getRouteSuggestions] Missing host");
-            return [];
-        }
-
         const loader = await createCachedDocsLoader(host, domain);
         const root = await loader.getRoot();
 
         if (!root) {
-            console.error("[getRouteSuggestions] No root navigation found for domain:", domain);
-            return [];
+            console.error("[route-suggestions] No root navigation found for domain:", domain);
+            return NextResponse.json([]);
         }
 
         const collector = FernNavigation.NodeCollector.collect(root);
@@ -76,8 +66,8 @@ export async function getRouteSuggestions(requestedPath: string): Promise<RouteS
         const slugMapWithParents = collector.getSlugMapWithParents();
 
         if (allNodes.length === 0) {
-            console.error("[getRouteSuggestions] No nodes found in navigation");
-            return [];
+            console.error("[route-suggestions] No nodes found in navigation");
+            return NextResponse.json([]);
         }
 
         const availablePaths = allNodes
@@ -92,19 +82,32 @@ export async function getRouteSuggestions(requestedPath: string): Promise<RouteS
             }));
 
         if (availablePaths.length === 0) {
-            console.error("[getRouteSuggestions] No available paths after filtering");
-            return [];
+            console.error("[route-suggestions] No available paths after filtering");
+            return NextResponse.json([]);
         }
 
         const suggestions = findSimilarPaths(requestedPath, availablePaths, 3);
 
-        return suggestions;
+        return NextResponse.json(suggestions, {
+            headers: {
+                "Cache-Control": "s-maxage=300, stale-while-revalidate=600" // Cache for 5 minutes
+            }
+        });
     } catch (error) {
-        console.error("[getRouteSuggestions] Error getting suggested routes:", error, {
+        console.error("[route-suggestions] Error getting suggested routes:", error, {
             requestedPath,
             errorMessage: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined
         });
-        return [];
+        return NextResponse.json([]);
     }
+}
+
+export async function OPTIONS(): Promise<NextResponse> {
+    return new NextResponse(null, {
+        status: 200,
+        headers: {
+            Allow: "OPTIONS, GET"
+        }
+    });
 }

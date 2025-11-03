@@ -9,7 +9,13 @@ import { useEffect, useState } from "react";
 import { i18n } from "@/constants";
 import { NotFound404Tracker } from "../analytics/NotFound404Tracker";
 import ReturnHomeButton from "../ReturnHomeButton";
-import { getRouteSuggestions, type RouteSuggestion } from "./get-route-suggestions";
+export interface RouteSuggestion {
+    slug: string;
+    title: string;
+    href: string;
+    score: number;
+    subtitle?: string;
+}
 
 export default function NotFoundContent() {
     const pathname = usePathname();
@@ -22,8 +28,15 @@ export default function NotFoundContent() {
         async function loadSuggestions() {
             try {
                 setIsLoading(true);
-                const suggestions = await getRouteSuggestions(requestedPath);
-                setSuggestedRoutes(suggestions);
+                const response = await fetch(
+                    `/api/fern-docs/route-suggestions?path=${encodeURIComponent(requestedPath)}`
+                );
+                if (response.ok) {
+                    const suggestions = await response.json();
+                    setSuggestedRoutes(suggestions);
+                } else {
+                    console.error("[NotFoundContent] Failed to load suggestions:", response.status);
+                }
             } catch (error) {
                 console.error("[NotFoundContent] Error loading suggestions:", error);
             } finally {
