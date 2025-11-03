@@ -77,10 +77,14 @@ export function SidebarVariantedNode({ node, depth, renderOptions }: SidebarVari
                         side="bottom"
                         align="start"
                         hideWhenDetached
-                        className={cn("fern-dropdown [&_svg]:size-icon")}
+                        className={cn("fern-dropdown fern-variant-selector-dropdown [&_svg]:size-icon")}
+                        data-testid="variant-dropdown-content"
                     >
                         <FernScrollArea rootClassName="min-h-0 shrink" className="p-1" scrollbars="vertical">
-                            <DropdownMenu.RadioGroup value={currentVariant.variantId} className="space-y-1">
+                            <DropdownMenu.RadioGroup
+                                value={currentVariant.variantId}
+                                className="fern-variant-selector-radio-group space-y-1"
+                            >
                                 {node.children.map((variant) => {
                                     const href = slugToHref(variant.pointsTo ?? variant.slug);
                                     // Process icon properly by passing the full variant object
