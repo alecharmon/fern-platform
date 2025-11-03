@@ -1,6 +1,7 @@
 "use client";
 
 import type { DangerousTransmittableDocsLoaderData } from "@fern-api/docs-loader";
+import { PrefetchedDocsLoader } from "@fern-api/docs-loader/client";
 import { getIsSidebarFixed, getIsSingleOverviewPage } from "@fern-api/docs-utils";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import {
@@ -42,6 +43,10 @@ export default function PageSidebar({
 
     // Store initial page data in a ref so we don't re-resolve it on every render
     const initialPageDataRef = useRef<ResolvedPageData | null>(null);
+
+    // Extract files from the loader data for custom icon support
+    const loader = PrefetchedDocsLoader.fromSerializable(prefetchedLoaderData);
+    const files = loader.getFiles();
 
     // Use useDerivedFoundNode to get the current foundNode from RootNode
     const { foundNode, hydrated } = useDerivedFoundNode({
@@ -102,7 +107,7 @@ export default function PageSidebar({
             )}
             {found.tabs && found.tabs.length > 0 && (
                 <SidebarClientTabsRoot loaderData={prefetchedLoaderData}>
-                    <SidebarTabsList tabs={found.tabs} forceClientRender={true} />
+                    <SidebarTabsList tabs={found.tabs} forceClientRender={true} files={files} />
                 </SidebarClientTabsRoot>
             )}
             {isSingleOverviewPage && !isSidebarFixed ? (
@@ -120,7 +125,10 @@ export default function PageSidebar({
                             wrapPageNode: (node, component) => (
                                 <DeletablePageNodeWrapper node={node} component={component} />
                             ),
-                            wrapSectionNode: (node, trigger) => <SidebarSectionWithMenu node={node} trigger={trigger} />
+                            wrapSectionNode: (node, trigger) => (
+                                <SidebarSectionWithMenu node={node} trigger={trigger} />
+                            ),
+                            files
                         }}
                     />
                 </>

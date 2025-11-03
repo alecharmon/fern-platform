@@ -41,18 +41,20 @@ export default async function SidebarPage({
         fernToken: session?.accessToken,
         branchName: branch
     });
-    const [config, authState, edgeFlags, layout] = await Promise.all([
+    const [config, authState, edgeFlags, layout, files] = await Promise.all([
         loader.getConfig(),
         loader.getAuthState(),
         loader.getEdgeFlags(),
-        loader.getLayout()
+        loader.getLayout(),
+        loader.getFiles()
     ]);
     const prefetchedLoaderData = new PrefetchedDocsLoader({
         domain: loader.domain,
         config,
         authState,
         edgeFlags,
-        layout
+        layout,
+        files
     }).serializable();
 
     const requestedSlug = slugjoin(slug);

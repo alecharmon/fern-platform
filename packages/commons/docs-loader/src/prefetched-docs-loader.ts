@@ -29,6 +29,7 @@ export interface DangerousTransmittableDocsLoaderData {
     authState: AuthState;
     edgeFlags: EdgeFlags;
     layout: FernLayoutConfig;
+    files?: Record<string, FileData>;
 }
 
 /**
@@ -43,13 +44,15 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
     private authState: AuthState;
     private edgeFlags: EdgeFlags;
     private layout: FernLayoutConfig;
+    private files?: Record<string, FileData>;
 
-    constructor({ config, domain, authState, edgeFlags, layout }: DangerousTransmittableDocsLoaderData) {
+    constructor({ config, domain, authState, edgeFlags, layout, files }: DangerousTransmittableDocsLoaderData) {
         this.config = config;
         this.domain = domain;
         this.authState = authState;
         this.edgeFlags = edgeFlags;
         this.layout = layout;
+        this.files = files;
     }
 
     // fern_token should never be available from the client-side loader, so we throw an error if it's accessed
@@ -66,7 +69,8 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
             domain: this.domain,
             authState: this.authState,
             edgeFlags: this.edgeFlags,
-            layout: this.layout
+            layout: this.layout,
+            files: this.files
         };
     }
 
@@ -99,7 +103,7 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
     }
 
     getFiles(): Record<string, FileData> {
-        return this.notSupported("getFiles");
+        return this.files ?? {};
     }
 
     getMdxBundlerFiles(): Record<string, string> {
