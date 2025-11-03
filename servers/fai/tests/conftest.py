@@ -39,6 +39,7 @@ TEST_FAI_LAMBDA_FUNCTION_NAME = "test-fai-lambda-function"
 TEST_KV_REST_API_TOKEN = "test-kv-token"
 TEST_KV_REST_API_READ_ONLY_TOKEN = "test-kv-readonly-token"
 TEST_KV_REST_API_URL = "test-kv-url"
+TEST_VENUS_URL = "test-venus-url"
 ROUTES_PACKAGE_NAME = "fai.routes"
 
 
@@ -100,6 +101,7 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["KV_REST_API_TOKEN"] = TEST_KV_REST_API_TOKEN
     os.environ["KV_REST_API_READ_ONLY_TOKEN"] = TEST_KV_REST_API_READ_ONLY_TOKEN
     os.environ["KV_REST_API_URL"] = TEST_KV_REST_API_URL
+    os.environ["VENUS_URL"] = TEST_VENUS_URL
     yield
 
     if original_url:

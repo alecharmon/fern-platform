@@ -36,6 +36,7 @@ class Variables:
     KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
 
     FERN_TOKEN: str | None = os.environ.get("FERN_TOKEN")
+    VENUS_URL: str | None = os.environ.get("VENUS_URL")
 
     @classmethod
     def validate_env_variables(cls) -> None:

@@ -148,6 +148,7 @@ jobs:
       KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+      VENUS_URL: ${{ secrets.VENUS_URL }}
       FAI_LAMBDA_FUNCTION_NAME: ${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}
     steps:
       - name: Checkout
@@ -176,6 +177,7 @@ jobs:
           echo "SLACK_CLIENT_ID=${{ env.SLACK_CLIENT_ID }}" >> .env
           echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
           echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env
+          echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env
       - name: test
         run: |
           cd servers/fai

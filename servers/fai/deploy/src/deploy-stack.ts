@@ -34,6 +34,7 @@ export interface FernAiEnvVariables {
     KV_REST_API_TOKEN: string;
     KV_REST_API_READ_ONLY_TOKEN: string;
     KV_REST_API_URL: string;
+    VENUS_URL: string;
     [key: string]: string;
 }
 
