@@ -29,6 +29,7 @@ Guidelines:
 Question: {question}
 """
 
+
 async def run_code_search_tool_call(domain: str, question: str, session_id: str | None = None) -> dict[str, Any]:
     """Run a code search tool call for a domain.
 
@@ -48,25 +49,21 @@ async def run_code_search_tool_call(domain: str, question: str, session_id: str 
     async for message in query(
         prompt=CLAUDE_ANSWER_CODE_QUESTION_USER_PROMPT.format(question=question),
         options=ClaudeAgentOptions(
-            cwd=str(domain_folder),
-            disallowed_tools=["Write", "Delete", "Rename"],
-            resume=session_id,
-            fork_session=True
-        )
+            cwd=str(domain_folder), disallowed_tools=["Write", "Delete", "Rename"], resume=session_id, fork_session=True
+        ),
     ):
-        if hasattr(message, 'subtype') and message.subtype == 'init':
-            session_id = message.data.get('session_id')
-            print(f"Session started with ID: {session_id}")
+        if hasattr(message, "subtype") and message.subtype == "init":
+            session_id = message.data.get("session_id")
+            logger.info(f"Session started with ID: {session_id}")
 
         if isinstance(message, AssistantMessage):
             for content in message.content:
                 if isinstance(content, ToolUseBlock):
-                    print(f"Tool used: {content.name}")
-                    print(f"Tool input: {content.input}")
+                    logger.info(f"Tool used: {content.name}")
+                    logger.info(f"Tool input: {content.input}")
                 if isinstance(content, TextBlock):
-                    print(f"Text: {content.text}")
+                    logger.info(f"Text: {content.text}")
                     answer = content.text
-
 
     return {
         "domain": domain,

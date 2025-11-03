@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 from datetime import (
     UTC,
     datetime,
@@ -10,15 +11,22 @@ from typing import (
     Literal,
 )
 
+import httpx
 from shared.utils.validation import validate_body_param_or_throw
 
 from .operations import (
     run_code_search_tool_call,
     setup_repos_for_domain,
 )
+from .operations.execute_command import call_shell_command
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+
+async def _post_callback(url: str, data: dict[str, Any]) -> None:
+    async with httpx.AsyncClient() as client:
+        await client.post(url, json=data, timeout=30.0)
 
 
 def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
@@ -29,28 +37,70 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     try:
         body = json.loads(event.get("body", "{}"))
         domain = validate_body_param_or_throw(body, "domain")
-        event_type: Literal["codeSearch", "indexRepo"] = validate_body_param_or_throw(body, "eventType")
+        event_type: Literal["codeSearch", "indexRepo", "executeCommand"] = validate_body_param_or_throw(
+            body, "eventType"
+        )
 
-        if event_type == "indexRepo":
+        if event_type == "executeCommand":
+            command = validate_body_param_or_throw(body, "command")
+            working_dir = os.environ.get("HOME", "/mnt/efs")
+
+            try:
+                execute_command_result = asyncio.run(call_shell_command(command, working_dir))
+
+                response_body = {
+                    "message": "Command executed",
+                    "command": command,
+                    "stdout": execute_command_result["stdout"],
+                    "stderr": execute_command_result["stderr"],
+                    "returncode": execute_command_result["returncode"],
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "requestId": context.aws_request_id,
+                }
+
+            except Exception as cmd_error:
+                response_body = {
+                    "message": "Command execution failed",
+                    "command": command,
+                    "error": str(cmd_error),
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "requestId": context.aws_request_id,
+                }
+
+        elif event_type == "indexRepo":
             repo_urls = validate_body_param_or_throw(body, "repoUrls", list[str])
-            asyncio.run(setup_repos_for_domain(domain=domain, repo_urls=repo_urls))
+            callback_url = validate_body_param_or_throw(body, "callbackUrl")
+            setup_result = asyncio.run(setup_repos_for_domain(domain=domain, repo_urls=repo_urls))
+
+            try:
+                callback_data = {
+                    "session_id": setup_result.session_id,
+                    "status": setup_result.status,
+                }
+                asyncio.run(_post_callback(callback_url, callback_data))
+                logger.info(f"Successfully posted callback to {callback_url}")
+            except Exception as callback_error:
+                logger.error(f"Failed to post callback: {str(callback_error)}", exc_info=True)
 
             response_body = {
                 "message": f"Successfully indexed {len(repo_urls)} repositories",
                 "timestamp": datetime.now(UTC).isoformat(),
                 "requestId": context.aws_request_id,
+                "session_id": setup_result.session_id,
             }
 
         elif event_type == "codeSearch":
             question = validate_body_param_or_throw(body, "question")
             session_id = body.get("sessionId")
-            result = asyncio.run(run_code_search_tool_call(domain=domain, question=question, session_id=session_id))
+            code_search_result = asyncio.run(
+                run_code_search_tool_call(domain=domain, question=question, session_id=session_id)
+            )
 
             response_body = {
                 "message": "Code search completed successfully",
                 "timestamp": datetime.now(UTC).isoformat(),
                 "requestId": context.aws_request_id,
-                "answer": result.get("answer", None),
+                "answer": code_search_result.get("answer", None),
             }
 
         return {

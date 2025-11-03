@@ -27,3 +27,13 @@ class ReindexGithubRequest(BaseModel):
 
 class ReindexGithubResponse(BaseModel):
     job_id: str = Field(description="New job ID for tracking reindexing progress")
+
+
+class IndexingCallbackRequest(BaseModel):
+    session_id: str = Field(description="Session ID from the code indexing operation")
+    status: str = Field(description="Status of indexing operation: 'success' or 'failed'")
+
+
+class IndexingCallbackResponse(BaseModel):
+    status: str = Field(description="Callback processing status")
+    status_code: int = Field(description="HTTP status code")

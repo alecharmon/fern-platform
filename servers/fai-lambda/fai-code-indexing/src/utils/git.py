@@ -19,6 +19,10 @@ async def clone_repo_to_domain(domain: str, repo_url: str) -> str:
     github_token = os.environ.get("GITHUB_TOKEN")
     efs_root = Path(os.environ.get("HOME", "/mnt/efs"))
 
+    # Use /tmp for git config to avoid EFS lock contention
+    git_env = os.environ.copy()
+    git_env["GIT_CONFIG_GLOBAL"] = "/tmp/.gitconfig"
+
     domain_folder = efs_root / domain
     domain_folder.mkdir(parents=True, exist_ok=True)
 
@@ -37,13 +41,16 @@ async def clone_repo_to_domain(domain: str, repo_url: str) -> str:
                 "git",
                 "config",
                 "--global",
-                "--add",
                 "safe.directory",
-                str(repo_path),
+                "*",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
+                env=git_env,
             )
-            _, _ = await config_process.communicate()
+
+            _, stderr = await config_process.communicate()
+            if config_process.returncode != 0:
+                logger.warning(f"Failed to set safe.directory: {stderr.decode()}")
 
             process = await asyncio.create_subprocess_exec(
                 "git",
@@ -53,6 +60,7 @@ async def clone_repo_to_domain(domain: str, repo_url: str) -> str:
                 "origin",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
+                env=git_env,
             )
             _, stderr = await process.communicate()
             if process.returncode != 0:
@@ -66,6 +74,7 @@ async def clone_repo_to_domain(domain: str, repo_url: str) -> str:
                 "origin",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
+                env=git_env,
             )
             _, stderr = await process.communicate()
             if process.returncode != 0:
@@ -89,6 +98,7 @@ async def clone_repo_to_domain(domain: str, repo_url: str) -> str:
                 str(repo_path),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
+                env=git_env,
             )
             _, stderr = await process.communicate()
             if process.returncode != 0:
