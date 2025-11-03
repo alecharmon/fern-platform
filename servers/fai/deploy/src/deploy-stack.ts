@@ -159,6 +159,22 @@ export class FernAiDeployStack extends Stack {
             );
         }
 
+        fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: [
+                    "sqs:CreateQueue",
+                    "sqs:DeleteQueue",
+                    "sqs:SendMessage",
+                    "sqs:GetQueueUrl",
+                    "sqs:GetQueueAttributes",
+                    "sqs:SetQueueAttributes",
+                    "sqs:TagQueue"
+                ],
+                resources: [`arn:aws:sqs:us-east-1:985111089818:editing-session-*.fifo`]
+            })
+        );
+
         const lbResponseTimeAlarm = new cloudwatch.Alarm(
             this,
             `fai-${environmentType.toLowerCase()}-lb-target-response-time-alarm`,

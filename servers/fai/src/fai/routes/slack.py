@@ -64,7 +64,7 @@ from fai.utils.slack.message_handler import (
 )
 from fai.utils.slack.response_qa import log_message_for_qa
 
-MESSAGE_CACHE_TTL = 30
+MESSAGE_CACHE_TTL = 600
 
 
 async def cleanup_message_cache() -> None:

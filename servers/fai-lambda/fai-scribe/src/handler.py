@@ -1,9 +1,11 @@
 import asyncio
 import json
+import shutil
 from datetime import (
     UTC,
     datetime,
 )
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -75,6 +77,13 @@ async def handle_editing_request(
         )
         LOGGER.info(f"Repository ready at: {repo_path}")
 
+        queue_url = session.get("queue_url")
+        if not queue_url:
+            raise RuntimeError(
+                f"No queue_url found for editing session {editing_id}. "
+                f"Session is in invalid state - queue should have been created during initialization."
+            )
+
         try:
             session_id, pr_url = await run_editing_session(
                 repo_path=repo_path,
@@ -82,6 +91,7 @@ async def handle_editing_request(
                 base_branch=session["base_branch"],
                 working_branch=session["working_branch"],
                 editing_id=editing_id,
+                queue_url=queue_url,
                 resume_session_id=session.get("session_id"),
                 existing_pr_url=session.get("pr_url"),
             )
@@ -100,6 +110,24 @@ async def handle_editing_request(
                 LOGGER.error(f"Failed to update editing session: {response.status_code} - {response.text}")
             else:
                 LOGGER.info(f"Successfully updated editing session: {editing_id}")
+
+            LOGGER.info(f"Cleaning up SQS queue for session: {editing_id}")
+            cleanup_response = await client.delete(f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}/queue")
+            if cleanup_response.status_code == 200:
+                LOGGER.info(f"Successfully cleaned up queue for session: {editing_id}")
+            else:
+                LOGGER.warning(
+                    f"Failed to cleanup queue for session {editing_id}: "
+                    f"{cleanup_response.status_code} - {cleanup_response.text}"
+                )
+
+            try:
+                session_dir = Path(repo_path).parent
+                if session_dir.exists() and session_dir.name.startswith("editing-"):
+                    shutil.rmtree(session_dir)
+                    LOGGER.info(f"Cleaned up session directory: {session_dir}")
+            except Exception as cleanup_error:
+                LOGGER.warning(f"Failed to cleanup session directory: {cleanup_error}")
 
             return {
                 "editing_id": editing_id,

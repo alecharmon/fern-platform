@@ -1,9 +1,10 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
-import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
+import { CfnOutput, Duration, RemovalPolicy, Size, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as efs from "aws-cdk-lib/aws-efs";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
@@ -109,6 +110,7 @@ export class FaiScribeStack extends Stack {
             }),
             timeout: Duration.minutes(15),
             memorySize: 512,
+            ephemeralStorageSize: Size.mebibytes(2048),
             logGroup,
             vpc: this.vpc,
             vpcSubnets: {
@@ -124,6 +126,20 @@ export class FaiScribeStack extends Stack {
             },
             filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, "/mnt/efs")
         });
+
+        lambdaFunction.addToRolePolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: [
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:GetQueueAttributes",
+                    "sqs:GetQueueUrl",
+                    "sqs:ChangeMessageVisibility"
+                ],
+                resources: [`arn:aws:sqs:${this.region}:${this.account}:editing-session-*.fifo`]
+            })
+        );
 
         const apiName = `${lambdaName}-${environmentType.toLowerCase()}`;
 

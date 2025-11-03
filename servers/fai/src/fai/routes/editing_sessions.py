@@ -23,6 +23,12 @@ from fai.models.api.editing_session_api import (
 from fai.models.db.editing_session_db import EditingSessionDb
 from fai.models.types.editing_session_types import EditingSessionStatus
 from fai.settings import LOGGER
+from fai.utils.sqs_utils import (
+    InterruptMessage,
+    create_session_queue,
+    delete_session_queue,
+    send_message_to_queue,
+)
 
 
 def _generate_working_branch(repository: str) -> str:
@@ -48,6 +54,14 @@ async def create_editing_session(
         editing_id = str(uuid.uuid4())
         working_branch = _generate_working_branch(request.repository)
 
+        queue_url = await create_session_queue(editing_id)
+        if queue_url is None:
+            LOGGER.error(f"Failed to create SQS queue for session {editing_id}")
+            return JSONResponse(
+                content={"error": "Failed to create SQS queue for editing session"},
+                status_code=500,
+            )
+
         db_session = EditingSessionDb(
             id=editing_id,
             session_id=None,
@@ -55,6 +69,7 @@ async def create_editing_session(
             base_branch=request.base_branch,
             working_branch=working_branch,
             pr_url=None,
+            queue_url=queue_url,
             status=EditingSessionStatus.STARTUP,
             created_at=datetime.now(UTC),
             updated_at=datetime.now(UTC),
@@ -64,7 +79,7 @@ async def create_editing_session(
         await db.commit()
         await db.refresh(db_session)
 
-        LOGGER.info(f"Created editing session: {editing_id} with branch: {working_branch}")
+        LOGGER.info(f"Created editing session: {editing_id} with branch: {working_branch} and queue: {queue_url}")
 
         return JSONResponse(
             content=jsonable_encoder(CreateEditingSessionResponse(editing_session=db_session.to_api())),
@@ -167,7 +182,7 @@ async def interrupt_editing_session(
     editing_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
-    """Interrupt a running editing session."""
+    """Interrupt a running editing session by sending INTERRUPT message to SQS."""
     LOGGER.info(f"Interrupting editing session: {editing_id}")
     try:
         result = await db.execute(select(EditingSessionDb).where(EditingSessionDb.id == editing_id))
@@ -180,12 +195,31 @@ async def interrupt_editing_session(
                 status_code=404,
             )
 
-        # Only interrupt if session is active
-        if db_session.status != EditingSessionStatus.ACTIVE:
+        if db_session.status in [EditingSessionStatus.INTERRUPTED, EditingSessionStatus.COMPLETED]:
             LOGGER.warning(f"Cannot interrupt session with status {db_session.status}: {editing_id}")
             return JSONResponse(
                 content={"error": f"Cannot interrupt session with status: {db_session.status}"},
                 status_code=400,
+            )
+
+        if not db_session.queue_url:
+            LOGGER.error(f"No queue URL for session {editing_id}, cannot send interrupt message")
+            return JSONResponse(
+                content={"error": "No queue URL found for session"},
+                status_code=500,
+            )
+
+        interrupt_msg = InterruptMessage(
+            editing_id=editing_id,
+            timestamp=datetime.now(UTC).isoformat(),
+        )
+
+        success = await send_message_to_queue(db_session.queue_url, interrupt_msg)
+        if not success:
+            LOGGER.error(f"Failed to send interrupt message to queue for session {editing_id}")
+            return JSONResponse(
+                content={"error": "Failed to send interrupt message to queue"},
+                status_code=500,
             )
 
         db_session.status = EditingSessionStatus.INTERRUPTED
@@ -194,7 +228,7 @@ async def interrupt_editing_session(
         await db.commit()
         await db.refresh(db_session)
 
-        LOGGER.info(f"Interrupted editing session: {editing_id}")
+        LOGGER.info(f"Sent interrupt message and updated status for session: {editing_id}")
 
         return JSONResponse(
             content=jsonable_encoder(InterruptEditingSessionResponse(editing_session=db_session.to_api())),
@@ -205,5 +239,59 @@ async def interrupt_editing_session(
         LOGGER.exception(f"Failed to interrupt editing session: {e}")
         return JSONResponse(
             content={"error": "Failed to interrupt editing session", "details": str(e)},
+            status_code=500,
+        )
+
+
+@fai_app.delete(
+    "/editing-sessions/{editing_id}/queue",
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def cleanup_session_queue(
+    editing_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    """Delete the SQS queue for an editing session."""
+    LOGGER.info(f"Cleaning up queue for editing session: {editing_id}")
+    try:
+        result = await db.execute(select(EditingSessionDb).where(EditingSessionDb.id == editing_id))
+        db_session = result.scalar_one_or_none()
+
+        if db_session is None:
+            LOGGER.warning(f"Editing session not found: {editing_id}")
+            return JSONResponse(
+                content={"error": "Editing session not found"},
+                status_code=404,
+            )
+
+        if not db_session.queue_url:
+            LOGGER.info(f"No queue URL for session {editing_id}, nothing to clean up")
+            return JSONResponse(
+                content={"message": "No queue to clean up"},
+                status_code=200,
+            )
+
+        success = await delete_session_queue(db_session.queue_url)
+        if success:
+            db_session.queue_url = None
+            db_session.updated_at = datetime.now(UTC)
+            await db.commit()
+
+            LOGGER.info(f"Successfully cleaned up queue for session {editing_id}")
+            return JSONResponse(
+                content={"message": "Queue cleaned up successfully"},
+                status_code=200,
+            )
+        else:
+            LOGGER.warning(f"Failed to delete queue for session {editing_id}")
+            return JSONResponse(
+                content={"error": "Failed to delete queue"},
+                status_code=500,
+            )
+
+    except Exception as e:
+        LOGGER.exception(f"Error cleaning up queue for session {editing_id}: {e}")
+        return JSONResponse(
+            content={"error": "Failed to clean up queue", "details": str(e)},
             status_code=500,
         )

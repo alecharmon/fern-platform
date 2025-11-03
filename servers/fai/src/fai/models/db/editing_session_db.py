@@ -39,6 +39,9 @@ class EditingSessionDb(Base):
     working_branch = Column(String, nullable=False)
     pr_url = Column(String, nullable=True)
 
+    # SQS queue for session communication
+    queue_url = Column(String, nullable=True)
+
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     updated_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
 
@@ -51,6 +54,7 @@ class EditingSessionDb(Base):
             base_branch=self.base_branch,
             working_branch=self.working_branch,
             pr_url=self.pr_url,
+            queue_url=self.queue_url,
             status=self.status,
             created_at=self.created_at,
             updated_at=self.updated_at,

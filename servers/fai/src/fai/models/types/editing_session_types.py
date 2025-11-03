@@ -21,6 +21,7 @@ class EditingSession(BaseModel):
     base_branch: str
     working_branch: str
     pr_url: str | None
+    queue_url: str | None
     status: EditingSessionStatus
     created_at: datetime
     updated_at: datetime

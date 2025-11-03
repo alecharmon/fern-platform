@@ -16,14 +16,13 @@ from ..settings import (
     LOGGER,
     SETTINGS,
 )
+from .sqs_client import SQSClient
 from .system_prompts import EDITING_SYSTEM_PROMPT
 
 GITHUB_PR_URL_PATTERN = re.compile(r"(?:https?://)?(?:www\.)?github\.com/([^/]+)/([^/]+)/pull/(\d+)", re.IGNORECASE)
 
 
 class SessionInterruptedError(Exception):
-    """Raised when an editing session is interrupted."""
-
     pass
 
 
@@ -45,7 +44,6 @@ async def update_session_status(editing_id: str, status: str) -> bool:
 
 
 async def update_session_metadata(editing_id: str, session_id: str | None = None, pr_url: str | None = None) -> bool:
-    """Update session metadata (session_id and/or pr_url) immediately when available."""
     try:
         payload = {}
         if session_id is not None:
@@ -69,19 +67,15 @@ async def update_session_metadata(editing_id: str, session_id: str | None = None
         return False
 
 
-async def check_if_interrupted(editing_id: str) -> bool:
+def check_if_interrupted_via_sqs(sqs_client: SQSClient) -> tuple[bool, str | None]:
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(f"{SETTINGS.FAI_API_URL}/editing-sessions/{editing_id}")
-            if response.status_code == 200:
-                session_data = response.json()
-                return session_data["editing_session"]["status"] == "interrupted"
-            else:
-                LOGGER.warning(f"Failed to check interrupted status: {response.status_code}")
-                return False
+        is_interrupted, receipt_handle = sqs_client.has_interrupt_message()
+        if is_interrupted:
+            LOGGER.info("Received INTERRUPT message from SQS queue")
+        return is_interrupted, receipt_handle
     except Exception as e:
-        LOGGER.warning(f"Error checking interrupted status: {e}")
-        return False
+        LOGGER.warning(f"Error checking SQS for interruption: {e}")
+        return False, None
 
 
 async def run_editing_session(
@@ -90,6 +84,7 @@ async def run_editing_session(
     base_branch: str,
     working_branch: str,
     editing_id: str,
+    queue_url: str,
     resume_session_id: str | None = None,
     existing_pr_url: str | None = None,
 ) -> tuple[str, str | None]:
@@ -134,6 +129,9 @@ After making the changes:
     session_id = resume_session_id
     pr_url = existing_pr_url
 
+    sqs_client = SQSClient(queue_url)
+    LOGGER.info(f"Initialized SQS client for queue: {queue_url}")
+
     async with ClaudeSDKClient(options=options) as client:
         await client.query(full_prompt)
 
@@ -152,11 +150,14 @@ After making the changes:
                         await update_session_status(editing_id, "active")
                         LOGGER.info(f"Transitioned new session {editing_id} from STARTUP to ACTIVE")
 
-            if await check_if_interrupted(editing_id):
-                LOGGER.warning(f"Session interrupted: {editing_id}")
-                if session_id is not None:
+            if session_id is not None:
+                is_interrupted, receipt_handle = check_if_interrupted_via_sqs(sqs_client)
+                if is_interrupted:
+                    LOGGER.warning(f"Session interrupted via SQS: {editing_id}")
+                    if receipt_handle:
+                        sqs_client.delete_message(receipt_handle)
                     await update_session_status(editing_id, "waiting")
-                raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
+                    raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
 
             if isinstance(message, AssistantMessage):
                 for block in message.content:
@@ -184,6 +185,49 @@ After making the changes:
                     LOGGER.info(f"Cost: ${message.total_cost_usd}")
     if session_id is None:
         raise RuntimeError("Failed to obtain session ID from Claude")
+
+    LOGGER.info(f"Checking for RESUME messages in queue for session {editing_id}")
+    resume_messages = sqs_client.get_resume_messages()
+
+    if resume_messages:
+        LOGGER.info(f"Found {len(resume_messages)} RESUME messages, batching prompts")
+
+        all_prompts = []
+        for resume_msg in resume_messages:
+            body = resume_msg["body"]
+            prompts = body.get("prompts", [])
+            if prompts:
+                all_prompts.extend(prompts)
+            sqs_client.delete_message(resume_msg["receipt_handle"])
+
+        if all_prompts:
+            batched_prompt = "\n\n".join([f"Request {i+1}: {p}" for i, p in enumerate(all_prompts)])
+            LOGGER.info(f"Processing {len(all_prompts)} batched prompts: {batched_prompt[:200]}...")
+
+            async with ClaudeSDKClient(options=options) as client:
+                await client.query(batched_prompt)
+
+                async for msg in client.receive_response():
+                    is_interrupted, receipt_handle = check_if_interrupted_via_sqs(sqs_client)
+                    if is_interrupted:
+                        LOGGER.warning(f"Session interrupted while processing batched prompts: {editing_id}")
+                        if receipt_handle:
+                            sqs_client.delete_message(receipt_handle)
+                        await update_session_status(editing_id, "waiting")
+                        raise SessionInterruptedError(f"Editing session {editing_id} was interrupted")
+
+                    if isinstance(msg, AssistantMessage):
+                        for block in msg.content:
+                            if isinstance(block, TextBlock):
+                                for line in block.text.split("\n"):
+                                    if "PR_URL:" in line:
+                                        extracted_text = line.split("PR_URL:", 1)[1].strip()
+                                        if extracted_text:
+                                            match = GITHUB_PR_URL_PATTERN.search(extracted_text)
+                                            if match:
+                                                pr_url = match.group(0)
+                                                LOGGER.info(f"Updated PR URL: {pr_url}")
+                                                await update_session_metadata(editing_id, pr_url=pr_url)
 
     await update_session_status(editing_id, "waiting")
 
