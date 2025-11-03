@@ -22,7 +22,10 @@ export const queueTurbopufferReindex = async (
         basepath,
         endpoint: "/api/fern-docs/search/v2/reindex/turbopuffer",
         method: "GET",
-        timeoutSeconds
+        timeoutSeconds,
+        failureCallback: process.env.FAI_SERVER_URL
+            ? `${process.env.FAI_SERVER_URL}/upstash/qstash/failure-callback`
+            : `https://fai.buildwithfern.com/upstash/qstash/failure-callback`
     });
 };
 
@@ -54,7 +57,10 @@ export const queueTurbopufferStartReindex = async ({
         endpoint: endpoint as `/api/fern-docs/${string}`,
         method: "GET",
         timeoutSeconds,
-        callback
+        callback,
+        failureCallback: process.env.FAI_SERVER_URL
+            ? `${process.env.FAI_SERVER_URL}/upstash/qstash/failure-callback`
+            : `https://fai.buildwithfern.com/upstash/qstash/failure-callback`
     });
 
     return messageId;

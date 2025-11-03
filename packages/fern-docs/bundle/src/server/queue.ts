@@ -22,6 +22,7 @@ export async function queue<TBody = unknown>({
     endpoint: endpointProp,
     disableVercelPreviewDeployment = false,
     timeoutSeconds,
+    failureCallback,
     ...request
 }: {
     /**
@@ -41,6 +42,10 @@ export async function queue<TBody = unknown>({
     retries?: number;
     deduplicationId?: string;
     disableVercelPreviewDeployment?: boolean;
+    /**
+     * URL to POST to when the job fails
+     */
+    failureCallback?: string;
 }): Promise<void> {
     if (isLocal() || isSelfHosted() || q === undefined) {
         return undefined;
@@ -74,7 +79,8 @@ export async function queue<TBody = unknown>({
         ...request,
         method: request.method === "HEAD" ? "GET" : request.method,
         headers,
-        timeout: timeoutSeconds ? `${BigInt(timeoutSeconds)}s` : undefined
+        timeout: timeoutSeconds ? `${BigInt(timeoutSeconds)}s` : undefined,
+        failureCallback
     });
 }
 
@@ -87,6 +93,7 @@ export async function queueWithMessageId<TBody = unknown>({
     method,
     timeoutSeconds,
     callback,
+    failureCallback,
     ...request
 }: {
     /**
@@ -113,6 +120,10 @@ export async function queueWithMessageId<TBody = unknown>({
      * URL to POST to when the job completes (success or failure)
      */
     callback?: string;
+    /**
+     * URL to POST to when the job fails
+     */
+    failureCallback?: string;
 }): Promise<string | undefined> {
     if (isLocal() || isSelfHosted() || q === undefined) {
         return undefined;
@@ -145,7 +156,8 @@ export async function queueWithMessageId<TBody = unknown>({
         headers,
         method,
         timeout: timeoutSeconds ? `${BigInt(timeoutSeconds)}s` : undefined,
-        callback
+        callback,
+        failureCallback
     });
 
     if ("messageId" in response) {
