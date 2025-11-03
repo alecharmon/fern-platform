@@ -1,11 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { Button } from "../ui/button";
 import { GithubLogo } from "./GithubLogo";
 import { GoogleLogo } from "./GoogleLogo";
 
+// Used to prevent hydration errors
+function useHasMounted() {
+    const [hasMounted, setHasMounted] = useState(false);
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+    return hasMounted;
+}
+
 // Connection options for authentication providers
 export type AuthConnection = "google-oauth2" | "github";
+
+const LAST_USED_LOGIN_KEY = "fern-last-used-login";
 
 // Base login button component that can be used for different providers
 const BaseLoginButton = ({
@@ -21,9 +34,17 @@ const BaseLoginButton = ({
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
 }) => {
+    const handleClick = () => {
+        try {
+            localStorage.setItem(LAST_USED_LOGIN_KEY, connection);
+        } catch {}
+    };
+
     return (
         <Button {...buttonProps} asChild>
-            <a href={getLoginUrl({ connection, returnTo, additionalParams })}>{children}</a>
+            <a href={getLoginUrl({ connection, returnTo, additionalParams })} onClick={handleClick}>
+                {children}
+            </a>
         </Button>
     );
 };
@@ -40,6 +61,18 @@ export const GoogleLoginButton = ({
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
 }) => {
+    const [isLastUsed, setIsLastUsed] = useState(false);
+    const hasMounted = useHasMounted();
+
+    useEffect(() => {
+        try {
+            const lastUsed = localStorage.getItem(LAST_USED_LOGIN_KEY);
+            setIsLastUsed(lastUsed === "google-oauth2");
+        } catch {
+            setIsLastUsed(false);
+        }
+    }, []);
+
     return (
         <BaseLoginButton
             connection="google-oauth2"
@@ -48,10 +81,20 @@ export const GoogleLoginButton = ({
             buttonProps={buttonProps}
         >
             {children ?? (
-                <>
-                    <GoogleLogo />
-                    Continue with Google
-                </>
+                <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                    <div aria-hidden="true" />
+                    <div className="flex items-center gap-2 justify-self-center">
+                        <GoogleLogo />
+                        <span>Continue with Google</span>
+                    </div>
+                    {hasMounted && isLastUsed ? (
+                        <span className="justify-self-end px-2 py-0.5 text-xs font-medium text-white dark:text-[var(--gray-100)] bg-[var(--green-1200)] rounded-[4px]">
+                            last used
+                        </span>
+                    ) : (
+                        <div aria-hidden="true" />
+                    )}
+                </div>
             )}
         </BaseLoginButton>
     );
@@ -69,6 +112,18 @@ export const GithubLoginButton = ({
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
 }) => {
+    const [isLastUsed, setIsLastUsed] = useState(false);
+    const hasMounted = useHasMounted();
+
+    useEffect(() => {
+        try {
+            const lastUsed = localStorage.getItem(LAST_USED_LOGIN_KEY);
+            setIsLastUsed(lastUsed === "github");
+        } catch {
+            setIsLastUsed(false);
+        }
+    }, []);
+
     return (
         <BaseLoginButton
             connection="github"
@@ -77,10 +132,20 @@ export const GithubLoginButton = ({
             buttonProps={buttonProps}
         >
             {children ?? (
-                <>
-                    <GithubLogo />
-                    Continue with GitHub
-                </>
+                <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                    <div aria-hidden="true" />
+                    <div className="flex items-center gap-2 justify-self-center">
+                        <GithubLogo />
+                        <span>Continue with GitHub</span>
+                    </div>
+                    {hasMounted && isLastUsed ? (
+                        <span className="justify-self-end px-2 py-0.5 text-xs font-medium text-white dark:text-[var(--gray-100)] bg-[var(--green-1200)] rounded-[4px]">
+                            last used
+                        </span>
+                    ) : (
+                        <div aria-hidden="true" />
+                    )}
+                </div>
             )}
         </BaseLoginButton>
     );
