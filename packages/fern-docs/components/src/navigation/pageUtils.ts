@@ -168,13 +168,13 @@ export function getAllSectionsFromSectionNode(
                 sectionPath: [
                     ...sectionNode.sectionPath,
                     {
-                        id: sectionNode.id,
-                        type: sectionNode.type,
-                        title: sectionNode.title
+                        id: child.id,
+                        type: child.type,
+                        title: child.title
                     }
                 ]
             };
-            result.push(section);
+            result.push(section, ...getAllSectionsFromSectionNode(section));
         }
     }
     return result;
