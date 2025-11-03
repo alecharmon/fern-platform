@@ -162,6 +162,14 @@ export class FernAiDeployStack extends Stack {
         fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
             new iam.PolicyStatement({
                 effect: iam.Effect.ALLOW,
+                actions: ["lambda:InvokeFunction"],
+                resources: ["arn:aws:lambda:us-east-1:985111089818:function:fai-code-indexing-*"]
+            })
+        );
+
+        fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
                 actions: [
                     "sqs:CreateQueue",
                     "sqs:DeleteQueue",
