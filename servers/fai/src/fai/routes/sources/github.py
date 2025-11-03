@@ -53,13 +53,13 @@ async def index_github_source_repos(
         stripped_domain = strip_domain(domain)
         job_id = str(uuid.uuid4())
 
-        result = await db.execute(
+        domain_root_entry = await db.execute(
             select(IndexSourceDb).where(
                 IndexSourceDb.domain == stripped_domain, IndexSourceDb.source_type == SourceType.GITHUB_DOMAIN_ROOT
             )
         )
 
-        domain_root_entry = result.scalar_one_or_none()
+        domain_root_entry = domain_root_entry.scalar_one_or_none()
         if domain_root_entry is None:
             domain_root_entry = IndexSourceDb(
                 domain=stripped_domain,
@@ -71,7 +71,20 @@ async def index_github_source_repos(
             db.add(domain_root_entry)
             await db.flush()
 
+        existing_repo_entries = await db.execute(
+            select(IndexSourceDb).where(
+                IndexSourceDb.domain == stripped_domain,
+                IndexSourceDb.source_type == SourceType.GITHUB,
+                IndexSourceDb.source_identifier.in_(request.repo_urls),
+            )
+        )
+        existing_repo_urls = {repo.source_identifier for repo in existing_repo_entries.scalars().all()}
+
         for repo_url in request.repo_urls:
+            if repo_url in existing_repo_urls:
+                logger.info(f"Repository {repo_url} already exists for domain {stripped_domain}, skipping")
+                continue
+
             index_source = IndexSourceDb(
                 domain=stripped_domain,
                 source_type=SourceType.GITHUB,
