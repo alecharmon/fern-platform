@@ -4,7 +4,7 @@ describe("parseServerSidePathname", () => {
     it("should return the slug", () => {
         expect(
             parseServerSidePathname(
-                "/canary.ferndocs.com/buildwithfern.com/en/static/%2Flearn%2Fsdks%2Fcapabilities%2Fwebsockets"
+                "/canary.ferndocs.com/buildwithfern.com/static/%2Flearn%2Fsdks%2Fcapabilities%2Fwebsockets"
             )
         ).toEqual("/learn/sdks/capabilities/websockets");
     });
@@ -14,7 +14,7 @@ describe("parseServerSidePathname", () => {
     });
 
     it("should return /?explorer=true if the pathname is an explorer route", () => {
-        expect(parseServerSidePathname("/canary.ferndocs.com/buildwithfern.com/en/explorer/%2Fapi%2Ftest")).toEqual(
+        expect(parseServerSidePathname("/canary.ferndocs.com/buildwithfern.com/explorer/%2Fapi%2Ftest")).toEqual(
             "/api/test?explorer=true"
         );
     });
