@@ -21,6 +21,7 @@ import { cn } from "@/utils/utils";
 import { createCodeBlockComponent } from "./extension-code-block/CodeBlockComponent";
 import CustomElement from "./extension-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
+import { MarkdownPasteExtension } from "./extension-markdown-paste";
 import { SelectBlockExtension } from "./extension-select-block/select-block-extension";
 import FloatingMenu from "./FloatingMenu";
 import NodeHoverHandle from "./NodeHoverHandle";
@@ -74,6 +75,7 @@ const extensions = [
     FVEAttributesExtension.configure({
         types: dataAttributeNodeTypes
     }),
+    MarkdownPasteExtension,
     SelectBlockExtension,
     CustomElement,
     Placeholder.configure({
