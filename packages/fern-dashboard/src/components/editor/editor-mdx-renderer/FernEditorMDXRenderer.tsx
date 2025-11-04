@@ -5,6 +5,7 @@ import {
     type MdastNodes,
     type MdxJsxAttribute,
     type MdxJsxExpressionAttribute,
+    mdxToAST,
     mdxToHtml
 } from "@fern-docs/mdx";
 import { useMDXComponents } from "@mdx-js/react";
@@ -16,12 +17,69 @@ import { EditorComponentProvider } from "@/components/editor/editor-component/Ed
 import { CustomElementHoverWrapper } from "@/components/editor/NodeHoverWrapper";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
+import { MDX_COMPONENTS } from "@/docs/mdx/components";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { UnsupportedContent, UnsupportedContentDisplayOnly } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
 import { boundaryElements, parseMDX } from "./parse";
 import type { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
+
+/**
+ * Check if MDX contains unsupported custom components
+ * Returns the name of the first unsupported component found, or null if all are supported
+ */
+function findUnsupportedComponent(mdx: string): string | null {
+    const IGNORED_COMPONENTS = new Set(["InterceptedChildren"]);
+
+    try {
+        const { mdast } = mdxToAST(mdx);
+
+        function traverse(node: any): string | null {
+            if (node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement") {
+                const componentName = node.name;
+
+                if (!componentName) {
+                    return null;
+                }
+
+                if (IGNORED_COMPONENTS.has(componentName)) {
+                    return null;
+                }
+
+                if (componentName === componentName.toLowerCase()) {
+                    return null;
+                }
+
+                if (!Object.hasOwn(MDX_COMPONENTS, componentName)) {
+                    return componentName;
+                }
+            }
+
+            if (node.children && Array.isArray(node.children)) {
+                for (const child of node.children) {
+                    const unsupported = traverse(child);
+                    if (unsupported) {
+                        return unsupported;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        for (const child of mdast.children) {
+            const unsupported = traverse(child);
+            if (unsupported) {
+                return unsupported;
+            }
+        }
+
+        return null;
+    } catch (error) {
+        return null;
+    }
+}
 
 function buildMdxElement(
     name: string,
@@ -163,6 +221,23 @@ interface MDXRendererProps {
     branch?: string;
 }
 
+const CustomErrorFallback = ({ mdx, unsupportedComponent }: { mdx: string; unsupportedComponent?: string | null }) => {
+    const computedUnsupportedComponent = useMemo(() => {
+        if (unsupportedComponent != null) {
+            return unsupportedComponent;
+        }
+        return findUnsupportedComponent(mdx);
+    }, [unsupportedComponent, mdx]);
+
+    const displayMessage = computedUnsupportedComponent
+        ? `Unsupported markdown tag: ${computedUnsupportedComponent}`
+        : !mdx.includes("<InterceptedChildren />")
+          ? mdx
+          : "Unsupported markdown";
+
+    return <UnsupportedContentDisplayOnly>{displayMessage}</UnsupportedContentDisplayOnly>;
+};
+
 // Helper function to check if MDX starts with a boundary element
 function isBoundaryElement(mdx: string): boolean {
     const trimmed = mdx.trim();
@@ -198,7 +273,14 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
     const components = useMDXComponents();
     const isBoundary = useMemo(() => isBoundaryElement(mdx), [mdx]);
 
+    const unsupportedComponent = useMemo(() => findUnsupportedComponent(mdx), [mdx]);
+
     useEffect(() => {
+        if (unsupportedComponent) {
+            setState({ type: "ERROR", message: `Unsupported component: ${unsupportedComponent}` });
+            return;
+        }
+
         let cancelled = false;
 
         void (async () => {
@@ -218,35 +300,30 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
         return () => {
             cancelled = true;
         };
-    }, [mdx, docsUrl, branch]);
+    }, [mdx, docsUrl, branch, unsupportedComponent]);
 
     // Compute content based on state - all hooks must be called before this point
-    // Use UnsupportedContentSimple (no hooks) instead of UnsupportedContent (has hooks)
     const content = useMemo(() => {
         if (state.type === "BUNDLING") {
             return <LoadingTerminalElement />;
         }
 
         if (state.type === "ERROR") {
-            return (
-                <UnsupportedContent>
-                    {!mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown"}
-                </UnsupportedContent>
-            );
+            const displayMessage = unsupportedComponent
+                ? `Unsupported markdown tag: ${unsupportedComponent}`
+                : !mdx.includes("<InterceptedChildren />")
+                  ? mdx
+                  : "Unsupported markdown";
+
+            return <UnsupportedContent>{displayMessage}</UnsupportedContent>;
         }
 
         return (
-            <ErrorBoundary
-                fallback={
-                    <UnsupportedContentDisplayOnly>
-                        {!mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown"}
-                    </UnsupportedContentDisplayOnly>
-                }
-            >
+            <ErrorBoundary fallback={<CustomErrorFallback mdx={mdx} unsupportedComponent={unsupportedComponent} />}>
                 <TerminalMDXRenderer code={state.code} components={components} />
             </ErrorBoundary>
         );
-    }, [state, mdx, components]);
+    }, [state, mdx, components, unsupportedComponent]);
 
     // Only wrap with CustomElementHoverWrapper if it's a boundary element
     if (isBoundary) {
