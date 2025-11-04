@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 import { useEffect, useMemo, useRef } from "react";
 
+import { captureDocsTabViewed } from "@/components/posthog/events";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
@@ -14,9 +16,16 @@ export interface NavItem {
 
 const DOCS_PATHNAME_REGEX = /^(\/docs\/[^/]+)\/?([^/]*)\/?$/;
 
-export function DocsSiteNavBarWithOverflow({ items }: { items: NavItem[] }) {
+export function DocsSiteNavBarWithOverflow({
+    items,
+    siteHasGitHubAppInstalled
+}: {
+    items: NavItem[];
+    siteHasGitHubAppInstalled?: boolean;
+}) {
     const orgName = useOrgNameFromPathname();
     const pathname = usePathnameWithoutOrgName();
+    const posthog = usePostHog();
     const containerRef = useRef<HTMLDivElement>(null);
     const itemRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -43,6 +52,16 @@ export function DocsSiteNavBarWithOverflow({ items }: { items: NavItem[] }) {
             }
         }
     }, [items, tabPathname]);
+
+    useEffect(() => {
+        const selectedItem = items.find((item) => item.href === tabPathname);
+        if (selectedItem) {
+            captureDocsTabViewed(posthog, {
+                tab: selectedItem.title,
+                siteHasGitHubAppInstalled: siteHasGitHubAppInstalled ?? false
+            });
+        }
+    }, [items, tabPathname, posthog, siteHasGitHubAppInstalled]);
 
     const renderNavItem = (item: NavItem, index: number) => {
         const isSelected = tabPathname === item.href;

@@ -1,3 +1,4 @@
+import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
 import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
@@ -9,7 +10,7 @@ import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 export default async function DocsSiteNavbar({
     params
 }: Readonly<{ params: Promise<{ orgName: Auth0OrgName; docsUrl: string }> }>) {
-    const { docsUrl } = await params;
+    const { orgName, docsUrl } = await params;
 
     const session = await getCurrentSession();
     if (session == null) {
@@ -24,6 +25,14 @@ export default async function DocsSiteNavbar({
         askAiStatus = await isAskAiEnabled({ domain: parsedDocsUrl });
     } catch (error) {
         console.error("Failed to fetch Ask AI status:", error);
+    }
+
+    let siteHasGitHubAppInstalled = false;
+    try {
+        const githubAuthState = await getGitHubAuthState(parsedDocsUrl, session.accessToken, orgName, session);
+        siteHasGitHubAppInstalled = githubAuthState.success !== false && githubAuthState.validationResult.ok;
+    } catch (error) {
+        console.error("Failed to check GitHub App installation status:", error);
     }
 
     const navItems: NavItem[] = [
@@ -45,10 +54,15 @@ export default async function DocsSiteNavbar({
         <>
             <div className="hidden md:flex">
                 {navItems.map((item) => (
-                    <DocsSiteNavBarItem key={item.title} title={item.title} href={item.href} />
+                    <DocsSiteNavBarItem
+                        key={item.title}
+                        title={item.title}
+                        href={item.href}
+                        siteHasGitHubAppInstalled={siteHasGitHubAppInstalled}
+                    />
                 ))}
             </div>
-            <DocsSiteNavBarWithOverflow items={navItems} />
+            <DocsSiteNavBarWithOverflow items={navItems} siteHasGitHubAppInstalled={siteHasGitHubAppInstalled} />
         </>
     );
 }
