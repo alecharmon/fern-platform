@@ -5,7 +5,7 @@ import { constructEditorSlug, generateBranchName, ROOT_SLUG_ALIAS } from "@fern-
 
 import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -42,11 +42,7 @@ export function GoToEditorButton({
         });
     }, [orgName, docsUrl, newBranchName]);
 
-    const handleClick = () => {
-        setIsLoading(true);
-
-        // Preload editor data to warm the cache before navigation
-        // Fire and forget - don't block navigation on this
+    useEffect(() => {
         void preloadEditorData({
             docsUrl: encodeURIComponent(docsUrl) as EncodedDocsUrl,
             host: window.location.host,
@@ -55,6 +51,10 @@ export function GoToEditorButton({
             // Log error but don't block navigation
             console.error("Failed to preload editor data:", error);
         });
+    }, [docsUrl, newBranchName]);
+
+    const handleClick = () => {
+        setIsLoading(true);
     };
 
     return (

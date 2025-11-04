@@ -550,7 +550,7 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
 
                 return root;
             },
-            ["unsafe_getRoot", cacheConfig.cacheKeySuffix],
+            ["unsafe_getRoot", domainKey, cacheConfig.cacheKeySuffix],
             { tags: [domainKey, "unsafe_getRoot"] }
         )(domainKey);
     });
