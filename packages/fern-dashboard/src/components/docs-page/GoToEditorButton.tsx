@@ -69,12 +69,7 @@ export function GoToEditorButton({
                 >
                     <span className="pointer-events-auto">
                         <Button disabled={isLoading || disabled || isValidatingSource} asChild={!disabled}>
-                            <Link
-                                className="flex flex-row items-center gap-1"
-                                href={editorSlug}
-                                onClick={handleClick}
-                                prefetch
-                            >
+                            <Link className="flex flex-row items-center gap-1" href={editorSlug} onClick={handleClick}>
                                 {isLoading ? (
                                     <Loader2 className="animate-spin" />
                                 ) : (

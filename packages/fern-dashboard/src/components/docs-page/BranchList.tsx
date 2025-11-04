@@ -24,16 +24,6 @@ export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRe
     const [visibleCount, setVisibleCount] = useState(3);
     const BRANCHES_PER_PAGE = 3;
 
-    const handleBranchClick = (branchName: string) => {
-        const editorSlug = constructEditorSlug({
-            orgName,
-            docsUrl: encodeURIComponent(docsUrl) as EncodedDocsUrl,
-            branchName,
-            slug: ROOT_SLUG_ALIAS
-        });
-        router.push(editorSlug);
-    };
-
     const handleBranchDelete = (branchName: string) => {
         deleteBranch(branchName);
         setDeletedBranches((prev) => new Set(prev).add(branchName));
@@ -62,7 +52,6 @@ export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRe
                             sourceRepo={sourceRepo}
                             docsUrl={docsUrl}
                             handleBranchDelete={handleBranchDelete}
-                            handleBranchClick={handleBranchClick}
                             showDivider={index < visibleBranches.length - 1}
                         />
                     ))}
