@@ -1,6 +1,6 @@
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
-
+import { cache } from "react";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisGet, redisSet } from "@/app/services/redis/redis";
 
@@ -24,39 +24,41 @@ export type GetFernBotInstallationIdResult =
  * @param repo - The name of the repository
  * @returns A discriminated union result with the Octokit instance or an error
  */
-export async function getFernBotOctokitForRepo(owner: string, repo: string): Promise<GetFernBotOctokitForRepoResult> {
-    const appId = process.env.FERN_BOT_APP_ID;
-    const privateKey = process.env.FERN_BOT_PRIVATE_KEY;
+export const getFernBotOctokitForRepo = cache(
+    async (owner: string, repo: string): Promise<GetFernBotOctokitForRepoResult> => {
+        const appId = process.env.FERN_BOT_APP_ID;
+        const privateKey = process.env.FERN_BOT_PRIVATE_KEY;
 
-    if (!appId) {
-        return { ok: false, error: { type: "MISSING_APP_ID" } };
-    }
-    if (!privateKey) {
-        return { ok: false, error: { type: "MISSING_PRIVATE_KEY" } };
-    }
+        if (!appId) {
+            return { ok: false, error: { type: "MISSING_APP_ID" } };
+        }
+        if (!privateKey) {
+            return { ok: false, error: { type: "MISSING_PRIVATE_KEY" } };
+        }
 
-    const installationIdResult = await getFernBotInstallationId(owner, repo);
-    if (!installationIdResult.ok) {
-        return { ok: false, error: installationIdResult.error };
-    }
+        const installationIdResult = await getFernBotInstallationId(owner, repo);
+        if (!installationIdResult.ok) {
+            return { ok: false, error: installationIdResult.error };
+        }
 
-    try {
-        const octokit = new Octokit({
-            authStrategy: createAppAuth,
-            auth: {
-                appId,
-                privateKey: formatPrivateKey(privateKey),
-                installationId: installationIdResult.installationId
-            }
-        });
-        return { ok: true, octokit };
-    } catch (e: any) {
-        return {
-            ok: false,
-            error: { type: "UNKNOWN_ERROR", message: e?.message ?? "Unknown error" }
-        };
+        try {
+            const octokit = new Octokit({
+                authStrategy: createAppAuth,
+                auth: {
+                    appId,
+                    privateKey: formatPrivateKey(privateKey),
+                    installationId: installationIdResult.installationId
+                }
+            });
+            return { ok: true, octokit };
+        } catch (e: any) {
+            return {
+                ok: false,
+                error: { type: "UNKNOWN_ERROR", message: e?.message ?? "Unknown error" }
+            };
+        }
     }
-}
+);
 
 /**
  * Gets the installation id for the fern-bot for a given owner and repo
@@ -66,73 +68,75 @@ export async function getFernBotOctokitForRepo(owner: string, repo: string): Pro
  * @param repo - The name of the repository
  * @returns A discriminated union result with the installation id or an error
  */
-export async function getFernBotInstallationId(owner: string, repo: string): Promise<GetFernBotInstallationIdResult> {
-    // Try to get from cache first
-    const cacheKey = RedisCacheKey.githubInstallationId(owner, repo);
-    try {
-        const cachedInstallationId = await redisGet(cacheKey);
-        if (cachedInstallationId != null) {
-            return { ok: true, installationId: cachedInstallationId };
-        }
-    } catch (error) {
-        // If cache fails, continue to fetch from GitHub
-        console.warn("Failed to read from Redis cache for installation ID", error);
-    }
-
-    const appId = process.env.FERN_BOT_APP_ID;
-    const privateKeyEnv = process.env.FERN_BOT_PRIVATE_KEY;
-
-    if (!appId) {
-        return { ok: false, error: { type: "MISSING_APP_ID" } };
-    }
-    if (!privateKeyEnv) {
-        return { ok: false, error: { type: "MISSING_PRIVATE_KEY" } };
-    }
-
-    const privateKey = formatPrivateKey(privateKeyEnv);
-
-    const appOctokit = new Octokit({
-        authStrategy: createAppAuth,
-        auth: {
-            appId,
-            privateKey
-        }
-    });
-
-    try {
-        const response = await appOctokit.request("GET /repos/{owner}/{repo}/installation", {
-            owner,
-            repo
-        });
-        const installation = response.data;
-
-        // Cache the installation ID for 10 days
+export const getFernBotInstallationId = cache(
+    async (owner: string, repo: string): Promise<GetFernBotInstallationIdResult> => {
+        // Try to get from cache first
+        const cacheKey = RedisCacheKey.githubInstallationId(owner, repo);
         try {
-            await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 * 10 });
+            const cachedInstallationId = await redisGet(cacheKey);
+            if (cachedInstallationId != null) {
+                return { ok: true, installationId: cachedInstallationId };
+            }
         } catch (error) {
-            // If cache fails, continue - we still have the installation ID
-            console.warn("Failed to write to Redis cache for installation ID", error);
+            // If cache fails, continue to fetch from GitHub
+            console.warn("Failed to read from Redis cache for installation ID", error);
         }
 
-        return { ok: true, installationId: installation.id };
-    } catch (error: any) {
-        if (error?.status === 404) {
-            // fern-bot is not yet installed on that repo
-            return {
-                ok: false,
-                error: { type: "NOT_INSTALLED", owner, repo }
-            };
-        } else {
-            return {
-                ok: false,
-                error: {
-                    type: "UNKNOWN_ERROR",
-                    message: error?.message ?? "Unknown error"
-                }
-            };
+        const appId = process.env.FERN_BOT_APP_ID;
+        const privateKeyEnv = process.env.FERN_BOT_PRIVATE_KEY;
+
+        if (!appId) {
+            return { ok: false, error: { type: "MISSING_APP_ID" } };
+        }
+        if (!privateKeyEnv) {
+            return { ok: false, error: { type: "MISSING_PRIVATE_KEY" } };
+        }
+
+        const privateKey = formatPrivateKey(privateKeyEnv);
+
+        const appOctokit = new Octokit({
+            authStrategy: createAppAuth,
+            auth: {
+                appId,
+                privateKey
+            }
+        });
+
+        try {
+            const response = await appOctokit.request("GET /repos/{owner}/{repo}/installation", {
+                owner,
+                repo
+            });
+            const installation = response.data;
+
+            // Cache the installation ID for 10 days
+            try {
+                await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 * 10 });
+            } catch (error) {
+                // If cache fails, continue - we still have the installation ID
+                console.warn("Failed to write to Redis cache for installation ID", error);
+            }
+
+            return { ok: true, installationId: installation.id };
+        } catch (error: any) {
+            if (error?.status === 404) {
+                // fern-bot is not yet installed on that repo
+                return {
+                    ok: false,
+                    error: { type: "NOT_INSTALLED", owner, repo }
+                };
+            } else {
+                return {
+                    ok: false,
+                    error: {
+                        type: "UNKNOWN_ERROR",
+                        message: error?.message ?? "Unknown error"
+                    }
+                };
+            }
         }
     }
-}
+);
 
 function formatPrivateKey(privateKey: string) {
     // Convert any escaped newlines to actual newlines
