@@ -46,7 +46,7 @@ export function DocsSiteNavBarItem({ title, href }: DocsSiteNavBarItem.Props) {
 
     if (isClickable) {
         return (
-            <Link className={className} href={`/${orgName}${pathnameForDocsSite}/${href}`}>
+            <Link className={className} href={`/${orgName}${pathnameForDocsSite}/${href}`} prefetch>
                 {children}
             </Link>
         );

@@ -5,8 +5,8 @@ import {
     type GetMembers200ResponseOneOfInner,
     ManagementClient
 } from "auth0";
+import { cache } from "react";
 import { v4 as uuidv4 } from "uuid";
-
 import { AsyncRedisCache } from "../redis/AsyncRedisCache";
 import { type InviteToken, RedisCacheKey, RedisCacheKeyType } from "../redis/cacheKey";
 import { redisDel, redisGet, redisSet } from "../redis/redis";
@@ -267,10 +267,10 @@ export async function createIsFernEmployee(): Promise<(userId: Auth0UserID) => b
  * when checking multiple userIds at once, use createIsFernEmployee
  * to avoid loading the fern org members with every check
  */
-export async function isFernEmployee(userId: Auth0UserID): Promise<boolean> {
+export const isFernEmployee = cache(async (userId: Auth0UserID): Promise<boolean> => {
     const isFernEmployeeFunc = await createIsFernEmployee();
     return isFernEmployeeFunc(userId);
-}
+});
 
 export async function getOrgInvitations(orgName: Auth0OrgName) {
     return await ORGANIZATION_INVITATIONS_CACHE.get(RedisCacheKey.organizationInvitations(orgName), async () => {

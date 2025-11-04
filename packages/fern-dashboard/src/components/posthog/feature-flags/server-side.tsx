@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
-
+import { cache } from "react";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
-
 import { getServerSidePosthog } from "../getServerSidePosthog";
 import type { PosthogFeatureFlag, PosthogFeatureFlags } from "./flags";
 
@@ -35,21 +34,19 @@ export async function FeatureFlaggedServerSide({
     return null;
 }
 
-export async function isFeatureFlagEnabledForUser(
-    featureFlag: PosthogFeatureFlag,
-    userId: Auth0UserID,
-    orgName: Auth0OrgName
-) {
-    const posthog = getServerSidePosthog();
-    return await posthog.isFeatureEnabled(featureFlag, userId, {
-        personProperties: {
-            orgName: orgName
-        }
-    });
-}
+export const isFeatureFlagEnabledForUser = cache(
+    async (featureFlag: PosthogFeatureFlag, userId: Auth0UserID, orgName: Auth0OrgName) => {
+        const posthog = getServerSidePosthog();
+        return await posthog.isFeatureEnabled(featureFlag, userId, {
+            personProperties: {
+                orgName: orgName
+            }
+        });
+    }
+);
 
-export async function getAllFeatureFlags(userId: Auth0UserID) {
+export const getAllFeatureFlags = cache(async (userId: Auth0UserID) => {
     const posthog = getServerSidePosthog();
     const flags = await posthog.getAllFlags(userId);
     return flags as PosthogFeatureFlags;
-}
+});

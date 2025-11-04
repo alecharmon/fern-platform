@@ -36,7 +36,6 @@ export default async function Page(props: {
     });
     if (!response.ok) {
         console.warn("Failed to get docs sites for org: ", JSON.stringify(response.error, null, 2));
-
         notFound();
     }
     const currentDocsSite = response.docsSites.find((site) => getDocsSiteUrl(site) === docsUrl);

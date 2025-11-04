@@ -1,7 +1,7 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
-
 import type { Auth0Organization } from "@/app/services/auth0/types";
 import { useInvalidateOrganizations } from "@/state/useOrganizations";
 import { Button } from "../ui/button";
@@ -105,10 +105,11 @@ export function OrganizationLogo({ organization }: OrganizationLogo.Props) {
                 <div className="flex items-center justify-center rounded-lg border-2 border-gray-300 bg-card p-8">
                     {organization.branding?.logo_url ? (
                         <div className="flex size-32 items-center justify-center overflow-hidden rounded">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                            <Image
                                 src={organization.branding.logo_url}
                                 alt={`${organization.display_name} logo`}
+                                width={128}
+                                height={128}
                                 className="size-full object-contain"
                             />
                         </div>
@@ -136,13 +137,13 @@ export function OrganizationLogo({ organization }: OrganizationLogo.Props) {
                                 style={{ width: `${uploadProgress}%` }}
                             />
                         </div>
-                        <p className="text-center text-sm text-gray-600">Uploading...</p>
+                        <p className="text-center text-sm text-muted-foreground">Uploading...</p>
                     </div>
                 )}
 
                 {error && (
                     <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-                        <p className="text-sm text-red-800">{error}</p>
+                        <p className="text-sm text-destructive">{error}</p>
                     </div>
                 )}
 

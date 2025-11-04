@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
-
+import { cache } from "react";
 import { getAuth0Client } from "@/app/services/auth0/auth0";
-
 import { type Auth0User, Auth0UserID } from "./types";
 
 export interface Auth0SessionData {
@@ -9,7 +8,7 @@ export interface Auth0SessionData {
     accessToken: string;
 }
 
-export async function getCurrentSession(): Promise<Auth0SessionData | undefined> {
+export const getCurrentSession = cache(async (): Promise<Auth0SessionData | undefined> => {
     const auth0 = await getAuth0Client();
     const session = await auth0.getSession();
     if (session == null) {
@@ -24,7 +23,7 @@ export async function getCurrentSession(): Promise<Auth0SessionData | undefined>
         },
         accessToken: session.tokenSet.accessToken
     };
-}
+});
 
 export async function getCurrentSessionOrThrow(): Promise<Auth0SessionData> {
     const session = await getCurrentSession();

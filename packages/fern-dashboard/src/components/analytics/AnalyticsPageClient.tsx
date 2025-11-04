@@ -173,7 +173,7 @@ export function AnalyticsPageClient({
         <div className={ANALYTICS_PAGE_STYLES}>
             <AnalyticsPageHeader analyticsBillingEnabled={analyticsBillingEnabled} />
             {isLoading ? (
-                <div className={cn(BORDER_STYLES, "border-gray-0 w-full max-w-[1200px] border")}>
+                <div className={cn(BORDER_STYLES, "border-border w-full max-w-[1200px] border")}>
                     <div className="mb-6 flex w-full items-center justify-between">
                         <Skeleton className="h-7 w-32" />
                         <Skeleton className="h-9 w-32" />

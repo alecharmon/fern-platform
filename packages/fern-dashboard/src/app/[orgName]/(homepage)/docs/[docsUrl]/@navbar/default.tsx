@@ -2,7 +2,6 @@ import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { AskAiEnabledServerSide } from "@/components/ask-ai/AskAiEnabledServerSide";
 import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
 import { DocsSiteNavBarWithOverflow, type NavItem } from "@/components/docs-page/DocsSiteNavBarWithOverflow";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
@@ -45,14 +44,9 @@ export default async function DocsSiteNavbar({
     return (
         <>
             <div className="hidden md:flex">
-                <DocsSiteNavBarItem title="Overview" href="" />
-                <DocsSiteNavBarItem title="Web Analytics" href="web-analytics" />
-                <DocsSiteNavBarItem title="Search" href="search" />
-                <AskAiEnabledServerSide docsUrl={docsUrl}>
-                    <DocsSiteNavBarItem title="Ask Fern" href="ask-fern" />
-                </AskAiEnabledServerSide>
-                <DocsSiteNavBarItem title="Feedback" href="feedback" />
-                {isEmployee && <DocsSiteNavBarItem title="Settings" href="settings" />}
+                {navItems.map((item) => (
+                    <DocsSiteNavBarItem key={item.title} title={item.title} href={item.href} />
+                ))}
             </div>
             <DocsSiteNavBarWithOverflow items={navItems} />
         </>
