@@ -5,7 +5,7 @@ import { useNavigation } from "@fern-docs/components/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { MoreVertical, Pencil } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { RenameSectionDialog } from "./RenameSectionDialog";
 
 export interface SidebarSectionWithMenuProps {
@@ -18,6 +18,21 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
     const [showRenameDialog, setShowRenameDialog] = useState(false);
     const [_showDeleteDialog, _setShowDeleteDialog] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [buttonTop, setButtonTop] = useState<number | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
+
+    useLayoutEffect(() => {
+        if (containerRef.current) {
+            const expandIndicator = containerRef.current.querySelector(".expand-indicator");
+            if (expandIndicator) {
+                const containerRect = containerRef.current.getBoundingClientRect();
+                const indicatorRect = expandIndicator.getBoundingClientRect();
+                const relativeTop = indicatorRect.top - containerRect.top + indicatorRect.height / 2;
+                setButtonTop(relativeTop);
+            }
+        }
+    }, [node.title, isHovered]);
 
     const handleRenameConfirm = (newTitle: string) => {
         try {
@@ -32,12 +47,18 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
 
     return (
         <>
-            <div className="group sidebar-section-with-menu relative">
+            <div
+                ref={containerRef}
+                className="group sidebar-section-with-menu relative"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
                 {trigger}
                 <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenu.Trigger asChild>
                         <button
-                            className="absolute right-[5px] top-[5px] cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover:opacity-100 data-[state=open]:opacity-100"
+                            className="absolute right-[5px] -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover:opacity-100 data-[state=open]:opacity-100"
+                            style={{ top: buttonTop != null ? `${buttonTop}px` : "50%" }}
                             title="Section options"
                             aria-label="Section options"
                         >

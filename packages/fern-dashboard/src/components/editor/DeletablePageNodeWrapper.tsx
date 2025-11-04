@@ -1,6 +1,7 @@
 "use client";
 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { getChildren } from "@fern-api/fdr-sdk/navigation";
 import { Button } from "@fern-docs/components/FernButtonV2";
 import { constructEditorSlug, ROOT_SLUG_ALIAS, useNavigation } from "@fern-docs/components/navigation";
 import * as Popover from "@radix-ui/react-popover";
@@ -46,6 +47,13 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
     if (isMarkedForDeletion || isMarkedForDeletionInDocsYml) {
         return null;
     }
+
+    // Check if this page has children - if so, it should not be deletable
+    const hasChildren = getChildren(node).length > 0;
+
+    const isLandingPage = node.type === "landingPage";
+
+    const isSectionOverview = FernNavigation.isSectionOverview(node);
 
     const handlePageClick = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
@@ -162,7 +170,7 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
     return (
         <div className="group/deletable relative" onClick={isClientPage ? handlePageClick : undefined}>
             {component}
-            {renderDeleteConfirmation()}
+            {!hasChildren && !isLandingPage && !isSectionOverview && renderDeleteConfirmation()}
         </div>
     );
 }
