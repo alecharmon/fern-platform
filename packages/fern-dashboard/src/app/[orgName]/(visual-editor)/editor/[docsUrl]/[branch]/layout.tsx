@@ -2,7 +2,7 @@ import "server-only";
 
 import { ThemeProvider } from "next-themes";
 import type React from "react";
-
+import { Suspense } from "react";
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";
 import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";

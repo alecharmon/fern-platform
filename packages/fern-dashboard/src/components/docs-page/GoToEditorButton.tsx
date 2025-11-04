@@ -9,8 +9,8 @@ import { useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import preloadEditorData from "@/app/services/docs-loader/preloadEditorData";
 import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
-
 import { Button } from "../ui/button";
 
 export function GoToEditorButton({
@@ -47,14 +47,10 @@ export function GoToEditorButton({
 
         // Preload editor data to warm the cache before navigation
         // Fire and forget - don't block navigation on this
-        void fetch("/api/preload-editor-data", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                docsUrl: encodeURIComponent(docsUrl)
-            })
+        void preloadEditorData({
+            docsUrl: encodeURIComponent(docsUrl) as EncodedDocsUrl,
+            host: window.location.host,
+            branch: newBranchName
         }).catch((error) => {
             // Log error but don't block navigation
             console.error("Failed to preload editor data:", error);
@@ -73,7 +69,12 @@ export function GoToEditorButton({
                 >
                     <span className="pointer-events-auto">
                         <Button disabled={isLoading || disabled || isValidatingSource} asChild={!disabled}>
-                            <Link className="flex flex-row items-center gap-1" href={editorSlug} onClick={handleClick}>
+                            <Link
+                                className="flex flex-row items-center gap-1"
+                                href={editorSlug}
+                                onClick={handleClick}
+                                prefetch
+                            >
                                 {isLoading ? (
                                     <Loader2 className="animate-spin" />
                                 ) : (

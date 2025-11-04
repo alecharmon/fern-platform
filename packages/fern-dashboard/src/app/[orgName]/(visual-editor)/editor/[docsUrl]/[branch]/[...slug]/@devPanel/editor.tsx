@@ -20,24 +20,25 @@ export default function MonacoEditor({
         }
     }, []);
 
-    // TODO: add a loading state
-    if (isLoading) {
-        return null;
-    }
-
     return (
-        <CodeEditor
-            height="100%"
-            language="markdown"
-            value={currentMarkdown}
-            onMount={handleEditorDidMount}
-            theme="app-theme"
-            options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                wordWrap: "on",
-                readOnly: isEditingDisabled
-            }}
-        />
+        <>
+            {isLoading ? (
+                <div />
+            ) : (
+                <CodeEditor
+                    height="100%"
+                    language="markdown"
+                    value={currentMarkdown}
+                    onMount={handleEditorDidMount}
+                    theme="app-theme"
+                    options={{
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        wordWrap: "on",
+                        readOnly: isEditingDisabled
+                    }}
+                />
+            )}
+        </>
     );
 }

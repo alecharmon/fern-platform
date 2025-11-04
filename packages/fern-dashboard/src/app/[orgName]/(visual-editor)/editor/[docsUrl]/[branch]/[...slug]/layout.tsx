@@ -12,7 +12,8 @@ import { FernThemeProvider } from "@fern-docs/components/theme";
 import AbstractDefaultDocs from "@fern-docs/components/theming/AbstractDefaultDocs";
 import { GlobalStyles } from "@fern-docs/components/theming/global-styles";
 import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/desktop-search-button";
-import React from "react";
+import type React from "react";
+import { Suspense } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
@@ -59,13 +60,7 @@ export default async function VisualEditorPreviewLayout({
     const host = await getHostFromHeaders();
 
     // Use cached loader to prevent duplicate creation across parallel routes
-    const loader = await getCachedEditableDocsLoader({
-        host,
-        encodedDocsUrl: docsUrl,
-        fernToken: session.accessToken,
-        githubUrl,
-        branchName: branch
-    });
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch, githubUrl);
 
     const [colors, layout, fonts, config, root, unsafe_fullRoot, files, { basePath }] = await Promise.all([
         loader.getColors(),
@@ -165,34 +160,32 @@ export default async function VisualEditorPreviewLayout({
                                                     sidebar={
                                                         <SidebarContainer
                                                             key="sidebar-container"
-                                                            logo={
-                                                                <React.Suspense fallback={null}>{logo}</React.Suspense>
-                                                            }
+                                                            logo={<Suspense fallback={null}>{logo}</Suspense>}
                                                             showSearchBar={layout.searchbarPlacement === "SIDEBAR"}
                                                             showHeaderInSidebar={showHeaderInSidebar}
                                                             productSelect={
-                                                                <React.Suspense fallback={null} key="product-select-3">
+                                                                <Suspense fallback={null} key="product-select-3">
                                                                     {productSelect}
-                                                                </React.Suspense>
+                                                                </Suspense>
                                                             }
                                                             versionSelect={
-                                                                <React.Suspense fallback={null} key="version-select-3">
+                                                                <Suspense fallback={null} key="version-select-3">
                                                                     {versionSelect}
-                                                                </React.Suspense>
+                                                                </Suspense>
                                                             }
                                                             navbarLinks={
-                                                                <React.Suspense fallback={null}>
+                                                                <Suspense fallback={null}>
                                                                     <NavbarLinks loader={loader} />
-                                                                </React.Suspense>
+                                                                </Suspense>
                                                             }
                                                             loginButton={
-                                                                <React.Suspense fallback={null}>
+                                                                <Suspense fallback={null}>
                                                                     {/* <LoginButton
                                                                         loader={loader}
                                                                         className="my-6 flex w-full justify-between lg:hidden"
                                                                         showIcon
                                                                         /> */}
-                                                                </React.Suspense>
+                                                                </Suspense>
                                                             }
                                                             searchBar={<DesktopSearchButton />}
                                                         >

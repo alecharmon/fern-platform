@@ -16,23 +16,16 @@ export default async function ProductSelectPage({
     params: Promise<{ docsUrl: EncodedDocsUrl; slug: string; branch: string }>;
 }) {
     const session = await getCurrentSession();
+    if (session == null) {
+        return null;
+    }
     const { docsUrl, slug, branch } = await params;
     const host = await getHostFromHeaders();
     // Use cached loader - this will reuse the loader created in layout.tsx
-    const loader = await getCachedEditableDocsLoader({
-        host,
-        encodedDocsUrl: docsUrl,
-        fernToken: session?.accessToken,
-        branchName: branch
-    });
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session?.accessToken, branch);
 
     // preload:
-    const [layout, _auth, _flags, root] = await Promise.all([
-        loader.getLayout(),
-        loader.getAuthState(),
-        loader.getEdgeFlags(),
-        loader.getRoot()
-    ]);
+    const [layout, _auth, root] = await Promise.all([loader.getLayout(), loader.getAuthState(), loader.getRoot()]);
     const useDenseLayout = layout.isHeaderDisabled;
 
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);

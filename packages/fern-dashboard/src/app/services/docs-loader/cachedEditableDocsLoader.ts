@@ -1,8 +1,7 @@
 import { createEditableDocsLoader } from "@fern-api/docs-loader";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { cache } from "react";
-
-import type { GitHubUrl } from "@/app/services/github/types";
-
+import type { EncodedDocsUrl } from "@/utils/types";
 import { GitHubLoader } from "../github/github-loader";
 
 /**
@@ -10,21 +9,14 @@ import { GitHubLoader } from "../github/github-loader";
  * within the same request. Uses React's cache() to deduplicate based on parameters.
  */
 export const getCachedEditableDocsLoader = cache(
-    async ({
-        host,
-        encodedDocsUrl,
-        fernToken,
-        githubUrl,
-        branchName,
-        forceRevalidate
-    }: {
-        host: string;
-        encodedDocsUrl: string;
-        fernToken?: string;
-        githubUrl?: GitHubUrl;
-        branchName?: string;
-        forceRevalidate?: boolean;
-    }) => {
+    async (
+        host: string,
+        encodedDocsUrl: EncodedDocsUrl,
+        fernToken: string,
+        branchName?: string,
+        githubUrl?: string,
+        forceRevalidate?: boolean
+    ) => {
         return createEditableDocsLoader({
             host,
             encodedDocsUrl,

@@ -22,8 +22,7 @@ import { EditorRedirect } from "./EditorRedirect";
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
 
 export default async function Page({
-    params,
-    searchParams
+    params
 }: {
     params: Promise<{
         orgName: Auth0OrgName;
@@ -31,10 +30,9 @@ export default async function Page({
         branch: string;
         slug: string[];
     }>;
-    searchParams: Promise<Record<string, string>>;
 }) {
     const { orgName, docsUrl, branch, slug } = await params;
-    const [resolvedSearchParams, host] = await Promise.all([searchParams, getHostFromHeaders()]);
+    const host = await getHostFromHeaders();
 
     const { githubUrl, session } = await assertAuthAndFetchGithubUrl({
         orgName,
@@ -42,13 +40,7 @@ export default async function Page({
     });
 
     // Use cached loader - this will reuse the loader created in layout.tsx
-    const loader = await getCachedEditableDocsLoader({
-        host,
-        encodedDocsUrl: docsUrl,
-        fernToken: session.accessToken,
-        githubUrl,
-        branchName: branch
-    });
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch, githubUrl);
 
     const root = await loader.getRoot();
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);

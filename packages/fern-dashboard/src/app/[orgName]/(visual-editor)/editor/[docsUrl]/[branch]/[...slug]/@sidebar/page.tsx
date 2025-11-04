@@ -19,8 +19,7 @@ import type { PageNode as PageNodeNamespace } from "../PageNode";
 import PageSidebar from "./PageSidebar";
 
 export default async function SidebarPage({
-    params,
-    searchParams
+    params
 }: {
     params: Promise<{
         orgName: Auth0OrgName;
@@ -28,19 +27,15 @@ export default async function SidebarPage({
         slug: string[];
         branch: string;
     }>;
-    searchParams: Promise<Record<string, string>>;
 }) {
     const { orgName, docsUrl, branch, slug } = await params;
-    const resolvedSearchParams = await searchParams;
     const session = await getCurrentSession();
+    if (session == null) {
+        return null;
+    }
     const host = await getHostFromHeaders();
     // Use cached loader - this will reuse the loader created in layout.tsx
-    const loader = await getCachedEditableDocsLoader({
-        host,
-        encodedDocsUrl: docsUrl,
-        fernToken: session?.accessToken,
-        branchName: branch
-    });
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session?.accessToken, branch);
     const [config, authState, edgeFlags, layout, files] = await Promise.all([
         loader.getConfig(),
         loader.getAuthState(),

@@ -92,7 +92,15 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
     }
     if (branchName) {
         const response = await uncachedLoadWithUrl(domain);
-        await visualEditorStorage.storeFdrSnapshot(domain, branchName, response);
+        // Do not await this, we want to return the loadWithUrl response immediately
+        visualEditorStorage
+            .storeFdrSnapshot(domain, branchName, response)
+            .then(() => {
+                console.log(`[loadWithUrl] FDR snapshot stored for ${domain}:${branchName}`);
+            })
+            .catch((error) => {
+                console.error(`[loadWithUrl] Failed to store FDR snapshot for ${domain}:${branchName}`, error);
+            });
         return response;
     } else {
         const response = await cachedLoadWithUrl(domain);

@@ -3,7 +3,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import { DashboardApiClient } from "@/app/services/dashboard-api/client";
+import { getPrForBranch } from "@/app/services/dal/github/getPrForBranch";
 import type { GithubPrStatus } from "@/app/services/github/types";
 
 export const GitPRContext = createContext<{
@@ -74,14 +74,7 @@ export function GitPRProvider({
         setIsLoading(true);
 
         try {
-            const data = await DashboardApiClient.getPrForBranch({
-                orgName,
-                owner,
-                repo,
-                site,
-                branch,
-                baseBranch
-            });
+            const data = await getPrForBranch(orgName, owner, repo, branch, baseBranch);
 
             if (data.success) {
                 const { status, draft, merged, title, prUrl, prNumber: newPrNumber } = data;

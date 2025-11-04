@@ -16,15 +16,13 @@ export default async function LogoPage({
     params: Promise<{ docsUrl: EncodedDocsUrl; slug: string; branch: string }>;
 }) {
     const session = await getCurrentSession();
+    if (session == null) {
+        return null;
+    }
     const { docsUrl, slug, branch } = await params;
     const host = await getHostFromHeaders();
     // Use cached loader - this will reuse the loader created in layout.tsx
-    const loader = await getCachedEditableDocsLoader({
-        host,
-        encodedDocsUrl: docsUrl,
-        fernToken: session?.accessToken,
-        branchName: branch
-    });
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);
 
     const [{ basePath }, config, files, root] = await Promise.all([
         loader.getMetadata(),

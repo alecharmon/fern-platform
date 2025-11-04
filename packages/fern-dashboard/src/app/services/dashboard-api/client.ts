@@ -3,12 +3,10 @@ import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
-import type { getPrForBranch } from "@/app/api/get-pr-for-branch/route";
 import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
 import type { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
 import type { postDocsGithubSource } from "@/app/api/post-docs-github-source/route";
 import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
-import type { preloadEditorData } from "@/app/api/preload-editor-data/route";
 import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
 import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
 import type { updatePrTitle } from "@/app/api/update-pr-title/route";
@@ -34,10 +32,6 @@ export const DashboardApiClient = {
         typedFetch<validateGithubBranch.Response>("/api/get-validate-github-branch", request),
     validateGithubRepoAccess: (request: ValidateGithubRepoAccess.Request) =>
         typedFetch<ValidateGithubRepoAccess.Response>("/api/validate-github-repo-access", request),
-    preloadEditorData: (request: preloadEditorData.Request) =>
-        typedFetch<preloadEditorData.Response>("/api/preload-editor-data", request),
-    getPrForBranch: (request: getPrForBranch.Request) =>
-        typedFetch<getPrForBranch.Response>("/api/get-pr-for-branch", request),
     updatePrTitle: (request: updatePrTitle.Request) =>
         typedFetch<updatePrTitle.Response>("/api/update-pr-title", request),
     generateSignedUploadUrl: (request: generateSignedUploadUrl.Request) =>

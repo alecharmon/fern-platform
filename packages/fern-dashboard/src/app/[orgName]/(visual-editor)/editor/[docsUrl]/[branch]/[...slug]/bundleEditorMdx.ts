@@ -1,9 +1,9 @@
 "use server";
 
-import { createEditableDocsLoader } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { bundleMDX as internalBundleMDX } from "@/editor/mdx/bundle";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import type { EncodedDocsUrl } from "@/utils/types";
@@ -26,12 +26,12 @@ export async function bundleEditorMDX(
             const host = await getHostFromHeaders();
 
             if (session && host) {
-                const editableLoader = await createEditableDocsLoader({
+                const editableLoader = await getCachedEditableDocsLoader(
                     host,
-                    encodedDocsUrl: options.docsUrl,
-                    fernToken: session.accessToken,
-                    branchName: options.branch
-                });
+                    options.docsUrl,
+                    session.accessToken,
+                    options.branch
+                );
 
                 loader = editableLoader;
             }

@@ -271,6 +271,7 @@ export default function TiptapEditor({
             editorContainerProps={{
                 className: cn(className, "relative")
             }}
+            immediatelyRender={false}
             onCreate={onCreate}
             onUpdate={handleUpdate}
             onFocus={({ editor }) => {
