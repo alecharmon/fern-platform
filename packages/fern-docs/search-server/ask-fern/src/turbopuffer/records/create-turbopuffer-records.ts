@@ -1,15 +1,6 @@
 import { slugToHref } from "@fern-api/docs-utils";
-import type { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
-import {
-    type ApiDefinitionId,
-    getPageId,
-    hasMarkdown,
-    isApiLeaf,
-    type NavigationNodePage,
-    NodeCollector,
-    type PageId,
-    type RootNode
-} from "@fern-api/fdr-sdk/navigation";
+import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
+import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { flatten } from "es-toolkit/array";
 
 import type { TurbopufferRecordWithoutVector } from "../types";
@@ -19,12 +10,24 @@ import { createEndpointBaseRecordWebhook } from "./create-endpoint-record-webhoo
 import { createMarkdownRecords } from "./create-markdown-records";
 
 interface CreateTurbopufferRecordsOptions {
-    root: RootNode;
+    root: FernNavigation.RootNode;
     domain: string;
-    pages: Record<PageId, string>;
-    apis: Record<ApiDefinitionId, ApiDefinition>;
+    pages: Record<FernNavigation.PageId, string>;
+    apis: Record<ApiDefinition.ApiDefinitionId, ApiDefinition.ApiDefinition>;
     authed?: (node: NavigationNodePage) => boolean;
     splitText: (text: string) => Promise<string[]>;
+}
+
+function isEffectivelyHidden(
+    node: FernNavigation.NavigationNodeWithMetadata,
+    collector: ReturnType<typeof FernNavigation.NodeCollector.collect>
+): boolean {
+    if (node.hidden === true) {
+        return true;
+    }
+
+    const parents = collector.getParents(node.id) ?? [];
+    return parents.some((parent) => FernNavigation.hasMetadata(parent) && parent.hidden === true);
 }
 
 export async function createTurbopufferRecords({
@@ -34,17 +37,19 @@ export async function createTurbopufferRecords({
     domain,
     authed
 }: CreateTurbopufferRecordsOptions): Promise<TurbopufferRecordWithoutVector[]> {
-    const collector = NodeCollector.collect(root);
+    const collector = FernNavigation.NodeCollector.collect(root);
 
-    const pageNodes = collector.indexablePageNodesWithAuth;
+    const pageNodes = collector.indexablePageNodesWithAuth.filter((node) => !isEffectivelyHidden(node, collector));
 
-    const markdownNodes = pageNodes.filter((node) => !isApiLeaf(node)).filter(hasMarkdown);
-    const apiLeafNodes = pageNodes.filter(isApiLeaf);
+    const markdownNodes = pageNodes
+        .filter((node) => !FernNavigation.isApiLeaf(node))
+        .filter(FernNavigation.hasMarkdown);
+    const apiLeafNodes = pageNodes.filter(FernNavigation.isApiLeaf);
 
     const markdownRecords = flatten(
         await Promise.all(
             markdownNodes.map(async (node): Promise<TurbopufferRecordWithoutVector[]> => {
-                const pageId = getPageId(node);
+                const pageId = FernNavigation.getPageId(node);
                 if (!pageId) {
                     console.error(`Page node ${node.slug} has no page id`);
                     return [];

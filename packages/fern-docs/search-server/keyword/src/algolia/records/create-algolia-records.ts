@@ -25,6 +25,22 @@ interface CreateAlgoliaRecordsOptions {
     authed?: (node: NavigationNodePage) => boolean;
 }
 
+/**
+ * Checks if a node or any of its ancestors is hidden.
+ * This ensures that endpoints within hidden API packages are excluded from search indexes.
+ */
+function isEffectivelyHidden(
+    node: FernNavigation.NavigationNodeWithMetadata,
+    collector: ReturnType<typeof FernNavigation.NodeCollector.collect>
+): boolean {
+    if (node.hidden === true) {
+        return true;
+    }
+
+    const parents = collector.getParents(node.id) ?? [];
+    return parents.some((parent) => FernNavigation.hasMetadata(parent) && parent.hidden === true);
+}
+
 export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed }: CreateAlgoliaRecordsOptions): {
     records: AlgoliaRecord[];
     /**
@@ -39,8 +55,8 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
 
     const pageNodes = Array.from(collector.slugMap.values())
         .filter(FernNavigation.isPage)
-        // exclude hidden pages
-        .filter((node) => node.hidden !== true)
+        // exclude hidden pages and pages within hidden packages
+        .filter((node) => !isEffectivelyHidden(node, collector))
         // exclude pages that are noindexed
         .filter((node) => (FernNavigation.hasMarkdown(node) ? node.noindex !== true : true));
 
