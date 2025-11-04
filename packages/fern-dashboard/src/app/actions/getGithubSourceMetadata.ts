@@ -1,3 +1,5 @@
+"use server";
+
 import { unstable_cache } from "next/cache";
 
 import { getFernBotInstallationId, getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
@@ -13,7 +15,7 @@ const EMPTY_RESPONSE: GithubSourceRepo = {
     fernBotHasInstallationId: undefined
 };
 
-export default async function getGithubSourceMetadataHandler({
+export async function getGithubSourceMetadata({
     githubUrl,
     userId,
     skipCache = false
@@ -22,7 +24,7 @@ export default async function getGithubSourceMetadataHandler({
     userId: string;
     skipCache?: boolean;
 }): Promise<GithubSourceRepo> {
-    async function getGithubSourceMetadata() {
+    async function fetchGithubSourceMetadata() {
         if (githubUrl == null) {
             throw new Error("NoGithubUrl");
         }
@@ -67,14 +69,14 @@ export default async function getGithubSourceMetadataHandler({
     try {
         // Only cache successful responses; do not cache failures
         const result = skipCache
-            ? getGithubSourceMetadata()
-            : unstable_cache(getGithubSourceMetadata, [`github-source-${githubUrl}-${userId}`], {
+            ? fetchGithubSourceMetadata()
+            : unstable_cache(fetchGithubSourceMetadata, [`github-source-${githubUrl}-${userId}`], {
                   revalidate: 300, // 5 minutes
                   tags: [`github-source-${githubUrl}`]
               })();
         return await result;
     } catch (error) {
-        console.error("[getDocsGithubSourceHandler]", error);
+        console.error("[getGithubSourceMetadata]", error);
         // On any error, return EMPTY_RESPONSE (but don't cache the error)
         return EMPTY_RESPONSE;
     }

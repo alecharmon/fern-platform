@@ -183,22 +183,16 @@ export class NavigationStorage {
         legacyStorage.clear();
     }
 
-    getAllStoredBranches(): string[] {
+    getAllStoredBranches(): NavigationSnapshot[] {
         this.checkBufferedStorageInitialized();
-        const currentBranches = this._storage
+        const currentBranchNames = this._storage
             .getAllKeys()
             .map((key) => getBranchNameFromStorageKey(key))
             .filter((key) => key !== undefined);
 
-        // Also check legacy LocalStorage for branches not in current storage
-        const legacyStorage = new LocalStorage(NAVIGATION_STORAGE_KEY);
-        const legacyBranches = legacyStorage
-            .getAllKeys()
-            .map((key) => getBranchNameFromStorageKey(key))
-            .filter((key) => key !== undefined);
+        const currentBranches = currentBranchNames.map((key) => this.getStore(key));
 
-        // Combine and deduplicate
-        return Array.from(new Set([...currentBranches, ...legacyBranches]));
+        return currentBranches.filter((snapshot) => snapshot !== null) as NavigationSnapshot[];
     }
 }
 

@@ -1,33 +1,24 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-
-import getGithubSourceMetadataHandler from "@/app/api/get-github-source-metadata/handler";
+import { Suspense } from "react";
+import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
-import getDocsGithubUrl from "@/app/services/dal/github/getDocsGithubUrl";
-import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
-import { FernCliVersionDisplay } from "@/components/docs-page/FernCliVersionDisplay";
-import { type GithubAuthState, GithubSource } from "@/components/docs-page/GithubSource";
+import { VisualEditorLoadingCard } from "@/components/docs-page/visual-editor-section/VisualEditorLoadingCard";
 import { VisualEditorSection } from "@/components/docs-page/visual-editor-section/VisualEditorSection";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 
-export default async function Page(props: {
-    params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
+export default async function Page(props: { params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }> }) {
     const { orgName, docsUrl: encodedDocsUrl } = await props.params;
-    const searchParams = await props.searchParams;
 
     const session = await getAuthenticatedSessionOrRedirect(orgName);
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
-
-    // Only skip cache if explicitly requested via query param (e.g., ?refresh=true)
-    const skipCache = searchParams.refresh === "true";
 
     // Validate that the docsUrl belongs to this organization so that we avoid errors in the page
     const response = await getDocsSitesForOrg({
@@ -43,106 +34,18 @@ export default async function Page(props: {
         notFound();
     }
 
-    let githubUrl = undefined;
-    let githubAuthState: GithubAuthState = {
-        validationResult: {
-            ok: false,
-            error: {
-                type: "UNEXPECTED_ERROR",
-                message: ""
-            }
-        },
-        sourceRepo: undefined,
-        isLoading: false
-    };
-
-    try {
-        const urlResult = await getDocsGithubUrl({
-            url: encodedDocsUrl,
-            token: session.accessToken
-        });
-
-        if (!urlResult.success) {
-            if (urlResult.error.type === "DOMAIN_NOT_REGISTERED") {
-                githubAuthState.validationResult = {
-                    ok: false,
-                    error: {
-                        type: "UNEXPECTED_ERROR",
-                        message: "Domain not registered."
-                    }
-                };
-            } else {
-                githubAuthState.validationResult = {
-                    ok: false,
-                    error: urlResult.error
-                };
-            }
-        } else {
-            githubUrl = urlResult.githubUrl;
-
-            try {
-                // Parallelize validation and metadata fetching for better performance
-                const [validation, sourceRepo] = await Promise.all([
-                    validateGithubRepoAccess(
-                        orgName,
-                        docsUrl,
-                        {
-                            type: "url",
-                            githubUrl
-                        },
-                        true // Skip cache for now, since this cache was causing issues with validating repos
-                    ),
-                    // Optimistically fetch metadata in parallel (will be used if validation succeeds)
-                    getGithubSourceMetadataHandler({
-                        githubUrl,
-                        userId: session.user.sub
-                    }).catch((error) => {
-                        console.error("Failed to fetch source repo metadata:", error);
-                        return undefined;
-                    })
-                ]);
-
-                githubAuthState = {
-                    validationResult: validation,
-                    // Only include sourceRepo if validation succeeded
-                    sourceRepo: validation.ok ? sourceRepo : undefined,
-                    isLoading: false
-                };
-            } catch (error) {
-                console.error("Failed to validate GitHub access:", error);
-                // Keep default false state
-            }
-        }
-    } catch (error) {
-        console.error(error);
-    }
+    // Start expensive operations in parallel without awaiting
+    Promise.all([
+        getDocsGithubUrl(docsUrl, session.accessToken),
+        getGitHubAuthState(docsUrl, session.accessToken, orgName, session)
+    ]);
 
     return (
         <div className="flex w-full flex-col gap-4">
-            <DocsSiteOverviewCard
-                docsSite={currentDocsSite}
-                githubProtectedArea={
-                    <div className="flex flex-wrap gap-x-10 gap-y-4">
-                        <div className="flex w-fit flex-col gap-2">
-                            <p>Source</p>
-                            <GithubSource docsUrl={docsUrl} githubUrl={githubUrl} />
-                        </div>
-                        <FernCliVersionDisplay
-                            orgName={orgName}
-                            docsUrl={docsUrl}
-                            githubUrl={githubUrl}
-                            baseBranch={githubAuthState.sourceRepo?.baseBranch}
-                        />
-                    </div>
-                }
-            />
-            <VisualEditorSection
-                docsUrl={docsUrl}
-                session={session}
-                orgName={orgName}
-                githubAuthState={githubAuthState}
-                githubUrl={githubUrl}
-            />
+            <DocsSiteOverviewCard docsUrl={docsUrl} docsSite={currentDocsSite} orgName={orgName} />
+            <Suspense fallback={<VisualEditorLoadingCard />}>
+                <VisualEditorSection docsUrl={docsUrl} session={session} orgName={orgName} />
+            </Suspense>
         </div>
     );
 }

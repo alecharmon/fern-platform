@@ -1,41 +1,27 @@
 "use client";
 
 import { useRouter } from "@bprogress/next/app";
-import {
-    constructEditorSlug,
-    createNavigationBufferedIndexedDBStorage,
-    ROOT_SLUG_ALIAS
-} from "@fern-docs/components/navigation";
+import { constructEditorSlug, ROOT_SLUG_ALIAS } from "@fern-docs/components/navigation";
 import { useState } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import { Button } from "@/components/ui/button";
-import Card from "@/components/ui/card";
+import { useLocalBranches } from "@/hooks/useLocalBranches";
+import { useLocalBranchesForSite } from "@/hooks/useLocalBranchesForSite";
 import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 import { BranchListItem } from "./BranchListItem";
-import { GoToEditorButton } from "./GoToEditorButton";
-import { VisualEditorHeader } from "./visual-editor-section/VisualEditorHeader";
 
-export function BranchList({
-    docsUrl,
-    session,
-    sourceRepo,
-    branches,
-    maybeCriticalUpdateWarning
-}: {
-    maybeCriticalUpdateWarning: React.ReactNode;
-    docsUrl: DocsUrl;
-    session: Auth0SessionData;
-    sourceRepo?: GithubSourceRepo;
-    branches: string[];
-}) {
+export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRepo?: GithubSourceRepo }) {
     const orgName = useOrgName();
     const router = useRouter();
 
+    const [deletedBranches, setDeletedBranches] = useState<Set<string>>(new Set());
+
+    const { deleteBranch, loading } = useLocalBranches();
+    const { filteredBranches } = useLocalBranchesForSite(docsUrl);
+
     // Pagination state
     const [visibleCount, setVisibleCount] = useState(3);
-    const [deletedBranches, setDeletedBranches] = useState<Set<string>>(new Set());
     const BRANCHES_PER_PAGE = 3;
 
     const handleBranchClick = (branchName: string) => {
@@ -49,66 +35,50 @@ export function BranchList({
     };
 
     const handleBranchDelete = (branchName: string) => {
-        const deleteBranch = async () => {
-            const storage = createNavigationBufferedIndexedDBStorage();
-            await storage.init();
-            storage.removeStore(branchName);
-            setDeletedBranches((prev) => new Set(prev).add(branchName));
-            const remainingBranches = branches.filter((branch) => !deletedBranches.has(branch));
-            if (visibleCount > remainingBranches.length) {
-                setVisibleCount(remainingBranches.length);
-            }
-        };
-        void deleteBranch();
+        deleteBranch(branchName);
+        setDeletedBranches((prev) => new Set(prev).add(branchName));
+        if (visibleCount > filteredBranches.length) {
+            setVisibleCount(filteredBranches.length);
+        }
     };
 
     const handleLoadMore = () => {
-        setVisibleCount((prev) => Math.min(prev + BRANCHES_PER_PAGE, availableBranches.length));
+        setVisibleCount((prev) => Math.min(prev + BRANCHES_PER_PAGE, filteredBranches.length));
     };
 
     // Filter out deleted branches and get the branches to display (first N branches)
-    const availableBranches = branches.filter((branch) => !deletedBranches.has(branch));
+    const availableBranches = filteredBranches.filter((branch) => !deletedBranches.has(branch.branchName));
     const visibleBranches = availableBranches.slice(0, visibleCount);
     const hasMoreBranches = visibleCount < availableBranches.length;
 
     return (
-        <Card>
-            <div className="flex w-full flex-col gap-4">
-                {maybeCriticalUpdateWarning}
-                <div className="flex items-center justify-between">
-                    <VisualEditorHeader />
-                    <GoToEditorButton docsUrl={docsUrl} session={session} />
+        <>
+            {filteredBranches.length > 0 ? (
+                <div className="flex flex-col gap-y-3">
+                    {visibleBranches.map((branch, index) => (
+                        <BranchListItem
+                            key={branch.branchName}
+                            branch={branch.branchName}
+                            sourceRepo={sourceRepo}
+                            docsUrl={docsUrl}
+                            handleBranchDelete={handleBranchDelete}
+                            handleBranchClick={handleBranchClick}
+                            showDivider={index < visibleBranches.length - 1}
+                        />
+                    ))}
+                    {hasMoreBranches && (
+                        <div className="-mb-2 -ml-1">
+                            <Button variant="outline" size="xs" onClick={handleLoadMore}>
+                                Show more
+                            </Button>
+                        </div>
+                    )}
                 </div>
-
-                {availableBranches.length > 0 && (
-                    <div className="flex flex-col gap-y-3">
-                        {visibleBranches.map((branch, index) => (
-                            <BranchListItem
-                                key={branch}
-                                branch={branch}
-                                sourceRepo={sourceRepo}
-                                docsUrl={docsUrl}
-                                handleBranchDelete={handleBranchDelete}
-                                handleBranchClick={handleBranchClick}
-                                showDivider={index < visibleBranches.length - 1}
-                            />
-                        ))}
-                        {hasMoreBranches && (
-                            <div className="-mb-2 -ml-1">
-                                <Button variant="outline" size="xs" onClick={handleLoadMore}>
-                                    Show more
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {availableBranches.length === 0 && (
-                    <div className="py-8 text-center">
-                        <p className="dark:text-gray-1200 text-gray-500">No open sessions found</p>
-                    </div>
-                )}
-            </div>
-        </Card>
+            ) : (
+                <div className="text-center">
+                    <p className="text-muted-foreground">{loading ? "Loading..." : "No open sessions found"}</p>
+                </div>
+            )}
+        </>
     );
 }

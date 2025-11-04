@@ -1114,9 +1114,6 @@ importers:
       '@fern-api/venus-api-sdk':
         specifier: 0.20.0
         version: 0.20.0
-      '@fern-api/visual-editor-server':
-        specifier: workspace:*
-        version: link:../commons/visual-editor-server
       '@fern-docs/components':
         specifier: workspace:*
         version: link:../fern-docs/components

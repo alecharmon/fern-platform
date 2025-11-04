@@ -6,7 +6,7 @@ import type { DocsUrl } from "@/utils/types";
 import { getCurrentSession } from "../../auth0/getCurrentSession";
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
-import getDocsGithubUrl from "./getDocsGithubUrl";
+import { getDocsGithubUrl } from "./getDocsGithubUrl";
 import { assertGithubAccessByUrl } from "./validators";
 
 export const assertAuthAndFetchGithubUrl = cache(
@@ -21,10 +21,7 @@ export const assertAuthAndFetchGithubUrl = cache(
         await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
         // Validate GitHub access
-        const urlResult = await getDocsGithubUrl({
-            url: docsUrl,
-            token: session.accessToken
-        });
+        const urlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
         if (!urlResult.success) {
             redirect(`/${orgName}/docs`);
         }

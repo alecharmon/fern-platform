@@ -195,8 +195,6 @@ export const createEditableDocsLoader = async ({
     const docsLoader = await createCachedDocsLoader(host, encodeDocsLoaderDomain(domain, branchName), fernToken, {
         returnRawMarkdown: true,
         cacheConfig: {
-            // For editable docs, we want shorter TTL so that cache stays fresh
-            kvTtl: 5 * 60, // 5 minutes
             cacheKeySuffix: "editable",
             forceRevalidate
         },

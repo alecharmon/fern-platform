@@ -2,16 +2,16 @@
 
 import { fernToken_admin } from "@fern-api/docs-server";
 
-import type { GithubAuthState } from "@/components/docs-page/GithubSource";
-
-import getGithubSourceMetadataHandler from "../api/get-github-source-metadata/handler";
+import type { GithubAuthState } from "@/components/docs-page/GithubSourceClient";
+import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { type Auth0SessionData, getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
-import getDocsGithubUrl from "../services/dal/github/getDocsGithubUrl";
+import { getDocsGithubUrl } from "../services/dal/github/getDocsGithubUrl";
 import { validateGithubRepoAccess } from "../services/dal/github/validators";
+import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 
-async function getMetadata(encodedDocsUrl: string, session: Auth0SessionData, orgName: Auth0OrgName, docsUrl: string) {
+async function getMetadata(encodedDocsUrl: DocsUrl, session: Auth0SessionData, orgName: Auth0OrgName, docsUrl: string) {
     let githubAuthState: GithubAuthState = {
         validationResult: {
             ok: false,
@@ -25,10 +25,7 @@ async function getMetadata(encodedDocsUrl: string, session: Auth0SessionData, or
     };
     let githubUrl: string | undefined;
     try {
-        const urlResult = await getDocsGithubUrl({
-            url: encodedDocsUrl,
-            token: session.accessToken
-        });
+        const urlResult = await getDocsGithubUrl(encodedDocsUrl, session.accessToken);
 
         if (!urlResult.success) {
             if (urlResult.error.type === "DOMAIN_NOT_REGISTERED") {
@@ -63,7 +60,7 @@ async function getMetadata(encodedDocsUrl: string, session: Auth0SessionData, or
                     true // Skip cache for now, since this cache was causing issues with validating repos
                 ),
                 // Optimistically fetch metadata in parallel (will be used if validation succeeds)
-                getGithubSourceMetadataHandler({
+                getGithubSourceMetadata({
                     githubUrl,
                     userId: session.user.sub
                 }).catch((error: unknown) => {
@@ -88,7 +85,7 @@ async function getMetadata(encodedDocsUrl: string, session: Auth0SessionData, or
     }
 }
 
-export async function getDocsGithubMetadata(docsUrl: string): Promise<{
+export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<{
     success: boolean;
     orgName?: Auth0OrgName;
     githubUrl?: string;
@@ -102,10 +99,7 @@ export async function getDocsGithubMetadata(docsUrl: string): Promise<{
             url: decodedUrl,
             token: fernToken_admin() ?? session.accessToken
         });
-        const githubMetadata = await getDocsGithubUrl({
-            url: decodedUrl,
-            token: fernToken_admin() ?? session.accessToken
-        });
+        const githubMetadata = await getDocsGithubUrl(docsUrl, fernToken_admin() ?? session.accessToken);
         if (!githubMetadata.success) {
             return { success: false, error: "Failed to fetch github metadata" };
         }
@@ -116,7 +110,7 @@ export async function getDocsGithubMetadata(docsUrl: string): Promise<{
 
         const orgName = docsMetadata.body.org as unknown as Auth0OrgName;
 
-        const metadata = await getMetadata(decodedUrl, session, orgName, decodedUrl);
+        const metadata = await getMetadata(docsUrl, session, orgName, decodedUrl);
         if (!metadata?.success) {
             return { success: false, error: "Failed to fetch metadata" };
         }

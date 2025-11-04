@@ -1,8 +1,9 @@
 import "server-only";
 
 import { fernToken_admin } from "@fern-api/docs-server";
-
+import { cache } from "react";
 import { getDocsUrlMetadata } from "@/app/api/utils/getDocsUrlMetadata";
+import type { DocsUrl } from "@/utils/types";
 
 interface GetDocsGithubUrlSuccess {
     success: true;
@@ -17,14 +18,9 @@ interface GetDocsGithubUrlError {
         | { type: "REPO_NOT_CONNECTED" };
 }
 
-type GetDocsGithubUrlResult = GetDocsGithubUrlSuccess | GetDocsGithubUrlError;
-export default async function getDocsGithubUrl({
-    url,
-    token
-}: {
-    url: string;
-    token: string;
-}): Promise<GetDocsGithubUrlResult> {
+export type GetDocsGithubUrlResult = GetDocsGithubUrlSuccess | GetDocsGithubUrlError;
+
+export const getDocsGithubUrl = cache(async (url: DocsUrl, token: string): Promise<GetDocsGithubUrlResult> => {
     const docsUrlMetadata = await getDocsUrlMetadata({
         url: decodeURIComponent(url),
         token: fernToken_admin() ?? token
@@ -59,4 +55,4 @@ export default async function getDocsGithubUrl({
     }
 
     return { success: true, githubUrl: docsUrlMetadata.body.gitUrl };
-}
+});

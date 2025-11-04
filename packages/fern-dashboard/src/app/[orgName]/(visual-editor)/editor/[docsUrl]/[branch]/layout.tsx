@@ -5,7 +5,7 @@ import type React from "react";
 
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";
 import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
-import getGithubSourceMetadata from "@/app/api/get-github-source-metadata/handler";
+import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";

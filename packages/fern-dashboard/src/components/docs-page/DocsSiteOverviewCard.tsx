@@ -1,17 +1,23 @@
-"use client";
-
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-
+import { Suspense } from "react";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import type { DocsUrl } from "@/utils/types";
 import Card from "../ui/card";
+import { Skeleton } from "../ui/skeleton";
+import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { DocsSiteLink } from "./DocsSiteLink";
 import { DocsSiteImage } from "./docs-site-image/DocsSiteImage";
+import { FernCliVersion } from "./FernCliVersion";
+import { GithubSource } from "./GithubSource";
 
-export function DocsSiteOverviewCard({
+export async function DocsSiteOverviewCard({
     docsSite,
-    githubProtectedArea
+    docsUrl,
+    orgName
 }: {
+    docsUrl: DocsUrl;
     docsSite: FdrAPI.dashboard.DocsSite;
-    githubProtectedArea: React.ReactNode;
+    orgName: Auth0OrgName;
 }) {
     return (
         <div className="flex w-full flex-col gap-4">
@@ -26,7 +32,18 @@ export function DocsSiteOverviewCard({
                             ))}
                         </div>
                     </div>
-                    {githubProtectedArea}
+                    <div className="flex flex-wrap gap-x-10 gap-y-4">
+                        <DocsSiteAttribute name="Source">
+                            <Suspense fallback={<Skeleton className="h-6 w-24" />}>
+                                <GithubSource docsUrl={docsUrl} />
+                            </Suspense>
+                        </DocsSiteAttribute>
+                        <DocsSiteAttribute name="Fern CLI Version">
+                            <Suspense fallback={<Skeleton className="h-6 w-24" />}>
+                                <FernCliVersion orgName={orgName} docsUrl={docsUrl} />
+                            </Suspense>
+                        </DocsSiteAttribute>
+                    </div>
                 </div>
             </Card>
         </div>

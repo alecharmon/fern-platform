@@ -1,6 +1,5 @@
 import type { generatePrDescription } from "@/app/api/generate-pr-description/route";
 import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
-import type { getGithubSourceMetadata } from "@/app/api/get-github-source-metadata/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
@@ -29,8 +28,6 @@ export const DashboardApiClient = {
         typedFetch<postCreatePr.Response>("/api/post-git-create-pr", request),
     generatePrDescription: (request: generatePrDescription.Request) =>
         typedFetch<generatePrDescription.Response>("/api/generate-pr-description", request),
-    getGithubSourceMetadata: (request: getGithubSourceMetadata.Request) =>
-        typedFetch<getGithubSourceMetadata.Response>("/api/get-github-source-metadata", request),
     postDocsGithubSource: (request: postDocsGithubSource.Request) =>
         typedFetch<postDocsGithubSource.Response>("/api/post-docs-github-source", request),
     validateGithubBranch: (request: validateGithubBranch.Request) =>

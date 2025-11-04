@@ -1,10 +1,10 @@
 import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
-import type { getGithubSourceMetadata } from "@/app/api/get-github-source-metadata/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
 import type { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
 import type { Theme } from "@/app/api/homepage-images/types";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import type { GithubSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";
 
 import type { OrgInvitation } from "./types";
@@ -19,7 +19,7 @@ export const ReactQueryKey = {
         queryKey<getHomepageImageUrl.Response>("homepage-image-url", orgName, ...docsUrls, theme),
     docsUrlOwner: (docsUrl: DocsUrl) => queryKey<getDocsUrlOwner.Response>("docs-url-owner", docsUrl),
     orgSvgLogo: (svgUrl: string) => queryKey<string>("org-svg", svgUrl),
-    githubSourceRepo: (githubUrl: string) => queryKey<getGithubSourceMetadata.Response>("github-source-repo", githubUrl)
+    githubSourceRepo: (githubUrl: string) => queryKey<GithubSourceRepo>("github-source-repo", githubUrl)
 } as const;
 
 function queryKey<T>(...key: string[]) {

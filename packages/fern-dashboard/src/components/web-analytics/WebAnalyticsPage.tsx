@@ -17,7 +17,7 @@ import SelectDate from "./SelectDate";
 import AnalyticsTables from "./Tables";
 
 interface WebAnalyticsPageProps {
-    docsUrl: string;
+    docsUrl: DocsUrl;
 }
 
 export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
