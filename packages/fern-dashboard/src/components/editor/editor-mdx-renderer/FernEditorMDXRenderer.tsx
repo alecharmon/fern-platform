@@ -20,7 +20,7 @@ import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { MDX_COMPONENTS } from "@/docs/mdx/components";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
-import { UnsupportedContent, UnsupportedContentDisplayOnly } from "../UnsupportedContent";
+import { UnsupportedContentDisplayOnly } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
 import { boundaryElements, parseMDX } from "./parse";
 import type { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
@@ -315,7 +315,7 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
                   ? mdx
                   : "Unsupported markdown";
 
-            return <UnsupportedContent>{displayMessage}</UnsupportedContent>;
+            return <UnsupportedContentDisplayOnly>{displayMessage}</UnsupportedContentDisplayOnly>;
         }
 
         return (
@@ -325,11 +325,10 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
         );
     }, [state, mdx, components, unsupportedComponent]);
 
-    // Only wrap with CustomElementHoverWrapper if it's a boundary element
     if (isBoundary) {
+        // Only wrap with CustomElementHoverWrapper if it's a boundary element
         return <CustomElementHoverWrapper>{content}</CustomElementHoverWrapper>;
     }
-
     return content;
 });
 
