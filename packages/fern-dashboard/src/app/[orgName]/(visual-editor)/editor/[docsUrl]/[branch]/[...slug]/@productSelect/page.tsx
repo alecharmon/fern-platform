@@ -25,7 +25,7 @@ export default async function ProductSelectPage({
     const loader = await getCachedEditableDocsLoader(host, docsUrl, session?.accessToken, branch);
 
     // preload:
-    const [layout, _auth, root] = await Promise.all([loader.getLayout(), loader.getAuthState(), loader.getRoot()]);
+    const [layout, root] = await Promise.all([loader.getLayout(), loader.getRoot()]);
     const useDenseLayout = layout.isHeaderDisabled;
 
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);

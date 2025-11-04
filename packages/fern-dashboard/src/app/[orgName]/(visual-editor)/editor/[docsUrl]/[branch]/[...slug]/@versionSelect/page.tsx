@@ -62,6 +62,7 @@ export default async function VersionSelectPage({
             parents={parents}
             fallbackVersion={version}
             useDenseLayout={useDenseLayout}
+            lang="en"
         />
     );
 }

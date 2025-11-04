@@ -61,7 +61,7 @@ export default async function Page({
         };
 
         return (
-            <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={{}}>
+            <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={{}} lang="en">
                 <div className="flex w-full flex-col gap-2 py-12">
                     <PageNode
                         pageDataDeps={pageDataDeps}
@@ -128,7 +128,7 @@ export default async function Page({
         // TODO: Currently, we are force-hiding the table of contents is within Fern Editor.
         // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
         // on the tiptap editor's content.
-        <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={frontmatter}>
+        <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={frontmatter} lang="en">
             <div className={cn("flex w-full flex-col gap-2 py-12", frontmatter?.layout === "custom" && "py-10")}>
                 <PageNode
                     pageDataDeps={pageDataDeps}
