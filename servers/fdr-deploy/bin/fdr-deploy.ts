@@ -50,7 +50,7 @@ async function main() {
                     environmentType,
                     environmentInfo,
                     {
-                        desiredTaskCount: 12,
+                        desiredTaskCount: 4,
                         maxTaskCount: 24,
                         redis: true,
                         memory: 8192,
