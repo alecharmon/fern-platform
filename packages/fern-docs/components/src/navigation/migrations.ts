@@ -54,7 +54,17 @@ function applyMigration(
 function migrateV1ToV2(oldData: PreviousNavigationSnapshots["V1"]): PreviousNavigationSnapshots["V2"] {
     // For V1 data, docsYmlBaseContent is always string | null (V2 also supports Map)
     // Note: "docs.yml" is the canonical key for the main file (not "fern/docs.yml"), per DocsYmlFilePath convention
-    const docsYmlBaseContent = oldData.docsYmlBaseContent ? new Map([["docs.yml", oldData.docsYmlBaseContent]]) : null;
+    // IMPORTANT: Add type guard to prevent re-migration of already-migrated data
+    // If docsYmlBaseContent is already a Map (or array from serialization), it's already been migrated
+    const baseContent = oldData.docsYmlBaseContent as string | null | Map<string, string> | [string, string][];
+    const docsYmlBaseContent =
+        baseContent instanceof Map
+            ? baseContent // Already migrated
+            : Array.isArray(baseContent)
+              ? new Map(baseContent as [string, string][]) // Deserialized V2 data
+              : baseContent && typeof baseContent === "string"
+                ? new Map([["docs.yml", baseContent]]) // V1 string data
+                : null; // null or undefined
 
     // Migrate docsYmlChanges (V1) to navigationChanges (V2)
     // V2 changes require:
@@ -66,6 +76,12 @@ function migrateV1ToV2(oldData: PreviousNavigationSnapshots["V1"]): PreviousNavi
     >();
 
     for (const [key, change] of oldData.docsYmlChanges.entries()) {
+        // IDEMPOTENCY CHECK: If change already has docsYmlFilePath, it's already V2 format
+        if ("docsYmlFilePath" in change) {
+            navigationChanges.set(key, change as any);
+            continue;
+        }
+
         if (change.type === "add_page") {
             // "add_page" in V2 requires insertionMode
             navigationChanges.set(key, {
@@ -73,7 +89,7 @@ function migrateV1ToV2(oldData: PreviousNavigationSnapshots["V1"]): PreviousNavi
                 sectionTitle: change.sectionTitle,
                 tabSlug: change.tabSlug,
                 pageEntry: change.pageEntry,
-                insertionMode: "append", // Default insertion mode for migrated data
+                insertionMode: "insertionMode" in change ? (change as any).insertionMode : "append",
                 createdAt: change.createdAt,
                 committed: change.committed,
                 docsYmlFilePath: "docs.yml"

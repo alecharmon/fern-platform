@@ -43,6 +43,10 @@ export class NavigationStorage {
     async init(): Promise<void> {
         if (this.isBufferedStorage(this._storage)) {
             await this._storage.init();
+
+            // Cleanup nested backups from the infinite nesting bug (one-time cleanup)
+            // This can be removed in a future version after users have had time to clean up
+            this.cleanupNestedBackups();
         }
     }
 
@@ -68,10 +72,29 @@ export class NavigationStorage {
         const parsed = JSON.parse(serialized);
         const currentSchemaVersion: number = parsed.schemaVersion ?? 0;
 
+        // DEBUG: Log schema version detection
+        console.debug(
+            "[NavigationStorage.getStore] Branch:",
+            branchName,
+            "Schema version:",
+            currentSchemaVersion,
+            "Target:",
+            NAVIGATION_SNAPSHOT_SCHEMA_VERSION
+        );
+
         // Run migrations if needed
         if (currentSchemaVersion < NAVIGATION_SNAPSHOT_SCHEMA_VERSION) {
-            // Create backup before migrating
-            this._storage.set(`backup:v${currentSchemaVersion}:${branchName}`, serialized);
+            console.debug(
+                "[NavigationStorage.getStore] Running migration from",
+                currentSchemaVersion,
+                "to",
+                NAVIGATION_SNAPSHOT_SCHEMA_VERSION
+            );
+            // Create backup before migrating (only if one doesn't exist for this version)
+            const backupKey = `backup:v${currentSchemaVersion}:${branchName}`;
+            if (!this._storage.get(backupKey)) {
+                this._storage.set(backupKey, serialized);
+            }
 
             // Deserialize schema-specific fields before migration
             const dataToMigrate: any = { ...parsed };
@@ -86,12 +109,35 @@ export class NavigationStorage {
                 dataToMigrate.docsYmlChanges = new Map(parsed.docsYmlChanges);
             }
 
+            // V1 → V2: docsYmlBaseContent might already be a serialized Map (array of tuples)
+            // Deserialize it before passing to migration to ensure idempotency
+            if (
+                currentSchemaVersion === 1 &&
+                Array.isArray(parsed.docsYmlBaseContent) &&
+                parsed.docsYmlBaseContent.length > 0 &&
+                Array.isArray(parsed.docsYmlBaseContent[0])
+            ) {
+                dataToMigrate.docsYmlBaseContent = new Map(parsed.docsYmlBaseContent as [string, string][]);
+            }
+
             const migrated = runMigrations(branchName, dataToMigrate, currentSchemaVersion);
+            console.debug(
+                "[NavigationStorage.getStore] Migration complete. New schema version:",
+                migrated.schemaVersion
+            );
+
             // Persist migrated data back to storage
             this.setStore(branchName, migrated.metadata.orgName, migrated.metadata.docsUrl, migrated);
+            console.debug("[NavigationStorage.getStore] Migrated data persisted to storage");
+
+            // Clean up old backups after successful migration to prevent storage bloat
+            // Keep only the most recent backup (the one we just created)
+            this.cleanupOldBackups(branchName, currentSchemaVersion);
+
             return migrated;
         }
 
+        console.debug("[NavigationStorage.getStore] No migration needed, deserializing current version data");
         // Current version - deserialize Maps and Sets
         return {
             ...(parsed as NavigationSnapshot),
@@ -132,7 +178,19 @@ export class NavigationStorage {
                     ? Array.from(data.slugToDocsYmlFilePath.entries())
                     : data.slugToDocsYmlFilePath
         };
-        this._storage.set(branchName, JSON.stringify(serializable));
+        const serialized = JSON.stringify(serializable);
+        console.debug(
+            "[NavigationStorage.setStore] Saving branch:",
+            branchName,
+            "Schema version:",
+            data.schemaVersion,
+            "Size:",
+            Math.round(serialized.length / 1024),
+            "KB",
+            "PageRegistry entries:",
+            Object.keys(data.pageRegistry).length
+        );
+        this._storage.set(branchName, serialized);
     }
 
     updateStore(branchName: string, orgName: string, docsUrl: string, update: Partial<NavigationSnapshot>): void {
@@ -169,9 +227,45 @@ export class NavigationStorage {
         this.checkBufferedStorageInitialized();
         this._storage.remove(branchName);
 
+        // Also remove backups for this branch
+        this.removeBackupsForBranch(branchName);
+
         // Also remove from legacy LocalStorage if it exists
         const legacyStorage = new LocalStorage(NAVIGATION_STORAGE_KEY);
         legacyStorage.remove(branchName);
+    }
+
+    /** Removes all backup entries for a given branch */
+    private removeBackupsForBranch(branchName: string): void {
+        const allKeys = this._storage.getAllKeys();
+        const backupKeys = allKeys.filter((key) => key.includes(`backup:`) && key.endsWith(`:${branchName}`));
+        backupKeys.forEach((key) => {
+            const cleanKey = getBranchNameFromStorageKey(key);
+            if (cleanKey) {
+                this._storage.remove(cleanKey);
+            }
+        });
+    }
+
+    /** Cleans up old backup entries, keeping only the most recent one */
+    private cleanupOldBackups(branchName: string, currentVersion: number): void {
+        const allKeys = this._storage.getAllKeys();
+        const backupKeys = allKeys.filter((key) => key.includes(`backup:`) && key.endsWith(`:${branchName}`));
+
+        // Remove backups for versions older than the current one
+        backupKeys.forEach((key) => {
+            // Extract version from key format: "backup:vN:branchName"
+            const versionMatch = key.match(/backup:v(\d+):/);
+            if (versionMatch?.[1]) {
+                const backupVersion = parseInt(versionMatch[1], 10);
+                if (backupVersion < currentVersion) {
+                    const cleanKey = getBranchNameFromStorageKey(key);
+                    if (cleanKey) {
+                        this._storage.remove(cleanKey);
+                    }
+                }
+            }
+        });
     }
 
     clear(): void {
@@ -183,16 +277,46 @@ export class NavigationStorage {
         legacyStorage.clear();
     }
 
+    /** Removes all nested backup keys (cleanup utility for the infinite nesting bug) */
+    cleanupNestedBackups(): number {
+        this.checkBufferedStorageInitialized();
+        const allKeys = this._storage.getAllKeys();
+
+        // Find keys with multiple "backup:" prefixes (nested backups)
+        const nestedBackupKeys = allKeys.filter((key) => {
+            const branchName = getBranchNameFromStorageKey(key);
+            if (!branchName) return false;
+
+            // Count occurrences of "backup:" - if more than 1, it's nested
+            const backupCount = (branchName.match(/backup:/g) || []).length;
+            return backupCount > 1;
+        });
+
+        // Remove all nested backups
+        nestedBackupKeys.forEach((key) => {
+            const branchName = getBranchNameFromStorageKey(key);
+            if (branchName) {
+                this._storage.remove(branchName);
+            }
+        });
+
+        console.debug(`[NavigationStorage] Cleaned up ${nestedBackupKeys.length} nested backup keys`);
+        return nestedBackupKeys.length;
+    }
+
     getAllStoredBranches(): NavigationSnapshot[] {
         this.checkBufferedStorageInitialized();
         const currentBranchNames = this._storage
             .getAllKeys()
             .map((key) => getBranchNameFromStorageKey(key))
-            .filter((key) => key !== undefined);
+            .filter((key) => key !== undefined)
+            // CRITICAL: Exclude backup keys to prevent infinite nesting of backups
+            // Backup keys have format "backup:v1:branchName" and should never be loaded as branches
+            .filter((key) => !key.startsWith("backup:"));
 
         const currentBranches = currentBranchNames.map((key) => this.getStore(key));
 
-        return currentBranches.filter((snapshot) => snapshot !== null) as NavigationSnapshot[];
+        return currentBranches.filter((snapshot) => snapshot != null) as NavigationSnapshot[];
     }
 }
 
