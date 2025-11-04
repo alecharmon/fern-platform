@@ -164,9 +164,32 @@ export const middleware: NextMiddleware = async (request) => {
     /**
      * Rewrite llms.txt
      */
-    if (pathname.endsWith("/llms.txt")) {
-        const slug = removeLeadingSlash(withoutEnding(/\/llms\.txt$/));
-        return rewrite(withDomain("/api/fern-docs/llms.txt"), { slug });
+    if (pathname.endsWith("/llms.txt") || pathname.endsWith("/llms-full.txt") || pathname.match(MARKDOWN_PATTERN)) {
+        const { getAuthState } = await createGetAuthStateEdge(request, (token) => {
+            newToken = token;
+        });
+        const authState = await getAuthState(pathname);
+
+        const rolesValue = authState.authed
+            ? `authed:${[...(authState.user.roles ?? ["no_role"])].sort().join(",")}`
+            : "unauthed:everyone";
+
+        if (pathname.endsWith("/llms.txt")) {
+            const slug = removeLeadingSlash(withoutEnding(/\/llms\.txt$/));
+            return rewrite(withDomain("/api/fern-docs/llms.txt"), {
+                slug,
+                authed: rolesValue
+            });
+        } else if (pathname.endsWith("/llms-full.txt")) {
+            const slug = removeLeadingSlash(withoutEnding(/\/llms-full\.txt$/));
+            return rewrite(withDomain("/api/fern-docs/llms-full.txt"), {
+                slug,
+                authed: rolesValue
+            });
+        } else {
+            const slug = removeLeadingSlash(withoutEnding(MARKDOWN_PATTERN));
+            return rewrite(withDomain("/api/fern-docs/markdown"), { slug, authed: rolesValue });
+        }
     }
 
     /**
@@ -175,22 +198,6 @@ export const middleware: NextMiddleware = async (request) => {
     if (pathname.endsWith("/_mcp/server")) {
         console.log("[middleware] rewriting mcp");
         return rewrite(withDomain("/api/fern-docs/mcp"));
-    }
-
-    /**
-     * Rewrite llms-full.txt
-     */
-    if (pathname.endsWith("/llms-full.txt")) {
-        const slug = removeLeadingSlash(withoutEnding(/\/llms-full\.txt$/));
-        return rewrite(withDomain("/api/fern-docs/llms-full.txt"), { slug });
-    }
-
-    /**
-     * Rewrite markdown
-     */
-    if (pathname.match(MARKDOWN_PATTERN)) {
-        const slug = removeLeadingSlash(withoutEnding(MARKDOWN_PATTERN));
-        return rewrite(withDomain("/api/fern-docs/markdown"), { slug });
     }
 
     /**

@@ -66,6 +66,13 @@ export async function GET(
 
                 const uniqueNodes = uniqBy(nodes, (a) => FernNavigation.getPageId(a) ?? a.canonicalSlug ?? a.slug);
 
+                // Don't log to PostHog if no accessible nodes
+                if (uniqueNodes.length === 0) {
+                    controller.enqueue(encoder.encode("User is not logged in"));
+                    controller.close();
+                    return;
+                }
+
                 const markdownStartTime = performance.now();
 
                 for (const node of uniqueNodes) {

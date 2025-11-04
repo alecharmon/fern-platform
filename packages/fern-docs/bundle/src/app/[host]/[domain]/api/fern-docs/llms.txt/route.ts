@@ -65,7 +65,7 @@ export async function GET(
             let markdownProcessingMs = 0;
 
             try {
-                const { content: streamedContent, timingStats } = await getLlmsTxtStreaming(
+                const { timingStats, status } = await getLlmsTxtStreaming(
                     host,
                     domain,
                     path,
@@ -80,6 +80,11 @@ export async function GET(
                 markdownProcessingMs = timingStats.markdownProcessingMs;
 
                 controller.close();
+
+                // Don't log to PostHog for unauthorized requests
+                if (status === "unauthorized") {
+                    return;
+                }
 
                 const loadTimeMs = performance.now() - startTime;
 
@@ -120,7 +125,13 @@ async function getLlmsTxtStreaming(
     path: string,
     fernToken: string | undefined,
     onChunk: (chunk: string) => void
-): Promise<{ content: string; timingStats: any }> {
+): Promise<{
+    timingStats: {
+        rootRetrievalMs: number;
+        markdownProcessingMs: number;
+    };
+    status: "unauthorized" | "ok";
+}> {
     const loader = await createCachedDocsLoader(host, domain, fernToken);
 
     // Time the root retrieval and section root
@@ -131,6 +142,17 @@ async function getLlmsTxtStreaming(
     if (root == null) {
         console.error(`[llmsTxt:${domain}] Could not find root`);
         notFound();
+    }
+
+    if (root.authed || root.hidden) {
+        onChunk("User is not logged in");
+        return {
+            timingStats: {
+                rootRetrievalMs: 0,
+                markdownProcessingMs: 0
+            },
+            status: "unauthorized"
+        };
     }
 
     const pageInfos: {
@@ -150,7 +172,10 @@ async function getLlmsTxtStreaming(
     }[] = [];
 
     const landingPage = getLandingPage(root);
-    const markdown = landingPage != null ? await getMarkdownForPath(landingPage, loader) : undefined;
+    const markdown =
+        landingPage != null && !landingPage.authed && !landingPage.hidden
+            ? await getMarkdownForPath(landingPage, loader)
+            : undefined;
 
     const header = markdown?.content ?? `# ${root.title}`;
     onChunk(header + "\n\n");
@@ -289,12 +314,11 @@ async function getLlmsTxtStreaming(
     }
 
     return {
-        content: "", // Content is streamed via onChunk
         timingStats: {
-            loadTimeMs: 0, // Will be calculated by caller
             rootRetrievalMs: rootEndTime - rootStartTime,
             markdownProcessingMs: markdownEndTime - markdownStartTime
-        }
+        },
+        status: "ok"
     };
 }
 
