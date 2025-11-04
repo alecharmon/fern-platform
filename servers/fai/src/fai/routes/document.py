@@ -40,7 +40,11 @@ from fai.utils.turbopuffer.namespace import (
     get_query_index_name,
 )
 from fai.utils.turbopuffer.sync import (
+    delete_documents_from_query_index,
+    delete_documents_from_tpuf,
     sync_document_db_to_tpuf,
+    sync_documents_to_query_index,
+    sync_documents_to_tpuf,
     sync_index_to_target,
 )
 
@@ -81,8 +85,10 @@ async def create_document(
             created_document_ids.append(document_id)
         await db.commit()
         await db.refresh(new_db_document)
-        await sync_document_db_to_tpuf(domain, db)
-        await sync_index_to_target(domain, get_document_index_name(), get_query_index_name())
+        await sync_documents_to_tpuf(domain, created_document_ids, db)
+        await sync_documents_to_query_index(
+            domain, created_document_ids, get_document_index_name(), get_query_index_name()
+        )
         LOGGER.info(f"Indexed document {new_db_document.id} for domain: {domain}")
         return JSONResponse(
             jsonable_encoder([CreateDocumentResponse(document_id=document_id) for document_id in created_document_ids])
@@ -132,8 +138,10 @@ async def batch_create_document(
                 LOGGER.info(f"Created document {document_id} for domain: {domain}")
 
         await db.commit()
-        await sync_document_db_to_tpuf(domain, db)
-        await sync_index_to_target(domain, get_document_index_name(), get_query_index_name())
+        await sync_documents_to_tpuf(domain, created_document_ids, db)
+        await sync_documents_to_query_index(
+            domain, created_document_ids, get_document_index_name(), get_query_index_name()
+        )
 
         return JSONResponse(
             jsonable_encoder([CreateDocumentResponse(document_id=document_id) for document_id in created_document_ids])
@@ -181,8 +189,10 @@ async def update_document(
             db.add(db_document)
             await db.commit()
             await db.refresh(db_document)
-            await sync_document_db_to_tpuf(domain, db)
-            await sync_index_to_target(domain, get_document_index_name(), get_query_index_name())
+            await sync_documents_to_tpuf(domain, [document_id], db)
+            await sync_documents_to_query_index(
+                domain, [document_id], get_document_index_name(), get_query_index_name()
+            )
             LOGGER.info(f"Updated document {document_id} for domain: {domain}")
             return JSONResponse(jsonable_encoder(UpdateDocumentResponse(document=db_document.to_api())))
         return JSONResponse(status_code=404, content=jsonable_encoder({"message": "Document not found"}))
@@ -212,8 +222,10 @@ async def delete_document_by_id(
         if db_document:
             await db.delete(db_document)
             await db.commit()
-            await sync_document_db_to_tpuf(domain, db)
-            await sync_index_to_target(domain, get_document_index_name(), get_query_index_name())
+            await delete_documents_from_tpuf(domain, [body.document_id])
+            await delete_documents_from_query_index(
+                domain, [body.document_id], get_document_index_name(), get_query_index_name()
+            )
             LOGGER.info(f"Deleted document {body.document_id} for domain: {domain}")
             return JSONResponse(jsonable_encoder(DeleteDocumentResponse(success=True)))
         return JSONResponse(jsonable_encoder(DeleteDocumentResponse(success=False)))
@@ -237,6 +249,7 @@ async def batch_delete_document(
 ) -> JSONResponse:
     try:
         deleted_count = 0
+        deleted_document_ids = []
 
         for document in body:
             db_document = await db.execute(
@@ -245,13 +258,16 @@ async def batch_delete_document(
             db_document = db_document.scalar_one_or_none()
             if db_document:
                 await db.delete(db_document)
+                deleted_document_ids.append(document.document_id)
                 deleted_count += 1
                 LOGGER.info(f"Deleted document {document.document_id} for domain: {domain}")
 
         if deleted_count > 0:
             await db.commit()
-            await sync_document_db_to_tpuf(domain, db)
-            await sync_index_to_target(domain, get_document_index_name(), get_query_index_name())
+            await delete_documents_from_tpuf(domain, deleted_document_ids)
+            await delete_documents_from_query_index(
+                domain, deleted_document_ids, get_document_index_name(), get_query_index_name()
+            )
             return JSONResponse(jsonable_encoder(DeleteDocumentResponse(success=True)))
         else:
             return JSONResponse(jsonable_encoder(DeleteDocumentResponse(success=False)))
