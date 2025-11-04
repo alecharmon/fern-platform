@@ -68,5 +68,6 @@ jobs:
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
-          git_version="$(scripts/fai-sdk-version.sh)"
-          fern generate --api fai --group python-sdk --version ${git_version}
+          latest_tag=$(git tag -l "fai-sdk@*" --sort=-v:refname | head -n1)
+          python_version="$(echo "$latest_tag" | sed 's/^fai-sdk@//;')"
+          fern generate --api fai --group python-sdk --version ${python_version}
