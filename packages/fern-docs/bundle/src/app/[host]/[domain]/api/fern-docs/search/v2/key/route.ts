@@ -20,7 +20,7 @@ export const maxDuration = 10;
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     if (isLocal()) {
-        return NextResponse.json("search key is not accessible in local preview mode", { status: 400 });
+        return NextResponse.json(null, { status: 200 });
     }
 
     if (isSelfHosted()) {
@@ -43,9 +43,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const metadata = await getDocsUrlMetadata(domain);
     if (metadata.isPreview && !metadata.enableAlgoliaOnPreview) {
-        return NextResponse.json("Search is not supported for preview URLs", {
-            status: 400
-        });
+        return NextResponse.json(null, { status: 200 });
     }
 
     // Check for FERN_API_KEY header (alternative auth method, for api keys starting with "fern_")

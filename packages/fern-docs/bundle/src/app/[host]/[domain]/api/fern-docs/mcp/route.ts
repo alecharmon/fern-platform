@@ -38,7 +38,19 @@ async function createHandler(host: string, domain: string): Promise<McpHandler> 
                                 ]
                             };
                         }
+
                         const algoliaSearchKeyJson = await algoliaSearchKey.json();
+
+                        if (algoliaSearchKeyJson === null) {
+                            return {
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: `[Expected] search disabled`
+                                    }
+                                ]
+                            };
+                        }
 
                         const body = JSON.stringify({
                             algoliaSearchKey: algoliaSearchKeyJson?.apiKey ?? "",
