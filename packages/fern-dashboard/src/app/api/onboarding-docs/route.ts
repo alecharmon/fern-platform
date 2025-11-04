@@ -29,14 +29,16 @@ const CreateOnboardingDocsRequest = z.object({
             fileName: z.string(),
             assetUrl: z.string().url()
         })
-    )
+    ),
+    createGithubRepo: z.boolean().optional().default(true)
 });
 
 const CreateOnboardingDocsResponse = z.object({
     url: z.string(),
     message: z.string(),
     cliOutput: z.string(),
-    fernDocsDownloadUrl: z.string()
+    fernDocsDownloadUrl: z.string(),
+    githubRepoUrl: z.string().optional()
 });
 
 export const POST = withZodValidation(
@@ -47,7 +49,7 @@ export const POST = withZodValidation(
         // Use the session's access token as FERN_TOKEN if available
         const fernToken = session?.accessToken;
 
-        const result = await handler(validatedBody as OnboardingDocsRequest, fernToken);
+        const result = await handler(validatedBody as OnboardingDocsRequest, fernToken, validatedBody.createGithubRepo);
 
         if (result.errorResponse != null) {
             return result.errorResponse;

@@ -38,6 +38,7 @@ export default function NewDocsWizardPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [fernDocsDownloadUrl, setFernDocsDownloadUrl] = useState<string | undefined>(undefined);
+    const [githubRepoUrl, setGithubRepoUrl] = useState<string | undefined>(undefined);
     const [formData, setFormData] = useState<WizardFormData>({
         docsSiteName: "",
         docsSiteUrl: "",
@@ -79,6 +80,11 @@ export default function NewDocsWizardPage() {
                     setFernDocsDownloadUrl(result.fernDocsDownloadUrl);
                 }
 
+                // Store the GitHub repo URL if available
+                if (result.githubRepoUrl) {
+                    setGithubRepoUrl(result.githubRepoUrl);
+                }
+
                 setCurrentStep("confirmation");
             } catch (err) {
                 console.error("Error creating docs:", err);
@@ -86,6 +92,43 @@ export default function NewDocsWizardPage() {
             } finally {
                 setIsLoading(false);
             }
+        }
+    }
+
+    async function handlePublishToGithub() {
+        if (!fernDocsDownloadUrl) {
+            console.error("No download URL available");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/publish-to-github", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    orgName,
+                    docsSiteUrl: formData.docsSiteUrl,
+                    docsSiteName: formData.docsSiteName,
+                    fernDocsDownloadUrl
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to publish to GitHub");
+            }
+
+            const result = await response.json();
+
+            // Update the GitHub repo URL
+            if (result.githubRepoUrl) {
+                setGithubRepoUrl(result.githubRepoUrl);
+            }
+        } catch (err) {
+            console.error("Error publishing to GitHub:", err);
+            throw err; // Re-throw so the ConfirmScreen can handle it
         }
     }
 
@@ -176,6 +219,8 @@ export default function NewDocsWizardPage() {
                             docsUrl={formData.docsSiteUrl}
                             wizardFormData={formData}
                             fernDocsDownloadUrl={fernDocsDownloadUrl}
+                            githubRepoUrl={githubRepoUrl}
+                            onPublishToGithub={handlePublishToGithub}
                         />
                     </motion.div>
                 )}

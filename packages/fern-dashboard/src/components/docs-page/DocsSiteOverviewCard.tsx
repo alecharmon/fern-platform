@@ -12,6 +12,7 @@ import { DownloadFernDocsButton } from "./DownloadFernDocsButton";
 import { DocsSiteImage } from "./docs-site-image/DocsSiteImage";
 import { FernCliVersion } from "./FernCliVersion";
 import { GithubSource } from "./GithubSource";
+import { PublishToGitHubButton } from "./PublishToGitHubButton";
 
 export async function DocsSiteOverviewCard({
     docsSite,
@@ -47,6 +48,7 @@ export async function DocsSiteOverviewCard({
                             </Suspense>
                         </DocsSiteAttribute>
                         <DownloadFernDocsButton docsUrl={docsUrl} />
+                        <PublishToGitHubButton docsUrl={docsUrl} docsSiteName={docsSite.title ?? "Docs"} />
                     </div>
                 </div>
             </Card>

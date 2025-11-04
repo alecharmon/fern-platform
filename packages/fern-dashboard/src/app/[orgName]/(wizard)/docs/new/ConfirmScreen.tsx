@@ -1,6 +1,6 @@
 "use client";
 
-import { CopyIcon, DownloadIcon, ExternalLinkIcon } from "lucide-react";
+import { CopyIcon, DownloadIcon, ExternalLinkIcon, Upload } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -14,12 +14,35 @@ interface ConfirmScreenProps {
     docsUrl: string;
     wizardFormData: WizardFormData;
     fernDocsDownloadUrl?: string;
+    githubRepoUrl?: string;
+    onPublishToGithub?: () => Promise<void>;
 }
 
-export default function ConfirmScreen({ docsUrl, wizardFormData, fernDocsDownloadUrl }: ConfirmScreenProps) {
+export default function ConfirmScreen({
+    docsUrl,
+    wizardFormData,
+    fernDocsDownloadUrl,
+    githubRepoUrl,
+    onPublishToGithub
+}: ConfirmScreenProps) {
     const orgName = useOrgNameFromPathname();
     const [copied, setCopied] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
     const fullUrl = `${docsUrl}.docs.buildwithfern.com`;
+
+    const handlePublishToGithub = async () => {
+        if (!onPublishToGithub) return;
+
+        setIsPublishing(true);
+        try {
+            await onPublishToGithub();
+            // The parent component will update githubRepoUrl prop
+        } catch (error) {
+            console.error("Failed to publish to GitHub:", error);
+        } finally {
+            setIsPublishing(false);
+        }
+    };
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(fullUrl);
@@ -74,6 +97,34 @@ export default function ConfirmScreen({ docsUrl, wizardFormData, fernDocsDownloa
                                 Download Repository Code
                             </a>
                         </Button>
+                    )}
+
+                    {githubRepoUrl ? (
+                        <Button asChild variant="outline" size="sm">
+                            <a
+                                href={githubRepoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5"
+                            >
+                                <ExternalLinkIcon className="h-3.5 w-3.5" />
+                                View on GitHub
+                            </a>
+                        </Button>
+                    ) : (
+                        onPublishToGithub &&
+                        fernDocsDownloadUrl && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handlePublishToGithub}
+                                disabled={isPublishing}
+                                className="flex items-center gap-1.5"
+                            >
+                                <Upload className="h-3.5 w-3.5" />
+                                {isPublishing ? "Publishing..." : "Publish to GitHub"}
+                            </Button>
+                        )
                     )}
                 </div>
             </div>
