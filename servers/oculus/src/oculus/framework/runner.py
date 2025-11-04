@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
-from oculus.framework.judge import evaluate_answer
+from oculus.evaluators.llm_judge import evaluate_answer
 from oculus.framework.models import Answer, Evaluation, EvaluationMetrics, EvaluationRun, Question
 from oculus.utils.file_utils import load_json, load_json_files, save_json
 

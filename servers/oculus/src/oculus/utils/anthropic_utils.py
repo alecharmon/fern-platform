@@ -1,5 +1,5 @@
 import time
-from typing import Any, Optional, Type, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 from anthropic import Anthropic
 from pydantic import BaseModel
@@ -8,13 +8,27 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def generate_with_claude(
-    response_type: Type[T],
+    response_type: type[T],
     prompt_template: str,
     model: str = "claude-opus-4-20250514",
     max_tokens: int = 1000,
     max_retries: int = 3,
     **kwargs: str,
-) -> Optional[T]:
+) -> T | None:
+    """
+    Generate a structured response using Claude with tool calling.
+
+    Args:
+        response_type: Pydantic model class for the expected response structure
+        prompt_template: Template string with placeholders for kwargs
+        model: Claude model identifier to use
+        max_tokens: Maximum tokens in the response
+        max_retries: Number of retry attempts on failure
+        **kwargs: Values to format into the prompt_template
+
+    Returns:
+        Instance of response_type if successful, None otherwise
+    """
     anthropic_client = Anthropic()
     formatted_prompt = prompt_template.format(**kwargs)
 
@@ -49,21 +63,3 @@ def generate_with_claude(
             time.sleep(0.5 * tries)
 
     return None
-
-
-def evaluate_answer(
-    question: str,
-    answer: str,
-    ground_truth: str,
-    model: str = "claude-opus-4-20250514",
-) -> Optional[Any]:
-    from oculus.framework.models import EVALUATION_PROMPT_TEMPLATE, EvaluationResponse
-
-    return generate_with_claude(
-        response_type=EvaluationResponse,
-        prompt_template=EVALUATION_PROMPT_TEMPLATE,
-        model=model,
-        question=question,
-        answer=answer,
-        ground_truth=ground_truth,
-    )
