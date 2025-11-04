@@ -24,15 +24,20 @@ export default async function preloadEditorData(request: {
         }
 
         const loader = await getCachedEditableDocsLoader(
-            request.host, // Use the host from the request parameter instead of trying to get it from headers
+            request.host,
             request.docsUrl,
             session.accessToken,
-            request.branch,
-            true // force revalidate when preloading
+            request.branch
         );
 
-        // Preload root and config in parallel
-        await Promise.all([loader.getRoot(), loader.getConfig(), loader.getLayout(), loader.getFiles()]);
+        // Preload expensive operations to warm cache for editor route.
+        await Promise.all([
+            loader.getRoot(),
+            loader.unsafe_getFullRoot(),
+            loader.getMetadata(),
+            loader.getConfig(),
+            loader.getLayout()
+        ]);
 
         return { success: true };
     } catch (error) {
