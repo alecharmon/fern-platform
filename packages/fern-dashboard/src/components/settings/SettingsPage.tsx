@@ -25,7 +25,7 @@ export function SettingsPage({ session }: SettingsPage.Props) {
     return (
         <>
             <div className="flex flex-1 flex-col items-center gap-4">
-                <h1 className="mx-auto mt-6 w-full max-w-[750px] text-2xl font-bold sm:mt-8 md:mt-10">Team Settings</h1>
+                <h1 className="mx-auto w-full max-w-[750px] text-2xl font-bold">Team Settings</h1>
 
                 <OrganizationLogo organization={org} />
 

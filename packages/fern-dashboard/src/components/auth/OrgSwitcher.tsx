@@ -27,6 +27,11 @@ export async function OrgSwitcher({ currentOrgName }: { currentOrgName?: Auth0Or
     const isFernAdmin = await isFernEmployee(session.user.sub);
 
     return (
-        <OrgSwitcherClient organizations={organizations} currentOrgName={currentOrgName} isFernAdmin={isFernAdmin} />
+        <OrgSwitcherClient
+            organizations={organizations}
+            currentOrgName={currentOrgName}
+            isFernAdmin={isFernAdmin}
+            accessToken={session.accessToken}
+        />
     );
 }

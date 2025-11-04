@@ -1,10 +1,9 @@
 import { PopoverArrow } from "@radix-ui/react-popover";
-import { Book, RotateCcw } from "lucide-react";
+import { BookOpen, ExternalLink, RotateCcw } from "lucide-react";
 import { Suspense } from "react";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { CreateMenuItem } from "@/components/auth/CreateMenuItem";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { OrgSwitcher } from "@/components/auth/OrgSwitcher";
 import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
@@ -43,19 +42,40 @@ export default async function HeaderLayout({
             <div className="flex shrink-0 gap-2">
                 <div className="hidden items-center md:flex">
                     <SupportHeaderLink icon={false} />
-                    <HeaderLinkButton text="Docs" href="https://buildwithfern.com/learn" />
-                    <HeaderLinkButton
-                        text="Changelog"
-                        href="https://buildwithfern.com/learn/docs/getting-started/changelog"
-                    />
-                    <CreateMenuItem accessToken={accessToken} />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <button
+                                type="button"
+                                className="text-gray-1100 hover:text-gray-1200 flex h-8 w-8 cursor-pointer items-center justify-center transition-colors"
+                            >
+                                <BookOpen className="h-4 w-4" />
+                            </button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" collisionPadding={8} className="w-[200px] p-1">
+                            <PopoverArrow className="fill-popover" />
+                            <div className="flex flex-col">
+                                <HeaderLinkButton
+                                    text="Docs"
+                                    className="justify-start px-2 text-left"
+                                    href="https://buildwithfern.com/learn"
+                                    rightIcon={<ExternalLink className="h-3 w-3" />}
+                                />
+                                <HeaderLinkButton
+                                    text="Changelog"
+                                    className="justify-start px-2 text-left"
+                                    href="https://buildwithfern.com/learn/docs/getting-started/changelog"
+                                    rightIcon={<ExternalLink className="h-3 w-3" />}
+                                />
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                     <ThemeToggle />
                 </div>
                 <Popover>
                     <PopoverTrigger className="cursor-pointer">
                         <ProfileImage picture={picture} name={name} />
                     </PopoverTrigger>
-                    <PopoverContent collisionPadding={8}>
+                    <PopoverContent collisionPadding={8} className="w-[200px]">
                         <PopoverArrow className="fill-popover" />
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col">
@@ -63,21 +83,20 @@ export default async function HeaderLayout({
                                 <div className="text-xs text-gray-800">{email}</div>
                             </div>
                             <div className="flex flex-col md:hidden">
-                                <CreateMenuItem accessToken={accessToken} />
                                 <SupportHeaderLink
-                                    className="justify-start px-0 text-left hover:px-2 has-[>svg]:px-0 hover:has-[>svg]:px-2"
+                                    className="justify-start text-left !px-0"
                                     buttonProps={{ variant: "ghost" }}
                                     icon={true}
                                 />
                                 <HeaderLinkButton
                                     text="Docs"
-                                    className="justify-start px-0 text-left hover:px-2 has-[>svg]:px-0 hover:has-[>svg]:px-2"
+                                    className="justify-start text-left !px-0"
                                     href="https://buildwithfern.com/learn"
-                                    icon={<Book className="h-4 w-4" />}
+                                    icon={<BookOpen className="h-4 w-4" />}
                                 />
                                 <HeaderLinkButton
                                     text="Changelog"
-                                    className="justify-start px-0 text-left hover:px-2 has-[>svg]:px-0 hover:has-[>svg]:px-2"
+                                    className="justify-start text-left !px-0"
                                     href="https://buildwithfern.com/learn/docs/getting-started/changelog"
                                     icon={<RotateCcw className="h-4 w-4" />}
                                 />

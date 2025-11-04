@@ -36,14 +36,14 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
                     <NavbarItem title="SDKs" iconType="sdks" href="/sdks" />
                 </FeatureFlaggedServerSide>
                 <NavbarSectionTitle title="Settings" />
-                <NavbarItem title="Members" iconType="members" href="/members" />
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_INCIDENTS_PAGE} orgName={orgName}>
                     <NavbarItem title="Incidents" iconType="incidents" href="/incidents" />
                 </FeatureFlaggedServerSide>
+                <NavbarItem title="Members" iconType="members" href="/members" />
+                <NavbarItem title="General" iconType="settings" href="/settings" />
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_API_KEYS_PAGE} orgName={orgName}>
                     <NavbarItem title="API Keys" mobileTitle="Keys" iconType="api-keys" href="/api-keys" />
                 </FeatureFlaggedServerSide>
-                <NavbarItem title="Settings" iconType="settings" href="/settings" />
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_BILLING_PAGE} orgName={orgName}>
                     <NavbarItem title="Billing" iconType="billing" href="/billing" />
                 </FeatureFlaggedServerSide>

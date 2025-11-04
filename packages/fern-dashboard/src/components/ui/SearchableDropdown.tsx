@@ -25,6 +25,8 @@ export interface SearchableDropdownProps<T> {
     renderItem: (item: T, onSelect: () => void, isHighlighted: boolean) => ReactNode;
     getItemKey: (item: T) => string;
     shouldShowSearch?: boolean;
+    searchRightContent?: ReactNode;
+    headerContent?: ReactNode;
 }
 
 export interface SearchableDropdownRef {
@@ -44,7 +46,9 @@ function SearchableDropdownInner<T>(
         isLoading = false,
         renderItem,
         getItemKey,
-        shouldShowSearch = true
+        shouldShowSearch = true,
+        searchRightContent,
+        headerContent
     }: SearchableDropdownProps<T>,
     ref: React.Ref<SearchableDropdownRef>
 ) {
@@ -112,8 +116,11 @@ function SearchableDropdownInner<T>(
             <PopoverTrigger asChild>{children}</PopoverTrigger>
             <PopoverContent className="w-80 border border-[var(--border,var(--gray-500))] p-0" align="start">
                 <div className="flex flex-col">
+                    {headerContent && (
+                        <div className="border-b border-[var(--border,var(--gray-500))] p-2">{headerContent}</div>
+                    )}
                     {shouldShowSearch && (
-                        <div className="flex items-center border-b border-[var(--border,var(--gray-500))] p-2">
+                        <div className="flex items-center gap-2 border-b border-[var(--border,var(--gray-500))] p-2">
                             <div className="flex flex-1 items-center rounded-md border border-[var(--border,var(--gray-500))] px-3">
                                 <SearchIcon className="h-4 w-4 shrink-0 opacity-50" />
                                 <Input
@@ -127,6 +134,7 @@ function SearchableDropdownInner<T>(
                                     className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
                                 />
                             </div>
+                            {searchRightContent}
                         </div>
                     )}
                     <div className="flex flex-col max-h-60 overflow-y-auto p-1 gap-px">

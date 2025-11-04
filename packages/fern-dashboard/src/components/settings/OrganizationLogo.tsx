@@ -152,7 +152,7 @@ export function OrganizationLogo({ organization }: OrganizationLogo.Props) {
                     </div>
                 )}
 
-                <div className="text-xs text-gray-600">Upload a PNG, JPG, or SVG image. Maximum file size: 5MB.</div>
+                <div className="text-xs text-gray-900">Upload a PNG, JPG, or SVG image. Maximum file size: 5MB.</div>
             </div>
 
             <div className="mt-5 flex justify-center md:justify-end">
