@@ -40,7 +40,7 @@ export default async function Page({
     });
 
     // Use cached loader - this will reuse the loader created in layout.tsx
-    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch, githubUrl);
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);
 
     const root = await loader.getRoot();
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);

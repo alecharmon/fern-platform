@@ -27,7 +27,7 @@ export default async function HeaderTabsPage({
         docsUrl: parseDocsUrlParam({ docsUrl })
     });
     // Use cached loader - this will reuse the loader created in layout.tsx
-    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch, githubUrl);
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);
     const layout = await loader.getLayout();
 
     if (layout.tabsPlacement !== "HEADER") {

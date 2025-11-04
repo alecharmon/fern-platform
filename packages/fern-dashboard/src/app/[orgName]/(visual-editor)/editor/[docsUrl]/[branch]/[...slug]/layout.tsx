@@ -60,7 +60,7 @@ export default async function VisualEditorPreviewLayout({
     const host = await getHostFromHeaders();
 
     // Use cached loader to prevent duplicate creation across parallel routes
-    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch, githubUrl);
+    const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);
 
     const [colors, layout, fonts, config, root, unsafe_fullRoot, files, { basePath }] = await Promise.all([
         loader.getColors(),

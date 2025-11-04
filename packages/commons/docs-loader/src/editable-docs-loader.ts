@@ -15,10 +15,7 @@ class EditableDocsLoader implements DocsLoader {
     domain: string;
     fern_token: string | undefined;
 
-    constructor(
-        docsLoader: DocsLoader,
-        private gitLoader?: GitLoader
-    ) {
+    constructor(docsLoader: DocsLoader) {
         this.readOnlyDocsLoader = docsLoader;
         this.domain = docsLoader.domain;
         this.fern_token = docsLoader.fern_token;
@@ -180,14 +177,12 @@ export const createEditableDocsLoader = async ({
     host,
     encodedDocsUrl,
     fernToken,
-    gitLoader,
     forceRevalidate,
     branchName
 }: {
     host: string;
     encodedDocsUrl: string;
     fernToken?: string;
-    gitLoader?: GitLoader;
     forceRevalidate?: boolean;
     branchName?: string;
 }) => {
@@ -201,5 +196,5 @@ export const createEditableDocsLoader = async ({
         skipAuth: true
     });
 
-    return new EditableDocsLoader(docsLoader, gitLoader);
+    return new EditableDocsLoader(docsLoader);
 };

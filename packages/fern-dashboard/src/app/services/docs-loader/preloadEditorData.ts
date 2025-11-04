@@ -28,7 +28,6 @@ export default async function preloadEditorData(request: {
             request.docsUrl,
             session.accessToken,
             request.branch,
-            undefined,
             true // force revalidate when preloading
         );
 
