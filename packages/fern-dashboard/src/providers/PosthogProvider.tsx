@@ -35,7 +35,11 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
         // Initialize PostHog client
         posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
             api_host: "/ingest",
-            capture_pageview: isProduction()
+            capture_pageview: isProduction(),
+            // Experimental: enable session recording to capture replay URLs for Sentry error context
+            session_recording: {
+                recordCrossOriginIframes: true
+            }
         });
 
         // Register build timestamp as a super property and include it in ALL events automatically
