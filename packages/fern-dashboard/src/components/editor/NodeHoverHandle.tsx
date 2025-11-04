@@ -54,9 +54,18 @@ export default function NodeHoverHandle() {
                     draggable
                     onDragStart={(event) => {
                         try {
+                            // Persist the origin editor id for dragover (dataTransfer.getData isn't readable during dragover in many browsers).
+                            // Also tag the drag with a custom MIME type so dragover can scope behavior to handle-initiated drags.
+                            (window as any).__fernDraggingEditorId = editorId;
                             event.dataTransfer?.setData("editor-id", editorId);
                             event.dataTransfer?.setData("application/x-tiptap-dnd", "1");
+                            if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
                         } catch {}
+                    }}
+                    onDragEnd={() => {
+                        // Always clear the global state and body-level cursor when the drag ends (covers drops outside the editor too).
+                        (window as any).__fernDraggingEditorId = undefined;
+                        document.body.classList.remove("fern-dragging-blocked");
                     }}
                     className="fern-hover-handle flex items-center justify-center rounded-md py-1 px-0.5 hover:bg-gray-500/40 cursor-grab leading-none"
                 >

@@ -15,6 +15,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useMemo, useRef } from "react";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
+import "./drag-cursor.css";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useEditor } from "@/providers/EditorContext";
 import { cn } from "@/utils/utils";
@@ -205,28 +206,59 @@ export default function TiptapEditor({
                     // Block drops from other editors (e.g., outer → nested or vice versa) by comparing editor IDs
                     drop: (view, event) => {
                         const e = event as unknown as DragEvent;
+                        const isOurDnD = e.dataTransfer?.types?.includes("application/x-tiptap-dnd");
+                        document.body.classList.remove("fern-dragging-blocked");
+                        if (!isOurDnD) {
+                            return false; // Not our drag, don't process
+                        }
                         const fromId = e.dataTransfer?.getData("editor-id") || "";
                         const toId = (view.dom as HTMLElement)?.getAttribute("data-editor-id") || "";
                         if (fromId && toId && fromId !== toId) {
                             e.preventDefault();
                             e.stopPropagation();
+                            // Clear global state on drop
+                            (window as any).__fernDraggingEditorId = undefined;
                             return true;
                         }
+                        // Clear global state on successful drop
+                        (window as any).__fernDraggingEditorId = undefined;
                         return false;
                     },
-                    // Show "not-allowed" cursor when dragging between different editors
+                    // When dragging across different editors, block the drop and show a global "not-allowed" cursor.
+                    // We set a class on document.body (not the editor element) so the cursor wins over any child-level
+                    // cursor styles (e.g. .ProseMirror { cursor: text } or cursor: pointer on nodes).
+                    // We keep the class until drop/dragend to avoid flicker while moving between DOM children.
                     dragover: (view, event) => {
                         const e = event as unknown as DragEvent;
-                        const fromId = e.dataTransfer?.getData("editor-id") || "";
+                        // Read from global store since dataTransfer.getData doesn't work in dragover
+                        const fromId = (window as any).__fernDraggingEditorId || "";
                         const toId = (view.dom as HTMLElement)?.getAttribute("data-editor-id") || "";
-                        if (fromId && toId && fromId !== toId) {
+                        // Only apply this logic to handle-initiated drags. This avoids changing the cursor for unrelated drags (e.g., text or external files).
+                        const isOurDnD = e.dataTransfer?.types?.includes("application/x-tiptap-dnd");
+                        if (isOurDnD && fromId && toId && fromId !== toId) {
+                            // Call preventDefault so browser respects dropEffect
+                            e.preventDefault();
                             try {
                                 if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
                             } catch {}
-                            e.preventDefault();
                             e.stopPropagation();
+                            // Add CSS class to body for cursor display
+                            document.body.classList.add("fern-dragging-blocked");
                             return true;
                         }
+                        // If this drag isn't blocked, ensure the global cursor class is removed.
+                        document.body.classList.remove("fern-dragging-blocked");
+                        return false;
+                    },
+                    dragleave: (view, event) => {
+                        // Do not remove the global cursor class on dragleave. Moving between children fires dragleave
+                        // continuously and would cause cursor flicker. Cleanup happens on dragover (when unblocked), drop, or dragend.
+                        return false;
+                    },
+                    dragend: (view, event) => {
+                        // Clean up cursor class and global state when drag ends
+                        document.body.classList.remove("fern-dragging-blocked");
+                        (window as any).__fernDraggingEditorId = undefined;
                         return false;
                     }
                 }

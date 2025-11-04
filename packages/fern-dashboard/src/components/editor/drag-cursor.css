@@ -1,0 +1,9 @@
+/*
+ Apply the blocked-drag cursor at the body level so it appears anywhere the pointer can move during a blocked drag.
+ The descendant selector ensures we override element-level cursor styles (cursor is not inherited).
+ !important is required to beat component-level rules like .ProseMirror { cursor: text }.
+*/
+body.fern-dragging-blocked,
+body.fern-dragging-blocked * {
+  cursor: not-allowed !important;
+}
