@@ -290,13 +290,7 @@ const getItemImplementations = () => {
         image: {
             check: (editor: Editor) => isNodeInSchema("image", editor),
             action: ({ editor }: { editor: Editor }) => {
-                editor
-                    .chain()
-                    .focus()
-                    .insertContent({
-                        type: "imageUpload"
-                    })
-                    .run();
+                editor.chain().focus().setMediaUploadNode({ mediaType: "image", accept: "image/*" }).run();
             }
         }
     };

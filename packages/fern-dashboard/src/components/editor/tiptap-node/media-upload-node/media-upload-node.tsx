@@ -308,15 +308,21 @@ const MediaUploadPreview: React.FC<MediaUploadPreviewProps> = ({ fileItem }) => 
 };
 
 export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
-    const { accept, limit, maxSize } = props.node.attrs;
+    const { mediaType = "auto", accept, limit, maxSize } = props.node.attrs;
     const inputRef = React.useRef<HTMLInputElement>(null);
     const extension = props.extension;
     const [imageUrl, setImageUrl] = React.useState("");
 
+    const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".avi", ".mov", ".wmv", ".flv", ".mkv"];
+    const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".tiff"];
+
+    const computedAccept =
+        mediaType === "image" ? "image/*" : mediaType === "video" ? "video/*" : accept || "image/*,video/*";
+
     const uploadOptions: UploadOptions = {
         maxSize,
         limit,
-        accept,
+        accept: computedAccept,
         upload: extension.options.upload,
         onSuccess: extension.options.onSuccess,
         onError: extension.options.onError
@@ -324,11 +330,37 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
 
     const { fileItems, uploadFiles } = useFileUpload(uploadOptions);
 
+    const isImage = (file: File): boolean => {
+        if (file.type && file.type.startsWith("image/")) {
+            return true;
+        }
+        const fileName = (file.name || "").toLowerCase();
+        return IMAGE_EXTENSIONS.some((ext) => fileName.endsWith(ext));
+    };
+
     const isVideo = (file: File): boolean => {
-        return file.type.startsWith("video/");
+        if (file.type && file.type.startsWith("video/")) {
+            return true;
+        }
+        const fileName = (file.name || "").toLowerCase();
+        return VIDEO_EXTENSIONS.some((ext) => fileName.endsWith(ext));
     };
 
     const handleUpload = async (files: File[]) => {
+        if (mediaType === "image") {
+            const nonImageFiles = files.filter((file) => !isImage(file));
+            if (nonImageFiles.length > 0) {
+                extension.options.onError?.(new Error("Expected an image file"));
+                return;
+            }
+        } else if (mediaType === "video") {
+            const nonVideoFiles = files.filter((file) => !isVideo(file));
+            if (nonVideoFiles.length > 0) {
+                extension.options.onError?.(new Error("Expected a video file"));
+                return;
+            }
+        }
+
         const urls = await uploadFiles(files);
 
         if (urls.length > 0) {
@@ -339,7 +371,7 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                     const file = files[index];
                     const filename = file?.name.replace(/\.[^/.]+$/, "") || "unknown";
 
-                    if (file && isVideo(file)) {
+                    if (mediaType === "video" || (mediaType === "auto" && file && isVideo(file))) {
                         return createCustomElementNode(`<video src="${url}" title="${filename}" controls></video>`);
                     } else {
                         return createCustomElementNode(`<img src="${url}" alt="${filename}" title="${filename}" />`);
@@ -365,10 +397,87 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
         void handleUpload(Array.from(files));
     };
 
+    const isImageUrl = (url: string): boolean => {
+        try {
+            const pathname = new URL(url).pathname.toLowerCase();
+            return IMAGE_EXTENSIONS.some((ext) => pathname.endsWith(ext));
+        } catch {
+            const lowerUrl = url.toLowerCase();
+            return IMAGE_EXTENSIONS.some((ext) => lowerUrl.endsWith(ext));
+        }
+    };
+
+    const isDirectVideoFileUrl = (url: string): boolean => {
+        try {
+            const pathname = new URL(url).pathname.toLowerCase();
+            return VIDEO_EXTENSIONS.some((ext) => pathname.endsWith(ext));
+        } catch {
+            const lowerUrl = url.toLowerCase();
+            return VIDEO_EXTENSIONS.some((ext) => lowerUrl.endsWith(ext));
+        }
+    };
+
+    const getEmbedInfo = (url: string): string | null => {
+        try {
+            const urlObj = new URL(url);
+            const hostname = urlObj.hostname.toLowerCase();
+            const pathname = urlObj.pathname;
+
+            if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) {
+                if (hostname.includes("youtu.be")) {
+                    const videoId = pathname.split("/")[1]?.split("?")[0];
+                    if (videoId) {
+                        return `https://www.youtube.com/embed/${videoId}`;
+                    }
+                } else if (pathname.includes("/watch")) {
+                    const videoId = urlObj.searchParams.get("v");
+                    if (videoId) {
+                        return `https://www.youtube.com/embed/${videoId}`;
+                    }
+                } else if (pathname.includes("/shorts/")) {
+                    const videoId = pathname.split("/shorts/")[1]?.split("?")[0];
+                    if (videoId) {
+                        return `https://www.youtube.com/embed/${videoId}`;
+                    }
+                } else if (pathname.includes("/embed/")) {
+                    return url;
+                }
+            }
+
+            if (hostname.includes("vimeo.com")) {
+                if (hostname.includes("player.vimeo.com") && pathname.includes("/video/")) {
+                    return url;
+                }
+                const videoId = pathname.split("/").filter(Boolean)[0];
+                if (videoId && /^\d+$/.test(videoId)) {
+                    return `https://player.vimeo.com/video/${videoId}`;
+                }
+            }
+
+            if (hostname.includes("loom.com")) {
+                if (pathname.includes("/embed/")) {
+                    return url;
+                }
+                if (hostname.includes("share.loom.com") && pathname.includes("/share/")) {
+                    const videoId = pathname.split("/share/")[1]?.split("?")[0];
+                    if (videoId) {
+                        return `https://www.loom.com/embed/${videoId}`;
+                    }
+                }
+            }
+
+            return null;
+        } catch {
+            return null;
+        }
+    };
+
+    const isKnownVideoEmbed = (url: string): boolean => {
+        return getEmbedInfo(url) !== null;
+    };
+
     const isVideoUrl = (url: string): boolean => {
-        const videoExtensions = [".mp4", ".webm", ".ogg", ".avi", ".mov", ".wmv", ".flv", ".mkv"];
-        const lowerUrl = url.toLowerCase();
-        return videoExtensions.some((ext) => lowerUrl.includes(ext));
+        return isDirectVideoFileUrl(url) || isKnownVideoEmbed(url);
     };
 
     // Handles URL submission via input field in URL tab
@@ -383,9 +492,55 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
             return;
         }
 
-        const newMediaNode = isVideoUrl(imageUrl)
-            ? createCustomElementNode(`<video src="${imageUrl}" controls></video>`)
-            : createCustomElementNode(`<img src="${imageUrl}" />`);
+        let parsedUrl: URL;
+        try {
+            parsedUrl = new URL(imageUrl);
+            if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+                extension.options.onError?.(new Error("Invalid URL protocol"));
+                return;
+            }
+        } catch {
+            extension.options.onError?.(new Error("Invalid URL"));
+            return;
+        }
+
+        let newMediaNode;
+
+        if (mediaType === "image") {
+            if (!isImageUrl(imageUrl)) {
+                extension.options.onError?.(new Error("Expected an image URL"));
+                return;
+            }
+            newMediaNode = createCustomElementNode(`<img src="${imageUrl}" />`);
+        } else if (mediaType === "video") {
+            if (isDirectVideoFileUrl(imageUrl)) {
+                newMediaNode = createCustomElementNode(`<video src="${imageUrl}" controls></video>`);
+            } else if (isKnownVideoEmbed(imageUrl)) {
+                const embedUrl = getEmbedInfo(imageUrl) || imageUrl;
+                newMediaNode = createCustomElementNode(
+                    `<iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="Video" width="100%" height="315"></iframe>`
+                );
+            } else {
+                newMediaNode = createCustomElementNode(
+                    `<iframe src="${imageUrl}" sandbox="allow-same-origin allow-scripts allow-presentation" referrerpolicy="strict-origin-when-cross-origin" frameborder="0" allowfullscreen title="Media" width="100%" height="315"></iframe>`
+                );
+            }
+        } else {
+            if (isDirectVideoFileUrl(imageUrl)) {
+                newMediaNode = createCustomElementNode(`<video src="${imageUrl}" controls></video>`);
+            } else if (isKnownVideoEmbed(imageUrl)) {
+                const embedUrl = getEmbedInfo(imageUrl) || imageUrl;
+                newMediaNode = createCustomElementNode(
+                    `<iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="Video" width="100%" height="315"></iframe>`
+                );
+            } else if (isImageUrl(imageUrl)) {
+                newMediaNode = createCustomElementNode(`<img src="${imageUrl}" />`);
+            } else {
+                newMediaNode = createCustomElementNode(
+                    `<iframe src="${imageUrl}" sandbox="allow-same-origin allow-scripts allow-presentation" referrerpolicy="strict-origin-when-cross-origin" frameborder="0" allowfullscreen title="Media" width="100%" height="315"></iframe>`
+                );
+            }
+        }
 
         props.editor
             .chain()
@@ -397,6 +552,12 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
 
     const hasFiles = fileItems.length > 0;
 
+    const mediaTypeLabel = mediaType === "image" ? "image" : mediaType === "video" ? "video" : "media";
+    const uploadButtonLabel = `Upload ${mediaTypeLabel}`;
+    const urlPlaceholder = `Paste ${mediaTypeLabel} URL...`;
+    const embedButtonLabel = `Embed ${mediaTypeLabel}`;
+    const addMediaLabel = `Add ${mediaTypeLabel}`;
+
     return (
         <NodeViewWrapper className="tiptap-image-upload" tabIndex={0}>
             {!hasFiles && (
@@ -406,7 +567,7 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                             <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-3">
                                 <div className="tiptap-image-upload-text flex items-center gap-2">
                                     <CloudArrowUpIcon className="size-8" />
-                                    <p>Add media</p>
+                                    <p>{addMediaLabel}</p>
                                 </div>
                             </div>
                         </MediaUploadDragArea>
@@ -416,10 +577,10 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                             <Tab title="Upload">
                                 <Button asChild className="-mt-6">
                                     <button className="relative w-full">
-                                        Upload file
+                                        {uploadButtonLabel}
                                         <input
                                             type="file"
-                                            accept="image/*,video/*"
+                                            accept={computedAccept}
                                             onChange={(e) => {
                                                 const files = e.target.files;
                                                 if (!files || files.length === 0) {
@@ -437,13 +598,13 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                                 <div className="-mt-3 flex flex-col gap-2">
                                     <Input
                                         type="url"
-                                        placeholder="Paste image or video URL..."
+                                        placeholder={urlPlaceholder}
                                         value={imageUrl}
                                         onChange={(e) => setImageUrl(e.target.value)}
                                         className="w-full"
                                     />
                                     <Button onClick={handleUrlSubmit} disabled={!imageUrl.trim()} className="w-full">
-                                        Embed media
+                                        {embedButtonLabel}
                                     </Button>
                                 </div>
                             </Tab>

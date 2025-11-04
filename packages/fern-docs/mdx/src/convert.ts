@@ -244,15 +244,16 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
             throw new Error(`Unsupported node type: ${nodeType}`);
         }
 
-        // Handle image-upload custom element
+        // Handle image-upload and video-upload custom elements
         if (type === "mdxJsxFlowElement" && name === "div") {
             const maybeDataType = node?.attributes?.find((attr: any) => attr.name === "data-type")?.value;
-            if (maybeDataType === "image-upload") {
+            const allowedDataTypes = new Set(["image-upload", "video-upload"]);
+            if (allowedDataTypes.has(maybeDataType)) {
                 return {
                     type: "element",
                     tagName: "div",
                     properties: {
-                        dataType: "image-upload"
+                        dataType: maybeDataType
                     }
                 };
             }
@@ -349,9 +350,10 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
 
     // Default handler for base elements
     const baseElementHandler: ToMdastHandle = (state, element) => {
-        // Handle image-upload custom element separately
-        if (element?.properties?.dataType === "image-upload") {
-            return { type: "html", value: `<div data-type="image-upload" />` } as any;
+        // Handle image-upload and video-upload custom elements separately
+        const dataType = element?.properties?.dataType;
+        if (dataType === "image-upload" || dataType === "video-upload") {
+            return { type: "html", value: `<div data-type="${dataType}" />` } as any;
         }
 
         // Never use encoded mdx attribute for list elements (ul, ol, li) - always regenerate from structure

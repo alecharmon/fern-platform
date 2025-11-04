@@ -9,6 +9,7 @@ describe("mdxToHtml and htmlToMdx", () => {
     const mdxWithCustom = `# Hello <Custom value="foo" />`;
     const mdxWithImage = `# Document\n\n![Alt text](image.png "Title")\n\nSome text.`;
     const mdxWithImageUpload = `# Document\n\n<div data-type="image-upload" />\n\nSome text.`;
+    const mdxWithVideoUpload = `# Document\n\n<div data-type="video-upload" />\n\nSome text.`;
     it("mdxToHtml: simple mdx", () => {
         const result = mdxToHtml(simpleMdx);
         expect(result.html).toMatch(
@@ -94,6 +95,20 @@ describe("mdxToHtml and htmlToMdx", () => {
         const mdxResult = htmlToMdx(html, { frontmatter });
         expect(mdxResult.mdx).toContain("# Document");
         expect(mdxResult.mdx).toContain('<div data-type="image-upload"');
+        expect(mdxResult.mdx).toContain("Some text.");
+    });
+
+    it("mdxToHtml: with video-upload div", () => {
+        const result = mdxToHtml(mdxWithVideoUpload);
+        expect(result.html).toContain('<div data-type="video-upload"');
+        expect(result.frontmatter).toEqual(null);
+    });
+
+    it("htmlToMdx: round-trip with video-upload div", () => {
+        const { html, frontmatter } = mdxToHtml(mdxWithVideoUpload);
+        const mdxResult = htmlToMdx(html, { frontmatter });
+        expect(mdxResult.mdx).toContain("# Document");
+        expect(mdxResult.mdx).toContain('<div data-type="video-upload"');
         expect(mdxResult.mdx).toContain("Some text.");
     });
 

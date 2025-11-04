@@ -19,6 +19,11 @@ export interface MediaUploadNodeOptions {
      */
     type?: string | NodeType | undefined;
     /**
+     * The media type to upload (image, video, or auto for both).
+     * @default 'auto'
+     */
+    mediaType?: "image" | "video" | "auto";
+    /**
      * Acceptable file types for upload.
      * @default 'image/*,video/*'
      */
@@ -78,6 +83,7 @@ export const MediaUploadNode = Node.create<MediaUploadNodeOptions>({
     addOptions() {
         return {
             type: "media",
+            mediaType: "auto",
             accept: "image/*,video/*",
             limit: 1,
             maxSize: 0,
@@ -90,6 +96,9 @@ export const MediaUploadNode = Node.create<MediaUploadNodeOptions>({
 
     addAttributes() {
         return {
+            mediaType: {
+                default: this.options.mediaType
+            },
             accept: {
                 default: this.options.accept
             },
@@ -103,11 +112,22 @@ export const MediaUploadNode = Node.create<MediaUploadNodeOptions>({
     },
 
     parseHTML() {
-        return [{ tag: "div", attrs: { "data-type": "image-upload" } }];
+        return [
+            {
+                tag: 'div[data-type="image-upload"]',
+                getAttrs: () => ({ mediaType: "image" })
+            },
+            {
+                tag: 'div[data-type="video-upload"]',
+                getAttrs: () => ({ mediaType: "video" })
+            }
+        ];
     },
 
     renderHTML({ HTMLAttributes }) {
-        return ["div", mergeAttributes({ "data-type": "image-upload" }, HTMLAttributes)];
+        const mediaType = (HTMLAttributes.mediaType ?? "auto") as "image" | "video" | "auto";
+        const dataType = mediaType === "video" ? "video-upload" : "image-upload";
+        return ["div", mergeAttributes({ "data-type": dataType }, HTMLAttributes)];
     },
 
     addNodeView() {

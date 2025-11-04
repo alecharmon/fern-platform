@@ -63,7 +63,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
         group: "Media",
         keywords: ["image", "img", "picture", "media"],
         onSelect: ({ editor }) => {
-            editor.chain().focus().setMediaUploadNode().run();
+            editor.chain().focus().setMediaUploadNode({ mediaType: "image", accept: "image/*" }).run();
         }
     },
     {
@@ -74,7 +74,7 @@ export const slashMenuItems: (SuggestionItem & { aliases?: string[] })[] = [
         group: "Media",
         keywords: ["video", "embed", "iframe", "media"],
         onSelect: ({ editor }) => {
-            editor.chain().focus().setMediaUploadNode().run();
+            editor.chain().focus().setMediaUploadNode({ mediaType: "video", accept: "video/*" }).run();
         }
     },
     {
