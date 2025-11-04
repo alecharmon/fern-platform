@@ -3,10 +3,10 @@
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
 import { parseServerSidePathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
+import { t } from "@fern-docs/i18n";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { i18n } from "@/constants";
 import { NotFound404Tracker } from "../analytics/NotFound404Tracker";
 import ReturnHomeButton from "../ReturnHomeButton";
 export interface RouteSuggestion {
@@ -17,7 +17,7 @@ export interface RouteSuggestion {
     subtitle?: string;
 }
 
-export default function NotFoundContent() {
+export default function NotFoundContent({ lang }: { lang: string }) {
     const pathname = usePathname();
     const [suggestedRoutes, setSuggestedRoutes] = useState<RouteSuggestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -58,14 +58,14 @@ export default function NotFoundContent() {
             <div className="flex h-[calc(100svh-var(--header-height)-6rem)] w-screen flex-col items-center justify-center gap-6">
                 <GradientExclamation />
                 <div className="flex flex-col text-center gap-2">
-                    <h1>{i18n.errors.pageNotFound}</h1>
+                    <h1>{t(lang).errors.pageNotFound}</h1>
                     <p className="text-(color:--grayscale-a9)">
                         We&apos;ve been notified so we can fix this for next time.
                     </p>
                 </div>
 
                 {isLoading && requestedPath && requestedPath !== "/" && (
-                    <div className="text-sm text-(color:--grayscale-a11)">{i18n.errors.findingSimilarPages}</div>
+                    <div className="text-sm text-(color:--grayscale-a11)">{t(lang).errors.findingSimilarPages}</div>
                 )}
 
                 {!isLoading && suggestedRoutes.length > 0 && (
@@ -94,7 +94,7 @@ export default function NotFoundContent() {
                     </div>
                 )}
 
-                <ReturnHomeButton />
+                <ReturnHomeButton lang={lang} />
             </div>
         </>
     );

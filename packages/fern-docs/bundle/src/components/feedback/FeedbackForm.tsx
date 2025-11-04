@@ -7,14 +7,13 @@ import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { FernRadioGroup } from "@fern-docs/components/FernRadioGroup";
 import { FernTextarea } from "@fern-docs/components/FernTextarea";
+import { t } from "@fern-docs/i18n";
 import { useKeyboardPress } from "@fern-ui/react-commons";
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
 import { type FC, type FormEvent, useCallback, useMemo, useRef, useState } from "react";
-
-import { i18n } from "@/constants";
 
 const MotionFernRadioGroup = m.create(FernRadioGroup);
 
@@ -27,6 +26,7 @@ interface FeedbackFormProps {
         showEmailInput: boolean | "indeterminate";
     }) => void;
     layoutDensity?: "condensed" | "verbose";
+    lang: string;
 }
 
 const SHOW_EMAIL_INPUT_ATOM = atomWithStorage<boolean | "indeterminate">("feedback-show-email-input", false);
@@ -34,7 +34,7 @@ const EMAIL_ATOM = atomWithStorage<string>("feedback-email", "");
 
 const FEEDBACK_FORM_REASON_ID = "feedback-reason";
 
-export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layoutDensity = "verbose" }) => {
+export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layoutDensity = "verbose", lang }) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [feedbackId, setFeedbackId] = useState<string>();
     const [feedbackMessage, setFeedbackMessage] = useState<string>("");
@@ -43,12 +43,13 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
 
     const legend =
         isHelpful === "yes"
-            ? i18n.feedback.whatDidYouLike
+            ? t(lang).feedback.whatDidYouLike
             : isHelpful === "no"
-              ? i18n.feedback.whatWentWrong
-              : i18n.feedback.feedback;
+              ? t(lang).feedback.whatWentWrong
+              : t(lang).feedback.feedback;
     const feedbackOptions = useMemo<FernDropdown.Option[]>(() => {
-        const options = isHelpful === "yes" ? POSITIVE_FEEDBACK : isHelpful === "no" ? NEGATIVE_FEEDBACK : [];
+        const options =
+            isHelpful === "yes" ? POSITIVE_FEEDBACK(lang) : isHelpful === "no" ? NEGATIVE_FEEDBACK(lang) : [];
         const transformedOptions: FernDropdown.Option[] = options.map(
             (option): FernDropdown.Option => ({
                 type: "value",
@@ -61,7 +62,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
                             ref={textareaRef}
                             // autoFocus={true}
                             className="mt-2 w-full"
-                            placeholder={`(Optional) ${i18n.feedback.tellUsMoreAboutExperience}`}
+                            placeholder={`(Optional) ${t(lang).feedback.tellUsMoreAboutExperience}`}
                             onValueChange={setFeedbackMessage}
                             value={feedbackMessage}
                         />
@@ -73,14 +74,14 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
             transformedOptions.push({
                 type: "value",
                 value: "other",
-                label: i18n.feedback.anotherReason,
+                label: t(lang).feedback.anotherReason,
                 children: (active) =>
                     active ? (
                         <FernTextarea
                             ref={textareaRef}
                             autoFocus={true}
                             className="mt-2 w-full"
-                            placeholder={i18n.feedback.tellUsMoreAboutExperience}
+                            placeholder={t(lang).feedback.tellUsMoreAboutExperience}
                             onValueChange={setFeedbackMessage}
                             value={feedbackMessage}
                         />
@@ -88,7 +89,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
             });
         }
         return transformedOptions;
-    }, [isHelpful, feedbackMessage, layoutDensity]);
+    }, [isHelpful, feedbackMessage, layoutDensity, lang]);
 
     useKeyboardPress({
         key: "Escape",
@@ -143,7 +144,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
                 <FernTextarea
                     ref={textareaRef}
                     className="mt-2 w-full"
-                    placeholder={i18n.feedback.helpUsImproveDocs}
+                    placeholder={t(lang).feedback.helpUsImproveDocs}
                     onValueChange={setFeedbackMessage}
                     value={feedbackMessage}
                 />
@@ -155,7 +156,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
 
                     <div className="mt-4">
                         <FernCheckbox
-                            label={i18n.feedback.yesOkayToFollowUp}
+                            label={t(lang).feedback.yesOkayToFollowUp}
                             checked={showEmailInput}
                             onCheckedChange={setShowEmailInput}
                             autoFocus={false}
@@ -182,7 +183,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
                 disabled={feedbackId == null}
                 size={layoutDensity === "verbose" ? "large" : "normal"}
             >
-                {i18n.feedback.feedback}
+                {t(lang).feedback.feedback}
             </FernButton>
         </form>
     );
@@ -195,56 +196,56 @@ interface FeedbackItem {
     satisfied: boolean;
 }
 
-export const POSITIVE_FEEDBACK: FeedbackItem[] = [
+export const POSITIVE_FEEDBACK = (lang: string): FeedbackItem[] => [
     {
         feedbackId: "accurate",
-        title: i18n.feedbackQuality.accurate,
-        description: i18n.feedbackQuality.accuratelyDescribes,
+        title: t(lang).feedbackQuality.accurate,
+        description: t(lang).feedbackQuality.accuratelyDescribes,
         satisfied: true
     },
     {
         feedbackId: "solved-my-issue",
-        title: i18n.feedback.solvedMyIssue,
-        description: i18n.feedback.helpedMeResolveIssue,
+        title: t(lang).feedback.solvedMyIssue,
+        description: t(lang).feedback.helpedMeResolveIssue,
         satisfied: true
     },
     {
         feedbackId: "easy-to-understand",
-        title: i18n.feedbackQuality.easyToUnderstand,
-        description: i18n.feedbackQuality.easyToFollowAndComprehend,
+        title: t(lang).feedbackQuality.easyToUnderstand,
+        description: t(lang).feedbackQuality.easyToFollowAndComprehend,
         satisfied: true
     },
     {
         feedbackId: "product-adoption",
-        title: i18n.feedback.helpedMeDecideToUse,
-        description: i18n.feedback.convincedMeToAdopt,
+        title: t(lang).feedback.helpedMeDecideToUse,
+        description: t(lang).feedback.convincedMeToAdopt,
         satisfied: true
     }
 ];
 
-export const NEGATIVE_FEEDBACK: FeedbackItem[] = [
+export const NEGATIVE_FEEDBACK = (lang: string): FeedbackItem[] => [
     {
         feedbackId: "inaccurate",
-        title: i18n.feedbackQuality.inaccurate,
-        description: i18n.feedback.doesntAccuratelyDescribe,
+        title: t(lang).feedbackQuality.inaccurate,
+        description: t(lang).feedback.doesntAccuratelyDescribe,
         satisfied: false
     },
     {
         feedbackId: "hard-to-follow",
-        title: i18n.feedback.couldntFindWhatLookingFor,
-        description: i18n.feedback.missingImportantInfo,
+        title: t(lang).feedback.couldntFindWhatLookingFor,
+        description: t(lang).feedback.missingImportantInfo,
         satisfied: true
     },
     {
         feedbackId: "hard-to-understand",
-        title: i18n.feedbackQuality.hardToUnderstand,
-        description: i18n.feedback.tooComplicatedOrUnclear,
+        title: t(lang).feedbackQuality.hardToUnderstand,
+        description: t(lang).feedback.tooComplicatedOrUnclear,
         satisfied: true
     },
     {
         feedbackId: "code-sample-errors",
-        title: i18n.feedback.codeSampleErrors,
-        description: i18n.feedback.oneOrMoreCodeSamplesIncorrect,
+        title: t(lang).feedback.codeSampleErrors,
+        description: t(lang).feedback.oneOrMoreCodeSamplesIncorrect,
         satisfied: true
     }
 ];

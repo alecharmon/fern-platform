@@ -10,12 +10,12 @@ import { useCommandUx } from "../shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 export const DesktopCommandInputError = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<typeof TooltipTrigger>>(
-    ({ children, asChild, ...props }, ref) => {
+    ({ children, asChild, lang, ...props }, ref) => {
         const { inputError } = useCommandUx();
         if (inputError == null) {
             const Comp = asChild ? Slot : "button";
             return (
-                <Comp {...props} ref={ref}>
+                <Comp {...props} ref={ref} lang={lang}>
                     {children}
                 </Comp>
             );

@@ -3,7 +3,7 @@ import "server-only";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 
-import { i18n } from "@/constants";
+import { t } from "@fern-docs/i18n";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "../endpoints/EndpointRequestSection";
@@ -16,7 +16,7 @@ export interface HoveringProps {
     isHovering: boolean;
 }
 
-export async function GrpcContentLeft({ context: { grpc, types } }: { context: GrpcContext }) {
+export async function GrpcContentLeft({ context: { grpc, types }, lang }: { context: GrpcContext; lang: string }) {
     return (
         <>
             <TypeDefinitionAnchorPart part="request">
@@ -24,8 +24,8 @@ export async function GrpcContentLeft({ context: { grpc, types } }: { context: G
                     <GrpcSection
                         title={
                             isStreaming(grpc.protocol, "request")
-                                ? i18n.playground.streamRequest
-                                : i18n.apiReference.request
+                                ? t(lang).playground.streamRequest
+                                : t(lang).apiReference.request
                         }
                         titleOverride={
                             isGrpcTypeAlias(grpc.requests[0], grpc.protocol?.type)
@@ -37,12 +37,12 @@ export async function GrpcContentLeft({ context: { grpc, types } }: { context: G
                                 size="sm"
                                 className="text-(color:--grayscale-a11)"
                                 mdx={grpc.requests[0].description}
-                                fallback={createEndpointRequestDescriptionFallback(grpc.requests[0], types)}
+                                fallback={createEndpointRequestDescriptionFallback(grpc.requests[0], types, lang)}
                             />
                         }
                     >
                         <TypeDefinitionAnchorPart part="body">
-                            <EndpointRequestSection request={grpc.requests[0]} types={types} />
+                            <EndpointRequestSection request={grpc.requests[0]} types={types} lang={lang} />
                         </TypeDefinitionAnchorPart>
                     </GrpcSection>
                 )}
@@ -53,8 +53,8 @@ export async function GrpcContentLeft({ context: { grpc, types } }: { context: G
                         <GrpcSection
                             title={
                                 isStreaming(grpc.protocol, "response")
-                                    ? i18n.playground.streamResponse
-                                    : i18n.apiReference.response
+                                    ? t(lang).playground.streamResponse
+                                    : t(lang).apiReference.response
                             }
                             titleOverride={
                                 isGrpcTypeAlias(grpc.responses[0], grpc.protocol?.type)
@@ -66,12 +66,18 @@ export async function GrpcContentLeft({ context: { grpc, types } }: { context: G
                                     size="sm"
                                     className="text-(color:--grayscale-a11)"
                                     mdx={grpc.responses[0].description}
-                                    fallback={<ResponseSummaryFallback response={grpc.responses[0]} types={types} />}
+                                    fallback={
+                                        <ResponseSummaryFallback
+                                            response={grpc.responses[0]}
+                                            types={types}
+                                            lang={lang}
+                                        />
+                                    }
                                 />
                             }
                         >
                             <TypeDefinitionAnchorPart part="body">
-                                <EndpointResponseSection body={grpc.responses[0].body} types={types} />
+                                <EndpointResponseSection body={grpc.responses[0].body} types={types} lang={lang} />
                             </TypeDefinitionAnchorPart>
                         </GrpcSection>
                     )}

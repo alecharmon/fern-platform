@@ -1,11 +1,11 @@
 "use client";
 
 import { FernButton } from "@fern-docs/components/FernButton";
+import { t } from "@fern-docs/i18n";
 import { Rss } from "lucide-react";
 import React from "react";
-import { i18n } from "@/constants";
 
-export function RSSFeedButton() {
+export function RSSFeedButton({ lang }: { lang: string }) {
     const getRssUrl = () => {
         const currentUrl = window.location.href;
         return `${currentUrl}.rss`;
@@ -24,7 +24,7 @@ export function RSSFeedButton() {
             className="fern-rss-feed-button"
             rightIcon={<Rss className="text-(color:--accent-a11) size-3.5" />}
         >
-            {i18n.documentation.subscribeViaRss}
+            {t(lang).documentation.subscribeViaRss}
         </FernButton>
     );
 }

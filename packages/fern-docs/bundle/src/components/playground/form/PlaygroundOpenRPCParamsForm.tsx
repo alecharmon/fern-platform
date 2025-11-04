@@ -14,6 +14,7 @@ interface PlaygroundOpenRPCParamsFormProps {
     types: Record<string, TypeDefinition>;
     disabled?: boolean;
     defaultValue?: unknown;
+    lang: string;
 }
 
 export function PlaygroundOpenRPCParamsForm({
@@ -21,7 +22,8 @@ export function PlaygroundOpenRPCParamsForm({
     shape,
     onChange,
     value,
-    types
+    types,
+    lang
 }: PlaygroundOpenRPCParamsFormProps): ReactElement<any> {
     const { properties, extraProperties } = useMemo(() => unwrapObjectType(shape, types), [shape, types]);
     return (
@@ -32,6 +34,7 @@ export function PlaygroundOpenRPCParamsForm({
             onChange={onChange}
             value={value}
             types={types}
+            lang={lang}
         />
     );
 }

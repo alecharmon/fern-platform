@@ -10,15 +10,17 @@ import { EndpointErrorGroupClient } from "./EndpointErrorGroupClient";
 
 export function EndpointErrorGroup({
     errors,
-    types
+    types,
+    lang
 }: {
     errors: ErrorResponse[];
     types: Record<string, ApiDefinition.TypeDefinition>;
+    lang: string;
 }) {
     return (
         <EndpointErrorGroupClient
             errors={sortBy(errors, [(e) => e.statusCode, (e) => e.name]).map((error) => ({
-                children: <EndpointError error={error} availability={error.availability} types={types} />,
+                children: <EndpointError error={error} availability={error.availability} types={types} lang={lang} />,
                 data: error
             }))}
         />

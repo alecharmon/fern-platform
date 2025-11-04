@@ -24,11 +24,13 @@ export interface ProductDropdownItem {
 export function ProductDropdownClient({
     products,
     fallbackProduct,
-    useDenseLayout = false
+    useDenseLayout = false,
+    lang
 }: {
     products: ProductDropdownItem[];
     fallbackProduct: FernNavigation.ProductNode;
     useDenseLayout?: boolean;
+    lang: string;
 }) {
     const isDesktop = useIsDesktop();
     const currentProductId = useCurrentProductId();
@@ -80,6 +82,7 @@ export function ProductDropdownClient({
                 className: "fern-product-selector-radio-group"
             }}
             searchable={products.length > 12}
+            lang={lang}
         >
             <div
                 className={cn("product-dropdown-trigger hidden h-9", {

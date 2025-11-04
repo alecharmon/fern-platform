@@ -4,12 +4,19 @@ import { Badge } from "@fern-docs/components/badges";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { ChevronDown } from "lucide-react";
-
-import { i18n } from "@/constants";
 import { useSelectedFilters, useSetSelectedFilters } from "@/state/search";
 
-export function PageFilters({ filters, forcePillDisplay }: { filters: string[]; forcePillDisplay?: boolean }) {
+export function PageFilters({
+    filters,
+    forcePillDisplay,
+    lang
+}: {
+    filters: string[];
+    forcePillDisplay?: boolean;
+    lang: string;
+}) {
     const selectedFilters = useSelectedFilters();
     const setSelectedFilters = useSetSelectedFilters();
 
@@ -42,10 +49,11 @@ export function PageFilters({ filters, forcePillDisplay }: { filters: string[]; 
                 }))}
                 value={selectedFilters.length > 0 ? selectedFilters : ["All"]}
                 onValueChange={handleFilterClick}
+                lang={lang}
             >
                 <FernButton variant="outlined">
                     <div className="flex w-[10rem] items-center justify-between gap-2 truncate">
-                        {filterText(selectedFilters)}
+                        {filterText(selectedFilters, lang)}
                         <ChevronDown className="size-icon" />
                     </div>
                 </FernButton>
@@ -76,9 +84,9 @@ export function PageFilters({ filters, forcePillDisplay }: { filters: string[]; 
     );
 }
 
-function filterText(selectedFilters: string[]) {
+function filterText(selectedFilters: string[], lang: string) {
     if (selectedFilters.length === 0) {
-        return i18n.search.selectFilters;
+        return t(lang).search.selectFilters;
     }
 
     if (selectedFilters.join(", ").length < 12) {

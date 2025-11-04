@@ -2,9 +2,10 @@
 
 import { Badge } from "@fern-docs/components/badges";
 import { Button } from "@fern-docs/components/button";
+import { t } from "@fern-docs/i18n";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 import { ListFilter, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { getFacetDisplay, toFilterOptions } from "../../utils/facet-display";
 import { Filter } from "../icons/filter";
@@ -26,11 +27,13 @@ import { DesktopFilterDropdownMenu } from "./desktop-filter-dropdown-menu";
 export const FilterDropdownMenu = ({
     filters,
     open,
-    onOpenChange
+    onOpenChange,
+    lang
 }: {
     filters: readonly FacetFilter[];
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    lang: string;
 }) => {
     const { clear } = useSearchBox();
     const { setFilters } = useFacetFilters();
@@ -75,7 +78,7 @@ export const FilterDropdownMenu = ({
                             >
                                 <ListFilter className="mr-2 h-4 w-4" />
                                 <span className="flex flex-1 flex-row items-center gap-1">
-                                    Filter to {getFacetDisplay(filter.facet, filter.value)}
+                                    {t(lang).search.filterTo} {getFacetDisplay(filter.facet, filter.value)}
                                 </span>
                                 <Badge size="sm" rounded className="ml-auto">
                                     {filter.count}
@@ -92,11 +95,13 @@ export const FilterDropdownMenu = ({
 export const AddFilterButton = ({
     filters,
     open,
-    onOpenChange
+    onOpenChange,
+    lang
 }: {
     filters: readonly FacetFilter[];
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    lang: string;
 }) => {
     const { clear } = useSearchBox();
     const { setFilters } = useFacetFilters();
@@ -132,7 +137,7 @@ export const AddFilterButton = ({
                             >
                                 <ListFilter className="mr-2 h-4 w-4" />
                                 <span className="flex flex-1 flex-row items-center gap-1">
-                                    Filter to {getFacetDisplay(filter.facet, filter.value)}
+                                    {t(lang).search.filterTo} {getFacetDisplay(filter.facet, filter.value)}
                                 </span>
                                 <Badge size="sm" rounded className="ml-auto">
                                     {filter.count}
@@ -146,7 +151,7 @@ export const AddFilterButton = ({
     );
 };
 
-export const FilterManager = ({ filters }: { filters: readonly FacetFilter[] }) => {
+export const FilterManager = ({ filters, lang }: { filters: readonly FacetFilter[]; lang: string }) => {
     const { setFilters } = useFacetFilters();
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
@@ -177,6 +182,7 @@ export const FilterManager = ({ filters }: { filters: readonly FacetFilter[] }) 
                     filters={filters}
                     open={openDropdown === "filter"}
                     onOpenChange={handleFilterDropdownChange}
+                    lang={lang}
                 />
             ) : (
                 <>
@@ -191,12 +197,14 @@ export const FilterManager = ({ filters }: { filters: readonly FacetFilter[] }) 
                             className="z-[9999]"
                             open={openDropdown === `badge-${index}`}
                             onOpenChange={handleFilterBadgeChange(index)}
+                            lang={lang}
                         />
                     ))}
                     <AddFilterButton
                         filters={filters}
                         open={openDropdown === "add"}
                         onOpenChange={handleAddFilterChange}
+                        lang={lang}
                     />
                 </>
             )}

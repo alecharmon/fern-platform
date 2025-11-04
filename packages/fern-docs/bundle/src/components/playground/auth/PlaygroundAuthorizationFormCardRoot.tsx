@@ -3,6 +3,7 @@
 import type { APIV1Read } from "@fern-api/fdr-sdk";
 import { Button } from "@fern-docs/components/button";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
+import { t } from "@fern-docs/i18n";
 import { useBooleanState } from "@fern-ui/react-commons";
 import { noop } from "es-toolkit/function";
 import { useAtom, useSetAtom } from "jotai";
@@ -72,7 +73,15 @@ export function usePlaygroundAuthorizationFormCard() {
     return React.useContext(PlaygroundAuthorizationFormCardCtx);
 }
 
-export function PlaygroundAuthorizationCardTrigger({ auth, disabled }: { auth: APIV1Read.ApiAuth; disabled: boolean }) {
+export function PlaygroundAuthorizationCardTrigger({
+    auth,
+    disabled,
+    lang
+}: {
+    auth: APIV1Read.ApiAuth;
+    disabled: boolean;
+    lang: string;
+}) {
     const { open, toggleOpen, setOpen } = usePlaygroundAuthorizationFormCard();
     const apiKeyInjection = useApiKeyInjectionConfig();
     return apiKeyInjection.enabled ? (
@@ -82,9 +91,16 @@ export function PlaygroundAuthorizationCardTrigger({ auth, disabled }: { auth: A
             disabled={disabled}
             toggleOpen={toggleOpen}
             onClose={() => setOpen(false)}
+            lang={lang}
         />
     ) : (
-        <PlaygroundCardTriggerManual auth={auth} disabled={disabled} isOpen={open} toggleOpen={toggleOpen} />
+        <PlaygroundCardTriggerManual
+            auth={auth}
+            disabled={disabled}
+            isOpen={open}
+            toggleOpen={toggleOpen}
+            lang={lang}
+        />
     );
 }
 
@@ -102,23 +118,23 @@ export function useClosePlaygroundAuthorizationFormCard() {
     return () => setOpen(false);
 }
 
-export function PlaygroundAuthorizationFormCardResetButton() {
+export function PlaygroundAuthorizationFormCardResetButton({ lang }: { lang: string }) {
     const { apiKey, resetForm } = usePlaygroundAuthorizationFormCard();
     if (apiKey == null) {
         return null;
     }
     return (
         <Button onClick={resetForm} variant="outline">
-            Reset token to default
+            {t(lang).buttons.resetTokenToDefault}
         </Button>
     );
 }
 
-export function PlaygroundAuthorizationFormCardCloseButton() {
+export function PlaygroundAuthorizationFormCardCloseButton({ lang }: { lang: string }) {
     const { setOpen } = usePlaygroundAuthorizationFormCard();
     return (
         <Button onClick={() => setOpen(false)} variant="outline">
-            Close
+            {t(lang).buttons.close}
         </Button>
     );
 }

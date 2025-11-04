@@ -4,18 +4,25 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { createEndpointContext, createWebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
+import { t } from "@fern-docs/i18n";
 import { ArrowLeft } from "lucide-react";
-
-import { i18n } from "@/constants";
 import { ApiDefinitionIdProvider } from "@/contexts/ApiDefinitionIdContext";
 
 import { PlaygroundAuthorizationFormCard } from "./auth";
 import { PlaygroundEndpoint } from "./endpoint";
 import { PlaygroundWebSocket } from "./websocket";
 
-export async function ExplorerContent({ loader, node }: { loader: DocsLoader; node: NavigationNodePage }) {
+export async function ExplorerContent({
+    loader,
+    node,
+    lang
+}: {
+    loader: DocsLoader;
+    node: NavigationNodePage;
+    lang: string;
+}) {
     if (!FernNavigation.isApiLeaf(node)) {
-        return <NoEndpointSelected />;
+        return <NoEndpointSelected lang={lang} />;
     }
 
     let api: ApiDefinition.ApiDefinition | undefined;
@@ -31,7 +38,7 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
     }
 
     if (api == null) {
-        return <NoEndpointSelected />;
+        return <NoEndpointSelected lang={lang} />;
     }
 
     try {
@@ -55,6 +62,7 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
                 loader={loader}
                 apiDefinitionId={node.apiDefinitionId}
                 auth={context.auths[0]}
+                lang={lang}
             />
         );
         return (
@@ -64,6 +72,7 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
                     authForm={authForm}
                     dynamicIRsByLanguage={dynamicIRsByLanguage}
                     disableProxy={disableProxy}
+                    lang={lang}
                 />
             </ApiDefinitionIdProvider>
         );
@@ -75,22 +84,23 @@ export async function ExplorerContent({ loader, node }: { loader: DocsLoader; no
                 loader={loader}
                 apiDefinitionId={node.apiDefinitionId}
                 auth={context.auths[0]}
+                lang={lang}
             />
         );
         return (
             <ApiDefinitionIdProvider value={node.apiDefinitionId}>
-                <PlaygroundWebSocket context={context} authForm={authForm} />
+                <PlaygroundWebSocket context={context} authForm={authForm} lang={lang} />
             </ApiDefinitionIdProvider>
         );
     }
-    return <NoEndpointSelected />;
+    return <NoEndpointSelected lang={lang} />;
 }
 
-export function NoEndpointSelected() {
+export function NoEndpointSelected({ lang }: { lang: string }) {
     return (
         <div className="flex size-full flex-col items-center justify-center">
             <ArrowLeft className="t-muted mb-2 size-8" />
-            <h6 className="t-muted">{i18n.playground.selectAnEndpointToGetStarted}</h6>
+            <h6 className="t-muted">{t(lang).playground.selectAnEndpointToGetStarted}</h6>
         </div>
     );
 }

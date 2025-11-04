@@ -2,6 +2,7 @@ import { cn } from "../cn";
 import { EditThisPageButton } from "../EditThisPage";
 
 export function AbstractFooterLayout({
+    lang,
     feedback,
     hideNavLinks,
     editThisPageUrl,
@@ -9,6 +10,7 @@ export function AbstractFooterLayout({
     className,
     builtWithFern
 }: {
+    lang: string;
     feedback?: React.ReactNode;
     hideNavLinks?: boolean;
     editThisPageUrl?: string;
@@ -21,7 +23,7 @@ export function AbstractFooterLayout({
         <footer className={cn("fern-layout-footer not-prose", className)}>
             <div className="fern-layout-footer-toolbar">
                 {feedback}
-                <EditThisPageButton editThisPageUrl={editThisPageUrl} />
+                <EditThisPageButton editThisPageUrl={editThisPageUrl} lang={lang} />
             </div>
 
             {!hideNavLinks && bottomNavigation}

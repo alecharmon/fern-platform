@@ -1,6 +1,6 @@
-import { isSelfHosted } from "@fern-api/docs-server";
 import { Button } from "@fern-docs/components/button";
 import { Kbd } from "@fern-docs/components/kbd";
+import { t } from "@fern-docs/i18n";
 import { tunnel, usePlatformKbdShortcut } from "@fern-ui/react-commons";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
@@ -15,7 +15,6 @@ import {
     useEffect,
     useRef
 } from "react";
-
 import * as Command from "../cmdk";
 import { useFacetFilters } from "../search/useFacetFilters";
 import { useSearchBox } from "../search/useSearchBox";
@@ -28,6 +27,7 @@ export interface DesktopCommandProps {
     onEscapeKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
     onPopState?: (e: KeyboardEvent<HTMLDivElement>) => void;
     placeholder?: string;
+    lang: string;
 }
 
 export const beforeInput = tunnel();
@@ -39,7 +39,7 @@ export const afterInput = tunnel();
 const DesktopCommand = forwardRef<
     HTMLDivElement,
     DesktopCommandProps & ComponentPropsWithoutRef<typeof DesktopCommandRoot>
->(({ onPopState, children, placeholder, asChild, ...props }, forwardedRef) => {
+>(({ onPopState, children, placeholder, asChild, lang, ...props }, forwardedRef) => {
     const { filters, handlePopState: handlePopFilters } = useFacetFilters();
     const ref = useRef<HTMLDivElement>(null);
 
@@ -65,73 +65,79 @@ const DesktopCommand = forwardRef<
             data-fern-search="desktop-command"
             data-mode={"search"}
         >
-            <DesktopCommandContent asChild={asChild}>{children}</DesktopCommandContent>
+            <DesktopCommandContent asChild={asChild} lang={lang}>
+                {children}
+            </DesktopCommandContent>
         </DesktopCommandRoot>
     );
 });
 
 DesktopCommand.displayName = "DesktopCommand";
 
-export const DesktopCommandContent = memo(({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const scrollRef = useRef<HTMLDivElement>(null);
-    return (
-        <>
-            <div
-                className="cursor-text"
-                onClick={() => {
-                    inputRef.current?.focus();
-                }}
-            >
-                <DesktopCommandBadges />
+export const DesktopCommandContent = memo(
+    ({ children, asChild, lang }: { children: React.ReactNode; asChild?: boolean; lang: string }) => {
+        const inputRef = useRef<HTMLInputElement>(null);
+        const scrollRef = useRef<HTMLDivElement>(null);
+        return (
+            <>
+                <div
+                    className="cursor-text"
+                    onClick={() => {
+                        inputRef.current?.focus();
+                    }}
+                >
+                    <DesktopCommandBadges />
 
-                <div data-cmdk-fern-header="">
-                    <beforeInput.Out />
+                    <div data-cmdk-fern-header="">
+                        <beforeInput.Out />
 
-                    <DesktopCommandInputError asChild>
-                        <DesktopCommandInputSearch ref={inputRef} />
-                    </DesktopCommandInputError>
+                        <DesktopCommandInputError asChild>
+                            <DesktopCommandInputSearch ref={inputRef} lang={lang} />
+                        </DesktopCommandInputError>
 
-                    <afterInput.Out />
+                        <afterInput.Out />
+                    </div>
                 </div>
-            </div>
 
-            <Command.List ref={scrollRef} tabIndex={-1} asChild={asChild}>
-                {children}
-            </Command.List>
-        </>
-    );
-});
+                <Command.List ref={scrollRef} tabIndex={-1} asChild={asChild}>
+                    {children}
+                </Command.List>
+            </>
+        );
+    }
+);
 
 DesktopCommandContent.displayName = "DesktopCommandContent";
 
 const DesktopCommandInputSearch = memo(
-    forwardRef<HTMLInputElement, ComponentPropsWithoutRef<typeof DesktopCommandInput>>((props, forwardedRef) => {
-        const inputRef = useRef<HTMLInputElement>(null);
-        const { query, refine } = useSearchBox();
-        useEffect(() => {
-            setTimeout(() => {
-                if (document.activeElement !== inputRef.current) {
-                    inputRef.current?.focus();
-                }
+    forwardRef<HTMLInputElement, ComponentPropsWithoutRef<typeof DesktopCommandInput> & { lang: string }>(
+        ({ lang, ...props }, forwardedRef) => {
+            const inputRef = useRef<HTMLInputElement>(null);
+            const { query, refine } = useSearchBox();
+            useEffect(() => {
+                setTimeout(() => {
+                    if (document.activeElement !== inputRef.current) {
+                        inputRef.current?.focus();
+                    }
+                });
             });
-        });
-        return (
-            <DesktopCommandInput
-                inputMode="search"
-                autoFocus
-                value={query}
-                maxLength={100}
-                placeholder="Search"
-                {...props}
-                ref={composeRefs(inputRef, forwardedRef)}
-                onValueChange={(value) => {
-                    refine(value);
-                    props.onValueChange?.(value);
-                }}
-            />
-        );
-    })
+            return (
+                <DesktopCommandInput
+                    inputMode="search"
+                    autoFocus
+                    value={query}
+                    maxLength={100}
+                    placeholder={t(lang).search.search}
+                    {...props}
+                    ref={composeRefs(inputRef, forwardedRef)}
+                    onValueChange={(value) => {
+                        refine(value);
+                        props.onValueChange?.(value);
+                    }}
+                />
+            );
+        }
+    )
 );
 
 DesktopCommandInputSearch.displayName = "DesktopCommandInputSearch";

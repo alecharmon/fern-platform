@@ -13,9 +13,9 @@ import { FernInput } from "@fern-docs/components/FernInput";
 import { FernNumericInput } from "@fern-docs/components/FernNumericInput";
 import { FernSwitch } from "@fern-docs/components/FernSwitch";
 import { FernTextarea } from "@fern-docs/components/FernTextarea";
+import { t } from "@fern-docs/i18n";
 import { memo, type ReactElement, useCallback, useState } from "react";
 import { withErrorBoundary } from "@/components/error-boundary";
-import { i18n } from "@/constants";
 
 import { IdempotentInputGroup } from "../IdempotentInputGroup";
 import { PasswordInputGroup } from "../PasswordInputGroup";
@@ -47,10 +47,11 @@ interface PlaygroundTypeReferenceFormProps {
     disabled?: boolean;
     defaultValue?: unknown;
     indent?: boolean;
+    lang: string;
 }
 
 const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProps>((props) => {
-    const { id, property, shape, onChange, value, types, indent = true, defaultValue, disabled = false } = props;
+    const { id, property, shape, onChange, value, types, indent = true, defaultValue, disabled = false, lang } = props;
     const { isNullSelected } = usePlaygroundTypeReferenceFormContext();
     const onRemove = useCallback(() => {
         onChange(undefined);
@@ -87,7 +88,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 isNullSelected={isNullSelected}
             >
                 <span className={cn("block w-full", isNullSelected && "invisible")}>
-                    <PlaygroundEnumForm enumValues={values} onChange={onChange} value={value} id={id} />
+                    <PlaygroundEnumForm enumValues={values} onChange={onChange} value={value} id={id} lang={lang} />
                 </span>
             </WithLabel>
         ),
@@ -128,6 +129,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         value={value}
                         id={id}
                         types={types}
+                        lang={lang}
                         // TODO: add default value
                     />
                 </span>
@@ -359,7 +361,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                             <FernDatetimeInput
                                 id={id}
                                 className="w-full"
-                                placeholder={i18n.dataTypes.dateTimeFormat}
+                                placeholder={t(lang).dataTypes.dateTimeFormat}
                                 value={typeof value === "string" ? value : undefined}
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
@@ -427,7 +429,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 id={id}
                                 type="date"
                                 className="w-full"
-                                placeholder={i18n.dataTypes.dateFormat}
+                                placeholder={t(lang).dataTypes.dateFormat}
                                 value={typeof value === "string" ? value : undefined}
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
@@ -477,6 +479,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         value={value}
                         id={id}
                         types={types}
+                        lang={lang}
                         // TODO: add default value
                     />
                 </span>
@@ -499,6 +502,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         value={value}
                         id={id}
                         types={types}
+                        lang={lang}
                         // TODO: add default value
                     />
                 </span>
@@ -522,6 +526,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         onChange={onChange}
                         value={value}
                         types={types}
+                        lang={lang}
                         // TODO: add default value
                     />
                 </span>

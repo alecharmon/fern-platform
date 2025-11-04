@@ -8,12 +8,12 @@ import { AvailabilityBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
+import { t } from "@fern-docs/i18n";
 import { ArrowDown, ArrowUp, Wifi } from "lucide-react";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { PlaygroundButton } from "@/components/playground/PlaygroundButton";
 import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKeyboardTrigger";
-import { i18n } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -40,7 +40,8 @@ export async function WebSocketContent({
     action,
     hideFeedback,
     pageActionOptions,
-    markdownPromise
+    markdownPromise,
+    lang
 }: {
     serialize: MdxSerializer;
     context: WebSocketContext;
@@ -50,6 +51,7 @@ export async function WebSocketContent({
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
+    lang: string;
 }) {
     const { channel, node, types, globalHeaders } = context;
 
@@ -105,9 +107,15 @@ export async function WebSocketContent({
                     action={action}
                     slug={node.slug}
                     pageActionOptions={pageActionOptions}
+                    lang={lang}
                 >
                     <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
-                        <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} className="hidden lg:flex" method="WSS" />
+                        <EndpointUrlWithPlaygroundBaseUrl
+                            endpoint={channel}
+                            className="hidden lg:flex"
+                            method="WSS"
+                            lang={lang}
+                        />
                     </ApiReferenceClientWrapper>
                 </PageHeader>
             }
@@ -115,16 +123,16 @@ export async function WebSocketContent({
                 <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
                     <div className="not-prose grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6">
                         <TitledExample
-                            title={i18n.apiReference.handshake}
-                            tryIt={node != null ? <PlaygroundButtonTray state={node} /> : undefined}
+                            title={t(lang).apiReference.handshake}
+                            tryIt={node != null ? <PlaygroundButtonTray state={node} lang={lang} /> : undefined}
                             disableClipboard={true}
                         >
                             <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
-                                <HandshakeExample channel={channel} example={example} />
+                                <HandshakeExample channel={channel} example={example} lang={lang} />
                             </FernScrollArea>
                         </TitledExample>
                         {exampleMessages.length > 0 && (
-                            <TitledExample title={i18n.apiReference.messages} className="min-h-0 shrink">
+                            <TitledExample title={t(lang).apiReference.messages} className="min-h-0 shrink">
                                 <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
                                     <WebSocketMessages messages={exampleMessages} />
                                 </FernScrollArea>
@@ -135,13 +143,13 @@ export async function WebSocketContent({
             }
             reference={
                 <TypeDefinitionRoot types={types} slug={node.slug}>
-                    <TypeDefinitionSlotsServer types={types} serialize={serialize}>
+                    <TypeDefinitionSlotsServer types={types} lang={lang}>
                         <CardedSection
                             number={1}
                             title={
                                 <span className="flex w-full items-center justify-between">
                                     <span className="inline-flex items-center gap-2">
-                                        {i18n.apiReference.handshake}
+                                        {t(lang).apiReference.handshake}
                                         <span className="bg-(color:--grayscale-a3) inline-block rounded-full p-1">
                                             <Wifi
                                                 className="text-(color:--grayscale-a11) size-icon"
@@ -151,7 +159,7 @@ export async function WebSocketContent({
                                     </span>
                                     {node != null && (
                                         <>
-                                            <PlaygroundButton state={node} className="md:hidden" />
+                                            <PlaygroundButton state={node} className="md:hidden" lang={lang} />
                                         </>
                                     )}
                                 </span>
@@ -160,7 +168,7 @@ export async function WebSocketContent({
                             headingElement={
                                 <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
                                     <div className="border-border-default rounded-3 -mx-2 flex items-center justify-between border px-2 py-1 transition-colors">
-                                        <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} method="WSS" />
+                                        <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} method="WSS" lang={lang} />
                                         <CopyWithBaseUrl channel={channel} />
                                     </div>
                                 </ApiReferenceClientWrapper>
@@ -169,14 +177,14 @@ export async function WebSocketContent({
                             <TypeDefinitionAnchorPart part="request">
                                 {headers && headers.length > 0 && (
                                     <TypeDefinitionAnchorPart part="headers">
-                                        <EndpointSection title={i18n.apiReference.headers}>
+                                        <EndpointSection title={t(lang).apiReference.headers}>
                                             <WithSeparator>
                                                 {headers.map((parameter) => (
                                                     <ObjectProperty
-                                                        serialize={serialize}
                                                         key={parameter.key}
                                                         property={parameter}
                                                         types={types}
+                                                        lang={lang}
                                                     />
                                                 ))}
                                             </WithSeparator>
@@ -185,14 +193,14 @@ export async function WebSocketContent({
                                 )}
                                 {channel.pathParameters && channel.pathParameters.length > 0 && (
                                     <TypeDefinitionAnchorPart part="path">
-                                        <EndpointSection title={i18n.apiReference.pathParameters}>
+                                        <EndpointSection title={t(lang).apiReference.pathParameters}>
                                             <WithSeparator>
                                                 {channel.pathParameters.map((parameter) => (
                                                     <ObjectProperty
-                                                        serialize={serialize}
                                                         key={parameter.key}
                                                         property={parameter}
                                                         types={types}
+                                                        lang={lang}
                                                     />
                                                 ))}
                                             </WithSeparator>
@@ -201,15 +209,15 @@ export async function WebSocketContent({
                                 )}
                                 {channel.queryParameters && channel.queryParameters.length > 0 && (
                                     <TypeDefinitionAnchorPart part="query">
-                                        <EndpointSection title={i18n.apiReference.queryParameters}>
+                                        <EndpointSection title={t(lang).apiReference.queryParameters}>
                                             <WithSeparator>
                                                 {channel.queryParameters.map((parameter) => {
                                                     return (
                                                         <ObjectProperty
-                                                            serialize={serialize}
                                                             key={parameter.key}
                                                             property={parameter}
                                                             types={types}
+                                                            lang={lang}
                                                         />
                                                     );
                                                 })}
@@ -225,18 +233,14 @@ export async function WebSocketContent({
                                 <EndpointSection
                                     title={
                                         <span className="inline-flex items-center gap-2">
-                                            {i18n.buttons.send}
+                                            {t(lang).buttons.send}
                                             <span className="text-(color:--green-a11) bg-(color:--green-a3) inline-block rounded-full p-1">
                                                 <ArrowUp className="size-icon" />
                                             </span>
                                         </span>
                                     }
                                 >
-                                    <TypeReferenceDefinitions
-                                        serialize={serialize}
-                                        shape={publishMessageShape}
-                                        types={types}
-                                    />
+                                    <TypeReferenceDefinitions shape={publishMessageShape} types={types} lang={lang} />
                                 </EndpointSection>
                             </TypeDefinitionAnchorPart>
                         )}
@@ -245,28 +249,24 @@ export async function WebSocketContent({
                                 <EndpointSection
                                     title={
                                         <span className="inline-flex items-center gap-2">
-                                            {i18n.playground.receive}
+                                            {t(lang).playground.receive}
                                             <span className="text-(color:--accent-a12) bg-(color:--accent-a3) inline-block rounded-full p-1">
                                                 <ArrowDown className="size-icon" />
                                             </span>
                                         </span>
                                     }
                                 >
-                                    <TypeReferenceDefinitions
-                                        serialize={serialize}
-                                        shape={subscribeMessageShape}
-                                        types={types}
-                                    />
+                                    <TypeReferenceDefinitions shape={subscribeMessageShape} types={types} lang={lang} />
                                 </EndpointSection>
                             </TypeDefinitionAnchorPart>
                         )}
                     </TypeDefinitionSlotsServer>
                 </TypeDefinitionRoot>
             }
-            footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} />}
+            footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
         >
             <PlaygroundKeyboardTrigger />
-            <MdxServerComponentProseSuspense serialize={serialize} mdx={channel.description} />
+            <MdxServerComponentProseSuspense mdx={channel.description} />
         </ReferenceLayout>
     );
 }

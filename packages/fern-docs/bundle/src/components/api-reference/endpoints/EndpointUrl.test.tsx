@@ -31,6 +31,7 @@ describe("EndpointUrl", () => {
                 path={[lit("/testing/"), path("id")]}
                 method={"GET"}
                 showEnvironment={true}
+                lang="en"
             />
         );
 
@@ -47,6 +48,7 @@ describe("EndpointUrl", () => {
                 path={[lit("/testing/"), path("id")]}
                 method={"GET"}
                 showEnvironment={true}
+                lang="en"
             />
         );
 

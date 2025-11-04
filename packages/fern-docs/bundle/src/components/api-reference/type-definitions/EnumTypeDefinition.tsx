@@ -3,12 +3,11 @@
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { useBooleanState } from "@fern-ui/react-commons";
 import { Search, X } from "lucide-react";
 import React, { useState } from "react";
-
 import { ChipSizeProvider } from "@/components/Chip";
-import { i18n } from "@/constants";
 
 import { EnumDefinitionDetails } from "./EnumDefinitionDetails";
 import { FernCollapseWithButton } from "./FernCollapseWithButton";
@@ -16,12 +15,14 @@ import { FernCollapseWithButton } from "./FernCollapseWithButton";
 export type Ref = React.Dispatch<React.SetStateAction<HTMLDivElement | null>>;
 
 export function EnumTypeDefinition({
-    elements
+    elements,
+    lang
 }: {
     elements: {
         element: React.ReactNode;
         searchableString: string;
     }[];
+    lang: string;
 }) {
     const collapse = useBooleanState(false);
     const autofocus = useBooleanState(false);
@@ -30,7 +31,7 @@ export function EnumTypeDefinition({
         <div className="-mx-1 py-1">
             <FernInput
                 type="search"
-                placeholder={i18n.search.searchPlaceholder}
+                placeholder={t(lang).search.searchPlaceholder}
                 value={searchInput}
                 onClick={(e) => {
                     e.stopPropagation();
@@ -75,7 +76,7 @@ export function EnumTypeDefinition({
                         }
                     }}
                 >
-                    <EnumDefinitionDetails elements={elements} searchInput={searchInput} />
+                    <EnumDefinitionDetails elements={elements} searchInput={searchInput} lang={lang} />
                 </FernCollapseWithButton>
             )}
         </>

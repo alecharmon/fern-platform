@@ -6,11 +6,10 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { useAtom } from "jotai";
 import { HelpCircle, Key, User } from "lucide-react";
 import { type ReactElement, useState } from "react";
-
-import { i18n } from "@/constants";
 import { Callout } from "@/mdx/components/callout";
 import { PLAYGROUND_AUTH_STATE_OAUTH_ATOM, usePlaygroundEndpointFormState } from "@/state/playground";
 import { PlaygroundEndpointForm } from "../endpoint";
@@ -22,7 +21,8 @@ import { useClosePlaygroundAuthorizationFormCard } from "./PlaygroundAuthorizati
 export function FoundOAuthReferencedEndpointForm({
     context,
     referencedEndpoint,
-    disabled
+    disabled,
+    lang
 }: {
     /**
      * this must be the OAuth endpoint.
@@ -30,6 +30,7 @@ export function FoundOAuthReferencedEndpointForm({
     context: EndpointContext;
     referencedEndpoint: APIV1Read.OAuthClientCredentials.ReferencedEndpoint;
     disabled?: boolean;
+    lang: string;
 }): ReactElement<any> {
     const closeContainer = useClosePlaygroundAuthorizationFormCard();
     const [value, setValue] = useAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
@@ -59,14 +60,14 @@ export function FoundOAuthReferencedEndpointForm({
         {
             type: "value",
             value: "credentials",
-            label: i18n.auth.credentials,
+            label: t(lang).auth.credentials,
             icon: <User />
         },
-        { type: "value", value: "token", label: i18n.auth.bearerToken, icon: <Key /> }
+        { type: "value", value: "token", label: t(lang).auth.bearerToken, icon: <Key /> }
     ];
 
     return value.isLoggingIn ? (
-        <li className="-mx-4 flex flex-1 items-center justify-center space-y-2 p-4 pt-8">{i18n.status.loading}</li>
+        <li className="-mx-4 flex flex-1 items-center justify-center space-y-2 p-4 pt-8">{t(lang).status.loading}</li>
     ) : (
         <>
             <li className="-mx-4 space-y-2 p-4 pb-2">
@@ -89,24 +90,27 @@ export function FoundOAuthReferencedEndpointForm({
                 <>
                     <li className="-mx-4 space-y-2 p-4">
                         <label className="inline-flex flex-wrap items-baseline">
-                            <span className="font-mono text-sm">{i18n.auth.oauthClientCredentialsLogin}</span>
+                            <span className="font-mono text-sm">{t(lang).auth.oauthClientCredentialsLogin}</span>
                         </label>
                         <PlaygroundEndpointForm
                             context={context}
                             formState={formState}
                             setFormState={setFormState}
                             ignoreHeaders={true}
+                            lang={lang}
                         />
                     </li>
-                    {displayFailedLogin && <Callout intent="error">{i18n.auth.failedToLoginWithCredentials}</Callout>}
+                    {displayFailedLogin && (
+                        <Callout intent="error">{t(lang).auth.failedToLoginWithCredentials}</Callout>
+                    )}
                     {value.isLoggedIn && (
                         <li className="-mx-4 space-y-2 p-4 pt-0">
                             <FernTooltipProvider>
                                 <div className="flex min-w-0 flex-1 shrink items-center justify-between gap-2">
                                     <label className="inline-flex items-baseline gap-2 truncate">
                                         <span className="inline-flex font-mono text-sm">
-                                            {i18n.auth.generatedOAuthToken}
-                                            <FernTooltip content={i18n.auth.bearerTokenGenerated}>
+                                            {t(lang).auth.generatedOAuthToken}
+                                            <FernTooltip content={t(lang).auth.bearerTokenGenerated}>
                                                 <HelpCircle className="text-(color:--grayscale-a11) ml-2 size-4 self-center" />
                                             </FernTooltip>
                                         </span>
@@ -121,14 +125,14 @@ export function FoundOAuthReferencedEndpointForm({
                         </li>
                     )}
                     {value.isLoggedIn && value.accessToken !== value.loggedInStartingToken && (
-                        <Callout intent="warning">{i18n.auth.bearerTokenNoLongerValid}</Callout>
+                        <Callout intent="warning">{t(lang).auth.bearerTokenNoLongerValid}</Callout>
                     )}
                 </>
             ) : (
                 <>
                     <li className="-mx-4 space-y-2 p-4">
                         <label className="inline-flex flex-wrap items-baseline">
-                            <span className="font-mono text-sm">{i18n.auth.userSuppliedBearerToken}</span>
+                            <span className="font-mono text-sm">{t(lang).auth.userSuppliedBearerToken}</span>
                         </label>
 
                         <PasswordInputGroup
@@ -149,7 +153,7 @@ export function FoundOAuthReferencedEndpointForm({
             <li className="flex justify-end pt-4">
                 {value.selectedInputMethod === "credentials" && (
                     <FernButton
-                        text={value.isLoggedIn ? i18n.buttons.refreshBearerToken : i18n.buttons.fetchBearerToken}
+                        text={value.isLoggedIn ? t(lang).buttons.refreshBearerToken : t(lang).buttons.fetchBearerToken}
                         intent="primary"
                         onClick={() => {
                             void (async () => {

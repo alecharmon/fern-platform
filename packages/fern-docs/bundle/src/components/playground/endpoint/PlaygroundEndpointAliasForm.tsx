@@ -2,9 +2,8 @@
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { unwrapReference } from "@fern-api/fdr-sdk/api-definition";
+import { t } from "@fern-docs/i18n";
 import { type ReactElement, useMemo } from "react";
-
-import { i18n } from "@/constants";
 
 import { PlaygroundObjectForm } from "../form/PlaygroundObjectForm";
 import { PlaygroundTypeReferenceForm } from "../form/PlaygroundTypeReferenceForm";
@@ -16,6 +15,7 @@ interface PlaygroundEndpointAliasFormProps {
     ignoreHeaders: boolean;
     setBodyJson: (value: unknown) => void;
     value: unknown;
+    lang: string;
 }
 
 export function PlaygroundEndpointAliasForm({
@@ -23,13 +23,14 @@ export function PlaygroundEndpointAliasForm({
     types,
     ignoreHeaders,
     setBodyJson,
-    value
+    value,
+    lang
 }: PlaygroundEndpointAliasFormProps): ReactElement<any> {
     const { shape, isOptional } = useMemo(() => unwrapReference(alias.value, types), [alias.value, types]);
 
     if (shape.type === "object" && !isOptional) {
         return (
-            <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.bodyParameters}>
+            <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={t(lang).apiReference.bodyParameters}>
                 <PlaygroundObjectForm id="body" shape={shape} onChange={setBodyJson} value={value} types={types} />
             </PlaygroundEndpointFormSection>
         );
@@ -37,7 +38,7 @@ export function PlaygroundEndpointAliasForm({
     return (
         <PlaygroundEndpointFormSection
             ignoreHeaders={ignoreHeaders}
-            title={isOptional ? i18n.apiReference.optionalBody : i18n.apiReference.body}
+            title={isOptional ? t(lang).apiReference.optionalBody : t(lang).apiReference.body}
         >
             <PlaygroundTypeReferenceForm id="body" shape={shape} onChange={setBodyJson} value={value} types={types} />
         </PlaygroundEndpointFormSection>

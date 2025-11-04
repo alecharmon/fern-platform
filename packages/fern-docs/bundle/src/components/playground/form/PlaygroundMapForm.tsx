@@ -3,10 +3,9 @@
 import type { TypeDefinition, TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
 import { isPlainObject, unknownToString } from "@fern-api/ui-core-utils";
 import { FernButton } from "@fern-docs/components/FernButton";
+import { t } from "@fern-docs/i18n";
 import { Plus, X } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
-
-import { i18n } from "@/constants";
 import { getEmptyValueForType } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";
 
@@ -17,6 +16,7 @@ interface PlaygroundMapFormProps {
     onChange: (value: unknown) => void;
     value: unknown;
     types: Record<string, TypeDefinition>;
+    lang: string;
 }
 
 function toKeyValuePairs(value: unknown): { key: unknown; value: unknown }[] {
@@ -35,7 +35,7 @@ function fromKeyValuePairs(keyValuePairs: { key: unknown; value: unknown }[]): u
 }
 
 export const PlaygroundMapForm = memo<PlaygroundMapFormProps>((props) => {
-    const { id, keyShape, valueShape, onChange, value, types } = props;
+    const { id, keyShape, valueShape, onChange, value, types, lang } = props;
     const [internalState, setInternalState] = useState<{ key: unknown; value: unknown }[]>(() =>
         toKeyValuePairs(value)
     );
@@ -101,7 +101,7 @@ export const PlaygroundMapForm = memo<PlaygroundMapFormProps>((props) => {
                     <li className="pt-2">
                         <FernButton
                             icon={<Plus />}
-                            text={i18n.buttons.addNewItem}
+                            text={t(lang).buttons.addNewItem}
                             onClick={handleAppendItem}
                             variant="outlined"
                             className="w-full"
@@ -112,7 +112,7 @@ export const PlaygroundMapForm = memo<PlaygroundMapFormProps>((props) => {
             {internalState.length === 0 && (
                 <FernButton
                     icon={<Plus />}
-                    text={i18n.buttons.addNewItem}
+                    text={t(lang).buttons.addNewItem}
                     onClick={handleAppendItem}
                     variant="outlined"
                     className="w-full"

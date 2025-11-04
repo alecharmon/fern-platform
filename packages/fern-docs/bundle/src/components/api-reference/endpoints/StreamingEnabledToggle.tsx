@@ -1,33 +1,37 @@
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
+import { t } from "@fern-docs/i18n";
 import { Layers2, Radio } from "lucide-react";
-import { type FC, type PropsWithChildren, useCallback } from "react";
-
-import { i18n } from "@/constants";
+import { type FC, type PropsWithChildren, useCallback, useMemo } from "react";
 
 export declare namespace StreamingEnabledToggle {
     export interface Props {
         value: boolean;
         setValue: (enabled: boolean) => void;
         className?: string;
+        lang: string;
     }
 }
-
-const OPTIONS: FernDropdown.Option[] = [
-    { type: "value", value: "batch", label: i18n.streamTypes.batch, icon: <Layers2 /> },
-    {
-        type: "value",
-        value: "stream",
-        label: i18n.streamTypes.stream,
-        icon: <Radio />
-    }
-];
 
 export const StreamingEnabledToggle: FC<PropsWithChildren<StreamingEnabledToggle.Props>> = ({
     value,
     setValue,
-    className
+    className,
+    lang
 }) => {
+    const OPTIONS: FernDropdown.Option[] = useMemo(
+        () => [
+            { type: "value", value: "batch", label: t(lang).streamTypes.batch, icon: <Layers2 /> },
+            {
+                type: "value",
+                value: "stream",
+                label: t(lang).streamTypes.stream,
+                icon: <Radio />
+            }
+        ],
+        [lang]
+    );
+
     return (
         <FernSegmentedControl
             options={OPTIONS}

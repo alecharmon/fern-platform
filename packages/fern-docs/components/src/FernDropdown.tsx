@@ -1,7 +1,7 @@
 "use client";
 
+import { t } from "@fern-docs/i18n";
 import { useResizeObserver } from "@fern-ui/react-commons";
-
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Check, Info, Search } from "lucide-react";
 import {
@@ -85,6 +85,7 @@ export declare namespace FernDropdown {
         triggerAsChild?: boolean;
         radioGroupProps?: ComponentProps<typeof DropdownMenu.RadioGroup>;
         searchable?: boolean;
+        lang: string;
     }
 }
 
@@ -107,7 +108,8 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
             contentProps,
             triggerAsChild = true,
             radioGroupProps = {},
-            searchable = false
+            searchable = false,
+            lang
         },
         ref
     ): ReactElement => {
@@ -202,7 +204,7 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
                                         type="text"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        placeholder="Search..."
+                                        placeholder={t(lang).search.searchPlaceholder}
                                         className="bg-background-default text-text-primary placeholder:text-text-muted w-full rounded border-none py-1.5 pl-8 pr-2 text-sm outline-none"
                                         onKeyDown={(e) => {
                                             // Prevent dropdown from closing on key events

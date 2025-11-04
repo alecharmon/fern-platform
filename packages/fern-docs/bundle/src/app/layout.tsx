@@ -70,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <body className="antialiased" id={FERN_DOCS_ID}>
                 <ConsoleMessage />
                 <ScrollToTop />
-                {isLocal() && <WebSocketRefresh />}
+                {isLocal() && <WebSocketRefresh lang={"en"} />}
                 <Providers>{children}</Providers>
             </body>
         </html>

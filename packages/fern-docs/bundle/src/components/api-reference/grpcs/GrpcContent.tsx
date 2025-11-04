@@ -25,7 +25,8 @@ export async function GrpcContent({
     bottomNavigation,
     hideFeedback,
     pageActionOptions,
-    markdownPromise
+    markdownPromise,
+    lang
 }: {
     serialize: MdxSerializer;
     context: GrpcContext;
@@ -35,6 +36,7 @@ export async function GrpcContent({
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
+    lang: string;
 }) {
     const { node, grpc, types } = context;
 
@@ -58,17 +60,18 @@ export async function GrpcContent({
                         slug={node.slug}
                         pageActionOptions={pageActionOptions}
                         markdownPromise={markdownPromise}
+                        lang={lang}
                     />
                 }
-                aside={<GrpcContentCodeSnippets node={node} />}
+                aside={<GrpcContentCodeSnippets node={node} lang={lang} />}
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
-                        <TypeDefinitionSlotsServer types={types}>
-                            <GrpcContentLeft context={context} />
+                        <TypeDefinitionSlotsServer types={types} lang={lang}>
+                            <GrpcContentLeft context={context} lang={lang} />
                         </TypeDefinitionSlotsServer>
                     </TypeDefinitionRoot>
                 }
-                footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} />}
+                footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
             >
                 <MdxServerComponentProseSuspense mdx={grpc.description} />
             </ReferenceLayout>

@@ -190,6 +190,10 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("getSettings");
     }
 
+    getLanguage(): string {
+        return this.notSupported("getLanguage");
+    }
+
     getTypes(): Record<TypeId, TypeDefinition> {
         return this.notSupported("getTypes");
     }

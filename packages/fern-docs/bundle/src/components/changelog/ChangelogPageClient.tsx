@@ -11,14 +11,13 @@ import { AsideAwareDiv } from "@fern-docs/components/layouts/AsideAwareDiv";
 import { TableOfContentsLayout } from "@fern-docs/components/layouts/TableOfContentsLayout";
 import { SetLayout } from "@fern-docs/components/state/layout";
 import { SCROLL_BODY_ATOM } from "@fern-docs/components/state/viewport";
+import { t } from "@fern-docs/i18n";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { chunk } from "es-toolkit/array";
 import { useAtomValue } from "jotai";
 import React, { Fragment, type ReactElement, useEffect, useMemo } from "react";
-
 import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
-import { i18n } from "@/constants";
 import { useSelectedFilters } from "@/state/search";
 import { BottomNavigationClient } from "../bottom-nav-client";
 import { PageFilters } from "../PageFilters";
@@ -46,7 +45,8 @@ export default function ChangelogPageClient({
     overview,
     entries,
     isFullPage,
-    configLayout
+    configLayout,
+    lang
 }: {
     node: FernNavigation.ChangelogNode;
     anchorIds: Record<string, FernNavigation.PageId>;
@@ -54,6 +54,7 @@ export default function ChangelogPageClient({
     entries: Record<string, React.ReactNode>;
     isFullPage: boolean;
     configLayout: FernLayoutConfig;
+    lang: string;
 }): ReactElement<any> {
     const selectedFilters = useSelectedFilters();
     const flattenedEntries = useMemo(() => flattenChangelogEntries({ node, selectedFilters }), [node, selectedFilters]);
@@ -135,7 +136,7 @@ export default function ChangelogPageClient({
         }
 
         return {
-            title: i18n.navigation.olderPosts,
+            title: t(lang).navigation.olderPosts,
             href: `#page-${page + 1}`,
             shallow: true,
             onClick: () => {
@@ -143,11 +144,11 @@ export default function ChangelogPageClient({
                 window.scrollTo(0, 0);
             }
         };
-    }, [chunkedEntries.length, page]);
+    }, [chunkedEntries.length, page, lang]);
 
     return (
         <>
-            <TableOfContentsLayout tableOfContents={undefined} hideTableOfContents={true} />
+            <TableOfContentsLayout tableOfContents={undefined} hideTableOfContents={true} lang={lang} />
             {/* TODO(cd): treat as a guide for now, update for large-screen changelog */}
             <AsideAwareDiv className="fern-layout-changelog" isFullPage={isFullPage}>
                 <article className="max-w-full">
@@ -170,7 +171,11 @@ export default function ChangelogPageClient({
                                                     </FernLink>
                                                 </Badge>
                                                 <div className="filter-row">
-                                                    <PageFilters filters={entry.tags ?? []} forcePillDisplay />
+                                                    <PageFilters
+                                                        filters={entry.tags ?? []}
+                                                        forcePillDisplay
+                                                        lang={lang}
+                                                    />
                                                 </div>
                                             </div>
                                         }
@@ -185,8 +190,11 @@ export default function ChangelogPageClient({
                     <FooterLayout
                         hideFeedback
                         bottomNavigation={
-                            configLayout.hideNavLinks ? undefined : <BottomNavigationClient prev={prev} next={next} />
+                            configLayout.hideNavLinks ? undefined : (
+                                <BottomNavigationClient prev={prev} next={next} lang={lang} />
+                            )
                         }
+                        lang={lang}
                     />
                 </article>
             </AsideAwareDiv>

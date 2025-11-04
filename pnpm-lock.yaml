@@ -796,6 +796,24 @@ importers:
         specifier: 'catalog:'
         version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.4.2)(jsdom@24.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.30.1)(msw@2.10.3(@types/node@22.18.8)(typescript@5.7.3))(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0)
 
+  packages/commons/i18n:
+    devDependencies:
+      '@fern-platform/configs':
+        specifier: workspace:*
+        version: link:../../configs
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.18.8
+      depcheck:
+        specifier: 'catalog:'
+        version: 1.4.7
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.4.2)(jsdom@24.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.30.1)(msw@2.10.3(@types/node@22.18.8)(typescript@5.7.3))(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0)
+
   packages/commons/loadable:
     dependencies:
       '@fern-api/ui-core-utils':
@@ -1639,6 +1657,9 @@ importers:
       '@fern-docs/edge-config':
         specifier: workspace:*
         version: link:../edge-config
+      '@fern-docs/i18n':
+        specifier: workspace:*
+        version: link:../../commons/i18n
       '@fern-docs/mdx':
         specifier: workspace:*
         version: link:../mdx
@@ -2066,6 +2087,9 @@ importers:
       '@fern-api/ui-core-utils':
         specifier: workspace:*
         version: link:../../commons/core-utils
+      '@fern-docs/i18n':
+        specifier: workspace:*
+        version: link:../../commons/i18n
       '@fern-docs/mdx':
         specifier: workspace:*
         version: link:../mdx
@@ -2790,6 +2814,9 @@ importers:
       '@fern-docs/components':
         specifier: workspace:*
         version: link:../components
+      '@fern-docs/i18n':
+        specifier: workspace:*
+        version: link:../../commons/i18n
       '@fern-docs/search-ask-fern':
         specifier: workspace:*
         version: link:../search-server/ask-fern

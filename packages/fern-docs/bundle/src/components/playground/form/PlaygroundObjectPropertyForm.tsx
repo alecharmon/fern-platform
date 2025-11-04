@@ -10,12 +10,12 @@ import {
 import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { t } from "@fern-docs/i18n";
 import { useBooleanState } from "@fern-ui/react-commons";
 import { PlusCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type FC, memo, useCallback, useEffect, useMemo, useState } from "react";
 import { withErrorBoundary } from "@/components/error-boundary";
-import { i18n } from "@/constants";
 
 import { renderTypeShorthandRoot } from "../../type-shorthand";
 import { castToRecord, getEmptyValueForType, isExpandable } from "../utils";
@@ -35,6 +35,7 @@ interface PlaygroundObjectPropertyFormProps {
     types: Record<TypeId, TypeDefinition>;
     defaultValue?: unknown;
     isReadOnly?: boolean;
+    lang: string;
 }
 
 const PlaygroundObjectPropertyFormInternal: FC<PlaygroundObjectPropertyFormProps> = ({
@@ -44,7 +45,8 @@ const PlaygroundObjectPropertyFormInternal: FC<PlaygroundObjectPropertyFormProps
     value,
     expandByDefault = true,
     types,
-    isReadOnly = false
+    isReadOnly = false,
+    lang
 }) => {
     const handleChange = useCallback(
         (newValue: unknown) => {
@@ -82,6 +84,7 @@ const PlaygroundObjectPropertyFormInternal: FC<PlaygroundObjectPropertyFormProps
             onCloseStack={handleCloseStack}
             types={types}
             disabled={isReadOnly}
+            lang={lang}
         />
     );
 };
@@ -98,10 +101,11 @@ interface PlaygroundObjectPropertiesFormProps {
     indent?: boolean;
     types: Record<string, TypeDefinition>;
     readonly?: string[];
+    lang: string;
 }
 
 export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPropertiesFormProps>((props) => {
-    const { id, properties, onChange, value, indent = false, types, extraProperties, readonly } = props;
+    const { id, properties, onChange, value, indent = false, types, extraProperties, readonly, lang } = props;
 
     const onChangeObjectProperty = useCallback(
         (key: string, newValue: unknown) => {
@@ -149,7 +153,8 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                     isResponse: false,
                     hideOptional: true,
                     isNullable: false,
-                    onChange
+                    onChange,
+                    lang
                 }),
                 labelClassName: "font-mono",
                 tooltip:
@@ -166,13 +171,13 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                 {
                     type: "value",
                     value: ADD_ALL_KEY,
-                    label: i18n.buttons.addAllOptionalProperties,
+                    label: t(lang).buttons.addAllOptionalProperties,
                     rightElement: <PlusCircle className="size-icon" />
                 }
             );
         }
         return options;
-    }, [hiddenProperties, types, onChange]);
+    }, [hiddenProperties, types, onChange, lang]);
 
     const handleAddAdditionalProperties = useCallback(
         (key: string) => {
@@ -219,6 +224,7 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                                     value={castToRecord(value)[property.key]}
                                     types={types}
                                     isReadOnly={isReadOnly}
+                                    lang={lang}
                                 />
                             </li>
                         );
@@ -227,7 +233,11 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
             )}
 
             {hiddenProperties.length > 0 && (
-                <FernDropdown options={hiddenPropertiesOptions} onValueChange={handleAddAdditionalProperties}>
+                <FernDropdown
+                    options={hiddenPropertiesOptions}
+                    onValueChange={handleAddAdditionalProperties}
+                    lang={lang}
+                >
                     <FernButton
                         text={
                             <span>
@@ -251,6 +261,7 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                     extraProperties={extraProperties}
                     value={value}
                     types={types}
+                    lang={lang}
                 />
             )}
         </div>

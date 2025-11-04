@@ -2,14 +2,13 @@
 
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { t } from "@fern-docs/i18n";
 import { useSetAtom } from "jotai";
 import { Check, ChevronDown, Copy } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
-import { i18n } from "@/constants";
 import { useIsAskAiEnabled } from "@/state/search";
 import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
 
@@ -17,10 +16,12 @@ import { OpenAISearchOption, Separator } from "./PageActionsDropdownOptions";
 
 export function PageActionsDropdown({
     markdownPromise,
-    pageActionOptions
+    pageActionOptions,
+    lang
 }: {
     markdownPromise?: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     pageActionOptions: FernDropdown.PageActionOption[];
+    lang: string;
 }) {
     const [showCopied, setShowCopied] = useState<boolean>(false);
     const { domain, slug } = useParams();
@@ -31,7 +32,9 @@ export function PageActionsDropdown({
     const setPageContext = useSetPageContext();
     const isAskAiEnabled = useIsAskAiEnabled();
 
-    const options = isAskAiEnabled ? [OpenAISearchOption(), Separator(), ...pageActionOptions] : pageActionOptions;
+    const options = isAskAiEnabled
+        ? [OpenAISearchOption({ lang }), Separator(), ...pageActionOptions]
+        : pageActionOptions;
 
     if (options.length === 0) {
         return null;
@@ -98,12 +101,12 @@ export function PageActionsDropdown({
                 {showCopied ? (
                     <div className="flex items-center gap-2">
                         <Check className="size-icon" />
-                        <span>{i18n.buttons.copied}</span>
+                        <span>{t(lang).buttons.copied}</span>
                     </div>
                 ) : (
                     <div className="flex items-center gap-2">
                         <Copy className="size-icon" />
-                        <span>{i18n.buttons.copyPage}</span>
+                        <span>{t(lang).buttons.copyPage}</span>
                     </div>
                 )}
             </FernButton>
@@ -111,6 +114,7 @@ export function PageActionsDropdown({
                 options={options}
                 onValueChange={(value) => void handleValueChange(value)}
                 dropdownMenuElement={<a target="_blank" rel="noopener noreferrer" />}
+                lang={lang}
             >
                 <FernButton
                     variant="minimal"

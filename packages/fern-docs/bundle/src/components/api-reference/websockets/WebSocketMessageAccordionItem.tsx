@@ -14,12 +14,14 @@ export interface WebSocketMessageAccordionItemProps {
     message: WebSocketMessage;
     index: number;
     messagesLength: number;
+    lang: string;
 }
 
 export const WebsocketMessageAccordionItem: FC<WebSocketMessageAccordionItemProps> = ({
     message,
     index,
-    messagesLength
+    messagesLength,
+    lang
 }) => {
     return (
         <Accordion.Item value={index.toString()} key={index} className={cn("group relative")}>
@@ -62,6 +64,7 @@ export const WebsocketMessageAccordionItem: FC<WebSocketMessageAccordionItemProp
                             : JSON.stringify(message.data?.data, null, 2)
                     }
                     onClick={(e) => e.stopPropagation()}
+                    lang={lang}
                 />
             </Accordion.Trigger>
             <Accordion.Content className="fern-web-socket-content fern-collapsible" {...useFernCollapseOverflow()}>

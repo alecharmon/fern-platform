@@ -6,11 +6,10 @@ import { Button } from "@fern-docs/components/button";
 import { cn } from "@fern-docs/components/cn";
 import { toast } from "@fern-docs/components/FernToast";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
+import { t } from "@fern-docs/i18n";
 import { useKeyboardPress } from "@fern-ui/react-commons";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
-
-import { i18n } from "@/constants";
 import { track } from "../analytics";
 import { registerPosthogProperties } from "../analytics/posthog";
 import { FeedbackForm } from "./FeedbackForm";
@@ -25,19 +24,22 @@ export interface FeedbackProps {
     metadata?: Record<string, unknown> | (() => Record<string, unknown>);
     pathname?: string;
     feedbackSource?: string;
+    lang: string;
 }
 
 export const Feedback: FC<FeedbackProps> = ({
     className,
-    feedbackQuestion = i18n.feedback.wasThisPageHelpful,
+    feedbackQuestion,
     type = "on-page-feedback",
     metadata,
     pathname: pathnameProp,
-    feedbackSource
+    feedbackSource,
+    lang
 }) => {
     const [sent, setSent] = useState(false);
     const [isHelpful, setIsHelpful] = useState<"yes" | "no" | undefined>();
     const [showFeedbackInput, setShowFeedbackInput] = useState(false);
+    const defaultFeedbackQuestion = feedbackQuestion ?? t(lang).feedback.wasThisPageHelpful;
 
     const faiClient = new FernAIClient({
         baseUrl: getFaiOrigin()
@@ -61,7 +63,7 @@ export const Feedback: FC<FeedbackProps> = ({
         textareaRef.current?.focus();
         track("feedback_voted", {
             satisfied: true,
-            feedbackQuestion,
+            feedbackQuestion: defaultFeedbackQuestion,
             type,
             ...(typeof metadata === "function" ? metadata() : metadata)
         });
@@ -72,7 +74,7 @@ export const Feedback: FC<FeedbackProps> = ({
         textareaRef.current?.focus();
         track("feedback_voted", {
             satisfied: false,
-            feedbackQuestion,
+            feedbackQuestion: defaultFeedbackQuestion,
             type,
             ...(typeof metadata === "function" ? metadata() : metadata)
         });
@@ -119,15 +121,15 @@ export const Feedback: FC<FeedbackProps> = ({
                 message: feedbackPrepend + feedbackMessage,
                 email,
                 allowFollowUpViaEmail: showEmailInput === true,
-                feedbackQuestion,
+                feedbackQuestion: defaultFeedbackQuestion,
                 type,
                 ...(typeof metadata === "function" ? metadata() : metadata)
             });
-            toast.success(i18n.feedback.thankYouForFeedback);
+            toast.success(t(lang).feedback.thankYouForFeedback);
             setSent(true);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [isHelpful, metadata, feedbackQuestion, feedbackSource, type]
+        [isHelpful, metadata, defaultFeedbackQuestion, feedbackSource, type]
     );
 
     useKeyboardPress({
@@ -143,11 +145,13 @@ export const Feedback: FC<FeedbackProps> = ({
         <div className={className} ref={ref}>
             {!sent ? (
                 <div className="flex flex-wrap items-center justify-start gap-4">
-                    <span className="text-(color:--grayscale-a11) text-sm font-medium">{feedbackQuestion}</span>
+                    <span className="text-(color:--grayscale-a11) text-sm font-medium">{defaultFeedbackQuestion}</span>
                     <div className="flex gap-2">
                         <FeedbackFormDialog
                             content={
-                                isHelpful && <FeedbackForm isHelpful={isHelpful} onSubmit={handleSubmitFeedback} />
+                                isHelpful && (
+                                    <FeedbackForm isHelpful={isHelpful} onSubmit={handleSubmitFeedback} lang={lang} />
+                                )
                             }
                             trigger={
                                 <Button
@@ -160,13 +164,15 @@ export const Feedback: FC<FeedbackProps> = ({
                                             "animate-thumb-rock": isHelpful === "yes"
                                         })}
                                     />
-                                    Yes
+                                    {t(lang).feedback.yes}
                                 </Button>
                             }
                         />
                         <FeedbackFormDialog
                             content={
-                                isHelpful && <FeedbackForm isHelpful={isHelpful} onSubmit={handleSubmitFeedback} />
+                                isHelpful && (
+                                    <FeedbackForm isHelpful={isHelpful} onSubmit={handleSubmitFeedback} lang={lang} />
+                                )
                             }
                             trigger={
                                 <Button
@@ -179,7 +185,7 @@ export const Feedback: FC<FeedbackProps> = ({
                                             "animate-thumb-rock": isHelpful === "no"
                                         })}
                                     />
-                                    No
+                                    {t(lang).feedback.no}
                                 </Button>
                             }
                         />
@@ -187,7 +193,7 @@ export const Feedback: FC<FeedbackProps> = ({
                 </div>
             ) : (
                 <div className="flex h-6 items-center">
-                    <span className="text-(color:--grayscale-a11) text-xs">{i18n.feedback.thankYouForFeedback}</span>
+                    <span className="text-(color:--grayscale-a11) text-xs">{t(lang).feedback.thankYouForFeedback}</span>
                 </div>
             )}
         </div>

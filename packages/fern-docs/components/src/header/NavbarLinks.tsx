@@ -13,6 +13,7 @@ import { WithReturnTo } from "./WithReturnTo";
 export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
     const config = await loader.getConfig();
     const files = await loader.getFiles();
+    const lang = await loader.getLanguage();
 
     const navbarLinks: NavbarLink[] = [];
 
@@ -62,7 +63,7 @@ export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
     return (
         <>
             {navbarLinks.map((navbarLink, idx) => (
-                <HeaderNavbarLink key={navbarLink.id ?? idx} navbarLink={navbarLink} files={files} />
+                <HeaderNavbarLink key={navbarLink.id ?? idx} navbarLink={navbarLink} files={files} lang={lang} />
             ))}
         </>
     );
@@ -72,7 +73,15 @@ const getGitHubRepo = (url: string): string | null => {
     return url.match(/^https:\/\/(www\.)?github\.com\/([\w-]+\/[\w-]+)\/?$/)?.[2] ?? null;
 };
 
-function HeaderNavbarLink({ navbarLink, files }: { navbarLink: NavbarLinkType; files?: Record<string, FileData> }) {
+function HeaderNavbarLink({
+    navbarLink,
+    files,
+    lang
+}: {
+    navbarLink: NavbarLinkType;
+    files?: Record<string, FileData>;
+    lang: string;
+}) {
     if (navbarLink.type === "github") {
         const repo = getGitHubRepo(navbarLink.href);
         return repo && <GitHubWidget repo={repo} className={navbarLink.className} id={navbarLink.id} />;
@@ -93,6 +102,7 @@ function HeaderNavbarLink({ navbarLink, files }: { navbarLink: NavbarLinkType; f
                 align="start"
                 triggerAsChild={true}
                 className={cn("fern-button group cursor-pointer mr-2", navbarLink.className)}
+                lang={lang}
             >
                 <div
                     className={cn(

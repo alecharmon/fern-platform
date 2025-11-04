@@ -33,6 +33,9 @@
       "path": "../edge-config"
     },
     {
+      "path": "../../commons/i18n"
+    },
+    {
       "path": "../mdx"
     },
     {

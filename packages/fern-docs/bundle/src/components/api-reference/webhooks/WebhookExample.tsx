@@ -1,10 +1,9 @@
 "use client";
 
 import type { APIV1Read } from "@fern-api/fdr-sdk";
+import { t } from "@fern-docs/i18n";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
-
-import { i18n } from "@/constants";
 
 const CodeSnippetExample = dynamic(
     () => import("../examples/CodeSnippetExample").then(({ CodeSnippetExample }) => CodeSnippetExample),
@@ -15,10 +14,11 @@ export declare namespace WebhookExample {
     export interface Props {
         example: APIV1Read.ExampleWebhookPayload;
         slug: string;
+        lang: string;
     }
 }
 
-export const WebhookExample: React.FC<WebhookExample.Props> = ({ example, slug }) => {
+export const WebhookExample: React.FC<WebhookExample.Props> = ({ example, slug, lang }) => {
     // const { hoveredPayloadPropertyPath = EMPTY_ARRAY } = useWebhookContext();
     const payloadJsonString = useMemo(() => JSON.stringify(example.payload, null, 2), [example.payload]);
 
@@ -28,7 +28,7 @@ export const WebhookExample: React.FC<WebhookExample.Props> = ({ example, slug }
                 {example.payload != null && (
                     <CodeSnippetExample
                         className="max-h-full"
-                        title={i18n.apiReference.payload}
+                        title={t(lang).apiReference.payload}
                         onClick={(e) => {
                             e.stopPropagation();
                         }}

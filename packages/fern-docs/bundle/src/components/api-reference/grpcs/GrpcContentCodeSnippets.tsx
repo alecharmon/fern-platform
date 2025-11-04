@@ -2,9 +2,8 @@
 
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components/cn";
+import { t } from "@fern-docs/i18n";
 import { memo } from "react";
-
-import { i18n } from "@/constants";
 import { JsonCodeSnippetExample } from "../examples/CodeSnippetExample";
 import { useGrpcContext } from "./GrpcContext";
 
@@ -12,10 +11,11 @@ export declare namespace GrpcContentCodeSnippets {
     export interface Props {
         node: FernNavigation.GrpcNode;
         className?: string;
+        lang: string;
     }
 }
 
-const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props> = ({ node, className }) => {
+const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props> = ({ node, className, lang }) => {
     const { example } = useGrpcContext();
 
     return (
@@ -32,7 +32,7 @@ const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props>
             )}
         >
             <JsonCodeSnippetExample
-                title={i18n.apiReference.exampleRequest}
+                title={t(lang).apiReference.exampleRequest}
                 onClick={(e) => {
                     e.stopPropagation();
                 }}
@@ -42,7 +42,7 @@ const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props>
             />
 
             <JsonCodeSnippetExample
-                title={i18n.apiReference.exampleResponse}
+                title={t(lang).apiReference.exampleResponse}
                 onClick={(e) => {
                     e.stopPropagation();
                 }}

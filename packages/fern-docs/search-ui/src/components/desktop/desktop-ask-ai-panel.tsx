@@ -11,6 +11,7 @@ import {
 } from "@fern-docs/components/constants";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 import { useEventCallback } from "@fern-ui/react-commons";
 import { composeEventHandlers } from "@radix-ui/primitive";
@@ -36,7 +37,6 @@ import {
 } from "react";
 import type { Components } from "react-markdown";
 import { useIsomorphicLayoutEffect } from "swr/_internal";
-
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
 import { isQueryIdPart } from "../../utils/query-id-part";
 import { AskAiContextPill } from "../ask-ai-context-pill";
@@ -99,6 +99,7 @@ export const DesktopAskAiPanel = forwardRef<
         searchDialogOpen: boolean;
         isSidePanelOpen?: boolean;
         panelWidth: number;
+        lang: string;
     }
 >(
     (
@@ -125,6 +126,7 @@ export const DesktopAskAiPanel = forwardRef<
             searchDialogOpen,
             isSidePanelOpen = false,
             panelWidth,
+            lang,
             ...props
         },
         forwardedRef
@@ -134,7 +136,7 @@ export const DesktopAskAiPanel = forwardRef<
 
         return (
             <DesktopCommandRoot
-                label={"Ask AI"}
+                label={t(lang).search.askAI}
                 {...props}
                 ref={composeRefs(forwardedRef, ref)}
                 shouldFilter={false}
@@ -171,6 +173,7 @@ export const DesktopAskAiPanel = forwardRef<
                     searchDialogOpen={searchDialogOpen}
                     isSidePanelOpen={isSidePanelOpen}
                     panelWidth={panelWidth}
+                    lang={lang}
                 />
             </DesktopCommandRoot>
         );
@@ -209,6 +212,7 @@ const DesktopAskAIContent = (props: {
     searchDialogOpen: boolean;
     isSidePanelOpen?: boolean;
     panelWidth: number;
+    lang: string;
 }) => {
     return (
         <>
@@ -238,7 +242,8 @@ const DesktopAskAIChat = ({
     onRemovePageContext,
     searchDialogOpen,
     isSidePanelOpen = false,
-    panelWidth
+    panelWidth,
+    lang
 }: {
     initialInput?: string;
     setInitialInput?: (initialInput: string) => void;
@@ -269,6 +274,7 @@ const DesktopAskAIChat = ({
     searchDialogOpen: boolean;
     isSidePanelOpen?: boolean;
     panelWidth: number;
+    lang: string;
 }) => {
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const [userScrolled, setUserScrolled] = useState(false);
@@ -594,6 +600,7 @@ const DesktopAskAIChat = ({
                         setUserScrolled(true);
                     }
                 })}
+                lang={lang}
             />
         </>
     );
@@ -609,8 +616,9 @@ const AskAIComposer = forwardRef<
         onSend?: (message: string) => void;
         onPopState?: KeyboardEventHandler<HTMLTextAreaElement>;
         filters?: readonly FacetFilter[];
+        lang: string;
     }
->(({ error, onError, isLoading, stop, onSend, onPopState, filters = [], ...props }, forwardedRef) => {
+>(({ error, onError, isLoading, stop, onSend, onPopState, filters = [], lang, ...props }, forwardedRef) => {
     const value = typeof props.value === "string" ? props.value : "";
     const isOverLimit = value.length > MAX_AI_CHAT_MESSAGE_LENGTH;
     const canSubmit =
@@ -660,6 +668,7 @@ const AskAIComposer = forwardRef<
                                     if (value.length === 0) {
                                         return;
                                     } else if (isLoading) {
+                                        // do nothing
                                     } else {
                                         if (!e.shiftKey && canSubmit) {
                                             onSend?.(value);
@@ -692,9 +701,9 @@ const AskAIComposer = forwardRef<
             >
                 <div className="pointer-events-auto flex min-w-0 flex-1 items-center">
                     {filters.length === 0 ? (
-                        <FilterDropdownMenu filters={filters} />
+                        <FilterDropdownMenu filters={filters} lang={lang} />
                     ) : (
-                        <FilterManager filters={filters} />
+                        <FilterManager filters={filters} lang={lang} />
                     )}
                 </div>
                 <div className="pointer-events-auto flex items-center gap-2">

@@ -8,12 +8,12 @@ import { HttpMethodBadge } from "@fern-docs/components/badges";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { useBooleanState, useCopyToClipboard } from "@fern-ui/react-commons";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import React, { type PropsWithChildren, type ReactElement, useMemo, useRef, useState } from "react";
 import { noop } from "ts-essentials";
 import { MaybeEnvironmentDropdown } from "@/components/MaybeEnvironmentDropdown";
-import { i18n } from "@/constants";
 
 export declare namespace EndpointUrl {
     export type Props = React.PropsWithChildren<{
@@ -26,12 +26,13 @@ export declare namespace EndpointUrl {
         hideCopyButton?: boolean;
         large?: boolean;
         className?: string;
+        lang: string;
     }>;
 }
 
 // TODO: this component needs a refresh
 export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<EndpointUrl.Props>>(function EndpointUrl(
-    { path, method, baseUrl, environmentId, large, className, showEnvironment, hideCopyButton, options },
+    { path, method, baseUrl, environmentId, large, className, showEnvironment, hideCopyButton, options, lang },
     forwardedRef
 ) {
     const ref = useRef<HTMLDivElement>(null);
@@ -106,7 +107,7 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
     return (
         <FernTooltipProvider>
             <FernTooltip
-                content={wasJustCopied && hideCopyButton ? i18n.buttons.copied : undefined}
+                content={wasJustCopied && hideCopyButton ? t(lang).buttons.copied : undefined}
                 open={wasJustCopied && hideCopyButton ? true : undefined}
             >
                 <div
@@ -145,6 +146,7 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
                                                 protocolTextStyle="text-(color:--grayscale-a9)"
                                                 isEditingEnvironment={isEditingEnvironment}
                                                 editable
+                                                lang={lang}
                                             />
                                         </span>
                                     )}
@@ -165,6 +167,7 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
                                     path
                                 })
                             }
+                            lang={lang}
                         />
                     )}
                 </div>

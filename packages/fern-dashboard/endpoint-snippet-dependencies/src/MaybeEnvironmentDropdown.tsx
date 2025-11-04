@@ -130,6 +130,8 @@ export function MaybeEnvironmentDropdown({
                                     // useEffect updates the URL
                                 }}
                                 value={selectedEnvironmentId ?? environmentId}
+                                // TODO: support language in dashboard
+                                lang={"en"}
                             >
                                 <FernButton
                                     style={{ pointerEvents: "auto" }}

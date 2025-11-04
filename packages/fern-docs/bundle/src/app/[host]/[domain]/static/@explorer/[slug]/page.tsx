@@ -43,6 +43,8 @@ export default async function ExplorerPage({
     const root = await loader.getRoot();
 
     const found = FernNavigation.utils.findNode(root, slug);
+    const lang = await loader.getLanguage();
+
     if (found.type !== "found") {
         console.debug("Did not find node for slug", slug);
         if (found.redirect) {
@@ -51,9 +53,9 @@ export default async function ExplorerPage({
             redirect(conformTrailingSlash(conformExplorerRoute(found.redirect)), RedirectType.replace);
         }
 
-        return <NoEndpointSelected />;
+        return <NoEndpointSelected lang={lang} />;
     }
     const node = found.node;
 
-    return <ExplorerContent loader={loader} node={node} />;
+    return <ExplorerContent loader={loader} node={node} lang={lang} />;
 }

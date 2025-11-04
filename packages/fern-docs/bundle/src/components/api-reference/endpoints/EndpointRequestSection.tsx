@@ -1,9 +1,8 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { t } from "@fern-docs/i18n";
 import { compact } from "es-toolkit/array";
 import type { ReactNode } from "react";
-
-import { i18n } from "@/constants";
 
 import { renderTypeShorthand } from "../../type-shorthand";
 import { PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";
@@ -13,10 +12,12 @@ import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefin
 
 export function EndpointRequestSection({
     request,
-    types
+    types,
+    lang
 }: {
     request: ApiDefinition.HttpRequest;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    lang: string;
 }) {
     return visitDiscriminatedUnion(request.body)._visit({
         formData: (formData) => (
@@ -28,7 +29,7 @@ export function EndpointRequestSection({
                                 <PropertyRenderer
                                     name={file.key}
                                     description={file.description}
-                                    typeShorthand={renderTypeShorthandFormDataField(file)}
+                                    typeShorthand={renderTypeShorthandFormDataField(file, lang)}
                                     availability={file.availability}
                                 />
                             </TypeDefinitionAnchorPart>
@@ -38,7 +39,7 @@ export function EndpointRequestSection({
                                 <PropertyRenderer
                                     name={files.key}
                                     description={files.description}
-                                    typeShorthand={renderTypeShorthandFormDataField(files)}
+                                    typeShorthand={renderTypeShorthandFormDataField(files, lang)}
                                     availability={files.availability}
                                 />
                             </TypeDefinitionAnchorPart>
@@ -57,6 +58,7 @@ export function EndpointRequestSection({
                                     availability={property.availability}
                                     types={types}
                                     location="request"
+                                    lang={lang}
                                 />
                             </TypeDefinitionAnchorPart>
                         ),
@@ -66,14 +68,15 @@ export function EndpointRequestSection({
             </WithSeparator>
         ),
         bytes: () => null,
-        object: (obj) => <TypeReferenceDefinitions shape={obj} types={types} location="request" />,
-        alias: (obj) => <TypeReferenceDefinitions shape={obj} types={types} location="request" />
+        object: (obj) => <TypeReferenceDefinitions shape={obj} types={types} location="request" lang={lang} />,
+        alias: (obj) => <TypeReferenceDefinitions shape={obj} types={types} location="request" lang={lang} />
     });
 }
 
 export function createEndpointRequestDescriptionFallback(
     request: ApiDefinition.HttpRequest,
-    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>,
+    lang: string
 ) {
     return `This endpoint expects ${visitDiscriminatedUnion(request.body)._visit<string>({
         formData: (formData) => {
@@ -90,15 +93,16 @@ export function createEndpointRequestDescriptionFallback(
 }
 
 function renderTypeShorthandFormDataField(
-    property: Exclude<ApiDefinition.FormDataField, ApiDefinition.FormDataField.Property>
+    property: Exclude<ApiDefinition.FormDataField, ApiDefinition.FormDataField.Property>,
+    lang: string
 ): ReactNode {
     return (
         <span className="fern-api-property-meta">
             <span>{property.type}</span>
             {property.isOptional ? (
-                <span>{i18n.playground.optional}</span>
+                <span>{t(lang).playground.optional}</span>
             ) : (
-                <span className="text-(color:--red-a11)">{i18n.playground.required}</span>
+                <span className="text-(color:--red-a11)">{t(lang).playground.required}</span>
             )}
         </span>
     );

@@ -35,6 +35,7 @@ export async function ProductDropdown({
     }
 
     const files = await loader.getFiles();
+    const lang = await loader.getLanguage();
 
     const resolveFileSrc = createFileResolver(files);
 
@@ -68,6 +69,7 @@ export async function ProductDropdown({
             products={productOptions ?? []}
             fallbackProduct={fallbackProduct}
             useDenseLayout={useDenseLayout}
+            lang={lang}
         />
     );
 }

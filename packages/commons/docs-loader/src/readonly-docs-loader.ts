@@ -618,6 +618,20 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
         };
     });
 
+const getLanguage = (cacheConfig: Required<CacheConfig>) =>
+    cache(async (domainKey: string) => {
+        "use cache";
+        unstable_cacheTag(domainKey, "getLanguage");
+
+        const config = await getConfig(cacheConfig)(domainKey);
+        if (!config) {
+            console.error("Could not find config for domainKey", domainKey);
+            notFound();
+        }
+
+        return config.settings?.language ?? "en";
+    });
+
 const getConfig = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         // Check in-memory cache first
@@ -1176,6 +1190,7 @@ export const createCachedDocsLoader = async (
         getLogoUrls: () => getLogoUrls(config)(domainKey),
         getLayout: () => getLayout(config)(domainKey),
         getSettings: () => getSettings(config)(domainKey),
+        getLanguage: () => getLanguage(config)(domainKey),
         getFonts: () => getFonts(config)(domainKey),
         getAuthState,
         getEdgeFlags: () => cachedGetEdgeFlags(domainKey),

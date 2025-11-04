@@ -3,9 +3,9 @@
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { useBasePath } from "@fern-docs/components/state/navigation";
 
-import { i18n } from "@/constants";
+import { t } from "@fern-docs/i18n";
 
-export default function ReturnHomeButton() {
+export default function ReturnHomeButton({ lang }: { lang: string }) {
     const basePath = useBasePath();
-    return <FernLinkButton href={basePath} text={i18n.buttons.returnHome} intent="primary" />;
+    return <FernLinkButton href={basePath} text={t(lang).buttons.returnHome} intent="primary" />;
 }

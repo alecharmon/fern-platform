@@ -53,6 +53,7 @@ export async function LayoutEvaluator({
     const subtitle = frontmatter?.subtitle ?? frontmatter?.excerpt;
 
     const config = await loader.getConfig();
+    const lang = await loader.getLanguage();
 
     const extractedStyles = mdx?.styles ?? [];
 
@@ -68,10 +69,12 @@ export async function LayoutEvaluator({
                 await constructPageOptions({
                     pageActionConfig: config,
                     domain: loader.domain,
-                    slug
+                    slug,
+                    lang
                 })
             }
             tags={availability && <AvailabilityBadge availability={availability} rounded />}
+            lang={lang}
         />
     );
 
@@ -82,6 +85,7 @@ export async function LayoutEvaluator({
             hideNavLinks={frontmatter?.["hide-nav-links"] ?? config.layout?.hideNavLinks}
             editThisPageUrl={frontmatter?.["edit-this-page-url"]}
             bottomNavigation={bottomNavigation}
+            lang={lang}
         />
     );
 
@@ -104,6 +108,7 @@ export async function LayoutEvaluator({
                 }
                 footer={footer}
                 builtWithFern={<BuiltWithFern className="mx-auto my-8 w-fit" />}
+                lang={lang}
             >
                 <MdxContent mdx={mdx} fallback={markdown} useNextMdx={mdx?.engine === "next-remote"} />
             </AbstractLayoutEvaluatorContent>

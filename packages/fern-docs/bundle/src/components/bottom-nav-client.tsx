@@ -2,16 +2,15 @@
 
 import { MaybeFernLink } from "@fern-docs/components/FernLink";
 import { Separator } from "@fern-docs/components/Separator";
-
+import { t } from "@fern-docs/i18n";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-import { i18n } from "@/constants";
-
 export function BottomNavigationClient({
     prev,
-    next
+    next,
+    lang
 }: {
     prev?: {
         href?: string;
@@ -25,6 +24,7 @@ export function BottomNavigationClient({
         shallow?: boolean;
         onClick?: () => void;
     };
+    lang: string;
 }) {
     const router = useRouter();
     React.useEffect(() => {
@@ -52,7 +52,7 @@ export function BottomNavigationClient({
     }
 
     return (
-        <nav aria-label={i18n.navigation.upNext} className="fern-footer-nav">
+        <nav aria-label={t(lang).navigation.upNext} className="fern-footer-nav">
             {prev && (
                 <MaybeFernLink
                     href={prev.href}
@@ -61,7 +61,9 @@ export function BottomNavigationClient({
                     onClick={prev.onClick}
                 >
                     <ChevronLeft className="size-icon text-(color:--grayscale-a9)" />
-                    <span className="text-(color:--grayscale-a11) hidden text-sm font-medium sm:block">Previous</span>
+                    <span className="text-(color:--grayscale-a11) hidden text-sm font-medium sm:block">
+                        {t(lang).navigation.previous}
+                    </span>
                 </MaybeFernLink>
             )}
             {next && (
@@ -86,7 +88,9 @@ export function BottomNavigationClient({
                         className="bg-(color:--grayscale-a5) relative hidden h-8 w-px sm:block"
                     />
                     <span className="relative inline-flex items-center gap-1">
-                        <span className="text-(color:--grayscale-a11) hidden text-sm font-medium sm:block">Next</span>
+                        <span className="text-(color:--grayscale-a11) hidden text-sm font-medium sm:block">
+                            {t(lang).navigation.next}
+                        </span>
                         <ChevronRight className="size-icon text-(color:--grayscale-a9)" />
                     </span>
                 </MaybeFernLink>

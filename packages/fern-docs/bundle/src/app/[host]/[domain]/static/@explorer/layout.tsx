@@ -1,16 +1,24 @@
+import { createCachedDocsLoader } from "@fern-api/docs-loader";
+
 import { InterceptedPlaygroundCloseButton } from "@/components/playground/PlaygroundCloseButton";
 import { PlaygroundDrawer } from "@/components/playground/PlaygroundDrawer";
 import { HorizontalSplitPane } from "@/components/playground/VerticalSplitPane";
 
 export default async function ExplorerLayout({
     children,
-    sidebar
+    sidebar,
+    params
 }: {
     children: React.ReactNode;
     sidebar: React.ReactNode;
+    params: Promise<{ host: string; domain: string }>;
 }) {
+    const { host, domain } = await params;
+    const loader = await createCachedDocsLoader(host, domain);
+    const lang = await loader.getLanguage();
+
     return (
-        <PlaygroundDrawer>
+        <PlaygroundDrawer lang={lang}>
             <InterceptedPlaygroundCloseButton />
             <HorizontalSplitPane
                 mode="pixel"

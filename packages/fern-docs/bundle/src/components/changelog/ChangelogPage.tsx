@@ -5,11 +5,11 @@ import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FernLink } from "@fern-docs/components/FernLink";
+import { t } from "@fern-docs/i18n";
 import { makeToc, type TableOfContentsItem, toTree } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/compat";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
-import { i18n } from "@/constants";
 import { Markdown } from "@/mdx/components/Markdown";
 import { MdxContent } from "@/mdx/components/MdxContent";
 import type { MdxSerializer } from "@/server/mdx-serializer";
@@ -21,13 +21,15 @@ export default async function ChangelogPage({
     serialize,
     nodeId,
     breadcrumb,
-    isFullPage
+    isFullPage,
+    lang
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
     nodeId: FernNavigation.NodeId;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     isFullPage: boolean;
+    lang: string;
 }) {
     const node = await loader.getNavigationNode(nodeId);
     const configLayout = await loader.getLayout();
@@ -56,7 +58,7 @@ export default async function ChangelogPage({
     ).filter(isNonNullish);
 
     const tags = new Set(entries.flatMap((e) => e.tags ?? []));
-    const allTags = tags.size > 0 ? [i18n.ui.all, ...tags] : undefined;
+    const allTags = tags.size > 0 ? [t(lang).ui.all, ...tags] : undefined;
 
     /**
      * if there are duplicate anchor tags, the anchor from the first page where it appears will be used
@@ -81,6 +83,7 @@ export default async function ChangelogPage({
                     node={node}
                     breadcrumb={breadcrumb}
                     tags={allTags}
+                    lang={lang}
                 />
             }
             entries={Object.fromEntries(
@@ -93,6 +96,7 @@ export default async function ChangelogPage({
             )}
             isFullPage={isFullPage}
             configLayout={configLayout}
+            lang={lang}
         />
     );
 }
@@ -104,7 +108,8 @@ export async function ChangelogPageOverview({
     breadcrumb,
     showRssFeedButton = true,
     tags,
-    showBackIcon = false
+    showBackIcon = false,
+    lang
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -113,6 +118,7 @@ export async function ChangelogPageOverview({
     showRssFeedButton?: boolean;
     tags: string[] | undefined;
     showBackIcon?: boolean;
+    lang: string;
 }) {
     const page = node.overviewPageId != null ? await loader.getPage(node.overviewPageId) : undefined;
     const mdx = await serialize(page?.markdown, {
@@ -132,6 +138,7 @@ export async function ChangelogPageOverview({
                 showRssFeedButton={showRssFeedButton}
                 filters={tags}
                 showBackIcon={showBackIcon}
+                lang={lang}
                 markdownPromise={
                     page?.markdown
                         ? Promise.resolve({ content: page.markdown, contentType: "markdown" as const })

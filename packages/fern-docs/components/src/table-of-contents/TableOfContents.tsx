@@ -1,12 +1,11 @@
 "use client";
 
 import type { FernUser } from "@fern-api/docs-auth";
+import { t } from "@fern-docs/i18n";
 import type { TableOfContentsItem as TableOfContentsItemType } from "@fern-docs/mdx";
-
 import fastdom from "fastdom";
 import React, { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useCallbackOne } from "use-memo-one";
-
 import { cn } from "../cn";
 import { WithFeatureFlags } from "../feature-flags/WithFeatureFlags";
 import { useCurrentAnchor } from "../hooks/use-anchor";
@@ -19,6 +18,7 @@ export declare namespace TableOfContents {
         className?: string;
         style?: CSSProperties;
         tableOfContents: TableOfContentsItemType[];
+        lang: string;
     }
 }
 
@@ -82,7 +82,7 @@ function filterTocByRoles(items: TableOfContentsItemType[], user: FernUser | und
         .filter((item): item is TableOfContentsItemType => item != null);
 }
 
-export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, tableOfContents, style }) => {
+export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, tableOfContents, style, lang }) => {
     const user = useFernUser();
 
     // filter toc items based on user roles
@@ -172,7 +172,9 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
     return (
         <>
             {filteredTableOfContents.length > 0 && (
-                <div className="text-(color:--grayscale-a11) m-0 mb-3 text-sm font-medium">On this page</div>
+                <div className="text-(color:--grayscale-a11) m-0 mb-3 text-sm font-medium">
+                    {t(lang).navigation.onThisPage}
+                </div>
             )}
             {filteredTableOfContents.length > 0 && (
                 <ul

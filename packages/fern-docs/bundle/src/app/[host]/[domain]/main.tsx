@@ -20,6 +20,7 @@ export async function DocsMainContent({
     serializeNextMdx,
     node,
     parents,
+    lang,
     neighbors,
     breadcrumb
 }: {
@@ -41,8 +42,9 @@ export async function DocsMainContent({
         };
     };
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
+    lang: string;
 }) {
-    const bottomNavigation = neighbors && <BottomNavigation neighbors={neighbors} serialize={serialize} />;
+    const bottomNavigation = neighbors && <BottomNavigation neighbors={neighbors} serialize={serialize} lang={lang} />;
 
     if (node.type === "changelog") {
         // only render full page mode for changelog tabs
@@ -57,6 +59,7 @@ export async function DocsMainContent({
                 nodeId={node.id}
                 breadcrumb={breadcrumb}
                 isFullPage={changelogType === "tabbed" && !isSidebarFixed}
+                lang={lang}
             />
         );
     }
@@ -80,9 +83,11 @@ export async function DocsMainContent({
                         showRssFeedButton={false}
                         showBackIcon={true}
                         tags={undefined}
+                        lang={lang}
                     />
                 }
                 bottomNavigation={bottomNavigation}
+                lang={lang}
             >
                 <ChangelogPageEntry loader={loader} node={node} serialize={serialize} />
             </ChangelogEntryPage>
@@ -99,6 +104,7 @@ export async function DocsMainContent({
                 breadcrumb={breadcrumb}
                 bottomNavigation={bottomNavigation}
                 action={parent?.type === "endpointPair" ? <EndpointStreamingEnabledToggle node={parent} /> : undefined}
+                lang={lang}
             />
         );
     }

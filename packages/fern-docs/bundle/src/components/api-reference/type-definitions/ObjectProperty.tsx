@@ -14,11 +14,13 @@ import { TypeShorthand } from "./TypeShorthand";
 export const ObjectProperty = React.memo(function ObjectProperty({
     property,
     types,
-    location
+    location,
+    lang
 }: {
     property: ApiDefinition.ObjectProperty;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
+    lang: string;
 }) {
     const unwrapped = ApiDefinition.unwrapReference(property.valueShape, types);
     const description = compact([property.description, ...unwrapped.descriptions])[0];
@@ -31,6 +33,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
             shape={property.valueShape}
             types={types}
             location={location}
+            lang={lang}
         />
     );
 });
@@ -42,7 +45,8 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     availability,
     types,
     location,
-    additionalProperties
+    additionalProperties,
+    lang
 }: {
     icon?: React.ReactNode;
     name?: string;
@@ -52,12 +56,13 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     types: Record<string, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
+    lang: string;
 }) {
     return (
         <PropertyRenderer
             name={name}
             description={description}
-            typeShorthand={<TypeShorthand shape={shape} />}
+            typeShorthand={<TypeShorthand shape={shape} lang={lang} />}
             availability={availability}
         >
             <TypeReferenceDefinitions
@@ -65,6 +70,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
                 types={types}
                 location={location}
                 additionalProperties={additionalProperties}
+                lang={lang}
             />
         </PropertyRenderer>
     );

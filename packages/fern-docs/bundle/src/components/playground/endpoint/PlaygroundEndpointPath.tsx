@@ -41,6 +41,7 @@ interface PlaygroundEndpointPathProps {
     sendRequestIcon?: ReactNode;
     types: Record<TypeId, TypeDefinition>;
     apiDefinitionId?: FdrAPI.ApiDefinitionId;
+    lang: string;
 }
 
 export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
@@ -55,7 +56,8 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
     sendRequestButtonLabel,
     sendRequestIcon,
     types,
-    apiDefinitionId
+    apiDefinitionId,
+    lang
 }) => {
     const environmentIds = useAllEnvironmentIds();
     const isEditingEnvironment = useBooleanState(false);
@@ -83,6 +85,7 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                             editable
                             isEditingEnvironment={isEditingEnvironment}
                             apiDefinitionId={apiDefinitionId}
+                            lang={lang}
                         />
                     </span>
                     {path.map((part, idx) => {
@@ -160,6 +163,7 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                             baseUrl
                         })
                     }
+                    lang={lang}
                 />
             </div>
 
@@ -169,6 +173,7 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                     sendRequestButtonLabel={sendRequestButtonLabel}
                     sendRequestIcon={sendRequestIcon}
                     disabled={requestDisabled}
+                    lang={lang}
                 />
             </div>
 

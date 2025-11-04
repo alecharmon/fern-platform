@@ -9,11 +9,10 @@ import { FernInput } from "@fern-docs/components/FernInput";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
+import { t } from "@fern-docs/i18n";
 import { Search, Slash, X } from "lucide-react";
 import { Fragment, forwardRef, useEffect, useRef, useState } from "react";
-
 import { BuiltWithFern } from "@/components/built-with-fern";
-import { i18n } from "@/constants";
 
 import type { ApiGroup } from "../utils/flatten-apis";
 import { PlaygroundEndpointSelectorLeafNode } from "./PlaygroundEndpointSelectorLeafNode";
@@ -23,6 +22,7 @@ export interface PlaygroundEndpointSelectorContentProps {
     className?: string;
     shallow?: boolean;
     replace?: boolean;
+    lang: string;
 }
 
 function matchesEndpoint(query: string, group: ApiGroup, endpoint: FernNavigation.NavigationNodeApiLeaf): boolean {
@@ -35,7 +35,7 @@ function matchesEndpoint(query: string, group: ApiGroup, endpoint: FernNavigatio
 }
 
 export const PlaygroundEndpointSelectorContent = forwardRef<HTMLDivElement, PlaygroundEndpointSelectorContentProps>(
-    ({ apiGroups, className, shallow, replace }, forwardedRef) => {
+    ({ apiGroups, className, shallow, replace, lang }, forwardedRef) => {
         const pathname = useCurrentPathname();
 
         const [filterValue, setFilterValue] = useState<string>("");
@@ -106,7 +106,7 @@ export const PlaygroundEndpointSelectorContent = forwardRef<HTMLDivElement, Play
                                     <FernButton icon={<X />} variant="minimal" onClick={() => setFilterValue("")} />
                                 )
                             }
-                            placeholder={i18n.search.searchForEndpoints}
+                            placeholder={t(lang).search.searchForEndpoints}
                         />
                     </div>
                     <FernScrollArea

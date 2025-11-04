@@ -1,5 +1,6 @@
 import { cn } from "@fern-docs/components/cn";
 import { Kbd } from "@fern-docs/components/kbd";
+import { t } from "@fern-docs/i18n";
 import { cva, type VariantProps } from "class-variance-authority";
 import { SearchIcon } from "lucide-react";
 import { type ComponentPropsWithoutRef, forwardRef, memo } from "react";
@@ -27,12 +28,13 @@ export const DesktopSearchButton = forwardRef<
         VariantProps<typeof buttonVariants> & {
             placeholder?: string;
             isSearchInSidebar?: boolean;
+            lang: string;
         }
->(({ children, variant, placeholder = "Search", className, isSearchInSidebar, ...rest }, ref) => {
+>(({ children, variant, placeholder, className, isSearchInSidebar, lang, ...rest }, ref) => {
     return (
         <button {...rest} className={buttonVariants({ variant, className })} ref={ref}>
             <SearchIcon />
-            {placeholder}
+            {placeholder ?? t(lang).search.search}
             <CommandKbd className="pointer-coarse:hidden ml-auto" />
         </button>
     );

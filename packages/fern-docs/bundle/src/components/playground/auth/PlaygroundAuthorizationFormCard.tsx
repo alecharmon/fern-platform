@@ -19,16 +19,18 @@ interface PlaygroundAuthorizationFormCardProps {
     apiDefinitionId: string;
     auth: APIV1Read.ApiAuth;
     disabled?: boolean;
+    lang: string;
 }
 export function PlaygroundAuthorizationFormCard({
     loader,
     apiDefinitionId,
     auth,
-    disabled = false
+    disabled = false,
+    lang
 }: PlaygroundAuthorizationFormCardProps): ReactElement<any> | null {
     return (
         <PlaygroundAuthorizationFormCardRoot>
-            <PlaygroundAuthorizationCardTrigger auth={auth} disabled={disabled} />
+            <PlaygroundAuthorizationCardTrigger auth={auth} disabled={disabled} lang={lang} />
             <PlaygroundAuthorizationFormCardContent>
                 <div className="fern-dropdown max-h-full">
                     <PlaygroundAuthorizationForm
@@ -38,8 +40,8 @@ export function PlaygroundAuthorizationFormCard({
                         disabled={disabled}
                     />
                     <div className="flex justify-end gap-2 p-4 pt-2">
-                        {auth.type !== "oAuth" && <PlaygroundAuthorizationFormCardCloseButton />}
-                        <PlaygroundAuthorizationFormCardResetButton />
+                        {auth.type !== "oAuth" && <PlaygroundAuthorizationFormCardCloseButton lang={lang} />}
+                        <PlaygroundAuthorizationFormCardResetButton lang={lang} />
                     </div>
                 </div>
             </PlaygroundAuthorizationFormCardContent>

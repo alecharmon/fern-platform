@@ -9,11 +9,13 @@ import { EndpointUrlWithOverflow } from "./EndpointUrlWithOverflow";
 export function EndpointUrlWithPlaygroundBaseUrl({
     endpoint,
     className,
-    method = "GET"
+    method = "GET",
+    lang
 }: {
     endpoint: WebSocketChannel | EndpointDefinition;
     className?: string;
     method?: HttpOrWssOrGrpc;
+    lang: string;
 }) {
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);
     return (
@@ -26,6 +28,7 @@ export function EndpointUrlWithPlaygroundBaseUrl({
             showEnvironment
             large
             className={className}
+            lang={lang}
         />
     );
 }

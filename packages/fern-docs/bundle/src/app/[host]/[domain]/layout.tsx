@@ -58,6 +58,7 @@ export default async function Layout({
         colors,
         layout,
         settings,
+        lang,
         fonts,
         isAskAiEnabled,
         deprecated_customerAnalytics,
@@ -71,6 +72,7 @@ export default async function Layout({
         loader.getColors(),
         loader.getLayout(),
         loader.getSettings(),
+        loader.getLanguage(),
         loader.getFonts(),
         loader.isAskAiEnabledForDocs(),
         deprecated_getCustomerAnalytics(domain),
@@ -134,7 +136,7 @@ export default async function Layout({
                 <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>{children}</FeatureFlagProvider>
                 <React.Suspense fallback={null}>
                     {!isLocalEnvironment && !settings.disableSearch && (
-                        <SearchV2 domain={domain} disableAnalytics={settings.disableAnalytics} />
+                        <SearchV2 domain={domain} disableAnalytics={settings.disableAnalytics} lang={lang} />
                     )}
                 </React.Suspense>
                 {jsConfig != null && <JavascriptProvider config={jsConfig} />}

@@ -2,11 +2,10 @@ import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { SemanticBadge } from "@fern-docs/components/badges";
 import { Button } from "@fern-docs/components/button";
+import { t } from "@fern-docs/i18n";
 import { useAtomValue } from "jotai";
 import { Key } from "lucide-react";
 import type { ReactElement } from "react";
-
-import { i18n } from "@/constants";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 import type { PlaygroundAuthState } from "../types";
 import { isMultiAuthToken } from "../utils/parse-auth-options";
@@ -16,13 +15,15 @@ interface PlaygroundCardTriggerManualProps {
     disabled: boolean;
     toggleOpen: () => void;
     isOpen: boolean;
+    lang: string;
 }
 
 export function PlaygroundCardTriggerManual({
     auth,
     disabled,
     toggleOpen,
-    isOpen
+    isOpen,
+    lang
 }: PlaygroundCardTriggerManualProps): ReactElement<any> | false {
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
 
@@ -31,11 +32,11 @@ export function PlaygroundCardTriggerManual({
     }
 
     const authButtonCopy = visitDiscriminatedUnion(auth)._visit({
-        bearerAuth: () => i18n.auth.enterBearerToken,
-        basicAuth: () => i18n.auth.enterUsernameAndPassword,
-        header: () => i18n.auth.enterCredentials,
-        oAuth: () => i18n.auth.enterCredentials,
-        _other: () => i18n.auth.enterCredentials
+        bearerAuth: () => t(lang).auth.enterBearerToken,
+        basicAuth: () => t(lang).auth.enterUsernameAndPassword,
+        header: () => t(lang).auth.enterCredentials,
+        oAuth: () => t(lang).auth.enterCredentials,
+        _other: () => t(lang).auth.enterCredentials
     });
 
     const authed = isAuthed(auth, authState);
@@ -53,11 +54,11 @@ export function PlaygroundCardTriggerManual({
             {authButtonCopy}
             {authed ? (
                 <SemanticBadge intent="success" className="ml-auto">
-                    Authenticated
+                    {t(lang).apiReference.authenticated}
                 </SemanticBadge>
             ) : (
                 <SemanticBadge intent="danger" className="ml-auto">
-                    Not Authenticated
+                    {t(lang).apiReference.notAuthenticated}
                 </SemanticBadge>
             )}
         </Button>

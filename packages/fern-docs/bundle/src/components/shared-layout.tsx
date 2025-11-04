@@ -6,12 +6,11 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { cn } from "@fern-docs/components/cn";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
 import { SidebarContainer } from "@fern-docs/components/sidebar/SidebarContainer";
+import { t } from "@fern-docs/i18n";
 import React from "react";
-
 import { Announcement } from "@/components/header/Announcement";
 import { HeaderContent } from "@/components/header/HeaderContent";
 import { ThemedDocs } from "@/components/themes/ThemedDocs";
-import { i18n } from "@/constants";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
@@ -26,7 +25,8 @@ export default async function SharedLayout({
     versionSelect,
     productSelect,
     loader,
-    logo
+    logo,
+    lang
 }: {
     children: React.ReactNode;
     headertabs: React.ReactNode;
@@ -38,9 +38,9 @@ export default async function SharedLayout({
         isAskAiEnabledForDocs: () => Promise<boolean>;
     };
     logo: React.ReactNode;
+    lang: string;
 }) {
     const isLocalEnvironment = isLocal() || isSelfHosted();
-
     const [config, settings, edgeFlags, colors, layout, root, isAskAiEnabled] = await Promise.all([
         loader.getConfig(),
         loader.getSettings(),
@@ -99,12 +99,19 @@ export default async function SharedLayout({
                     navbarLinks={<NavbarLinks loader={loader} />}
                     loginButton={
                         <React.Suspense fallback={null}>
-                            <LoginButton loader={loader} size="sm" className="ml-2" disabled={isLocalEnvironment} />
+                            <LoginButton
+                                loader={loader}
+                                size="sm"
+                                className="ml-2"
+                                disabled={isLocalEnvironment}
+                                lang={lang}
+                            />
                         </React.Suspense>
                     }
                     forceHeader={edgeFlags.isCohereTheme}
                     headerDisabled={layout.isHeaderDisabled}
                     placeholder={settings.searchText}
+                    lang={lang}
                 />
             }
             productSelect={
@@ -140,6 +147,7 @@ export default async function SharedLayout({
                                 loader={loader}
                                 className="my-6 flex w-full justify-between lg:hidden"
                                 showIcon
+                                lang={lang}
                             />
                         </React.Suspense>
                     }
@@ -154,14 +162,16 @@ export default async function SharedLayout({
                             )}
                         >
                             <SearchV2Trigger
-                                aria-label={i18n.search.search}
+                                aria-label={t(lang).search.search}
                                 className={cn("w-full overflow-hidden")}
                                 isSearchInSidebar={true}
                                 placeholder={settings.searchText}
+                                lang={lang}
                             />
-                            {isAskAiEnabled && <SearchPanelTrigger isSearchInSidebar={true} />}
+                            {isAskAiEnabled && <SearchPanelTrigger isSearchInSidebar={true} lang={lang} />}
                         </div>
                     }
+                    lang={lang}
                 >
                     {sidebar}
                 </SidebarContainer>
@@ -172,7 +182,8 @@ export default async function SharedLayout({
                     {versionSelect}
                 </React.Suspense>
             }
-            searchPlaceholder={settings.searchText}
+            searchPlaceholder={settings.searchText ?? t(lang).search.search}
+            lang={lang}
         >
             {children}
         </ThemedDocs>

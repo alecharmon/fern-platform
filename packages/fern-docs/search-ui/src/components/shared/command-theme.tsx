@@ -1,14 +1,15 @@
+import { t } from "@fern-docs/i18n";
 import { Laptop, Moon, Sun } from "lucide-react";
 import { type ComponentPropsWithoutRef, forwardRef } from "react";
-
 import * as Command from "../cmdk";
 
 export const CommandGroupTheme = forwardRef<
     HTMLDivElement,
     ComponentPropsWithoutRef<typeof Command.Group> & {
         setTheme?: (theme: "light" | "dark" | "system") => void;
+        lang: string;
     }
->(({ setTheme, ...props }, ref) => {
+>(({ setTheme, lang, ...props }, ref) => {
     if (setTheme == null) {
         return false;
     }
@@ -21,7 +22,7 @@ export const CommandGroupTheme = forwardRef<
                 keywords={["light mode", "light theme"]}
             >
                 <Sun />
-                Change theme to light
+                {t(lang).search.changeThemeToLight}
             </Command.Item>
             <Command.Item
                 value="change theme to dark"
@@ -29,7 +30,7 @@ export const CommandGroupTheme = forwardRef<
                 keywords={["dark mode", "dark theme"]}
             >
                 <Moon />
-                Change theme to dark
+                {t(lang).search.changeThemeToDark}
             </Command.Item>
             <Command.Item
                 value="change theme to system"
@@ -37,7 +38,7 @@ export const CommandGroupTheme = forwardRef<
                 keywords={["system mode", "system theme"]}
             >
                 <Laptop />
-                Change theme to system
+                {t(lang).search.changeThemeToSystem}
             </Command.Item>
         </Command.Group>
     );

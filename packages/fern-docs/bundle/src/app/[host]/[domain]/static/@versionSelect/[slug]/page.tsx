@@ -19,11 +19,12 @@ export default async function VersionSelectPage({
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
 
     // preload:
-    const [layout, _auth, _flags, root] = await Promise.all([
+    const [layout, _auth, _flags, root, lang] = await Promise.all([
         loader.getLayout(),
         loader.getAuthState(),
         loader.getEdgeFlags(),
-        loader.getRoot()
+        loader.getRoot(),
+        loader.getLanguage()
     ]);
     const useDenseLayout = layout.isHeaderDisabled;
 
@@ -55,6 +56,7 @@ export default async function VersionSelectPage({
             parents={parents}
             fallbackVersion={version}
             useDenseLayout={useDenseLayout}
+            lang={lang}
         />
     );
 }

@@ -4,11 +4,10 @@ import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButt
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
+import { t } from "@fern-docs/i18n";
 import { useSetAtom } from "jotai";
 import { type ReactElement, useRef } from "react";
-
 import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
-import { i18n } from "@/constants";
 import { useProgrammingLanguage } from "@/state/language";
 import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/state/playground";
 import { PlaygroundCodeSnippetResolverBuilder } from "../code-snippets/resolver";
@@ -25,6 +24,7 @@ interface PlaygroundEndpointRequestCardProps {
     context: EndpointContext;
     formState: PlaygroundEndpointRequestFormState;
     dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
+    lang: string;
 }
 
 type RequestType = "curl" | DynamicSnippetLanguage;
@@ -65,7 +65,8 @@ function useRequestType(
 export function PlaygroundEndpointRequestCard({
     context,
     formState,
-    dynamicIRsByLanguage
+    dynamicIRsByLanguage,
+    lang
 }: PlaygroundEndpointRequestCardProps): ReactElement<any> | null {
     const [requestType, setRequestType] = useRequestType(dynamicIRsByLanguage);
     const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
@@ -85,7 +86,7 @@ export function PlaygroundEndpointRequestCard({
     return (
         <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
             <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
-                <span className="text-(color:--grayscale-a11) text-xs uppercase">{i18n.apiReference.request}</span>
+                <span className="text-(color:--grayscale-a11) text-xs uppercase">{t(lang).apiReference.request}</span>
                 {!hasDynamicIr && (
                     <FernButtonGroup>
                         <FernButton
@@ -145,6 +146,7 @@ export function PlaygroundEndpointRequestCard({
                             return resolver.resolve(getFallbackRequestType());
                         }}
                         className="-mr-2"
+                        lang={lang}
                     />
                 </div>
             </div>
@@ -155,6 +157,7 @@ export function PlaygroundEndpointRequestCard({
                     formState={formState}
                     requestType={requestType as DynamicSnippetLanguage}
                     dynamicIRsByLanguage={dynamicIRsByLanguage}
+                    lang={lang}
                 />
             ) : (
                 <PlaygroundRequestPreview

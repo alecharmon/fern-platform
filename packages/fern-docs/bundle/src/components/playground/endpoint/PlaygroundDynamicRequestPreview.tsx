@@ -4,10 +4,9 @@ import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { SnippetResolver } from "@fern-api/snippets";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
+import { t } from "@fern-docs/i18n";
 import { useAtomValue } from "jotai";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
-
-import { i18n } from "@/constants";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 
 import type { PlaygroundEndpointRequestFormState } from "../types";
@@ -21,6 +20,7 @@ interface PlaygroundDynamicRequestPreviewProps {
     formState: PlaygroundEndpointRequestFormState;
     requestType: DynamicSnippetLanguage;
     dynamicIRsByLanguage: DynamicIRsByLanguage;
+    lang: string;
 }
 export interface PlaygroundDynamicRequestPreviewRef {
     getCurrentCode: () => string;
@@ -30,8 +30,8 @@ export interface PlaygroundDynamicRequestPreviewRef {
 export const PlaygroundDynamicRequestPreview = forwardRef<
     PlaygroundDynamicRequestPreviewRef,
     PlaygroundDynamicRequestPreviewProps
->(({ context, formState, requestType, dynamicIRsByLanguage }, ref) => {
-    const [code, setCode] = useState<string>(i18n.status.loading);
+>(({ context, formState, requestType, dynamicIRsByLanguage, lang }, ref) => {
+    const [code, setCode] = useState<string>(t(lang).status.loading);
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
     const [baseURL] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
@@ -169,7 +169,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         const generateCode = () => {
             try {
                 if (!memoizedGenerators) {
-                    setCode(i18n.errors.failedToCreateSnippetGenerators);
+                    setCode(t(lang).errors.failedToCreateSnippetGenerators);
                     return;
                 }
 
@@ -204,10 +204,10 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
 
                 const result = generator.generateSync(request);
 
-                setCode(result.snippet ?? i18n.errors.errorGeneratingCodeSnippet);
+                setCode(result.snippet ?? t(lang).errors.errorGeneratingCodeSnippet);
             } catch (error: unknown) {
                 console.error(`Error generating ${requestType} snippet:`, error);
-                const errorMessage = error instanceof Error ? error.message : i18n.status.unknownError;
+                const errorMessage = error instanceof Error ? error.message : t(lang).status.unknownError;
                 setCode(`Failed to generate ${requestType} code: ${errorMessage}`);
             }
         };

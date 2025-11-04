@@ -1,17 +1,19 @@
 "use client";
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { t } from "@fern-docs/i18n";
 import { renderTypeShorthand } from "@/components/type-shorthand";
-import { i18n } from "@/constants";
 
 import { useEndpointContext } from "./EndpointContext";
 
 export function ResponseSummaryFallback({
     response,
-    types
+    types,
+    lang
 }: {
     response: ApiDefinition.HttpResponse;
     types: Record<string, ApiDefinition.TypeDefinition>;
+    lang: string;
 }) {
     const { selectedExample } = useEndpointContext();
     const exampleResponseBody = selectedExample?.exampleCall.responseBody;
@@ -20,7 +22,8 @@ export function ResponseSummaryFallback({
         response,
         exampleResponseBody,
         types,
-        isAudioFileDownloadSpanSummary: false
+        isAudioFileDownloadSpanSummary: false,
+        lang
     });
 }
 
@@ -28,16 +31,18 @@ function getResponseSummary({
     response,
     exampleResponseBody,
     types,
-    isAudioFileDownloadSpanSummary
+    isAudioFileDownloadSpanSummary,
+    lang
 }: {
     response: ApiDefinition.HttpResponse;
     exampleResponseBody: ApiDefinition.ExampleEndpointResponse | undefined;
     types: Record<string, ApiDefinition.TypeDefinition>;
     isAudioFileDownloadSpanSummary: boolean;
+    lang: string;
 }) {
     switch (response.body.type) {
         case "empty":
-            return i18n.responses.thisEndpointReturnsNothing;
+            return t(lang).responses.thisEndpointReturnsNothing;
         case "fileDownload": {
             if (isAudioFileDownloadSpanSummary) {
                 return (
@@ -46,10 +51,10 @@ function getResponseSummary({
                     </span>
                 );
             }
-            return i18n.responses.thisEndpointReturnsFile;
+            return t(lang).responses.thisEndpointReturnsFile;
         }
         case "streamingText":
-            return i18n.responses.thisEndpointSendsTextResponses;
+            return t(lang).responses.thisEndpointSendsTextResponses;
         case "stream":
             return `This endpoint returns a stream of ${exampleResponseBody?.type === "sse" ? "server sent events" : renderTypeShorthand(response.body.shape, { withArticle: false }, types)}.`;
         default:

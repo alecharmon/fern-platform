@@ -4,6 +4,7 @@ import { BuiltWithFern } from "../built-with-fern";
 import { Feedback } from "../feedback/Feedback";
 
 export function FooterLayout({
+    lang,
     hideFeedback,
     hideNavLinks,
     editThisPageUrl,
@@ -11,6 +12,7 @@ export function FooterLayout({
     pathname,
     className
 }: {
+    lang: string;
     hideFeedback?: boolean;
     hideNavLinks?: boolean;
     editThisPageUrl?: string;
@@ -20,11 +22,12 @@ export function FooterLayout({
 }) {
     return (
         <AbstractFooterLayout
+            lang={lang}
             editThisPageUrl={editThisPageUrl}
             bottomNavigation={bottomNavigation}
             hideNavLinks={hideNavLinks}
             className={className}
-            feedback={<div>{!hideFeedback && <Feedback pathname={pathname} />}</div>}
+            feedback={<div>{!hideFeedback && <Feedback pathname={pathname} lang={lang} />}</div>}
             builtWithFern={<BuiltWithFern className="mx-auto mt-12 w-fit" />}
         />
     );

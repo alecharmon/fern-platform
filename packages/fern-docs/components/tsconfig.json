@@ -17,6 +17,9 @@
     },
     {
       "path": "../../commons/docs-utils"
+    },
+    {
+      "path": "../../commons/i18n"
     }
   ]
 }

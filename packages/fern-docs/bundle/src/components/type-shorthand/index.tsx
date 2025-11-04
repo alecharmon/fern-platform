@@ -5,10 +5,9 @@ import {
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { t } from "@fern-docs/i18n";
 import { uniq } from "es-toolkit/array";
 import type { ReactNode } from "react";
-
-import { i18n } from "@/constants";
 import { NullableDropdown } from "./NullableDropdown";
 
 export interface TypeShorthandRootOptions {
@@ -20,6 +19,7 @@ export interface TypeShorthandRootOptions {
     hideAllModifiers?: boolean;
     isNullable?: boolean;
     onChange?: (value: unknown) => void;
+    lang: string;
 }
 
 export interface TypeShorthandOptions {
@@ -37,7 +37,8 @@ export function renderTypeShorthandRoot({
     hideAllModifiers = false,
     isNullable = false,
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onChange = () => {}
+    onChange = () => {},
+    lang
 }: TypeShorthandRootOptions): ReactNode {
     const unwrapped = unwrapReference(shape, types);
     const typeShorthand = renderTypeShorthand(
@@ -74,7 +75,7 @@ export function renderTypeShorthandRoot({
                 ))}
             {unwrapped.default != null && !hideAllModifiers && (
                 <span>
-                    {i18n.playground.defaultsTo}
+                    {t(lang).playground.defaultsTo}
                     <code>{unknownToString(unwrapped.default)}</code>
                 </span>
             )}

@@ -8,10 +8,11 @@ import { TypeReferenceDefinitions } from "@/components/api-reference/type-defini
 type SchemaProps = {
     typeDefinition?: ApiDefinition.TypeDefinition;
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    lang?: string;
     className?: string;
 };
 
-export function Schema({ typeDefinition, types, className }: SchemaProps) {
+export function Schema({ typeDefinition, types, lang, className }: SchemaProps) {
     const currentSlug = useCurrentSlug();
 
     if (typeDefinition == null || types == null) {
@@ -20,9 +21,9 @@ export function Schema({ typeDefinition, types, className }: SchemaProps) {
 
     return (
         <TypeDefinitionRoot types={types} slug={currentSlug}>
-            <TypeDefinitionSlotsServer types={types}>
+            <TypeDefinitionSlotsServer types={types} lang={lang ?? "en"}>
                 <div className={className}>
-                    <TypeReferenceDefinitions shape={typeDefinition.shape} types={types} />
+                    <TypeReferenceDefinitions shape={typeDefinition.shape} types={types} lang={lang ?? "en"} />
                 </div>
             </TypeDefinitionSlotsServer>
         </TypeDefinitionRoot>

@@ -3,21 +3,22 @@
 import { SemanticBadge } from "@fern-docs/components/badges/semantic-badge";
 import { cn } from "@fern-docs/components/cn";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { RefreshCcw } from "lucide-react";
 import type React from "react";
 import type { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
-import { i18n } from "@/constants";
-
 export function ErrorBoundaryFallback({
     className,
     error,
-    resetErrorBoundary
+    resetErrorBoundary,
+    lang
 }: {
     className?: string;
     error: Error & { digest?: string };
     resetErrorBoundary?: () => void;
+    lang: string;
 }) {
     console.error(`[error-boundary-fallback] ${JSON.stringify(error)}`);
     const errorBadge = (
@@ -29,7 +30,7 @@ export function ErrorBoundaryFallback({
             interactive={resetErrorBoundary != null}
             className="m-auto flex w-fit"
         >
-            {i18n.errors.somethingWentWrong}
+            {t(lang).errors.somethingWentWrong}
             {resetErrorBoundary != null && <RefreshCcw />}
         </SemanticBadge>
     );
@@ -37,7 +38,7 @@ export function ErrorBoundaryFallback({
         <div className={cn("size-full py-2", className)}>
             {resetErrorBoundary != null ? (
                 <FernTooltipProvider>
-                    <FernTooltip content={i18n.buttons.clickToRefresh}>{errorBadge}</FernTooltip>
+                    <FernTooltip content={t(lang).buttons.clickToRefresh}>{errorBadge}</FernTooltip>
                 </FernTooltipProvider>
             ) : (
                 errorBadge
@@ -49,10 +50,12 @@ export function ErrorBoundaryFallback({
 export function ErrorBoundary({
     children,
     onResetAction,
-    fallback
+    fallback,
+    lang = "en"
 }: PropsWithChildren<{
     onResetAction?: () => void;
     fallback?: React.ReactNode;
+    lang?: string;
 }>) {
     if (fallback != null) {
         return (
@@ -68,7 +71,10 @@ export function ErrorBoundary({
     }
 
     return (
-        <ReactErrorBoundary onReset={onResetAction} FallbackComponent={ErrorBoundaryFallback}>
+        <ReactErrorBoundary
+            onReset={onResetAction}
+            FallbackComponent={(props) => <ErrorBoundaryFallback {...props} lang={lang} />}
+        >
             {children}
         </ReactErrorBoundary>
     );

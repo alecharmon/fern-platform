@@ -18,6 +18,7 @@ export declare namespace InternalTypeDefinition {
         types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
         location?: PropertyLocation;
         additionalProperties?: ApiDefinition.ObjectProperty[];
+        lang: string;
     }
 }
 
@@ -25,7 +26,8 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     shape,
     types,
     location,
-    additionalProperties
+    additionalProperties,
+    lang
 }: {
     shape:
         | ApiDefinition.TypeShape.Enum
@@ -36,6 +38,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
+    lang: string;
 }) {
     switch (shape.type) {
         case "enum": {
@@ -45,6 +48,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                         element: <EnumValue key={value.value} enumValue={value} />,
                         searchableString: `${value.value} ${value.description ?? ""}`
                     }))}
+                    lang={lang}
                 />
             );
         }
@@ -63,6 +67,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 types={types}
                                 location={location}
                                 additionalProperties={additionalProperties}
+                                lang={lang}
                             />
                         ))}
                     </WithSeparator>
@@ -82,6 +87,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 unionVariant={variant}
                                 types={types}
                                 location={location}
+                                lang={lang}
                             />
                         ))}
                     </WithSeparator>
@@ -109,7 +115,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 key={property.key}
                                 part={{ type: "objectProperty", propertyName: property.key }}
                             >
-                                <ObjectProperty property={property} types={types} location={location} />
+                                <ObjectProperty property={property} types={types} location={location} lang={lang} />
                             </TypeDefinitionPathPart>
                         ))}
                         {filteredProperties.map((property) => (
@@ -117,7 +123,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 key={property.key}
                                 part={{ type: "objectProperty", propertyName: property.key }}
                             >
-                                <ObjectProperty property={property} types={types} location={location} />
+                                <ObjectProperty property={property} types={types} location={location} lang={lang} />
                             </TypeDefinitionPathPart>
                         ))}
                     </WithSeparator>

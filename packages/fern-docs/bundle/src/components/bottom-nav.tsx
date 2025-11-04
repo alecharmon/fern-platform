@@ -10,9 +10,11 @@ import { BottomNavigationClient } from "./bottom-nav-client";
 
 export function BottomNavigation({
     neighbors,
-    serialize
+    serialize,
+    lang
 }: {
     serialize: MdxSerializer;
+    lang: string;
     neighbors: {
         prev?: {
             title: string;
@@ -54,6 +56,7 @@ export function BottomNavigation({
                       }
                     : undefined
             }
+            lang={lang}
         />
     );
 }

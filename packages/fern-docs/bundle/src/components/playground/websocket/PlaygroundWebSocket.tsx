@@ -4,12 +4,11 @@ import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildRequestUrl, type WebSocketMessage } from "@fern-api/fdr-sdk/api-definition";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
+import { t } from "@fern-docs/i18n";
 import { usePrevious } from "@fern-ui/react-commons";
 import { Wifi, WifiOff } from "lucide-react";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import urlJoin from "url-join";
-
-import { i18n } from "@/constants";
 import { PLAYGROUND_AUTH_STATE_ATOM, usePlaygroundWebsocketFormState } from "@/state/playground";
 
 import { usePlaygroundSettings } from "../../hooks/usePlaygroundSettings";
@@ -25,9 +24,10 @@ const WEBSOCKET_PROXY_URI = "wss://proxy.ferndocs.com/";
 interface PlaygroundWebSocketProps {
     context: WebSocketContext;
     authForm: React.ReactNode;
+    lang: string;
 }
 
-export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, authForm }) => {
+export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, authForm, lang }) => {
     const [formState, setFormState] = usePlaygroundWebsocketFormState(context);
     const websocketMessageLimit = usePlaygroundSettings(context.node.id)?.["limit-websocket-messages-per-connection"];
 
@@ -59,7 +59,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                 type: "end",
                 data: {
                     type: "json",
-                    data: i18n.ai.endOfSampleSession
+                    data: t(lang).ai.endOfSampleSession
                 },
                 origin: "endSample",
                 displayName: undefined
@@ -202,10 +202,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         queryParameters={context.channel.queryParameters}
                         sendRequestButtonLabel={
                             connectedState === "closed"
-                                ? i18n.buttons.connect
+                                ? t(lang).buttons.connect
                                 : connectedState === "opening"
-                                  ? i18n.playground.connecting
-                                  : i18n.buttons.disconnect
+                                  ? t(lang).playground.connecting
+                                  : t(lang).buttons.disconnect
                         }
                         sendRequestIcon={
                             connectedState === "opening" ? null : connectedState === "opened" ? (
@@ -233,6 +233,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         connected={connectedState === "opened"}
                         error={error}
                         authForm={authForm}
+                        lang={lang}
                     />
                 </div>
             </div>

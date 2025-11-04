@@ -1,5 +1,6 @@
 import { Badge } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
+import { t } from "@fern-docs/i18n";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 import { ChevronDown, ChevronUp, Minus } from "lucide-react";
 import { cloneElement, isValidElement, useState } from "react";
@@ -29,7 +30,8 @@ export function DesktopFilterDropdownMenu({
     inSidePanel = false,
     className,
     open,
-    onOpenChange
+    onOpenChange,
+    lang
 }: {
     filter: FacetFilter;
     removeFilter?: () => void;
@@ -40,6 +42,7 @@ export function DesktopFilterDropdownMenu({
     className?: string;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    lang: string;
 }) {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -121,7 +124,7 @@ export function DesktopFilterDropdownMenu({
                             }}
                         >
                             <Minus className="size-4" />
-                            Remove filter
+                            {t(lang).search.removeFilter}
                             {!inSidePanel && <DropdownMenuShortcut>Del</DropdownMenuShortcut>}
                         </DropdownMenuItem>
                     </DropdownMenuGroup>

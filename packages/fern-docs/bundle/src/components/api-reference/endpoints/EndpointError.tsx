@@ -11,11 +11,13 @@ import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefin
 
 export function EndpointError({
     error,
-    types
+    types,
+    lang
 }: {
     error: ApiDefinition.ErrorResponse;
     availability: APIV1Read.Availability | null | undefined;
     types: Record<string, ApiDefinition.TypeDefinition>;
+    lang: string;
 }) {
     if (error.shape == null) {
         return null;
@@ -31,7 +33,7 @@ export function EndpointError({
             {shouldHideShape(error.shape, types) ? null : (
                 <>
                     <Separator />
-                    <TypeReferenceDefinitions shape={error.shape} types={types} />
+                    <TypeReferenceDefinitions shape={error.shape} types={types} lang={lang} />
                 </>
             )}
         </div>

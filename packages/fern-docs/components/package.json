@@ -85,6 +85,7 @@
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
+    "@fern-docs/i18n": "workspace:*",
     "@fern-docs/mdx": "workspace:*",
     "@fern-ui/react-commons": "workspace:*",
     "@radix-ui/colors": "catalog:",

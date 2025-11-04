@@ -17,6 +17,7 @@ interface PlaygroundWebSocketContentProps {
     connected: boolean;
     error: string | null;
     authForm: React.ReactNode;
+    lang: string;
 }
 
 export const PlaygroundWebSocketContent: FC<PlaygroundWebSocketContentProps> = ({
@@ -28,7 +29,8 @@ export const PlaygroundWebSocketContent: FC<PlaygroundWebSocketContentProps> = (
     clearMessages,
     connected,
     error,
-    authForm
+    authForm,
+    lang
 }) => {
     const [scrollAreaHeight, setScrollAreaHeight] = useState(0);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -65,6 +67,7 @@ export const PlaygroundWebSocketContent: FC<PlaygroundWebSocketContentProps> = (
                     connected={connected}
                     error={error}
                     authForm={authForm}
+                    lang={lang}
                 />
             </div>
         </div>

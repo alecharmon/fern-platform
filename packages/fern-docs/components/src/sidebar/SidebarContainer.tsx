@@ -18,7 +18,8 @@ export const SidebarContainer = React.memo(function SidebarContainer({
     children,
     showSearchBar,
     showHeaderInSidebar,
-    searchBar
+    searchBar,
+    lang
 }: {
     showSearchBar: boolean;
     showHeaderInSidebar: boolean;
@@ -29,6 +30,7 @@ export const SidebarContainer = React.memo(function SidebarContainer({
     loginButton: React.ReactNode;
     searchBar: React.ReactNode;
     children: React.ReactNode;
+    lang: string;
 }) {
     const ref = React.useRef<HTMLDivElement>(null);
     useDismountMeasureSidebarScrollPosition(ref);
@@ -58,6 +60,7 @@ export const SidebarContainer = React.memo(function SidebarContainer({
                 <ThemeSwitch
                     className={cn("mx-auto mt-8 flex", !showHeaderInSidebar && "lg:hidden")}
                     key="theme-switch"
+                    lang={lang}
                 />
             </FernScrollArea>
         </>

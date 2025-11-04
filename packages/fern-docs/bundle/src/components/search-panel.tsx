@@ -2,6 +2,7 @@
 
 import { cn } from "@fern-docs/components/cn";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
+import { t } from "@fern-docs/i18n";
 import { AlgoliaSearchClientRoot, DesktopAskAiPanel, SEARCH_INDEX } from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";
 import { isEqual } from "es-toolkit/predicate";
@@ -11,7 +12,6 @@ import React from "react";
 import { z } from "zod";
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
-import { i18n } from "@/constants";
 import { useIsDarkCode } from "@/state/dark-code";
 import { useIsSearchDialogOpen } from "@/state/search";
 import {
@@ -67,7 +67,7 @@ const getDefaultWidth = () => {
 
 const widthAtom = atom(getDefaultWidth());
 
-export const SearchPanel = React.memo(function SearchPanel({ domain }: { domain: string }) {
+export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { domain: string; lang: string }) {
     const isDarkCodeEnabled = useIsDarkCode();
     const userToken = useAlgoliaUserToken();
     const user = useFernUser();
@@ -258,7 +258,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain }: { domain:
                             }
                             return (
                                 <Feedback
-                                    feedbackQuestion={i18n.feedback.wasThisResponseHelpful}
+                                    feedbackQuestion={t(lang).feedback.wasThisResponseHelpful}
                                     type="conversational-search"
                                     metadata={() => ({
                                         user: user?.content,
@@ -269,6 +269,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain }: { domain:
                                         domain
                                     })}
                                     feedbackSource="ask-fern"
+                                    lang={lang}
                                 />
                             );
                         }}
@@ -280,6 +281,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain }: { domain:
                         searchDialogOpen={searchDialogOpen}
                         panelWidth={width}
                         isSidePanelOpen={isSidePanelOpen}
+                        lang={lang}
                     />
                 </div>
             </div>

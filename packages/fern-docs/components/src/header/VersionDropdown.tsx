@@ -24,7 +24,8 @@ export async function VersionDropdown({
     slugMap,
     parents,
     fallbackVersion,
-    useDenseLayout = false
+    useDenseLayout = false,
+    lang
 }: {
     loader: DocsLoader;
     slugMap: Map<string, FernNavigation.NavigationNodeWithMetadata>;
@@ -33,6 +34,7 @@ export async function VersionDropdown({
     parents: FernNavigation.NavigationNodeParent[];
     fallbackVersion: FernNavigation.VersionNode;
     useDenseLayout?: boolean;
+    lang: string;
 }) {
     const root = await loader.getRoot();
     // HACK: force the version dropdown to appear in the cohere theme
@@ -97,6 +99,7 @@ export async function VersionDropdown({
             fallbackVersion={fallbackVersion}
             useDenseLayout={useDenseLayout}
             forceHeader={isCohere}
+            lang={lang}
         />
     );
 }

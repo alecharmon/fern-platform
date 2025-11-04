@@ -4,9 +4,7 @@ import type { ObjectProperty, TypeDefinition, TypeId, TypeReference } from "@fer
 import { cn } from "@fern-docs/components/cn";
 import { useBooleanState } from "@fern-ui/react-commons";
 import { type FC, memo, useCallback, useEffect, useState } from "react";
-
 import { withErrorBoundary } from "@/components/error-boundary";
-import { i18n } from "@/constants";
 
 import { castToArray, isExpandable } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";
@@ -21,6 +19,7 @@ interface PlaygroundOpenRPCParameterFormProps {
     types: Record<TypeId, TypeDefinition>;
     disabled?: boolean;
     defaultValue?: unknown;
+    lang: string;
 }
 
 const PlaygroundOpenRPCParameterFormInternal: FC<PlaygroundOpenRPCParameterFormProps> = ({
@@ -31,7 +30,8 @@ const PlaygroundOpenRPCParameterFormInternal: FC<PlaygroundOpenRPCParameterFormP
     value,
     expandByDefault = true,
     types,
-    disabled
+    disabled,
+    lang
 }) => {
     const handleChange = useCallback(
         (newValue: unknown) => {
@@ -69,6 +69,7 @@ const PlaygroundOpenRPCParameterFormInternal: FC<PlaygroundOpenRPCParameterFormP
             onCloseStack={handleCloseStack}
             types={types}
             disabled={disabled}
+            lang={lang}
         />
     );
 };
@@ -85,10 +86,11 @@ interface PlaygroundOpenRPCParametersFormProps {
     indent?: boolean;
     types: Record<string, TypeDefinition>;
     disabled?: boolean;
+    lang: string;
 }
 
 export const PlaygroundOpenRPCParametersFormInternal = memo<PlaygroundOpenRPCParametersFormProps>((props) => {
-    const { id, properties, onChange, value, indent = false, types, disabled } = props;
+    const { id, properties, onChange, value, indent = false, types, disabled, lang } = props;
 
     const onChangeOpenRPCParameter = useCallback(
         (index: number, newValue: unknown) => {
@@ -122,6 +124,7 @@ export const PlaygroundOpenRPCParametersFormInternal = memo<PlaygroundOpenRPCPar
                                     value={castToArray(value)[index]}
                                     types={types}
                                     disabled={disabled}
+                                    lang={lang}
                                 />
                             </li>
                         );
@@ -134,7 +137,11 @@ export const PlaygroundOpenRPCParametersFormInternal = memo<PlaygroundOpenRPCPar
 
 PlaygroundOpenRPCParametersFormInternal.displayName = "PlaygroundOpenRPCParametersFormInternal";
 
+const ErrorFallback = () => {
+    return <div>Error rendering object properties form</div>;
+};
+
 export const PlaygroundOpenRPCParametersForm = withErrorBoundary(
     PlaygroundOpenRPCParametersFormInternal,
-    <div>{i18n.errors.errorRenderingForm}</div>
+    <ErrorFallback />
 );

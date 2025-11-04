@@ -30,6 +30,7 @@ type EndpointSchemaSnippetProps = {
      * @internal the rehype-endpoint-schema-snippets plugin will set this
      */
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    lang?: string;
     className?: string;
 };
 
@@ -38,6 +39,7 @@ export function EndpointSchemaSnippet({
     endpointDefinition,
     selector,
     types,
+    lang,
     className
 }: EndpointSchemaSnippetProps) {
     const currentSlug = useCurrentSlug();
@@ -47,12 +49,13 @@ export function EndpointSchemaSnippet({
 
     return (
         <TypeDefinitionRoot types={types} slug={currentSlug}>
-            <TypeDefinitionSlotsServer types={types}>
+            <TypeDefinitionSlotsServer types={types} lang={lang ?? "en"}>
                 <EndpointSchemaSnippetInternal
                     endpoint={endpoint}
                     endpointDefinition={endpointDefinition}
                     selector={selector}
                     types={types}
+                    lang={lang ?? "en"}
                     className={className}
                 />
             </TypeDefinitionSlotsServer>
@@ -83,11 +86,14 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
     endpoint,
     endpointDefinition,
     types,
+    lang,
     className
 }) => {
     if (endpoint == null || endpointDefinition == null || types == null) {
         return null;
     }
+
+    const language = lang ?? "en";
 
     return (
         <div className={className}>
@@ -96,7 +102,12 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
                     <EndpointSection title="Path parameters">
                         <WithSeparator>
                             {endpointDefinition.pathParameters.map((parameter) => (
-                                <ObjectProperty key={parameter.key} property={parameter} types={types} />
+                                <ObjectProperty
+                                    key={parameter.key}
+                                    property={parameter}
+                                    types={types}
+                                    lang={language}
+                                />
                             ))}
                         </WithSeparator>
                     </EndpointSection>
@@ -108,7 +119,7 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
                         <WithSeparator>
                             {endpointDefinition.queryParameters.map((parameter) => (
                                 <PropertyContainer key={parameter.key}>
-                                    <ObjectProperty property={parameter} types={types} />
+                                    <ObjectProperty property={parameter} types={types} lang={language} />
                                 </PropertyContainer>
                             ))}
                         </WithSeparator>
@@ -118,7 +129,11 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
             {shouldShowSection(selector, "request.body") && endpointDefinition.requests?.[0] != null && (
                 <TypeDefinitionAnchorPart part="request">
                     <EndpointSection key={endpointDefinition.requests[0].contentType} title="Request">
-                        <EndpointRequestSection request={endpointDefinition.requests[0]} types={types} />
+                        <EndpointRequestSection
+                            request={endpointDefinition.requests[0]}
+                            types={types}
+                            lang={language}
+                        />
                     </EndpointSection>
                 </TypeDefinitionAnchorPart>
             )}
@@ -126,7 +141,11 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
                 <TypeDefinitionAnchorPart part="response">
                     <EndpointSection title="Response">
                         <TypeDefinitionAnchorPart part="body">
-                            <EndpointResponseSection body={endpointDefinition.responses[0].body} types={types} />
+                            <EndpointResponseSection
+                                body={endpointDefinition.responses[0].body}
+                                types={types}
+                                lang={language}
+                            />
                         </TypeDefinitionAnchorPart>
                     </EndpointSection>
                 </TypeDefinitionAnchorPart>

@@ -22,7 +22,8 @@ export default function ChangelogEntryPage({
     node,
     overview,
     bottomNavigation,
-    children
+    children,
+    lang
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -30,6 +31,7 @@ export default function ChangelogEntryPage({
     overview: React.ReactNode;
     bottomNavigation: React.ReactNode;
     children: React.ReactNode;
+    lang: string;
 }): ReactElement<any> {
     return (
         <>
@@ -52,7 +54,7 @@ export default function ChangelogEntryPage({
                                         </FernLink>
                                     </Badge>
                                     <div className="filter-row">
-                                        <PageFilters filters={node.tags ?? []} forcePillDisplay />
+                                        <PageFilters filters={node.tags ?? []} forcePillDisplay lang={lang} />
                                     </div>
                                 </div>
                             }
@@ -66,6 +68,7 @@ export default function ChangelogEntryPage({
                         loader={loader}
                         serialize={serialize}
                         bottomNavigation={bottomNavigation}
+                        lang={lang}
                     />
                 </article>
             </AsideAwareDiv>
@@ -78,13 +81,15 @@ async function FooterLayoutWithEditThisPageUrl({
     loader,
     serialize,
     slug,
-    bottomNavigation
+    bottomNavigation,
+    lang
 }: {
     pageId: string;
     loader: DocsLoader;
     serialize: MdxSerializer;
     slug: string;
     bottomNavigation: React.ReactNode;
+    lang: string;
 }) {
     // all this does is get the edit this page url from the mdx frontmatter, but hopefully the mdx was already serialized and cached
     const page = await loader.getPage(pageId);
@@ -102,6 +107,7 @@ async function FooterLayoutWithEditThisPageUrl({
             hideNavLinks={mdx?.frontmatter?.["hide-nav-links"] ?? configLayout.hideNavLinks}
             bottomNavigation={bottomNavigation}
             editThisPageUrl={editThisPageUrl}
+            lang={lang}
         />
     );
 }

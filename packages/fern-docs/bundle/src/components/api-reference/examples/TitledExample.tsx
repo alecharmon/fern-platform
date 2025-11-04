@@ -17,6 +17,7 @@ export declare namespace TitledExample {
         copyToClipboardText?: () => string; // use provider to lazily compute clipboard text
         onClick?: MouseEventHandler<HTMLDivElement>;
         disableClipboard?: boolean;
+        lang: string;
     }
 }
 
@@ -30,7 +31,8 @@ export const TitledExample = forwardRef<HTMLDivElement, PropsWithChildren<Titled
         children,
         copyToClipboardText,
         onClick,
-        disableClipboard = false
+        disableClipboard = false,
+        lang
     },
     ref
 ) {
@@ -71,7 +73,9 @@ export const TitledExample = forwardRef<HTMLDivElement, PropsWithChildren<Titled
                     )}
                     <div className="flex items-center gap-2">
                         {languageDropdown}
-                        {!disableClipboard && <CopyToClipboardButton content={copyToClipboardText} className="-m-1" />}
+                        {!disableClipboard && (
+                            <CopyToClipboardButton content={copyToClipboardText} className="-m-1" lang={lang} />
+                        )}
                     </div>
                 </div>
             </div>

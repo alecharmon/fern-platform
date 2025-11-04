@@ -18,6 +18,7 @@ export default async function EndpointSelectorPage({
 
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
     const root = await loader.getRoot();
+    const lang = await loader.getLanguage();
 
     const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
     if (foundNode.type !== "found") {
@@ -62,5 +63,5 @@ export default async function EndpointSelectorPage({
 
     const apiGroups = flattenApiSection(scopedNode);
 
-    return <PlaygroundEndpointSelectorContent apiGroups={apiGroups} className="h-full" shallow replace />;
+    return <PlaygroundEndpointSelectorContent apiGroups={apiGroups} className="h-full" shallow replace lang={lang} />;
 }

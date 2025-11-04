@@ -8,11 +8,19 @@ import type { RootContent as MdastRootContent } from "mdast";
 import parseNumericRange from "parse-numeric-range";
 import { SKIP, visit } from "unist-util-visit";
 import { mdastFromMarkdown } from "../mdast-utils/mdast-from-markdown";
-import { isMdxJsxElementHast } from "../mdx-utils";
+import { isMdxJsxElementHast, unknownToMdxJsxAttribute } from "../mdx-utils";
 import type { Unified } from "../unified";
 
-export const rehypeCodeBlock: Unified.Plugin<[], HastRoot> = () => {
-    return (tree) => {
+interface RehypeCodeBlockOptions {
+    loader?: {
+        getLanguage: () => Promise<string | undefined>;
+    };
+}
+
+export const rehypeCodeBlock: Unified.Plugin<[RehypeCodeBlockOptions?], HastRoot> = (opts) => {
+    const loader = opts?.loader;
+
+    return async (tree) => {
         visit(tree, (node) => {
             if (!isMdxJsxElementHast(node)) {
                 return;
@@ -45,6 +53,8 @@ export const rehypeCodeBlock: Unified.Plugin<[], HastRoot> = () => {
         /**
          * Convert <pre><code>...</code></pre> to <CodeBlock>...</CodeBlock>
          */
+        const promises: Promise<void>[] = [];
+
         visit(tree, "element", (node, index, parent) => {
             if (node.tagName !== "pre" || parent == null || index == null) {
                 return;
@@ -111,9 +121,30 @@ export const rehypeCodeBlock: Unified.Plugin<[], HastRoot> = () => {
                 });
             }
 
+            // Add lang attribute from loader if available
+            if (loader) {
+                promises.push(
+                    (async () => {
+                        try {
+                            const lang = await loader.getLanguage();
+                            if (lang && isMdxJsxElementHast(replacement)) {
+                                replacement.attributes.push(unknownToMdxJsxAttribute("lang", lang));
+                            }
+                        } catch (e) {
+                            console.error("Could not get language from loader", e);
+                        }
+                    })()
+                );
+            }
+
             parent.children[index] = replacement;
             return SKIP;
         });
+
+        // Wait for all promises to resolve before proceeding
+        if (promises.length > 0) {
+            await Promise.all(promises);
+        }
 
         /**
          * unravel <CodeBlock><CodeBlock>...</CodeBlock></CodeBlock> into <CodeBlock>...</CodeBlock>

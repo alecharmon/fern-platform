@@ -26,12 +26,14 @@ export function VersionDropdownClient({
     versions,
     fallbackVersion,
     useDenseLayout = false,
-    forceHeader = false
+    forceHeader = false,
+    lang
 }: {
     versions: VersionDropdownItem[];
     fallbackVersion: FernNavigation.VersionNode;
     useDenseLayout?: boolean;
     forceHeader?: boolean;
+    lang: string;
 }) {
     const isDesktop = useIsDesktop();
     const currentVersionId = useCurrentVersionId();
@@ -74,6 +76,7 @@ export function VersionDropdownClient({
             radioGroupProps={{
                 className: "fern-version-selector-radio-group"
             }}
+            lang={lang}
         >
             <>
                 <div

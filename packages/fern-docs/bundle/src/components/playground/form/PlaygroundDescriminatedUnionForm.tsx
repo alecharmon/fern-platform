@@ -5,11 +5,10 @@ import { titleCase } from "@fern-api/ui-core-utils";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
+import { t } from "@fern-docs/i18n";
 import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { memo, useCallback, useMemo } from "react";
-
-import { i18n } from "@/constants";
 
 import { castToRecord, getEmptyValueForObjectProperties } from "../utils";
 import { PlaygroundObjectPropertiesForm } from "./PlaygroundObjectPropertyForm";
@@ -23,10 +22,11 @@ interface PlaygroundDiscriminatedUnionFormProps {
     value: unknown;
     id: string;
     disabled?: boolean;
+    lang: string;
 }
 
 export const PlaygroundDiscriminatedUnionForm = memo<PlaygroundDiscriminatedUnionFormProps>((props) => {
-    const { discriminatedUnion, types, onChange, value, id, disabled } = props;
+    const { discriminatedUnion, types, onChange, value, id, disabled, lang } = props;
     const selectedVariantKey =
         value != null ? (castToRecord(value)[discriminatedUnion.discriminant] as string) : undefined;
 
@@ -102,7 +102,9 @@ export const PlaygroundDiscriminatedUnionForm = memo<PlaygroundDiscriminatedUnio
                             activeVariant != null ? (
                                 <span className="font-mono">{activeVariant.discriminantValue}</span>
                             ) : (
-                                <span className="text-(color:--grayscale-a11)">{i18n.playground.selectAVariant}</span>
+                                <span className="text-(color:--grayscale-a11)">
+                                    {t(lang).playground.selectAVariant}
+                                </span>
                             )
                         }
                         rightIcon={<ChevronDown />}

@@ -1,11 +1,9 @@
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
-
+import { t } from "@fern-docs/i18n";
 import { Copy, ExternalLink } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
 import type { ReactNode } from "react";
-
-import { i18n } from "@/constants";
 import { isSelfHosted } from "@/server/isSelfHosted";
 
 import {
@@ -23,22 +21,22 @@ export const Separator = (): FernDropdown.SeparatorOption => {
     } as FernDropdown.SeparatorOption;
 };
 
-export const CopyPageOption = (): FernDropdown.ValueOption => {
+export const CopyPageOption = ({ lang }: { lang: string }): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "copy-page",
-        label: i18n.documentation.copyPage,
-        helperText: i18n.documentation.copyPageAsMarkdown,
+        label: t(lang).documentation.copyPage,
+        helperText: t(lang).documentation.copyPageAsMarkdown,
         icon: <Copy className="size-icon" height={24} width={24} />
     } as FernDropdown.ValueOption;
 };
 
-export const ViewAsMarkdownOption = (domain: string, slug: string): FernDropdown.ValueOption => {
+export const ViewAsMarkdownOption = (domain: string, slug: string, lang: string): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "view-as-markdown",
-        label: i18n.buttons.viewAsMarkdown,
-        helperText: i18n.documentation.viewThisPageAsPlainText,
+        label: t(lang).buttons.viewAsMarkdown,
+        helperText: t(lang).documentation.viewThisPageAsPlainText,
         icon: <MarkdownIcon />,
         href: `https://${domain}/${slug}.md`,
         rightElement: <ExternalLink className="size-icon" />
@@ -52,22 +50,22 @@ export const LLM_URLS: Record<LLM_OPTIONS, [string, ReactNode]> = {
     Claude: ["https://claude.ai/new?q=", <ClaudeIcon key="claude-logo" />]
 };
 
-export const OpenAISearchOption = (): FernDropdown.ValueOption => {
+export const OpenAISearchOption = ({ lang }: { lang: string }): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "open-ai-search",
-        label: i18n.search.askAQuestion,
-        helperText: i18n.search.chatWithAIAssistant,
+        label: t(lang).search.askAQuestion,
+        helperText: t(lang).search.chatWithAIAssistant,
         icon: <SparklesIconHollow />
     } as FernDropdown.ValueOption;
 };
 
-export const OpenLLMSTxtOption = (): FernDropdown.ValueOption => {
+export const OpenLLMSTxtOption = ({ lang }: { lang: string }): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "open-llms-txt",
-        label: i18n.ai.llm,
-        helperText: i18n.buttons.readLlmsTxt,
+        label: t(lang).ai.llm,
+        helperText: t(lang).buttons.readLlmsTxt,
         icon: <TextIcon key="llms-txt-logo" />,
         href: `/llms.txt`
     } as FernDropdown.ValueOption;
@@ -78,11 +76,13 @@ export const OpenLLMSTxtOption = (): FernDropdown.ValueOption => {
 export const OpenWithLLM = ({
     domain,
     slug,
-    llm
+    llm,
+    lang
 }: {
     domain: ParamValue;
     slug: ParamValue;
     llm: LLM_OPTIONS;
+    lang: string;
 }): FernDropdown.ValueOption => {
     const resolveParam = (param: ParamValue): string => {
         if (typeof param === "string") {
@@ -99,18 +99,26 @@ export const OpenWithLLM = ({
 
     const prompt = `Read ${decodedDomain}/${decodedSlug}.md so I can ask questions about it.`;
 
+    const label = llm === "ChatGPT" ? t(lang).documentation.openInChatGPT : t(lang).documentation.openInClaude;
+
     return {
         type: "value",
         value: `open-${llm.toLowerCase()}`,
-        label: `Open in ${llm}`,
-        helperText: i18n.search.askQuestionsAboutThisPage,
+        label: label,
+        helperText: t(lang).search.askQuestionsAboutThisPage,
         icon: LLM_URLS[llm][1],
         href: `${LLM_URLS[llm][0]}${encodeURIComponent(prompt)}`,
         rightElement: <ExternalLink className="size-icon" />
     } as FernDropdown.ValueOption;
 };
 
-export const OpenWithCursor = async ({ domain }: { domain: ParamValue }): Promise<FernDropdown.ValueOption> => {
+export const OpenWithCursor = async ({
+    domain,
+    lang
+}: {
+    domain: ParamValue;
+    lang: string;
+}): Promise<FernDropdown.ValueOption> => {
     const resolveParam = (param: ParamValue): string => {
         if (typeof param === "string") {
             return decodeURIComponent(param);
@@ -132,8 +140,8 @@ export const OpenWithCursor = async ({ domain }: { domain: ParamValue }): Promis
     return {
         type: "value",
         value: "open-cursor",
-        label: i18n.buttons.connectToCursor,
-        helperText: i18n.documentation.installMcpServerOnCursor,
+        label: t(lang).buttons.connectToCursor,
+        helperText: t(lang).documentation.installMcpServerOnCursor,
         icon: <CursorIcon />,
         // Example MCP server config for Cursor install link
         // See: https://modelcontextprotocol.org/docs/context/mcp
@@ -145,16 +153,18 @@ export const OpenWithCursor = async ({ domain }: { domain: ParamValue }): Promis
 export async function constructPageOptions({
     pageActionConfig,
     domain,
-    slug
+    slug,
+    lang
 }: {
     pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
     domain: ParamValue;
     slug: ParamValue;
+    lang: string;
 }): Promise<FernDropdown.PageActionOption[] | undefined> {
-    const options: FernDropdown.PageActionOption[] = [CopyPageOption()];
+    const options: FernDropdown.PageActionOption[] = [CopyPageOption({ lang })];
 
     if (slug?.toString() && domain?.toString()) {
-        options.push(Separator(), ViewAsMarkdownOption(domain?.toString(), slug?.toString()));
+        options.push(Separator(), ViewAsMarkdownOption(domain?.toString(), slug?.toString(), lang));
     }
 
     if (isSelfHosted()) {
@@ -162,15 +172,15 @@ export async function constructPageOptions({
     }
 
     if (pageActionConfig.pageActions?.options?.claude !== false) {
-        options.push(Separator(), OpenWithLLM({ domain, slug, llm: "Claude" }));
+        options.push(Separator(), OpenWithLLM({ domain, slug, llm: "Claude", lang }));
     }
 
     if (pageActionConfig.pageActions?.options?.openAi !== false) {
-        options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT" }));
+        options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT", lang }));
     }
 
     if (pageActionConfig.pageActions?.options?.cursor !== false) {
-        options.push(Separator(), await OpenWithCursor({ domain }));
+        options.push(Separator(), await OpenWithCursor({ domain, lang }));
     }
 
     return options;

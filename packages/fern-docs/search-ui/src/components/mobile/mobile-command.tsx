@@ -1,6 +1,7 @@
 import { Button } from "@fern-docs/components/button";
 
 import { cn } from "@fern-docs/components/cn";
+import { t } from "@fern-docs/i18n";
 import { type ComponentPropsWithoutRef, forwardRef, useRef, useState } from "react";
 
 import { FERN_SEARCH_MOBILE_COMMAND_ID } from "../../constants";
@@ -16,13 +17,14 @@ import "./mobile.scss";
 export interface MobileCommandProps {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    lang: string;
 }
 
 export const MobileCommand = forwardRef<
     HTMLDivElement,
     MobileCommandProps & ComponentPropsWithoutRef<typeof Command.Root>
 >((props, ref) => {
-    const { open, onOpenChange, children, ...rest } = props;
+    const { open, onOpenChange, children, lang, ...rest } = props;
     const { query, refine } = useSearchBox();
     const { filters, resetFilters } = useFacetFilters();
 
@@ -54,7 +56,7 @@ export const MobileCommand = forwardRef<
                     ref={inputRef}
                     autoFocus={false}
                     value={query}
-                    placeholder={toPlaceholder(filters)}
+                    placeholder={toPlaceholder(filters, lang)}
                     onValueChange={(value) => {
                         refine(value);
                         setTimeout(() => {
@@ -76,7 +78,7 @@ export const MobileCommand = forwardRef<
                         className="shrink-0"
                         variant="secondary"
                     >
-                        Cancel
+                        {t(lang).buttons.cancel}
                     </Button>
                 )}
             </div>
@@ -86,6 +88,7 @@ export const MobileCommand = forwardRef<
                         focus();
                         scrollTop();
                     }}
+                    lang={lang}
                 />
             )}
             <Command.List
@@ -132,10 +135,10 @@ export const MobileCommand = forwardRef<
 
 MobileCommand.displayName = "MobileCommand";
 
-function toPlaceholder(filters: readonly FacetFilter[]): string {
+function toPlaceholder(filters: readonly FacetFilter[], lang: string): string {
     if (filters.length === 0) {
-        return "Search";
+        return t(lang).search.search;
     }
 
-    return `Search ${filters.map((filter) => FACET_DISPLAY_NAME_MAP[filter.facet]?.[filter.value] ?? filter.value).join(", ")}`;
+    return `${t(lang).search.search} ${filters.map((filter) => FACET_DISPLAY_NAME_MAP[filter.facet]?.[filter.value] ?? filter.value).join(", ")}`;
 }

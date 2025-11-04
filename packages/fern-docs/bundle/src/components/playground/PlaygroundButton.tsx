@@ -5,16 +5,16 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components/cn";
 import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { Play } from "lucide-react";
 import type { FC } from "react";
-
-import { i18n } from "@/constants";
 import { usePlaygroundSettings } from "../hooks/usePlaygroundSettings";
 
 export const PlaygroundButton: FC<{
     state: FernNavigation.NavigationNodeApiLeaf;
     className?: string;
-}> = ({ state, className }) => {
+    lang: string;
+}> = ({ state, className, lang }) => {
     const settings = usePlaygroundSettings(state.id);
 
     return (
@@ -22,8 +22,10 @@ export const PlaygroundButton: FC<{
             <FernTooltip
                 content={
                     <span>
-                        {i18n.apiReference.customizeAndRunIn}
-                        <span className="text-(color:--accent-a11) font-semibold">{i18n.apiReference.apiExplorer}</span>
+                        {t(lang).apiReference.customizeAndRunIn}
+                        <span className="text-(color:--accent-a11) font-semibold">
+                            {t(lang).apiReference.apiExplorer}
+                        </span>
                     </span>
                 }
             >
@@ -31,8 +33,8 @@ export const PlaygroundButton: FC<{
                     id={`playground-button:${state.slug}`}
                     aria-description={
                         settings?.button?.href
-                            ? i18n.apiReference.opensApiExplorerNewTab
-                            : i18n.apiReference.opensApiExplorer
+                            ? t(lang).apiReference.opensApiExplorerNewTab
+                            : t(lang).apiReference.opensApiExplorer
                     }
                     href={settings?.button?.href ?? conformExplorerRoute(state.slug)}
                     target={settings?.button?.href ? "_blank" : undefined}
@@ -42,7 +44,7 @@ export const PlaygroundButton: FC<{
                     scroll={false}
                 >
                     <Play className="fill-current" />
-                    {i18n.buttons.tryIt}
+                    {t(lang).buttons.tryIt}
                 </ButtonLink>
             </FernTooltip>
         </FernTooltipProvider>

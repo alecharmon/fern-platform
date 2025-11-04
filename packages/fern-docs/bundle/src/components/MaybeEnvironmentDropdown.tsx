@@ -5,11 +5,10 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import type { useBooleanState } from "@fern-ui/react-commons";
 import { useAtom } from "jotai";
 import React, { type ReactElement, useEffect, useState } from "react";
-
-import { i18n } from "@/constants";
 import { useApiDefinitionIdFromContext } from "@/contexts/ApiDefinitionIdContext";
 import { SELECTED_ENVIRONMENT_ID_ATOM, useSelectedEnvironmentUrlAtom } from "@/state/environment";
 
@@ -23,6 +22,7 @@ interface MaybeEnvironmentDropdownProps {
     editable?: boolean;
     isEditingEnvironment: useBooleanState.Return;
     apiDefinitionId?: FdrAPI.ApiDefinitionId;
+    lang: string;
 }
 
 export function MaybeEnvironmentDropdown({
@@ -34,7 +34,8 @@ export function MaybeEnvironmentDropdown({
     options,
     editable,
     isEditingEnvironment,
-    apiDefinitionId
+    apiDefinitionId,
+    lang
 }: MaybeEnvironmentDropdownProps): ReactElement<any> | null {
     const idFromContext = useApiDefinitionIdFromContext();
     const id = apiDefinitionId ?? idFromContext;
@@ -121,7 +122,7 @@ export function MaybeEnvironmentDropdown({
                     />
                 </span>
             ) : (
-                <FernTooltip content={<span>{i18n.playground.doubleClickToEdit}</span>}>
+                <FernTooltip content={<span>{t(lang).playground.doubleClickToEdit}</span>}>
                     <span className="max-sm:hidden" style={{ pointerEvents: "auto" }}>
                         {options && options.length > 1 ? (
                             <FernDropdown
@@ -136,6 +137,7 @@ export function MaybeEnvironmentDropdown({
                                     // useEffect updates the URL
                                 }}
                                 value={selectedEnvironmentId ?? environmentId}
+                                lang={lang}
                             >
                                 <FernButton
                                     style={{ pointerEvents: "auto" }}

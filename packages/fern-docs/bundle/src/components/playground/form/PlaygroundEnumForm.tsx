@@ -3,12 +3,11 @@
 import type { EnumValue } from "@fern-api/fdr-sdk/api-definition";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { t } from "@fern-docs/i18n";
 import { sortBy } from "es-toolkit/array";
 import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
-
-import { i18n } from "@/constants";
 
 const Markdown = dynamic(() => import("@/mdx/components/Markdown").then(({ Markdown }) => Markdown));
 
@@ -19,10 +18,11 @@ interface PlaygroundEnumFormProps {
     id: string;
     onFocus?: () => void;
     disabled?: boolean;
+    lang: string;
 }
 
 export const PlaygroundEnumForm = memo<PlaygroundEnumFormProps>((props) => {
-    const { enumValues, onChange, value, id, onFocus, disabled } = props;
+    const { enumValues, onChange, value, id, onFocus, disabled, lang } = props;
     const options = useMemo(
         () =>
             sortBy(enumValues, ["value"]).map(
@@ -68,7 +68,7 @@ export const PlaygroundEnumForm = memo<PlaygroundEnumFormProps>((props) => {
                     activeItem != null ? (
                         <span className="font-mono">{activeItem.value}</span>
                     ) : (
-                        <span className="text-(color:--grayscale-a11)">{i18n.playground.selectAnEnum}</span>
+                        <span className="text-(color:--grayscale-a11)">{t(lang).playground.selectAnEnum}</span>
                     )
                 }
                 variant="outlined"

@@ -2,9 +2,8 @@
 
 import { type EndpointContext, PropertyKey } from "@fern-api/fdr-sdk/api-definition";
 import { EMPTY_ARRAY, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { t } from "@fern-docs/i18n";
 import { type Dispatch, type FC, type SetStateAction, useCallback, useMemo } from "react";
-
-import { i18n } from "@/constants";
 
 import { PlaygroundFileUploadForm } from "../form/PlaygroundFileUploadForm";
 import { PlaygroundObjectForm } from "../form/PlaygroundObjectForm";
@@ -20,13 +19,15 @@ interface PlaygroundEndpointFormProps {
     formState: PlaygroundEndpointRequestFormState | undefined;
     setFormState: Dispatch<SetStateAction<PlaygroundEndpointRequestFormState>>;
     ignoreHeaders?: boolean;
+    lang: string;
 }
 
 export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
     context: { endpoint, types, globalHeaders },
     formState,
     setFormState,
-    ignoreHeaders
+    ignoreHeaders,
+    lang
 }) => {
     const setHeaders = useCallback(
         (value: ((old: unknown) => unknown) | unknown) => {
@@ -107,7 +108,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
     return (
         <>
             {headers != null && headers.length > 0 && (
-                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.headers}>
+                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={t(lang).apiReference.headers}>
                     <PlaygroundObjectPropertiesForm
                         id="header"
                         properties={headers.map((header) => ({
@@ -118,12 +119,16 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         onChange={setHeaders}
                         value={formState?.headers}
                         types={types}
+                        lang={lang}
                     />
                 </PlaygroundEndpointFormSection>
             )}
 
             {endpoint.pathParameters != null && endpoint.pathParameters.length > 0 && (
-                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.pathParameters}>
+                <PlaygroundEndpointFormSection
+                    ignoreHeaders={ignoreHeaders}
+                    title={t(lang).apiReference.pathParameters}
+                >
                     <PlaygroundObjectPropertiesForm
                         id="path"
                         properties={endpoint.pathParameters ?? EMPTY_ARRAY}
@@ -131,12 +136,16 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         onChange={setPathParameters}
                         value={formState?.pathParameters}
                         types={types}
+                        lang={lang}
                     />
                 </PlaygroundEndpointFormSection>
             )}
 
             {endpoint.queryParameters != null && endpoint.queryParameters.length > 0 && (
-                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.queryParameters}>
+                <PlaygroundEndpointFormSection
+                    ignoreHeaders={ignoreHeaders}
+                    title={t(lang).apiReference.queryParameters}
+                >
                     <PlaygroundObjectPropertiesForm
                         id="query"
                         properties={endpoint.queryParameters ?? EMPTY_ARRAY}
@@ -144,6 +153,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         onChange={setQueryParameters}
                         value={formState?.queryParameters}
                         types={types}
+                        lang={lang}
                     />
                 </PlaygroundEndpointFormSection>
             )}
@@ -151,13 +161,17 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
             {endpoint.requests?.[0]?.body != null &&
                 endpoint.requests?.[0]?.body.type === "object" &&
                 endpoint.protocol?.type === "openrpc" && (
-                    <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.parameters}>
+                    <PlaygroundEndpointFormSection
+                        ignoreHeaders={ignoreHeaders}
+                        title={t(lang).apiReference.parameters}
+                    >
                         <PlaygroundOpenRPCParamsForm
                             id="body"
                             shape={endpoint.requests?.[0]?.body}
                             onChange={setBodyJson}
                             value={formState?.body?.value}
                             types={types}
+                            lang={lang}
                         />
                     </PlaygroundEndpointFormSection>
                 )}
@@ -168,7 +182,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                     formData: (formData) => (
                         <PlaygroundEndpointFormSection
                             ignoreHeaders={ignoreHeaders}
-                            title={i18n.playground.multipartForm}
+                            title={t(lang).playground.multipartForm}
                         >
                             <PlaygroundEndpointMultipartForm
                                 endpoint={endpoint}
@@ -176,11 +190,12 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                                 formData={formData}
                                 types={types}
                                 setBody={setBody}
+                                lang={lang}
                             />
                         </PlaygroundEndpointFormSection>
                     ),
                     bytes: (bytes) => (
-                        <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={i18n.apiReference.body}>
+                        <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={t(lang).apiReference.body}>
                             <PlaygroundFileUploadForm
                                 id="body"
                                 propertyKey="body"
@@ -192,6 +207,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                                         ? [formState.body.value]
                                         : undefined
                                 }
+                                lang={lang}
                             />
                         </PlaygroundEndpointFormSection>
                     ),
@@ -199,7 +215,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         return (
                             <PlaygroundEndpointFormSection
                                 ignoreHeaders={ignoreHeaders}
-                                title={i18n.apiReference.bodyParameters}
+                                title={t(lang).apiReference.bodyParameters}
                             >
                                 <PlaygroundObjectForm
                                     id="body"
@@ -219,6 +235,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                                 ignoreHeaders={ignoreHeaders ?? false}
                                 setBodyJson={setBodyJson}
                                 value={formState?.body?.value}
+                                lang={lang}
                             />
                         );
                     }

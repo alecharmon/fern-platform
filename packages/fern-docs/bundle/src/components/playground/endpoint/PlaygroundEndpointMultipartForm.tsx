@@ -2,10 +2,9 @@ import type { EndpointDefinition, HttpRequestBodyShape, TypeDefinition } from "@
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { t } from "@fern-docs/i18n";
 import { PlusCircle } from "lucide-react";
 import { type ReactElement, useCallback } from "react";
-
-import { i18n } from "@/constants";
 import { Markdown } from "@/mdx/components/Markdown";
 
 import { renderTypeShorthandRoot } from "../../type-shorthand";
@@ -30,6 +29,7 @@ interface PlaygroundEndpointMultipartFormProps {
             | ((old: PlaygroundFormStateBody | undefined) => PlaygroundFormStateBody | undefined)
             | undefined
     ) => void;
+    lang: string;
 }
 
 const ADD_ALL_KEY = "__FERN_ADD_ALL__";
@@ -39,7 +39,8 @@ export function PlaygroundEndpointMultipartForm({
     formState,
     formData,
     types,
-    setBody
+    setBody,
+    lang
 }: PlaygroundEndpointMultipartFormProps): ReactElement<any> {
     const formDataFormValue = formState?.body?.type === "form-data" ? formState?.body.value : {};
 
@@ -180,6 +181,7 @@ export function PlaygroundEndpointMultipartForm({
                                                 : undefined
                                             : undefined
                                     }
+                                    lang={lang}
                                 />
                             </li>
                         );
@@ -195,6 +197,7 @@ export function PlaygroundEndpointMultipartForm({
                                     isOptional={fileArray.isOptional}
                                     onValueChange={(files) => handleFormDataFileChange(field.key, files)}
                                     value={currentValue?.type === "fileArray" ? currentValue.value : undefined}
+                                    lang={lang}
                                 />
                             </li>
                         );
@@ -209,6 +212,7 @@ export function PlaygroundEndpointMultipartForm({
                                         onChange={handleFormDataExplodedChange}
                                         value={formDataFormValue[field.key]?.value}
                                         types={types}
+                                        lang={lang}
                                     />
                                 </li>
                             );
@@ -221,6 +225,7 @@ export function PlaygroundEndpointMultipartForm({
                                     onChange={handleFormDataJsonChange}
                                     value={formDataFormValue[field.key]?.value}
                                     types={types}
+                                    lang={lang}
                                 />
                             </li>
                         );
@@ -246,7 +251,8 @@ export function PlaygroundEndpointMultipartForm({
                                                   },
                                                   types,
                                                   isResponse: false,
-                                                  hideOptional: true
+                                                  hideOptional: true,
+                                                  lang
                                               })
                                             : field.type,
                                     labelClassName: "font-mono",
@@ -263,13 +269,14 @@ export function PlaygroundEndpointMultipartForm({
                                       {
                                           type: "value" as const,
                                           value: ADD_ALL_KEY,
-                                          label: i18n.buttons.addAllOptionalProperties,
+                                          label: t(lang).buttons.addAllOptionalProperties,
                                           rightElement: <PlusCircle className="size-icon" />
                                       }
                                   ]
                                 : [])
                         ]}
                         onValueChange={handleAddAdditionalFields}
+                        lang={lang}
                     >
                         <FernButton
                             text={

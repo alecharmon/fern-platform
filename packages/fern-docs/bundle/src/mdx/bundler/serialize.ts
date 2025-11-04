@@ -167,7 +167,7 @@ async function serializeMdxImpl(
                 rehypeKatex,
                 [rehypeFiles, { files: remoteFiles }],
                 rehypeMdxClassStyle,
-                rehypeCodeBlock,
+                [rehypeCodeBlock, { loader }],
                 rehypeSteps,
                 rehypeAccordions,
                 rehypeTable,

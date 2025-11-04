@@ -35,7 +35,8 @@ export async function EndpointContent({
     bottomNavigation,
     hideFeedback,
     pageActionOptions,
-    markdownPromise
+    markdownPromise,
+    lang
 }: {
     serialize: MdxSerializer;
     showErrors: boolean;
@@ -47,6 +48,7 @@ export async function EndpointContent({
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
+    lang: string;
 }) {
     const { node, endpoint, types } = context;
 
@@ -63,28 +65,40 @@ export async function EndpointContent({
                         slug={node.slug}
                         pageActionOptions={pageActionOptions}
                         markdownPromise={markdownPromise}
+                        lang={lang}
                     >
                         <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
                             <EndpointUrlWithPlaygroundBaseUrl
                                 endpoint={endpoint}
                                 className={endpoint.protocol?.type === "grpc" ? "hidden" : "hidden lg:flex"}
+                                lang={lang}
                             />
                         </ApiReferenceClientWrapper>
                     </PageHeader>
                 }
                 aside={
                     <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
-                        <EndpointContentCodeSnippets endpoint={endpoint} showErrors={showErrors} node={node} />
+                        <EndpointContentCodeSnippets
+                            endpoint={endpoint}
+                            showErrors={showErrors}
+                            node={node}
+                            lang={lang}
+                        />
                     </ApiReferenceClientWrapper>
                 }
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
-                        <TypeDefinitionSlotsServer types={types}>
-                            <EndpointContentLeft context={context} showAuth={showAuth} showErrors={showErrors} />
+                        <TypeDefinitionSlotsServer types={types} lang={lang}>
+                            <EndpointContentLeft
+                                context={context}
+                                showAuth={showAuth}
+                                showErrors={showErrors}
+                                lang={lang}
+                            />
                         </TypeDefinitionSlotsServer>
                     </TypeDefinitionRoot>
                 }
-                footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} />}
+                footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
             >
                 <PlaygroundKeyboardTrigger />
                 <MdxServerComponentProseSuspense mdx={endpoint.description} />

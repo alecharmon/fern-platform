@@ -28,7 +28,8 @@ export default async function ApiEndpointPage({
     node,
     action,
     breadcrumb,
-    bottomNavigation
+    bottomNavigation,
+    lang
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -36,6 +37,7 @@ export default async function ApiEndpointPage({
     action?: React.ReactNode;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     bottomNavigation?: React.ReactNode;
+    lang: string;
 }) {
     const apiDefinition = await loader.getPrunedApi(node.apiDefinitionId, createPruneKey(node));
 
@@ -60,6 +62,7 @@ export default async function ApiEndpointPage({
             hideFeedback={layout.hideFeedback}
             pageActionOptions={pageActionOptions}
             markdownPromise={markdownPromise}
+            lang={lang}
         />
     );
 }
@@ -73,7 +76,8 @@ async function ApiEndpointContent({
     bottomNavigation,
     hideFeedback,
     pageActionOptions,
-    markdownPromise
+    markdownPromise,
+    lang
 }: {
     serialize: MdxSerializer;
     node: FernNavigation.NavigationNodeApiLeaf;
@@ -84,6 +88,7 @@ async function ApiEndpointContent({
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
+    lang: string;
 }) {
     switch (node.type) {
         case "endpoint": {
@@ -103,6 +108,7 @@ async function ApiEndpointContent({
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
+                    lang={lang}
                 />
             );
         }
@@ -121,6 +127,7 @@ async function ApiEndpointContent({
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
+                    lang={lang}
                 />
             );
         }
@@ -139,6 +146,7 @@ async function ApiEndpointContent({
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
+                    lang={lang}
                 />
             );
         }
@@ -157,6 +165,7 @@ async function ApiEndpointContent({
                     hideFeedback={hideFeedback}
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
+                    lang={lang}
                 />
             );
         }

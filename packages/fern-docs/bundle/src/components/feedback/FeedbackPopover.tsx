@@ -19,6 +19,7 @@ const MotionSelectionContent = m.create(Selection.Content);
 type SelectionTextToolbarElement = React.ComponentRef<typeof Selection.Trigger>;
 type SelectionTextToolbarProps = {
     children: React.ReactNode;
+    lang: string;
 };
 
 // const CopyLinkButton = () => {
@@ -79,7 +80,7 @@ type SelectionTextToolbarProps = {
 // };
 
 const FeedbackPopover = forwardRef<SelectionTextToolbarElement, SelectionTextToolbarProps>(
-    ({ children }, forwardedRef) => {
+    ({ children, lang }, forwardedRef) => {
         const [isHelpful, setIsHelpful] = useState<"yes" | "no" | undefined>();
         const [isFeedbackSubmitted, setIsFeedbackSubmitted] = useState<boolean>(false);
         const { selection } = useSelection();
@@ -238,6 +239,7 @@ const FeedbackPopover = forwardRef<SelectionTextToolbarElement, SelectionTextToo
                                             layoutDensity="condensed"
                                             onSubmit={handleSubmitFeedback}
                                             isHelpful={isHelpful}
+                                            lang={lang}
                                         />
                                     </m.div>
                                 ))}

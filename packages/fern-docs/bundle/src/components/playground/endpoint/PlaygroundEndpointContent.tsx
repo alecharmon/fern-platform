@@ -23,6 +23,7 @@ interface PlaygroundEndpointContentProps {
     sendRequest: () => void;
     authForm?: React.ReactNode;
     dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
+    lang: string;
 }
 
 export function PlaygroundEndpointContent({
@@ -34,7 +35,8 @@ export function PlaygroundEndpointContent({
     response,
     sendRequest,
     authForm,
-    dynamicIRsByLanguage
+    dynamicIRsByLanguage,
+    lang
 }: PlaygroundEndpointContentProps): ReactElement<any> {
     const deferredFormState = useDeferredValue(formState);
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
@@ -45,13 +47,19 @@ export function PlaygroundEndpointContent({
             {authForm}
 
             <div className="col-span-2 space-y-8">
-                <PlaygroundEndpointForm context={context} formState={formState} setFormState={setFormState} />
+                <PlaygroundEndpointForm
+                    context={context}
+                    formState={formState}
+                    setFormState={setFormState}
+                    lang={lang}
+                />
             </div>
 
             <PlaygroundEndpointFormButtons
                 node={context.node}
                 resetWithExample={resetWithExample}
                 resetWithoutExample={resetWithoutExample}
+                lang={lang}
             />
         </div>
     );
@@ -61,6 +69,7 @@ export function PlaygroundEndpointContent({
             context={context}
             formState={deferredFormState}
             dynamicIRsByLanguage={dynamicIRsByLanguage}
+            lang={lang}
         />
     );
     const responseCard = (
@@ -68,6 +77,7 @@ export function PlaygroundEndpointContent({
             response={response}
             sendRequest={sendRequest}
             requestDisabled={requestDisabled ?? false}
+            lang={lang}
         />
     );
 

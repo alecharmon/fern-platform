@@ -56,6 +56,7 @@ export function CodeBlock(props: {
      * maps exact string matches in the code to URLs, creating clickable links
      */
     links?: Record<string, string>;
+    lang: string;
 }) {
     const {
         className,
@@ -64,7 +65,8 @@ export function CodeBlock(props: {
         filename,
         language = "plaintext",
         template: templateProp,
-        tooltips: tooltipsProp
+        tooltips: tooltipsProp,
+        lang
     } = props;
     const isDarkCode = useIsDarkCode();
     // TODO: once this is in beta, we can add expandable logic for any code block greater than 20 lines
@@ -113,7 +115,11 @@ export function CodeBlock(props: {
                                 language={language}
                             />
                         )}
-                        <CopyToClipboardButton className="ml-2 mr-1" content={() => applyTemplates(code, template)} />
+                        <CopyToClipboardButton
+                            className="ml-2 mr-1"
+                            content={() => applyTemplates(code, template)}
+                            lang={lang}
+                        />
                     </div>
                 </div>
                 <FernSyntaxHighlighter

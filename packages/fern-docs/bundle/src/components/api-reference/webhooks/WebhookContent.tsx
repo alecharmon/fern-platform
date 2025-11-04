@@ -5,10 +5,10 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { Prose } from "@fern-docs/components/mdx/prose";
+import { t } from "@fern-docs/i18n";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { renderTypeShorthand } from "@/components/type-shorthand";
-import { i18n } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -29,7 +29,8 @@ export async function WebhookContent({
     action,
     hideFeedback,
     pageActionOptions,
-    markdownPromise
+    markdownPromise,
+    lang
 }: {
     serialize: MdxSerializer;
     context: ApiDefinition.WebhookContext;
@@ -39,12 +40,13 @@ export async function WebhookContent({
     hideFeedback: boolean;
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
+    lang: string;
 }) {
     const { node, webhook, types } = context;
 
     const example = webhook.examples?.[0]; // TODO: Need a way to show all the examples
 
-    const webhookExample = example ? <WebhookExample example={example} slug={node.slug} /> : null;
+    const webhookExample = example ? <WebhookExample example={example} slug={node.slug} lang={lang} /> : null;
 
     return (
         <ReferenceLayout
@@ -57,20 +59,21 @@ export async function WebhookContent({
                     slug={node.slug}
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
+                    lang={lang}
                 />
             }
             aside={webhookExample}
             reference={
                 <TypeDefinitionRoot types={types} slug={node.slug}>
-                    <TypeDefinitionSlotsServer types={types}>
+                    <TypeDefinitionSlotsServer types={types} lang={lang}>
                         <TypeDefinitionAnchorPart part="payload">
                             {webhook.headers && webhook.headers.length > 0 && (
                                 <TypeDefinitionAnchorPart part="header">
-                                    <EndpointSection title={i18n.apiReference.headers}>
+                                    <EndpointSection title={t(lang).apiReference.headers}>
                                         <WithSeparator>
                                             {webhook.headers.map((parameter) => (
                                                 <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
-                                                    <ObjectProperty property={parameter} types={types} />
+                                                    <ObjectProperty property={parameter} types={types} lang={lang} />
                                                 </TypeDefinitionAnchorPart>
                                             ))}
                                         </WithSeparator>
@@ -81,28 +84,32 @@ export async function WebhookContent({
                             {webhook.payloads?.[0] && (
                                 <TypeDefinitionAnchorPart part="body">
                                     <EndpointSection
-                                        title={i18n.apiReference.payload}
+                                        title={t(lang).apiReference.payload}
                                         description={
                                             <Prose className="text-(color:--grayscale-a11) my-3" size="sm">
                                                 {`The payload of this webhook request is ${renderTypeShorthand(webhook.payloads[0].shape, { withArticle: true }, types)}.`}
                                             </Prose>
                                         }
                                     >
-                                        <TypeReferenceDefinitions shape={webhook.payloads?.[0].shape} types={types} />
+                                        <TypeReferenceDefinitions
+                                            shape={webhook.payloads?.[0].shape}
+                                            types={types}
+                                            lang={lang}
+                                        />
                                     </EndpointSection>
                                 </TypeDefinitionAnchorPart>
                             )}
                         </TypeDefinitionAnchorPart>
 
                         <TypeDefinitionAnchorPart part="response">
-                            <EndpointSection title={i18n.apiReference.response}>
-                                <WebhookResponseSection />
+                            <EndpointSection title={t(lang).apiReference.response}>
+                                <WebhookResponseSection lang={lang} />
                             </EndpointSection>
                         </TypeDefinitionAnchorPart>
                     </TypeDefinitionSlotsServer>
                 </TypeDefinitionRoot>
             }
-            footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} />}
+            footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
         >
             <MdxServerComponentProseSuspense mdx={webhook.description} />
         </ReferenceLayout>

@@ -5,10 +5,12 @@ import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefin
 
 export function EndpointResponseSection({
     body,
-    types
+    types,
+    lang
 }: {
     body: ApiDefinition.HttpResponseBodyShape;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    lang: string;
 }) {
     switch (body.type) {
         case "empty":
@@ -16,8 +18,8 @@ export function EndpointResponseSection({
         case "streamingText":
             return null;
         case "stream":
-            return <TypeReferenceDefinitions shape={body.shape} types={types} location="response" />;
+            return <TypeReferenceDefinitions shape={body.shape} types={types} location="response" lang={lang} />;
         default:
-            return <TypeReferenceDefinitions shape={body} types={types} location="response" />;
+            return <TypeReferenceDefinitions shape={body} types={types} location="response" lang={lang} />;
     }
 }

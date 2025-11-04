@@ -2,9 +2,8 @@
 
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
+import { t } from "@fern-docs/i18n";
 import React, { useCallback } from "react";
-
-import { i18n } from "@/constants";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
@@ -15,19 +14,23 @@ import { EndpointSection } from "./EndpointSection";
 export interface EndpointMultipleRequestSectionProps {
     requests: HttpRequest[];
     types: Record<string, ApiDefinition.TypeDefinition>;
+    lang: string;
 }
 
-export function EndpointMultipleRequestSection({ requests, types }: EndpointMultipleRequestSectionProps) {
+export function EndpointMultipleRequestSection({ requests, types, lang }: EndpointMultipleRequestSectionProps) {
     const { selectedRequest, setSelectedRequest } = useEndpointContext();
 
-    const getRequestId = useCallback((request: HttpRequest) => {
-        const contentType = request.contentType ?? i18n.apiReference.request;
-        return (
-            <span className="inline-flex items-center gap-2">
-                <span className="text-intent-info">{contentType}</span>
-            </span>
-        );
-    }, []);
+    const getRequestId = useCallback(
+        (request: HttpRequest) => {
+            const contentType = request.contentType ?? t(lang).apiReference.request;
+            return (
+                <span className="inline-flex items-center gap-2">
+                    <span className="text-intent-info">{contentType}</span>
+                </span>
+            );
+        },
+        [lang]
+    );
 
     if (!selectedRequest) {
         return null;
@@ -35,13 +38,13 @@ export function EndpointMultipleRequestSection({ requests, types }: EndpointMult
 
     return (
         <EndpointSection
-            title={i18n.apiReference.request}
+            title={t(lang).apiReference.request}
             description={
                 <MdxServerComponentProseSuspense
                     size="sm"
                     className="text-(color:--grayscale-a11)"
                     mdx={selectedRequest.description}
-                    fallback={createEndpointRequestDescriptionFallback(selectedRequest, types)}
+                    fallback={createEndpointRequestDescriptionFallback(selectedRequest, types, lang)}
                 />
             }
             multipleRequestsProps={{
@@ -52,7 +55,7 @@ export function EndpointMultipleRequestSection({ requests, types }: EndpointMult
             }}
         >
             <TypeDefinitionAnchorPart part="body">
-                <EndpointRequestSection request={selectedRequest} types={types} />
+                <EndpointRequestSection request={selectedRequest} types={types} lang={lang} />
             </TypeDefinitionAnchorPart>
         </EndpointSection>
     );

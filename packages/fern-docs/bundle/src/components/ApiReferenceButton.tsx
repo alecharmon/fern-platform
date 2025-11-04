@@ -1,14 +1,13 @@
 import { slugToHref } from "@fern-api/docs-utils";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { ArrowUpRight } from "lucide-react";
 
-import { i18n } from "@/constants";
-
-export const ApiReferenceButton: React.FC<{ slug: string }> = ({ slug }) => {
+export const ApiReferenceButton: React.FC<{ slug: string; lang: string }> = ({ slug, lang }) => {
     return (
         <FernTooltipProvider>
-            <FernTooltip content={i18n.apiReference.openInApiReference}>
+            <FernTooltip content={t(lang).apiReference.openInApiReference}>
                 <FernLinkButton
                     className="-m-1"
                     rounded

@@ -1,9 +1,7 @@
-import { i18n } from "@/constants";
+import { t } from "@fern-docs/i18n";
 import { Markdown } from "@/mdx/components/Markdown";
 
-const STATUS_200_TEXT = i18n.responses.return200Status;
-
-export const WebhookResponseSection: React.FC = () => {
+export const WebhookResponseSection: React.FC<{ lang: string }> = ({ lang }) => {
     return (
         <div className="border-border-default rounded-3/2 flex flex-col overflow-hidden border">
             <div className="flex flex-col items-start p-3">
@@ -14,7 +12,7 @@ export const WebhookResponseSection: React.FC = () => {
 
                 <Markdown
                     mdx={undefined}
-                    fallback={STATUS_200_TEXT}
+                    fallback={t(lang).responses.return200Status}
                     size="sm"
                     className="mt-3 text-start"
                     useNextMdx={false}

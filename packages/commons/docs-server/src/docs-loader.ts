@@ -160,6 +160,8 @@ export interface DocsLoader<IsAsync extends boolean = true> {
 
     getSettings: () => MaybePromise<FernSettingsConfig, IsAsync>;
 
+    getLanguage: () => MaybePromise<string, IsAsync>;
+
     getAuthState: (pathname?: string) => MaybePromise<AuthState, IsAsync>;
 
     getEdgeFlags: () => MaybePromise<EdgeFlags, IsAsync>;

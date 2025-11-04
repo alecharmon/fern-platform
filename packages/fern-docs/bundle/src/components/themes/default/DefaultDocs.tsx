@@ -2,10 +2,10 @@
 
 import { useDomain } from "@fern-docs/components/state/domain";
 import AbstractDefaultDocs from "@fern-docs/components/theming/AbstractDefaultDocs";
+import { t } from "@fern-docs/i18n";
 import type React from "react";
 import { HeaderTabsRoot } from "@/components/header/HeaderTabsRoot";
 import { SearchPanel } from "@/components/search-panel";
-import { i18n } from "@/constants";
 import { useIsAskAiEnabled } from "@/state/search";
 import { useIsSearchPanelOpen, useIsSearchPanelResizing } from "@/state/search-panel";
 
@@ -25,7 +25,8 @@ export default function DefaultDocs({
     darkHeaderClassName,
     lightSidebarClassName,
     darkSidebarClassName,
-    searchPlaceholder = i18n.search.search
+    searchPlaceholder,
+    lang
 }: {
     header: React.ReactNode;
     versionSelect?: React.ReactNode;
@@ -43,6 +44,7 @@ export default function DefaultDocs({
     lightSidebarClassName?: string;
     darkSidebarClassName?: string;
     searchPlaceholder?: string;
+    lang: string;
 }) {
     const domain = useDomain();
     const isSidePanelOpen = useIsSearchPanelOpen();
@@ -62,7 +64,11 @@ export default function DefaultDocs({
                 isSidePanelOpen={isSidePanelOpen}
                 isSidePanelResizing={isResizing}
                 headerTabs={
-                    <HeaderTabsRoot showSearchBar={showSearchBarInTabs} placeholder={searchPlaceholder}>
+                    <HeaderTabsRoot
+                        showSearchBar={showSearchBarInTabs}
+                        placeholder={searchPlaceholder ?? t(lang).search.search}
+                        lang={lang}
+                    >
                         {tabs}
                     </HeaderTabsRoot>
                 }
@@ -73,7 +79,7 @@ export default function DefaultDocs({
             >
                 {children}
             </AbstractDefaultDocs>
-            {isAskAiEnabled && <SearchPanel domain={domain} />}
+            {isAskAiEnabled && <SearchPanel domain={domain} lang={lang} />}
         </>
     );
 }

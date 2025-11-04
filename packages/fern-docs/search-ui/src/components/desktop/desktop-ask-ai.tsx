@@ -2,7 +2,7 @@
 
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
-import { type ComponentPropsWithoutRef, forwardRef, KeyboardEventHandler, type ReactNode, useRef } from "react";
+import { type ComponentPropsWithoutRef, forwardRef, type ReactNode, useRef } from "react";
 
 import type { SqueezedMessage } from "../chatbot/utils";
 import { useFacetFilters } from "../search/useFacetFilters";
@@ -30,6 +30,7 @@ export const DesktopCommandWithAskAI = forwardRef<
             resetConversationId: () => void;
         };
         openSearchPanel?: () => void;
+        lang: string;
     }
 >(
     (
@@ -48,6 +49,7 @@ export const DesktopCommandWithAskAI = forwardRef<
             darkCodeEnabled,
             useConversationId,
             openSearchPanel,
+            lang,
             ...props
         },
         forwardedRef
@@ -70,7 +72,7 @@ export const DesktopCommandWithAskAI = forwardRef<
                 data-fern-search="desktop-command"
                 data-mode={"search"}
             >
-                <DesktopCommandContent asChild={asChild}>
+                <DesktopCommandContent asChild={asChild} lang={lang}>
                     <CommandAskAIGroup
                         onAskAI={(initialInput) => {
                             setInitialInput?.(initialInput);
@@ -78,6 +80,7 @@ export const DesktopCommandWithAskAI = forwardRef<
                             props.onEscapeKeyDown?.({} as any);
                         }}
                         forceMount
+                        lang={lang}
                     />
                     {children}
                 </DesktopCommandContent>

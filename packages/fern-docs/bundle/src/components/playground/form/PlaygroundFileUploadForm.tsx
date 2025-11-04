@@ -3,11 +3,10 @@
 import { cn } from "@fern-docs/components/cn";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
+import { t } from "@fern-docs/i18n";
 import { File, FilePlus, Mic, X } from "lucide-react";
 import prettyBytes from "pretty-bytes";
 import { type ChangeEvent, type DragEventHandler, memo, useEffect, useRef, useState } from "react";
-
-import { i18n } from "@/constants";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { isValidFile, uniqueFiles } from "../utils/utils";
 import { WithLabelInternal } from "../WithLabel";
@@ -22,10 +21,11 @@ export interface PlaygroundFileUploadFormProps {
     onValueChange: (value: readonly File[] | undefined) => void;
     value: readonly File[] | undefined;
     allowAudioRecording?: boolean;
+    lang: string;
 }
 
 export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
-    ({ id, propertyKey, type, isOptional, onValueChange, value, allowAudioRecording = true }) => {
+    ({ id, propertyKey, type, isOptional, onValueChange, value, allowAudioRecording = true, lang }) => {
         // Remove invalid files
         useEffect(() => {
             if (value != null) {
@@ -153,7 +153,7 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                             <div className="flex gap-2">
                                 <FernButton
                                     onClick={() => ref.current?.click()}
-                                    text={i18n.buttons.browseFiles}
+                                    text={t(lang).buttons.browseFiles}
                                     rounded
                                     variant="outlined"
                                     intent="primary"
@@ -189,7 +189,7 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                                             {audioUrl && <PlaygroundAudioControls audioUrl={audioUrl} />}
                                             {!audioUrl && (
                                                 <FernButton
-                                                    text={i18n.buttons.change}
+                                                    text={t(lang).buttons.change}
                                                     onClick={() => ref.current?.click()}
                                                     size="small"
                                                     variant="minimal"
@@ -224,7 +224,7 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                                     <FernButton
                                         onClick={() => ref.current?.click()}
                                         icon={<FilePlus />}
-                                        text={i18n.buttons.addMoreFiles}
+                                        text={t(lang).buttons.addMoreFiles}
                                         rounded
                                         variant="outlined"
                                         intent="primary"

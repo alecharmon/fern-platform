@@ -1,11 +1,11 @@
 "use client";
 
+import { t } from "@fern-docs/i18n";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
 import { Check, Copy } from "lucide-react";
 import { cn } from "./cn";
 import { Button } from "./FernButtonV2";
 import { FernTooltip, FernTooltipProvider } from "./FernTooltip";
-
 export declare namespace CopyToClipboardButton {
     export interface Props {
         className?: string;
@@ -13,6 +13,7 @@ export declare namespace CopyToClipboardButton {
         testId?: string;
         children?: (onClick: ((e: React.MouseEvent) => void) | undefined) => React.ReactNode;
         onClick?: (e: React.MouseEvent) => void;
+        lang?: string;
     }
 }
 
@@ -21,7 +22,8 @@ export const CopyToClipboardButton: React.FC<CopyToClipboardButton.Props> = ({
     content,
     testId,
     children,
-    onClick
+    onClick,
+    lang = "en"
 }) => {
     const { copyToClipboard, wasJustCopied } = useCopyToClipboard(content);
 
@@ -32,7 +34,7 @@ export const CopyToClipboardButton: React.FC<CopyToClipboardButton.Props> = ({
     return (
         <FernTooltipProvider>
             <FernTooltip
-                content={wasJustCopied ? "Copied!" : "Copy to clipboard"}
+                content={wasJustCopied ? t(lang).buttons.copied : t(lang).buttons.copyToClipboard}
                 open={wasJustCopied ? true : undefined}
             >
                 {children?.((e) => {

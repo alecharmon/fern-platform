@@ -36,12 +36,14 @@ export const PlaygroundEndpoint = ({
     context,
     authForm,
     dynamicIRsByLanguage,
-    disableProxy
+    disableProxy,
+    lang
 }: {
     context: EndpointContext;
     authForm: React.ReactNode;
     dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
     disableProxy: boolean | undefined;
+    lang: string;
 }) => {
     const resolvedPlaygroundState = useResolvedPlaygroundState();
     const { node, endpoint, auths } = context;
@@ -273,6 +275,7 @@ export const PlaygroundEndpoint = ({
                             })();
                         }}
                         dynamicIRsByLanguage={dynamicIRsByLanguage}
+                        lang={lang}
                     />
                 </div>
             </div>

@@ -3,6 +3,7 @@
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { useCurrentVersionId } from "@fern-docs/components/state/navigation";
+import { t } from "@fern-docs/i18n";
 import {
     AlgoliaSearchClientRoot,
     CommandActions,
@@ -25,7 +26,6 @@ import React from "react";
 import { z } from "zod";
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
-import { i18n } from "@/constants";
 import { useSetTheme, useThemeSwitchEnabled } from "@/hooks/use-theme";
 import { useIsDarkCode } from "@/state/dark-code";
 import {
@@ -68,10 +68,12 @@ export function useQueryId() {
 
 export const SearchV2 = React.memo(function SearchV2({
     domain,
-    disableAnalytics
+    disableAnalytics,
+    lang
 }: {
     domain: string;
     disableAnalytics?: boolean;
+    lang: string;
 }) {
     const currentVersion = useCurrentVersionId();
 
@@ -146,7 +148,7 @@ export const SearchV2 = React.memo(function SearchV2({
     const children = (
         <>
             <DefaultDesktopBackButton />
-            <CommandGroupFilters />
+            <CommandGroupFilters lang={lang} />
             <CommandEmpty />
             <CommandSearchHits onSelect={handleNavigate} prefetch={(path) => router.prefetch(path)} domain={domain} />
             <CommandActions>
@@ -154,6 +156,7 @@ export const SearchV2 = React.memo(function SearchV2({
                     onClose={() => {
                         setOpen(false);
                     }}
+                    lang={lang}
                 />
             </CommandActions>
         </>
@@ -173,7 +176,7 @@ export const SearchV2 = React.memo(function SearchV2({
                 initialFilters={shouldApplyVersionFilter ? { "version.title": currentVersion } : undefined}
             >
                 <DesktopSearchDialog open={open} onOpenChange={setOpen}>
-                    <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl">
+                    <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl" lang={lang}>
                         {children}
                     </DesktopCommand>
                 </DesktopSearchDialog>
@@ -210,7 +213,7 @@ export const SearchV2 = React.memo(function SearchV2({
                             }
                             return (
                                 <Feedback
-                                    feedbackQuestion={i18n.feedback.wasThisResponseHelpful}
+                                    feedbackQuestion={t(lang).feedback.wasThisResponseHelpful}
                                     type="conversational-search"
                                     metadata={() => ({
                                         user: user?.content,
@@ -220,17 +223,19 @@ export const SearchV2 = React.memo(function SearchV2({
                                         domain
                                     })}
                                     feedbackSource="ask-fern"
+                                    lang={lang}
                                 />
                             );
                         }}
                         darkCodeEnabled={isDarkCodeEnabled}
                         className="shadow-xl"
                         openSearchPanel={openSearchPanel}
+                        lang={lang}
                     >
                         {children}
                     </DesktopCommandWithAskAI>
                 ) : (
-                    <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl">
+                    <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl" lang={lang}>
                         {children}
                     </DesktopCommand>
                 )}
@@ -239,7 +244,7 @@ export const SearchV2 = React.memo(function SearchV2({
     );
 }, isEqual);
 
-function CommandTheme({ onClose }: { onClose: () => void }) {
+function CommandTheme({ onClose, lang }: { onClose: () => void; lang: string }) {
     const themeSwitchEnabled = useThemeSwitchEnabled();
     const setTheme = useSetTheme();
     if (!themeSwitchEnabled) {
@@ -251,6 +256,7 @@ function CommandTheme({ onClose }: { onClose: () => void }) {
                 setTheme(theme);
                 onClose();
             }}
+            lang={lang}
         />
     );
 }

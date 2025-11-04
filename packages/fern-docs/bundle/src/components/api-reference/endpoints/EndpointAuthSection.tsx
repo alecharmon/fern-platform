@@ -1,7 +1,7 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
-import { i18n } from "@/constants";
+import { t } from "@fern-docs/i18n";
 import { FernCollapseWithButtonUncontrolled } from "../type-definitions/FernCollapseWithButtonUncontrolled";
 import { PropertyRenderer } from "../type-definitions/ObjectProperty";
 import { WithSeparator } from "../type-definitions/TypeDefinitionDetails";
@@ -14,17 +14,17 @@ interface AuthSchemeDisplay {
     typeShorthand: string;
 }
 
-function authSchemeToDisplay(auth: ApiDefinition.AuthScheme): AuthSchemeDisplay {
+function authSchemeToDisplay(auth: ApiDefinition.AuthScheme, lang: string): AuthSchemeDisplay {
     return visitDiscriminatedUnion(auth)._visit<AuthSchemeDisplay>({
         basicAuth: (basicAuth) => ({
             name: "Authorization",
-            description: basicAuth.description ?? i18n.authTypes.basicAuth,
+            description: basicAuth.description ?? t(lang).authTypes.basicAuth,
             availability: undefined,
             typeShorthand: "Basic"
         }),
         bearerAuth: (bearerAuth) => ({
             name: "Authorization",
-            description: bearerAuth.description ?? i18n.authTypes.bearerAuth,
+            description: bearerAuth.description ?? t(lang).authTypes.bearerAuth,
             availability: undefined,
             typeShorthand: "Bearer"
         }),
@@ -34,7 +34,7 @@ function authSchemeToDisplay(auth: ApiDefinition.AuthScheme): AuthSchemeDisplay 
                 value.description ??
                 (value.prefix != null
                     ? `Header authentication of the form \`${value.prefix} <token>\``
-                    : i18n.authTypes.apiKey),
+                    : t(lang).authTypes.apiKey),
             availability: undefined,
             typeShorthand: value.prefix || "string"
         }),
@@ -55,8 +55,8 @@ function authSchemeToDisplay(auth: ApiDefinition.AuthScheme): AuthSchemeDisplay 
     });
 }
 
-function AuthSchemeVariant({ auth }: { auth: ApiDefinition.AuthScheme }) {
-    const display = authSchemeToDisplay(auth);
+function AuthSchemeVariant({ auth, lang }: { auth: ApiDefinition.AuthScheme; lang: string }) {
+    const display = authSchemeToDisplay(auth, lang);
     return (
         <PropertyRenderer
             name={display.name}
@@ -71,20 +71,20 @@ function AuthSchemeVariant({ auth }: { auth: ApiDefinition.AuthScheme }) {
     );
 }
 
-export function EndpointAuthSection({ auths }: { auths: ApiDefinition.AuthScheme[] }) {
+export function EndpointAuthSection({ auths, lang }: { auths: ApiDefinition.AuthScheme[]; lang: string }) {
     if (auths.length === 0) {
         return null;
     }
 
     return (
-        <EndpointSection title={i18n.apiReference.authentication}>
+        <EndpointSection title={t(lang).apiReference.authentication}>
             <FernCollapseWithButtonUncontrolled
                 showText={`Show ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}
                 hideText={`Hide ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}
             >
                 <WithSeparator separatorText={auths.length > 1 ? "OR" : undefined}>
                     {auths.map((auth, index) => (
-                        <AuthSchemeVariant key={index} auth={auth} />
+                        <AuthSchemeVariant key={index} auth={auth} lang={lang} />
                     ))}
                 </WithSeparator>
             </FernCollapseWithButtonUncontrolled>

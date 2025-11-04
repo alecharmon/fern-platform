@@ -15,6 +15,7 @@ export function EndpointRequestSnippet({
     example,
     endpointDefinition,
     slugs,
+    lang,
     className
 }: {
     /**
@@ -33,6 +34,7 @@ export function EndpointRequestSnippet({
      * @internal the rehype-endpoint-examples-snippets plugin will set this
      */
     slugs?: string[];
+    lang?: string;
     className?: string;
 }) {
     if (endpointDefinition == null) {
@@ -45,6 +47,7 @@ export function EndpointRequestSnippet({
             slugs={slugs ?? []}
             example={example}
             className={className}
+            lang={lang ?? "en"}
         />
     );
 }
@@ -53,11 +56,13 @@ function EndpointRequestSnippetInternal({
     endpoint,
     example,
     slugs,
-    className
+    className,
+    lang
 }: {
     endpoint: ApiDefinition.EndpointDefinition;
     example: string | undefined;
     slugs: string[];
+    lang: string;
     className?: string;
 }): ReactElement<any> | null {
     const slug = useCurrentSlug(slugs);
@@ -83,8 +88,10 @@ function EndpointRequestSnippetInternal({
                         baseUrl={baseUrl}
                         options={endpoint.environments}
                         hideCopyButton={true}
+                        lang={lang}
                     />
                 }
+                lang={lang}
                 // include both dropdown and api ref button for proper placement
                 languageDropdown={
                     <>
@@ -100,7 +107,7 @@ function EndpointRequestSnippetInternal({
                                 value={selectedExampleKey.language}
                             />
                         )}
-                        {slug != null && <ApiReferenceButton slug={slug} />}
+                        {slug != null && <ApiReferenceButton slug={slug} lang={lang} />}
                     </>
                 }
                 code={selectedExample.code}

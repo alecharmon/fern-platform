@@ -2,14 +2,13 @@
 
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { cn } from "@fern-docs/components/cn";
+import { t } from "@fern-docs/i18n";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { i18n } from "@/constants";
-
 import { Loading } from "./Loading";
 
-export function WebSocketRefresh() {
+export function WebSocketRefresh({ lang }: { lang: string }) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [failedToLoad, setFailedToLoad] = useState(false);
@@ -146,7 +145,7 @@ export function WebSocketRefresh() {
         return (
             <div className="animate-slide-down fixed left-1/2 top-0 z-50 -translate-x-1/2">
                 <div className="rounded-3 border-border-default mt-6 border bg-white px-4 py-2 shadow-lg">
-                    <div className="text-(color:--red-a11) font-medium">{i18n.errors.serverConnectionLost}</div>
+                    <div className="text-(color:--red-a11) font-medium">{t(lang).errors.serverConnectionLost}</div>
                 </div>
             </div>
         );
@@ -161,7 +160,7 @@ export function WebSocketRefresh() {
             )}
         >
             <div className="rounded-3 border-border-default mt-6 border bg-white px-4 py-2 shadow-lg">
-                <Loading text={i18n.status.reloading} />
+                <Loading text={t(lang).status.reloading} />
             </div>
         </div>
     );

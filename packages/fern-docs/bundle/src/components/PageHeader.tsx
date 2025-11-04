@@ -27,7 +27,8 @@ export function PageHeader({
     pageActionOptions,
     showRssFeedButton,
     filters,
-    showBackIcon
+    showBackIcon,
+    lang
 }: {
     slug: string;
     serialize: MdxSerializer;
@@ -44,6 +45,7 @@ export function PageHeader({
     // tags for the changelog section
     filters?: string[];
     showBackIcon?: boolean;
+    lang: string;
 }) {
     return (
         <header className="my-8 space-y-2">
@@ -90,12 +92,13 @@ export function PageHeader({
                             <PageActionsDropdown
                                 markdownPromise={markdownPromise}
                                 pageActionOptions={pageActionOptions}
+                                lang={lang}
                             />
                         </div>
                     )}
                     {showRssFeedButton && (
                         <div className="hidden md:flex">
-                            <RSSFeedButton />
+                            <RSSFeedButton lang={lang} />
                         </div>
                     )}
                 </div>
@@ -113,7 +116,7 @@ export function PageHeader({
                 <>
                     <hr className="my-4" />
                     <div className="flex flex-row gap-2 overflow-x-auto">
-                        <PageFilters filters={filters} />
+                        <PageFilters filters={filters} lang={lang} />
                     </div>
                 </>
             )}

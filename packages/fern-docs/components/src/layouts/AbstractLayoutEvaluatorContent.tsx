@@ -19,7 +19,8 @@ export async function AbstractLayoutEvaluatorContent({
     aside,
     pageHeader,
     builtWithFern,
-    footer
+    footer,
+    lang
 }: {
     pageHeader?: React.ReactNode;
     frontmatter?: Partial<FernDocs.Frontmatter>;
@@ -28,6 +29,7 @@ export async function AbstractLayoutEvaluatorContent({
     aside?: React.ReactNode;
     builtWithFern?: React.ReactNode;
     footer?: React.ReactNode;
+    lang: string;
 }) {
     let layout = frontmatter?.layout ?? "guide";
 
@@ -36,7 +38,11 @@ export async function AbstractLayoutEvaluatorContent({
     }
 
     const toc = (
-        <TableOfContentsLayout tableOfContents={tableOfContents} hideTableOfContents={frontmatter?.["hide-toc"]} />
+        <TableOfContentsLayout
+            tableOfContents={tableOfContents}
+            hideTableOfContents={frontmatter?.["hide-toc"]}
+            lang={lang}
+        />
     );
 
     switch (layout) {

@@ -4,12 +4,12 @@ import { FernAudioPlayer } from "@fern-docs/components/FernAudioPlayer";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { type Loadable, visitLoadable } from "@fern-ui/loadable";
 import { round } from "es-toolkit/math";
 import { Download } from "lucide-react";
 import type { ReactElement } from "react";
 import { ErrorBoundaryFallback } from "@/components/error-boundary";
-import { i18n } from "@/constants";
 import { PlaygroundResponsePreview } from "../PlaygroundResponsePreview";
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import type { PlaygroundResponse } from "../types/playgroundResponse";
@@ -19,12 +19,14 @@ interface PlaygroundResponseCard {
     response: Loadable<PlaygroundResponse>;
     sendRequest: () => void;
     requestDisabled: boolean;
+    lang: string;
 }
 
 export function PlaygroundResponseCard({
     response,
     sendRequest,
-    requestDisabled
+    requestDisabled,
+    lang
 }: PlaygroundResponseCard): ReactElement<any> {
     return (
         <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
@@ -68,7 +70,7 @@ export function PlaygroundResponseCard({
                     loaded: (response) =>
                         response.type === "file" ? (
                             <FernTooltipProvider>
-                                <FernTooltip content={i18n.buttons.downloadFile}>
+                                <FernTooltip content={t(lang).buttons.downloadFile}>
                                     <FernButton
                                         icon={<Download />}
                                         size="small"
@@ -92,6 +94,7 @@ export function PlaygroundResponseCard({
                                           : ""
                                 }
                                 className="-mr-2"
+                                lang={lang}
                             />
                         ),
                     failed: () => (
@@ -105,7 +108,11 @@ export function PlaygroundResponseCard({
                 loading: () =>
                     response.type === "notStartedLoading" ? (
                         <div className="flex flex-1 items-center justify-center">
-                            <PlaygroundSendRequestButton sendRequest={sendRequest} disabled={requestDisabled} />
+                            <PlaygroundSendRequestButton
+                                sendRequest={sendRequest}
+                                disabled={requestDisabled}
+                                lang={lang}
+                            />
                         </div>
                     ) : (
                         <div className="flex flex-1 items-center justify-center">Loading...</div>
@@ -136,7 +143,7 @@ export function PlaygroundResponseCard({
                             <iframe
                                 src={response.response.body}
                                 className="size-full"
-                                title={i18n.status.pdfPreview}
+                                title={t(lang).status.pdfPreview}
                                 allowFullScreen
                             />
                         );
@@ -160,12 +167,13 @@ export function PlaygroundResponseCard({
                     return (
                         <ErrorBoundaryFallback
                             error={new Error(`File preview not supported for ${response.contentType}`)}
+                            lang={lang}
                         />
                     );
                 },
                 failed: (e) => {
                     console.error(`[playground-response-card] ${JSON.stringify(e)}`);
-                    return <ErrorBoundaryFallback error={new Error(String(e))} />;
+                    return <ErrorBoundaryFallback error={new Error(String(e))} lang={lang} />;
                 }
             })}
         </FernCard>

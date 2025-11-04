@@ -14,6 +14,7 @@
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/components": "workspace:*",
+    "@fern-docs/i18n": "workspace:*",
     "@fern-docs/search-ask-fern": "workspace:*",
     "@fern-docs/search-keyword": "workspace:*",
     "@fern-docs/search-utils": "workspace:*",

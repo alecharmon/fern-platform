@@ -282,8 +282,10 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
         console.log(`[SharedPage] neighborsPromise (getNeighbors) took ${end - start}ms`);
     }
 
+    const lang = await loader.getLanguage();
+
     return (
-        <FeedbackPopoverProvider>
+        <FeedbackPopoverProvider lang={lang}>
             <SetCurrentNavigationNode
                 nodeId={found.node.id}
                 sidebarRootNodeId={found.sidebar?.id}
@@ -305,6 +307,7 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
                 neighbors={neighbors}
                 breadcrumb={found.breadcrumb}
                 globalLayout={config.layout}
+                lang={lang}
             />
         </FeedbackPopoverProvider>
     );

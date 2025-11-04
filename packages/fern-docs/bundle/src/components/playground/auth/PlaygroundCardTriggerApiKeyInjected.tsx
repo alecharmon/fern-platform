@@ -2,13 +2,12 @@ import type { APIKeyInjectionConfigEnabled } from "@fern-api/docs-auth";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
+import { t } from "@fern-docs/i18n";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Key, User } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { type ReactElement, useEffect } from "react";
 import urlJoin from "url-join";
-
-import { i18n } from "@/constants";
 import { Callout } from "@/mdx/components/callout";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
@@ -25,6 +24,7 @@ interface PlaygroundCardTriggerApiKeyInjectedProps {
     disabled: boolean;
     toggleOpen: () => void;
     onClose: () => void;
+    lang: string;
 }
 
 export function PlaygroundCardTriggerApiKeyInjected({
@@ -32,7 +32,8 @@ export function PlaygroundCardTriggerApiKeyInjected({
     config,
     disabled,
     toggleOpen,
-    onClose
+    onClose,
+    lang
 }: PlaygroundCardTriggerApiKeyInjectedProps): ReactElement<any> | false {
     const searchParams = useSearchParams();
     const error = searchParams.get("error");
@@ -90,13 +91,13 @@ export function PlaygroundCardTriggerApiKeyInjected({
 
     if (apiKey != null && apiKey.trim().length > 0) {
         return (
-            <FernCard className="rounded-3 mb-3 p-4" title={i18n.auth.loginToSendRequest}>
+            <FernCard className="rounded-3 mb-3 p-4" title={t(lang).auth.loginToSendRequest}>
                 <FernButton
                     className="pointer-events-none w-full text-left"
                     size="large"
                     intent="success"
                     variant="outlined"
-                    text={i18n.auth.successfullyLoggedIn}
+                    text={t(lang).auth.successfullyLoggedIn}
                     icon={<Key />}
                     active={true}
                 />
@@ -107,7 +108,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                     <div className="flex justify-end gap-2">
                         {apiKey !== authState?.bearerAuth?.token && apiKey && (
                             <FernButton
-                                text={i18n.auth.resetTokenToDefault}
+                                text={t(lang).auth.resetTokenToDefault}
                                 intent="none"
                                 icon={<Key />}
                                 onClick={handleResetAuth}
@@ -116,7 +117,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                             />
                         )}
                         <FernButton
-                            text={i18n.auth.logout}
+                            text={t(lang).auth.logout}
                             intent="none"
                             onClick={() => {
                                 if (!config.authenticated) {
@@ -144,12 +145,12 @@ export function PlaygroundCardTriggerApiKeyInjected({
         <FernCard className="rounded-3 mb-2 p-4">
             {error && <Callout intent="error">{errorDescription ?? error}</Callout>}
 
-            <h5 className="text-(color:--grayscale-a11) m-0">{i18n.auth.loginToSendRequest}</h5>
+            <h5 className="text-(color:--grayscale-a11) m-0">{t(lang).auth.loginToSendRequest}</h5>
             <div className="my-5 flex justify-center gap-2">
                 <FernButton
                     size="normal"
                     intent="primary"
-                    text={i18n.auth.login}
+                    text={t(lang).auth.login}
                     icon={<User />}
                     onClick={redirectOrOpenAuthForm}
                 />
@@ -158,7 +159,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                     intent="none"
                     variant="outlined"
                     icon={<Key />}
-                    text={i18n.auth.provideTokenManually}
+                    text={t(lang).auth.provideTokenManually}
                     onClick={toggleOpen}
                 />
             </div>

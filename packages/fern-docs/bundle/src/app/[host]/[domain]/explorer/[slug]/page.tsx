@@ -19,6 +19,8 @@ export default async function Page(props: { params: Promise<{ host: string; doma
     const root = await loader.getRoot();
 
     const found = FernNavigation.utils.findNode(root, slug);
+    const lang = await loader.getLanguage();
+
     if (found.type !== "found") {
         if (found.redirect) {
             console.log(`[${loader.domain}] Redirecting from ${slug} to ${found.redirect}`);
@@ -27,15 +29,15 @@ export default async function Page(props: { params: Promise<{ host: string; doma
         }
 
         console.error(`[${loader.domain}] Could not find node for slug: ${slug}`);
-        return <NoEndpointSelected />;
+        return <NoEndpointSelected lang={lang} />;
     }
     const node = found.node;
     if (!FernNavigation.isApiLeaf(node)) {
         console.error(`[${loader.domain}] Found non-leaf node for slug: ${slug}`);
-        return <NoEndpointSelected />;
+        return <NoEndpointSelected lang={lang} />;
     }
 
-    return <ExplorerContent loader={loader} node={node} />;
+    return <ExplorerContent loader={loader} node={node} lang={lang} />;
 }
 
 export async function generateMetadata({

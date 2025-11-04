@@ -2,11 +2,10 @@
 
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
+import { t } from "@fern-docs/i18n";
 // import { Property, TypeIdKey, TypeId } from "@fern-api/fdr-sdk/navigation";
 import { type ReactElement, useCallback, useMemo } from "react";
 import { noop } from "ts-essentials";
-
-import { i18n } from "@/constants";
 import { castToRecord } from "../utils";
 import { WithLabel } from "../WithLabel";
 import { PlaygroundMapForm } from "./PlaygroundMapForm";
@@ -64,6 +63,7 @@ interface PlaygroundAdditionalPropertiesProps {
     extraProperties: ApiDefinition.TypeReference;
     value: unknown;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    lang: string;
 }
 
 export function PlaygroundAdditionalProperties({
@@ -72,7 +72,8 @@ export function PlaygroundAdditionalProperties({
     // TODO: this should be used:
     // extraProperties,
     value,
-    types
+    types,
+    lang
 }: PlaygroundAdditionalPropertiesProps): ReactElement<any> {
     const additionalProperties = useMemo(() => {
         // remove property keys from value
@@ -112,12 +113,12 @@ export function PlaygroundAdditionalProperties({
         <div className={cn("mt-8 min-w-0 flex-1 shrink")}>
             <WithLabel
                 property={{
-                    key: ApiDefinition.PropertyKey(i18n.playground.optionalExtraProperties),
+                    key: ApiDefinition.PropertyKey(t(lang).playground.optionalExtraProperties),
                     valueShape: ADDITIONAL_PROPERTIES_DEFAULT_SHAPE,
                     description: undefined,
                     availability: undefined
                 }}
-                value={i18n.playground.optionalExtraProperties}
+                value={t(lang).playground.optionalExtraProperties}
                 onRemove={noop}
                 types={types}
             >

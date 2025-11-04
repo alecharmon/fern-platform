@@ -1,9 +1,8 @@
 "use client";
 
 import { Empty } from "@fern-docs/components/Empty";
+import { t } from "@fern-docs/i18n";
 import React from "react";
-
-import { i18n } from "@/constants";
 
 export interface EnumDefinitionDetailsProps {
     elements: {
@@ -11,9 +10,10 @@ export interface EnumDefinitionDetailsProps {
         searchableString: string;
     }[];
     searchInput: string;
+    lang: string;
 }
 
-export function EnumDefinitionDetails({ elements, searchInput }: EnumDefinitionDetailsProps) {
+export function EnumDefinitionDetails({ elements, searchInput, lang }: EnumDefinitionDetailsProps) {
     console.log(elements);
     const [filteredElements, setFilteredElements] = React.useState<React.ReactNode[]>(() =>
         elements.map((element) => element.element)
@@ -43,7 +43,7 @@ export function EnumDefinitionDetails({ elements, searchInput }: EnumDefinitionD
                     ))}
                 </div>
             ) : (
-                <Empty name={i18n.search.noResults} description={i18n.errors.noEnumValuesFound} />
+                <Empty name={t(lang).search.noResults} description={t(lang).errors.noEnumValuesFound} />
             )}
         </div>
     );

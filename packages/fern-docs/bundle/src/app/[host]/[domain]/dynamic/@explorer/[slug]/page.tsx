@@ -45,15 +45,17 @@ export default async function ExplorerPage({
     const root = await loader.getRoot();
 
     const found = FernNavigation.utils.findNode(root, slug);
+    const lang = await loader.getLanguage();
+
     if (found.type !== "found") {
         if (found.redirect) {
             // this will allow us to redirect to the correct page in the same intercepted API Explorer page
             redirect(conformTrailingSlash(conformExplorerRoute(found.redirect)), RedirectType.replace);
         }
 
-        return <NoEndpointSelected />;
+        return <NoEndpointSelected lang={lang} />;
     }
     const node = found.node;
 
-    return <ExplorerContent loader={loader} node={node} />;
+    return <ExplorerContent loader={loader} node={node} lang={lang} />;
 }

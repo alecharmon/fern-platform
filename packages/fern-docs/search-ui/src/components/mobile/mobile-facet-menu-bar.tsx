@@ -8,16 +8,22 @@ import {
     isAvailability
 } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
+import { t } from "@fern-docs/i18n";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 import type { FacetName } from "@fern-docs/search-keyword/types";
 import * as Menubar from "@radix-ui/react-menubar";
 import { Check, ChevronDown, Minus } from "lucide-react";
 import { type ComponentPropsWithoutRef, Fragment, forwardRef, type ReactNode } from "react";
-
 import { getFacetDisplay, toFilterLabel } from "../../utils/facet-display";
 import { useFacetFilters, useFacets } from "../search/algolia-search-client";
 
-export function MobileFacetMenuBar({ onUpdateFilters }: { onUpdateFilters?: () => void }): ReactNode {
+export function MobileFacetMenuBar({
+    onUpdateFilters,
+    lang
+}: {
+    onUpdateFilters?: () => void;
+    lang: string;
+}): ReactNode {
     const { filters, setFilters } = useFacetFilters();
     const { facets: facetsResponse } = useFacets(EMPTY_ARRAY);
     const facets = (Object.keys(facetsResponse ?? {}) as FacetName[]).filter(
@@ -47,6 +53,7 @@ export function MobileFacetMenuBar({ onUpdateFilters }: { onUpdateFilters?: () =
                             });
                             onUpdateFilters?.();
                         }}
+                        lang={lang}
                     />
                 );
             })}
@@ -59,13 +66,15 @@ function MobileFacetMenu({
     value,
     filters,
     removeFilter,
-    updateFilter
+    updateFilter,
+    lang
 }: {
     facet: FacetName;
     value?: string;
     filters: readonly FacetFilter[];
     removeFilter?: () => void;
     updateFilter?: (value: string) => void;
+    lang: string;
 }) {
     const otherFilters = filters.filter((f) => f.facet !== facet);
 
@@ -116,7 +125,7 @@ function MobileFacetMenu({
                                 <Menubar.Separator className="bg-(color:--grayscale-a5) h-px" />
                                 <Menubar.Item onClick={removeFilter} asChild>
                                     <MenubarItem>
-                                        Remove filter
+                                        {t(lang).search.removeFilter}
                                         <Minus className="text-(color:--grayscale-a9) size-4" />
                                     </MenubarItem>
                                 </Menubar.Item>

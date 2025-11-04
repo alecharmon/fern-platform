@@ -6,10 +6,10 @@ import { EMPTY_OBJECT, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { StatusCodeBadge, statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
 import { cn } from "@fern-docs/components/cn";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
+import { t } from "@fern-docs/i18n";
 import { sortBy } from "es-toolkit/array";
 import { memo, type ReactNode, useCallback, useMemo } from "react";
 import { WebSocketMessages } from "@/components/api-reference/websockets/WebSocketMessages";
-import { i18n } from "@/constants";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
 import { AudioExample } from "../examples/AudioExample";
@@ -30,6 +30,7 @@ export declare namespace EndpointContentCodeSnippets {
         endpoint: ApiDefinition.EndpointDefinition;
         showErrors: boolean;
         className?: string;
+        lang: string;
     }
 }
 
@@ -37,7 +38,8 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
     node,
     endpoint,
     showErrors,
-    className
+    className,
+    lang
 }) => {
     const {
         selectedExample,
@@ -65,23 +67,23 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                 case "json":
                 case "filename": {
                     if (endpoint.protocol?.type === "grpc") {
-                        return i18n.apiReference.exampleResponse;
+                        return t(lang).apiReference.exampleResponse;
                     }
                     const title =
                         example.exampleCall.name ??
                         ApiDefinition.getMessageForStatus(example.exampleCall.responseStatusCode, endpoint.method) ??
-                        i18n.apiReference.response;
+                        t(lang).apiReference.response;
                     return renderResponseTitle(title, example.exampleCall.responseStatusCode);
                 }
                 case "stream":
-                    return i18n.playground.streamedResponse;
+                    return t(lang).playground.streamedResponse;
                 case "sse":
-                    return i18n.playground.serverSentEvents;
+                    return t(lang).playground.serverSentEvents;
                 default:
-                    return i18n.apiReference.response;
+                    return t(lang).apiReference.response;
             }
         },
-        [endpoint.method, endpoint.protocol?.type]
+        [endpoint.method, endpoint.protocol?.type, lang]
     );
 
     const errorSelector =
@@ -145,7 +147,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
             )}
             {endpoint.protocol?.type === "grpc" ? (
                 <JsonCodeSnippetExample
-                    title={i18n.apiReference.exampleRequest}
+                    title={t(lang).apiReference.exampleRequest}
                     onClick={(e) => {
                         e.stopPropagation();
                     }}
@@ -162,6 +164,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                             environmentId={environmentId}
                             baseUrl={baseUrl}
                             hideCopyButton={true}
+                            lang={lang}
                         />
                     }
                     onClick={(e) => {
@@ -172,7 +175,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                             {node != null && (
                                 <PlaygroundButtonTray
                                     state={node}
-
+                                    lang={lang}
                                     // example={selectedExample?.exampleCall}
                                 />
                             )}
@@ -234,7 +237,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                         />
                     ),
                     // TODO: support other media types
-                    filename: () => <AudioExample title={errorSelector} />,
+                    filename: () => <AudioExample title={errorSelector} lang={lang} />,
                     stream: (value) => (
                         <TitledExample title={errorSelector}>
                             <FernScrollArea className="rounded-b-[inherit]">

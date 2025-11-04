@@ -3,10 +3,9 @@
 import type { TypeDefinition, TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
+import { t } from "@fern-docs/i18n";
 import { Plus, X } from "lucide-react";
 import { memo, useCallback } from "react";
-
-import { i18n } from "@/constants";
 import { getEmptyValueForType, shouldRenderInline } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";
 
@@ -16,9 +15,10 @@ interface PlaygroundListFormProps {
     value: unknown;
     id: string;
     types: Record<string, TypeDefinition>;
+    lang: string;
 }
 
-export const PlaygroundListForm = memo<PlaygroundListFormProps>(({ itemShape, onChange, value, id, types }) => {
+export const PlaygroundListForm = memo<PlaygroundListFormProps>(({ itemShape, onChange, value, id, types, lang }) => {
     const appendItem = useCallback(() => {
         onChange((oldValue: unknown) => {
             const oldArray = Array.isArray(oldValue) ? oldValue : [];
@@ -70,7 +70,7 @@ export const PlaygroundListForm = memo<PlaygroundListFormProps>(({ itemShape, on
                     <li className="pt-2">
                         <FernButton
                             icon={<Plus />}
-                            text={i18n.buttons.addNewItem}
+                            text={t(lang).buttons.addNewItem}
                             onClick={appendItem}
                             variant="outlined"
                             className="w-full"
@@ -81,7 +81,7 @@ export const PlaygroundListForm = memo<PlaygroundListFormProps>(({ itemShape, on
             {valueAsList.length === 0 && (
                 <FernButton
                     icon={<Plus />}
-                    text={i18n.buttons.addNewItem}
+                    text={t(lang).buttons.addNewItem}
                     className="w-full"
                     onClick={appendItem}
                     variant="outlined"

@@ -4,9 +4,9 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { cn } from "@fern-docs/components/cn";
 import { FERN_ASK_AI_BUTTON_ICON_ID, FERN_ASK_AI_BUTTON_ID } from "@fern-docs/components/constants";
 import { FernButton } from "@fern-docs/components/FernButton";
+import { t } from "@fern-docs/i18n";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import React from "react";
-
 import { SparklesIcon } from "@/components/PageActionsDropdownAssets";
 
 export const searchPanelInitializedAtom = atom(false);
@@ -22,9 +22,11 @@ export interface PageContext {
 export const pageContextAtom = atom<PageContext | null>(null);
 
 export const SearchPanelTrigger = React.memo(function SearchPanelTrigger({
-    isSearchInSidebar = false
+    isSearchInSidebar = false,
+    lang
 }: {
     isSearchInSidebar?: boolean;
+    lang: string;
 }) {
     const isInitialized = useAtomValue(searchPanelInitializedAtom);
     const toggleAskAiSidePanel = useToggleSearchPanel();
@@ -41,7 +43,7 @@ export const SearchPanelTrigger = React.memo(function SearchPanelTrigger({
                     className="h-[16.667px] w-[16.667px]"
                 />
             }
-            text={isSearchInSidebar ? "" : "Ask AI"}
+            text={isSearchInSidebar ? "" : t(lang).search.askAI}
             className={cn(
                 "text-(color:--grayscale-a11) h-9 w-fit flex-shrink-0 font-normal",
                 isSearchInSidebar && "w-9",

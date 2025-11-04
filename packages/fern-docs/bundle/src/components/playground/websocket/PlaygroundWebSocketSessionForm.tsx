@@ -7,10 +7,9 @@ import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
+import { t } from "@fern-docs/i18n";
 import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
-
 import { WebSocketMessagesVirtualized } from "@/components/api-reference/websockets/WebSocketMessagesVirtualized";
-import { i18n } from "@/constants";
 import { PlaygroundTypeReferenceForm } from "../form/PlaygroundTypeReferenceForm";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
 import type { PlaygroundWebSocketRequestFormState } from "../types";
@@ -28,6 +27,7 @@ interface PlaygroundWebSocketSessionFormProps {
     connected: boolean;
     error: string | null;
     authForm: React.ReactNode;
+    lang: string;
 }
 
 export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormProps> = ({
@@ -39,7 +39,8 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
     clearMessages,
     connected,
     error,
-    authForm
+    authForm,
+    lang
 }) => {
     const { messages } = useWebsocketMessages(context.node.id);
 
@@ -95,7 +96,7 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
 
                                     <div className="flex justify-end p-4">
                                         <FernButton
-                                            text={i18n.playground.sendMessage}
+                                            text={t(lang).playground.sendMessage}
                                             rightIcon="send"
                                             intent="primary"
                                             onClick={() => {
@@ -113,12 +114,12 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
                 <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
                     <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
                         <span className="text-(color:--grayscale-a11) text-xs uppercase">
-                            {i18n.apiReference.messages}
+                            {t(lang).apiReference.messages}
                         </span>
                         <div className="flex items-center gap-2">
                             {messages.length > 0 && (
                                 <FernButton
-                                    text={i18n.buttons.clear}
+                                    text={t(lang).buttons.clear}
                                     variant="minimal"
                                     size="small"
                                     onClick={clearMessages}
@@ -143,7 +144,7 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
                                     ></span>
                                 </span>
                                 <span className="font-mono text-sm">
-                                    {connected ? i18n.playground.connected : i18n.playground.notConnected}
+                                    {connected ? t(lang).playground.connected : t(lang).playground.notConnected}
                                 </span>
                             </span>
                         </div>

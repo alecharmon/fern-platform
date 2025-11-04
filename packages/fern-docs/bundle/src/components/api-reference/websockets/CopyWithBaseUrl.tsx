@@ -6,12 +6,13 @@ import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButt
 
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
 
-export function CopyWithBaseUrl({ channel }: { channel: WebSocketChannel }) {
+export function CopyWithBaseUrl({ channel, lang }: { channel: WebSocketChannel; lang: string }) {
     const [baseUrl] = usePlaygroundBaseUrl(channel);
     return (
         <CopyToClipboardButton
             className="-mr-1"
             content={() => `${removeTrailingSlash(baseUrl ?? "")}${toColonEndpointPathLiteral(channel.path)}`}
+            lang={lang}
         />
     );
 }
