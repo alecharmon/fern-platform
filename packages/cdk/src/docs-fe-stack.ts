@@ -93,15 +93,21 @@ export async function zipLocalBundle(zipFilePath: string): Promise<void> {
         throw new Error(`Local preview bundle not found at ${LOCAL_PREVIEW_BUNDLE_OUT_DIR}`);
     }
 
-    // Copy install-esbuild.js into the .next folder
-    return fs.promises
-        .copyFile(
-            path.resolve(__dirname, "../utilities/install-esbuild.js"),
-            path.join(LOCAL_PREVIEW_BUNDLE_OUT_DIR, "install-esbuild.js")
-        )
-        .then(() => {
-            return zipFolder(LOCAL_PREVIEW_BUNDLE_OUT_DIR, zipFilePath);
-        });
+    // Copy install-esbuild.js and pnpm-workspace.yaml into the .next folder
+    const installEsbuildPath = path.resolve(__dirname, "../utilities/install-esbuild.js");
+    const pnpmWorkspacePath = path.resolve(__dirname, "../../../pnpm-workspace.yaml");
+
+    const LOCAL_PREVIEW_BUNDLE_STANDALONE_DIR = path.join(LOCAL_PREVIEW_BUNDLE_OUT_DIR, "standalone");
+    if (fs.existsSync(LOCAL_PREVIEW_BUNDLE_STANDALONE_DIR)) {
+        await fs.promises.copyFile(
+            pnpmWorkspacePath,
+            path.join(LOCAL_PREVIEW_BUNDLE_STANDALONE_DIR, "pnpm-workspace.yaml")
+        );
+    }
+
+    await fs.promises.copyFile(installEsbuildPath, path.join(LOCAL_PREVIEW_BUNDLE_OUT_DIR, "install-esbuild.js"));
+
+    return zipFolder(LOCAL_PREVIEW_BUNDLE_OUT_DIR, zipFilePath);
 }
 
 export function resolveLocalPreviewBundleTarPath(zipFilePath?: string) {
