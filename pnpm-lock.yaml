@@ -3293,9 +3293,6 @@ importers:
       '@fern-docs/search-utils':
         specifier: workspace:*
         version: link:../../packages/fern-docs/search-server/utils
-      '@fern-fern/fdr-cjs-sdk':
-        specifier: 0.0.6432
-        version: 0.0.6432
       '@fern-fern/fern-docs-sdk':
         specifier: 0.0.5
         version: 0.0.5
@@ -5924,9 +5921,6 @@ packages:
   '@fern-api/venus-api-sdk@0.20.0':
     resolution: {integrity: sha512-lV6QaYD/kH809S09g1qV/dpNgyHWd4zKwltVX2IKoqpEgIoEG6ZGpTlBfRMpkes6mDEWPcbwtvqgl3Ogdxs/Yg==}
     engines: {node: '>=18.0.0'}
-
-  '@fern-fern/fdr-cjs-sdk@0.0.6432':
-    resolution: {integrity: sha512-cm/I82voOuoTQTBA+eKvZ8EwoJvrEV6/BgRjAj9/5U/7AhySn0g7OJ6rHZ72o58ZClpMN6JfwImGLj2m/gacSQ==}
 
   '@fern-fern/fern-cloud-sdk@0.0.305':
     resolution: {integrity: sha512-FDV2dlBpIaf4ZULjPKwUh+kZ8jnUbRS0Vth/Izwa/mIt7lbbrynUTJiPVANhQdVpt5cqq0Q/8BeBx0/7IvNVDA==}
@@ -24076,18 +24070,6 @@ snapshots:
   '@fern-api/venus-api-sdk@0.19.9': {}
 
   '@fern-api/venus-api-sdk@0.20.0': {}
-
-  '@fern-fern/fdr-cjs-sdk@0.0.6432':
-    dependencies:
-      form-data: 4.0.4
-      formdata-node: 6.0.3
-      js-base64: 3.7.7
-      node-fetch: 2.7.0
-      qs: 6.14.0
-      readable-stream: 4.7.0
-      url-join: 4.0.1
-    transitivePeerDependencies:
-      - encoding
 
   '@fern-fern/fern-cloud-sdk@0.0.305':
     dependencies:

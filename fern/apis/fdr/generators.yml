@@ -48,43 +48,6 @@ groups:
           useLegacyExports: false
           namespaceExport: FdrLambda
 
-  fdr-cjs-sdk:
-    generators:
-      - name: fernapi/fern-typescript-node-sdk
-        version: 0.51.7
-        disable-examples: true
-        output:
-          location: npm
-          url: npm.buildwithfern.com
-          package-name: "@fern-fern/fdr-cjs-sdk"
-        config:
-          useBrandedStringAliases: true
-          noSerdeLayer: true
-          noOptionalProperties: true
-          neverThrowErrors: true
-          timeoutInSeconds: infinity
-          packageJson:
-            devDependencies:
-              "typescript": "~5.7.2"
-
-  local-fdr-cjs-sdk:
-    generators:
-      - name: fernapi/fern-typescript-node-sdk
-        version: 0.51.7
-        disable-examples: true
-        output:
-          location: local-file-system
-          path: ../../../.local-sdk-output/fdr-cjs-sdk
-        config:
-          useBrandedStringAliases: true
-          noSerdeLayer: true
-          noOptionalProperties: true
-          neverThrowErrors: true
-          timeoutInSeconds: infinity
-          packageJson:
-            devDependencies:
-              "typescript": "~5.7.2"
-
   generators-sdk:
     audiences:
       - generators

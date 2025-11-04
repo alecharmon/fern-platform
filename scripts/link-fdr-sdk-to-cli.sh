@@ -89,32 +89,7 @@ fi
 
 echo "✅ Created FDR SDK tarball: $TARBALL"
 
-# Step 5: Generate and pack fdr-cjs-sdk
-echo ""
-echo "📦 Generating fdr-cjs-sdk locally..."
-bash "$SCRIPT_DIR/generate-fdr-cjs-sdk-local.sh"
-
-echo ""
-echo "📦 Creating fdr-cjs-sdk package tarball..."
-cd "$PLATFORM_ROOT/.local-sdk-output/fdr-cjs-sdk"
-
-# Clean up any old tarballs
-rm -f /tmp/fern-fern-fdr-cjs-sdk-*.tgz
-
-# Pack the SDK
-npm pack --pack-destination /tmp > /dev/null 2>&1
-
-# Find the created tarball
-CJS_TARBALL=$(ls -t /tmp/fern-fern-fdr-cjs-sdk-*.tgz 2>/dev/null | head -1)
-
-if [ -z "$CJS_TARBALL" ]; then
-    echo "❌ Error: Failed to create fdr-cjs-sdk tarball"
-    exit 1
-fi
-
-echo "✅ Created fdr-cjs-sdk tarball: $CJS_TARBALL"
-
-# Step 6: Create or update pnpm overrides in CLI
+# Step 5: Create or update pnpm overrides in CLI
 echo ""
 echo "🔧 Configuring pnpm overrides in CLI..."
 cd "$CLI_ROOT"
@@ -134,7 +109,6 @@ if (!pkg.pnpm.overrides) {
     pkg.pnpm.overrides = {};
 }
 
-pkg.pnpm.overrides['@fern-fern/fdr-cjs-sdk'] = 'file:$CJS_TARBALL';
 pkg.pnpm.overrides['@fern-api/fdr-sdk'] = 'file:$TARBALL';
 pkg.pnpm.overrides['@fern-api/ui-core-utils'] = 'file:$UI_CORE_UTILS_TARBALL';
 

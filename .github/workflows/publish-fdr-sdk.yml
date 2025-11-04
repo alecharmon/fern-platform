@@ -93,8 +93,3 @@ jobs:
           cat package.json.workspace | sed "${workspace_replace}" > package.json
           rm -rf package.json.tmp package.json.workspace
           npm publish --access public --tag latest
-
-      - name: Publish CJS SDK
-        run: |
-          git_version="$(scripts/fdr-version.sh)"
-          fern generate --api fdr --group fdr-cjs-sdk --version ${git_version} --log-level debug

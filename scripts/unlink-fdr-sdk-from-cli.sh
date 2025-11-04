@@ -29,7 +29,6 @@ const pkgPath = path.join('$CLI_ROOT', 'package.json');
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
 if (pkg.pnpm && pkg.pnpm.overrides) {
-    delete pkg.pnpm.overrides['@fern-fern/fdr-cjs-sdk'];
     delete pkg.pnpm.overrides['@fern-api/fdr-sdk'];
     delete pkg.pnpm.overrides['@fern-api/ui-core-utils'];
 
@@ -57,7 +56,6 @@ echo ""
 echo "🧹 Cleaning up temporary files..."
 rm -f /tmp/fern-api-fdr-sdk-*.tgz
 rm -f /tmp/fern-api-ui-core-utils-*.tgz
-rm -f /tmp/fern-fern-fdr-cjs-sdk-*.tgz
 
 echo ""
 echo "✅ Successfully unlinked local FDR SDK from CLI!"

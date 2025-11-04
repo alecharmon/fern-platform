@@ -57,7 +57,6 @@ pnpm fdr:link-to-cli
 This will:
 - Build and pack `@fern-api/ui-core-utils` (dependency)
 - Build and pack `@fern-api/fdr-sdk`
-- Generate and pack `@fern-fern/fdr-cjs-sdk`
 - Use pnpm overrides to install these local versions in the CLI
 
 **Important**: The local SDK may have API differences from the published version the CLI expects, which can cause TypeScript errors. You'll need to update the CLI code to match the local SDK API.
