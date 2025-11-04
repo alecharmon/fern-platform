@@ -8,12 +8,6 @@
     "./styles": "./src/index.css",
     "./*": "./src/*.tsx"
   },
-  "scripts": {
-    "demo:build": "next build",
-    "demo:dev": "next dev",
-    "demo:lint": "next lint",
-    "demo:start": "next start"
-  },
   "dependencies": {
     "@algolia/client-search": "^5.20.3",
     "@fern-api/docs-server": "workspace:*",
