@@ -77,15 +77,21 @@ export function WebSocketRefresh() {
                         }
 
                         if (message.type === "finishReload") {
-                            setIsLoading(false);
                             try {
                                 const response = await fetch("/api/fern-docs/revalidate-local");
                                 if (!response.ok) {
                                     throw new Error(`HTTP error! status: ${response.status}`);
                                 }
                                 router.refresh();
+
+                                // Keep loading indicator visible for a bit longer to ensure
+                                // the revalidation and router refresh complete
+                                setTimeout(() => {
+                                    setIsLoading(false);
+                                }, 600);
                             } catch (error) {
                                 console.error("Client: Failed to revalidate:", error);
+                                setIsLoading(false);
                             }
                         }
 
