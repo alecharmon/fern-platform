@@ -20,6 +20,10 @@ export default function PageTitle({ className, filename, initialText }: PageTitl
 
     const { updatePageFrontmatter, subscribePageSaveEvent } = useNavigation();
 
+    useEffect(() => {
+        setText(initialText ?? "");
+    }, [filename, initialText]);
+
     // Subscribe to save events from @devPanel
     useEffect(() => {
         const unsubscribe = subscribePageSaveEvent((event) => {

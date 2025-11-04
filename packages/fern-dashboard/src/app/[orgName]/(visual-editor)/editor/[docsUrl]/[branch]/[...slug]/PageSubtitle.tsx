@@ -16,10 +16,14 @@ export declare namespace PageSubtitle {
 }
 
 export default function PageSubtitle({ className, filename, initialText }: PageSubtitle.Props) {
-    const [text, setText] = useState(initialText);
+    const [text, setText] = useState(initialText ?? "");
     const isEditingDisabled = useEditingDisabled();
 
     const { updatePageFrontmatter, subscribePageSaveEvent } = useNavigation();
+
+    useEffect(() => {
+        setText(initialText ?? "");
+    }, [filename, initialText]);
 
     // Subscribe to save events from @devPanel
     useEffect(() => {
