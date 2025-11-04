@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json
+
+instances:
+  - url: "{{DOCS_URL}}"
+
+ai-search:
+  location:
+    - docs
+
+title: "{{TITLE}}"
+
+layout:
+  searchbar-placement: header
+  page-width: full
+  tabs-placement: header
+
+tabs:
+  home:
+    display-name: Home
+    icon: home
+  guides:
+    display-name: Guides
+    icon: book
+  API Reference:
+    display-name: API Reference
+    icon: puzzle
+
+navigation:
+  - tab: home
+    layout:
+      - section: Get Started
+        contents:
+          - page: Welcome
+            path: docs/pages/welcome.mdx
+  - tab: guides
+    layout:
+      - section: Learn
+        contents:
+          - page: Concepts
+            path: docs/pages/concepts.mdx
+          - page: SDKs
+            path: docs/pages/sdks.mdx
+            slug: sdks
+  - tab: API Reference
+    layout:
+      - api: API Reference

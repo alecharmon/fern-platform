@@ -1,7 +1,8 @@
 import type { User } from "@auth0/nextjs-auth0/types";
 import { PlusIcon } from "lucide-react";
-
+import Link from "next/link";
 import { Button } from "../ui/button";
+import { DocsZeroStateButton } from "./DocsZeroStateButton";
 import { DocsZeroStateImage } from "./DocsZeroStateImage";
 
 export declare namespace DocsZeroState {
@@ -25,17 +26,7 @@ export async function DocsZeroState({ user }: DocsZeroState.Props) {
                 <div className="flex flex-col gap-4">
                     <DocsZeroStateImage />
                     <div className="flex justify-center">
-                        <Button variant="default" asChild>
-                            <a
-                                href="https://buildwithfern.com/learn/docs/getting-started/quickstart"
-                                target="_blank"
-                                className="flex items-center gap-2"
-                                rel="noopener"
-                            >
-                                <PlusIcon className="h-4 w-4" />
-                                Create your first Docs site
-                            </a>
-                        </Button>
+                        <DocsZeroStateButton />
                     </div>
                 </div>
             </div>

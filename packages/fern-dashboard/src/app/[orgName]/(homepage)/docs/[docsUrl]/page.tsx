@@ -2,6 +2,7 @@ import "server-only";
 
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+
 import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";

@@ -131,6 +131,7 @@
     "posthog-node": "^5.10.0",
     "puppeteer-core": "^24.4.0",
     "react": "catalog:",
+    "react-color": "^2.19.3",
     "react-dom": "catalog:",
     "react-error-boundary": "^5.0.0",
     "react-hotkeys-hook": "^5.1.0",

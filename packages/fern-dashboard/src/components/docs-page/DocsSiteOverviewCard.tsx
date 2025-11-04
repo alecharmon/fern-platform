@@ -1,11 +1,14 @@
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { Suspense } from "react";
+
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsUrl } from "@/utils/types";
+
 import Card from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { DocsSiteLink } from "./DocsSiteLink";
+import { DownloadFernDocsButton } from "./DownloadFernDocsButton";
 import { DocsSiteImage } from "./docs-site-image/DocsSiteImage";
 import { FernCliVersion } from "./FernCliVersion";
 import { GithubSource } from "./GithubSource";
@@ -43,6 +46,7 @@ export async function DocsSiteOverviewCard({
                                 <FernCliVersion orgName={orgName} docsUrl={docsUrl} />
                             </Suspense>
                         </DocsSiteAttribute>
+                        <DownloadFernDocsButton docsUrl={docsUrl} />
                     </div>
                 </div>
             </Card>
