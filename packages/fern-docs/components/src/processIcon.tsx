@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { NoZoom } from "./contexts/NoZoom";
 import { FernImage } from "./FernImage";
+import { FernSvgIcon } from "./FernSvgIcon";
 import { FaIconServer } from "./fa-icon-server";
 
 export interface ProcessIconOptions {
@@ -35,6 +36,14 @@ export const processIcon = ({
         const fileData = files?.[fileId];
 
         if (fileData) {
+            if (fileData.src.endsWith(".svg")) {
+                return (
+                    <NoZoom>
+                        <FernSvgIcon src={fileData.src} alt={fileData.alt ?? ""} className="fern-file-icon size-5" />
+                    </NoZoom>
+                );
+            }
+
             return (
                 <NoZoom>
                     <FernImage
