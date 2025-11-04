@@ -14,12 +14,17 @@ import { getFrontmatter } from "@fern-docs/mdx";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
+import ApiReferenceComingSoon from "@/components/editor/unsupported-pages/ApiReferenceComingSoon";
+import ChangelogComingSoon from "@/components/editor/unsupported-pages/ChangelogComingSoon";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
 import { EditorRedirect } from "./EditorRedirect";
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
+
+const CHANGELOG_NODE_TYPES = new Set(["changelog", "changelogEntry"]);
+const API_REFERENCE_NODE_TYPES = new Set(["apiReference", "apiPackage", "endpoint", "webSocket", "webhook", "grpc"]);
 
 export default async function Page({
     params
@@ -85,6 +90,13 @@ export default async function Page({
     // Redirect should have been handled by the getEditorRedirectSlug, throw an error if it wasn't
     if (navigationNode.type === "redirect") {
         throw new Error("navigationNode of type 'redirect' should be handled by EditorRedirect");
+    }
+
+    if (API_REFERENCE_NODE_TYPES.has(navigationNode.node.type)) {
+        return <ApiReferenceComingSoon />;
+    }
+    if (CHANGELOG_NODE_TYPES.has(navigationNode.node.type)) {
+        return <ChangelogComingSoon />;
     }
 
     // Get a serializable copy of the found node to be passed over the wire to PageNode
