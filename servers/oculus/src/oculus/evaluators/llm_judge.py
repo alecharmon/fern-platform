@@ -1,4 +1,3 @@
-
 from oculus.utils.anthropic_utils import generate_with_claude
 from pydantic import BaseModel
 

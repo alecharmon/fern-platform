@@ -21,7 +21,9 @@ fern-ai = {path = "../fai", develop = true}
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 mypy = "^1.8.0"
-ruff = "^0.3.0"
+black = "^24.3.0"
+isort = "^5.13.2"
+ruff = "^0.1.0"
 
 [tool.poetry.scripts]
 oculus = "oculus.__main__:main"
@@ -30,13 +32,6 @@ oculus = "oculus.__main__:main"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.ruff]
-line-length = 120
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
-
 [tool.mypy]
 python_version = "3.11"
 strict = true
@@ -44,3 +39,40 @@ warn_return_any = true
 warn_unused_configs = true
 mypy_path = "src"
 explicit_package_bases = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings  
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["fai", "tests", "utils"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 2
+line_length = 120
+profile = "black"
+use_parentheses = true
+known_first_party = ["fai", "tests", "utils"]
+src_paths = ["src"]
+
+[tool.autoflake]
+in-place = true

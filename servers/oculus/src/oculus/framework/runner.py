@@ -1,11 +1,20 @@
 import concurrent.futures
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Optional
 
 from oculus.evaluators.llm_judge import evaluate_answer
-from oculus.framework.models import Answer, Evaluation, EvaluationMetrics, EvaluationRun, Question
-from oculus.utils.file_utils import load_json, load_json_files, save_json
+from oculus.framework.models import (
+    Answer,
+    Evaluation,
+    EvaluationMetrics,
+    EvaluationRun,
+    Question,
+)
+from oculus.utils.file_utils import (
+    load_json,
+    save_json,
+)
 
 
 class EvaluationRunner:
@@ -13,7 +22,7 @@ class EvaluationRunner:
         self,
         suite_name: str,
         suite_path: Path,
-        run_id: Optional[str] = None,
+        run_id: str | None = None,
         max_workers: int = 16,
     ):
         self.suite_name = suite_name

@@ -1,5 +1,6 @@
+import asyncio
 import os
-from typing import Any, Optional
+from collections.abc import Callable
 
 _FAI_ENV_VARS = {
     "COHERE_API_KEY": "dummy",
@@ -30,12 +31,11 @@ async def generate_answer_with_fai(
     question: str,
     domain: str,
     model: str = "claude-4-sonnet-20250514",
-    system_prompt: Optional[str] = None,
+    system_prompt: str | None = None,
 ) -> str:
     _setup_fai_env()
 
     try:
-        from fai.models.api.chat_api import PostChatCompletionRequest
         from fai.models.types.chat_types import ChatMessage
         from fai.models.utils.chat import format_record
         from fai.utils.chat.response.anthropic import get_anthropic_response
@@ -63,10 +63,7 @@ async def generate_answer_with_fai(
     return "ERROR: No response generated"
 
 
-def create_fai_answer_function(domain: str, model: str = "claude-4-sonnet-20250514") -> Any:
-    import asyncio
-    from typing import Callable
-
+def create_fai_answer_function(domain: str, model: str = "claude-4-sonnet-20250514") -> Callable[[str], str]:
     def answer_fn(question: str) -> str:
         try:
             loop = asyncio.new_event_loop()

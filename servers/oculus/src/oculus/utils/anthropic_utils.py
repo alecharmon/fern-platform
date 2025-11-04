@@ -1,5 +1,9 @@
 import time
-from typing import Any, TypeVar, cast
+from typing import (
+    Any,
+    TypeVar,
+    cast,
+)
 
 from anthropic import Anthropic
 from pydantic import BaseModel

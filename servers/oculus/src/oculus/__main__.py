@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-
 from oculus.framework.runner import EvaluationRunner
 from oculus.integrations.fai_integration import create_fai_answer_function
 
@@ -50,10 +49,10 @@ Examples:
 
     if not suite_path.exists():
         print(f"Error: Suite directory not found: {suite_path}", file=sys.stderr)
-        print(f"\nExpected structure:", file=sys.stderr)
+        print("\nExpected structure:", file=sys.stderr)
         print(f"  {suite_path}/", file=sys.stderr)
-        print(f"    questions/", file=sys.stderr)
-        print(f"      question_0.json", file=sys.stderr)
+        print("    questions/", file=sys.stderr)
+        print("      question_0.json", file=sys.stderr)
         return 1
 
     questions_dir = suite_path / "questions"
@@ -90,15 +89,15 @@ Examples:
         return 0
 
     except ImportError as e:
-        print(f"\nError: Failed to import required modules", file=sys.stderr)
+        print("\nError: Failed to import required modules", file=sys.stderr)
         print(f"{e}", file=sys.stderr)
-        print(f"\nMake sure:", file=sys.stderr)
-        print(f"  1. FAI dependencies are installed (poetry install in servers/fai)", file=sys.stderr)
-        print(f"  2. PYTHONPATH includes the FAI source directory", file=sys.stderr)
+        print("\nMake sure:", file=sys.stderr)
+        print("  1. FAI dependencies are installed (poetry install in servers/fai)", file=sys.stderr)
+        print("  2. PYTHONPATH includes the FAI source directory", file=sys.stderr)
         return 1
 
     except Exception as e:
-        print(f"\nError: Evaluation failed", file=sys.stderr)
+        print("\nError: Evaluation failed", file=sys.stderr)
         print(f"{e}", file=sys.stderr)
         import traceback
 

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 QUESTION_TEMPLATES = [
     "Tell me about the {method} {path} endpoint.",
@@ -12,7 +12,7 @@ QUESTION_TEMPLATES = [
 ]
 
 
-def extract_operation_id(spec: dict[str, Any], method: str, path: str) -> Optional[str]:
+def extract_operation_id(spec: dict[str, Any], method: str, path: str) -> str | None:
     for path_key, path_item in spec.get("paths", {}).items():
         if path_key == path:
             operation = path_item.get(method, {})
@@ -21,7 +21,7 @@ def extract_operation_id(spec: dict[str, Any], method: str, path: str) -> Option
     return None
 
 
-def extract_first_request_property(spec: dict[str, Any], method: str, path: str) -> Optional[str]:
+def extract_first_request_property(spec: dict[str, Any], method: str, path: str) -> str | None:
     for path_key, path_item in spec.get("paths", {}).items():
         if path_key == path:
             operation = path_item.get(method, {})
@@ -38,7 +38,7 @@ def extract_first_request_property(spec: dict[str, Any], method: str, path: str)
     return None
 
 
-def extract_first_response_property(spec: dict[str, Any], method: str, path: str) -> Optional[str]:
+def extract_first_response_property(spec: dict[str, Any], method: str, path: str) -> str | None:
     for path_key, path_item in spec.get("paths", {}).items():
         if path_key == path:
             operation = path_item.get(method, {})
