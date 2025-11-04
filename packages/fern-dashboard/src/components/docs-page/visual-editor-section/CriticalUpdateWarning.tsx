@@ -16,11 +16,7 @@ export async function CriticalUpdateWarning({
     githubUrl: string;
     baseBranch: string;
 }) {
-    const fernVersionInfoResult = await getFernVersionUpdateInfo({
-        githubUrl,
-        docsUrl,
-        baseBranch
-    });
+    const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
 
     const fernVersionInfo = fernVersionInfoResult.ok ? fernVersionInfoResult.result : undefined;
 

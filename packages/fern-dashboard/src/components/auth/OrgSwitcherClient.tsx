@@ -204,6 +204,7 @@ const OrgSwitcherClientInternal = forwardRef<
                                 onClickOrg(organization.name);
                                 onSelectFromDropdown();
                             }}
+                            prefetch
                         >
                             <div className="flex items-center gap-2">
                                 <OrgLogo organization={organization} />
