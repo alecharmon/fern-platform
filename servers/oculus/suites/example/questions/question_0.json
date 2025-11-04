@@ -1,0 +1,8 @@
+{
+  "question": "What is Fern and what does it do?",
+  "ground_truth": "Fern is a toolkit for building REST APIs. It provides API definition using OpenAPI or Fern Definition, generates SDKs in multiple languages, and creates documentation sites.",
+  "metadata": {
+    "category": "overview",
+    "difficulty": "basic"
+  }
+}

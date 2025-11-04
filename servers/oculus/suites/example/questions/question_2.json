@@ -1,0 +1,8 @@
+{
+  "question": "What programming languages does Fern support for SDK generation?",
+  "ground_truth": "Fern supports SDK generation for TypeScript, Python, Java, Go, Ruby, and C#/.NET. Each SDK is idiomatic to its language with proper type safety.",
+  "metadata": {
+    "category": "sdks",
+    "difficulty": "basic"
+  }
+}

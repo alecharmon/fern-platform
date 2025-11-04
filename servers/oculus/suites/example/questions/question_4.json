@@ -1,0 +1,8 @@
+{
+  "question": "What is the difference between Fern Definition and OpenAPI?",
+  "ground_truth": "Fern Definition is Fern's native API specification format that is more concise and developer-friendly than OpenAPI. It uses YAML, has simpler syntax, and is optimized for SDK generation. OpenAPI is also supported and Fern can convert between the two formats.",
+  "metadata": {
+    "category": "api_definition",
+    "difficulty": "intermediate"
+  }
+}

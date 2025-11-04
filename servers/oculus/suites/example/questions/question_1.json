@@ -1,0 +1,8 @@
+{
+  "question": "How do I install the Fern CLI?",
+  "ground_truth": "Install the Fern CLI using npm: npm install -g fern-api. You can verify installation by running: fern --version",
+  "metadata": {
+    "category": "getting_started",
+    "difficulty": "basic"
+  }
+}
