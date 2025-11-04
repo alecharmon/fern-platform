@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import Card from "@/components/ui/card";
@@ -26,6 +27,10 @@ export function VisualEditorSectionClient({
     const { loading } = useLocalBranches();
     const { filteredBranches } = useLocalBranchesForSite(docsUrl);
 
+    const goToEditorButton = useMemo(() => {
+        return <GoToEditorButton docsUrl={docsUrl} session={session} />;
+    }, [docsUrl, session]);
+
     return (
         <>
             {loading ? (
@@ -36,9 +41,7 @@ export function VisualEditorSectionClient({
                         <VisualEditorEmptyCard>
                             <>
                                 {maybeCriticalUpdateWarning}
-                                <div className="flex flex-col gap-2 sm:flex-row">
-                                    <GoToEditorButton docsUrl={docsUrl} session={session} />
-                                </div>
+                                <div className="flex flex-col gap-2 sm:flex-row">{goToEditorButton}</div>
                             </>
                         </VisualEditorEmptyCard>
                     ) : (
@@ -46,7 +49,7 @@ export function VisualEditorSectionClient({
                             {maybeCriticalUpdateWarning}
                             <div className="flex items-center justify-between">
                                 <VisualEditorHeader />
-                                <GoToEditorButton docsUrl={docsUrl} session={session} />
+                                {goToEditorButton}
                             </div>
                             <BranchList docsUrl={docsUrl} sourceRepo={sourceRepo} />
                         </Card>

@@ -1,20 +1,14 @@
 "use client";
 
-import { useRouter } from "@bprogress/next/app";
-import { constructEditorSlug, ROOT_SLUG_ALIAS } from "@fern-docs/components/navigation";
 import { useState } from "react";
-import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import { Button } from "@/components/ui/button";
 import { useLocalBranches } from "@/hooks/useLocalBranches";
 import { useLocalBranchesForSite } from "@/hooks/useLocalBranchesForSite";
-import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
+import type { DocsUrl } from "@/utils/types";
 import { BranchListItem } from "./BranchListItem";
 
 export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRepo?: GithubSourceRepo }) {
-    const orgName = useOrgName();
-    const router = useRouter();
-
     const [deletedBranches, setDeletedBranches] = useState<Set<string>>(new Set());
 
     const { deleteBranch, loading } = useLocalBranches();
