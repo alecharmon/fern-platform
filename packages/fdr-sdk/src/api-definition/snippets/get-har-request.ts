@@ -51,7 +51,7 @@ export function getHarRequest(
         };
 
         // filter out request parameters that have no value and are not an array
-        if (requestBody.value && typeof requestBody.value === "object") {
+        if (requestBody.value && typeof requestBody.value === "object" && !Array.isArray(requestBody.value)) {
             requestBody.value = Object.fromEntries(
                 Object.entries(requestBody.value).filter(([_, valueObj]) => {
                     // Keep arrays and primitive values

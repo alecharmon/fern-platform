@@ -142,7 +142,7 @@ async function backfillSnippetsForExample(
             // process request body similar to getHarRequest
             let bodyValue = undefined;
             if (example.requestBody != null && example.requestBody.type === "json" && example.requestBody.value) {
-                if (typeof example.requestBody.value === "object") {
+                if (typeof example.requestBody.value === "object" && !Array.isArray(example.requestBody.value)) {
                     const filteredValue = Object.fromEntries(
                         Object.entries(example.requestBody.value).filter(([_, valueObj]) => {
                             // keep arrays and primitive values
