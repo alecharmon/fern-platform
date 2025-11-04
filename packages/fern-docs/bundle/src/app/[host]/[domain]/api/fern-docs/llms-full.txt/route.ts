@@ -20,7 +20,7 @@ export async function GET(
 
     const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
 
-    const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
+    const fernToken = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
     const userAgent = req.headers.get("user-agent");
     const acceptHeader = req.headers.get("accept");

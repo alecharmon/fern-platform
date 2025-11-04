@@ -48,7 +48,7 @@ export async function GET(
         });
     }
 
-    const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
+    const fernToken = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
     const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
 

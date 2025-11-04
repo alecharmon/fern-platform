@@ -162,9 +162,26 @@ export const middleware: NextMiddleware = async (request) => {
     }
 
     /**
+     * If Accept header contains text/plain or text/markdown,
+     * serve the llms.txt version instead
+     */
+    const acceptHeader = request.headers.get("accept");
+    const shouldServeLlmsTxt =
+        acceptHeader &&
+        (acceptHeader.includes("text/plain") || acceptHeader.includes("text/markdown")) &&
+        !pathname.endsWith("/llms.txt") &&
+        !pathname.endsWith("/llms-full.txt") &&
+        !pathname.match(MARKDOWN_PATTERN);
+
+    /**
      * Rewrite llms.txt
      */
-    if (pathname.endsWith("/llms.txt") || pathname.endsWith("/llms-full.txt") || pathname.match(MARKDOWN_PATTERN)) {
+    if (
+        shouldServeLlmsTxt ||
+        pathname.endsWith("/llms.txt") ||
+        pathname.endsWith("/llms-full.txt") ||
+        pathname.match(MARKDOWN_PATTERN)
+    ) {
         const { getAuthState } = await createGetAuthStateEdge(request, (token) => {
             newToken = token;
         });
@@ -174,7 +191,13 @@ export const middleware: NextMiddleware = async (request) => {
             ? `authed:${[...(authState.user.roles ?? ["no_role"])].sort().join(",")}`
             : "unauthed:everyone";
 
-        if (pathname.endsWith("/llms.txt")) {
+        if (shouldServeLlmsTxt) {
+            const slug = removeLeadingSlash(pathname);
+            return rewrite(withDomain("/api/fern-docs/llms.txt"), {
+                slug,
+                authed: rolesValue
+            });
+        } else if (pathname.endsWith("/llms.txt")) {
             const slug = removeLeadingSlash(withoutEnding(/\/llms\.txt$/));
             return rewrite(withDomain("/api/fern-docs/llms.txt"), {
                 slug,
@@ -224,16 +247,6 @@ export const middleware: NextMiddleware = async (request) => {
         const format = pathname.match(JSON_PATTERN)?.[1] ?? "json";
         const slug = removeLeadingSlash(withoutEnding(JSON_PATTERN));
         return rewrite(withDomain("/api/fern-docs/changelog"), { format, slug });
-    }
-
-    /**
-     * Content negotiation: If Accept header contains text/plain or text/markdown,
-     * serve the llms.txt version instead
-     */
-    const acceptHeader = request.headers.get("accept");
-    if (acceptHeader && (acceptHeader.includes("text/plain") || acceptHeader.includes("text/markdown"))) {
-        const slug = removeLeadingSlash(pathname);
-        return rewrite(withDomain("/api/fern-docs/llms.txt"), { slug });
     }
 
     /**
