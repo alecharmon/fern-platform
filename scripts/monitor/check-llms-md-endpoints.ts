@@ -46,8 +46,8 @@ const MONITORED_SITES: MonitoredSite[] = [
     { domain: "docs.letta.com", name: "Letta" }
 ];
 
-const TIMEOUT_MS = 10000;
-const MAX_RETRIES = 2;
+const TIMEOUT_MS = 60000;
+const MAX_RETRIES = 5;
 
 const INCIDENT_STATUS_MONITORING = "01HR85VFNXWH1H6976YCEJ5XJB";
 const INCIDENT_STATUS_CANCELED = "01HR85VFNXMV8SBQ3FRPMDBCST";
