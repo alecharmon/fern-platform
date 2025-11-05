@@ -29,12 +29,10 @@ export default async function Layout({
     const { host, domain } = await params;
     const fernToken = await getFernToken();
     const loader = await createCachedDocsLoader(host, domain, fernToken);
-    const lang = await loader.getLanguage();
 
     return (
         <SharedLayout
             loader={loader}
-            lang={lang}
             headertabs={headertabs}
             versionSelect={versionSelect}
             productSelect={productSelect}

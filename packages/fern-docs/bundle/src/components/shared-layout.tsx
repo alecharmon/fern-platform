@@ -26,8 +26,7 @@ export default async function SharedLayout({
     productSelect,
     languageSelect,
     loader,
-    logo,
-    lang
+    logo
 }: {
     children: React.ReactNode;
     headertabs: React.ReactNode;
@@ -40,16 +39,16 @@ export default async function SharedLayout({
         isAskAiEnabledForDocs: () => Promise<boolean>;
     };
     logo: React.ReactNode;
-    lang: string;
 }) {
     const isLocalEnvironment = isLocal() || isSelfHosted();
-    const [config, settings, edgeFlags, colors, layout, root, isAskAiEnabled] = await Promise.all([
+    const [config, settings, edgeFlags, colors, layout, root, lang, isAskAiEnabled] = await Promise.all([
         loader.getConfig(),
         loader.getSettings(),
         loader.getEdgeFlags(),
         loader.getColors(),
         loader.getLayout(),
         loader.getRoot(),
+        loader.getLanguage(),
         loader.isAskAiEnabledForDocs()
     ]);
     const theme = edgeFlags.isCohereTheme ? "cohere" : "default";
