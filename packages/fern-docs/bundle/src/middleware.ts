@@ -162,6 +162,40 @@ export const middleware: NextMiddleware = async (request) => {
     }
 
     /**
+     * Rewrite mcp
+     */
+    if (pathname.endsWith("/_mcp/server")) {
+        console.log("[middleware] rewriting mcp");
+        return rewrite(withDomain("/api/fern-docs/mcp"));
+    }
+
+    /**
+     * Rewrite changelog rss and atom feeds
+     */
+    if (pathname.match(RSS_PATTERN)) {
+        const format = pathname.match(RSS_PATTERN)?.[1] ?? "rss";
+        const slug = removeLeadingSlash(withoutEnding(RSS_PATTERN));
+        // standalone mode does not support search params, so we need to use headers
+        return rewrite(
+            withDomain("/api/fern-docs/changelog"),
+            { format, slug },
+            {
+                "x-fern-changelog-slug": slug,
+                "x-fern-changelog-format": format
+            }
+        );
+    }
+
+    /**
+     * Rewrite changelog json feed
+     */
+    if (pathname.match(JSON_PATTERN)) {
+        const format = pathname.match(JSON_PATTERN)?.[1] ?? "json";
+        const slug = removeLeadingSlash(withoutEnding(JSON_PATTERN));
+        return rewrite(withDomain("/api/fern-docs/changelog"), { format, slug });
+    }
+
+    /**
      * If Accept header contains text/plain or text/markdown,
      * serve the llms.txt version instead
      */
@@ -213,40 +247,6 @@ export const middleware: NextMiddleware = async (request) => {
             const slug = removeLeadingSlash(withoutEnding(MARKDOWN_PATTERN));
             return rewrite(withDomain("/api/fern-docs/markdown"), { slug, authed: rolesValue });
         }
-    }
-
-    /**
-     * Rewrite mcp
-     */
-    if (pathname.endsWith("/_mcp/server")) {
-        console.log("[middleware] rewriting mcp");
-        return rewrite(withDomain("/api/fern-docs/mcp"));
-    }
-
-    /**
-     * Rewrite changelog rss and atom feeds
-     */
-    if (pathname.match(RSS_PATTERN)) {
-        const format = pathname.match(RSS_PATTERN)?.[1] ?? "rss";
-        const slug = removeLeadingSlash(withoutEnding(RSS_PATTERN));
-        // standalone mode does not support search params, so we need to use headers
-        return rewrite(
-            withDomain("/api/fern-docs/changelog"),
-            { format, slug },
-            {
-                "x-fern-changelog-slug": slug,
-                "x-fern-changelog-format": format
-            }
-        );
-    }
-
-    /**
-     * Rewrite changelog json feed
-     */
-    if (pathname.match(JSON_PATTERN)) {
-        const format = pathname.match(JSON_PATTERN)?.[1] ?? "json";
-        const slug = removeLeadingSlash(withoutEnding(JSON_PATTERN));
-        return rewrite(withDomain("/api/fern-docs/changelog"), { format, slug });
     }
 
     /**
