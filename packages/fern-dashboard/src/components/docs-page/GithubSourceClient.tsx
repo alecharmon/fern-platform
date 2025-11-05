@@ -11,6 +11,7 @@ import type { DocsUrl } from "@/utils/types";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
+import { ConnectGithubRepoButton } from "./ConnectGithubRepoButton";
 import { SetGithubSourcePopover } from "./SetGithubSource";
 
 export interface GithubAuthState {
@@ -64,14 +65,7 @@ export function GithubSourceClient({
                                 </SetGithubSourcePopover>
                             </>
                         ) : (
-                            <SetGithubSourcePopover docsUrl={docsUrl} setIsSaving={setIsSaving}>
-                                <Button size="sm" className="w-fit" variant="outline" disabled={isSaving}>
-                                    <span className="text-gray-1100">
-                                        <GithubLogo />
-                                    </span>
-                                    {isSaving ? "Saving..." : "Connect Repo"}
-                                </Button>
-                            </SetGithubSourcePopover>
+                            <ConnectGithubRepoButton docsUrl={docsUrl} />
                         )}
                     </div>
                 </div>

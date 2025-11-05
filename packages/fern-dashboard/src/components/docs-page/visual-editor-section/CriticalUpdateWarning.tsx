@@ -13,9 +13,12 @@ export async function CriticalUpdateWarning({
 }: {
     orgName: Auth0OrgName;
     docsUrl: DocsUrl;
-    githubUrl: string;
-    baseBranch: string;
+    githubUrl?: string;
+    baseBranch?: string;
 }) {
+    if (githubUrl == null || baseBranch == null) {
+        return null;
+    }
     const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
 
     const fernVersionInfo = fernVersionInfoResult.ok ? fernVersionInfoResult.result : undefined;

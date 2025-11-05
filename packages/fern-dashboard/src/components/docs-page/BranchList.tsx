@@ -7,6 +7,8 @@ import { useLocalBranches } from "@/hooks/useLocalBranches";
 import { useLocalBranchesForSite } from "@/hooks/useLocalBranchesForSite";
 import type { DocsUrl } from "@/utils/types";
 import { BranchListItem } from "./BranchListItem";
+import { BranchListSkeleton } from "./BranchListSkeleton";
+import { VEPreviewImage } from "./VEPreviewImage";
 
 export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRepo?: GithubSourceRepo }) {
     const [deletedBranches, setDeletedBranches] = useState<Set<string>>(new Set());
@@ -37,7 +39,9 @@ export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRe
 
     return (
         <>
-            {filteredBranches.length > 0 ? (
+            {loading ? (
+                <></>
+            ) : filteredBranches.length > 0 ? (
                 <div className="flex flex-col gap-y-3">
                     {visibleBranches.map((branch, index) => (
                         <BranchListItem
@@ -58,9 +62,7 @@ export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRe
                     )}
                 </div>
             ) : (
-                <div className="text-center">
-                    <p className="text-muted-foreground">{loading ? "Loading..." : "No open sessions found"}</p>
-                </div>
+                <VEPreviewImage />
             )}
         </>
     );

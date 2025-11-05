@@ -15,30 +15,28 @@ export function VEPreviewImage({ className }: { className?: string }) {
     }
 
     return (
-        <div className={`relative h-full w-full ${className ?? ""}`}>
+        <div className={`w-full flex justify-center overflow-hidden -mb-3 md:-mb-5 lg:-mb-6 ${className ?? ""}`}>
             <Image
                 src={veLight}
                 alt="Fern Editor Preview"
-                fill
                 placeholder="blur"
                 aria-hidden={resolvedTheme !== "light"}
-                className={`absolute left-0 top-0 h-full w-full object-contain object-bottom transition-opacity duration-300 ${
+                className={`w-full h-auto max-w-[640px] object-contain transition-opacity duration-300 ${
                     resolvedTheme === "light" ? "opacity-100" : "opacity-0"
                 }`}
                 priority
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1500px"
             />
             <Image
                 src={veDark}
                 alt="Fern Editor Preview"
-                fill
                 placeholder="blur"
                 aria-hidden={resolvedTheme !== "dark"}
-                className={`absolute left-0 top-0 h-full w-full object-contain object-bottom transition-opacity duration-300 ${
+                className={`absolute inset-0 max-w-[640px] h-auto object-contain transition-opacity duration-300 ${
                     resolvedTheme === "dark" ? "opacity-100" : "opacity-0"
                 }`}
                 priority
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1500px"
             />
         </div>
     );

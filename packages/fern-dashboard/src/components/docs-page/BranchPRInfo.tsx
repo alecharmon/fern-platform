@@ -9,6 +9,7 @@ import type { DocsUrl } from "@/utils/types";
 
 import { ClickablePrNumber } from "../editor/ClickablePrNumber";
 import { PRTitleEditor } from "../editor/PRTitleEditor";
+import { Skeleton } from "../ui/skeleton";
 
 const getDisplayNameFromBranch = (branch: string) => {
     // Extracts date from branch name format: YYYY-MM-DD-*
@@ -49,9 +50,7 @@ function BranchPRContent({ branch }: { branch: string }) {
     return (
         <div className="flex items-center gap-2">
             {loading ? (
-                <div className="flex items-center gap-2">
-                    <p className="text-gray-600">Loading title...</p>
-                </div>
+                <Skeleton className="h-8 w-40" />
             ) : (
                 <>
                     {gitPrUrl ? (

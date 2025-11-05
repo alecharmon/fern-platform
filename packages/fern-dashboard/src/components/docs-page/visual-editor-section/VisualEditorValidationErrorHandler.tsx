@@ -1,8 +1,8 @@
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { GithubRepoValidationError } from "@/app/services/dal/github/validators";
-import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import { getValidationErrorMessage } from "@/utils/errors";
-
+import type { DocsUrl } from "@/utils/types";
+import { ConnectGithubRepoButton } from "../ConnectGithubRepoButton";
 import { InstallGithubAppButton } from "../InstallGithubAppButton";
 import { WarningNote } from "../WarningNote";
 
@@ -10,35 +10,18 @@ interface ValidationErrorHandlerProps {
     error: GithubRepoValidationError;
     githubUrl?: string;
     orgName: Auth0OrgName;
-    site: string;
+    docsUrl: DocsUrl;
 }
 
-export function VisualEditorValidationErrorHandler({ error, orgName, site, githubUrl }: ValidationErrorHandlerProps) {
+export function VisualEditorValidationErrorHandler({
+    error,
+    orgName,
+    docsUrl,
+    githubUrl
+}: ValidationErrorHandlerProps) {
     switch (error.type) {
         case "FERN_BOT_NOT_INSTALLED":
-            return (
-                <>
-                    <p className="text-muted-foreground text-sm">
-                        {githubUrl ? (
-                            <>
-                                To get started, install the Fern app on{" "}
-                                <a
-                                    href={githubUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:text-primary underline transition-colors"
-                                >
-                                    {getRepoDisplayNameFromUrl(githubUrl)}
-                                </a>
-                            </>
-                        ) : (
-                            "To get started, connect a GitHub repo above and install the Fern GitHub app."
-                        )}
-                        .
-                    </p>
-                    <InstallGithubAppButton orgName={orgName} site={site} githubUrl={githubUrl} />
-                </>
-            );
+            return <InstallGithubAppButton orgName={orgName} docsUrl={docsUrl} githubUrl={githubUrl} />;
 
         case "MALFORMED_GITHUB_URL":
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
@@ -50,7 +33,7 @@ export function VisualEditorValidationErrorHandler({ error, orgName, site, githu
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
         case "REPO_NOT_CONNECTED":
-            return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
+            return <ConnectGithubRepoButton docsUrl={docsUrl} variant="default" size="default" />;
 
         case "FERN_CONFIG_JSON_MISSING":
             return (

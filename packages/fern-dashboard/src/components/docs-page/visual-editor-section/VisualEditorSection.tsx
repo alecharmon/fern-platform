@@ -1,20 +1,17 @@
 import "server-only";
 
-import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
+import { Suspense } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
-import type { GithubAuthState } from "@/components/docs-page/GithubSourceClient";
 import type { DocsUrl } from "@/utils/types";
-import { CriticalUpdateWarning } from "./CriticalUpdateWarning";
-import { VisualEditorEmptyCard } from "./VisualEditorEmptyCard";
-import { VisualEditorSectionClient } from "./VisualEditorSectionClient";
-import { VisualEditorValidationErrorHandler } from "./VisualEditorValidationErrorHandler";
+import { VisualEditorContent } from "./VisualEditorContent";
+import { VisualEditorContentAsync } from "./VisualEditorContentAsync";
+import { VisualEditorContentSkeleton } from "./VisualEditorContentSkeleton";
 
 /**
- * Async wrapper component for VisualEditorSection that handles the promise resolution
- * This allows the parent to pass promises and let this component await them,
- * enabling proper Suspense boundary behavior
+ * Outer shell that validates the GitHub URL and coordinates rendering
+ * The expensive auth validation happens inside VisualEditorContentAsync
  */
 export async function VisualEditorSection({
     docsUrl,
@@ -25,94 +22,28 @@ export async function VisualEditorSection({
     session: Auth0SessionData;
     orgName: Auth0OrgName;
 }) {
-    const [githubUrlResult, githubAuthStateResult] = await Promise.all([
-        getDocsGithubUrl(docsUrl, session.accessToken),
-        getGitHubAuthState(docsUrl, session.accessToken, orgName, session)
-    ]);
+    // Only fetch the GitHub URL (fast, cached operation)
+    const githubUrlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
 
     const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
 
-    // Ensure we have a proper GithubAuthState, handling both error shapes
-    let githubAuthState: GithubAuthState;
-
+    // Handle early errors (missing GitHub URL)
     if (!githubUrlResult.success) {
-        githubAuthState = {
-            validationResult: {
-                ok: false,
-                error: githubUrlResult.error
-            },
-            sourceRepo: undefined,
-            isLoading: false
-        };
-    } else if ("success" in githubAuthStateResult && githubAuthStateResult.success === false) {
-        githubAuthState = {
-            validationResult: {
-                ok: false,
-                error: githubAuthStateResult.error
-            },
-            sourceRepo: undefined,
-            isLoading: false
-        };
-    } else if ("validationResult" in githubAuthStateResult) {
-        githubAuthState = githubAuthStateResult;
-    } else {
-        githubAuthState = {
-            validationResult: {
-                ok: false,
-                error: {
-                    type: "UNEXPECTED_ERROR",
-                    message: "Failed to load GitHub auth state"
-                }
-            },
-            sourceRepo: undefined,
-            isLoading: false
-        };
-    }
-
-    if (!githubAuthState.validationResult.ok) {
         return (
-            <VisualEditorEmptyCard>
-                <VisualEditorValidationErrorHandler
-                    error={githubAuthState.validationResult.error}
-                    githubUrl={githubUrl}
-                    orgName={orgName}
-                    site={docsUrl}
-                />
-            </VisualEditorEmptyCard>
-        );
-    }
-    const baseBranch = githubAuthState.sourceRepo?.baseBranch;
-
-    // This should never happen because this would be caught by the validation handler above, but added to mitigate type errors
-    if (githubUrl == null || baseBranch == null) {
-        return (
-            <VisualEditorEmptyCard>
-                <VisualEditorValidationErrorHandler
-                    error={{
-                        type: "UNEXPECTED_ERROR",
-                        message: "GitHub URL or base branch is was not found."
-                    }}
-                    githubUrl={githubUrl}
-                    orgName={orgName}
-                    site={docsUrl}
-                />
-            </VisualEditorEmptyCard>
+            <VisualEditorContent
+                docsUrl={docsUrl}
+                session={session}
+                orgName={orgName}
+                githubUrl={githubUrl}
+                error={githubUrlResult.error}
+            />
         );
     }
 
+    // Load the content with full validation via Suspense
     return (
-        <VisualEditorSectionClient
-            maybeCriticalUpdateWarning={
-                <CriticalUpdateWarning
-                    orgName={orgName}
-                    docsUrl={docsUrl}
-                    githubUrl={githubUrl}
-                    baseBranch={baseBranch}
-                />
-            }
-            session={session}
-            docsUrl={docsUrl}
-            sourceRepo={githubAuthState.sourceRepo}
-        />
+        <Suspense fallback={<VisualEditorContentSkeleton />}>
+            <VisualEditorContentAsync docsUrl={docsUrl} session={session} orgName={orgName} githubUrl={githubUrl} />
+        </Suspense>
     );
 }

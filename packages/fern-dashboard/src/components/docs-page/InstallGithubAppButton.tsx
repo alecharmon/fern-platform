@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { validateGithubRepoAction } from "@/app/actions/validate-github-repo";
-
+import type { DocsUrl } from "@/utils/types";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 
@@ -14,11 +14,11 @@ const POLLING_INTERVAL_BACKGROUND = 30 * 1000; // 30 seconds
 
 export function InstallGithubAppButton({
     orgName,
-    site,
+    docsUrl,
     githubUrl
 }: {
     orgName: string;
-    site: string;
+    docsUrl: DocsUrl;
     githubUrl?: string;
 }) {
     const [clicked, setClicked] = useState(false);
@@ -48,11 +48,11 @@ export function InstallGithubAppButton({
             console.warn("[checkIfRepoIsValid] No githubUrl to validate");
             return;
         }
-        const result = await validateGithubRepoAction(orgName, site, githubUrl);
+        const result = await validateGithubRepoAction(orgName, docsUrl, githubUrl);
         if (result.ok) {
             cleanUp(true);
         }
-    }, [orgName, site, githubUrl, cleanUp]);
+    }, [orgName, docsUrl, githubUrl, cleanUp]);
 
     const startBackgroundPoller = useCallback(() => {
         // If we don't have a github url, we can't poll
@@ -134,7 +134,7 @@ export function InstallGithubAppButton({
                         <Loader2 className="animate-spin" />
                     </>
                 ) : (
-                    "Install"
+                    "Install GitHub App"
                 )}
             </a>
         </Button>
