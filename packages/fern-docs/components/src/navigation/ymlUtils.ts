@@ -80,12 +80,14 @@ function _buildDocsYmlContentFromChanges(
         for (const change of fileChanges.values()) {
             if (change.type === "add_page" && change.pageEntry) {
                 // Apply add operation with insertionMode and insertionIndex
+                // Pass the ymlFilePath so paths can be converted to be relative to this file
                 _applyAddOperation(config, {
                     sectionTitle: change.sectionTitle ?? null,
                     tabSlug: change.tabSlug,
                     pageEntry: change.pageEntry,
                     insertionMode: change.insertionMode,
-                    insertionIndex: change.insertionIndex
+                    insertionIndex: change.insertionIndex,
+                    ymlFilePath: filePath
                 });
             } else if (change.type === "remove_page" && change.pageEntry) {
                 _applyRemoveOperation(config, {
@@ -109,6 +111,61 @@ function _buildDocsYmlContentFromChanges(
 /** Normalizes a path by removing leading "./" if present */
 function _normalizePath(path: string): string {
     return path.startsWith("./") ? path.slice(2) : path;
+}
+
+/**
+ * Converts a root-relative path to be relative to a specific yml file's directory.
+ * This ensures paths are written correctly when yml files are in subdirectories.
+ *
+ * @param rootRelativePath - Path relative to the root docs.yml (e.g., "pages/new-page.mdx")
+ * @param ymlFilePath - Path to the yml file being written (e.g., "products/platform.yml" or "docs.yml")
+ * @returns Path relative to the yml file's directory (e.g., "../pages/new-page.mdx" or "./pages/new-page.mdx")
+ */
+function _makePathRelativeToYmlFile(rootRelativePath: string, ymlFilePath: string): string {
+    // Get the directory of the yml file
+    // e.g., "products/platform.yml" -> "products/"
+    // e.g., "docs.yml" -> ""
+    const lastSlashIndex = ymlFilePath.lastIndexOf("/");
+    const ymlDir = lastSlashIndex >= 0 ? ymlFilePath.substring(0, lastSlashIndex + 1) : "";
+
+    // If yml file is at root (docs.yml), just add "./" prefix
+    if (!ymlDir) {
+        return `./${rootRelativePath}`;
+    }
+
+    // If the path already starts with the yml directory, make it relative
+    if (rootRelativePath.startsWith(ymlDir)) {
+        const relativePath = rootRelativePath.substring(ymlDir.length);
+        return `./${relativePath}`;
+    }
+
+    // Path is outside yml directory - need to calculate "../" references
+    // Split both paths into segments
+    const ymlSegments = ymlDir.split("/").filter((s) => s.length > 0);
+    const pathSegments = rootRelativePath.split("/").filter((s) => s.length > 0);
+
+    // Find common prefix length
+    let commonLength = 0;
+    while (
+        commonLength < ymlSegments.length &&
+        commonLength < pathSegments.length &&
+        ymlSegments[commonLength] === pathSegments[commonLength]
+    ) {
+        commonLength++;
+    }
+
+    // Build relative path: "../" for each remaining yml segment, then remaining path segments
+    const upLevels = ymlSegments.length - commonLength;
+    const downPath = pathSegments.slice(commonLength);
+
+    if (upLevels === 0) {
+        // Same directory
+        return `./${downPath.join("/")}`;
+    } else {
+        // Need to go up levels
+        const ups = Array(upLevels).fill("..").join("/");
+        return `${ups}/${downPath.join("/")}`;
+    }
 }
 
 /**
@@ -166,15 +223,24 @@ function _applyAddOperation(
         pageEntry: { page: string; path: string };
         insertionMode?: "atIndex" | "prepend" | "append";
         insertionIndex?: number;
+        ymlFilePath: DocsYmlFilePath;
     }
 ) {
-    const { sectionTitle, tabSlug, pageEntry, insertionMode, insertionIndex } = update;
+    const { sectionTitle, tabSlug, pageEntry, insertionMode, insertionIndex, ymlFilePath } = update;
     docsConfig.navigation ??= [];
 
     if (tabSlug) {
-        _addToTabbedNavigation(docsConfig, tabSlug, sectionTitle, pageEntry, insertionMode, insertionIndex);
+        _addToTabbedNavigation(
+            docsConfig,
+            tabSlug,
+            sectionTitle,
+            pageEntry,
+            insertionMode,
+            insertionIndex,
+            ymlFilePath
+        );
     } else {
-        _addToRootNavigation(docsConfig, sectionTitle, pageEntry, insertionMode, insertionIndex);
+        _addToRootNavigation(docsConfig, sectionTitle, pageEntry, insertionMode, insertionIndex, ymlFilePath);
     }
 }
 
@@ -184,15 +250,17 @@ function _addToRootNavigation(
     sectionTitle: string | null,
     pageEntry: { page: string; path: string },
     insertionMode?: "atIndex" | "prepend" | "append",
-    insertionIndex?: number
+    insertionIndex?: number,
+    ymlFilePath?: DocsYmlFilePath
 ) {
     if (!docsConfig.navigation) return;
 
     if (sectionTitle == null) {
-        _addPageToContainer(docsConfig.navigation, pageEntry, insertionMode, insertionIndex);
+        _addPageToContainer(docsConfig.navigation, pageEntry, insertionMode, insertionIndex, ymlFilePath);
     } else {
         const section = _findOrCreateSection(docsConfig.navigation, sectionTitle);
-        if (section.contents) _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex);
+        if (section.contents)
+            _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex, ymlFilePath);
     }
 }
 
@@ -203,18 +271,20 @@ function _addToTabbedNavigation(
     sectionTitle: string | null,
     pageEntry: { page: string; path: string },
     insertionMode?: "atIndex" | "prepend" | "append",
-    insertionIndex?: number
+    insertionIndex?: number,
+    ymlFilePath?: DocsYmlFilePath
 ) {
     if (!docsConfig.navigation) return;
 
     const tab = _findOrCreateTab(docsConfig.navigation, tabSlug);
 
     if (sectionTitle == null) {
-        if (tab.layout) _addPageToContainer(tab.layout, pageEntry, insertionMode, insertionIndex);
+        if (tab.layout) _addPageToContainer(tab.layout, pageEntry, insertionMode, insertionIndex, ymlFilePath);
     } else {
         if (tab.layout) {
             const section = _findOrCreateSection(tab.layout, sectionTitle);
-            if (section.contents) _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex);
+            if (section.contents)
+                _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex, ymlFilePath);
         }
     }
 }
@@ -255,12 +325,16 @@ function _findOrCreateSection(container: YmlNavigationItem[], sectionTitle: stri
  *
  * This function uses the insertionMode and insertionIndex from the NavigationChange to determine
  * where to insert the page. This ensures RootNode and YAML mutations stay in sync automatically.
+ *
+ * The path in pageEntry is expected to be root-relative (relative to docs.yml). This function
+ * converts it to be relative to the yml file being written.
  */
 function _addPageToContainer(
     container: YmlNavigationItem[],
     pageEntry: { page: string; path: string },
     insertionMode?: "atIndex" | "prepend" | "append",
-    insertionIndex?: number
+    insertionIndex?: number,
+    ymlFilePath?: DocsYmlFilePath
 ) {
     const pageExists = container.some(
         (item) => isYmlPageItem(item) && (item.page === pageEntry.page || item.path === pageEntry.path)
@@ -269,6 +343,15 @@ function _addPageToContainer(
     if (pageExists) {
         return;
     }
+
+    // Convert path from root-relative to yml-file-relative
+    // The stored path is relative to the root docs.yml, but we need to write it relative to the yml file
+    const pathToWrite = ymlFilePath ? _makePathRelativeToYmlFile(pageEntry.path, ymlFilePath) : `./${pageEntry.path}`;
+
+    const entryToWrite = {
+        page: pageEntry.page,
+        path: pathToWrite
+    };
 
     // Determine insertion position based on mode
     let position: number;
@@ -281,7 +364,7 @@ function _addPageToContainer(
         position = container.length;
     }
 
-    container.splice(position, 0, pageEntry);
+    container.splice(position, 0, entryToWrite);
 }
 
 /** Removes page entry from all navigation structures */

@@ -260,4 +260,166 @@ describe("buildDocsYmlContentFromChanges", () => {
         expect(resultString).toContain("Third Rename");
         expect(resultString).toContain("Test Page");
     });
+
+    describe("multi-file config path handling", () => {
+        it("should write paths relative to non-root yml files", () => {
+            // Setup: Root docs.yml references products/platform.yml
+            const rootDocsYml = `navigation:
+  - page: Welcome
+    path: ./pages/welcome.mdx`;
+
+            const platformYml = `navigation:
+  - section: Platform Section
+    contents:
+      - page: Existing Page
+        path: ./pages/existing.mdx`;
+
+            // Create a snapshot with both files
+            const snapshot: NavigationSnapshot = {
+                ...createEmptyNavigationSnapshot("test-branch", "test-org", "test-docs-url"),
+                docsYmlBaseContent: new Map([
+                    ["docs.yml", rootDocsYml],
+                    ["products/platform.yml", platformYml]
+                ]),
+                navigationChanges: new Map()
+            };
+
+            // Add a new page to the platform product
+            // The path is stored as root-relative: "pages/new-page.mdx"
+            // But should be written as: "../pages/new-page.mdx" in products/platform.yml
+            const changes = new Map<string, NavigationChange>();
+            changes.set("pages/new-page.mdx", {
+                type: "add_page",
+                sectionTitle: "Platform Section",
+                pageEntry: { page: "New Page", path: "pages/new-page.mdx" }, // Root-relative path
+                insertionMode: "append",
+                docsYmlFilePath: "products/platform.yml",
+                createdAt: Date.now()
+            });
+
+            snapshot.navigationChanges = changes;
+
+            // Build the updated yml content
+            const result = buildDocsYmlContentFromChanges(snapshot);
+
+            // Should only have products/platform.yml in result (docs.yml unchanged)
+            expect(result.size).toBe(1);
+            expect(result.has("products/platform.yml")).toBe(true);
+
+            const platformYmlResult = result.get("products/platform.yml") ?? "";
+
+            // The new page should be written with a relative path: ../pages/new-page.mdx
+            expect(platformYmlResult).toContain("New Page");
+            expect(platformYmlResult).toContain("../pages/new-page.mdx");
+            // Should NOT contain the root-relative path
+            expect(platformYmlResult).not.toContain("path: pages/new-page.mdx");
+            expect(platformYmlResult).not.toContain("path: ./pages/new-page.mdx");
+        });
+
+        it("should write paths relative to nested version yml files", () => {
+            // Setup: versions/v2.yml in a subdirectory
+            const v2Yml = `navigation:
+  - section: API Reference
+    contents:
+      - page: Introduction
+        path: ./intro.mdx`;
+
+            const snapshot: NavigationSnapshot = {
+                ...createEmptyNavigationSnapshot("test-branch", "test-org", "test-docs-url"),
+                docsYmlBaseContent: new Map([["versions/v2.yml", v2Yml]]),
+                navigationChanges: new Map()
+            };
+
+            // Add a page in the root pages directory
+            // Stored path: "pages/guide.mdx" (root-relative)
+            // Should be written as: "../pages/guide.mdx" in versions/v2.yml
+            const changes = new Map<string, NavigationChange>();
+            changes.set("pages/guide.mdx", {
+                type: "add_page",
+                sectionTitle: "API Reference",
+                pageEntry: { page: "Guide", path: "pages/guide.mdx" }, // Root-relative
+                insertionMode: "append",
+                docsYmlFilePath: "versions/v2.yml",
+                createdAt: Date.now()
+            });
+
+            snapshot.navigationChanges = changes;
+
+            const result = buildDocsYmlContentFromChanges(snapshot);
+            const v2YmlResult = result.get("versions/v2.yml") ?? "";
+
+            expect(v2YmlResult).toContain("Guide");
+            expect(v2YmlResult).toContain("../pages/guide.mdx");
+        });
+
+        it("should handle pages in same directory as yml file", () => {
+            // Setup: products/platform.yml and pages are in products/pages/
+            const platformYml = `navigation:
+  - section: Platform
+    contents: []`;
+
+            const snapshot: NavigationSnapshot = {
+                ...createEmptyNavigationSnapshot("test-branch", "test-org", "test-docs-url"),
+                docsYmlBaseContent: new Map([["products/platform.yml", platformYml]]),
+                navigationChanges: new Map()
+            };
+
+            // Add a page in the same directory structure
+            // Stored path: "products/pages/new.mdx" (root-relative)
+            // Should be written as: "./pages/new.mdx" in products/platform.yml
+            const changes = new Map<string, NavigationChange>();
+            changes.set("products/pages/new.mdx", {
+                type: "add_page",
+                sectionTitle: "Platform",
+                pageEntry: { page: "New Page", path: "products/pages/new.mdx" }, // Root-relative
+                insertionMode: "append",
+                docsYmlFilePath: "products/platform.yml",
+                createdAt: Date.now()
+            });
+
+            snapshot.navigationChanges = changes;
+
+            const result = buildDocsYmlContentFromChanges(snapshot);
+            const platformYmlResult = result.get("products/platform.yml") ?? "";
+
+            expect(platformYmlResult).toContain("New Page");
+            expect(platformYmlResult).toContain("./pages/new.mdx");
+            // Should NOT contain the full path
+            expect(platformYmlResult).not.toContain("products/pages/new.mdx");
+        });
+
+        it("should handle root docs.yml correctly", () => {
+            // When yml file is at root (docs.yml), paths should just get "./" prefix
+            const docsYml = `navigation:
+  - section: Root Section
+    contents: []`;
+
+            const snapshot: NavigationSnapshot = {
+                ...createEmptyNavigationSnapshot("test-branch", "test-org", "test-docs-url"),
+                docsYmlBaseContent: new Map([["docs.yml", docsYml]]),
+                navigationChanges: new Map()
+            };
+
+            // Add a page to root docs.yml
+            // Stored path: "pages/new.mdx" (root-relative, which is the same as file-relative for root)
+            // Should be written as: "./pages/new.mdx"
+            const changes = new Map<string, NavigationChange>();
+            changes.set("pages/new.mdx", {
+                type: "add_page",
+                sectionTitle: "Root Section",
+                pageEntry: { page: "New Page", path: "pages/new.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                createdAt: Date.now()
+            });
+
+            snapshot.navigationChanges = changes;
+
+            const result = buildDocsYmlContentFromChanges(snapshot);
+            const docsYmlResult = result.get("docs.yml") ?? "";
+
+            expect(docsYmlResult).toContain("New Page");
+            expect(docsYmlResult).toContain("./pages/new.mdx");
+        });
+    });
 });
