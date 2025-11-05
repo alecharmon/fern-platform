@@ -9,7 +9,8 @@ import { Skeleton } from "../ui/skeleton";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { DocsSiteLink } from "./DocsSiteLink";
 import { DownloadFernDocsButton } from "./DownloadFernDocsButton";
-import { DocsSiteImage } from "./docs-site-image/DocsSiteImage";
+import { DocsSiteImageServer } from "./docs-site-image/DocsSiteImageServer";
+import { SkeletonDocsSiteImage } from "./docs-site-image/SkeletonDocsSiteImage";
 import { FernCliVersion } from "./FernCliVersion";
 import { GithubSource } from "./GithubSource";
 import { PublishToGitHubButton } from "./PublishToGitHubButton";
@@ -26,7 +27,9 @@ export async function DocsSiteOverviewCard({
     return (
         <div className="flex w-full flex-col gap-4">
             <Card className="flex flex-col md:flex-row">
-                <DocsSiteImage docsSite={docsSite} />
+                <Suspense fallback={<SkeletonDocsSiteImage />}>
+                    <DocsSiteImageServer docsSite={docsSite} />
+                </Suspense>
                 <div className="flex min-w-0 flex-col gap-4 text-gray-900">
                     <div className="flex flex-col gap-2">
                         <p>Domains</p>

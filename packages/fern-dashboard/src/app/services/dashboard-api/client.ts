@@ -4,7 +4,6 @@ import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
 import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
-import type { getHomepageImageUrl } from "@/app/api/homepage-images/get/route";
 import type { postDocsGithubSource } from "@/app/api/post-docs-github-source/route";
 import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
@@ -18,8 +17,6 @@ export const DashboardApiClient = {
         typedFetch<getOrgInvitations.Response>("/api/get-org-invitations", request),
     getOrgMembers: (request: getOrgMembers.Request): Promise<getOrgMembers.Response> =>
         typedFetch<getOrgMembers.Response>("/api/get-org-members", request),
-    getHomepageImages: (request: getHomepageImageUrl.Request) =>
-        typedFetch<getHomepageImageUrl.Response>("/api/homepage-images/get", request),
     getDocsUrlOwner: (request: getDocsUrlOwner.Request) =>
         typedFetch<getDocsUrlOwner.Response>("/api/get-docs-url-owner", request),
     postCreatePr: (request: postCreatePr.Request) =>
