@@ -51,7 +51,7 @@ export function renderTypeShorthandRoot({
 
     const nullableDropdown =
         nullableDropdownOptions.length > 0 ? (
-            <NullableDropdown options={nullableDropdownOptions} onChange={onChange} />
+            <NullableDropdown options={nullableDropdownOptions} onChange={onChange} lang={lang} />
         ) : null;
 
     return (

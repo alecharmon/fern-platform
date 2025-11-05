@@ -5,6 +5,7 @@ import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { cn } from "@fern-docs/components/cn";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
 import { FernInput } from "@fern-docs/components/FernInput";
+import { t } from "@fern-docs/i18n";
 import * as Select from "@radix-ui/react-select";
 import { useAtom } from "jotai";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
@@ -19,15 +20,16 @@ import {
 
 interface RunnableEndpointAuthSectionProps {
     authSchemes: AuthScheme[];
+    lang: string;
 }
 
-function getAuthSchemeLabel(auth: AuthScheme): string {
+function getAuthSchemeLabel(auth: AuthScheme, lang: string): string {
     return visitDiscriminatedUnion(auth)._visit({
-        bearerAuth: (bearer) => bearer.tokenName || "Bearer Token",
-        basicAuth: (basic) => basic.usernameName || "Basic Auth",
+        bearerAuth: (bearer) => bearer.tokenName || t(lang).auth.bearerToken,
+        basicAuth: (basic) => basic.usernameName || t(lang).auth.basicAuth,
         header: (header) => header.nameOverride || header.headerWireValue,
-        oAuth: () => "OAuth Token",
-        _other: () => "Authentication"
+        oAuth: () => t(lang).auth.oauthToken,
+        _other: () => t(lang).apiReference.authentication
     });
 }
 
@@ -35,7 +37,7 @@ function getAuthSchemeValue(index: number): string {
     return `auth-${index}`;
 }
 
-export function RunnableEndpointAuthSection({ authSchemes }: RunnableEndpointAuthSectionProps) {
+export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpointAuthSectionProps) {
     const [selectedAuthIndex, setSelectedAuthIndex] = useState(0);
     const [open, openState] = useState(true);
 
@@ -109,7 +111,9 @@ export function RunnableEndpointAuthSection({ authSchemes }: RunnableEndpointAut
                                                             "cursor-pointer data-[highlighted]:bg-(color:--grayscale-a3)"
                                                         )}
                                                     >
-                                                        <Select.ItemText>{getAuthSchemeLabel(auth)}</Select.ItemText>
+                                                        <Select.ItemText>
+                                                            {getAuthSchemeLabel(auth, lang)}
+                                                        </Select.ItemText>
                                                         <Select.ItemIndicator className="absolute left-2 inline-flex items-center justify-center">
                                                             <Check className="size-4" />
                                                         </Select.ItemIndicator>

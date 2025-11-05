@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { createCachedDocsLoader } from "@fern-api/docs-loader";
+import type { CachedDocsLoader } from "@fern-api/docs-loader";
 import { cacheSeed } from "@fern-api/docs-server/cache-seed";
 import type { Frontmatter } from "@fern-api/fdr-sdk/docs";
 import { Semaphore } from "es-toolkit";
@@ -42,7 +42,7 @@ export type MdxSerializer = (
           code: string;
           frontmatter?: Partial<Frontmatter>;
           jsxElements: string[];
-          engine: "esbuild" | "next-remote";
+          engine: "esbuild" | "next-remote" | "plaintext";
           styles?: string[];
       }
     | undefined
@@ -51,7 +51,7 @@ export type MdxSerializer = (
 const monitor = new Semaphore(20);
 
 export function createCachedMdxSerializer(
-    loader: Awaited<ReturnType<typeof createCachedDocsLoader>>,
+    loader: CachedDocsLoader,
     {
         scope,
         replaceHref,
@@ -69,7 +69,11 @@ export function createCachedMdxSerializer(
         }
 
         if (isPlainText(content)) {
-            return content;
+            return {
+                code: content,
+                jsxElements: [],
+                engine: "plaintext" as const
+            };
         }
 
         await monitor.acquire();

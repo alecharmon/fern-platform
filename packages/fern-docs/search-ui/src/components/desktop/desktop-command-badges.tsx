@@ -6,6 +6,7 @@ import { DesktopFilterDropdownMenu } from "./desktop-filter-dropdown-menu";
 
 interface DesktopCommandBadgesProps {
     onDropdownClose?: () => void;
+    lang: string;
 }
 
 export const aboveInput = tunnel();
@@ -14,7 +15,7 @@ export const DesktopCommandBadges = forwardRef<
     HTMLDivElement,
     DesktopCommandBadgesProps & ComponentPropsWithoutRef<"div">
 >((props, ref) => {
-    const { onDropdownClose, children, ...rest } = props;
+    const { onDropdownClose, children, lang, ...rest } = props;
     const { filters, setFilters } = useFacetFilters();
     const hasChildren = aboveInput.useHasChildren();
 
@@ -35,6 +36,7 @@ export const DesktopCommandBadges = forwardRef<
                     updateFilter={(value) => {
                         setFilters?.((prev) => prev.map((f) => (f.facet === filter.facet ? { ...f, value } : f)));
                     }}
+                    lang={lang}
                 />
             ))}
             <aboveInput.Out />

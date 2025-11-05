@@ -1,6 +1,7 @@
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
+import { t } from "@fern-docs/i18n";
 import type { Loadable } from "@fern-ui/loadable";
 import { round } from "es-toolkit/math";
 import { ChevronDown } from "lucide-react";
@@ -11,12 +12,14 @@ interface RunnableEndpointResponseSectionProps {
     response: Loadable<PlaygroundResponse>;
     isExpanded: boolean;
     onToggle: () => void;
+    lang: string;
 }
 
 export function RunnableEndpointResponseSection({
     response,
     isExpanded,
-    onToggle
+    onToggle,
+    lang
 }: RunnableEndpointResponseSectionProps) {
     if (response.type === "notStartedLoading") {
         return null;
@@ -35,7 +38,9 @@ export function RunnableEndpointResponseSection({
                             "-rotate-90": !isExpanded
                         })}
                     />
-                    <span className="text-(color:--grayscale-a11) text-xs uppercase">Response</span>
+                    <span className="text-(color:--grayscale-a11) text-xs uppercase">
+                        {t(lang).apiReference.response}
+                    </span>
                 </div>
 
                 {response.type === "loaded" && (
@@ -47,16 +52,16 @@ export function RunnableEndpointResponseSection({
                                 "bg-(color:--red-a3) text-(color:--red-a11)": response.value.response.status >= 300
                             })}
                         >
-                            status: {response.value.response.status}
+                            {t(lang).apiReference.status}: {response.value.response.status}
                         </span>
                         <span className="bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
-                            time: {round(response.value.time, 2)}ms
+                            {t(lang).apiReference.time}: {round(response.value.time, 2)}ms
                         </span>
                         {response.value.type === "json" &&
                             response.value.size != null &&
                             response.value.size.trim().length > 0 && (
                                 <span className="bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
-                                    size: {response.value.size}b
+                                    {t(lang).apiReference.size}: {response.value.size}b
                                 </span>
                             )}
                         <CopyToClipboardButton
@@ -70,17 +75,18 @@ export function RunnableEndpointResponseSection({
                                         : ""
                             }
                             className="-mr-2"
+                            lang={lang}
                         />
                     </div>
                 )}
 
                 {response.type === "loading" && (
-                    <span className="text-(color:--grayscale-a11) text-xs">Loading...</span>
+                    <span className="text-(color:--grayscale-a11) text-xs">{t(lang).status.loading}...</span>
                 )}
 
                 {response.type === "failed" && (
                     <span className="bg-(color:--red-a3) text-(color:--red-a11) rounded-1 flex items-center p-1 font-mono text-xs uppercase leading-none">
-                        Failed
+                        {t(lang).apiReference.failed}
                     </span>
                 )}
             </button>
@@ -91,7 +97,7 @@ export function RunnableEndpointResponseSection({
                 {response.type === "failed" && (
                     <div className="p-4">
                         <div className="bg-(color:--red-a3) text-(color:--red-a11) rounded p-3 text-sm">
-                            <strong>Error:</strong> {String(response.error)}
+                            <strong>{t(lang).errors.error}:</strong> {String(response.error)}
                         </div>
                     </div>
                 )}

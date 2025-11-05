@@ -9,7 +9,7 @@ export declare namespace MdxContent {
     export interface Props {
         mdx: MarkdownText | MarkdownText[] | undefined;
         fallback?: React.ReactNode;
-        useNextMdx?: boolean;
+        engine?: "esbuild" | "next-remote" | "plaintext";
     }
 }
 
@@ -41,26 +41,30 @@ function isMdxEmpty(mdx: MarkdownText | MarkdownText[] | undefined): boolean {
     return mdx.code.trim().length === 0;
 }
 
-export function MdxContent({ mdx, fallback, useNextMdx }: MdxContent.Props) {
+export function MdxContent({ mdx, fallback, engine }: MdxContent.Props): React.ReactNode {
     if (isMdxEmpty(mdx) || mdx == null) {
         return fallback;
     }
 
     if (typeof mdx === "string") {
-        return mdx;
+        return <>{mdx}</>;
     }
 
     if (Array.isArray(mdx)) {
         return (
             <>
                 {mdx.map((mdx, index) => (
-                    <MdxContent key={index} mdx={mdx} useNextMdx={useNextMdx} />
+                    <MdxContent key={index} mdx={mdx} engine={engine} />
                 ))}
             </>
         );
     }
 
-    const MdxComponent = useNextMdx ? NextMdxRemoteComponent : MdxBundlerComponent;
+    if (engine === "plaintext") {
+        return <>{typeof mdx === "string" ? mdx : mdx.code}</>;
+    }
+
+    const MdxComponent = engine === "next-remote" ? NextMdxRemoteComponent : MdxBundlerComponent;
 
     return (
         <ErrorBoundary>

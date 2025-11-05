@@ -29,7 +29,6 @@ import { mapKeys } from "es-toolkit/object";
 import fs from "fs";
 import { gracefulify } from "graceful-fs";
 import { bundleMDX } from "mdx-bundler";
-import { after } from "next/server";
 import path from "path";
 import rehypeKatex from "rehype-katex";
 import remarkFrontmatter from "remark-frontmatter";
@@ -76,7 +75,7 @@ export interface SerializeMdxResponse {
     frontmatter?: Partial<FernDocs.Frontmatter>;
     jsxElements: string[];
     scope?: Record<string, unknown>;
-    engine: "next-remote" | "esbuild";
+    engine: "next-remote" | "esbuild" | "plaintext";
     styles?: string[];
 }
 
@@ -455,6 +454,7 @@ export async function processTwoslashBlocks(content: string): Promise<string> {
                         // Replace only this specific block
                         const twoSlashContent = `<TwoSlash content={${JSON.stringify({ ...result, value: block.codeContent })}} />`;
                         content = content.replace(block.fullMatch, twoSlashContent);
+                        return undefined;
                     } catch (error) {
                         console.error("Error processing twoslash block:", error);
                         return originalContent;

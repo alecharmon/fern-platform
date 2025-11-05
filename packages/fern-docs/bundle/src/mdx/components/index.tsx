@@ -166,7 +166,7 @@ export function createMdxComponents(jsxElements: string[]): MDXComponents {
         // spread in jsx elements that may be unsupported
         ...jsxElements.reduce<Record<string, () => ReactElement>>((acc, jsxElement) => {
             acc[jsxElement] = () => (
-                <ErrorBoundaryFallback error={new Error(`Unsupported JSX tag: <${jsxElement} />`)} />
+                <ErrorBoundaryFallback error={new Error(`Unsupported JSX tag: <${jsxElement} />`)} lang="en" />
             );
             return acc;
         }, {}),

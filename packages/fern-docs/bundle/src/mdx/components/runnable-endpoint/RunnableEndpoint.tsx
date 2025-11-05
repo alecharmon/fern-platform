@@ -68,6 +68,11 @@ interface RunnableEndpointProps {
      * @internal Whether to disable the proxy.
      */
     disableProxy?: boolean;
+
+    /**
+     * @internal the rehype-runnable-endpoint plugin will set this
+     */
+    lang?: string;
 }
 
 export function RunnableEndpoint({
@@ -79,7 +84,8 @@ export function RunnableEndpoint({
     endpointSlugs,
     className,
     readonly,
-    disableProxy
+    disableProxy,
+    lang
 }: RunnableEndpointProps) {
     const endpointSlug = useCurrentSlug(endpointSlugs);
 
@@ -98,6 +104,7 @@ export function RunnableEndpoint({
             className={className}
             readonly={readonly}
             disableProxy={disableProxy}
+            lang={lang ?? "en"}
         />
     );
 }
@@ -126,7 +133,8 @@ function RunnableEndpointInternal({
     endpointSlug,
     className,
     readonly,
-    disableProxy
+    disableProxy,
+    lang
 }: {
     endpoint: EndpointDefinition;
     types: Record<string, TypeDefinition>;
@@ -137,6 +145,7 @@ function RunnableEndpointInternal({
     className?: string;
     readonly?: string[];
     disableProxy?: boolean;
+    lang: string;
 }) {
     const [formExpanded, setFormExpanded] = useState(true);
     const [responseExpanded, setResponseExpanded] = useState(true);
@@ -231,6 +240,7 @@ function RunnableEndpointInternal({
                         selectedExampleIndex={selectedExampleIndex}
                         onExampleChange={handleExampleChange}
                         endpointSlug={endpointSlug}
+                        lang={lang}
                     />
 
                     {/* Collapsible Form Section */}
@@ -240,7 +250,7 @@ function RunnableEndpointInternal({
                                 <div className="space-y-4">
                                     {/* Authentication */}
                                     {authSchemes.length > 0 && (
-                                        <RunnableEndpointAuthSection authSchemes={authSchemes} />
+                                        <RunnableEndpointAuthSection authSchemes={authSchemes} lang={lang} />
                                     )}
 
                                     {/* Headers */}
@@ -253,6 +263,7 @@ function RunnableEndpointInternal({
                                         onChange={setHeaders}
                                         types={types}
                                         readonly={readonly}
+                                        lang={lang}
                                     />
 
                                     {/* Path Parameters */}
@@ -265,6 +276,7 @@ function RunnableEndpointInternal({
                                         onChange={setPathParameters}
                                         types={types}
                                         readonly={readonly}
+                                        lang={lang}
                                     />
 
                                     {/* Query Parameters */}
@@ -277,6 +289,7 @@ function RunnableEndpointInternal({
                                         onChange={setQueryParameters}
                                         types={types}
                                         readonly={readonly}
+                                        lang={lang}
                                     />
 
                                     {/* Body Parameters */}
@@ -290,6 +303,7 @@ function RunnableEndpointInternal({
                                             onChange={setBodyJson}
                                             types={types}
                                             readonly={readonly}
+                                            lang={lang}
                                         />
                                     )}
                                 </div>
@@ -301,6 +315,7 @@ function RunnableEndpointInternal({
                             onClear={handleClearForm}
                             onSend={handleSendRequest}
                             isSending={response.type === "loading"}
+                            lang={lang}
                         />
                     </FernCollapse>
 
@@ -309,6 +324,7 @@ function RunnableEndpointInternal({
                         response={response}
                         isExpanded={responseExpanded}
                         onToggle={() => setResponseExpanded(!responseExpanded)}
+                        lang={lang}
                     />
                 </FernCard>
             </div>

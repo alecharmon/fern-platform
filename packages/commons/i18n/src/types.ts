@@ -13,9 +13,11 @@ export type Translations = {
         password: string;
         credentials: string;
         bearerToken: string;
+        basicAuth: string;
         bearerTokenGenerated: string;
         bearerTokenNoLongerValid: string;
         oauthClientCredentialsLogin: string;
+        oauthToken: string;
         generatedOAuthToken: string;
         userSuppliedBearerToken: string;
         provideTokenManually: string;
@@ -25,6 +27,7 @@ export type Translations = {
     buttons: {
         sendRequest: string;
         send: string;
+        sending: string;
         tryIt: string;
         connect: string;
         disconnect: string;
@@ -107,6 +110,9 @@ export type Translations = {
         status: string;
         notAuthenticated: string;
         authenticated: string;
+        time: string;
+        size: string;
+        failed: string;
     };
 
     playground: {
@@ -211,6 +217,7 @@ export type Translations = {
         noPortFoundInEnvLocal: string;
         objectExtendsNonObject: string;
         typeDefinitionContextNotFound: string;
+        error: string;
     };
 
     navigation: {

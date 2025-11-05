@@ -13,9 +13,11 @@
     "password": "Contraseña",
     "credentials": "Credenciales",
     "bearerToken": "Token de portador",
+    "basicAuth": "Autenticación básica",
     "bearerTokenGenerated": "Este token de portador fue generado desde una llamada OAuth API y, por lo tanto, no se puede editar",
     "bearerTokenNoLongerValid": "El token de portador ya no es válido. Por favor, actualízalo haciendo clic en el botón a continuación",
     "oauthClientCredentialsLogin": "Inicio de sesión OAuth con credenciales de cliente",
+    "oauthToken": "Token OAuth",
     "generatedOAuthToken": "Token OAuth generado",
     "userSuppliedBearerToken": "Token de portador proporcionado por el usuario",
     "provideTokenManually": "Proporcionar token manualmente",
@@ -24,6 +26,7 @@
   "buttons": {
     "sendRequest": "Enviar solicitud",
     "send": "Enviar",
+    "sending": "Enviando...",
     "tryIt": "Pruébalo",
     "connect": "Conectar",
     "disconnect": "Desconectar",
@@ -103,7 +106,10 @@
     "method": "Método",
     "status": "Estado",
     "notAuthenticated": "No autenticado",
-    "authenticated": "Autenticado"
+    "authenticated": "Autenticado",
+    "time": "Tiempo",
+    "size": "Tamaño",
+    "failed": "Fallido"
   },
   "playground": {
     "cannotSendToLocalhost": "No se pueden enviar solicitudes a localhost",
@@ -201,7 +207,8 @@
     "noEnumValuesFound": "No se encontraron valores enum",
     "noPortFoundInEnvLocal": "No se encontró puerto en la respuesta env-local",
     "objectExtendsNonObject": "El objeto extiende un no-objeto",
-    "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider no encontrado en el árbol"
+    "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider no encontrado en el árbol",
+    "error": "Error"
   },
   "navigation": {
     "upNext": "A continuación",

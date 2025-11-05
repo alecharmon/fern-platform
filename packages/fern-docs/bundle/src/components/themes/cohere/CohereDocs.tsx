@@ -120,6 +120,7 @@ export default function CohereDocs({
                     <HeaderTabsRoot
                         showSearchBar={showSearchBarInTabs}
                         className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
+                        lang={lang}
                     >
                         {tabs}
                     </HeaderTabsRoot>

@@ -15,7 +15,7 @@ export const WebhookResponseSection: React.FC<{ lang: string }> = ({ lang }) => 
                     fallback={t(lang).responses.return200Status}
                     size="sm"
                     className="mt-3 text-start"
-                    useNextMdx={false}
+                    engine="esbuild"
                 />
             </div>
         </div>

@@ -27,7 +27,7 @@ export async function MdxServerComponent({
         slug
     });
 
-    return <MdxContent mdx={parsed_mdx} fallback={mdx} useNextMdx={parsed_mdx?.engine === "next-remote"} />;
+    return <MdxContent mdx={parsed_mdx} fallback={mdx} engine={parsed_mdx?.engine} />;
 }
 
 export function MdxServerComponentProse({

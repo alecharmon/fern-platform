@@ -160,7 +160,7 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
                 tooltip:
                     property.description != null ? (
                         // todo: server-side render this
-                        <Markdown size="xs" mdx={property.description} useNextMdx={false} />
+                        <Markdown size="xs" mdx={property.description} engine="esbuild" />
                     ) : undefined
             })
         );

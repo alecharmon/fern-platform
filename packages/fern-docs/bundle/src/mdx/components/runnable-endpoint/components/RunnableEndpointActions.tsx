@@ -1,19 +1,21 @@
 import { FernButton } from "@fern-docs/components/FernButton";
+import { t } from "@fern-docs/i18n";
 import { RotateCcw, SendHorizonal } from "lucide-react";
 
 interface RunnableEndpointActionsProps {
     onClear: () => void;
     onSend: () => void;
     isSending: boolean;
+    lang: string;
 }
 
-export function RunnableEndpointActions({ onClear, onSend, isSending }: RunnableEndpointActionsProps) {
+export function RunnableEndpointActions({ onClear, onSend, isSending, lang }: RunnableEndpointActionsProps) {
     return (
         <div className="border-border-default bg-tag-default flex items-center justify-between border-b px-3 py-2">
             <FernButton onClick={onClear} variant="outlined" intent="none" className="group">
                 <span className="flex flex-row items-center">
                     <RotateCcw className="mr-2 size-4 transition-transform group-hover:rotate-180" />
-                    Clear
+                    {t(lang).buttons.clear}
                 </span>
             </FernButton>
 
@@ -25,7 +27,7 @@ export function RunnableEndpointActions({ onClear, onSend, isSending }: Runnable
                 className="group overflow-visible"
             >
                 <span className="flex flex-row items-center font-medium">
-                    {isSending ? "Sending..." : "Send Request"}
+                    {isSending ? "Sending..." : t(lang).buttons.sendRequest}
                     <SendHorizonal className="ml-2 mr-0.5 size-4 transition-transform group-hover:translate-x-0.5" />
                 </span>
             </FernButton>

@@ -1109,6 +1109,11 @@ export type DocsLoaderOptions = {
     returnRawMarkdown?: boolean;
 };
 
+export type CachedDocsLoader = DocsLoader & {
+    clearKvCache: () => Promise<void>;
+    isAskAiEnabledForDocs: () => Promise<boolean>;
+};
+
 /**
  * The "use cache" tags help us speed up rendering specific parts of the page that are static.
  * It has a hard-limit of 2MB which is why we cannot use it to cache the entire response.
@@ -1120,12 +1125,7 @@ export const createCachedDocsLoader = async (
     domainKey: string,
     fern_token?: string,
     options?: DocsLoaderOptions
-): Promise<
-    DocsLoader & {
-        clearKvCache: () => Promise<void>;
-        isAskAiEnabledForDocs: () => Promise<boolean>;
-    }
-> => {
+): Promise<CachedDocsLoader> => {
     assertDocsDomain(domainKey);
 
     const config = { ...DEFAULT_CACHE_CONFIG, ...options?.cacheConfig };

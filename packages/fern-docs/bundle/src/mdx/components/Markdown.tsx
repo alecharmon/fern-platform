@@ -22,11 +22,11 @@ export declare namespace Markdown {
          * Fallback content to render if the MDX is empty
          */
         fallback?: ReactNode;
-        useNextMdx?: boolean;
+        engine?: "esbuild" | "next-remote" | "plaintext";
     }
 }
 
-export const Markdown = memo<Markdown.Props>(({ title, mdx, className, size, fallback, useNextMdx }) => {
+export const Markdown = memo<Markdown.Props>(({ title, mdx, className, size, fallback, engine }) => {
     // If the MDX is empty, return null
     if (!fallback && (mdx == null || (typeof mdx === "string" && mdx.trimStart().length === 0))) {
         return null;
@@ -35,7 +35,7 @@ export const Markdown = memo<Markdown.Props>(({ title, mdx, className, size, fal
     return (
         <Prose className={className} size={size} pre={typeof mdx === "string"}>
             {title}
-            <MdxContent mdx={mdx} fallback={fallback} useNextMdx={useNextMdx} />
+            <MdxContent mdx={mdx} fallback={fallback} engine={engine} />
         </Prose>
     );
 });

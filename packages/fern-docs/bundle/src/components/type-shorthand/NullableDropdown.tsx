@@ -10,9 +10,10 @@ import { usePlaygroundTypeReferenceFormContext } from "../playground/form/Playgr
 interface NullableDropdownProps {
     options: string[];
     onChange: (value: unknown) => void;
+    lang: string;
 }
 
-export function NullableDropdown({ options, onChange }: NullableDropdownProps) {
+export function NullableDropdown({ options, onChange, lang }: NullableDropdownProps) {
     const [selectedOption, setSelectedOption] = useState(options[0] || "");
     const { setIsNullSelected } = usePlaygroundTypeReferenceFormContext();
 
@@ -34,6 +35,7 @@ export function NullableDropdown({ options, onChange }: NullableDropdownProps) {
             value={selectedOption}
             onValueChange={handleValueChange}
             triggerAsChild={false}
+            lang={lang}
         >
             <div className="flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 transition-colors hover:bg-gray-100">
                 <span>

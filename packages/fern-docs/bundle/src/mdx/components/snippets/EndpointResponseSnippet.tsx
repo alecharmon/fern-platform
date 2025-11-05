@@ -1,7 +1,7 @@
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
-
+import { t } from "@fern-docs/i18n";
 import { useExampleSelection } from "@/components/api-reference/endpoints/useExampleSelection";
 import { CodeSnippetExample } from "@/components/api-reference/examples/CodeSnippetExample";
 
@@ -9,7 +9,8 @@ export function EndpointResponseSnippet({
     example,
     endpointDefinition,
     slug,
-    className
+    className,
+    lang
 }: {
     /**
      * The endpoint locator to use for the request snippet.
@@ -28,6 +29,7 @@ export function EndpointResponseSnippet({
      */
     slug: string;
     className?: string;
+    lang?: string;
 }) {
     if (endpointDefinition == null) {
         return null;
@@ -39,6 +41,7 @@ export function EndpointResponseSnippet({
             example={example}
             slug={slug}
             className={className}
+            lang={lang ?? "en"}
         />
     );
 }
@@ -47,12 +50,14 @@ function EndpointResponseSnippetInternal({
     endpoint,
     example,
     slug,
-    className
+    className,
+    lang
 }: {
     slug: string;
     endpoint: EndpointDefinition;
     example: string | undefined;
     className?: string;
+    lang: string;
 }) {
     const { selectedExample } = useExampleSelection(endpoint, example);
 
@@ -67,7 +72,7 @@ function EndpointResponseSnippetInternal({
     return (
         <div className={cn("mb-5 mt-3", className)}>
             <CodeSnippetExample
-                title="Response"
+                title={t(lang).apiReference.response}
                 // actions={undefined}
                 code={responseJsonString}
                 language="json"
@@ -75,6 +80,7 @@ function EndpointResponseSnippetInternal({
                 scrollAreaStyle={{ maxHeight: "500px" }}
                 slug={slug}
                 isResponse
+                lang={lang}
             />
         </div>
     );

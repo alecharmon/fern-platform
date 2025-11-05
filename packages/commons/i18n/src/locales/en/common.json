@@ -13,9 +13,11 @@
     "password": "Password",
     "credentials": "Credentials",
     "bearerToken": "Bearer token",
+    "basicAuth": "Basic Auth",
     "bearerTokenGenerated": "This bearer token was generated from an OAuth API call, and as a result cannot be edited",
     "bearerTokenNoLongerValid": "The bearer token is no longer valid. Please refresh it by clicking the button below",
     "oauthClientCredentialsLogin": "OAuth Client Credentials Login",
+    "oauthToken": "OAuth Token",
     "generatedOAuthToken": "Generated OAuth Token",
     "userSuppliedBearerToken": "User Supplied Bearer Token",
     "provideTokenManually": "Provide token manually",
@@ -24,6 +26,7 @@
   "buttons": {
     "sendRequest": "Send Request",
     "send": "Send",
+    "sending": "Sending...",
     "tryIt": "Try it",
     "connect": "Connect",
     "disconnect": "Disconnect",
@@ -103,7 +106,10 @@
     "method": "Method",
     "status": "Status",
     "notAuthenticated": "Not Authenticated",
-    "authenticated": "Authenticated"
+    "authenticated": "Authenticated",
+    "time": "Time",
+    "size": "Size",
+    "failed": "Failed"
   },
   "playground": {
     "cannotSendToLocalhost": "Cannot send requests to localhost",
@@ -201,7 +207,8 @@
     "noEnumValuesFound": "No enum values found",
     "noPortFoundInEnvLocal": "No port found in env-local response",
     "objectExtendsNonObject": "Object extends non-object",
-    "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider not found in tree"
+    "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider not found in tree",
+    "error": "Error"
   },
   "navigation": {
     "upNext": "Up next",

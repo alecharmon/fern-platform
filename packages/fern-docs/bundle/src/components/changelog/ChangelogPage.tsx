@@ -145,7 +145,7 @@ export async function ChangelogPageOverview({
                         : undefined
                 }
             />
-            <Markdown mdx={mdx} fallback={page?.markdown} useNextMdx={mdx?.engine === "next-remote"} />
+            <Markdown mdx={mdx} fallback={page?.markdown} engine={mdx?.engine} />
         </>
     );
 }
@@ -173,12 +173,12 @@ export async function ChangelogPageEntry({
     return (
         <Markdown
             mdx={mdx}
-            useNextMdx={mdx?.engine === "next-remote"}
+            engine={mdx?.engine}
             title={
                 title != null ? (
                     <h2>
                         <FernLink href={slugToHref(node.slug)} className="not-prose" scroll={true}>
-                            <MdxContent mdx={title} useNextMdx={mdx?.engine === "next-remote"} />
+                            <MdxContent mdx={title} engine={title?.engine} />
                         </FernLink>
                     </h2>
                 ) : undefined

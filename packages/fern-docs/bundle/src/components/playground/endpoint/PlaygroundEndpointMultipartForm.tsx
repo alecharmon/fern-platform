@@ -259,7 +259,7 @@ export function PlaygroundEndpointMultipartForm({
                                     tooltip:
                                         field.description != null ? (
                                             // todo: server-side render this
-                                            <Markdown size="xs" mdx={field.description} useNextMdx={false} />
+                                            <Markdown size="xs" mdx={field.description} engine="esbuild" />
                                         ) : undefined
                                 })
                             ),

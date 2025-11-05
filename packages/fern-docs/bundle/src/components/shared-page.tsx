@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { CachedDocsLoader } from "@fern-api/docs-loader";
 import { withPrunedNavigationLoader } from "@fern-api/docs-server/withPrunedNavigation";
 import {
     addLeadingSlash,
@@ -24,7 +24,7 @@ import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 
 import { DocsMainContent } from "../app/[host]/[domain]/main";
 
-export default async function SharedPage({ loader, slug }: { loader: DocsLoader; slug: Slug }) {
+export default async function SharedPage({ loader, slug }: { loader: CachedDocsLoader; slug: Slug }) {
     if (slug.endsWith(".js")) {
         console.debug(`[SharedPage] returning early not found for ${slug}`);
         return notFound();
@@ -291,7 +291,7 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
                 sidebarRootNodeId={found.sidebar?.id}
                 tabId={found.currentTab?.id}
                 productId={found.currentProduct?.productId}
-                productSlug={found.currentProduct?.slug}
+                productSlug={found.currentProduct?.type === "product" ? found.currentProduct.slug : undefined}
                 versionId={found.currentVersion?.versionId}
                 versionSlug={found.currentVersion?.slug}
                 variantId={found.currentVariant?.variantId}
@@ -306,7 +306,6 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
                 parents={found.parents}
                 neighbors={neighbors}
                 breadcrumb={found.breadcrumb}
-                globalLayout={config.layout}
                 lang={lang}
             />
         </FeedbackPopoverProvider>
@@ -314,7 +313,7 @@ export default async function SharedPage({ loader, slug }: { loader: DocsLoader;
 }
 
 async function getNeighbor(
-    loader: DocsLoader,
+    loader: CachedDocsLoader,
     node: FernNavigation.NavigationNodeNeighbor | undefined
 ): Promise<
     | {
@@ -366,7 +365,7 @@ async function getNeighbor(
 }
 
 async function getNeighbors(
-    loader: DocsLoader,
+    loader: CachedDocsLoader,
     neighbors: {
         prev: FernNavigation.NavigationNodeNeighbor | undefined;
         next: FernNavigation.NavigationNodeNeighbor | undefined;

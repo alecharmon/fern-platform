@@ -86,7 +86,7 @@ export const DesktopCommandContent = memo(
                         inputRef.current?.focus();
                     }}
                 >
-                    <DesktopCommandBadges />
+                    <DesktopCommandBadges lang={lang} />
 
                     <div data-cmdk-fern-header="">
                         <beforeInput.Out />

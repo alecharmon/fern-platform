@@ -5,6 +5,7 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { EndpointUrlWithOverflow } from "@/components/api-reference/endpoints/EndpointUrlWithOverflow";
 
@@ -19,6 +20,7 @@ interface RunnableEndpointHeaderProps {
     selectedExampleIndex: number;
     onExampleChange: (value: string) => void;
     endpointSlug?: string;
+    lang: string;
 }
 
 export function RunnableEndpointHeader({
@@ -31,7 +33,8 @@ export function RunnableEndpointHeader({
     exampleOptions,
     selectedExampleIndex,
     onExampleChange,
-    endpointSlug
+    endpointSlug,
+    lang
 }: RunnableEndpointHeaderProps) {
     return (
         <div className="border-border-default flex w-full items-center justify-between border-b bg-tag-default px-3 py-2">
@@ -57,6 +60,7 @@ export function RunnableEndpointHeader({
                         options={endpoint.environments}
                         showEnvironment={true}
                         hideCopyButton={false}
+                        lang={lang}
                     />
                 </div>
             </div>
@@ -66,6 +70,7 @@ export function RunnableEndpointHeader({
                         value={String(selectedExampleIndex)}
                         options={exampleOptions}
                         onValueChange={onExampleChange}
+                        lang={lang}
                     >
                         <FernButton
                             text={
@@ -80,7 +85,7 @@ export function RunnableEndpointHeader({
                     </FernDropdown>
                 )}
                 {endpointSlug && (
-                    <FernTooltip content="Open in API reference">
+                    <FernTooltip content={t(lang).apiReference.openInApiReference}>
                         <FernLinkButton
                             className="-m-1"
                             rounded

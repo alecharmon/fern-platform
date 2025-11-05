@@ -57,16 +57,20 @@ export const NextMdxRemoteComponent = React.memo<{
 export const MdxAside = React.memo<{
     code: string;
     jsxElements: string[];
-    useNextMdx?: boolean;
+    engine?: "esbuild" | "next-remote" | "plaintext";
 }>(
-    function MdxAside({ code, jsxElements, useNextMdx }) {
+    function MdxAside({ code, jsxElements, engine }) {
+        // plaintext content doesn't have aside sections
+        if (engine === "plaintext") {
+            return null;
+        }
         const { Aside } = getMDXExport(code, globals) ?? {};
         if (Aside == null) {
             return null;
         }
         return (
             <ErrorBoundary>
-                {useNextMdx ? (
+                {engine === "next-remote" ? (
                     <NextMdxRemoteComponent code={code} scope={{}} jsxElements={jsxElements} />
                 ) : (
                     <MDXProvider components={createMdxComponents(jsxElements)}>

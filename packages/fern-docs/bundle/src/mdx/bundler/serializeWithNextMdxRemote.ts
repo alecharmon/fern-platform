@@ -78,14 +78,14 @@ function withDefaultMdxOptions(
         [rehypeSlug, { additionalJsxElements: ["Step", "Accordion", "Tab", "ParamField"] }],
         [rehypeLinks, { replaceHref }],
         ...(collectStyles
-            ? [
+            ? ([
                   [
                       rehypeExtractStyles,
                       {
                           collect: collectStyles
                       }
-                  ] as const
-              ]
+                  ]
+              ] as PluggableList)
             : []),
         rehypeAccordionNestedHeaders,
         [

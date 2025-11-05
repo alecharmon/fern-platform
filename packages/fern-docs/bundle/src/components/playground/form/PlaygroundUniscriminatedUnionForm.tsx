@@ -58,7 +58,7 @@ export const PlaygroundUniscriminatedUnionForm = memo<PlaygroundUniscriminatedUn
                     tooltip:
                         variant.description != null ? (
                             // todo: server-side render this
-                            <Markdown size="xs" mdx={variant.description} useNextMdx={false} />
+                            <Markdown size="xs" mdx={variant.description} engine="esbuild" />
                         ) : undefined
                 };
             }),
