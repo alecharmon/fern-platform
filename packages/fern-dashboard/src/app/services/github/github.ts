@@ -37,20 +37,24 @@ export async function handleCreatePr({
         if (response.success) {
             try {
                 // No need to await this, we just want to try to generate a PR description.
-                void handleGeneratePrDescription({
+                void DashboardApiClient.generatePrDescription({
                     orgName,
-                    branch,
                     owner,
                     site,
                     repo,
+                    branch,
                     baseBranch
-                }).then((result) => {
-                    if (result.success && onAiGenerationComplete) {
-                        onAiGenerationComplete();
-                    }
-                });
+                })
+                    .then((result) => {
+                        if (result.success && onAiGenerationComplete) {
+                            onAiGenerationComplete();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error generating PR description:", error);
+                    });
             } catch (error) {
-                // Silently fail if we can't generate a PR description.
+                //Log error if we can't generate a PR description.
                 console.error("Error generating PR description:", error);
             }
             return response.prUrl;
@@ -61,35 +65,6 @@ export async function handleCreatePr({
         console.error("Error creating PR:", error);
     }
     return undefined;
-}
-
-export async function handleGeneratePrDescription({
-    orgName,
-    branch,
-    owner,
-    site,
-    repo,
-    baseBranch
-}: {
-    orgName: Auth0OrgName;
-    branch: string;
-    owner: string;
-    site: string;
-    repo: string;
-    baseBranch: string;
-}): Promise<{
-    success: boolean;
-    error?: string;
-    newTitle?: string;
-}> {
-    return await DashboardApiClient.generatePrDescription({
-        orgName,
-        owner,
-        site,
-        repo,
-        branch,
-        baseBranch
-    });
 }
 
 export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {

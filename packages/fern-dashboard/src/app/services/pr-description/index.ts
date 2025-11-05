@@ -271,7 +271,7 @@ Format your response as:
 [DESCRIPTION]`;
 
             const response = await anthropic.messages.create({
-                model: "claude-3-5-sonnet-20241022",
+                model: "claude-sonnet-4-20250514",
                 max_tokens: 1000,
                 temperature: 0.3,
                 messages: [
@@ -348,7 +348,7 @@ Please generate a new, concise title (max 100 characters) that accurately descri
 Return only the title, nothing else.`;
 
             const response = await anthropic.messages.create({
-                model: "claude-3-5-sonnet-20241022",
+                model: "claude-sonnet-4-20250514",
                 max_tokens: 150,
                 temperature: 0.3,
                 messages: [

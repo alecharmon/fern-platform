@@ -79,18 +79,18 @@ export function GitPRProvider({
             if (data.success) {
                 const { status, draft, merged, title, prUrl, prNumber: newPrNumber } = data;
 
-                if (newPrNumber && newPrNumber !== prNumber) {
+                if (newPrNumber != null) {
                     setPrNumber(newPrNumber);
                 }
 
-                // Update the PR title if it has changed
-                if (title && title !== prTitle) {
+                // Always update the PR title from the server
+                if (title != null) {
                     setPrTitle(title);
                 }
 
-                // Update the PR URL if it has changed
-                if (prUrl && prUrl !== gitPrUrl) {
-                    setPrUrl(prUrl);
+                // Always update the PR URL from the server
+                if (prUrl != null) {
+                    setGitPrUrl(prUrl);
                 }
 
                 if (merged) {
@@ -115,7 +115,7 @@ export function GitPRProvider({
         } finally {
             setIsLoading(false);
         }
-    }, [owner, repo, site, branch, baseBranch, prNumber, prTitle, gitPrUrl, orgName]);
+    }, [owner, repo, site, branch, baseBranch, orgName]);
 
     // Fetch PR information when component mounts or dependencies change
     useEffect(() => {

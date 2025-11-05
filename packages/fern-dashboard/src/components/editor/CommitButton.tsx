@@ -27,11 +27,10 @@ import {
 } from "./EditorToasts";
 
 export interface CommitButtonProps {
-    onFirstCommit?: () => void;
     onShowCelebrationModal?: (show: boolean) => void;
 }
 
-export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitButtonProps = {}) {
+export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {}) {
     const orgName = useOrgName();
     const { branch } = useBranch();
     const { owner, repo, baseBranch } = useGitHubRepo();
@@ -123,7 +122,6 @@ export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitBu
                 if (!hasCommittedRef.current) {
                     hasCommittedRef.current = true;
                     onShowCelebrationModal?.(true);
-                    onFirstCommit?.();
                 }
             } else {
                 ErrorCommitToast(response.error);
@@ -173,8 +171,7 @@ export function CommitButton({ onFirstCommit, onShowCelebrationModal }: CommitBu
         handleCommitSuccess,
         commitMutation,
         createBranchMutation,
-        onShowCelebrationModal,
-        onFirstCommit
+        onShowCelebrationModal
     ]);
 
     const commitDisabledReason = useMemo(() => {

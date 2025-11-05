@@ -24,7 +24,7 @@ import { PRTitleEditor } from "./PRTitleEditor";
 
 export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData; docsUrl: DocsUrl }) {
     const { name, picture } = session.user;
-    const { gitPrUrl, setPrUrl, setPrStatus } = useGitPrInfo();
+    const { gitPrUrl, setPrUrl } = useGitPrInfo();
     const { branch } = useBranch();
     const isEditingDisabled = useEditingDisabled();
     const { owner, repo, baseBranch } = useGitHubRepo();
@@ -47,11 +47,6 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
             setShowRocketButton(true);
         }
     }, [gitPrUrl, showRocketButton]);
-
-    const handleFirstCommit = useCallback(() => {
-        // This will be called when the modal from CommitButton is closed
-        // We don't show the rocket button immediately - it will appear after modal closes
-    }, []);
 
     const handleCelebrationModalChange = useCallback(
         (open: boolean) => {
@@ -113,7 +108,6 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
                     </DashboardTooltip>
                     <FilesDropdown />
                     <CommitButton
-                        onFirstCommit={handleFirstCommit}
                         onShowCelebrationModal={(show) => {
                             setShowCelebrationModal(show);
                         }}
