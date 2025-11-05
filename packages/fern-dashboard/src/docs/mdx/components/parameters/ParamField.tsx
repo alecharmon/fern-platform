@@ -89,7 +89,7 @@ export const ParamField: React.FC<
             attributes={{
                 [paramType]: new TextInputControl({ defaultValue: name }),
                 type: new TextInputControl({ defaultValue: type }),
-                default: new TextInputControl({ defaultValue: defaultProp || "" }),
+                default: new TextInputControl({ defaultValue: defaultProp || "", label: "Default value" }),
                 required: new CheckboxControl({
                     defaultValue: required || false,
                     label: "Required"

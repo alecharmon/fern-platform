@@ -137,7 +137,7 @@ export const Card: React.FC<Card.Props> = ({
                 icon: new TextInputControl({
                     defaultValue: typeof icon === "string" ? icon : ""
                 }),
-                href: new TextInputControl({ defaultValue: href || "" }),
+                href: new TextInputControl({ defaultValue: href || "", label: "Link" }),
                 badge: new TextInputControl({ defaultValue: badge || "" })
             }}
             targetRef={popoverRef}

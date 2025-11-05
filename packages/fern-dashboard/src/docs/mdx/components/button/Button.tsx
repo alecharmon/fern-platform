@@ -97,7 +97,7 @@ export function Button({
         return (
             <EditorComponentPopoverProvider
                 attributes={{
-                    href: new TextInputControl({ defaultValue: href }),
+                    href: new TextInputControl({ defaultValue: href, label: "Link" }),
                     intent: new SelectControl({
                         options: ["none", "primary", "success", "warning", "danger"],
                         defaultValue: intent

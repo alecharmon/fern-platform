@@ -32,11 +32,13 @@ export class TextInputControl extends Control {
     readonly type = "text" as const;
     readonly placeholder?: string;
     readonly defaultValue?: string;
+    readonly label?: string;
 
-    constructor(params?: { placeholder?: string; defaultValue?: string }) {
+    constructor(params?: { placeholder?: string; defaultValue?: string; label?: string }) {
         super();
         this.placeholder = params?.placeholder;
         this.defaultValue = params?.defaultValue;
+        this.label = params?.label;
     }
 
     getDefaultValue(): AttributeValue {
@@ -54,18 +56,21 @@ export class IntegerInputControl extends Control {
     readonly defaultValue?: number;
     readonly min?: number;
     readonly max?: number;
+    readonly label?: string;
 
     constructor(params?: {
         placeholder?: string;
         defaultValue?: number;
         min?: number;
         max?: number;
+        label?: string;
     }) {
         super();
         this.placeholder = params?.placeholder;
         this.defaultValue = params?.defaultValue;
         this.min = params?.min;
         this.max = params?.max;
+        this.label = params?.label;
     }
 
     getDefaultValue(): AttributeValue {
@@ -81,11 +86,13 @@ export class CheckboxControl extends Control {
     readonly type = "checkbox" as const;
     readonly defaultValue?: boolean;
     readonly label?: string;
+    readonly tooltip?: string;
 
-    constructor(params?: { defaultValue?: boolean; label?: string }) {
+    constructor(params?: { defaultValue?: boolean; label?: string; tooltip?: string }) {
         super();
         this.defaultValue = params?.defaultValue;
         this.label = params?.label;
+        this.tooltip = params?.tooltip;
     }
 
     getDefaultValue(): AttributeValue {

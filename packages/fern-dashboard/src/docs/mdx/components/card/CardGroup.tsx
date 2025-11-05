@@ -68,7 +68,8 @@ function CardGroupContent({
                     cols: new IntegerInputControl({
                         defaultValue: explicitCols,
                         min: 1,
-                        max: 6
+                        max: 6,
+                        label: "Columns"
                     })
                 }}
                 targetRef={cardGroupRef}

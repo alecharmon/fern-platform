@@ -50,7 +50,8 @@ export function Embed({ src, type, ...props }: Embed.Props) {
                 attributes={{
                     src: new TextInputControl({
                         placeholder: "Enter embed URL",
-                        defaultValue: src
+                        defaultValue: src,
+                        label: "Source"
                     }),
                     type: new TextInputControl({
                         placeholder: "MIME type (optional)",

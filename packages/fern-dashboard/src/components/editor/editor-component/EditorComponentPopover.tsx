@@ -1,7 +1,7 @@
 "use client";
 
 import * as Popover from "@radix-ui/react-popover";
-import { Trash2, TriangleAlert } from "lucide-react";
+import { Info, Trash2, TriangleAlert } from "lucide-react";
 import type React from "react";
 import { createContext, type ReactNode, type RefObject, useContext, useEffect, useState } from "react";
 
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/utils/utils";
+import { DashboardTooltip } from "../DashboardTooltip";
 
 import type { AttributeValue } from "../editor-mdx-renderer/types";
 import {
@@ -203,9 +204,10 @@ function TextInputControlComponent({
     if (value.type !== "string") {
         return <UnsupportedValue name={name} />;
     }
+    const displayLabel = control.label || name.replace(/([A-Z])/g, " $1").trim();
     return (
         <div className="space-y-1.5">
-            <label className="fern-control-label text-sm">{name.replace(/([A-Z])/g, " $1").trim()}</label>
+            <label className="fern-control-label text-sm">{displayLabel}</label>
             <Input
                 type="text"
                 value={value.value}
@@ -283,9 +285,10 @@ function IntegerInputControlComponent({
         }
     };
 
+    const displayLabel = control.label || name.replace(/([A-Z])/g, " $1").trim();
     return (
         <div className="space-y-1.5">
-            <label className="fern-control-label text-sm">{name.replace(/([A-Z])/g, " $1").trim()}</label>
+            <label className="fern-control-label text-sm">{displayLabel}</label>
             <Input
                 type="number"
                 value={displayValue}
@@ -330,12 +333,21 @@ function CheckboxControlComponent({
         <div className="flex items-center gap-2 py-2">
             <Switch id={name} checked={currentValue} onCheckedChange={handleChange} />
             {control.label && (
-                <label
-                    htmlFor={name}
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                    {control.label}
-                </label>
+                <div className="flex items-center gap-1.5">
+                    <label
+                        htmlFor={name}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                        {control.label}
+                    </label>
+                    {control.tooltip && (
+                        <DashboardTooltip content={control.tooltip}>
+                            <button type="button" className="text-muted-foreground hover:text-foreground">
+                                <Info className="h-3.5 w-3.5" />
+                            </button>
+                        </DashboardTooltip>
+                    )}
+                </div>
             )}
         </div>
     );

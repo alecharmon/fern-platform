@@ -122,11 +122,13 @@ export const Image = forwardRef<
                 attributes={{
                     src: new TextInputControl({
                         placeholder: "Enter image URL",
-                        defaultValue: src
+                        defaultValue: src,
+                        label: "Source URL"
                     }),
                     alt: new TextInputControl({
                         placeholder: "Enter alt text for accessibility",
-                        defaultValue: alt
+                        defaultValue: alt,
+                        label: "Alt text"
                     }),
                     title: new TextInputControl({
                         placeholder: "Enter title (tooltip text)",
@@ -134,7 +136,8 @@ export const Image = forwardRef<
                     }),
                     noZoom: new CheckboxControl({
                         label: "Disable zoom",
-                        defaultValue: isImageZoomDisabledProp
+                        defaultValue: isImageZoomDisabledProp,
+                        tooltip: "Disables image zoom functionality"
                     })
                 }}
                 targetRef={imageRef}
