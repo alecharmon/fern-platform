@@ -72,6 +72,7 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
                         error={error}
                         disabled={connected}
                         authForm={authForm}
+                        lang={lang}
                     />
 
                     {context.channel.messages

@@ -216,6 +216,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         }
                         types={context.types}
                         apiDefinitionId={context.node.apiDefinitionId}
+                        lang={lang}
                     />
                 </div>
                 <div className="flex min-h-0 flex-1 shrink">

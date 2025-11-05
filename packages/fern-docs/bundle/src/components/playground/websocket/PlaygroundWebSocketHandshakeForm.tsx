@@ -16,6 +16,7 @@ interface PlaygroundWebSocketHandshakeFormProps {
     error: string | null;
     disabled: boolean;
     authForm: React.ReactNode;
+    lang: string;
 }
 
 export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFormProps> = ({
@@ -23,7 +24,8 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
     formState,
     setFormState,
     error,
-    authForm
+    authForm,
+    lang
 }) => {
     const setHeaders = useCallback(
         (value: ((old: unknown) => unknown) | unknown) => {
@@ -93,6 +95,7 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
                                 onChange={setHeaders}
                                 value={formState?.headers}
                                 types={types}
+                                lang={lang}
                             />
                         </FernCard>
                     </div>
@@ -111,6 +114,7 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
                                 onChange={setPathParameters}
                                 value={formState?.pathParameters}
                                 types={types}
+                                lang={lang}
                             />
                         </FernCard>
                     </div>
@@ -129,6 +133,7 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
                                 onChange={setQueryParameters}
                                 value={formState?.queryParameters}
                                 types={types}
+                                lang={lang}
                             />
                         </FernCard>
                     </div>
