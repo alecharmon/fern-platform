@@ -325,28 +325,28 @@ function FernDropdownItemValue({
 
     function renderButtonContent() {
         return (
-            <div className="w-full">
-                <div className="flex items-center gap-2">
-                    {option.icon}
+            <div className="flex w-full items-start gap-2">
+                <span className="mt-1">{option.icon}</span>
 
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <div className={option.labelClassName}>{option.label ?? option.value}</div>
-                    <span className="ml-auto space-x-1">
-                        {option.rightElement && <span>{option.rightElement}</span>}
-                        {(isEllipsisActive || (option.tooltip != null && option.tooltip !== "")) && (
-                            <Info className="size-icon" />
-                        )}
-                    </span>
-
-                    <DropdownMenu.ItemIndicator asChild>
-                        <Check />
-                    </DropdownMenu.ItemIndicator>
+                    {option.helperText != null && (
+                        <div className="text-start text-xs leading-snug opacity-60" ref={helperTextRef}>
+                            {option.helperText}
+                        </div>
+                    )}
                 </div>
 
-                {option.helperText != null && (
-                    <div className="mt-0.5 text-start text-xs leading-snug opacity-60" ref={helperTextRef}>
-                        {option.helperText}
-                    </div>
-                )}
+                <span className="ml-auto space-x-1">
+                    {option.rightElement && <span>{option.rightElement}</span>}
+                    {(isEllipsisActive || (option.tooltip != null && option.tooltip !== "")) && (
+                        <Info className="size-icon" />
+                    )}
+                </span>
+
+                <DropdownMenu.ItemIndicator asChild>
+                    <Check />
+                </DropdownMenu.ItemIndicator>
             </div>
         );
     }
