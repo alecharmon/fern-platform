@@ -179,7 +179,7 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
 
     return (
         <div className="flex items-center justify-end gap-2">
-            {isReindexing && <p className="mr-1 w-20 text-sm">{getReindexingText()}</p>}
+            {isReindexing && <p className="mr-1 w-24 text-sm whitespace-nowrap">{getReindexingText()}</p>}
             {isEnabled && !isReindexing && (
                 <Button
                     variant="outline"
