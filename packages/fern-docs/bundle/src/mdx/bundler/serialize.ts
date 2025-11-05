@@ -60,6 +60,7 @@ import { rehypeSteps } from "../plugins/rehype-steps";
 import { rehypeTable } from "../plugins/rehype-table";
 import { rehypeTabs } from "../plugins/rehype-tabs";
 import { remarkExtractTitle } from "../plugins/remark-extract-title";
+import { trackCustomComponents } from "./track-custom-components";
 
 // gracefulify fs to avoid EMFILE errors on Vercel
 gracefulify(fs);
@@ -86,15 +87,19 @@ async function serializeMdxImpl(
         filename,
         scope,
         toc = false,
-        replaceHref
+        replaceHref,
+        org,
+        domain
     }: {
         loader?: Partial<Pick<DocsLoader, "getFiles" | "getMdxBundlerFiles">>;
         scope?: Record<string, unknown>;
         filename?: string;
         toc?: boolean;
         replaceHref?: RehypeLinksOptions["replaceHref"];
+        org?: string;
+        domain?: string;
     } = {},
-    domain: string
+    domainFallback: string
 ): Promise<SerializeMdxResponse> {
     content = sanitizeBreaks(content);
     content = sanitizeMdxExpression(content)[0];
@@ -126,6 +131,12 @@ async function serializeMdxImpl(
 
     remoteFiles = (await loader?.getFiles?.()) ?? {};
     files = (await loader?.getMdxBundlerFiles?.()) ?? {};
+
+    // Track usage of custom components (throttled to once per 10 minutes per org-domain)
+    if (Object.keys(files).length > 0 && org != null && domain != null) {
+        trackCustomComponents(org, domain, files);
+    }
+
     files = mapKeys(files ?? {}, (_file, filename) => {
         if (cwd != null) {
             return path.relative(cwd, filename);
@@ -296,10 +307,11 @@ async function serializeMdxImpl(
 
     if (bundled.errors.length > 0) {
         bundled.errors.forEach((error) => {
-            if (!isPreviewDomain(domain) && !isDevelopment(domain)) {
+            const domainForLogging = domain ?? domainFallback;
+            if (!isPreviewDomain(domainForLogging) && !isDevelopment(domainForLogging)) {
                 postToSlack(
                     "#docs-notifs",
-                    `:rotating_light: Error serializing mdx for ${domain}${path ? "/" + path : ""} with ${String(error)}`,
+                    `:rotating_light: Error serializing mdx for ${domainForLogging}${path ? "/" + path : ""} with ${String(error)}`,
                     "mdx-serializer",
                     { message: processedContent, mrkdwn: true }
                 );

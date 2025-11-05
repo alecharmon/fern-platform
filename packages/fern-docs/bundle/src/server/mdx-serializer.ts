@@ -86,7 +86,7 @@ export function createCachedMdxSerializer(
                 console.log(
                     `[serializeMdx] inside cache function for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${cacheStartTime - startTime}ms`
                 );
-                const authState = await loader.getAuthState();
+                const [authState, metadata] = await Promise.all([loader.getAuthState(), loader.getMetadata()]);
 
                 try {
                     if (useNextMdx && !content.includes("twoslash")) {
@@ -131,7 +131,9 @@ export function createCachedMdxSerializer(
                                         user: authState.authed ? authState.user : undefined,
                                         ...scope
                                     },
-                                    replaceHref
+                                    replaceHref,
+                                    org: metadata.org,
+                                    domain: metadata.domain
                                 });
                                 const fallbackEndTime = Date.now();
                                 console.log(
@@ -158,7 +160,9 @@ export function createCachedMdxSerializer(
                                 user: authState.authed ? authState.user : undefined,
                                 ...scope
                             },
-                            replaceHref
+                            replaceHref,
+                            org: metadata.org,
+                            domain: metadata.domain
                         });
                         const regularEndTime = Date.now();
                         console.log(
