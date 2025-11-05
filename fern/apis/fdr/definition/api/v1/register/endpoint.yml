@@ -44,6 +44,9 @@ types:
       errorsV2: optional<list<ErrorDeclarationV2>>
       examples: list<ExampleEndpointCall>
       protocol: optional<commons.Protocol>
+      includeInApiExplorer:
+        type: optional<boolean>
+        docs: Whether this endpoint should be included in the API explorer. Defaults to true.
 
   EndpointPath:
     properties:

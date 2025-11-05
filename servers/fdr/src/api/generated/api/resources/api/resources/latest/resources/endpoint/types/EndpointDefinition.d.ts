@@ -21,4 +21,6 @@ export interface EndpointDefinition extends FernRegistry.api.latest.WithDescript
     examples: FernRegistry.api.latest.ExampleEndpointCall[] | undefined;
     snippetTemplates: FernRegistry.api.latest.EndpointSnippetTemplates | undefined;
     protocol: FernRegistry.api.latest.Protocol | undefined;
+    /** Whether this endpoint should be included in the API explorer. Defaults to true. */
+    includeInApiExplorer: boolean | undefined;
 }

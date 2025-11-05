@@ -392,7 +392,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tools._raw_data": {
         "id": "endpoint_tools._raw_data",
@@ -572,7 +573,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

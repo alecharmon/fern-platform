@@ -262,7 +262,8 @@ function transformEndpoint({
             endpointMethod: writeShape.method,
             endpointId: writeShape.originalEndpointId
         }),
-        protocol: writeShape.protocol
+        protocol: writeShape.protocol,
+        includeInApiExplorer: writeShape.includeInApiExplorer
     };
 }
 

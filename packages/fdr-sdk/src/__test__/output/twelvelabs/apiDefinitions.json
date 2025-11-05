@@ -956,7 +956,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_tasks.create": {
         "id": "endpoint_tasks.create",
@@ -1660,7 +1661,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_tasks.retrieve": {
         "id": "endpoint_tasks.retrieve",
@@ -1983,7 +1985,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_tasks.delete": {
         "id": "endpoint_tasks.delete",
@@ -2264,7 +2267,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_tasks.status": {
         "id": "endpoint_tasks.status",
@@ -2564,7 +2568,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_tasks.transfers": {
         "id": "endpoint_tasks.transfers",
@@ -2717,7 +2722,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_uploadVideos.cloud-to-cloud-import-videos": {
         "id": "endpoint_uploadVideos.cloud-to-cloud-import-videos",
@@ -3120,7 +3126,8 @@
               "type": "generic"
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_uploadVideos.cloud-to-cloud-retrieve-status": {
         "id": "endpoint_uploadVideos.cloud-to-cloud-retrieve-status",
@@ -3363,7 +3370,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_uploadVideos.cloud-to-cloud-retrieve-import-logs": {
         "id": "endpoint_uploadVideos.cloud-to-cloud-retrieve-import-logs",
@@ -3561,7 +3569,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_indexes.list": {
         "id": "endpoint_indexes.list",
@@ -4452,7 +4461,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes.create": {
         "id": "endpoint_indexes.create",
@@ -5022,7 +5032,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes.retrieve": {
         "id": "endpoint_indexes.retrieve",
@@ -5351,7 +5362,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes.update": {
         "id": "endpoint_indexes.update",
@@ -5711,7 +5723,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes.delete": {
         "id": "endpoint_indexes.delete",
@@ -5992,7 +6005,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_summarize.create": {
         "id": "endpoint_summarize.create",
@@ -6517,7 +6531,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_generate.create": {
         "id": "endpoint_generate.create",
@@ -7187,7 +7202,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embed.create": {
         "id": "endpoint_embed.create",
@@ -7814,7 +7830,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_search.query": {
         "id": "endpoint_search.query",
@@ -9096,7 +9113,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_search.retrieve": {
         "id": "endpoint_search.retrieve",
@@ -9427,7 +9445,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_gist.create": {
         "id": "endpoint_gist.create",
@@ -9613,7 +9632,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedNew.create": {
         "id": "endpoint_embedNew.create",
@@ -9886,7 +9906,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embed/tasks.list": {
         "id": "endpoint_embed/tasks.list",
@@ -10453,7 +10474,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embed/tasks.create": {
         "id": "endpoint_embed/tasks.create",
@@ -11121,7 +11143,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embed/tasks.retrieve": {
         "id": "endpoint_embed/tasks.retrieve",
@@ -11474,7 +11497,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embed/tasks/status.retrieve": {
         "id": "endpoint_embed/tasks/status.retrieve",
@@ -11791,7 +11815,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes/videos.list": {
         "id": "endpoint_indexes/videos.list",
@@ -13051,7 +13076,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes/videos.retrieve": {
         "id": "endpoint_indexes/videos.retrieve",
@@ -13457,7 +13483,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes/videos.update": {
         "id": "endpoint_indexes/videos.update",
@@ -14019,7 +14046,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_indexes/videos.delete": {
         "id": "endpoint_indexes/videos.delete",
@@ -14356,7 +14384,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

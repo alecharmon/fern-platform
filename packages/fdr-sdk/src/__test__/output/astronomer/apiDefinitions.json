@@ -349,7 +349,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_organization.GetOrganization": {
         "id": "subpackage_organization.GetOrganization",
@@ -690,7 +691,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_organization.UpdateOrganization": {
         "id": "subpackage_organization.UpdateOrganization",
@@ -1097,7 +1099,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_options.GetClusterOptions": {
         "id": "subpackage_options.GetClusterOptions",
@@ -1471,7 +1474,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_options.GetDeploymentOptions": {
         "id": "subpackage_options.GetDeploymentOptions",
@@ -1881,7 +1885,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_cluster.ListClusters": {
         "id": "subpackage_cluster.ListClusters",
@@ -2272,7 +2277,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_cluster.CreateCluster": {
         "id": "subpackage_cluster.CreateCluster",
@@ -2675,7 +2681,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_cluster.GetCluster": {
         "id": "subpackage_cluster.GetCluster",
@@ -3020,7 +3027,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_cluster.UpdateCluster": {
         "id": "subpackage_cluster.UpdateCluster",
@@ -3436,7 +3444,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_cluster.DeleteCluster": {
         "id": "subpackage_cluster.DeleteCluster",
@@ -3717,7 +3726,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deployment.ListDeployments": {
         "id": "subpackage_deployment.ListDeployments",
@@ -4176,7 +4186,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deployment.CreateDeployment": {
         "id": "subpackage_deployment.CreateDeployment",
@@ -4649,7 +4660,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deployment.GetDeployment": {
         "id": "subpackage_deployment.GetDeployment",
@@ -5056,7 +5068,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deployment.UpdateDeployment": {
         "id": "subpackage_deployment.UpdateDeployment",
@@ -5626,7 +5639,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deployment.DeleteDeployment": {
         "id": "subpackage_deployment.DeleteDeployment",
@@ -5907,7 +5921,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deployment.UpdateDeploymentHibernationOverride": {
         "id": "subpackage_deployment.UpdateDeploymentHibernationOverride",
@@ -6066,7 +6081,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deployment.DeleteDeploymentHibernationOverride": {
         "id": "subpackage_deployment.DeleteDeploymentHibernationOverride",
@@ -6158,7 +6174,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deploy.ListDeploys": {
         "id": "subpackage_deploy.ListDeploys",
@@ -6550,7 +6567,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deploy.CreateDeploy": {
         "id": "subpackage_deploy.CreateDeploy",
@@ -6959,7 +6977,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deploy.GetDeploy": {
         "id": "subpackage_deploy.GetDeploy",
@@ -7314,7 +7333,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deploy.UpdateDeploy": {
         "id": "subpackage_deploy.UpdateDeploy",
@@ -7724,7 +7744,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deploy.FinalizeDeploy": {
         "id": "subpackage_deploy.FinalizeDeploy",
@@ -8093,7 +8114,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_deploy.DeployRollback": {
         "id": "subpackage_deploy.DeployRollback",
@@ -8504,7 +8526,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_workspace.ListWorkspaces": {
         "id": "subpackage_workspace.ListWorkspaces",
@@ -8877,7 +8900,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_workspace.CreateWorkspace": {
         "id": "subpackage_workspace.CreateWorkspace",
@@ -9274,7 +9298,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_workspace.GetWorkspace": {
         "id": "subpackage_workspace.GetWorkspace",
@@ -9595,7 +9620,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_workspace.UpdateWorkspace": {
         "id": "subpackage_workspace.UpdateWorkspace",
@@ -10013,7 +10039,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_workspace.DeleteWorkspace": {
         "id": "subpackage_workspace.DeleteWorkspace",
@@ -10294,7 +10321,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -19029,7 +19057,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_invite.CreateUserInvite": {
         "id": "subpackage_invite.CreateUserInvite",
@@ -19400,7 +19429,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_invite.DeleteUserInvite": {
         "id": "subpackage_invite.DeleteUserInvite",
@@ -19681,7 +19711,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_role.ListRoleTemplates": {
         "id": "subpackage_role.ListRoleTemplates",
@@ -19998,7 +20029,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_role.ListRoles": {
         "id": "subpackage_role.ListRoles",
@@ -20420,7 +20452,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_role.CreateCustomRole": {
         "id": "subpackage_role.CreateCustomRole",
@@ -20882,7 +20915,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_role.UpdateCustomRole": {
         "id": "subpackage_role.UpdateCustomRole",
@@ -21348,7 +21382,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_role.DeleteCustomRole": {
         "id": "subpackage_role.DeleteCustomRole",
@@ -21629,7 +21664,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_role.GetCustomRole": {
         "id": "subpackage_role.GetCustomRole",
@@ -21954,7 +21990,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.ListTeams": {
         "id": "subpackage_team.ListTeams",
@@ -22361,7 +22398,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.CreateTeam": {
         "id": "subpackage_team.CreateTeam",
@@ -22793,7 +22831,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.GetTeam": {
         "id": "subpackage_team.GetTeam",
@@ -23127,7 +23166,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.UpdateTeam": {
         "id": "subpackage_team.UpdateTeam",
@@ -23540,7 +23580,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.DeleteTeam": {
         "id": "subpackage_team.DeleteTeam",
@@ -23821,7 +23862,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.ListTeamMembers": {
         "id": "subpackage_team.ListTeamMembers",
@@ -24206,7 +24248,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.AddTeamMembers": {
         "id": "subpackage_team.AddTeamMembers",
@@ -24568,7 +24611,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.RemoveTeamMember": {
         "id": "subpackage_team.RemoveTeamMember",
@@ -24876,7 +24920,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_team.UpdateTeamRoles": {
         "id": "subpackage_team.UpdateTeamRoles",
@@ -25305,7 +25350,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_apiToken.ListApiTokens": {
         "id": "subpackage_apiToken.ListApiTokens",
@@ -25748,7 +25794,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_apiToken.CreateApiToken": {
         "id": "subpackage_apiToken.CreateApiToken",
@@ -26212,7 +26259,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_apiToken.GetApiToken": {
         "id": "subpackage_apiToken.GetApiToken",
@@ -26544,7 +26592,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_apiToken.UpdateApiToken": {
         "id": "subpackage_apiToken.UpdateApiToken",
@@ -26955,7 +27004,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_apiToken.DeleteApiToken": {
         "id": "subpackage_apiToken.DeleteApiToken",
@@ -27236,7 +27286,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_apiToken.UpdateApiTokenRoles": {
         "id": "subpackage_apiToken.UpdateApiTokenRoles",
@@ -27649,7 +27700,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_apiToken.RotateApiToken": {
         "id": "subpackage_apiToken.RotateApiToken",
@@ -27985,7 +28037,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_user.ListUsers": {
         "id": "subpackage_user.ListUsers",
@@ -28356,7 +28409,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_user.GetUser": {
         "id": "subpackage_user.GetUser",
@@ -28673,7 +28727,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_user.UpdateUserRoles": {
         "id": "subpackage_user.UpdateUserRoles",
@@ -29097,7 +29152,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

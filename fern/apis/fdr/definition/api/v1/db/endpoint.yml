@@ -35,6 +35,9 @@ types:
       examples: list<readEndpoint.ExampleEndpointCall>
       snippetTemplates: optional<readEndpoint.EndpointSnippetTemplates>
       protocol: optional<commons.Protocol>
+      includeInApiExplorer:
+        type: optional<boolean>
+        docs: Whether this endpoint should be included in the API explorer. Defaults to true.
 
   DbHttpRequest:
     extends: commons.WithDescription

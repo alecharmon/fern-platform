@@ -135,7 +135,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_fileInformation.fileInfoJsonp": {
         "id": "subpackage_fileInformation.fileInfoJsonp",
@@ -270,7 +271,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_fileNames.fileWithName": {
         "id": "subpackage_fileNames.fileWithName",
@@ -363,7 +365,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -1038,7 +1041,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_upload.multipartFileUploadStart": {
         "id": "subpackage_upload.multipartFileUploadStart",
@@ -1426,7 +1430,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_upload.multipartFileUploadPart": {
         "id": "subpackage_upload.multipartFileUploadPart",
@@ -1478,7 +1483,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_upload.multipartFileUploadComplete": {
         "id": "subpackage_upload.multipartFileUploadComplete",
@@ -1835,7 +1841,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_upload.fromURLUpload": {
         "id": "subpackage_upload.fromURLUpload",
@@ -2217,7 +2224,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_upload.fromURLUploadStatus": {
         "id": "subpackage_upload.fromURLUploadStatus",
@@ -2376,7 +2384,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_upload.fileUploadInfo": {
         "id": "subpackage_upload.fileUploadInfo",
@@ -2709,7 +2718,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_groups.createFilesGroup": {
         "id": "subpackage_groups.createFilesGroup",
@@ -3045,7 +3055,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_groups.filesGroupInfo": {
         "id": "subpackage_groups.filesGroupInfo",
@@ -3348,7 +3359,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -6427,7 +6439,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.filesList": {
         "id": "subpackage_file.filesList",
@@ -6943,7 +6956,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.storeFile": {
         "id": "subpackage_file.storeFile",
@@ -7390,7 +7404,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.deleteFileStorage": {
         "id": "subpackage_file.deleteFileStorage",
@@ -7782,7 +7797,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.info": {
         "id": "subpackage_file.info",
@@ -8199,7 +8215,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.filesStoring": {
         "id": "subpackage_file.filesStoring",
@@ -8627,7 +8644,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.filesDelete": {
         "id": "subpackage_file.filesDelete",
@@ -9055,7 +9073,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.createLocalCopy": {
         "id": "subpackage_file.createLocalCopy",
@@ -9390,7 +9409,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_file.createRemoteCopy": {
         "id": "subpackage_file.createRemoteCopy",
@@ -9707,7 +9727,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.awsRekognitionExecute": {
         "id": "subpackage_addOns.awsRekognitionExecute",
@@ -10001,7 +10022,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.awsRekognitionExecutionStatus": {
         "id": "subpackage_addOns.awsRekognitionExecutionStatus",
@@ -10195,7 +10217,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.awsRekognitionDetectModerationLabelsExecute": {
         "id": "subpackage_addOns.awsRekognitionDetectModerationLabelsExecute",
@@ -10481,7 +10504,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.awsRekognitionDetectModerationLabelsExecutionStatus": {
         "id": "subpackage_addOns.awsRekognitionDetectModerationLabelsExecutionStatus",
@@ -10667,7 +10691,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.ucClamavVirusScanExecute": {
         "id": "subpackage_addOns.ucClamavVirusScanExecute",
@@ -10989,7 +11014,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.ucClamavVirusScanExecutionStatus": {
         "id": "subpackage_addOns.ucClamavVirusScanExecutionStatus",
@@ -11191,7 +11217,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.removeBgExecute": {
         "id": "subpackage_addOns.removeBgExecute",
@@ -11508,7 +11535,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_addOns.removeBgExecutionStatus": {
         "id": "subpackage_addOns.removeBgExecutionStatus",
@@ -11705,7 +11733,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_fileMetadata.key": {
         "id": "subpackage_fileMetadata.key",
@@ -11933,7 +11962,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_fileMetadata.updateFileMetadataKey": {
         "id": "subpackage_fileMetadata.updateFileMetadataKey",
@@ -12186,7 +12216,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_fileMetadata.deleteFileMetadataKey": {
         "id": "subpackage_fileMetadata.deleteFileMetadataKey",
@@ -12399,7 +12430,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_group.groupsList": {
         "id": "subpackage_group.groupsList",
@@ -12695,7 +12727,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_group.info": {
         "id": "subpackage_group.info",
@@ -12982,7 +13015,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_group.deleteGroup": {
         "id": "subpackage_group.deleteGroup",
@@ -13243,7 +13277,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_project.info": {
         "id": "subpackage_project.info",
@@ -13458,7 +13493,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_webhook.webhooksList": {
         "id": "subpackage_webhook.webhooksList",
@@ -13689,7 +13725,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_webhook.create": {
         "id": "subpackage_webhook.create",
@@ -13912,7 +13949,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_webhook.updateWebhook": {
         "id": "subpackage_webhook.updateWebhook",
@@ -14162,7 +14200,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_webhook.unsubscribe": {
         "id": "subpackage_webhook.unsubscribe",
@@ -14360,7 +14399,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_conversion.documentConvertInfo": {
         "id": "subpackage_conversion.documentConvertInfo",
@@ -14640,7 +14680,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_conversion.documentConvert": {
         "id": "subpackage_conversion.documentConvert",
@@ -14916,7 +14957,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_conversion.documentConvertStatus": {
         "id": "subpackage_conversion.documentConvertStatus",
@@ -15234,7 +15276,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_conversion.videoConvert": {
         "id": "subpackage_conversion.videoConvert",
@@ -15494,7 +15537,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_conversion.videoConvertStatus": {
         "id": "subpackage_conversion.videoConvertStatus",
@@ -15813,7 +15857,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

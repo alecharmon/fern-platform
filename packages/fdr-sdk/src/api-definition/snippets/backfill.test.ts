@@ -52,6 +52,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Basic Search",
@@ -149,6 +150,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Basic Search",
@@ -245,6 +247,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Basic Search",
@@ -343,6 +346,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Basic Search",
@@ -476,6 +480,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Create User",
@@ -597,6 +602,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Create Regular User",
@@ -775,6 +781,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Create Regular User",
@@ -966,6 +973,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Create User",
@@ -1090,6 +1098,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Create User",
@@ -1228,6 +1237,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Check User Exists",
@@ -1344,6 +1354,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Create Contact",
@@ -1398,6 +1409,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Get Contact",
@@ -1447,6 +1459,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Send SMS",
@@ -1501,6 +1514,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Send MMS",
@@ -1557,6 +1571,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Buy Phone Number",
@@ -1610,6 +1625,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Search Phone Numbers",
@@ -1667,6 +1683,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Get Brand",
@@ -1718,6 +1735,7 @@ describe("backfillSnippets", () => {
                     description: undefined,
                     availability: undefined,
                     namespace: undefined,
+                    includeInApiExplorer: undefined,
                     examples: [
                         {
                             name: "Get Conversation",

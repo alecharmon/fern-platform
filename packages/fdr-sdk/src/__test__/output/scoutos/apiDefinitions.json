@@ -541,7 +541,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_workflows.create": {
         "id": "endpoint_workflows.create",
@@ -3545,7 +3546,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_workflows.get": {
         "id": "endpoint_workflows.get",
@@ -3888,7 +3890,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_workflows.update": {
         "id": "endpoint_workflows.update",
@@ -6958,7 +6961,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_workflows.delete": {
         "id": "endpoint_workflows.delete",
@@ -7259,7 +7263,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_workflows.run_stream": {
         "id": "endpoint_workflows.run_stream",
@@ -8288,7 +8293,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_workflows.run": {
         "id": "endpoint_workflows.run",
@@ -9250,7 +9256,8 @@
               "type": "generic"
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_environments.list": {
         "id": "endpoint_environments.list",
@@ -9609,7 +9616,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_environments.update": {
         "id": "endpoint_environments.update",
@@ -10261,7 +10269,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_revisions.list": {
         "id": "endpoint_revisions.list",
@@ -10598,7 +10607,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_revisions.update": {
         "id": "endpoint_revisions.update",
@@ -10998,7 +11008,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_revisions.delete": {
         "id": "endpoint_revisions.delete",
@@ -11353,7 +11364,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_usage.get": {
         "id": "endpoint_usage.get",
@@ -11714,7 +11726,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_workflowLogs.get": {
         "id": "endpoint_workflowLogs.get",
@@ -12312,7 +12325,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_copilots.list": {
         "id": "endpoint_copilots.list",
@@ -12853,7 +12867,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_copilots.create": {
         "id": "endpoint_copilots.create",
@@ -13664,7 +13679,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_copilots.get": {
         "id": "endpoint_copilots.get",
@@ -14005,7 +14021,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_copilots.update": {
         "id": "endpoint_copilots.update",
@@ -14882,7 +14899,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_copilots.delete": {
         "id": "endpoint_copilots.delete",
@@ -15183,7 +15201,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_collections.get": {
         "id": "endpoint_collections.get",
@@ -15521,7 +15540,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_collections.create": {
         "id": "endpoint_collections.create",
@@ -17328,7 +17348,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_collections.update": {
         "id": "endpoint_collections.update",
@@ -19201,7 +19222,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_collections.delete": {
         "id": "endpoint_collections.delete",
@@ -19503,7 +19525,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_documents.get": {
         "id": "endpoint_documents.get",
@@ -19897,7 +19920,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_documents.create": {
         "id": "endpoint_documents.create",
@@ -21004,7 +21028,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_documents.update": {
         "id": "endpoint_documents.update",
@@ -21751,7 +21776,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_documents.delete": {
         "id": "endpoint_documents.delete",
@@ -22107,7 +22133,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

@@ -2859,7 +2859,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.chat": {
         "id": "endpoint_.chat",
@@ -6159,7 +6160,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.generate_stream": {
         "id": "endpoint_.generate_stream",
@@ -7610,7 +7612,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.generate": {
         "id": "endpoint_.generate",
@@ -9086,7 +9089,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.embed": {
         "id": "endpoint_.embed",
@@ -13362,7 +13366,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.rerank": {
         "id": "endpoint_.rerank",
@@ -14611,7 +14616,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.classify": {
         "id": "endpoint_.classify",
@@ -15805,7 +15811,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.summarize": {
         "id": "endpoint_.summarize",
@@ -16899,7 +16906,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.tokenize": {
         "id": "endpoint_.tokenize",
@@ -17841,7 +17849,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.detokenize": {
         "id": "endpoint_.detokenize",
@@ -18808,7 +18817,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.checkAPIKey": {
         "id": "endpoint_.checkAPIKey",
@@ -19538,7 +19548,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_v2.chat_stream": {
         "id": "endpoint_v2.chat_stream",
@@ -22329,7 +22340,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_v2.chat": {
         "id": "endpoint_v2.chat",
@@ -25356,7 +25368,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_v2.embed": {
         "id": "endpoint_v2.embed",
@@ -29689,7 +29702,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_v2.rerank": {
         "id": "endpoint_v2.rerank",
@@ -30941,7 +30955,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.list": {
         "id": "endpoint_embedJobs.list",
@@ -31707,7 +31722,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.create": {
         "id": "endpoint_embedJobs.create",
@@ -32813,7 +32829,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.get": {
         "id": "endpoint_embedJobs.get",
@@ -33668,7 +33685,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.cancel": {
         "id": "endpoint_embedJobs.cancel",
@@ -34482,7 +34500,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.list": {
         "id": "endpoint_datasets.list",
@@ -35524,7 +35543,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.create": {
         "id": "endpoint_datasets.create",
@@ -36820,7 +36840,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.getUsage": {
         "id": "endpoint_datasets.getUsage",
@@ -37575,7 +37596,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.get": {
         "id": "endpoint_datasets.get",
@@ -38429,7 +38451,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.delete": {
         "id": "endpoint_datasets.delete",
@@ -39268,7 +39291,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.list": {
         "id": "endpoint_connectors.list",
@@ -40163,7 +40187,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.create": {
         "id": "endpoint_connectors.create",
@@ -41434,7 +41459,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.get": {
         "id": "endpoint_connectors.get",
@@ -42283,7 +42309,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.delete": {
         "id": "endpoint_connectors.delete",
@@ -43110,7 +43137,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.update": {
         "id": "endpoint_connectors.update",
@@ -44391,7 +44419,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.oAuthAuthorize": {
         "id": "endpoint_connectors.oAuthAuthorize",
@@ -45293,7 +45322,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_models.get": {
         "id": "endpoint_models.get",
@@ -46103,7 +46133,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_models.list": {
         "id": "endpoint_models.list",
@@ -47019,7 +47050,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.ListFinetunedModels": {
         "id": "endpoint_finetuning.ListFinetunedModels",
@@ -47706,7 +47738,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.CreateFinetunedModel": {
         "id": "endpoint_finetuning.CreateFinetunedModel",
@@ -48827,7 +48860,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.GetFinetunedModel": {
         "id": "endpoint_finetuning.GetFinetunedModel",
@@ -49419,7 +49453,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.DeleteFinetunedModel": {
         "id": "endpoint_finetuning.DeleteFinetunedModel",
@@ -49980,7 +50015,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.UpdateFinetunedModel": {
         "id": "endpoint_finetuning.UpdateFinetunedModel",
@@ -51288,7 +51324,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.ListEvents": {
         "id": "endpoint_finetuning.ListEvents",
@@ -52013,7 +52050,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.ListTrainingStepMetrics": {
         "id": "endpoint_finetuning.ListTrainingStepMetrics",
@@ -52704,7 +52742,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -75093,7 +75132,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.chat": {
         "id": "endpoint_.chat",
@@ -78393,7 +78433,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.generate_stream": {
         "id": "endpoint_.generate_stream",
@@ -79844,7 +79885,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.generate": {
         "id": "endpoint_.generate",
@@ -81320,7 +81362,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.embed": {
         "id": "endpoint_.embed",
@@ -85596,7 +85639,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.rerank": {
         "id": "endpoint_.rerank",
@@ -86845,7 +86889,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.classify": {
         "id": "endpoint_.classify",
@@ -88039,7 +88084,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.summarize": {
         "id": "endpoint_.summarize",
@@ -89133,7 +89179,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.tokenize": {
         "id": "endpoint_.tokenize",
@@ -90075,7 +90122,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.detokenize": {
         "id": "endpoint_.detokenize",
@@ -91042,7 +91090,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_.checkAPIKey": {
         "id": "endpoint_.checkAPIKey",
@@ -91772,7 +91821,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.list": {
         "id": "endpoint_embedJobs.list",
@@ -92538,7 +92588,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.create": {
         "id": "endpoint_embedJobs.create",
@@ -93644,7 +93695,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.get": {
         "id": "endpoint_embedJobs.get",
@@ -94499,7 +94551,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_embedJobs.cancel": {
         "id": "endpoint_embedJobs.cancel",
@@ -95313,7 +95366,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.list": {
         "id": "endpoint_datasets.list",
@@ -96355,7 +96409,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.create": {
         "id": "endpoint_datasets.create",
@@ -97651,7 +97706,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.getUsage": {
         "id": "endpoint_datasets.getUsage",
@@ -98406,7 +98462,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.get": {
         "id": "endpoint_datasets.get",
@@ -99260,7 +99317,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_datasets.delete": {
         "id": "endpoint_datasets.delete",
@@ -100099,7 +100157,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.list": {
         "id": "endpoint_connectors.list",
@@ -100994,7 +101053,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.create": {
         "id": "endpoint_connectors.create",
@@ -102265,7 +102325,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.get": {
         "id": "endpoint_connectors.get",
@@ -103114,7 +103175,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.delete": {
         "id": "endpoint_connectors.delete",
@@ -103941,7 +104003,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.update": {
         "id": "endpoint_connectors.update",
@@ -105222,7 +105285,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_connectors.oAuthAuthorize": {
         "id": "endpoint_connectors.oAuthAuthorize",
@@ -106124,7 +106188,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_models.get": {
         "id": "endpoint_models.get",
@@ -106934,7 +106999,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_models.list": {
         "id": "endpoint_models.list",
@@ -107850,7 +107916,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.ListFinetunedModels": {
         "id": "endpoint_finetuning.ListFinetunedModels",
@@ -108537,7 +108604,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.CreateFinetunedModel": {
         "id": "endpoint_finetuning.CreateFinetunedModel",
@@ -109658,7 +109726,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.GetFinetunedModel": {
         "id": "endpoint_finetuning.GetFinetunedModel",
@@ -110250,7 +110319,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.DeleteFinetunedModel": {
         "id": "endpoint_finetuning.DeleteFinetunedModel",
@@ -110811,7 +110881,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.UpdateFinetunedModel": {
         "id": "endpoint_finetuning.UpdateFinetunedModel",
@@ -112119,7 +112190,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.ListEvents": {
         "id": "endpoint_finetuning.ListEvents",
@@ -112844,7 +112916,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_finetuning.ListTrainingStepMetrics": {
         "id": "endpoint_finetuning.ListTrainingStepMetrics",
@@ -113535,7 +113608,8 @@
               ]
             }
           }
-        }
+        },
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

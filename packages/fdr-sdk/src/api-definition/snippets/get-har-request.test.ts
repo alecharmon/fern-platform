@@ -25,7 +25,8 @@ describe("getHarRequest", () => {
             examples: undefined,
             snippetTemplates: undefined,
             protocol: undefined,
-            namespace: undefined
+            namespace: undefined,
+            includeInApiExplorer: undefined
         };
 
         const example: ExampleEndpointCall = {
@@ -93,7 +94,8 @@ describe("getHarRequest", () => {
             examples: undefined,
             snippetTemplates: undefined,
             protocol: undefined,
-            namespace: undefined
+            namespace: undefined,
+            includeInApiExplorer: undefined
         };
 
         const example: ExampleEndpointCall = {
@@ -148,7 +150,8 @@ describe("getHarRequest", () => {
             examples: undefined,
             snippetTemplates: undefined,
             protocol: undefined,
-            namespace: undefined
+            namespace: undefined,
+            includeInApiExplorer: undefined
         };
 
         const example: ExampleEndpointCall = {

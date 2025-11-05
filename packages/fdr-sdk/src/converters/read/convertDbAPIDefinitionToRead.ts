@@ -105,7 +105,8 @@ export function transformEndpoint({
         authV2: dbShape.authV2,
         // descriptionContainsMarkdown: dbShape.descriptionContainsMarkdown,
         snippetTemplates: dbShape.snippetTemplates,
-        protocol: dbShape.protocol
+        protocol: dbShape.protocol,
+        includeInApiExplorer: dbShape.includeInApiExplorer ?? true
     };
 }
 

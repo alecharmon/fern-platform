@@ -181,7 +181,8 @@ export class ApiDefinitionV1ToLatest {
             errors: this.migrateHttpErrors(v1.errorsV2),
             examples: undefined,
             snippetTemplates: v1.snippetTemplates,
-            protocol: v1.protocol
+            protocol: v1.protocol,
+            includeInApiExplorer: v1.includeInApiExplorer ?? true
         };
 
         toRet.examples = this.migrateHttpExamples(v1.examples, toRet);

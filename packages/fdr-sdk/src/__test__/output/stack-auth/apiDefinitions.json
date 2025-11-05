@@ -173,7 +173,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.listContactChannels": {
         "id": "endpoint_contactChannels.listContactChannels",
@@ -287,7 +288,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.createAContactChannel": {
         "id": "endpoint_contactChannels.createAContactChannel",
@@ -485,7 +487,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.verifyAnEmail": {
         "id": "endpoint_contactChannels.verifyAnEmail",
@@ -573,7 +576,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.checkEmailVerificationCode": {
         "id": "endpoint_contactChannels.checkEmailVerificationCode",
@@ -661,7 +665,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.getAContactChannel": {
         "id": "endpoint_contactChannels.getAContactChannel",
@@ -811,7 +816,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.deleteAContactChannel": {
         "id": "endpoint_contactChannels.deleteAContactChannel",
@@ -955,7 +961,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.updateAContactChannel": {
         "id": "endpoint_contactChannels.updateAContactChannel",
@@ -1200,7 +1207,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.sendContactChannelVerificationCode": {
         "id": "endpoint_contactChannels.sendContactChannelVerificationCode",
@@ -1336,7 +1344,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_oauth.oAuthTokenEndpoints": {
         "id": "endpoint_oauth.oAuthTokenEndpoints",
@@ -1423,7 +1432,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_oauth.oAuthAuthorizeEndpoint": {
         "id": "endpoint_oauth.oAuthAuthorizeEndpoint",
@@ -1696,7 +1706,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.signInWithACode": {
         "id": "endpoint_otp.signInWithACode",
@@ -1787,7 +1798,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.sendSignInCode": {
         "id": "endpoint_otp.sendSignInCode",
@@ -1890,7 +1902,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.mfaSignIn": {
         "id": "endpoint_otp.mfaSignIn",
@@ -2007,7 +2020,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.checkSignInCode": {
         "id": "endpoint_otp.checkSignInCode",
@@ -2095,7 +2109,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.updatePassword": {
         "id": "endpoint_password.updatePassword",
@@ -2216,7 +2231,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.signUpWithEmailAndPassword": {
         "id": "endpoint_password.signUpWithEmailAndPassword",
@@ -2334,7 +2350,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.signInWithEmailAndPassword": {
         "id": "endpoint_password.signInWithEmailAndPassword",
@@ -2437,7 +2454,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.setPassword": {
         "id": "endpoint_password.setPassword",
@@ -2525,7 +2543,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.sendResetPasswordCode": {
         "id": "endpoint_password.sendResetPasswordCode",
@@ -2626,7 +2645,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.resetPasswordWithACode": {
         "id": "endpoint_password.resetPasswordWithACode",
@@ -2727,7 +2747,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.checkResetPasswordCode": {
         "id": "endpoint_password.checkResetPasswordCode",
@@ -2815,7 +2836,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_permissions.listTeamPermissions": {
         "id": "endpoint_permissions.listTeamPermissions",
@@ -2967,7 +2989,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.getTheCurrentProject": {
         "id": "endpoint_projects.getTheCurrentProject",
@@ -3036,7 +3059,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_sessions.signOutOfTheCurrentSession": {
         "id": "endpoint_sessions.signOutOfTheCurrentSession",
@@ -3112,7 +3136,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_sessions.refreshAccessToken": {
         "id": "endpoint_sessions.refreshAccessToken",
@@ -3188,7 +3213,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.listTeams": {
         "id": "endpoint_teams.listTeams",
@@ -3286,7 +3312,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.createATeam": {
         "id": "endpoint_teams.createATeam",
@@ -3457,7 +3484,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.listTeamMembersProfiles": {
         "id": "endpoint_teams.listTeamMembersProfiles",
@@ -3565,7 +3593,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.getATeam": {
         "id": "endpoint_teams.getATeam",
@@ -3653,7 +3682,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.deleteATeam": {
         "id": "endpoint_teams.deleteATeam",
@@ -3733,7 +3763,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.updateATeam": {
         "id": "endpoint_teams.updateATeam",
@@ -3910,7 +3941,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.sendAnEmailToInviteAUserToATeam": {
         "id": "endpoint_teams.sendAnEmailToInviteAUserToATeam",
@@ -4027,7 +4059,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.inviteAUserToATeam": {
         "id": "endpoint_teams.inviteAUserToATeam",
@@ -4113,7 +4146,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.removeAUserFromATeam": {
         "id": "endpoint_teams.removeAUserFromATeam",
@@ -4215,7 +4249,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.getATeamMemberProfile": {
         "id": "endpoint_teams.getATeamMemberProfile",
@@ -4320,7 +4355,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.updateYourTeamMemberProfile": {
         "id": "endpoint_teams.updateYourTeamMemberProfile",
@@ -4480,7 +4516,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.getTeamInvitationDetails": {
         "id": "endpoint_teams.getTeamInvitationDetails",
@@ -4569,7 +4606,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.checkIfATeamInvitationCodeIsValid": {
         "id": "endpoint_teams.checkIfATeamInvitationCodeIsValid",
@@ -4657,7 +4695,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.getCurrentUser": {
         "id": "endpoint_users.getCurrentUser",
@@ -4740,7 +4779,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.deleteCurrentUser": {
         "id": "endpoint_users.deleteCurrentUser",
@@ -4800,7 +4840,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.updateCurrentUser": {
         "id": "endpoint_users.updateCurrentUser",
@@ -5012,7 +5053,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -9982,7 +10024,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.listContactChannels": {
         "id": "endpoint_contactChannels.listContactChannels",
@@ -10096,7 +10139,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.createAContactChannel": {
         "id": "endpoint_contactChannels.createAContactChannel",
@@ -10314,7 +10358,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.verifyAnEmail": {
         "id": "endpoint_contactChannels.verifyAnEmail",
@@ -10402,7 +10447,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.checkEmailVerificationCode": {
         "id": "endpoint_contactChannels.checkEmailVerificationCode",
@@ -10490,7 +10536,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.getAContactChannel": {
         "id": "endpoint_contactChannels.getAContactChannel",
@@ -10640,7 +10687,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.deleteAContactChannel": {
         "id": "endpoint_contactChannels.deleteAContactChannel",
@@ -10784,7 +10832,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.updateAContactChannel": {
         "id": "endpoint_contactChannels.updateAContactChannel",
@@ -11049,7 +11098,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_contactChannels.sendContactChannelVerificationCode": {
         "id": "endpoint_contactChannels.sendContactChannelVerificationCode",
@@ -11185,7 +11235,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_oauth.oAuthTokenEndpoints": {
         "id": "endpoint_oauth.oAuthTokenEndpoints",
@@ -11272,7 +11323,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_oauth.oAuthAuthorizeEndpoint": {
         "id": "endpoint_oauth.oAuthAuthorizeEndpoint",
@@ -11545,7 +11597,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.signInWithACode": {
         "id": "endpoint_otp.signInWithACode",
@@ -11636,7 +11689,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.sendSignInCode": {
         "id": "endpoint_otp.sendSignInCode",
@@ -11739,7 +11793,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.mfaSignIn": {
         "id": "endpoint_otp.mfaSignIn",
@@ -11856,7 +11911,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_otp.checkSignInCode": {
         "id": "endpoint_otp.checkSignInCode",
@@ -11944,7 +12000,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.updatePassword": {
         "id": "endpoint_password.updatePassword",
@@ -12065,7 +12122,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.signUpWithEmailAndPassword": {
         "id": "endpoint_password.signUpWithEmailAndPassword",
@@ -12183,7 +12241,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.signInWithEmailAndPassword": {
         "id": "endpoint_password.signInWithEmailAndPassword",
@@ -12286,7 +12345,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.setPassword": {
         "id": "endpoint_password.setPassword",
@@ -12374,7 +12434,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.sendResetPasswordCode": {
         "id": "endpoint_password.sendResetPasswordCode",
@@ -12475,7 +12536,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.resetPasswordWithACode": {
         "id": "endpoint_password.resetPasswordWithACode",
@@ -12576,7 +12638,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_password.checkResetPasswordCode": {
         "id": "endpoint_password.checkResetPasswordCode",
@@ -12664,7 +12727,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_permissions.listTeamPermissionsOfAUser": {
         "id": "endpoint_permissions.listTeamPermissionsOfAUser",
@@ -12816,7 +12880,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_permissions.grantATeamPermissionToAUser": {
         "id": "endpoint_permissions.grantATeamPermissionToAUser",
@@ -13055,7 +13120,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_permissions.revokeATeamPermissionFromAUser": {
         "id": "endpoint_permissions.revokeATeamPermissionFromAUser",
@@ -13262,7 +13328,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.getTheCurrentProject": {
         "id": "endpoint_projects.getTheCurrentProject",
@@ -13331,7 +13398,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_sessions.createSession": {
         "id": "endpoint_sessions.createSession",
@@ -13440,7 +13508,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_sessions.signOutOfTheCurrentSession": {
         "id": "endpoint_sessions.signOutOfTheCurrentSession",
@@ -13516,7 +13585,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_sessions.refreshAccessToken": {
         "id": "endpoint_sessions.refreshAccessToken",
@@ -13592,7 +13662,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.listTeams": {
         "id": "endpoint_teams.listTeams",
@@ -13694,7 +13765,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.createATeam": {
         "id": "endpoint_teams.createATeam",
@@ -13937,7 +14009,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.listTeamMembersProfiles": {
         "id": "endpoint_teams.listTeamMembersProfiles",
@@ -14080,7 +14153,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.getATeam": {
         "id": "endpoint_teams.getATeam",
@@ -14172,7 +14246,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.deleteATeam": {
         "id": "endpoint_teams.deleteATeam",
@@ -14252,7 +14327,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.updateATeam": {
         "id": "endpoint_teams.updateATeam",
@@ -14501,7 +14577,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.sendAnEmailToInviteAUserToATeam": {
         "id": "endpoint_teams.sendAnEmailToInviteAUserToATeam",
@@ -14618,7 +14695,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.inviteAUserToATeam": {
         "id": "endpoint_teams.inviteAUserToATeam",
@@ -14704,7 +14782,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.addAUserToATeam": {
         "id": "endpoint_teams.addAUserToATeam",
@@ -14831,7 +14910,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.removeAUserFromATeam": {
         "id": "endpoint_teams.removeAUserFromATeam",
@@ -14933,7 +15013,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.getATeamMemberProfile": {
         "id": "endpoint_teams.getATeamMemberProfile",
@@ -15073,7 +15154,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.updateATeamMemberProfile": {
         "id": "endpoint_teams.updateATeamMemberProfile",
@@ -15268,7 +15350,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.getTeamInvitationDetails": {
         "id": "endpoint_teams.getTeamInvitationDetails",
@@ -15357,7 +15440,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_teams.checkIfATeamInvitationCodeIsValid": {
         "id": "endpoint_teams.checkIfATeamInvitationCodeIsValid",
@@ -15445,7 +15529,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.listUsers": {
         "id": "endpoint_users.listUsers",
@@ -15660,7 +15745,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.createUser": {
         "id": "endpoint_users.createUser",
@@ -16009,7 +16095,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.getCurrentUser": {
         "id": "endpoint_users.getCurrentUser",
@@ -16101,7 +16188,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.deleteCurrentUser": {
         "id": "endpoint_users.deleteCurrentUser",
@@ -16161,7 +16249,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.updateCurrentUser": {
         "id": "endpoint_users.updateCurrentUser",
@@ -16530,7 +16619,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.getUser": {
         "id": "endpoint_users.getUser",
@@ -16643,7 +16733,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.deleteUser": {
         "id": "endpoint_users.deleteUser",
@@ -16724,7 +16815,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_users.updateUser": {
         "id": "endpoint_users.updateUser",
@@ -17114,7 +17206,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

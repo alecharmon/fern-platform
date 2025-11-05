@@ -26,4 +26,6 @@ export interface DbEndpointDefinition extends FernRegistry.api.v1.WithDescriptio
     examples: FernRegistry.api.v1.read.ExampleEndpointCall[];
     snippetTemplates: FernRegistry.api.v1.read.EndpointSnippetTemplates | undefined;
     protocol: FernRegistry.api.v1.Protocol | undefined;
+    /** Whether this endpoint should be included in the API explorer. Defaults to true. */
+    includeInApiExplorer: boolean | undefined;
 }

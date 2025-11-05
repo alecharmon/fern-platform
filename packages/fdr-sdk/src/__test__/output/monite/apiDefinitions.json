@@ -284,7 +284,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingDataPull.get_accounting_payables_id": {
         "id": "endpoint_accountingDataPull.get_accounting_payables_id",
@@ -548,7 +549,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingDataPull.get_accounting_receivables": {
         "id": "endpoint_accountingDataPull.get_accounting_receivables",
@@ -824,7 +826,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingDataPull.get_accounting_receivables_id": {
         "id": "endpoint_accountingDataPull.get_accounting_receivables_id",
@@ -1080,7 +1083,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.get_accounting_connections": {
         "id": "endpoint_accountingConnections.get_accounting_connections",
@@ -1303,7 +1307,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.post_accounting_connections": {
         "id": "endpoint_accountingConnections.post_accounting_connections",
@@ -1560,7 +1565,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.get_accounting_connections_id": {
         "id": "endpoint_accountingConnections.get_accounting_connections_id",
@@ -1803,7 +1809,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.post_accounting_connections_id_disconnect": {
         "id": "endpoint_accountingConnections.post_accounting_connections_id_disconnect",
@@ -2050,7 +2057,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.post_accounting_connections_id_sync": {
         "id": "endpoint_accountingConnections.post_accounting_connections_id_sync",
@@ -2285,7 +2293,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingSynchronizedRecords.get_accounting_synced_records": {
         "id": "endpoint_accountingSynchronizedRecords.get_accounting_synced_records",
@@ -2789,7 +2798,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingSynchronizedRecords.get_accounting_synced_records_id": {
         "id": "endpoint_accountingSynchronizedRecords.get_accounting_synced_records_id",
@@ -3037,7 +3047,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingSynchronizedRecords.post_accounting_synced_records_id_push": {
         "id": "endpoint_accountingSynchronizedRecords.post_accounting_synced_records_id_push",
@@ -3289,7 +3300,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingTaxRates.get_accounting_tax_rates": {
         "id": "endpoint_accountingTaxRates.get_accounting_tax_rates",
@@ -3591,7 +3603,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingTaxRates.get_accounting_tax_rates_id": {
         "id": "endpoint_accountingTaxRates.get_accounting_tax_rates_id",
@@ -3835,7 +3848,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies": {
         "id": "endpoint_approvalPolicies.get_approval_policies",
@@ -4534,7 +4548,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.post_approval_policies": {
         "id": "endpoint_approvalPolicies.post_approval_policies",
@@ -5076,7 +5091,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id",
@@ -5480,7 +5496,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.delete_approval_policies_id": {
         "id": "endpoint_approvalPolicies.delete_approval_policies_id",
@@ -5853,7 +5870,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.patch_approval_policies_id": {
         "id": "endpoint_approvalPolicies.patch_approval_policies_id",
@@ -6481,7 +6499,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id_processes": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id_processes",
@@ -6895,7 +6914,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id_processes_id": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id_processes_id",
@@ -7327,7 +7347,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.post_approval_policies_id_processes_id_cancel": {
         "id": "endpoint_approvalPolicies.post_approval_policies_id_processes_id_cancel",
@@ -7763,7 +7784,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id_processes_id_steps": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id_processes_id_steps",
@@ -8200,7 +8222,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.get_approval_requests": {
         "id": "endpoint_approvalRequests.get_approval_requests",
@@ -9024,7 +9047,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests": {
         "id": "endpoint_approvalRequests.post_approval_requests",
@@ -9602,7 +9626,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.get_approval_requests_id": {
         "id": "endpoint_approvalRequests.get_approval_requests_id",
@@ -10115,7 +10140,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests_id_approve": {
         "id": "endpoint_approvalRequests.post_approval_requests_id_approve",
@@ -10632,7 +10658,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests_id_cancel": {
         "id": "endpoint_approvalRequests.post_approval_requests_id_cancel",
@@ -11149,7 +11176,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests_id_reject": {
         "id": "endpoint_approvalRequests.post_approval_requests_id_reject",
@@ -11666,7 +11694,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_auditLogs.get_audit_logs": {
         "id": "endpoint_auditLogs.get_audit_logs",
@@ -12123,7 +12152,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_auditLogs.get_audit_logs_id": {
         "id": "endpoint_auditLogs.get_audit_logs_id",
@@ -12376,7 +12406,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accessTokens.post_auth_revoke": {
         "id": "endpoint_accessTokens.post_auth_revoke",
@@ -12638,7 +12669,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accessTokens.post_auth_token": {
         "id": "endpoint_accessTokens.post_auth_token",
@@ -12973,7 +13005,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.get_bank_accounts": {
         "id": "endpoint_entityBankAccounts.get_bank_accounts",
@@ -13250,7 +13283,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.post_bank_accounts": {
         "id": "endpoint_entityBankAccounts.post_bank_accounts",
@@ -13756,7 +13790,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.get_bank_accounts_id": {
         "id": "endpoint_entityBankAccounts.get_bank_accounts_id",
@@ -14106,7 +14141,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.delete_bank_accounts_id": {
         "id": "endpoint_entityBankAccounts.delete_bank_accounts_id",
@@ -14426,7 +14462,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.patch_bank_accounts_id": {
         "id": "endpoint_entityBankAccounts.patch_bank_accounts_id",
@@ -14848,7 +14885,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.post_bank_accounts_id_make_default": {
         "id": "endpoint_entityBankAccounts.post_bank_accounts_id_make_default",
@@ -15202,7 +15240,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_complete_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_complete_verification",
@@ -15529,7 +15568,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_start_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_start_verification",
@@ -15785,7 +15825,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_id_complete_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_id_complete_verification",
@@ -16062,7 +16103,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_id_refresh_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_id_refresh_verification",
@@ -16345,7 +16387,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.get_bank_accounts_id_verifications": {
         "id": "endpoint_entityBankAccountVerifications.get_bank_accounts_id_verifications",
@@ -16582,7 +16625,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_batchPayments.post_batch_payments": {
         "id": "endpoint_batchPayments.post_batch_payments",
@@ -16926,7 +16970,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_batchPayments.get_batch_payments_id": {
         "id": "endpoint_batchPayments.get_batch_payments_id",
@@ -17186,7 +17231,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.get_comments": {
         "id": "endpoint_comments.get_comments",
@@ -17758,7 +17804,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.post_comments": {
         "id": "endpoint_comments.post_comments",
@@ -18299,7 +18346,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.get_comments_id": {
         "id": "endpoint_comments.get_comments_id",
@@ -18752,7 +18800,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.delete_comments_id": {
         "id": "endpoint_comments.delete_comments_id",
@@ -19178,7 +19227,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.patch_comments_id": {
         "id": "endpoint_comments.patch_comments_id",
@@ -19705,7 +19755,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.get_counterparts": {
         "id": "endpoint_counterparts.get_counterparts",
@@ -20573,7 +20624,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.post_counterparts": {
         "id": "endpoint_counterparts.post_counterparts",
@@ -20872,7 +20924,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.get_counterparts_id": {
         "id": "endpoint_counterparts.get_counterparts_id",
@@ -21185,7 +21238,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.delete_counterparts_id": {
         "id": "endpoint_counterparts.delete_counterparts_id",
@@ -21451,7 +21505,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.patch_counterparts_id": {
         "id": "endpoint_counterparts.patch_counterparts_id",
@@ -21799,7 +21854,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.get_counterparts_id_partner_metadata": {
         "id": "endpoint_counterparts.get_counterparts_id_partner_metadata",
@@ -22036,7 +22092,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.put_counterparts_id_partner_metadata": {
         "id": "endpoint_counterparts.put_counterparts_id_partner_metadata",
@@ -22308,7 +22365,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.get_counterparts_id_addresses": {
         "id": "endpoint_counterpartAddresses.get_counterparts_id_addresses",
@@ -22607,7 +22665,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.post_counterparts_id_addresses": {
         "id": "endpoint_counterpartAddresses.post_counterparts_id_addresses",
@@ -22949,7 +23008,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.get_counterparts_id_addresses_id": {
         "id": "endpoint_counterpartAddresses.get_counterparts_id_addresses_id",
@@ -23264,7 +23324,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.delete_counterparts_id_addresses_id": {
         "id": "endpoint_counterpartAddresses.delete_counterparts_id_addresses_id",
@@ -23554,7 +23615,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.patch_counterparts_id_addresses_id": {
         "id": "endpoint_counterpartAddresses.patch_counterparts_id_addresses_id",
@@ -24007,7 +24069,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts": {
         "id": "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts",
@@ -24260,7 +24323,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts": {
         "id": "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts",
@@ -24801,7 +24865,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts_id": {
         "id": "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts_id",
@@ -25123,7 +25188,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.delete_counterparts_id_bank_accounts_id": {
         "id": "endpoint_counterpartBankAccounts.delete_counterparts_id_bank_accounts_id",
@@ -25413,7 +25479,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.patch_counterparts_id_bank_accounts_id": {
         "id": "endpoint_counterpartBankAccounts.patch_counterparts_id_bank_accounts_id",
@@ -25956,7 +26023,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts_id_make_default": {
         "id": "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts_id_make_default",
@@ -26213,7 +26281,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.get_counterparts_id_contacts": {
         "id": "endpoint_counterpartContacts.get_counterparts_id_contacts",
@@ -26465,7 +26534,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.post_counterparts_id_contacts": {
         "id": "endpoint_counterpartContacts.post_counterparts_id_contacts",
@@ -26924,7 +26994,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.get_counterparts_id_contacts_id": {
         "id": "endpoint_counterpartContacts.get_counterparts_id_contacts_id",
@@ -27247,7 +27318,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.delete_counterparts_id_contacts_id": {
         "id": "endpoint_counterpartContacts.delete_counterparts_id_contacts_id",
@@ -27537,7 +27609,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.patch_counterparts_id_contacts_id": {
         "id": "endpoint_counterpartContacts.patch_counterparts_id_contacts_id",
@@ -27998,7 +28071,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.post_counterparts_id_contacts_id_make_default": {
         "id": "endpoint_counterpartContacts.post_counterparts_id_contacts_id_make_default",
@@ -28325,7 +28399,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids": {
         "id": "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids",
@@ -28568,7 +28643,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.post_counterparts_id_vat_ids": {
         "id": "endpoint_counterpartVatIDs.post_counterparts_id_vat_ids",
@@ -28938,7 +29014,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids_id": {
         "id": "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids_id",
@@ -29250,7 +29327,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.delete_counterparts_id_vat_ids_id": {
         "id": "endpoint_counterpartVatIDs.delete_counterparts_id_vat_ids_id",
@@ -29540,7 +29618,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.patch_counterparts_id_vat_ids_id": {
         "id": "endpoint_counterpartVatIDs.patch_counterparts_id_vat_ids_id",
@@ -29928,7 +30007,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.get_data_exports": {
         "id": "endpoint_dataExport.get_data_exports",
@@ -30536,7 +30616,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.post_data_exports": {
         "id": "endpoint_dataExport.post_data_exports",
@@ -31186,7 +31267,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.get_data_exports_supported_formats": {
         "id": "endpoint_dataExport.get_data_exports_supported_formats",
@@ -31406,7 +31488,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.get_data_exports_id": {
         "id": "endpoint_dataExport.get_data_exports_id",
@@ -31858,7 +31941,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.get_data_exports_extra_data": {
         "id": "endpoint_dataExportExtraData.get_data_exports_extra_data",
@@ -32464,7 +32548,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.post_data_exports_extra_data": {
         "id": "endpoint_dataExportExtraData.post_data_exports_extra_data",
@@ -32942,7 +33027,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.get_data_exports_extra_data_id": {
         "id": "endpoint_dataExportExtraData.get_data_exports_extra_data_id",
@@ -33339,7 +33425,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.delete_data_exports_extra_data_id": {
         "id": "endpoint_dataExportExtraData.delete_data_exports_extra_data_id",
@@ -33736,7 +33823,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.patch_data_exports_extra_data_id": {
         "id": "endpoint_dataExportExtraData.patch_data_exports_extra_data_id",
@@ -34295,7 +34383,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates": {
         "id": "endpoint_pdfTemplates.get_document_templates",
@@ -34532,7 +34621,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates_system": {
         "id": "endpoint_pdfTemplates.get_document_templates_system",
@@ -34769,7 +34859,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates_id": {
         "id": "endpoint_pdfTemplates.get_document_templates_id",
@@ -35026,7 +35117,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.post_document_templates_id_make_default": {
         "id": "endpoint_pdfTemplates.post_document_templates_id_make_default",
@@ -35287,7 +35379,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates_id_preview": {
         "id": "endpoint_pdfTemplates.get_document_templates_id_preview",
@@ -35517,7 +35610,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities": {
         "id": "endpoint_entities.get_entities",
@@ -36230,7 +36324,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.post_entities": {
         "id": "endpoint_entities.post_entities",
@@ -36715,7 +36810,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_me": {
         "id": "endpoint_entities.get_entities_me",
@@ -37009,7 +37105,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entities_me": {
         "id": "endpoint_entities.patch_entities_me",
@@ -37330,7 +37427,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_id": {
         "id": "endpoint_entities.get_entities_id",
@@ -37650,7 +37748,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entities_id": {
         "id": "endpoint_entities.patch_entities_id",
@@ -37997,7 +38096,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.put_entities_id_logo": {
         "id": "endpoint_entities.put_entities_id_logo",
@@ -38344,7 +38444,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.delete_entities_id_logo": {
         "id": "endpoint_entities.delete_entities_id_logo",
@@ -38598,7 +38699,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_id_partner_metadata": {
         "id": "endpoint_entities.get_entities_id_partner_metadata",
@@ -38820,7 +38922,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.put_entities_id_partner_metadata": {
         "id": "endpoint_entities.put_entities_id_partner_metadata",
@@ -39077,7 +39180,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_id_settings": {
         "id": "endpoint_entities.get_entities_id_settings",
@@ -39442,7 +39546,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entities_id_settings": {
         "id": "endpoint_entities.patch_entities_id_settings",
@@ -40027,7 +40132,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entity_users_my_entity": {
         "id": "endpoint_entities.get_entity_users_my_entity",
@@ -40320,7 +40426,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entity_users_my_entity": {
         "id": "endpoint_entities.patch_entity_users_my_entity",
@@ -40640,7 +40747,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_entities_id_documents": {
         "id": "endpoint_onboardingDocuments.post_entities_id_documents",
@@ -40964,7 +41072,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_onboarding_documents": {
         "id": "endpoint_onboardingDocuments.post_onboarding_documents",
@@ -41416,7 +41525,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_persons_id_documents": {
         "id": "endpoint_onboardingDocuments.post_persons_id_documents",
@@ -41693,7 +41803,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_persons_id_onboarding_documents": {
         "id": "endpoint_onboardingDocuments.post_persons_id_onboarding_documents",
@@ -42005,7 +42116,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityOnboardingData.get_entities_id_onboarding_data": {
         "id": "endpoint_entityOnboardingData.get_entities_id_onboarding_data",
@@ -42347,7 +42459,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityOnboardingData.put_entities_id_onboarding_data": {
         "id": "endpoint_entityOnboardingData.put_entities_id_onboarding_data",
@@ -42722,7 +42835,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityOnboardingData.patch_entities_id_onboarding_data": {
         "id": "endpoint_entityOnboardingData.patch_entities_id_onboarding_data",
@@ -43095,7 +43209,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingRequirements.get_entities_id_onboarding_requirements": {
         "id": "endpoint_onboardingRequirements.get_entities_id_onboarding_requirements",
@@ -43342,7 +43457,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingRequirements.get_onboarding_requirements": {
         "id": "endpoint_onboardingRequirements.get_onboarding_requirements",
@@ -43583,7 +43699,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentMethods.get_entities_id_payment_methods": {
         "id": "endpoint_paymentMethods.get_entities_id_payment_methods",
@@ -43810,7 +43927,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentMethods.put_entities_id_payment_methods": {
         "id": "endpoint_paymentMethods.put_entities_id_payment_methods",
@@ -44129,7 +44247,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.get_entities_id_vat_ids": {
         "id": "endpoint_entityVatIDs.get_entities_id_vat_ids",
@@ -44356,7 +44475,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.post_entities_id_vat_ids": {
         "id": "endpoint_entityVatIDs.post_entities_id_vat_ids",
@@ -44707,7 +44827,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.get_entities_id_vat_ids_id": {
         "id": "endpoint_entityVatIDs.get_entities_id_vat_ids_id",
@@ -45002,7 +45123,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.delete_entities_id_vat_ids_id": {
         "id": "endpoint_entityVatIDs.delete_entities_id_vat_ids_id",
@@ -45275,7 +45397,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.patch_entities_id_vat_ids_id": {
         "id": "endpoint_entityVatIDs.patch_entities_id_vat_ids_id",
@@ -45646,7 +45769,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users": {
         "id": "endpoint_entityUsers.get_entity_users",
@@ -46364,7 +46488,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.post_entity_users": {
         "id": "endpoint_entityUsers.post_entity_users",
@@ -46791,7 +46916,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users_me": {
         "id": "endpoint_entityUsers.get_entity_users_me",
@@ -47043,7 +47169,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.patch_entity_users_me": {
         "id": "endpoint_entityUsers.patch_entity_users_me",
@@ -47416,7 +47543,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users_my_role": {
         "id": "endpoint_entityUsers.get_entity_users_my_role",
@@ -47619,7 +47747,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users_id": {
         "id": "endpoint_entityUsers.get_entity_users_id",
@@ -47914,7 +48043,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.delete_entity_users_id": {
         "id": "endpoint_entityUsers.delete_entity_users_id",
@@ -48180,7 +48310,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.patch_entity_users_id": {
         "id": "endpoint_entityUsers.patch_entity_users_id",
@@ -48634,7 +48765,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_events.get_events": {
         "id": "endpoint_events.get_events",
@@ -49025,7 +49157,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_events.get_events_id": {
         "id": "endpoint_events.get_events_id",
@@ -49251,7 +49384,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.get_files": {
         "id": "endpoint_files.get_files",
@@ -49483,7 +49617,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.post_files": {
         "id": "endpoint_files.post_files",
@@ -49749,7 +49884,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.get_files_id": {
         "id": "endpoint_files.get_files_id",
@@ -49975,7 +50111,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.delete_files_id": {
         "id": "endpoint_files.delete_files_id",
@@ -50172,7 +50309,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ledgerAccounts.get_ledger_accounts": {
         "id": "endpoint_ledgerAccounts.get_ledger_accounts",
@@ -50475,7 +50613,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ledgerAccounts.get_ledger_accounts_id": {
         "id": "endpoint_ledgerAccounts.get_ledger_accounts_id",
@@ -50716,7 +50855,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.get_mail_templates": {
         "id": "endpoint_mailTemplates.get_mail_templates",
@@ -51140,7 +51280,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.post_mail_templates": {
         "id": "endpoint_mailTemplates.post_mail_templates",
@@ -51469,7 +51610,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.post_mail_templates_preview": {
         "id": "endpoint_mailTemplates.post_mail_templates_preview",
@@ -51763,7 +51905,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.get_mail_templates_system": {
         "id": "endpoint_mailTemplates.get_mail_templates_system",
@@ -51966,7 +52109,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.get_mail_templates_id": {
         "id": "endpoint_mailTemplates.get_mail_templates_id",
@@ -52190,7 +52334,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.delete_mail_templates_id": {
         "id": "endpoint_mailTemplates.delete_mail_templates_id",
@@ -52388,7 +52533,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.patch_mail_templates_id": {
         "id": "endpoint_mailTemplates.patch_mail_templates_id",
@@ -52710,7 +52856,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.post_mail_templates_id_make_default": {
         "id": "endpoint_mailTemplates.post_mail_templates_id_make_default",
@@ -52938,7 +53085,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.get_mailbox_domains": {
         "id": "endpoint_mailboxDomains.get_mailbox_domains",
@@ -53156,7 +53304,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.post_mailbox_domains": {
         "id": "endpoint_mailboxDomains.post_mailbox_domains",
@@ -53410,7 +53559,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.delete_mailbox_domains_id": {
         "id": "endpoint_mailboxDomains.delete_mailbox_domains_id",
@@ -53816,7 +53966,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.post_mailbox_domains_id_verify": {
         "id": "endpoint_mailboxDomains.post_mailbox_domains_id_verify",
@@ -54298,7 +54449,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.get_mailboxes": {
         "id": "endpoint_mailboxes.get_mailboxes",
@@ -54515,7 +54667,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.post_mailboxes": {
         "id": "endpoint_mailboxes.post_mailboxes",
@@ -54797,7 +54950,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.post_mailboxes_search": {
         "id": "endpoint_mailboxes.post_mailboxes_search",
@@ -55066,7 +55220,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.delete_mailboxes_id": {
         "id": "endpoint_mailboxes.delete_mailboxes_id",
@@ -55492,7 +55647,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.get_measure_units": {
         "id": "endpoint_measureUnits.get_measure_units",
@@ -55860,7 +56016,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.post_measure_units": {
         "id": "endpoint_measureUnits.post_measure_units",
@@ -56271,7 +56428,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.get_measure_units_id": {
         "id": "endpoint_measureUnits.get_measure_units_id",
@@ -56718,7 +56876,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.delete_measure_units_id": {
         "id": "endpoint_measureUnits.delete_measure_units_id",
@@ -57143,7 +57302,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.patch_measure_units_id": {
         "id": "endpoint_measureUnits.patch_measure_units_id",
@@ -57666,7 +57826,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingLinks.post_onboarding_links": {
         "id": "endpoint_onboardingLinks.post_onboarding_links",
@@ -57952,7 +58113,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingLinks.post_payment_onboarding_links": {
         "id": "endpoint_onboardingLinks.post_payment_onboarding_links",
@@ -58249,7 +58411,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.get_overdue_reminders": {
         "id": "endpoint_overdueReminders.get_overdue_reminders",
@@ -58572,7 +58735,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.post_overdue_reminders": {
         "id": "endpoint_overdueReminders.post_overdue_reminders",
@@ -59052,7 +59216,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.get_overdue_reminders_id": {
         "id": "endpoint_overdueReminders.get_overdue_reminders_id",
@@ -59463,7 +59628,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.delete_overdue_reminders_id": {
         "id": "endpoint_overdueReminders.delete_overdue_reminders_id",
@@ -59888,7 +60054,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.patch_overdue_reminders_id": {
         "id": "endpoint_overdueReminders.patch_overdue_reminders_id",
@@ -60449,7 +60616,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.get_payable_purchase_orders": {
         "id": "endpoint_purchaseOrders.get_payable_purchase_orders",
@@ -61316,7 +61484,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.post_payable_purchase_orders": {
         "id": "endpoint_purchaseOrders.post_payable_purchase_orders",
@@ -61950,7 +62119,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.get_payable_purchase_orders_variables": {
         "id": "endpoint_purchaseOrders.get_payable_purchase_orders_variables",
@@ -62203,7 +62373,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.get_payable_purchase_orders_id": {
         "id": "endpoint_purchaseOrders.get_payable_purchase_orders_id",
@@ -62654,7 +62825,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.delete_payable_purchase_orders_id": {
         "id": "endpoint_purchaseOrders.delete_payable_purchase_orders_id",
@@ -62973,7 +63145,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.patch_payable_purchase_orders_id": {
         "id": "endpoint_purchaseOrders.patch_payable_purchase_orders_id",
@@ -63573,7 +63746,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.post_payable_purchase_orders_id_preview": {
         "id": "endpoint_purchaseOrders.post_payable_purchase_orders_id_preview",
@@ -64104,7 +64278,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.post_payable_purchase_orders_id_send": {
         "id": "endpoint_purchaseOrders.post_payable_purchase_orders_id_send",
@@ -64694,7 +64869,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables": {
         "id": "endpoint_payables.get_payables",
@@ -66001,7 +66177,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables": {
         "id": "endpoint_payables.post_payables",
@@ -67056,7 +67233,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_analytics": {
         "id": "endpoint_payables.get_payables_analytics",
@@ -68066,7 +68244,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_upload_from_file": {
         "id": "endpoint_payables.post_payables_upload_from_file",
@@ -68766,7 +68945,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_validations": {
         "id": "endpoint_payables.get_payables_validations",
@@ -69129,7 +69309,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.put_payables_validations": {
         "id": "endpoint_payables.put_payables_validations",
@@ -69566,7 +69747,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_validations_reset": {
         "id": "endpoint_payables.post_payables_validations_reset",
@@ -69929,7 +70111,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_variables": {
         "id": "endpoint_payables.get_payables_variables",
@@ -70199,7 +70382,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_id": {
         "id": "endpoint_payables.get_payables_id",
@@ -70854,7 +71038,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.delete_payables_id": {
         "id": "endpoint_payables.delete_payables_id",
@@ -71280,7 +71465,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.patch_payables_id": {
         "id": "endpoint_payables.patch_payables_id",
@@ -72401,7 +72587,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_approve_payment_operation": {
         "id": "endpoint_payables.post_payables_id_approve_payment_operation",
@@ -73113,7 +73300,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_attach_file": {
         "id": "endpoint_payables.post_payables_id_attach_file",
@@ -73849,7 +74037,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_cancel": {
         "id": "endpoint_payables.post_payables_id_cancel",
@@ -74561,7 +74750,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_mark_as_paid": {
         "id": "endpoint_payables.post_payables_id_mark_as_paid",
@@ -75334,7 +75524,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_mark_as_partially_paid": {
         "id": "endpoint_payables.post_payables_id_mark_as_partially_paid",
@@ -76118,7 +76309,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_reject": {
         "id": "endpoint_payables.post_payables_id_reject",
@@ -76830,7 +77022,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_reopen": {
         "id": "endpoint_payables.post_payables_id_reopen",
@@ -77542,7 +77735,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_submit_for_approval": {
         "id": "endpoint_payables.post_payables_id_submit_for_approval",
@@ -78254,7 +78448,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_validate": {
         "id": "endpoint_payables.post_payables_id_validate",
@@ -78707,7 +78902,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.get_payables_id_line_items": {
         "id": "endpoint_payableLineItems.get_payables_id_line_items",
@@ -79284,7 +79480,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.post_payables_id_line_items": {
         "id": "endpoint_payableLineItems.post_payables_id_line_items",
@@ -79841,7 +80038,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.put_payables_id_line_items": {
         "id": "endpoint_payableLineItems.put_payables_id_line_items",
@@ -80510,7 +80708,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.get_payables_id_line_items_id": {
         "id": "endpoint_payableLineItems.get_payables_id_line_items_id",
@@ -81048,7 +81247,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.delete_payables_id_line_items_id": {
         "id": "endpoint_payableLineItems.delete_payables_id_line_items_id",
@@ -81501,7 +81701,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.patch_payables_id_line_items_id": {
         "id": "endpoint_payableLineItems.patch_payables_id_line_items_id",
@@ -82082,7 +82283,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.get_payment_intents": {
         "id": "endpoint_paymentIntents.get_payment_intents",
@@ -82419,7 +82621,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.get_payment_intents_id": {
         "id": "endpoint_paymentIntents.get_payment_intents_id",
@@ -82710,7 +82913,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.patch_payment_intents_id": {
         "id": "endpoint_paymentIntents.patch_payment_intents_id",
@@ -83041,7 +83245,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.get_payment_intents_id_history": {
         "id": "endpoint_paymentIntents.get_payment_intents_id_history",
@@ -83284,7 +83489,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentLinks.post_payment_links": {
         "id": "endpoint_paymentLinks.post_payment_links",
@@ -83757,7 +83963,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentLinks.get_payment_links_id": {
         "id": "endpoint_paymentLinks.get_payment_links_id",
@@ -84054,7 +84261,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentLinks.post_payment_links_id_expire": {
         "id": "endpoint_paymentLinks.post_payment_links_id_expire",
@@ -84355,7 +84563,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentRecords.get_payment_records": {
         "id": "endpoint_paymentRecords.get_payment_records",
@@ -85075,7 +85284,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentRecords.post_payment_records": {
         "id": "endpoint_paymentRecords.post_payment_records",
@@ -85867,7 +86077,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentRecords.get_payment_records_id": {
         "id": "endpoint_paymentRecords.get_payment_records_id",
@@ -86482,7 +86693,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.get_payment_reminders": {
         "id": "endpoint_paymentReminders.get_payment_reminders",
@@ -86815,7 +87027,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.post_payment_reminders": {
         "id": "endpoint_paymentReminders.post_payment_reminders",
@@ -87333,7 +87546,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.get_payment_reminders_id": {
         "id": "endpoint_paymentReminders.get_payment_reminders_id",
@@ -87754,7 +87968,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.delete_payment_reminders_id": {
         "id": "endpoint_paymentReminders.delete_payment_reminders_id",
@@ -88179,7 +88394,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.patch_payment_reminders_id": {
         "id": "endpoint_paymentReminders.patch_payment_reminders_id",
@@ -88778,7 +88994,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.get_payment_terms": {
         "id": "endpoint_paymentTerms.get_payment_terms",
@@ -89104,7 +89321,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.post_payment_terms": {
         "id": "endpoint_paymentTerms.post_payment_terms",
@@ -89618,7 +89836,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.get_payment_terms_id": {
         "id": "endpoint_paymentTerms.get_payment_terms_id",
@@ -90021,7 +90240,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.delete_payment_terms_id": {
         "id": "endpoint_paymentTerms.delete_payment_terms_id",
@@ -90446,7 +90666,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.patch_payment_terms_id": {
         "id": "endpoint_paymentTerms.patch_payment_terms_id",
@@ -91029,7 +91250,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.get_persons": {
         "id": "endpoint_entityPersons.get_persons",
@@ -91259,7 +91481,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.post_persons": {
         "id": "endpoint_entityPersons.post_persons",
@@ -91759,7 +91982,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.get_persons_id": {
         "id": "endpoint_entityPersons.get_persons_id",
@@ -92071,7 +92295,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.delete_persons_id": {
         "id": "endpoint_entityPersons.delete_persons_id",
@@ -92390,7 +92615,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.patch_persons_id": {
         "id": "endpoint_entityPersons.patch_persons_id",
@@ -92977,7 +93203,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.get_products": {
         "id": "endpoint_products.get_products",
@@ -93746,7 +93973,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.post_products": {
         "id": "endpoint_products.post_products",
@@ -94291,7 +94519,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.get_products_id": {
         "id": "endpoint_products.get_products_id",
@@ -94748,7 +94977,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.delete_products_id": {
         "id": "endpoint_products.delete_products_id",
@@ -95173,7 +95403,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.patch_products_id": {
         "id": "endpoint_products.patch_products_id",
@@ -95799,7 +96030,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.get_projects": {
         "id": "endpoint_projects.get_projects",
@@ -96747,7 +96979,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.post_projects": {
         "id": "endpoint_projects.post_projects",
@@ -97367,7 +97600,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.get_projects_id": {
         "id": "endpoint_projects.get_projects_id",
@@ -97836,7 +98070,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.delete_projects_id": {
         "id": "endpoint_projects.delete_projects_id",
@@ -98262,7 +98497,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.patch_projects_id": {
         "id": "endpoint_projects.patch_projects_id",
@@ -98963,7 +99199,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables": {
         "id": "endpoint_receivables.get_receivables",
@@ -100221,7 +100458,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables": {
         "id": "endpoint_receivables.post_receivables",
@@ -100999,7 +101237,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_variables": {
         "id": "endpoint_receivables.get_receivables_variables",
@@ -101302,7 +101541,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id": {
         "id": "endpoint_receivables.get_receivables_id",
@@ -101938,7 +102178,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.delete_receivables_id": {
         "id": "endpoint_receivables.delete_receivables_id",
@@ -102416,7 +102657,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.patch_receivables_id": {
         "id": "endpoint_receivables.patch_receivables_id",
@@ -103164,7 +103406,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_accept": {
         "id": "endpoint_receivables.post_receivables_id_accept",
@@ -103723,7 +103966,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_cancel": {
         "id": "endpoint_receivables.post_receivables_id_cancel",
@@ -104205,7 +104449,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_clone": {
         "id": "endpoint_receivables.post_receivables_id_clone",
@@ -104898,7 +105143,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_decline": {
         "id": "endpoint_receivables.post_receivables_id_decline",
@@ -105459,7 +105705,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_history": {
         "id": "endpoint_receivables.get_receivables_id_history",
@@ -106119,7 +106366,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_history_id": {
         "id": "endpoint_receivables.get_receivables_id_history_id",
@@ -106598,7 +106846,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_issue": {
         "id": "endpoint_receivables.post_receivables_id_issue",
@@ -107291,7 +107540,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.put_receivables_id_line_items": {
         "id": "endpoint_receivables.put_receivables_id_line_items",
@@ -107926,7 +108176,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_mails": {
         "id": "endpoint_receivables.get_receivables_id_mails",
@@ -108578,7 +108829,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_mails_id": {
         "id": "endpoint_receivables.get_receivables_id_mails_id",
@@ -109071,7 +109323,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_mark_as_paid": {
         "id": "endpoint_receivables.post_receivables_id_mark_as_paid",
@@ -109844,7 +110097,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_mark_as_partially_paid": {
         "id": "endpoint_receivables.post_receivables_id_mark_as_partially_paid",
@@ -110630,7 +110884,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_mark_as_uncollectible": {
         "id": "endpoint_receivables.post_receivables_id_mark_as_uncollectible",
@@ -111384,7 +111639,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_pdf_link": {
         "id": "endpoint_receivables.get_receivables_id_pdf_link",
@@ -111832,7 +112088,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_preview": {
         "id": "endpoint_receivables.post_receivables_id_preview",
@@ -112403,7 +112660,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_send": {
         "id": "endpoint_receivables.post_receivables_id_send",
@@ -113037,7 +113295,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_send_test_reminder": {
         "id": "endpoint_receivables.post_receivables_id_send_test_reminder",
@@ -113624,7 +113883,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_verify": {
         "id": "endpoint_receivables.post_receivables_id_verify",
@@ -114095,7 +114355,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.get_recurrences": {
         "id": "endpoint_recurrences.get_recurrences",
@@ -114526,7 +114787,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.post_recurrences": {
         "id": "endpoint_recurrences.post_recurrences",
@@ -115118,7 +115380,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.get_recurrences_id": {
         "id": "endpoint_recurrences.get_recurrences_id",
@@ -115579,7 +115842,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.patch_recurrences_id": {
         "id": "endpoint_recurrences.patch_recurrences_id",
@@ -116133,7 +116397,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.post_recurrences_id_cancel": {
         "id": "endpoint_recurrences.post_recurrences_id_cancel",
@@ -116615,7 +116880,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.get_roles": {
         "id": "endpoint_roles.get_roles",
@@ -117256,7 +117522,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.post_roles": {
         "id": "endpoint_roles.post_roles",
@@ -117590,7 +117857,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.get_roles_id": {
         "id": "endpoint_roles.get_roles_id",
@@ -117885,7 +118153,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.patch_roles_id": {
         "id": "endpoint_roles.patch_roles_id",
@@ -118245,7 +118514,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_partnerSettings.get_settings": {
         "id": "endpoint_partnerSettings.get_settings",
@@ -118548,7 +118818,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_partnerSettings.patch_settings": {
         "id": "endpoint_partnerSettings.patch_settings",
@@ -119110,7 +119381,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.get_tags": {
         "id": "endpoint_tags.get_tags",
@@ -119680,7 +119952,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.post_tags": {
         "id": "endpoint_tags.post_tags",
@@ -120260,7 +120533,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.get_tags_id": {
         "id": "endpoint_tags.get_tags_id",
@@ -120763,7 +121037,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.delete_tags_id": {
         "id": "endpoint_tags.delete_tags_id",
@@ -121189,7 +121464,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.patch_tags_id": {
         "id": "endpoint_tags.patch_tags_id",
@@ -121793,7 +122069,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.get_text_templates": {
         "id": "endpoint_textTemplates.get_text_templates",
@@ -122072,7 +122349,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.post_text_templates": {
         "id": "endpoint_textTemplates.post_text_templates",
@@ -122368,7 +122646,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.get_text_templates_id": {
         "id": "endpoint_textTemplates.get_text_templates_id",
@@ -122607,7 +122886,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.delete_text_templates_id": {
         "id": "endpoint_textTemplates.delete_text_templates_id",
@@ -122822,7 +123102,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.patch_text_templates_id": {
         "id": "endpoint_textTemplates.patch_text_templates_id",
@@ -123120,7 +123401,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.post_text_templates_id_make_default": {
         "id": "endpoint_textTemplates.post_text_templates_id_make_default",
@@ -123364,7 +123646,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_vatRates.get_vat_rates": {
         "id": "endpoint_vatRates.get_vat_rates",
@@ -123895,7 +124178,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookDeliveries.get_webhook_deliveries": {
         "id": "endpoint_webhookDeliveries.get_webhook_deliveries",
@@ -124319,7 +124603,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.get_webhook_subscriptions": {
         "id": "endpoint_webhookSubscriptions.get_webhook_subscriptions",
@@ -124690,7 +124975,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_subscriptions": {
         "id": "endpoint_webhookSubscriptions.post_webhook_subscriptions",
@@ -124967,7 +125253,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.get_webhook_subscriptions_id": {
         "id": "endpoint_webhookSubscriptions.get_webhook_subscriptions_id",
@@ -125188,7 +125475,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.delete_webhook_subscriptions_id": {
         "id": "endpoint_webhookSubscriptions.delete_webhook_subscriptions_id",
@@ -125385,7 +125673,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.patch_webhook_subscriptions_id": {
         "id": "endpoint_webhookSubscriptions.patch_webhook_subscriptions_id",
@@ -125688,7 +125977,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_subscriptions_id_disable": {
         "id": "endpoint_webhookSubscriptions.post_webhook_subscriptions_id_disable",
@@ -125913,7 +126203,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_subscriptions_id_enable": {
         "id": "endpoint_webhookSubscriptions.post_webhook_subscriptions_id_enable",
@@ -126138,7 +126429,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_subscriptions_id_regenerate_secret": {
         "id": "endpoint_webhookSubscriptions.post_webhook_subscriptions_id_regenerate_secret",
@@ -126364,7 +126656,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -170460,7 +170753,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingDataPull.get_accounting_payables_id": {
         "id": "endpoint_accountingDataPull.get_accounting_payables_id",
@@ -170724,7 +171018,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingDataPull.get_accounting_receivables": {
         "id": "endpoint_accountingDataPull.get_accounting_receivables",
@@ -171000,7 +171295,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingDataPull.get_accounting_receivables_id": {
         "id": "endpoint_accountingDataPull.get_accounting_receivables_id",
@@ -171256,7 +171552,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.get_accounting_connections": {
         "id": "endpoint_accountingConnections.get_accounting_connections",
@@ -171479,7 +171776,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.post_accounting_connections": {
         "id": "endpoint_accountingConnections.post_accounting_connections",
@@ -171736,7 +172034,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.get_accounting_connections_id": {
         "id": "endpoint_accountingConnections.get_accounting_connections_id",
@@ -171979,7 +172278,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.post_accounting_connections_id_disconnect": {
         "id": "endpoint_accountingConnections.post_accounting_connections_id_disconnect",
@@ -172226,7 +172526,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingConnections.post_accounting_connections_id_sync": {
         "id": "endpoint_accountingConnections.post_accounting_connections_id_sync",
@@ -172461,7 +172762,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingSynchronizedRecords.get_accounting_synced_records": {
         "id": "endpoint_accountingSynchronizedRecords.get_accounting_synced_records",
@@ -172965,7 +173267,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingSynchronizedRecords.get_accounting_synced_records_id": {
         "id": "endpoint_accountingSynchronizedRecords.get_accounting_synced_records_id",
@@ -173213,7 +173516,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingSynchronizedRecords.post_accounting_synced_records_id_push": {
         "id": "endpoint_accountingSynchronizedRecords.post_accounting_synced_records_id_push",
@@ -173465,7 +173769,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingTaxRates.get_accounting_tax_rates": {
         "id": "endpoint_accountingTaxRates.get_accounting_tax_rates",
@@ -173767,7 +174072,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accountingTaxRates.get_accounting_tax_rates_id": {
         "id": "endpoint_accountingTaxRates.get_accounting_tax_rates_id",
@@ -174011,7 +174317,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies": {
         "id": "endpoint_approvalPolicies.get_approval_policies",
@@ -174710,7 +175017,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.post_approval_policies": {
         "id": "endpoint_approvalPolicies.post_approval_policies",
@@ -175252,7 +175560,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id",
@@ -175656,7 +175965,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.delete_approval_policies_id": {
         "id": "endpoint_approvalPolicies.delete_approval_policies_id",
@@ -176029,7 +176339,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.patch_approval_policies_id": {
         "id": "endpoint_approvalPolicies.patch_approval_policies_id",
@@ -176657,7 +176968,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id_processes": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id_processes",
@@ -177071,7 +177383,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id_processes_id": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id_processes_id",
@@ -177503,7 +177816,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.post_approval_policies_id_processes_id_cancel": {
         "id": "endpoint_approvalPolicies.post_approval_policies_id_processes_id_cancel",
@@ -177939,7 +178253,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalPolicies.get_approval_policies_id_processes_id_steps": {
         "id": "endpoint_approvalPolicies.get_approval_policies_id_processes_id_steps",
@@ -178376,7 +178691,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.get_approval_requests": {
         "id": "endpoint_approvalRequests.get_approval_requests",
@@ -179200,7 +179516,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests": {
         "id": "endpoint_approvalRequests.post_approval_requests",
@@ -179778,7 +180095,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.get_approval_requests_id": {
         "id": "endpoint_approvalRequests.get_approval_requests_id",
@@ -180291,7 +180609,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests_id_approve": {
         "id": "endpoint_approvalRequests.post_approval_requests_id_approve",
@@ -180808,7 +181127,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests_id_cancel": {
         "id": "endpoint_approvalRequests.post_approval_requests_id_cancel",
@@ -181325,7 +181645,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_approvalRequests.post_approval_requests_id_reject": {
         "id": "endpoint_approvalRequests.post_approval_requests_id_reject",
@@ -181842,7 +182163,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_auditLogs.get_audit_logs": {
         "id": "endpoint_auditLogs.get_audit_logs",
@@ -182299,7 +182621,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_auditLogs.get_audit_logs_id": {
         "id": "endpoint_auditLogs.get_audit_logs_id",
@@ -182552,7 +182875,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accessTokens.post_auth_revoke": {
         "id": "endpoint_accessTokens.post_auth_revoke",
@@ -182814,7 +183138,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_accessTokens.post_auth_token": {
         "id": "endpoint_accessTokens.post_auth_token",
@@ -183149,7 +183474,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.get_bank_accounts": {
         "id": "endpoint_entityBankAccounts.get_bank_accounts",
@@ -183426,7 +183752,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.post_bank_accounts": {
         "id": "endpoint_entityBankAccounts.post_bank_accounts",
@@ -183928,7 +184255,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.get_bank_accounts_id": {
         "id": "endpoint_entityBankAccounts.get_bank_accounts_id",
@@ -184278,7 +184606,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.delete_bank_accounts_id": {
         "id": "endpoint_entityBankAccounts.delete_bank_accounts_id",
@@ -184598,7 +184927,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.patch_bank_accounts_id": {
         "id": "endpoint_entityBankAccounts.patch_bank_accounts_id",
@@ -185016,7 +185346,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccounts.post_bank_accounts_id_make_default": {
         "id": "endpoint_entityBankAccounts.post_bank_accounts_id_make_default",
@@ -185370,7 +185701,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_complete_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_complete_verification",
@@ -185697,7 +186029,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_start_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_start_verification",
@@ -185953,7 +186286,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_id_complete_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_id_complete_verification",
@@ -186230,7 +186564,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.post_bank_accounts_id_refresh_verification": {
         "id": "endpoint_entityBankAccountVerifications.post_bank_accounts_id_refresh_verification",
@@ -186513,7 +186848,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityBankAccountVerifications.get_bank_accounts_id_verifications": {
         "id": "endpoint_entityBankAccountVerifications.get_bank_accounts_id_verifications",
@@ -186750,7 +187086,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_batchPayments.post_batch_payments": {
         "id": "endpoint_batchPayments.post_batch_payments",
@@ -187094,7 +187431,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_batchPayments.get_batch_payments_id": {
         "id": "endpoint_batchPayments.get_batch_payments_id",
@@ -187354,7 +187692,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.get_comments": {
         "id": "endpoint_comments.get_comments",
@@ -187926,7 +188265,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.post_comments": {
         "id": "endpoint_comments.post_comments",
@@ -188467,7 +188807,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.get_comments_id": {
         "id": "endpoint_comments.get_comments_id",
@@ -188920,7 +189261,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.delete_comments_id": {
         "id": "endpoint_comments.delete_comments_id",
@@ -189346,7 +189688,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_comments.patch_comments_id": {
         "id": "endpoint_comments.patch_comments_id",
@@ -189873,7 +190216,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.get_counterparts": {
         "id": "endpoint_counterparts.get_counterparts",
@@ -190741,7 +191085,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.post_counterparts": {
         "id": "endpoint_counterparts.post_counterparts",
@@ -191040,7 +191385,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.get_counterparts_id": {
         "id": "endpoint_counterparts.get_counterparts_id",
@@ -191353,7 +191699,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.delete_counterparts_id": {
         "id": "endpoint_counterparts.delete_counterparts_id",
@@ -191619,7 +191966,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.patch_counterparts_id": {
         "id": "endpoint_counterparts.patch_counterparts_id",
@@ -191971,7 +192319,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.get_counterparts_id_partner_metadata": {
         "id": "endpoint_counterparts.get_counterparts_id_partner_metadata",
@@ -192208,7 +192557,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterparts.put_counterparts_id_partner_metadata": {
         "id": "endpoint_counterparts.put_counterparts_id_partner_metadata",
@@ -192480,7 +192830,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.get_counterparts_id_addresses": {
         "id": "endpoint_counterpartAddresses.get_counterparts_id_addresses",
@@ -192780,7 +193131,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.post_counterparts_id_addresses": {
         "id": "endpoint_counterpartAddresses.post_counterparts_id_addresses",
@@ -193123,7 +193475,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.get_counterparts_id_addresses_id": {
         "id": "endpoint_counterpartAddresses.get_counterparts_id_addresses_id",
@@ -193439,7 +193792,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.delete_counterparts_id_addresses_id": {
         "id": "endpoint_counterpartAddresses.delete_counterparts_id_addresses_id",
@@ -193729,7 +194083,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.patch_counterparts_id_addresses_id": {
         "id": "endpoint_counterpartAddresses.patch_counterparts_id_addresses_id",
@@ -194183,7 +194538,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartAddresses.post_counterparts_id_addresses_id_make_default": {
         "id": "endpoint_counterpartAddresses.post_counterparts_id_addresses_id_make_default",
@@ -194503,7 +194859,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts": {
         "id": "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts",
@@ -194756,7 +195113,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts": {
         "id": "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts",
@@ -195297,7 +195655,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts_id": {
         "id": "endpoint_counterpartBankAccounts.get_counterparts_id_bank_accounts_id",
@@ -195619,7 +195978,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.delete_counterparts_id_bank_accounts_id": {
         "id": "endpoint_counterpartBankAccounts.delete_counterparts_id_bank_accounts_id",
@@ -195909,7 +196269,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.patch_counterparts_id_bank_accounts_id": {
         "id": "endpoint_counterpartBankAccounts.patch_counterparts_id_bank_accounts_id",
@@ -196452,7 +196813,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts_id_make_default": {
         "id": "endpoint_counterpartBankAccounts.post_counterparts_id_bank_accounts_id_make_default",
@@ -196709,7 +197071,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.get_counterparts_id_contacts": {
         "id": "endpoint_counterpartContacts.get_counterparts_id_contacts",
@@ -196961,7 +197324,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.post_counterparts_id_contacts": {
         "id": "endpoint_counterpartContacts.post_counterparts_id_contacts",
@@ -197420,7 +197784,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.get_counterparts_id_contacts_id": {
         "id": "endpoint_counterpartContacts.get_counterparts_id_contacts_id",
@@ -197743,7 +198108,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.delete_counterparts_id_contacts_id": {
         "id": "endpoint_counterpartContacts.delete_counterparts_id_contacts_id",
@@ -198033,7 +198399,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.patch_counterparts_id_contacts_id": {
         "id": "endpoint_counterpartContacts.patch_counterparts_id_contacts_id",
@@ -198494,7 +198861,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartContacts.post_counterparts_id_contacts_id_make_default": {
         "id": "endpoint_counterpartContacts.post_counterparts_id_contacts_id_make_default",
@@ -198821,7 +199189,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids": {
         "id": "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids",
@@ -199064,7 +199433,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.post_counterparts_id_vat_ids": {
         "id": "endpoint_counterpartVatIDs.post_counterparts_id_vat_ids",
@@ -199434,7 +199804,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids_id": {
         "id": "endpoint_counterpartVatIDs.get_counterparts_id_vat_ids_id",
@@ -199746,7 +200117,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.delete_counterparts_id_vat_ids_id": {
         "id": "endpoint_counterpartVatIDs.delete_counterparts_id_vat_ids_id",
@@ -200036,7 +200408,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_counterpartVatIDs.patch_counterparts_id_vat_ids_id": {
         "id": "endpoint_counterpartVatIDs.patch_counterparts_id_vat_ids_id",
@@ -200424,7 +200797,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.get_data_exports": {
         "id": "endpoint_dataExport.get_data_exports",
@@ -201032,7 +201406,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.post_data_exports": {
         "id": "endpoint_dataExport.post_data_exports",
@@ -201682,7 +202057,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.get_data_exports_supported_formats": {
         "id": "endpoint_dataExport.get_data_exports_supported_formats",
@@ -201902,7 +202278,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExport.get_data_exports_id": {
         "id": "endpoint_dataExport.get_data_exports_id",
@@ -202354,7 +202731,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.get_data_exports_extra_data": {
         "id": "endpoint_dataExportExtraData.get_data_exports_extra_data",
@@ -202960,7 +203338,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.post_data_exports_extra_data": {
         "id": "endpoint_dataExportExtraData.post_data_exports_extra_data",
@@ -203438,7 +203817,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.get_data_exports_extra_data_id": {
         "id": "endpoint_dataExportExtraData.get_data_exports_extra_data_id",
@@ -203835,7 +204215,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.delete_data_exports_extra_data_id": {
         "id": "endpoint_dataExportExtraData.delete_data_exports_extra_data_id",
@@ -204232,7 +204613,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_dataExportExtraData.patch_data_exports_extra_data_id": {
         "id": "endpoint_dataExportExtraData.patch_data_exports_extra_data_id",
@@ -204791,7 +205173,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates": {
         "id": "endpoint_pdfTemplates.get_document_templates",
@@ -205041,7 +205424,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates_system": {
         "id": "endpoint_pdfTemplates.get_document_templates_system",
@@ -205291,7 +205675,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates_id": {
         "id": "endpoint_pdfTemplates.get_document_templates_id",
@@ -205560,7 +205945,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.post_document_templates_id_make_default": {
         "id": "endpoint_pdfTemplates.post_document_templates_id_make_default",
@@ -205833,7 +206219,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_pdfTemplates.get_document_templates_id_preview": {
         "id": "endpoint_pdfTemplates.get_document_templates_id_preview",
@@ -206063,7 +206450,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities": {
         "id": "endpoint_entities.get_entities",
@@ -206776,7 +207164,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.post_entities": {
         "id": "endpoint_entities.post_entities",
@@ -207259,7 +207648,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_me": {
         "id": "endpoint_entities.get_entities_me",
@@ -207553,7 +207943,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entities_me": {
         "id": "endpoint_entities.patch_entities_me",
@@ -207874,7 +208265,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_id": {
         "id": "endpoint_entities.get_entities_id",
@@ -208194,7 +208586,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entities_id": {
         "id": "endpoint_entities.patch_entities_id",
@@ -208541,7 +208934,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.put_entities_id_logo": {
         "id": "endpoint_entities.put_entities_id_logo",
@@ -208888,7 +209282,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.delete_entities_id_logo": {
         "id": "endpoint_entities.delete_entities_id_logo",
@@ -209142,7 +209537,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_id_partner_metadata": {
         "id": "endpoint_entities.get_entities_id_partner_metadata",
@@ -209364,7 +209760,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.put_entities_id_partner_metadata": {
         "id": "endpoint_entities.put_entities_id_partner_metadata",
@@ -209621,7 +210018,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entities_id_settings": {
         "id": "endpoint_entities.get_entities_id_settings",
@@ -209986,7 +210384,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entities_id_settings": {
         "id": "endpoint_entities.patch_entities_id_settings",
@@ -210571,7 +210970,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.get_entity_users_my_entity": {
         "id": "endpoint_entities.get_entity_users_my_entity",
@@ -210864,7 +211264,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entities.patch_entity_users_my_entity": {
         "id": "endpoint_entities.patch_entity_users_my_entity",
@@ -211184,7 +211585,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_entities_id_documents": {
         "id": "endpoint_onboardingDocuments.post_entities_id_documents",
@@ -211508,7 +211910,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_onboarding_documents": {
         "id": "endpoint_onboardingDocuments.post_onboarding_documents",
@@ -211960,7 +212363,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_persons_id_documents": {
         "id": "endpoint_onboardingDocuments.post_persons_id_documents",
@@ -212237,7 +212641,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingDocuments.post_persons_id_onboarding_documents": {
         "id": "endpoint_onboardingDocuments.post_persons_id_onboarding_documents",
@@ -212549,7 +212954,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityOnboardingData.get_entities_id_onboarding_data": {
         "id": "endpoint_entityOnboardingData.get_entities_id_onboarding_data",
@@ -212891,7 +213297,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityOnboardingData.put_entities_id_onboarding_data": {
         "id": "endpoint_entityOnboardingData.put_entities_id_onboarding_data",
@@ -213266,7 +213673,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityOnboardingData.patch_entities_id_onboarding_data": {
         "id": "endpoint_entityOnboardingData.patch_entities_id_onboarding_data",
@@ -213639,7 +214047,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingRequirements.get_entities_id_onboarding_requirements": {
         "id": "endpoint_onboardingRequirements.get_entities_id_onboarding_requirements",
@@ -213886,7 +214295,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingRequirements.get_onboarding_requirements": {
         "id": "endpoint_onboardingRequirements.get_onboarding_requirements",
@@ -214127,7 +214537,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentMethods.get_entities_id_payment_methods": {
         "id": "endpoint_paymentMethods.get_entities_id_payment_methods",
@@ -214354,7 +214765,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentMethods.put_entities_id_payment_methods": {
         "id": "endpoint_paymentMethods.put_entities_id_payment_methods",
@@ -214673,7 +215085,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.get_entities_id_vat_ids": {
         "id": "endpoint_entityVatIDs.get_entities_id_vat_ids",
@@ -214900,7 +215313,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.post_entities_id_vat_ids": {
         "id": "endpoint_entityVatIDs.post_entities_id_vat_ids",
@@ -215251,7 +215665,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.get_entities_id_vat_ids_id": {
         "id": "endpoint_entityVatIDs.get_entities_id_vat_ids_id",
@@ -215546,7 +215961,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.delete_entities_id_vat_ids_id": {
         "id": "endpoint_entityVatIDs.delete_entities_id_vat_ids_id",
@@ -215819,7 +216235,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityVatIDs.patch_entities_id_vat_ids_id": {
         "id": "endpoint_entityVatIDs.patch_entities_id_vat_ids_id",
@@ -216190,7 +216607,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users": {
         "id": "endpoint_entityUsers.get_entity_users",
@@ -216908,7 +217326,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.post_entity_users": {
         "id": "endpoint_entityUsers.post_entity_users",
@@ -217335,7 +217754,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users_me": {
         "id": "endpoint_entityUsers.get_entity_users_me",
@@ -217587,7 +218007,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.patch_entity_users_me": {
         "id": "endpoint_entityUsers.patch_entity_users_me",
@@ -217960,7 +218381,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users_my_role": {
         "id": "endpoint_entityUsers.get_entity_users_my_role",
@@ -218163,7 +218585,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.get_entity_users_id": {
         "id": "endpoint_entityUsers.get_entity_users_id",
@@ -218458,7 +218881,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.delete_entity_users_id": {
         "id": "endpoint_entityUsers.delete_entity_users_id",
@@ -218724,7 +219148,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityUsers.patch_entity_users_id": {
         "id": "endpoint_entityUsers.patch_entity_users_id",
@@ -219178,7 +219603,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_events.get_events": {
         "id": "endpoint_events.get_events",
@@ -219571,7 +219997,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_events.get_events_id": {
         "id": "endpoint_events.get_events_id",
@@ -219799,7 +220226,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.get_files": {
         "id": "endpoint_files.get_files",
@@ -220031,7 +220459,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.post_files": {
         "id": "endpoint_files.post_files",
@@ -220297,7 +220726,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.get_files_id": {
         "id": "endpoint_files.get_files_id",
@@ -220523,7 +220953,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_files.delete_files_id": {
         "id": "endpoint_files.delete_files_id",
@@ -220720,7 +221151,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ledgerAccounts.get_ledger_accounts": {
         "id": "endpoint_ledgerAccounts.get_ledger_accounts",
@@ -221023,7 +221455,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ledgerAccounts.get_ledger_accounts_id": {
         "id": "endpoint_ledgerAccounts.get_ledger_accounts_id",
@@ -221264,7 +221697,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.get_mail_templates": {
         "id": "endpoint_mailTemplates.get_mail_templates",
@@ -221688,7 +222122,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.post_mail_templates": {
         "id": "endpoint_mailTemplates.post_mail_templates",
@@ -222017,7 +222452,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.post_mail_templates_preview": {
         "id": "endpoint_mailTemplates.post_mail_templates_preview",
@@ -222311,7 +222747,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.get_mail_templates_system": {
         "id": "endpoint_mailTemplates.get_mail_templates_system",
@@ -222514,7 +222951,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.get_mail_templates_id": {
         "id": "endpoint_mailTemplates.get_mail_templates_id",
@@ -222738,7 +223176,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.delete_mail_templates_id": {
         "id": "endpoint_mailTemplates.delete_mail_templates_id",
@@ -222936,7 +223375,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.patch_mail_templates_id": {
         "id": "endpoint_mailTemplates.patch_mail_templates_id",
@@ -223258,7 +223698,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailTemplates.post_mail_templates_id_make_default": {
         "id": "endpoint_mailTemplates.post_mail_templates_id_make_default",
@@ -223486,7 +223927,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.get_mailbox_domains": {
         "id": "endpoint_mailboxDomains.get_mailbox_domains",
@@ -223704,7 +224146,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.post_mailbox_domains": {
         "id": "endpoint_mailboxDomains.post_mailbox_domains",
@@ -223958,7 +224401,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.delete_mailbox_domains_id": {
         "id": "endpoint_mailboxDomains.delete_mailbox_domains_id",
@@ -224364,7 +224808,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxDomains.post_mailbox_domains_id_verify": {
         "id": "endpoint_mailboxDomains.post_mailbox_domains_id_verify",
@@ -224846,7 +225291,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.get_mailboxes": {
         "id": "endpoint_mailboxes.get_mailboxes",
@@ -225063,7 +225509,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.post_mailboxes": {
         "id": "endpoint_mailboxes.post_mailboxes",
@@ -225345,7 +225792,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.post_mailboxes_search": {
         "id": "endpoint_mailboxes.post_mailboxes_search",
@@ -225614,7 +226062,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_mailboxes.delete_mailboxes_id": {
         "id": "endpoint_mailboxes.delete_mailboxes_id",
@@ -226040,7 +226489,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.get_measure_units": {
         "id": "endpoint_measureUnits.get_measure_units",
@@ -226408,7 +226858,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.post_measure_units": {
         "id": "endpoint_measureUnits.post_measure_units",
@@ -226819,7 +227270,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.get_measure_units_id": {
         "id": "endpoint_measureUnits.get_measure_units_id",
@@ -227266,7 +227718,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.delete_measure_units_id": {
         "id": "endpoint_measureUnits.delete_measure_units_id",
@@ -227691,7 +228144,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_measureUnits.patch_measure_units_id": {
         "id": "endpoint_measureUnits.patch_measure_units_id",
@@ -228214,7 +228668,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingLinks.post_onboarding_links": {
         "id": "endpoint_onboardingLinks.post_onboarding_links",
@@ -228500,7 +228955,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_onboardingLinks.post_payment_onboarding_links": {
         "id": "endpoint_onboardingLinks.post_payment_onboarding_links",
@@ -228797,7 +229253,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.get_overdue_reminders": {
         "id": "endpoint_overdueReminders.get_overdue_reminders",
@@ -229118,7 +229575,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.post_overdue_reminders": {
         "id": "endpoint_overdueReminders.post_overdue_reminders",
@@ -229614,7 +230072,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.get_overdue_reminders_id": {
         "id": "endpoint_overdueReminders.get_overdue_reminders_id",
@@ -230023,7 +230482,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.delete_overdue_reminders_id": {
         "id": "endpoint_overdueReminders.delete_overdue_reminders_id",
@@ -230448,7 +230908,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_overdueReminders.patch_overdue_reminders_id": {
         "id": "endpoint_overdueReminders.patch_overdue_reminders_id",
@@ -231037,7 +231498,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.get_payable_purchase_orders": {
         "id": "endpoint_purchaseOrders.get_payable_purchase_orders",
@@ -231904,7 +232366,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.post_payable_purchase_orders": {
         "id": "endpoint_purchaseOrders.post_payable_purchase_orders",
@@ -232538,7 +233001,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.get_payable_purchase_orders_variables": {
         "id": "endpoint_purchaseOrders.get_payable_purchase_orders_variables",
@@ -232791,7 +233255,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.get_payable_purchase_orders_id": {
         "id": "endpoint_purchaseOrders.get_payable_purchase_orders_id",
@@ -233242,7 +233707,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.delete_payable_purchase_orders_id": {
         "id": "endpoint_purchaseOrders.delete_payable_purchase_orders_id",
@@ -233561,7 +234027,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.patch_payable_purchase_orders_id": {
         "id": "endpoint_purchaseOrders.patch_payable_purchase_orders_id",
@@ -234161,7 +234628,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.post_payable_purchase_orders_id_preview": {
         "id": "endpoint_purchaseOrders.post_payable_purchase_orders_id_preview",
@@ -234692,7 +235160,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_purchaseOrders.post_payable_purchase_orders_id_send": {
         "id": "endpoint_purchaseOrders.post_payable_purchase_orders_id_send",
@@ -235282,7 +235751,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables": {
         "id": "endpoint_payables.get_payables",
@@ -236516,7 +236986,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables": {
         "id": "endpoint_payables.post_payables",
@@ -237571,7 +238042,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_analytics": {
         "id": "endpoint_payables.get_payables_analytics",
@@ -238581,7 +239053,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_upload_from_file": {
         "id": "endpoint_payables.post_payables_upload_from_file",
@@ -239281,7 +239754,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_validations": {
         "id": "endpoint_payables.get_payables_validations",
@@ -239644,7 +240118,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.put_payables_validations": {
         "id": "endpoint_payables.put_payables_validations",
@@ -240081,7 +240556,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_validations_reset": {
         "id": "endpoint_payables.post_payables_validations_reset",
@@ -240444,7 +240920,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_variables": {
         "id": "endpoint_payables.get_payables_variables",
@@ -240714,7 +241191,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.get_payables_id": {
         "id": "endpoint_payables.get_payables_id",
@@ -241369,7 +241847,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.delete_payables_id": {
         "id": "endpoint_payables.delete_payables_id",
@@ -241795,7 +242274,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.patch_payables_id": {
         "id": "endpoint_payables.patch_payables_id",
@@ -242916,7 +243396,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_approve_payment_operation": {
         "id": "endpoint_payables.post_payables_id_approve_payment_operation",
@@ -243628,7 +244109,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_attach_file": {
         "id": "endpoint_payables.post_payables_id_attach_file",
@@ -244364,7 +244846,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_cancel": {
         "id": "endpoint_payables.post_payables_id_cancel",
@@ -245076,7 +245559,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_mark_as_paid": {
         "id": "endpoint_payables.post_payables_id_mark_as_paid",
@@ -245849,7 +246333,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_mark_as_partially_paid": {
         "id": "endpoint_payables.post_payables_id_mark_as_partially_paid",
@@ -246633,7 +247118,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_reject": {
         "id": "endpoint_payables.post_payables_id_reject",
@@ -247345,7 +247831,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_reopen": {
         "id": "endpoint_payables.post_payables_id_reopen",
@@ -248057,7 +248544,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_submit_for_approval": {
         "id": "endpoint_payables.post_payables_id_submit_for_approval",
@@ -248769,7 +249257,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payables.post_payables_id_validate": {
         "id": "endpoint_payables.post_payables_id_validate",
@@ -249222,7 +249711,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.get_payables_id_line_items": {
         "id": "endpoint_payableLineItems.get_payables_id_line_items",
@@ -249799,7 +250289,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.post_payables_id_line_items": {
         "id": "endpoint_payableLineItems.post_payables_id_line_items",
@@ -250356,7 +250847,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.put_payables_id_line_items": {
         "id": "endpoint_payableLineItems.put_payables_id_line_items",
@@ -251025,7 +251517,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.get_payables_id_line_items_id": {
         "id": "endpoint_payableLineItems.get_payables_id_line_items_id",
@@ -251563,7 +252056,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.delete_payables_id_line_items_id": {
         "id": "endpoint_payableLineItems.delete_payables_id_line_items_id",
@@ -252016,7 +252510,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_payableLineItems.patch_payables_id_line_items_id": {
         "id": "endpoint_payableLineItems.patch_payables_id_line_items_id",
@@ -252597,7 +253092,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.get_payment_intents": {
         "id": "endpoint_paymentIntents.get_payment_intents",
@@ -252934,7 +253430,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.get_payment_intents_id": {
         "id": "endpoint_paymentIntents.get_payment_intents_id",
@@ -253225,7 +253722,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.patch_payment_intents_id": {
         "id": "endpoint_paymentIntents.patch_payment_intents_id",
@@ -253556,7 +254054,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentIntents.get_payment_intents_id_history": {
         "id": "endpoint_paymentIntents.get_payment_intents_id_history",
@@ -253799,7 +254298,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentLinks.post_payment_links": {
         "id": "endpoint_paymentLinks.post_payment_links",
@@ -254272,7 +254772,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentLinks.get_payment_links_id": {
         "id": "endpoint_paymentLinks.get_payment_links_id",
@@ -254569,7 +255070,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentLinks.post_payment_links_id_expire": {
         "id": "endpoint_paymentLinks.post_payment_links_id_expire",
@@ -254870,7 +255372,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentRecords.get_payment_records": {
         "id": "endpoint_paymentRecords.get_payment_records",
@@ -255590,7 +256093,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentRecords.post_payment_records": {
         "id": "endpoint_paymentRecords.post_payment_records",
@@ -256382,7 +256886,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentRecords.get_payment_records_id": {
         "id": "endpoint_paymentRecords.get_payment_records_id",
@@ -256997,7 +257502,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.get_payment_reminders": {
         "id": "endpoint_paymentReminders.get_payment_reminders",
@@ -257330,7 +257836,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.post_payment_reminders": {
         "id": "endpoint_paymentReminders.post_payment_reminders",
@@ -257848,7 +258355,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.get_payment_reminders_id": {
         "id": "endpoint_paymentReminders.get_payment_reminders_id",
@@ -258269,7 +258777,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.delete_payment_reminders_id": {
         "id": "endpoint_paymentReminders.delete_payment_reminders_id",
@@ -258694,7 +259203,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentReminders.patch_payment_reminders_id": {
         "id": "endpoint_paymentReminders.patch_payment_reminders_id",
@@ -259293,7 +259803,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.get_payment_terms": {
         "id": "endpoint_paymentTerms.get_payment_terms",
@@ -259619,7 +260130,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.post_payment_terms": {
         "id": "endpoint_paymentTerms.post_payment_terms",
@@ -260133,7 +260645,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.get_payment_terms_id": {
         "id": "endpoint_paymentTerms.get_payment_terms_id",
@@ -260536,7 +261049,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.delete_payment_terms_id": {
         "id": "endpoint_paymentTerms.delete_payment_terms_id",
@@ -260961,7 +261475,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_paymentTerms.patch_payment_terms_id": {
         "id": "endpoint_paymentTerms.patch_payment_terms_id",
@@ -261544,7 +262059,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.get_persons": {
         "id": "endpoint_entityPersons.get_persons",
@@ -261772,7 +262288,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.post_persons": {
         "id": "endpoint_entityPersons.post_persons",
@@ -262245,7 +262762,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.get_persons_id": {
         "id": "endpoint_entityPersons.get_persons_id",
@@ -262555,7 +263073,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.delete_persons_id": {
         "id": "endpoint_entityPersons.delete_persons_id",
@@ -262874,7 +263393,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_entityPersons.patch_persons_id": {
         "id": "endpoint_entityPersons.patch_persons_id",
@@ -263434,7 +263954,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.get_products": {
         "id": "endpoint_products.get_products",
@@ -264203,7 +264724,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.post_products": {
         "id": "endpoint_products.post_products",
@@ -264748,7 +265270,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.get_products_id": {
         "id": "endpoint_products.get_products_id",
@@ -265205,7 +265728,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.delete_products_id": {
         "id": "endpoint_products.delete_products_id",
@@ -265630,7 +266154,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_products.patch_products_id": {
         "id": "endpoint_products.patch_products_id",
@@ -266256,7 +266781,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.get_projects": {
         "id": "endpoint_projects.get_projects",
@@ -267204,7 +267730,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.post_projects": {
         "id": "endpoint_projects.post_projects",
@@ -267824,7 +268351,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.get_projects_id": {
         "id": "endpoint_projects.get_projects_id",
@@ -268293,7 +268821,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.delete_projects_id": {
         "id": "endpoint_projects.delete_projects_id",
@@ -268719,7 +269248,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_projects.patch_projects_id": {
         "id": "endpoint_projects.patch_projects_id",
@@ -269420,7 +269950,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables": {
         "id": "endpoint_receivables.get_receivables",
@@ -270687,7 +271218,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables": {
         "id": "endpoint_receivables.post_receivables",
@@ -271478,7 +272010,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_variables": {
         "id": "endpoint_receivables.get_receivables_variables",
@@ -271781,7 +272314,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id": {
         "id": "endpoint_receivables.get_receivables_id",
@@ -272430,7 +272964,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.delete_receivables_id": {
         "id": "endpoint_receivables.delete_receivables_id",
@@ -272908,7 +273443,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.patch_receivables_id": {
         "id": "endpoint_receivables.patch_receivables_id",
@@ -273669,7 +274205,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_accept": {
         "id": "endpoint_receivables.post_receivables_id_accept",
@@ -274228,7 +274765,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_cancel": {
         "id": "endpoint_receivables.post_receivables_id_cancel",
@@ -274710,7 +275248,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_clone": {
         "id": "endpoint_receivables.post_receivables_id_clone",
@@ -275416,7 +275955,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_decline": {
         "id": "endpoint_receivables.post_receivables_id_decline",
@@ -275977,7 +276517,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_history": {
         "id": "endpoint_receivables.get_receivables_id_history",
@@ -276637,7 +277178,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_history_id": {
         "id": "endpoint_receivables.get_receivables_id_history_id",
@@ -277116,7 +277658,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_issue": {
         "id": "endpoint_receivables.post_receivables_id_issue",
@@ -277822,7 +278365,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.put_receivables_id_line_items": {
         "id": "endpoint_receivables.put_receivables_id_line_items",
@@ -278468,7 +279012,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_mails": {
         "id": "endpoint_receivables.get_receivables_id_mails",
@@ -279120,7 +279665,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_mails_id": {
         "id": "endpoint_receivables.get_receivables_id_mails_id",
@@ -279613,7 +280159,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_mark_as_paid": {
         "id": "endpoint_receivables.post_receivables_id_mark_as_paid",
@@ -280399,7 +280946,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_mark_as_partially_paid": {
         "id": "endpoint_receivables.post_receivables_id_mark_as_partially_paid",
@@ -281198,7 +281746,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_mark_as_uncollectible": {
         "id": "endpoint_receivables.post_receivables_id_mark_as_uncollectible",
@@ -281965,7 +282514,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.get_receivables_id_pdf_link": {
         "id": "endpoint_receivables.get_receivables_id_pdf_link",
@@ -282413,7 +282963,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_preview": {
         "id": "endpoint_receivables.post_receivables_id_preview",
@@ -282984,7 +283535,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_send": {
         "id": "endpoint_receivables.post_receivables_id_send",
@@ -283618,7 +284170,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_send_test_reminder": {
         "id": "endpoint_receivables.post_receivables_id_send_test_reminder",
@@ -284205,7 +284758,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_receivables.post_receivables_id_verify": {
         "id": "endpoint_receivables.post_receivables_id_verify",
@@ -284674,7 +285228,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.get_recurrences": {
         "id": "endpoint_recurrences.get_recurrences",
@@ -285105,7 +285660,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.post_recurrences": {
         "id": "endpoint_recurrences.post_recurrences",
@@ -285697,7 +286253,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.get_recurrences_id": {
         "id": "endpoint_recurrences.get_recurrences_id",
@@ -286158,7 +286715,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.patch_recurrences_id": {
         "id": "endpoint_recurrences.patch_recurrences_id",
@@ -286712,7 +287270,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_recurrences.post_recurrences_id_cancel": {
         "id": "endpoint_recurrences.post_recurrences_id_cancel",
@@ -287194,7 +287753,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.get_roles": {
         "id": "endpoint_roles.get_roles",
@@ -287835,7 +288395,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.post_roles": {
         "id": "endpoint_roles.post_roles",
@@ -288169,7 +288730,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.get_roles_id": {
         "id": "endpoint_roles.get_roles_id",
@@ -288464,7 +289026,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_roles.patch_roles_id": {
         "id": "endpoint_roles.patch_roles_id",
@@ -288824,7 +289387,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_partnerSettings.get_settings": {
         "id": "endpoint_partnerSettings.get_settings",
@@ -289127,7 +289691,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_partnerSettings.patch_settings": {
         "id": "endpoint_partnerSettings.patch_settings",
@@ -289689,7 +290254,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.get_tags": {
         "id": "endpoint_tags.get_tags",
@@ -290259,7 +290825,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.post_tags": {
         "id": "endpoint_tags.post_tags",
@@ -290839,7 +291406,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.get_tags_id": {
         "id": "endpoint_tags.get_tags_id",
@@ -291342,7 +291910,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.delete_tags_id": {
         "id": "endpoint_tags.delete_tags_id",
@@ -291768,7 +292337,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_tags.patch_tags_id": {
         "id": "endpoint_tags.patch_tags_id",
@@ -292372,7 +292942,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.get_text_templates": {
         "id": "endpoint_textTemplates.get_text_templates",
@@ -292651,7 +293222,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.post_text_templates": {
         "id": "endpoint_textTemplates.post_text_templates",
@@ -292947,7 +293519,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.get_text_templates_id": {
         "id": "endpoint_textTemplates.get_text_templates_id",
@@ -293186,7 +293759,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.delete_text_templates_id": {
         "id": "endpoint_textTemplates.delete_text_templates_id",
@@ -293401,7 +293975,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.patch_text_templates_id": {
         "id": "endpoint_textTemplates.patch_text_templates_id",
@@ -293699,7 +294274,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_textTemplates.post_text_templates_id_make_default": {
         "id": "endpoint_textTemplates.post_text_templates_id_make_default",
@@ -293943,7 +294519,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_vatRates.get_vat_rates": {
         "id": "endpoint_vatRates.get_vat_rates",
@@ -294474,7 +295051,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.get_webhook_settings": {
         "id": "endpoint_webhookSubscriptions.get_webhook_settings",
@@ -294845,7 +295423,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_settings": {
         "id": "endpoint_webhookSubscriptions.post_webhook_settings",
@@ -295122,7 +295701,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.get_webhook_settings_id": {
         "id": "endpoint_webhookSubscriptions.get_webhook_settings_id",
@@ -295343,7 +295923,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.delete_webhook_settings_id": {
         "id": "endpoint_webhookSubscriptions.delete_webhook_settings_id",
@@ -295558,7 +296139,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.patch_webhook_settings_id": {
         "id": "endpoint_webhookSubscriptions.patch_webhook_settings_id",
@@ -295861,7 +296443,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_settings_id_disable": {
         "id": "endpoint_webhookSubscriptions.post_webhook_settings_id_disable",
@@ -296086,7 +296669,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_settings_id_enable": {
         "id": "endpoint_webhookSubscriptions.post_webhook_settings_id_enable",
@@ -296311,7 +296895,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookSubscriptions.post_webhook_settings_id_regenerate_secret": {
         "id": "endpoint_webhookSubscriptions.post_webhook_settings_id_regenerate_secret",
@@ -296537,7 +297122,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_webhookDeliveries.get_webhooks": {
         "id": "endpoint_webhookDeliveries.get_webhooks",
@@ -296961,7 +297547,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

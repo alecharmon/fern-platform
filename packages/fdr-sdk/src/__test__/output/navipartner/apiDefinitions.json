@@ -205,7 +205,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-card.replaceCard": {
         "id": "endpoint_memberships/service-card.replaceCard",
@@ -438,7 +439,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-card.getCardId": {
         "id": "endpoint_memberships/service-card.getCardId",
@@ -630,7 +632,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-card.getCardNumber": {
         "id": "endpoint_memberships/service-card.getCardNumber",
@@ -822,7 +825,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-card.registerArrival": {
         "id": "endpoint_memberships/service-card.registerArrival",
@@ -1003,7 +1007,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-card.sendToWallet": {
         "id": "endpoint_memberships/service-card.sendToWallet",
@@ -1183,7 +1188,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-catalog.getCatalog": {
         "id": "endpoint_memberships/service-catalog.getCatalog",
@@ -1354,7 +1360,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.getMembershipHistory": {
         "id": "endpoint_memberships/service-lifecycle.getMembershipHistory",
@@ -1542,7 +1549,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.activateMembership": {
         "id": "endpoint_memberships/service-lifecycle.activateMembership",
@@ -1730,7 +1738,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.cancelMembership": {
         "id": "endpoint_memberships/service-lifecycle.cancelMembership",
@@ -1935,7 +1944,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.getRenewalOptions": {
         "id": "endpoint_memberships/service-lifecycle.getRenewalOptions",
@@ -2111,7 +2121,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.renewMembership": {
         "id": "endpoint_memberships/service-lifecycle.renewMembership",
@@ -2329,7 +2340,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.getUpgradeOptions": {
         "id": "endpoint_memberships/service-lifecycle.getUpgradeOptions",
@@ -2505,7 +2517,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.upgradeMembership": {
         "id": "endpoint_memberships/service-lifecycle.upgradeMembership",
@@ -2723,7 +2736,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.getExtendOptions": {
         "id": "endpoint_memberships/service-lifecycle.getExtendOptions",
@@ -2899,7 +2913,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-lifecycle.extendMembership": {
         "id": "endpoint_memberships/service-lifecycle.extendMembership",
@@ -3117,7 +3132,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.addMember": {
         "id": "endpoint_memberships/service-member.addMember",
@@ -3359,7 +3375,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.getMemberId": {
         "id": "endpoint_memberships/service-member.getMemberId",
@@ -3559,7 +3576,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.getMemberNumber": {
         "id": "endpoint_memberships/service-member.getMemberNumber",
@@ -3759,7 +3777,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.blockMember": {
         "id": "endpoint_memberships/service-member.blockMember",
@@ -3938,7 +3957,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.unblockMember": {
         "id": "endpoint_memberships/service-member.unblockMember",
@@ -4117,7 +4137,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.updateMember": {
         "id": "endpoint_memberships/service-member.updateMember",
@@ -4322,7 +4343,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.getMemberImage": {
         "id": "endpoint_memberships/service-member.getMemberImage",
@@ -4485,7 +4507,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.setMemberImage": {
         "id": "endpoint_memberships/service-member.setMemberImage",
@@ -4665,7 +4688,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-member.findMembers": {
         "id": "endpoint_memberships/service-member.findMembers",
@@ -4989,7 +5013,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-membership.createMembership": {
         "id": "endpoint_memberships/service-membership.createMembership",
@@ -5161,7 +5186,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-membership.getMembershipId": {
         "id": "endpoint_memberships/service-membership.getMembershipId",
@@ -5330,7 +5356,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-membership.getMembershipNumber": {
         "id": "endpoint_memberships/service-membership.getMembershipNumber",
@@ -5499,7 +5526,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-membership.blockMembership": {
         "id": "endpoint_memberships/service-membership.blockMembership",
@@ -5672,7 +5700,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-membership.unblockMembership": {
         "id": "endpoint_memberships/service-membership.unblockMembership",
@@ -5845,7 +5874,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-membership.getMembers": {
         "id": "endpoint_memberships/service-membership.getMembers",
@@ -6049,7 +6079,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_memberships/service-misc.resolveIdentifier": {
         "id": "endpoint_memberships/service-misc.resolveIdentifier",
@@ -6220,7 +6251,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_systemservices/companies.getCompanies": {
         "id": "endpoint_systemservices/companies.getCompanies",
@@ -6342,7 +6374,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_systemservices/helloworld.getHelloWorld": {
         "id": "endpoint_systemservices/helloworld.getHelloWorld",
@@ -6466,7 +6499,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-capacity.getCapacity": {
         "id": "endpoint_ticketing/service-capacity.getCapacity",
@@ -6770,7 +6804,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-catalog.getCatalog": {
         "id": "endpoint_ticketing/service-catalog.getCatalog",
@@ -6970,7 +7005,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-reservations.createReservation": {
         "id": "endpoint_ticketing/service-reservations.createReservation",
@@ -7185,7 +7221,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-reservations.updateReservation": {
         "id": "endpoint_ticketing/service-reservations.updateReservation",
@@ -7414,7 +7451,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-reservations.cancelReservation": {
         "id": "endpoint_ticketing/service-reservations.cancelReservation",
@@ -7576,7 +7614,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-reservations.preConfirmReservation": {
         "id": "endpoint_ticketing/service-reservations.preConfirmReservation",
@@ -7739,7 +7778,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-reservations.confirmReservation": {
         "id": "endpoint_ticketing/service-reservations.confirmReservation",
@@ -7969,7 +8009,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-reservations.getReservation": {
         "id": "endpoint_ticketing/service-reservations.getReservation",
@@ -8246,7 +8287,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-reservations.getTickets": {
         "id": "endpoint_ticketing/service-reservations.getTickets",
@@ -8457,7 +8499,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-ticket.getTicket": {
         "id": "endpoint_ticketing/service-ticket.getTicket",
@@ -8656,7 +8699,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-ticket.revokeTicket": {
         "id": "endpoint_ticketing/service-ticket.revokeTicket",
@@ -8819,7 +8863,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-ticket.validateArrival": {
         "id": "endpoint_ticketing/service-ticket.validateArrival",
@@ -9012,7 +9057,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-ticket.validateDeparture": {
         "id": "endpoint_ticketing/service-ticket.validateDeparture",
@@ -9199,7 +9245,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-ticket.validateMemberArrival": {
         "id": "endpoint_ticketing/service-ticket.validateMemberArrival",
@@ -9429,7 +9476,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-ticket.sendToWallet": {
         "id": "endpoint_ticketing/service-ticket.sendToWallet",
@@ -9609,7 +9657,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_ticketing/service-ticket.exchangeForCoupon": {
         "id": "endpoint_ticketing/service-ticket.exchangeForCoupon",
@@ -9789,7 +9838,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

@@ -40,6 +40,9 @@ types:
       examples: list<ExampleEndpointCall>
       snippetTemplates: optional<EndpointSnippetTemplates>
       protocol: optional<commons.Protocol>
+      includeInApiExplorer:
+        type: optional<boolean>
+        docs: Whether this endpoint should be included in the API explorer. Defaults to true.
 
   EndpointSnippetTemplates:
     properties:

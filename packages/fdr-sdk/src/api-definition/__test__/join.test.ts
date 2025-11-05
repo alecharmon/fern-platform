@@ -55,7 +55,8 @@ const endpoint1: Latest.EndpointDefinition = {
     availability: undefined,
     errors: undefined,
     examples: undefined,
-    snippetTemplates: undefined
+    snippetTemplates: undefined,
+    includeInApiExplorer: undefined
 };
 
 const endpoint2: Latest.EndpointDefinition = {
@@ -99,7 +100,8 @@ const endpoint2: Latest.EndpointDefinition = {
     availability: undefined,
     errors: undefined,
     examples: undefined,
-    snippetTemplates: undefined
+    snippetTemplates: undefined,
+    includeInApiExplorer: undefined
 };
 
 const websocket1: Latest.WebSocketChannel = {

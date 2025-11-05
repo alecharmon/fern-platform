@@ -68,7 +68,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/dev/dev.uploadEor": {
         "id": "endpoint_api/dev/dev.uploadEor",
@@ -160,7 +161,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/services/file.attachDocumentToEmployment": {
         "id": "endpoint_api/services/file.attachDocumentToEmployment",
@@ -272,7 +274,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/services/file.deleteDocumentFromEmployment": {
         "id": "endpoint_api/services/file.deleteDocumentFromEmployment",
@@ -386,7 +389,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/services/file.loadGenericDocumentFromEmployment": {
         "id": "endpoint_api/services/file.loadGenericDocumentFromEmployment",
@@ -493,7 +497,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/services/file.loadPayslipFromEorEmployment": {
         "id": "endpoint_api/services/file.loadPayslipFromEorEmployment",
@@ -600,7 +605,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/services/file.loadPayInFromEorEmployment": {
         "id": "endpoint_api/services/file.loadPayInFromEorEmployment",
@@ -707,7 +713,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/accounting/accounting_api.changeAccountingIntegrationSetting": {
         "id": "endpoint_api/thera/accounting/accounting_api.changeAccountingIntegrationSetting",
@@ -842,7 +849,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/accounting/accounting_api.getAccountingIntegrationsInfo": {
         "id": "endpoint_api/thera/accounting/accounting_api.getAccountingIntegrationsInfo",
@@ -936,7 +944,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/accounting/accounting_api.getCompanyAccountingMappingDetails": {
         "id": "endpoint_api/thera/accounting/accounting_api.getCompanyAccountingMappingDetails",
@@ -1027,7 +1036,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/accounting/accounting_api.completeAccountingIntegrationAuth": {
         "id": "endpoint_api/thera/accounting/accounting_api.completeAccountingIntegrationAuth",
@@ -1121,7 +1131,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getPlaidBankDetails": {
         "id": "endpoint_api/thera/bank/bank_api.getPlaidBankDetails",
@@ -1211,7 +1222,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.generatePlaidUpdateFlowLinkToken": {
         "id": "endpoint_api/thera/bank/bank_api.generatePlaidUpdateFlowLinkToken",
@@ -1338,7 +1350,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.generateBankSignup": {
         "id": "endpoint_api/thera/bank/bank_api.generateBankSignup",
@@ -1440,7 +1453,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.completeBankSignup": {
         "id": "endpoint_api/thera/bank/bank_api.completeBankSignup",
@@ -1501,7 +1515,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.reattachStripeMandate": {
         "id": "endpoint_api/thera/bank/bank_api.reattachStripeMandate",
@@ -1562,7 +1577,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getPaymentMethods": {
         "id": "endpoint_api/thera/bank/bank_api.getPaymentMethods",
@@ -1658,7 +1674,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.deletePaymentMethod": {
         "id": "endpoint_api/thera/bank/bank_api.deletePaymentMethod",
@@ -1742,7 +1759,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.chooseW2PaymentMethod": {
         "id": "endpoint_api/thera/bank/bank_api.chooseW2PaymentMethod",
@@ -1830,7 +1848,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.verifyBankSignup": {
         "id": "endpoint_api/thera/bank/bank_api.verifyBankSignup",
@@ -1959,7 +1978,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.setAutoPay": {
         "id": "endpoint_api/thera/bank/bank_api.setAutoPay",
@@ -2095,7 +2115,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWithdrawalMethodCurrencies": {
         "id": "endpoint_api/thera/bank/bank_api.getWithdrawalMethodCurrencies",
@@ -2186,7 +2207,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getBankTransferCurrenciesByCountry": {
         "id": "endpoint_api/thera/bank/bank_api.getBankTransferCurrenciesByCountry",
@@ -2252,7 +2274,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWithdrawalLimitsByMethod": {
         "id": "endpoint_api/thera/bank/bank_api.getWithdrawalLimitsByMethod",
@@ -2387,7 +2410,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWithdrawalMinimumByCurrency": {
         "id": "endpoint_api/thera/bank/bank_api.getWithdrawalMinimumByCurrency",
@@ -2463,7 +2487,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWithdrawalMinimumByMethod": {
         "id": "endpoint_api/thera/bank/bank_api.getWithdrawalMinimumByMethod",
@@ -2597,7 +2622,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getSupportedWithdrawalMethods": {
         "id": "endpoint_api/thera/bank/bank_api.getSupportedWithdrawalMethods",
@@ -2725,7 +2751,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.saveWithdrawalMethod": {
         "id": "endpoint_api/thera/bank/bank_api.saveWithdrawalMethod",
@@ -2856,7 +2883,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.deleteWithdrawalMethod": {
         "id": "endpoint_api/thera/bank/bank_api.deleteWithdrawalMethod",
@@ -2954,7 +2982,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.editWithdrawalMethod": {
         "id": "endpoint_api/thera/bank/bank_api.editWithdrawalMethod",
@@ -3081,7 +3110,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWorkerWithdrawalPreview": {
         "id": "endpoint_api/thera/bank/bank_api.getWorkerWithdrawalPreview",
@@ -3209,7 +3239,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.initiateWorkerWithdrawal": {
         "id": "endpoint_api/thera/bank/bank_api.initiateWorkerWithdrawal",
@@ -3332,7 +3363,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWorkerBalance": {
         "id": "endpoint_api/thera/bank/bank_api.getWorkerBalance",
@@ -3442,7 +3474,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWorkerTransactions": {
         "id": "endpoint_api/thera/bank/bank_api.getWorkerTransactions",
@@ -3562,7 +3595,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getWorkerWithdrawalDeliveryEstimate": {
         "id": "endpoint_api/thera/bank/bank_api.getWorkerWithdrawalDeliveryEstimate",
@@ -3641,7 +3675,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getPayInHistory": {
         "id": "endpoint_api/thera/bank/bank_api.getPayInHistory",
@@ -3789,7 +3824,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getPayInDetails": {
         "id": "endpoint_api/thera/bank/bank_api.getPayInDetails",
@@ -3932,7 +3968,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.deleteOffPlatformPayment": {
         "id": "endpoint_api/thera/bank/bank_api.deleteOffPlatformPayment",
@@ -4031,7 +4068,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.getCurrencyConversion": {
         "id": "endpoint_api/thera/bank/bank_api.getCurrencyConversion",
@@ -4133,7 +4171,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.setAutoWithdrawals": {
         "id": "endpoint_api/thera/bank/bank_api.setAutoWithdrawals",
@@ -4263,7 +4302,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.createCheckPaymentMethodFromPlaid": {
         "id": "endpoint_api/thera/bank/bank_api.createCheckPaymentMethodFromPlaid",
@@ -4333,7 +4373,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/bank/bank_api.createStripePaymentMethodFromPlaid": {
         "id": "endpoint_api/thera/bank/bank_api.createStripePaymentMethodFromPlaid",
@@ -4421,7 +4462,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.getMoniteToken": {
         "id": "endpoint_api/thera/company/company_api.getMoniteToken",
@@ -4539,7 +4581,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.inviteContractor": {
         "id": "endpoint_api/thera/company/company_api.inviteContractor",
@@ -4894,7 +4937,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.inviteManager": {
         "id": "endpoint_api/thera/company/company_api.inviteManager",
@@ -5091,7 +5135,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.editManagerRoles": {
         "id": "endpoint_api/thera/company/company_api.editManagerRoles",
@@ -5268,7 +5313,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.editOrgRoles": {
         "id": "endpoint_api/thera/company/company_api.editOrgRoles",
@@ -5469,7 +5515,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.removeManager": {
         "id": "endpoint_api/thera/company/company_api.removeManager",
@@ -5568,7 +5615,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.changeContractTeam": {
         "id": "endpoint_api/thera/company/company_api.changeContractTeam",
@@ -5712,7 +5760,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.getTeams": {
         "id": "endpoint_api/thera/company/company_api.getTeams",
@@ -5814,7 +5863,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.getManagers": {
         "id": "endpoint_api/thera/company/company_api.getManagers",
@@ -6069,7 +6119,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.createTeam": {
         "id": "endpoint_api/thera/company/company_api.createTeam",
@@ -6206,7 +6257,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.deleteTeam": {
         "id": "endpoint_api/thera/company/company_api.deleteTeam",
@@ -6305,7 +6357,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.editTeam": {
         "id": "endpoint_api/thera/company/company_api.editTeam",
@@ -6432,7 +6485,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.getAllCompanyAffiliations": {
         "id": "endpoint_api/thera/company/company_api.getAllCompanyAffiliations",
@@ -6914,7 +6968,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.checkCanCreateAccount": {
         "id": "endpoint_api/thera/company/company_api.checkCanCreateAccount",
@@ -6990,7 +7045,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.addEorEmployee": {
         "id": "endpoint_api/thera/company/company_api.addEorEmployee",
@@ -7110,7 +7166,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.getContractorCsv": {
         "id": "endpoint_api/thera/company/company_api.getContractorCsv",
@@ -7215,7 +7272,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_api.getContractsCSV": {
         "id": "endpoint_api/thera/company/company_api.getContractsCSV",
@@ -7368,7 +7426,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_w2payroll_api.onboardW2Payroll": {
         "id": "endpoint_api/thera/company/company_w2payroll_api.onboardW2Payroll",
@@ -7430,7 +7489,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_w2payroll_api.toggleW2PayrollOnboardingFlowComplete": {
         "id": "endpoint_api/thera/company/company_w2payroll_api.toggleW2PayrollOnboardingFlowComplete",
@@ -7525,7 +7585,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/company/company_w2payroll_api.setupPayroll": {
         "id": "endpoint_api/thera/company/company_w2payroll_api.setupPayroll",
@@ -7618,7 +7679,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/contractor/contractor_api.getUsContractorsTaxInfo": {
         "id": "endpoint_api/thera/contractor/contractor_api.getUsContractorsTaxInfo",
@@ -7725,7 +7787,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/contractor/contractor_api.updateUsContractorTaxInfo": {
         "id": "endpoint_api/thera/contractor/contractor_api.updateUsContractorTaxInfo",
@@ -7871,7 +7934,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/contractor/contractor_api.onboardContractorsCsv": {
         "id": "endpoint_api/thera/contractor/contractor_api.onboardContractorsCsv",
@@ -8044,7 +8108,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/disbursement/disbursement_api.uploadCsvInvoice": {
         "id": "endpoint_api/thera/disbursement/disbursement_api.uploadCsvInvoice",
@@ -8209,7 +8274,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/disbursement/disbursement_api.createDisbursement": {
         "id": "endpoint_api/thera/disbursement/disbursement_api.createDisbursement",
@@ -8291,7 +8357,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/disbursement/disbursement_api.approveInvoice": {
         "id": "endpoint_api/thera/disbursement/disbursement_api.approveInvoice",
@@ -8358,7 +8425,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/disbursement/disbursement_api.createInvoiceDeduction": {
         "id": "endpoint_api/thera/disbursement/disbursement_api.createInvoiceDeduction",
@@ -8458,7 +8526,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/disbursement/disbursement_api.deleteInvoiceDeduction": {
         "id": "endpoint_api/thera/disbursement/disbursement_api.deleteInvoiceDeduction",
@@ -8556,7 +8625,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/disbursement/disbursement_api.getInvoicesCsv": {
         "id": "endpoint_api/thera/disbursement/disbursement_api.getInvoicesCsv",
@@ -8707,7 +8777,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/disbursement/disbursement_webhook_api.invoiceWebhook": {
         "id": "endpoint_api/thera/disbursement/disbursement_webhook_api.invoiceWebhook",
@@ -8797,7 +8868,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/document/document_api.getW9Document": {
         "id": "endpoint_api/thera/document/document_api.getW9Document",
@@ -8869,7 +8941,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/document/document_api.getUsIrs1099NecDocument": {
         "id": "endpoint_api/thera/document/document_api.getUsIrs1099NecDocument",
@@ -9035,7 +9108,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/document/document_api.bulkFileUsIrs1099NecDocument": {
         "id": "endpoint_api/thera/document/document_api.bulkFileUsIrs1099NecDocument",
@@ -9177,7 +9251,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/email/email_api.sendLoginEmail": {
         "id": "endpoint_api/thera/email/email_api.sendLoginEmail",
@@ -9237,7 +9312,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/email/email_api.updateUserEmail": {
         "id": "endpoint_api/thera/email/email_api.updateUserEmail",
@@ -9332,7 +9408,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/employment/employment_api.deleteInvoiceItemRecurrence": {
         "id": "endpoint_api/thera/employment/employment_api.deleteInvoiceItemRecurrence",
@@ -9447,7 +9524,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/employment/employment_api.estimateContract": {
         "id": "endpoint_api/thera/employment/employment_api.estimateContract",
@@ -9557,7 +9635,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/employment/employment_api.deleteContract": {
         "id": "endpoint_api/thera/employment/employment_api.deleteContract",
@@ -9620,7 +9699,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/employment/employment_api.cancelContractTermination": {
         "id": "endpoint_api/thera/employment/employment_api.cancelContractTermination",
@@ -9717,7 +9797,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/employment/employment_api.getPayCycle": {
         "id": "endpoint_api/thera/employment/employment_api.getPayCycle",
@@ -9819,7 +9900,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/misc/misc.regularCron": {
         "id": "endpoint_api/thera/misc/misc.regularCron",
@@ -9929,7 +10011,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/misc/misc.autoPayCron": {
         "id": "endpoint_api/thera/misc/misc.autoPayCron",
@@ -9985,7 +10068,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/misc/misc.autoPayEmailNotificationCron": {
         "id": "endpoint_api/thera/misc/misc.autoPayEmailNotificationCron",
@@ -10041,7 +10125,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/misc/misc.contractRenewalCron": {
         "id": "endpoint_api/thera/misc/misc.contractRenewalCron",
@@ -10116,7 +10201,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/payroll/offcycle_api.getCurrentOffCycleChecks": {
         "id": "endpoint_api/thera/payroll/offcycle_api.getCurrentOffCycleChecks",
@@ -10211,7 +10297,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/payroll/oncycle_api.approveOncycleChecks": {
         "id": "endpoint_api/thera/payroll/oncycle_api.approveOncycleChecks",
@@ -10300,7 +10387,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/payroll/oncycle_api.getOnCycleChecks": {
         "id": "endpoint_api/thera/payroll/oncycle_api.getOnCycleChecks",
@@ -10394,7 +10482,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/payroll/oncycle_api.cancelCurrentAutopilotPayroll": {
         "id": "endpoint_api/thera/payroll/oncycle_api.cancelCurrentAutopilotPayroll",
@@ -10461,7 +10550,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.associateTimeOffPolicyToContractor": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.associateTimeOffPolicyToContractor",
@@ -10568,7 +10658,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.requestPtoForContractor": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.requestPtoForContractor",
@@ -10680,7 +10771,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.addTimeOffPolicy": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.addTimeOffPolicy",
@@ -10785,7 +10877,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.getTimeOffPolicy": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.getTimeOffPolicy",
@@ -10901,7 +10994,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.updateTimeOffPolicy": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.updateTimeOffPolicy",
@@ -11023,7 +11117,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.deleteTimeOffPolicy": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.deleteTimeOffPolicy",
@@ -11121,7 +11216,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.getContractorsTimeOffHistoryByCompany": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.getContractorsTimeOffHistoryByCompany",
@@ -11266,7 +11362,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.getTimeOffHistoryByContractor": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.getTimeOffHistoryByContractor",
@@ -11391,7 +11488,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.getContractorsPoliciesDetailsByPolicy": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.getContractorsPoliciesDetailsByPolicy",
@@ -11508,7 +11606,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.getContractorsPoliciesDetailsByContractor": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.getContractorsPoliciesDetailsByContractor",
@@ -11625,7 +11724,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.modifyTimeOffStatus": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.modifyTimeOffStatus",
@@ -11924,7 +12024,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.bulkModifyTimeOffStatuses": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.bulkModifyTimeOffStatuses",
@@ -12034,7 +12135,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/timeoff/timeoff_api.updatePTOForContractor": {
         "id": "endpoint_api/thera/timeoff/timeoff_api.updatePTOForContractor",
@@ -12175,7 +12277,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.addCompanyBankingDetails": {
         "id": "endpoint_api/thera/tp/tp_api.addCompanyBankingDetails",
@@ -12343,7 +12446,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.getNaicsCodes": {
         "id": "endpoint_api/thera/tp/tp_api.getNaicsCodes",
@@ -12408,7 +12512,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.processTreasuryPrimePayment": {
         "id": "endpoint_api/thera/tp/tp_api.processTreasuryPrimePayment",
@@ -12510,7 +12615,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.createCounterPartyForBanking": {
         "id": "endpoint_api/thera/tp/tp_api.createCounterPartyForBanking",
@@ -12608,7 +12714,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.getTpAccountsForCompany": {
         "id": "endpoint_api/thera/tp/tp_api.getTpAccountsForCompany",
@@ -12689,7 +12796,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.getTpAccount": {
         "id": "endpoint_api/thera/tp/tp_api.getTpAccount",
@@ -12787,7 +12895,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.transferFundsToOmnibusAccount": {
         "id": "endpoint_api/thera/tp/tp_api.transferFundsToOmnibusAccount",
@@ -12886,7 +12995,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.transactionHistory": {
         "id": "endpoint_api/thera/tp/tp_api.transactionHistory",
@@ -13017,7 +13127,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.deatiledTpTransaction": {
         "id": "endpoint_api/thera/tp/tp_api.deatiledTpTransaction",
@@ -13140,7 +13251,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/tp/tp_api.externalTransferFund": {
         "id": "endpoint_api/thera/tp/tp_api.externalTransferFund",
@@ -13234,7 +13346,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/user/user_api.setUserComplianceSetting": {
         "id": "endpoint_api/thera/user/user_api.setUserComplianceSetting",
@@ -13336,7 +13449,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/user/user_api.getComplianceUserSetting": {
         "id": "endpoint_api/thera/user/user_api.getComplianceUserSetting",
@@ -13466,7 +13580,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_api/thera/user/user_api.getUser": {
         "id": "endpoint_api/thera/user/user_api.getUser",
@@ -13697,7 +13812,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

@@ -209,7 +209,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_.GetAppointmentTask": {
         "id": "endpoint_.GetAppointmentTask",
@@ -303,7 +304,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_.CancelAppointmentTask": {
         "id": "endpoint_.CancelAppointmentTask",
@@ -372,7 +374,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_.GetAllAppointmentTasks": {
         "id": "endpoint_.GetAllAppointmentTasks",
@@ -485,7 +488,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

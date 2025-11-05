@@ -262,7 +262,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.createUser": {
         "id": "endpoint_users.createUser",
@@ -499,7 +500,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.getUser": {
         "id": "endpoint_users.getUser",
@@ -683,7 +685,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.replaceUser": {
         "id": "endpoint_users.replaceUser",
@@ -950,7 +953,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.deleteUser": {
         "id": "endpoint_users.deleteUser",
@@ -1126,7 +1130,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.updateUser": {
         "id": "endpoint_users.updateUser",
@@ -1379,7 +1384,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.checkUserExists": {
         "id": "endpoint_users.checkUserExists",
@@ -1550,7 +1556,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -2466,7 +2473,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.createUser": {
         "id": "endpoint_users.createUser",
@@ -2703,7 +2711,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.getUser": {
         "id": "endpoint_users.getUser",
@@ -2887,7 +2896,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.replaceUser": {
         "id": "endpoint_users.replaceUser",
@@ -3154,7 +3164,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.deleteUser": {
         "id": "endpoint_users.deleteUser",
@@ -3330,7 +3341,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.updateUser": {
         "id": "endpoint_users.updateUser",
@@ -3583,7 +3595,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_users.checkUserExists": {
         "id": "endpoint_users.checkUserExists",
@@ -3754,7 +3767,8 @@
         ],
         "protocol": {
           "type": "rest"
-        }
+        },
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

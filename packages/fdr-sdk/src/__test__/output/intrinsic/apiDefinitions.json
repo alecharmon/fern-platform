@@ -247,7 +247,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_events.createEventSync": {
         "id": "subpackage_events.createEventSync",
@@ -605,7 +606,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_events.createEventAsync": {
         "id": "subpackage_events.createEventAsync",
@@ -952,7 +954,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_eventTypes.getEventTypes": {
         "id": "subpackage_eventTypes.getEventTypes",
@@ -1128,7 +1131,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_eventTypes.createEventType": {
         "id": "subpackage_eventTypes.createEventType",
@@ -1378,7 +1382,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "subpackage_eventTypes.patchEventType": {
         "id": "subpackage_eventTypes.patchEventType",
@@ -1614,7 +1619,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},

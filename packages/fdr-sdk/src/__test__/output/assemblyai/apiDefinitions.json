@@ -374,7 +374,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.list": {
         "id": "endpoint_transcripts.list",
@@ -853,7 +854,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.submit": {
         "id": "endpoint_transcripts.submit",
@@ -1986,7 +1988,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.get": {
         "id": "endpoint_transcripts.get",
@@ -3031,7 +3034,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.delete": {
         "id": "endpoint_transcripts.delete",
@@ -4076,7 +4080,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.getSubtitles": {
         "id": "endpoint_transcripts.getSubtitles",
@@ -4467,7 +4472,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.getSentences": {
         "id": "endpoint_transcripts.getSentences",
@@ -4897,7 +4903,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.getParagraphs": {
         "id": "endpoint_transcripts.getParagraphs",
@@ -5309,7 +5316,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.wordSearch": {
         "id": "endpoint_transcripts.wordSearch",
@@ -5709,7 +5717,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_transcripts.getRedactedAudio": {
         "id": "endpoint_transcripts.getRedactedAudio",
@@ -6058,7 +6067,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_lemur.task": {
         "id": "endpoint_lemur.task",
@@ -6448,7 +6458,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_lemur.summary": {
         "id": "endpoint_lemur.summary",
@@ -6829,7 +6840,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_lemur.questionAnswer": {
         "id": "endpoint_lemur.questionAnswer",
@@ -7276,7 +7288,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_lemur.actionItems": {
         "id": "endpoint_lemur.actionItems",
@@ -7659,7 +7672,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_lemur.purgeRequestData": {
         "id": "endpoint_lemur.purgeRequestData",
@@ -8005,7 +8019,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_realtime.createTemporaryToken": {
         "id": "endpoint_realtime.createTemporaryToken",
@@ -8386,7 +8401,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {

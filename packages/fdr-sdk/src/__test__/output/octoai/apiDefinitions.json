@@ -69,7 +69,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_account.patchAccount": {
         "id": "endpoint_account.patchAccount",
@@ -179,7 +180,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_endpoint.createEndpoint": {
         "id": "endpoint_endpoint.createEndpoint",
@@ -301,7 +303,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_endpoint.getEndpoint": {
         "id": "endpoint_endpoint.getEndpoint",
@@ -425,7 +428,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_endpoint.deleteEndpoint": {
         "id": "endpoint_endpoint.deleteEndpoint",
@@ -509,7 +513,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_endpoint.patchEndpoint": {
         "id": "endpoint_endpoint.patchEndpoint",
@@ -648,7 +653,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_endpoint.getEndpoints": {
         "id": "endpoint_endpoint.getEndpoints",
@@ -759,7 +765,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_endpoint.getContainerMetadata": {
         "id": "endpoint_endpoint.getContainerMetadata",
@@ -859,7 +866,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_endpoint.getEndpointVolumeToken": {
         "id": "endpoint_endpoint.getEndpointVolumeToken",
@@ -947,7 +955,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_telemetry.getEndpointLogs": {
         "id": "endpoint_telemetry.getEndpointLogs",
@@ -1119,7 +1128,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_telemetry.getEndpointLogsStream": {
         "id": "endpoint_telemetry.getEndpointLogsStream",
@@ -1238,7 +1248,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_telemetry.getEndpointEvents": {
         "id": "endpoint_telemetry.getEndpointEvents",
@@ -1417,7 +1428,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_telemetry.getEndpointEventsStream": {
         "id": "endpoint_telemetry.getEndpointEventsStream",
@@ -1543,7 +1555,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_secret.createSecret": {
         "id": "endpoint_secret.createSecret",
@@ -1625,7 +1638,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_secret.getSecret": {
         "id": "endpoint_secret.getSecret",
@@ -1709,7 +1723,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_secret.updateSecret": {
         "id": "endpoint_secret.updateSecret",
@@ -1821,7 +1836,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_secret.deleteSecret": {
         "id": "endpoint_secret.deleteSecret",
@@ -1904,7 +1920,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_secret.getSecrets": {
         "id": "endpoint_secret.getSecrets",
@@ -1975,7 +1992,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_registryCredential.createRegistryCredential": {
         "id": "endpoint_registryCredential.createRegistryCredential",
@@ -2058,7 +2076,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_registryCredential.getRegistryCredential": {
         "id": "endpoint_registryCredential.getRegistryCredential",
@@ -2143,7 +2162,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_registryCredential.updateRegistryCredential": {
         "id": "endpoint_registryCredential.updateRegistryCredential",
@@ -2277,7 +2297,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_registryCredential.deleteRegistryCredential": {
         "id": "endpoint_registryCredential.deleteRegistryCredential",
@@ -2360,7 +2381,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_registryCredential.getRegistryCredentials": {
         "id": "endpoint_registryCredential.getRegistryCredentials",
@@ -2432,7 +2454,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_publicEndpoint.getPublicEndpoints": {
         "id": "endpoint_publicEndpoint.getPublicEndpoints",
@@ -2534,7 +2557,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_instanceTypes.getInstanceTypes": {
         "id": "endpoint_instanceTypes.getInstanceTypes",
@@ -2612,7 +2636,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -4840,7 +4865,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_.remove_background": {
         "id": "endpoint_.remove_background",
@@ -5142,7 +5168,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       },
       "endpoint_.generate_images": {
         "id": "endpoint_.generate_images",
@@ -5732,7 +5759,8 @@
               ]
             }
           }
-        ]
+        ],
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
@@ -6931,7 +6959,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_asset-library.create": {
         "id": "endpoint_asset-library.create",
@@ -8718,7 +8747,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_asset-library.delete": {
         "id": "endpoint_asset-library.delete",
@@ -8949,7 +8979,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_asset-library.completeUpload": {
         "id": "endpoint_asset-library.completeUpload",
@@ -9316,7 +9347,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_asset-library.get": {
         "id": "endpoint_asset-library.get",
@@ -9640,7 +9672,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_fine-tuning.create": {
         "id": "endpoint_fine-tuning.create",
@@ -10658,7 +10691,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_fine-tuning.get": {
         "id": "endpoint_fine-tuning.get",
@@ -10935,7 +10969,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_fine-tuning.delete": {
         "id": "endpoint_fine-tuning.delete",
@@ -11183,7 +11218,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_fine-tuning.cancel": {
         "id": "endpoint_fine-tuning.cancel",
@@ -11464,7 +11500,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_fine-tuning.list": {
         "id": "endpoint_fine-tuning.list",
@@ -12009,7 +12046,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_image-gen.generateSsd": {
         "id": "endpoint_image-gen.generateSsd",
@@ -13613,7 +13651,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_image-gen.generateControlnetSdxl": {
         "id": "endpoint_image-gen.generateControlnetSdxl",
@@ -15217,7 +15256,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_image-gen.generateControlnetSd15": {
         "id": "endpoint_image-gen.generateControlnetSd15",
@@ -16821,7 +16861,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_image-gen.generateSdxl": {
         "id": "endpoint_image-gen.generateSdxl",
@@ -18425,7 +18466,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_image-gen.generateSd": {
         "id": "endpoint_image-gen.generateSd",
@@ -20029,7 +20071,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_image-gen.generateSvd": {
         "id": "endpoint_image-gen.generateSvd",
@@ -20872,7 +20915,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_text-gen.createChatCompletion_stream": {
         "id": "endpoint_text-gen.createChatCompletion_stream",
@@ -22747,7 +22791,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_text-gen.createChatCompletion": {
         "id": "endpoint_text-gen.createChatCompletion",
@@ -24557,7 +24602,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_text-gen.createCompletion_stream": {
         "id": "endpoint_text-gen.createCompletion_stream",
@@ -25883,7 +25929,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       },
       "endpoint_text-gen.createCompletion": {
         "id": "endpoint_text-gen.createCompletion",
@@ -27147,7 +27194,8 @@
             },
             "clientInstantiation": "from octoai.client import OctoAI\n\nclient = OctoAI(\n    api_key=\"YOUR_API_KEY\",\n)"
           }
-        }
+        },
+        "includeInApiExplorer": true
       }
     },
     "websockets": {},
