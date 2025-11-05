@@ -103,7 +103,11 @@ export async function DocsMainContent({
                 node={node}
                 breadcrumb={breadcrumb}
                 bottomNavigation={bottomNavigation}
-                action={parent?.type === "endpointPair" ? <EndpointStreamingEnabledToggle node={parent} /> : undefined}
+                action={
+                    parent?.type === "endpointPair" ? (
+                        <EndpointStreamingEnabledToggle node={parent} lang={lang} />
+                    ) : undefined
+                }
                 lang={lang}
             />
         );

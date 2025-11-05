@@ -46,7 +46,8 @@ export default async function ApiEndpointPage({
     const pageActionOptions = await constructPageOptions({
         pageActionConfig: config,
         domain: loader.domain,
-        slug: node.slug
+        slug: node.slug,
+        lang
     });
 
     const markdownPromise = getMarkdownForPath(node, loader, loader.domain);

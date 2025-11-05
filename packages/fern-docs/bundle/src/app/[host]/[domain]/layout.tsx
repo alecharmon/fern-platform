@@ -115,7 +115,7 @@ export default async function Layout({
                 {/** HACKHACK: this is a hack to set the logo text to "Docs" for Cohere, this needs to be moved into docs.yml */}
                 <SetLogoText text={domain.includes("cohere") ? "Docs" : undefined} />
                 {config.defaultLanguage != null && <DefaultLanguage language={config.defaultLanguage} />}
-                <DarkCode value={edgeFlags.isDarkCodeEnabled || settings.darkModeCode} />
+                <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
                 <Whitelabeled value={edgeFlags.isWhitelabeled} />
                 <SetColors colors={colors} />
                 <SetIsAskAiEnabled isAskAiEnabled={isAskAiEnabled} />

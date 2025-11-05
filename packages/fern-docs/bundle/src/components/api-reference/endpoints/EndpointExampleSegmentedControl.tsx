@@ -8,7 +8,8 @@ import type { CodeExample } from "../examples/code-example";
 export function EndpointExampleSegmentedControl({
     segmentedControlExamples,
     selectedExample,
-    onSelectExample
+    onSelectExample,
+    lang
 }: {
     segmentedControlExamples: {
         exampleKey: string;
@@ -16,6 +17,7 @@ export function EndpointExampleSegmentedControl({
     }[];
     selectedExample: CodeExample | undefined;
     onSelectExample: (exampleKey: string) => void;
+    lang: string;
 }): ReactElement<any> {
     if (
         segmentedControlExamples.length >= 8 ||
@@ -38,6 +40,7 @@ export function EndpointExampleSegmentedControl({
                         onSelectExample(value);
                     }}
                     value={selectedExample?.exampleKey}
+                    lang={lang}
                 >
                     <FernButton
                         className="w-full min-w-0 truncate text-left"

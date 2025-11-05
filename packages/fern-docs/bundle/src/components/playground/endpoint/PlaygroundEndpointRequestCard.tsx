@@ -126,6 +126,7 @@ export function PlaygroundEndpointRequestCard({
                             onValueChange={(language) => {
                                 setRequestType(language as RequestType);
                             }}
+                            lang={lang}
                         />
                     )}
                     <CopyToClipboardButton

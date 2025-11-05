@@ -50,6 +50,7 @@ export default async function EndpointSelectorPage({
                 scopedNode = node;
                 return false;
             }
+            return true;
         });
     }
 
@@ -59,6 +60,7 @@ export default async function EndpointSelectorPage({
                 scopedNode = node;
                 return false;
             }
+            return true;
         });
     }
 

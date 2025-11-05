@@ -10,7 +10,13 @@ import { useRouter } from "next/navigation";
 
 import { StreamingEnabledToggle } from "./StreamingEnabledToggle";
 
-export function EndpointStreamingEnabledToggle({ node }: { node: FernNavigation.EndpointPairNode }) {
+export function EndpointStreamingEnabledToggle({
+    node,
+    lang
+}: {
+    node: FernNavigation.EndpointPairNode;
+    lang: string;
+}) {
     const router = useRouter();
     const [isStream, setIsStream] = useAtom(FERN_STREAM_ATOM);
     const currentSlug = useCurrentSlug();
@@ -30,6 +36,7 @@ export function EndpointStreamingEnabledToggle({ node }: { node: FernNavigation.
                 setIsStream(value);
                 router.replace(slugToHref(value ? node.stream.slug : node.nonStream.slug), { scroll: true });
             }}
+            lang={lang}
         />
     );
 }

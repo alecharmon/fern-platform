@@ -143,6 +143,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                             return { ...prev, exampleKey };
                         });
                     }}
+                    lang={lang}
                 />
             )}
             {endpoint.protocol?.type === "grpc" ? (
@@ -154,6 +155,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     json={endpoint.examples?.[0]?.requestBody?.value}
                     slug={node?.slug ?? ""}
                     isResponse={false}
+                    lang={lang}
                 />
             ) : (
                 <CodeSnippetExample
@@ -193,6 +195,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                                             language
                                         }));
                                     }}
+                                    lang={lang}
                                 />
                             )}
                         </>
@@ -207,6 +210,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     }
                     slug={node?.slug ?? ""}
                     isResponse={false}
+                    lang={lang}
                 />
             )}
             {selectedExample != null && selectedExample.exampleCall.responseStatusCode >= 400 && (
@@ -219,6 +223,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     intent={statusCodeToIntent(String(selectedExample.exampleCall.responseStatusCode))}
                     slug={node?.slug ?? ""}
                     isResponse={true}
+                    lang={lang}
                 />
             )}
             {selectedExample?.exampleCall.responseBody != null &&
@@ -234,12 +239,13 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                             json={value.value}
                             slug={node?.slug ?? ""}
                             isResponse={true}
+                            lang={lang}
                         />
                     ),
                     // TODO: support other media types
                     filename: () => <AudioExample title={errorSelector} lang={lang} />,
                     stream: (value) => (
-                        <TitledExample title={errorSelector}>
+                        <TitledExample title={errorSelector} lang={lang}>
                             <FernScrollArea className="rounded-b-[inherit]">
                                 <WebSocketMessages
                                     messages={value.value.map((event) => ({
@@ -256,7 +262,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                         </TitledExample>
                     ),
                     sse: (value) => (
-                        <TitledExample title={errorSelector}>
+                        <TitledExample title={errorSelector} lang={lang}>
                             <FernScrollArea className="rounded-b-[inherit]">
                                 <WebSocketMessages
                                     messages={value.value.map(({ event, data }) => ({

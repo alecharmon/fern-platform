@@ -10,13 +10,15 @@ export declare namespace CodeExampleClientDropdown {
         languages: string[];
         value: string;
         onValueChange: (language: string) => void;
+        lang: string;
     }
 }
 
 export const CodeExampleClientDropdown: React.FC<CodeExampleClientDropdown.Props> = ({
     languages,
     value,
-    onValueChange
+    onValueChange,
+    lang
 }) => {
     const options = languages.map((language) => ({
         type: "value" as const,
@@ -34,7 +36,7 @@ export const CodeExampleClientDropdown: React.FC<CodeExampleClientDropdown.Props
     const selectedOption = options.find((option) => option.value === value);
     return (
         <div className="flex justify-end">
-            <FernDropdown value={value} options={options} onValueChange={onValueChange}>
+            <FernDropdown value={value} options={options} onValueChange={onValueChange} lang={lang}>
                 <FernButton
                     icon={<FaIcon className="text-(color:--accent-a11) size-4" icon={getIconForClient(value)} />}
                     rightIcon={<ChevronDown className="!size-icon" />}

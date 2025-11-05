@@ -105,6 +105,7 @@ function EndpointRequestSnippetInternal({
                                     }))
                                 }
                                 value={selectedExampleKey.language}
+                                lang={lang}
                             />
                         )}
                         {slug != null && <ApiReferenceButton slug={slug} lang={lang} />}
