@@ -24,6 +24,7 @@ export default async function SharedLayout({
     sidebar,
     versionSelect,
     productSelect,
+    languageSelect,
     loader,
     logo,
     lang
@@ -33,6 +34,7 @@ export default async function SharedLayout({
     sidebar?: React.ReactNode;
     versionSelect: React.ReactNode;
     productSelect: React.ReactNode;
+    languageSelect: React.ReactNode;
     loader: DocsLoader & {
         clearKvCache: () => Promise<void>;
         isAskAiEnabledForDocs: () => Promise<boolean>;
@@ -95,6 +97,11 @@ export default async function SharedLayout({
                             {productSelect}
                         </React.Suspense>
                     }
+                    languageSelect={
+                        <React.Suspense fallback={null} key="language-select-1">
+                            {languageSelect}
+                        </React.Suspense>
+                    }
                     showSearchBar={layout.searchbarPlacement === "HEADER"}
                     navbarLinks={<NavbarLinks loader={loader} />}
                     loginButton={
@@ -134,6 +141,11 @@ export default async function SharedLayout({
                     versionSelect={
                         <React.Suspense fallback={null} key="version-select-3">
                             {versionSelect}
+                        </React.Suspense>
+                    }
+                    languageSelect={
+                        <React.Suspense fallback={null} key="language-select-3">
+                            {languageSelect}
                         </React.Suspense>
                     }
                     navbarLinks={

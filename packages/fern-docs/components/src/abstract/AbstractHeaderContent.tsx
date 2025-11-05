@@ -11,6 +11,7 @@ export function AbstractHeaderContent({
     logo,
     versionSelect,
     productSelect,
+    languageSelect,
     className,
     style,
     showSearchBar,
@@ -24,6 +25,7 @@ export function AbstractHeaderContent({
     logo: React.ReactNode;
     versionSelect: React.ReactNode;
     productSelect: React.ReactNode;
+    languageSelect?: React.ReactNode;
     className?: string;
     style?: CSSProperties;
     showSearchBar?: boolean;
@@ -49,6 +51,7 @@ export function AbstractHeaderContent({
                         >
                             {productSelect}
                             {versionSelect}
+                            {languageSelect}
                         </div>
                     </div>
                 </div>

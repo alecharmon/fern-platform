@@ -12,6 +12,7 @@ export function HeaderContent({
     logo,
     versionSelect,
     productSelect,
+    languageSelect,
     className,
     style,
     showSearchBar,
@@ -25,6 +26,7 @@ export function HeaderContent({
     logo: React.ReactNode;
     versionSelect: React.ReactNode;
     productSelect: React.ReactNode;
+    languageSelect: React.ReactNode;
     className?: string;
     style?: CSSProperties;
     showSearchBar?: boolean;
@@ -44,6 +46,7 @@ export function HeaderContent({
             logo={logo}
             versionSelect={versionSelect}
             productSelect={productSelect}
+            languageSelect={languageSelect}
             navbarLinks={navbarLinks}
             loginButton={loginButton}
             forceHeader={forceHeader}

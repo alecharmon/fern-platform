@@ -21,7 +21,8 @@
   }
 
   .product-dropdown-trigger,
-  .version-dropdown-trigger {
+  .version-dropdown-trigger,
+  .language-dropdown-trigger {
     @apply py-2 lg:py-0;
     @apply rounded-3/2 hover:bg-(color:--grayscale-a4) flex cursor-pointer items-center gap-1 self-baseline px-2 transition-[background-color];
   }
@@ -30,7 +31,8 @@
     @apply text-(color:--grayscale-a12);
   }
 
-  .version-dropdown-trigger {
+  .version-dropdown-trigger,
+  .language-dropdown-trigger {
     @apply text-(color:--grayscale-a11) lg:text-sm;
   }
 }

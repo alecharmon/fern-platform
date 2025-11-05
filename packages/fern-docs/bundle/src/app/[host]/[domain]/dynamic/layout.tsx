@@ -12,6 +12,7 @@ export default async function Layout({
     sidebar,
     versionSelect,
     productSelect,
+    languageSelect,
     logo,
     explorer
 }: {
@@ -21,6 +22,7 @@ export default async function Layout({
     sidebar: React.ReactNode;
     versionSelect: React.ReactNode;
     productSelect: React.ReactNode;
+    languageSelect: React.ReactNode;
     logo: React.ReactNode;
     explorer: React.ReactNode;
 }) {
@@ -36,6 +38,7 @@ export default async function Layout({
             headertabs={headertabs}
             versionSelect={versionSelect}
             productSelect={productSelect}
+            languageSelect={languageSelect}
             sidebar={sidebar}
             logo={logo}
         >

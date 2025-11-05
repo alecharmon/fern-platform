@@ -9,6 +9,7 @@ export function SidebarFixedItemsSection({
     logo,
     versionSelect,
     productSelect,
+    languageSelect,
     className,
     showSearchBar,
     showHeaderInSidebar,
@@ -17,6 +18,7 @@ export function SidebarFixedItemsSection({
     logo: React.ReactNode;
     versionSelect: React.ReactNode;
     productSelect: React.ReactNode;
+    languageSelect?: React.ReactNode;
     showBorder?: boolean;
     showSearchBar?: boolean;
     searchBar?: React.ReactNode;
@@ -41,6 +43,7 @@ export function SidebarFixedItemsSection({
                     </div>
                     <Fragment key="product-select">{productSelect}</Fragment>
                     <Fragment key="version-select">{versionSelect}</Fragment>
+                    <Fragment key="language-select">{languageSelect}</Fragment>
                 </>
             )}
             {searchBar}

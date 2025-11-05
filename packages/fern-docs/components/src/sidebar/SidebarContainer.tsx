@@ -13,6 +13,7 @@ export const SidebarContainer = React.memo(function SidebarContainer({
     logo,
     productSelect,
     versionSelect,
+    languageSelect,
     navbarLinks,
     loginButton,
     children,
@@ -26,6 +27,7 @@ export const SidebarContainer = React.memo(function SidebarContainer({
     logo: React.ReactNode;
     productSelect: React.ReactNode;
     versionSelect: React.ReactNode;
+    languageSelect?: React.ReactNode;
     navbarLinks: React.ReactNode;
     loginButton: React.ReactNode;
     searchBar: React.ReactNode;
@@ -41,6 +43,7 @@ export const SidebarContainer = React.memo(function SidebarContainer({
                 logo={logo}
                 productSelect={productSelect}
                 versionSelect={versionSelect}
+                languageSelect={languageSelect}
                 showSearchBar={showSearchBar}
                 searchBar={searchBar}
                 showHeaderInSidebar={showHeaderInSidebar}
