@@ -199,7 +199,7 @@ describe("getInterceptedLink", () => {
 
             const result = getInterceptedLink(event, defaultMetadata);
 
-            expect(result).toBe("/test-org/editor/test-docs/main/");
+            expect(result).toBe("/test-org/editor/test-docs/main/root");
         });
 
         it("should handle empty path", () => {

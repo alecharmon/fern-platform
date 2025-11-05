@@ -1,3 +1,5 @@
+import { ROOT_SLUG_ALIAS } from "@fern-docs/components/navigation";
+
 export const getInterceptedLink = (
     event: MouseEvent,
     metadata: {
@@ -33,6 +35,11 @@ export const getInterceptedLink = (
     // If the link already matches or starts with the base path, use it as-is
     if (cleanBasePath && (cleanHref === cleanBasePath || cleanHref.startsWith(cleanBasePath + "/"))) {
         return `/${orgName}/editor/${docsUrl}/${branch}/${cleanHref}`;
+    }
+
+    // Handle root path - forward to ROOT_SLUG_ALIAS
+    if (cleanBasePath == "" && cleanHref === "") {
+        return `/${orgName}/editor/${docsUrl}/${branch}/${ROOT_SLUG_ALIAS}`;
     }
 
     // Otherwise, add the base path prefix
