@@ -50,11 +50,15 @@ export async function GET(
 
                 const nodes: FernNavigation.NavigationNodePage[] = [];
 
-                FernNavigation.traverseDF(root, (node) => {
+                FernNavigation.traverseDF(root, (node, parents) => {
                     if (FernNavigation.hasMetadata(node)) {
                         if (node.hidden || node.authed) {
                             return SKIP;
                         }
+                    }
+
+                    if (node.type === "version" && !node.default) {
+                        return SKIP;
                     }
 
                     if (FernNavigation.isPage(node)) {

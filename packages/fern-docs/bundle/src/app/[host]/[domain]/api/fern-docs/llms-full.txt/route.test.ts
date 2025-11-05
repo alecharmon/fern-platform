@@ -267,4 +267,140 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
 
         expect(mockTrack).not.toHaveBeenCalled();
     });
+
+    it("should only include pages from the default version when multiple versions exist", async () => {
+        const mockRoot = {
+            type: "root",
+            title: "Test Docs",
+            authed: false,
+            hidden: false,
+            child: {
+                type: "versioned",
+                children: [
+                    {
+                        type: "version",
+                        id: "version-v1",
+                        slug: "v1",
+                        title: "v1",
+                        default: false,
+                        authed: false,
+                        hidden: false,
+                        landingPage: null,
+                        child: {
+                            type: "sidebarRoot",
+                            children: []
+                        }
+                    },
+                    {
+                        type: "version",
+                        id: "version-v2",
+                        slug: "v2",
+                        title: "v2",
+                        default: true,
+                        authed: false,
+                        hidden: false,
+                        landingPage: null,
+                        child: {
+                            type: "sidebarRoot",
+                            children: []
+                        }
+                    }
+                ]
+            }
+        };
+
+        const mockPageV1 = {
+            type: "page",
+            title: "V1 Page",
+            slug: "v1/page",
+            authed: false,
+            hidden: false,
+            id: "page-v1"
+        };
+
+        const mockPageV2 = {
+            type: "page",
+            title: "V2 Page",
+            slug: "v2/page",
+            authed: false,
+            hidden: false,
+            id: "page-v2"
+        };
+
+        mockGetSectionRoot.mockReturnValue(mockRoot as any);
+        mockCreateCachedDocsLoader.mockResolvedValue({
+            getRoot: vi.fn().mockResolvedValue(mockRoot)
+        } as any);
+
+        mockHasMetadata.mockImplementation((node: any) => {
+            return node.authed !== undefined || node.hidden !== undefined;
+        });
+        mockIsPage.mockImplementation((node: any) => {
+            return node.type === "page";
+        });
+
+        const collectedPages: any[] = [];
+        mockTraverseDF.mockImplementation((root, callback) => {
+            const versionedNode = (root as any).child;
+            for (const versionNode of versionedNode.children) {
+                const result = callback(versionNode, [root, versionedNode]);
+                if (result === "SKIP") {
+                    continue;
+                }
+                if (versionNode.id === "version-v2") {
+                    const pageResult = callback(mockPageV2, [root, versionedNode, versionNode]);
+                    if (pageResult !== "SKIP") {
+                        collectedPages.push(mockPageV2);
+                    }
+                } else if (versionNode.id === "version-v1") {
+                    const pageResult = callback(mockPageV1, [root, versionedNode, versionNode]);
+                    if (pageResult !== "SKIP") {
+                        collectedPages.push(mockPageV1);
+                    }
+                }
+            }
+        });
+
+        mockGetPageId.mockImplementation((node: any) => node.id);
+        mockGetMarkdownForPath.mockImplementation(async (node: any) => {
+            return {
+                content: `# ${node.title} Content`
+            };
+        });
+
+        const request = new NextRequest("https://example.com/llms-full.txt");
+        const params = Promise.resolve({ host: "example.com", domain: "example.com" });
+
+        const response = await GET(request, { params });
+
+        expect(response.status).toBe(200);
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let content = "";
+
+        if (reader) {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                content += decoder.decode(value, { stream: true });
+            }
+        }
+
+        expect(content).toContain("V2 Page Content");
+        expect(content).not.toContain("V1 Page Content");
+
+        expect(collectedPages.length).toBe(1);
+        expect(collectedPages[0].id).toBe("page-v2");
+
+        expect(mockTrack).toHaveBeenCalledWith(
+            "static_content_served",
+            expect.objectContaining({
+                domain: "example.com",
+                host: "example.com",
+                staticContentType: "llms-full.txt",
+                streaming: true
+            })
+        );
+    });
 });
