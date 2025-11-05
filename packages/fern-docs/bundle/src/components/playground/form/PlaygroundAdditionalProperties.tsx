@@ -113,14 +113,18 @@ export function PlaygroundAdditionalProperties({
         <div className={cn("mt-8 min-w-0 flex-1 shrink")}>
             <WithLabel
                 property={{
-                    key: ApiDefinition.PropertyKey(t(lang).playground.optionalExtraProperties),
+                    key: ApiDefinition.PropertyKey(t(lang).ui.optionalExtraProperties),
                     valueShape: ADDITIONAL_PROPERTIES_DEFAULT_SHAPE,
                     description: undefined,
-                    availability: undefined
+                    availability: undefined,
+                    propertyAccess: undefined
                 }}
-                value={t(lang).playground.optionalExtraProperties}
+                value={t(lang).ui.optionalExtraProperties}
                 onRemove={noop}
                 types={types}
+                lang={lang}
+                onChange={noop}
+                isNullSelected={false}
             >
                 <PlaygroundMapForm
                     id="extraProperties"
@@ -129,6 +133,7 @@ export function PlaygroundAdditionalProperties({
                     onChange={handleChange}
                     value={additionalProperties}
                     types={types}
+                    lang={lang}
                 />
             </WithLabel>
         </div>

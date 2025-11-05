@@ -25,6 +25,7 @@ interface WithLabelProps {
     onRemove: () => void;
     types: Record<string, TypeDefinition>;
     isNullSelected: boolean;
+    lang: string;
 }
 
 export const WithLabel: FC<PropsWithChildren<WithLabelProps>> = ({
@@ -35,7 +36,8 @@ export const WithLabel: FC<PropsWithChildren<WithLabelProps>> = ({
     onRemove,
     children,
     types,
-    isNullSelected
+    isNullSelected,
+    lang
 }) => {
     if (!property) {
         return <>{children}</>;
@@ -62,7 +64,8 @@ export const WithLabel: FC<PropsWithChildren<WithLabelProps>> = ({
                 isResponse: false,
                 hideOptional: true,
                 isNullable: unwrapped.isNullable,
-                onChange
+                onChange,
+                lang
             })}
             isNullSelected={isNullSelected}
         >

@@ -223,6 +223,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                                     onChange={setBodyJson}
                                     value={formState?.body?.value}
                                     types={types}
+                                    lang={lang}
                                 />
                             </PlaygroundEndpointFormSection>
                         );

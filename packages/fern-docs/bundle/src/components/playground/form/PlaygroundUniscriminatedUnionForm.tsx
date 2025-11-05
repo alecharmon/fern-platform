@@ -21,10 +21,11 @@ interface PlaygroundUniscriminatedUnionFormProps {
     id: string;
     types: Record<string, TypeDefinition>;
     disabled?: boolean;
+    lang: string;
 }
 
 export const PlaygroundUniscriminatedUnionForm = memo<PlaygroundUniscriminatedUnionFormProps>((props) => {
-    const { undiscriminatedUnion, onChange, value, id, types, disabled } = props;
+    const { undiscriminatedUnion, onChange, value, id, types, disabled, lang } = props;
     const [internalSelectedVariant, setInternalSelectedVariant] = useState<number>(() => {
         return Math.max(
             undiscriminatedUnion.variants.findIndex((variant) => matchesTypeReference(variant.shape, value, types)),
@@ -83,6 +84,7 @@ export const PlaygroundUniscriminatedUnionForm = memo<PlaygroundUniscriminatedUn
                     options={options}
                     onValueChange={setSelectedVariant}
                     value={internalSelectedVariant.toString()}
+                    lang={lang}
                 >
                     <FernButton
                         text={
@@ -110,6 +112,7 @@ export const PlaygroundUniscriminatedUnionForm = memo<PlaygroundUniscriminatedUn
                         types={types}
                         disabled={disabled}
                         indent={false}
+                        lang={lang}
                     />
                 </div>
             )}

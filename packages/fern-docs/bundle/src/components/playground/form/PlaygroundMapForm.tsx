@@ -96,6 +96,7 @@ export const PlaygroundMapForm = memo<PlaygroundMapFormProps>((props) => {
                             onRemoveItem={handleRemoveItem}
                             item={item}
                             types={types}
+                            lang={lang}
                         />
                     ))}
                     <li className="pt-2">
@@ -132,6 +133,7 @@ interface PlaygroundMapItemFormProps {
     onRemoveItem: (idx: number) => void;
     item: { key: unknown; value: unknown };
     types: Record<string, TypeDefinition>;
+    lang: string;
 }
 
 function PlaygroundMapItemForm({
@@ -143,7 +145,8 @@ function PlaygroundMapItemForm({
     onValueChange,
     onRemoveItem,
     item,
-    types
+    types,
+    lang
 }: PlaygroundMapItemFormProps) {
     const handleChangeKey = useCallback(
         (newKey: unknown) => {
@@ -177,6 +180,7 @@ function PlaygroundMapItemForm({
                     value={item.key}
                     onChange={handleChangeKey}
                     types={types}
+                    lang={lang}
                 />
             </div>
             <div className="min-w-0 flex-1 shrink">
@@ -187,6 +191,7 @@ function PlaygroundMapItemForm({
                     value={item.value}
                     onChange={handleChangeValue}
                     types={types}
+                    lang={lang}
                 />
             </div>
             <div>

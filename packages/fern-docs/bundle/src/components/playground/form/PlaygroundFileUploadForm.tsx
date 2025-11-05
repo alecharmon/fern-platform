@@ -106,6 +106,9 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                 typeShorthand={type === "file" ? "file" : "multiple files"}
                 availability={undefined}
                 description={undefined}
+                onChange={() => {
+                    void 0;
+                }}
             >
                 <input
                     ref={ref}

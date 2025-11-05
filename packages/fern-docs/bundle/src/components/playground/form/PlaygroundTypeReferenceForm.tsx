@@ -65,6 +65,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 onRemove={onRemove}
                 types={types}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
                     <PlaygroundObjectForm
@@ -74,6 +75,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         indent={indent}
                         id={id}
                         types={types}
+                        lang={lang}
                     />
                 </span>
             </WithLabel>
@@ -86,6 +88,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 onRemove={onRemove}
                 types={types}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "invisible")}>
                     <PlaygroundEnumForm enumValues={values} onChange={onChange} value={value} id={id} lang={lang} />
@@ -100,6 +103,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 onRemove={onRemove}
                 types={types}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
                     <PlaygroundUniscriminatedUnionForm
@@ -108,6 +112,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         value={value}
                         id={id}
                         types={types}
+                        lang={lang}
                         // TODO: add default value
                     />
                 </span>
@@ -121,6 +126,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 onRemove={onRemove}
                 types={types}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
                     <PlaygroundDiscriminatedUnionForm
@@ -146,6 +152,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         isNullSelected={isNullSelected}
                         htmlFor={id}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             {property?.key === "user_audio_chunk" || // TODO(naman): remove hardcoding for ElevenLabs once the backend mimeType is plumbed through
@@ -209,6 +216,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                             types={types}
                             htmlFor={id}
                             isNullSelected={isNullSelected}
+                            lang={lang}
                         >
                             <span className={cn("block w-full", isNullSelected && "invisible")}>
                                 <div className="flex items-center justify-start gap-3">
@@ -236,6 +244,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernNumericInput
@@ -261,6 +270,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernNumericInput
@@ -285,6 +295,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernNumericInput
@@ -310,6 +321,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernNumericInput
@@ -333,6 +345,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernNumericInput
@@ -356,6 +369,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernDatetimeInput
@@ -379,6 +393,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernInput
@@ -402,6 +417,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernTextarea
@@ -423,6 +439,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernInput
@@ -447,6 +464,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <FernTextarea
@@ -471,6 +489,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 types={types}
                 htmlFor={id}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
                     <PlaygroundListForm
@@ -494,6 +513,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 types={types}
                 htmlFor={id}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
                     <PlaygroundListForm
@@ -517,6 +537,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 types={types}
                 htmlFor={id}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
                     <PlaygroundMapForm
@@ -543,6 +564,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <code>{stringLiteral.value}</code>
@@ -558,6 +580,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         types={types}
                         htmlFor={id}
                         isNullSelected={isNullSelected}
+                        lang={lang}
                     >
                         <span className={cn("block w-full", isNullSelected && "invisible")}>
                             <code>{stringLiteral.value ? "true" : "false"}</code>
@@ -575,6 +598,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 types={types}
                 htmlFor={id}
                 isNullSelected={isNullSelected}
+                lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
                     <FernTextarea

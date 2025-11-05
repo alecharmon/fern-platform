@@ -65,6 +65,7 @@ export const PlaygroundListForm = memo<PlaygroundListFormProps>(({ itemShape, on
                             onChange={handleChangeItem}
                             types={types}
                             onRemove={handleRemoveItem}
+                            lang={lang}
                         />
                     ))}
                     <li className="pt-2">
@@ -100,6 +101,7 @@ interface PlaygroundListItemFormProps {
     onChange: (idx: number, newValue: unknown) => void;
     types: Record<string, TypeDefinition>;
     onRemove: (idx: number) => void;
+    lang: string;
 }
 
 function PlaygroundListItemForm({
@@ -110,7 +112,8 @@ function PlaygroundListItemForm({
     item,
     onChange,
     types,
-    onRemove
+    onRemove,
+    lang
 }: PlaygroundListItemFormProps) {
     const handleChangeItem = useCallback(
         (newItem: unknown) =>
@@ -141,6 +144,7 @@ function PlaygroundListItemForm({
                         renderAsPanel={true}
                         id={`${id}[${idx}]`}
                         types={types}
+                        lang={lang}
                     />
                 )}
 
@@ -161,6 +165,7 @@ function PlaygroundListItemForm({
                     renderAsPanel={true}
                     id={`${id}[${idx}]`}
                     types={types}
+                    lang={lang}
                 />
             )}
         </li>

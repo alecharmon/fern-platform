@@ -96,7 +96,12 @@ export const PlaygroundDiscriminatedUnionForm = memo<PlaygroundDiscriminatedUnio
                     muted={disabled}
                 />
             ) : (
-                <FernDropdown options={options} onValueChange={setSelectedVariant} value={selectedVariantKey}>
+                <FernDropdown
+                    options={options}
+                    onValueChange={setSelectedVariant}
+                    value={selectedVariantKey}
+                    lang={lang}
+                >
                     <FernButton
                         text={
                             activeVariant != null ? (
@@ -123,6 +128,7 @@ export const PlaygroundDiscriminatedUnionForm = memo<PlaygroundDiscriminatedUnio
                         onChange={onChange}
                         id={id}
                         types={types}
+                        lang={lang}
                     />
                 </div>
             )}

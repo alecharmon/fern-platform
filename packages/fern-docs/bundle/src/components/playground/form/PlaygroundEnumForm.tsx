@@ -61,7 +61,7 @@ export const PlaygroundEnumForm = memo<PlaygroundEnumFormProps>((props) => {
     const activeItem = enumValues.find((enumValue) => enumValue.value === value);
 
     return (
-        <FernDropdown options={options} onValueChange={onChange} value={activeItem?.value} onOpen={onFocus}>
+        <FernDropdown options={options} onValueChange={onChange} value={activeItem?.value} onOpen={onFocus} lang={lang}>
             <FernButton
                 id={id}
                 text={
