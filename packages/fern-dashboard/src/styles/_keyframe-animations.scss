@@ -101,3 +101,30 @@
     transform: translateX(2px);
   }
 }
+
+@keyframes alert-draw-line {
+  0% {
+    stroke-dasharray: 3.125;
+    stroke-dashoffset: 3.125;
+  }
+  60% {
+    stroke-dasharray: 3.125;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dasharray: 3.125;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes alert-show-dot {
+  0% {
+    opacity: 0;
+  }
+  60% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

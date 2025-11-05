@@ -21,12 +21,28 @@ export function AlertIconAnimated({ className, strokeColor = "var(--green-1100)"
             aria-hidden="true"
         >
             <path
-                d="M10 6.25V10.625M10 13.75H10.0083M8.6025 2.91583L1.79083 14.375C1.34833 15.1417 1.90333 16.125 2.81333 16.125H17.1867C18.0967 16.125 18.6517 15.1417 18.2092 14.375L11.3975 2.91583C10.955 2.14917 9.845 2.14917 9.4025 2.91583H8.6025Z"
+                d="M2.24711 13.4381C1.52595 14.6881 2.42809 16.2501 3.8712 16.2501H16.1284C17.5715 16.2501 18.4737 14.6881 17.7525 13.4381L11.6239 2.81522C10.9024 1.56452 9.09727 1.56452 8.37571 2.81522L2.24711 13.4381Z"
                 stroke={strokeColor}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="transition-stroke-color transition"
+                className="alert-triangle transition-stroke-color transition"
+            />
+            <path
+                d="M9.99981 7.50011V10.6251"
+                stroke={strokeColor}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="alert-line transition-stroke-color transition"
+            />
+            <path
+                d="M9.99981 13.1251H10.0061V13.1314H9.99981V13.1251"
+                stroke={strokeColor}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="alert-dot transition-stroke-color transition"
             />
         </svg>
     );

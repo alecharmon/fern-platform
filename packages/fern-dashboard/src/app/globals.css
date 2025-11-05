@@ -721,14 +721,21 @@ why? who knows. thanks monaco:)
 }
 
 /* Icon animations: Incidents */
-.group:hover .alert,
-.hover-animating .alert {
-  animation: alert-shake-x 0.5s ease-in-out;
+.group:hover .alert-line,
+.hover-animating .alert-line {
+  animation: alert-draw-line 0.3s ease-out;
+}
+
+.group:hover .alert-dot,
+.hover-animating .alert-dot {
+  animation: alert-show-dot 0.3s ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .group:hover .alert,
-  .hover-animating .alert {
+  .group:hover .alert-line,
+  .hover-animating .alert-line,
+  .group:hover .alert-dot,
+  .hover-animating .alert-dot {
     animation: none;
   }
 }
