@@ -36,7 +36,8 @@ export default async function preloadEditorData(request: {
             loader.unsafe_getFullRoot(),
             loader.getMetadata(),
             loader.getConfig(),
-            loader.getLayout()
+            loader.getLayout(),
+            loader.getColors()
         ]);
 
         return { success: true };

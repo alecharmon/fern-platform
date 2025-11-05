@@ -187,7 +187,8 @@ export default async function VisualEditorPreviewLayout({
                                                                         /> */}
                                                                 </Suspense>
                                                             }
-                                                            searchBar={<DesktopSearchButton />}
+                                                            searchBar={<DesktopSearchButton lang="en" />}
+                                                            lang="en"
                                                         >
                                                             {sidebar}
                                                         </SidebarContainer>
@@ -199,6 +200,7 @@ export default async function VisualEditorPreviewLayout({
                                                                     <DesktopSearchButton
                                                                         id={FERN_SEARCH_BUTTON_ID}
                                                                         className="fern-header-search-bar cursor-not-allowed overflow-hidden"
+                                                                        lang="en"
                                                                     />
                                                                 )
                                                             }

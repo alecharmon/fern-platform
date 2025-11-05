@@ -21,7 +21,7 @@ export function VEPreviewImage({ className }: { className?: string }) {
                 alt="Fern Editor Preview"
                 placeholder="blur"
                 aria-hidden={resolvedTheme !== "light"}
-                className={`w-full h-auto max-w-[640px] object-contain transition-opacity duration-300 ${
+                className={`w-full h-auto max-w-[640px] object-contain transition-opacity duration-300 block dark:hidden ${
                     resolvedTheme === "light" ? "opacity-100" : "opacity-0"
                 }`}
                 priority
@@ -32,7 +32,7 @@ export function VEPreviewImage({ className }: { className?: string }) {
                 alt="Fern Editor Preview"
                 placeholder="blur"
                 aria-hidden={resolvedTheme !== "dark"}
-                className={`absolute inset-0 max-w-[640px] h-auto object-contain transition-opacity duration-300 ${
+                className={`w-full h-auto max-w-[640px] object-contain transition-opacity duration-300 hidden dark:block ${
                     resolvedTheme === "dark" ? "opacity-100" : "opacity-0"
                 }`}
                 priority

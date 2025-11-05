@@ -65,7 +65,13 @@ export function GithubSourceClient({
                                 </SetGithubSourcePopover>
                             </>
                         ) : (
-                            <ConnectGithubRepoButton docsUrl={docsUrl} />
+                            <ConnectGithubRepoButton
+                                docsUrl={docsUrl}
+                                variant="link"
+                                buttonText="Configure GitHub"
+                                size="lg"
+                                buttonClasses="text-muted-foreground !pl-0 !pr-0 !pt-0 h-fit"
+                            />
                         )}
                     </div>
                 </div>
