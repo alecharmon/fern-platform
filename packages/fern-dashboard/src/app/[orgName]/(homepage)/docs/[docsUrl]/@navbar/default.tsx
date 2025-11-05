@@ -42,7 +42,7 @@ export default async function DocsSiteNavbar({
         { title: "Feedback", href: "feedback" }
     ];
 
-    if (askAiStatus?.ask_ai_enabled) {
+    if (askAiStatus?.ask_ai_enabled || askAiStatus?.job_id) {
         navItems.splice(3, 0, { title: "Ask Fern", href: "ask-fern" });
     }
 
