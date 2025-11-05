@@ -2,11 +2,11 @@
 
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { FernInput } from "@fern-docs/components/FernInput";
+import { t } from "@fern-docs/i18n";
 import { useAtom, useAtomValue } from "jotai/react";
 import { RESET } from "jotai/utils";
 import { User } from "lucide-react";
 import { type ReactElement, useEffect } from "react";
-
 import {
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_ATOM,
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_IS_RESETTABLE_ATOM,
@@ -14,15 +14,16 @@ import {
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_IS_RESETTABLE_ATOM,
     useResolvedPlaygroundState
 } from "@/state/playground";
-
 import { PasswordInputGroup } from "../PasswordInputGroup";
 
 export function PlaygroundBasicAuthForm({
     basicAuth,
-    disabled
+    disabled,
+    lang
 }: {
     basicAuth: APIV1Read.BasicAuth;
     disabled?: boolean;
+    lang: string;
 }): ReactElement<any> {
     const [username, setUsername] = useAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_ATOM);
     const [password, setPassword] = useAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_ATOM);
@@ -41,7 +42,7 @@ export function PlaygroundBasicAuthForm({
         <>
             <li className="-mx-4 space-y-2 p-4">
                 <label className="inline-flex flex-wrap items-baseline">
-                    <span className="font-mono text-sm">{basicAuth.usernameName ?? "Username"}</span>
+                    <span className="font-mono text-sm">{basicAuth.usernameName ?? t(lang).auth.username}</span>
                 </label>
                 <div>
                     <FernInput
@@ -57,7 +58,7 @@ export function PlaygroundBasicAuthForm({
 
             <li className="-mx-4 space-y-2 p-4">
                 <label className="inline-flex flex-wrap items-baseline">
-                    <span className="font-mono text-sm">{basicAuth.passwordName ?? "Password"}</span>
+                    <span className="font-mono text-sm">{basicAuth.passwordName ?? t(lang).auth.password}</span>
                 </label>
 
                 <div>

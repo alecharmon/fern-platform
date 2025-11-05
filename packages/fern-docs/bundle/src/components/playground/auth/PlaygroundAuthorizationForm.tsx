@@ -13,19 +13,25 @@ interface PlaygroundAuthorizationFormProps {
     apiDefinitionId: string;
     auth: APIV1Read.ApiAuth;
     disabled: boolean;
+    lang: string;
 }
 
 export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> = ({
     loader,
     apiDefinitionId,
     auth,
-    disabled
+    disabled,
+    lang
 }) => {
     return (
         <ul className="list-none px-4">
             {visitDiscriminatedUnion(auth, "type")._visit<ReactElement<any> | false>({
-                bearerAuth: (bearerAuth) => <PlaygroundBearerAuthForm bearerAuth={bearerAuth} disabled={disabled} />,
-                basicAuth: (basicAuth) => <PlaygroundBasicAuthForm basicAuth={basicAuth} disabled={disabled} />,
+                bearerAuth: (bearerAuth) => (
+                    <PlaygroundBearerAuthForm bearerAuth={bearerAuth} disabled={disabled} lang={lang} />
+                ),
+                basicAuth: (basicAuth) => (
+                    <PlaygroundBasicAuthForm basicAuth={basicAuth} disabled={disabled} lang={lang} />
+                ),
                 header: (header) => <PlaygroundHeaderAuthForm header={header} disabled={disabled} />,
                 oAuth: (oAuth) => (
                     <PlaygroundOAuthFormServer
@@ -33,6 +39,7 @@ export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> =
                         apiDefinitionId={apiDefinitionId}
                         oAuth={oAuth}
                         disabled={disabled}
+                        lang={lang}
                     />
                 ),
                 _other: () => false

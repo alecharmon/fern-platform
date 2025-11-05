@@ -30,7 +30,13 @@ export function PlaygroundAuthorizationFormCard({
 }: PlaygroundAuthorizationFormCardProps): ReactElement<any> | null {
     return (
         <PlaygroundAuthorizationFormCardRoot>
-            <PlaygroundAuthorizationCardTrigger auth={auth} disabled={disabled} lang={lang} />
+            <PlaygroundAuthorizationCardTrigger
+                loader={loader}
+                apiDefinitionId={apiDefinitionId}
+                auth={auth}
+                disabled={disabled}
+                lang={lang}
+            />
             <PlaygroundAuthorizationFormCardContent>
                 <div className="fern-dropdown max-h-full">
                     <PlaygroundAuthorizationForm
@@ -38,6 +44,7 @@ export function PlaygroundAuthorizationFormCard({
                         apiDefinitionId={apiDefinitionId}
                         auth={auth}
                         disabled={disabled}
+                        lang={lang}
                     />
                     <div className="flex justify-end gap-2 p-4 pt-2">
                         {auth.type !== "oAuth" && <PlaygroundAuthorizationFormCardCloseButton lang={lang} />}

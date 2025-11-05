@@ -5,9 +5,11 @@ import { conformExplorerRoute, conformTrailingSlash } from "@fern-api/docs-utils
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { getFernToken } from "@/app/fern-token";
 import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
+import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";
 
 export default async function Page(props: { params: Promise<{ host: string; domain: string; slug: string }> }) {
     const { host, domain, slug: slugProp } = await props.params;
@@ -37,7 +39,11 @@ export default async function Page(props: { params: Promise<{ host: string; doma
         return <NoEndpointSelected lang={lang} />;
     }
 
-    return <ExplorerContent loader={loader} node={node} lang={lang} />;
+    return (
+        <Suspense fallback={<PlaygroundEndpointSkeleton />}>
+            <ExplorerContent loader={loader} node={node} lang={lang} />
+        </Suspense>
+    );
 }
 
 export async function generateMetadata({

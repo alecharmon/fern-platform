@@ -13,6 +13,7 @@ interface PlaygroundObjectFormProps {
     indent?: boolean;
     types: Record<string, TypeDefinition>;
     defaultValue?: unknown;
+    lang: string;
 }
 
 export function PlaygroundObjectForm({
@@ -20,7 +21,8 @@ export function PlaygroundObjectForm({
     shape,
     onChange,
     value,
-    types
+    types,
+    lang
 }: PlaygroundObjectFormProps): ReactElement<any> {
     const { properties, extraProperties } = useMemo(() => unwrapObjectType(shape, types), [shape, types]);
     return (
@@ -31,6 +33,7 @@ export function PlaygroundObjectForm({
             onChange={onChange}
             value={value}
             types={types}
+            lang={lang}
         />
     );
 }

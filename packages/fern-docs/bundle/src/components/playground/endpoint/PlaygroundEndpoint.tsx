@@ -254,6 +254,7 @@ export const PlaygroundEndpoint = ({
                         sendRequestIcon={<SendHorizonal className="transition-transform group-hover:translate-x-0.5" />}
                         types={context.types}
                         apiDefinitionId={node.apiDefinitionId}
+                        lang={lang}
                     />
                 </div>
                 <div className="flex min-h-0 flex-1 shrink">

@@ -10,9 +10,10 @@ import {
 } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { permanentRedirect, RedirectType, redirect } from "next/navigation";
-import React from "react";
+import React, { Suspense } from "react";
 
 import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
+import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";
 
 export const revalidate = false;
 
@@ -57,5 +58,9 @@ export default async function ExplorerPage({
     }
     const node = found.node;
 
-    return <ExplorerContent loader={loader} node={node} lang={lang} />;
+    return (
+        <Suspense fallback={<PlaygroundEndpointSkeleton />}>
+            <ExplorerContent loader={loader} node={node} lang={lang} />
+        </Suspense>
+    );
 }

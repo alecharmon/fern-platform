@@ -31,7 +31,14 @@ export function PlaygroundEndpointAliasForm({
     if (shape.type === "object" && !isOptional) {
         return (
             <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={t(lang).apiReference.bodyParameters}>
-                <PlaygroundObjectForm id="body" shape={shape} onChange={setBodyJson} value={value} types={types} />
+                <PlaygroundObjectForm
+                    id="body"
+                    shape={shape}
+                    onChange={setBodyJson}
+                    value={value}
+                    types={types}
+                    lang={lang}
+                />
             </PlaygroundEndpointFormSection>
         );
     }
@@ -40,7 +47,14 @@ export function PlaygroundEndpointAliasForm({
             ignoreHeaders={ignoreHeaders}
             title={isOptional ? t(lang).apiReference.optionalBody : t(lang).apiReference.body}
         >
-            <PlaygroundTypeReferenceForm id="body" shape={shape} onChange={setBodyJson} value={value} types={types} />
+            <PlaygroundTypeReferenceForm
+                id="body"
+                shape={shape}
+                onChange={setBodyJson}
+                value={value}
+                types={types}
+                lang={lang}
+            />
         </PlaygroundEndpointFormSection>
     );
 }

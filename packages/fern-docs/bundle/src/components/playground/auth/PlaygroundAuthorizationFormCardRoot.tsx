@@ -1,5 +1,6 @@
 "use client";
 
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { APIV1Read } from "@fern-api/fdr-sdk";
 import { Button } from "@fern-docs/components/button";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
@@ -76,21 +77,26 @@ export function usePlaygroundAuthorizationFormCard() {
 export function PlaygroundAuthorizationCardTrigger({
     auth,
     disabled,
+    loader,
+    apiDefinitionId,
     lang
 }: {
     auth: APIV1Read.ApiAuth;
     disabled: boolean;
+    loader: DocsLoader;
+    apiDefinitionId: string;
     lang: string;
 }) {
-    const { open, toggleOpen, setOpen } = usePlaygroundAuthorizationFormCard();
+    const { open, toggleOpen } = usePlaygroundAuthorizationFormCard();
     const apiKeyInjection = useApiKeyInjectionConfig();
     return apiKeyInjection.enabled ? (
         <PlaygroundCardTriggerApiKeyInjected
             auth={auth}
             config={apiKeyInjection}
+            loader={loader}
+            apiDefinitionId={apiDefinitionId}
             disabled={disabled}
             toggleOpen={toggleOpen}
-            onClose={() => setOpen(false)}
             lang={lang}
         />
     ) : (

@@ -19,12 +19,8 @@ function PlaygroundEndpointPath() {
             </div>
 
             <div className="max-sm:hidden">
-                <PlaygroundSendRequestButton disabled={true} />
+                <PlaygroundSendRequestButton sendRequestButtonLabel="" disabled={true} lang="en" />
             </div>
-
-            {/* <Dialog.Close asChild className="max-sm:hidden">
-        <FernButton icon={<Xmark />} size="large" rounded-1 variant="outlined" />
-      </Dialog.Close> */}
         </div>
     );
 }
@@ -33,8 +29,8 @@ export function PlaygroundEndpointSkeleton(): ReactElement<any> {
     const form = (
         <div className="mx-auto w-full max-w-5xl space-y-6 pt-6 max-sm:pt-0 sm:pb-20">
             <div className="col-span-2 space-y-8">
-                <PlaygroundEndpointFormSectionSkeleton />
-                <PlaygroundEndpointFormSectionSkeleton />
+                <PlaygroundEndpointFormSectionSkeleton lang="en" />
+                <PlaygroundEndpointFormSectionSkeleton lang="en" />
             </div>
         </div>
     );
@@ -50,6 +46,7 @@ export function PlaygroundEndpointSkeleton(): ReactElement<any> {
                     requestCard={<PlaygroundCardSkeleton className="flex-1" />}
                     responseCard={<PlaygroundCardSkeleton className="flex-1" />}
                     requestDisabled={true}
+                    lang="en"
                 />
             </div>
         </div>

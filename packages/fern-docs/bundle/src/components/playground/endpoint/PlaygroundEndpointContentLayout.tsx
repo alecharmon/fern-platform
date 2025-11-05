@@ -14,6 +14,7 @@ interface PlaygroundEndpointContentLayoutProps {
     responseCard: ReactNode;
     endpointId?: string;
     requestDisabled: boolean;
+    lang: string;
 }
 
 export function PlaygroundEndpointContentLayout({
@@ -22,7 +23,8 @@ export function PlaygroundEndpointContentLayout({
     requestCard,
     responseCard,
     endpointId,
-    requestDisabled
+    requestDisabled,
+    lang
 }: PlaygroundEndpointContentLayoutProps): ReactElement<any> {
     const isMobile = useIsMobile();
 
@@ -55,9 +57,14 @@ export function PlaygroundEndpointContentLayout({
                         requestCard={requestCard}
                         responseCard={responseCard}
                         sendButton={
-                            <PlaygroundSendRequestButton sendRequest={sendRequest} disabled={requestDisabled} />
+                            <PlaygroundSendRequestButton
+                                sendRequest={sendRequest}
+                                disabled={requestDisabled}
+                                lang={lang}
+                            />
                         }
                         endpointId={endpointId}
+                        lang={lang}
                     />
                 )}
             </div>

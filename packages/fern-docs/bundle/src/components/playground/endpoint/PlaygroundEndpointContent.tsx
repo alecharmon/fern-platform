@@ -89,6 +89,7 @@ export function PlaygroundEndpointContent({
             requestCard={requestCard}
             responseCard={responseCard}
             requestDisabled={requestDisabled ?? false}
+            lang={lang}
         />
     );
 }

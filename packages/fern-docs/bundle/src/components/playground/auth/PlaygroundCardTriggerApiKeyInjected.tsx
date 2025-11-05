@@ -1,4 +1,5 @@
 import type { APIKeyInjectionConfigEnabled } from "@fern-api/docs-auth";
+import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
@@ -14,25 +15,26 @@ import {
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM,
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM
 } from "@/state/playground";
-
 import { useApiRoute } from "../../hooks/useApiRoute";
 import { PlaygroundAuthorizationForm } from "./PlaygroundAuthorizationForm";
 
 interface PlaygroundCardTriggerApiKeyInjectedProps {
     auth: APIV1Read.ApiAuth;
+    loader: DocsLoader;
+    apiDefinitionId: string;
     config: APIKeyInjectionConfigEnabled;
     disabled: boolean;
     toggleOpen: () => void;
-    onClose: () => void;
     lang: string;
 }
 
 export function PlaygroundCardTriggerApiKeyInjected({
     auth,
+    loader,
+    apiDefinitionId,
     config,
     disabled,
     toggleOpen,
-    onClose,
     lang
 }: PlaygroundCardTriggerApiKeyInjectedProps): ReactElement<any> | false {
     const searchParams = useSearchParams();
@@ -102,7 +104,13 @@ export function PlaygroundCardTriggerApiKeyInjected({
                     active={true}
                 />
                 <div className="-mx-4">
-                    <PlaygroundAuthorizationForm auth={auth} closeContainer={onClose} disabled={disabled} />
+                    <PlaygroundAuthorizationForm
+                        loader={loader}
+                        apiDefinitionId={apiDefinitionId}
+                        auth={auth}
+                        disabled={disabled}
+                        lang={lang}
+                    />
                 </div>
                 {
                     <div className="flex justify-end gap-2">

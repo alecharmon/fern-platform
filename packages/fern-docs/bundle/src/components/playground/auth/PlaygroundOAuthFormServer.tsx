@@ -9,12 +9,14 @@ async function OAuthReferencedEndpointForm({
     loader,
     apiDefinitionId,
     referencedEndpoint,
-    disabled
+    disabled,
+    lang
 }: {
     loader: DocsLoader;
     apiDefinitionId: string;
     referencedEndpoint: APIV1Read.OAuthClientCredentials.ReferencedEndpoint;
     disabled?: boolean;
+    lang: string;
 }) {
     try {
         const { endpoint, nodes, globalHeaders, authSchemes, types } = await loader.getEndpointById(
@@ -27,6 +29,7 @@ async function OAuthReferencedEndpointForm({
                 <PlaygroundBearerAuthForm
                     bearerAuth={{ tokenName: "token", description: undefined }}
                     disabled={disabled}
+                    lang={lang}
                 />
             );
         }
@@ -38,17 +41,22 @@ async function OAuthReferencedEndpointForm({
                     node: nodes[0]!,
                     endpoint,
                     globalHeaders,
-                    auth: authSchemes.filter((auth) => auth.type !== "oAuth")[0],
+                    auths: authSchemes.filter((auth) => auth.type !== "oAuth"),
                     types
                 }}
                 referencedEndpoint={referencedEndpoint}
                 disabled={disabled}
+                lang={lang}
             />
         );
     } catch (e) {
         console.error(`[playground-oauth-form-server] ${JSON.stringify(e)}`);
         return (
-            <PlaygroundBearerAuthForm bearerAuth={{ tokenName: "token", description: undefined }} disabled={disabled} />
+            <PlaygroundBearerAuthForm
+                bearerAuth={{ tokenName: "token", description: undefined }}
+                disabled={disabled}
+                lang={lang}
+            />
         );
     }
 }
@@ -57,12 +65,14 @@ export async function PlaygroundOAuthFormServer({
     loader,
     apiDefinitionId,
     oAuth,
-    disabled
+    disabled,
+    lang
 }: {
     loader: DocsLoader;
     apiDefinitionId: string;
     oAuth: APIV1Read.ApiAuth.OAuth;
     disabled?: boolean;
+    lang: string;
 }): Promise<React.ReactNode> {
     return visitDiscriminatedUnion(oAuth.value, "type")._visit({
         clientCredentials: (clientCredentials) =>
@@ -73,6 +83,7 @@ export async function PlaygroundOAuthFormServer({
                         apiDefinitionId={apiDefinitionId}
                         referencedEndpoint={referencedEndpoint}
                         disabled={disabled}
+                        lang={lang}
                     />
                 ),
                 _other: () => null
