@@ -325,16 +325,6 @@
     @apply text-foreground;
     background: linear-gradient(to bottom, var(--gray-300), var(--gray-400));
   }
-
-  ::selection {
-    background-color: var(--gray-1200);
-    color: var(--gray-100);
-  }
-
-  .selection\:bg-primary::selection {
-    background-color: var(--gray-1200) !important;
-    color: var(--gray-100) !important;
-  }
 }
 
 /* Animated background noise overlay */
