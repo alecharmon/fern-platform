@@ -29,6 +29,7 @@ export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
         "You do not have write permission to the underlying GitHub repo. Please contact your GitHub admin for access.",
     MALFORMED_GITHUB_URL:
         "The provided GitHub URL is not valid. Please ensure you're using a valid GitHub repository URL.",
+    DOMAIN_NOT_REGISTERED: "This docs domain is not registered. Please contact support to register your domain.",
     FERN_CONFIG_JSON_ORG_MISMATCH:
         "The organization in fern.config.json does not match your current organization. Please update the configuration file.",
     FERN_CONFIG_JSON_MISSING:
@@ -51,6 +52,8 @@ export function getValidationErrorMessage(error: GithubRepoValidationError): str
             return ERROR_DIGEST_MESSAGES.REPO_NOT_CONNECTED;
         case "MALFORMED_GITHUB_URL":
             return `${ERROR_DIGEST_MESSAGES.MALFORMED_GITHUB_URL} URL: ${error.url}`;
+        case "DOMAIN_NOT_REGISTERED":
+            return ERROR_DIGEST_MESSAGES.DOMAIN_NOT_REGISTERED;
         case "FERN_BOT_NOT_INSTALLED":
             return ERROR_DIGEST_MESSAGES.FERN_BOT_NOT_INSTALLED;
         case "FERN_CONFIG_JSON_ORG_MISMATCH":

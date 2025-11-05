@@ -10,6 +10,7 @@ import type { RepoIdentifier } from "./types";
 export type GithubRepoValidationError =
     | { type: "REPO_NOT_CONNECTED" }
     | { type: "MALFORMED_GITHUB_URL"; url: string }
+    | { type: "DOMAIN_NOT_REGISTERED" }
     | { type: "FERN_BOT_NOT_INSTALLED" }
     | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
     | FernConfigJsonErrors

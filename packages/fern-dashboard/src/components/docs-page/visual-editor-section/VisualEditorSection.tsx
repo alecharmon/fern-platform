@@ -32,21 +32,42 @@ export async function VisualEditorSection({
 
     const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
 
-    // Ensure we have a proper GithubAuthState, not an error result
-    const githubAuthState: GithubAuthState =
-        "validationResult" in githubAuthStateResult
-            ? githubAuthStateResult
-            : {
-                  validationResult: {
-                      ok: false,
-                      error: {
-                          type: "UNEXPECTED_ERROR",
-                          message: "Failed to load GitHub auth state"
-                      }
-                  },
-                  sourceRepo: undefined,
-                  isLoading: false
-              };
+    // Ensure we have a proper GithubAuthState, handling both error shapes
+    let githubAuthState: GithubAuthState;
+
+    if (!githubUrlResult.success) {
+        githubAuthState = {
+            validationResult: {
+                ok: false,
+                error: githubUrlResult.error
+            },
+            sourceRepo: undefined,
+            isLoading: false
+        };
+    } else if ("success" in githubAuthStateResult && githubAuthStateResult.success === false) {
+        githubAuthState = {
+            validationResult: {
+                ok: false,
+                error: githubAuthStateResult.error
+            },
+            sourceRepo: undefined,
+            isLoading: false
+        };
+    } else if ("validationResult" in githubAuthStateResult) {
+        githubAuthState = githubAuthStateResult;
+    } else {
+        githubAuthState = {
+            validationResult: {
+                ok: false,
+                error: {
+                    type: "UNEXPECTED_ERROR",
+                    message: "Failed to load GitHub auth state"
+                }
+            },
+            sourceRepo: undefined,
+            isLoading: false
+        };
+    }
 
     if (!githubAuthState.validationResult.ok) {
         return (

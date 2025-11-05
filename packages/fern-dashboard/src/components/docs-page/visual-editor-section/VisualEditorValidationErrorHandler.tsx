@@ -43,6 +43,9 @@ export function VisualEditorValidationErrorHandler({ error, orgName, site, githu
         case "MALFORMED_GITHUB_URL":
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
+        case "DOMAIN_NOT_REGISTERED":
+            return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
+
         case "REPO_NOT_FOUND":
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
