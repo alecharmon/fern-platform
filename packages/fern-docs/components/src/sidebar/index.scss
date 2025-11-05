@@ -49,6 +49,23 @@
 
     &.nested {
       @apply data-[state=active]:max-lg:border-(color:--accent-a6) data-[state=active]:max-lg:-ml-px data-[state=active]:max-lg:border-l lg:py-1.5;
+
+      position: relative;
+    }
+
+    /* Desktop-only accent line overlay for active nested items */
+    @media (width >= 1024px) {
+      &.nested[data-state="active"]::before {
+        content: "";
+        position: absolute;
+        top: 6px;
+        bottom: 6px;
+        left: -5px;
+        width: 1px;
+        background: var(--accent-a11);
+        pointer-events: none;
+        z-index: 1;
+      }
     }
 
     .expand-indicator {
