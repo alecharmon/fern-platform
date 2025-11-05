@@ -15,6 +15,11 @@ from fai.models.api.guidance_api import (
     CreateGuidanceRequest,
     UpdateGuidanceRequest,
 )
+from fai.models.api.website_api import (
+    DeleteWebsiteRequest,
+    IndexWebsiteRequest,
+    ReindexWebsiteRequest,
+)
 from fai.models.types.chat_types import ChatMessage
 from fai.models.types.query_types import Query
 
@@ -151,6 +156,78 @@ def create_test_domain() -> str:
 def create_test_id() -> str:
     """Generate a test ID."""
     return str(uuid.uuid4())
+
+
+class IndexWebsiteRequestFactory:
+    @classmethod
+    def build(
+        cls,
+        base_url: str | None = None,
+        domain_filter: str | None = None,
+        path_filter: str | None = None,
+        url_pattern: str | None = None,
+        chunk_size: int | None = None,
+        chunk_overlap: int | None = None,
+        min_content_length: int | None = None,
+        max_pages: int | None = None,
+        delay: float | None = None,
+        version: str | None = None,
+        product: str | None = None,
+        authed: bool | None = None,
+    ) -> IndexWebsiteRequest:
+        return IndexWebsiteRequest(
+            base_url=base_url or "https://example.com/docs",
+            domain_filter=domain_filter,
+            path_filter=path_filter,
+            url_pattern=url_pattern,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            min_content_length=min_content_length,
+            max_pages=max_pages or 10,
+            delay=delay,
+            version=version,
+            product=product,
+            authed=authed,
+        )
+
+
+class ReindexWebsiteRequestFactory:
+    @classmethod
+    def build(
+        cls,
+        base_url: str | None = None,
+        domain_filter: str | None = None,
+        path_filter: str | None = None,
+        url_pattern: str | None = None,
+        chunk_size: int | None = None,
+        chunk_overlap: int | None = None,
+        min_content_length: int | None = None,
+        max_pages: int | None = None,
+        delay: float | None = None,
+        version: str | None = None,
+        product: str | None = None,
+        authed: bool | None = None,
+    ) -> ReindexWebsiteRequest:
+        return ReindexWebsiteRequest(
+            base_url=base_url or "https://example.com/docs",
+            domain_filter=domain_filter,
+            path_filter=path_filter,
+            url_pattern=url_pattern,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            min_content_length=min_content_length,
+            max_pages=max_pages,
+            delay=delay,
+            version=version,
+            product=product,
+            authed=authed,
+        )
+
+
+class DeleteWebsiteRequestFactory:
+    @classmethod
+    def build(cls, base_url: str | None = None) -> DeleteWebsiteRequest:
+        return DeleteWebsiteRequest(base_url=base_url or "https://example.com/docs")
 
 
 def mock_external_services(**kwargs: Any) -> dict[str, Any]:

@@ -385,14 +385,14 @@ Content for H3.
 
         part_numbers = [c.metadata["part_number"] for c in section_parts]
         expected_part_numbers = list(range(1, len(section_parts) + 1))
-        assert part_numbers == expected_part_numbers, (
-            f"Part numbers {part_numbers} are not sequential. Expected {expected_part_numbers}"
-        )
+        assert (
+            part_numbers == expected_part_numbers
+        ), f"Part numbers {part_numbers} are not sequential. Expected {expected_part_numbers}"
 
         for chunk in section_parts:
-            assert chunk.metadata["total_parts"] == len(section_parts), (
-                f"total_parts is {chunk.metadata['total_parts']} but actual chunks: {len(section_parts)}"
-            )
+            assert chunk.metadata["total_parts"] == len(
+                section_parts
+            ), f"total_parts is {chunk.metadata['total_parts']} but actual chunks: {len(section_parts)}"
 
     def test_heading_hierarchy_preserved_in_metadata(self, chunker: MarkdownChunker) -> None:
         markdown = """# H1

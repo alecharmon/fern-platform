@@ -93,8 +93,11 @@ class MarkdownChunker:
         else:
             text_chunks = self._split_with_overlap(content)
 
-            filtered_chunks = [(i, chunk_text) for i, chunk_text in enumerate(text_chunks)
-                             if len(chunk_text.strip()) >= self.min_chunk_size]
+            filtered_chunks = [
+                (i, chunk_text)
+                for i, chunk_text in enumerate(text_chunks)
+                if len(chunk_text.strip()) >= self.min_chunk_size
+            ]
 
             total_filtered = len(filtered_chunks)
 

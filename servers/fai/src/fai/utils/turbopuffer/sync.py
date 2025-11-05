@@ -13,6 +13,7 @@ from turbopuffer.types.row import Row
 from fai.models.db.document_db import DocumentDb
 from fai.models.db.guidance_db import GuidanceDb
 from fai.models.db.slack_context_db import SlackContextDb
+from fai.models.db.website_db import WebsiteDb
 from fai.settings import (
     CONFIG,
     LOGGER,
@@ -23,6 +24,7 @@ from fai.utils.turbopuffer.namespace import (
     get_guidance_index_name,
     get_slack_context_index_name,
     get_tpuf_namespace,
+    get_website_index_name,
 )
 from fai.utils.turbopuffer.schemas import (
     get_data_index_tpuf_schema,
@@ -168,6 +170,56 @@ async def sync_slack_context_db_to_tpuf(domain: str, db: AsyncSession) -> None:
             LOGGER.info(f"Wrote {len(slack_contexts)} slack contexts to {target_namespace_id}")
 
 
+async def sync_websites_to_tpuf(domain: str, website_ids: list[str], db: AsyncSession) -> None:
+    if not website_ids:
+        LOGGER.info("No website IDs provided for sync, skipping")
+        return
+
+    websites = await db.execute(select(WebsiteDb).where(WebsiteDb.domain == domain, WebsiteDb.id.in_(website_ids)))
+    websites = websites.scalars().all()
+
+    if not websites:
+        LOGGER.warning(f"No websites found for IDs {website_ids} in domain {domain}")
+        return
+
+    async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
+        async with AsyncTurbopuffer(
+            region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+            api_key=VARIABLES.TURBOPUFFER_API_KEY,
+        ) as tpuf_client:
+            target_namespace_id = get_tpuf_namespace(domain, get_website_index_name())
+            target_ns = tpuf_client.namespace(target_namespace_id)
+
+            tbuf_records = []
+            for website in websites:
+                tbuf_records.append(await website.to_tpuf_record(openai_client))
+
+            await target_ns.write(
+                upsert_rows=[jsonable_encoder(record) for record in tbuf_records],
+                distance_metric="cosine_distance",
+                schema=get_data_index_tpuf_schema(),
+            )
+            LOGGER.info(f"Upserted {len(websites)} websites to {target_namespace_id}")
+
+
+async def delete_websites_from_tpuf(domain: str, website_ids: list[str]) -> None:
+    if not website_ids:
+        LOGGER.info("No website IDs provided for deletion, skipping")
+        return
+
+    async with AsyncTurbopuffer(
+        region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+        api_key=VARIABLES.TURBOPUFFER_API_KEY,
+    ) as tpuf_client:
+        target_namespace_id = get_tpuf_namespace(domain, get_website_index_name())
+        target_ns = tpuf_client.namespace(target_namespace_id)
+
+        for website_id in website_ids:
+            await target_ns.write(delete_by_filter=["id", "Eq", website_id])
+
+        LOGGER.info(f"Deleted {len(website_ids)} websites from {target_namespace_id}")
+
+
 async def sync_documents_to_query_index(
     domain: str, document_ids: list[str], source_index_name: str, target_index_name: str
 ) -> None:
@@ -228,6 +280,68 @@ async def delete_documents_from_query_index(
             await target_ns.write(delete_by_filter=["id", "Eq", prefixed_doc_id])
 
         LOGGER.info(f"Deleted {len(document_ids)} documents from query index {target_namespace_id}")
+
+
+async def sync_websites_to_query_index(
+    domain: str, website_ids: list[str], source_index_name: str, target_index_name: str
+) -> None:
+    if not website_ids:
+        LOGGER.info("No website IDs provided for query index sync, skipping")
+        return
+
+    source_namespace_id = get_tpuf_namespace(domain, source_index_name)
+    target_namespace_id = get_tpuf_namespace(domain, target_index_name)
+
+    async with AsyncTurbopuffer(
+        region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+        api_key=VARIABLES.TURBOPUFFER_API_KEY,
+    ) as tpuf_client:
+        source_ns = tpuf_client.namespace(source_namespace_id)
+        target_ns = tpuf_client.namespace(target_namespace_id)
+
+        for website_id in website_ids:
+            prefixed_web_id = prefixed_id(source_namespace_id, website_id)
+            await target_ns.write(delete_by_filter=["id", "Eq", prefixed_web_id])
+
+        prefixed_rows = []
+        for website_id in website_ids:
+            result = await source_ns.query(filters=("id", "Eq", website_id), top_k=1, include_attributes=True)
+
+            if result.rows:
+                row = result.rows[0]
+                new_row = Row.from_dict(row.model_dump())
+                new_row.id = prefixed_id(source_namespace_id, website_id)
+                new_row.source = source_index_name
+                prefixed_rows.append(new_row)
+
+        if prefixed_rows:
+            await target_ns.write(
+                upsert_rows=prefixed_rows, distance_metric="cosine_distance", schema=get_query_index_tpuf_schema()
+            )
+            LOGGER.info(f"Synced {len(prefixed_rows)} websites to query index {target_namespace_id}")
+
+
+async def delete_websites_from_query_index(
+    domain: str, website_ids: list[str], source_index_name: str, target_index_name: str
+) -> None:
+    if not website_ids:
+        LOGGER.info("No website IDs provided for query index deletion, skipping")
+        return
+
+    source_namespace_id = get_tpuf_namespace(domain, source_index_name)
+    target_namespace_id = get_tpuf_namespace(domain, target_index_name)
+
+    async with AsyncTurbopuffer(
+        region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+        api_key=VARIABLES.TURBOPUFFER_API_KEY,
+    ) as tpuf_client:
+        target_ns = tpuf_client.namespace(target_namespace_id)
+
+        for website_id in website_ids:
+            prefixed_web_id = prefixed_id(source_namespace_id, website_id)
+            await target_ns.write(delete_by_filter=["id", "Eq", prefixed_web_id])
+
+        LOGGER.info(f"Deleted {len(website_ids)} websites from query index {target_namespace_id}")
 
 
 async def sync_index_to_target(domain: str, source_index_name: str, target_index_name: str) -> None:
