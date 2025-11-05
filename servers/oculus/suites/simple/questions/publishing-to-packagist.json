@@ -1,0 +1,11 @@
+{
+  "question": "How do I configure the GitHub webhook for automatic Packagist updates?",
+  "ground_truth": "To configure the GitHub webhook for Packagist: 1) Go to your repository's Settings > Webhooks, 2) Add a new webhook with the Payload URL as https://packagist.org/api/github?username=<your.packagist.username>, 3) Set content type to application/json, 4) Add your Packagist API token (found in your Packagist Profile) to the Secret field, 5) Set trigger events to \"Just the push event\", and 6) Click \"Add Webhook\".",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-packagist",
+    "domain": "buildwithfern.com",
+    "cited_context": "Once you've submitted your URL, you'll be prompted to set up the GitHub Hook. 1. In to your repository, go to **Settings > Webhooks**. 2. Select **\"Add webhook\"** 3. Set the Payload URL as `https://packagist.org/api/github?username=<your.packagist.username>` 4. Set the content type as `application/json` 5. Packagist autogenerates API Tokens. To find yours, go to your **Profile**. Then, add your token to the **Secret** field. 6. Set the trigger events as **Just the `push` event** 7. Click **\"Add Webhook\"**"
+  }
+}

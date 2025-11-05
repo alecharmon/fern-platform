@@ -1,0 +1,11 @@
+{
+  "question": "How do I add custom branding like logos and colors to my Fern documentation?",
+  "ground_truth": "You can configure custom branding for your Fern documentation by modifying the docs.yml file. You can set logos (dark and light versions), colors (with accent-primary for dark and light modes), fonts, and favicon. For example, add a colors section with accent-primary dark and light values, a logo section with paths to dark and light SVG files plus height and href properties, and a favicon path to customize your documentation's appearance.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "quickstart",
+    "domain": "buildwithfern.com",
+    "cited_context": "All of the branding for your docs can be configured in the `docs.yml` file. For example, to set the logos, colors, and fonts for your docs, you can add the following to your `docs.yml` file:\n\n```yml\ncolors:\n  accent-primary:\n    dark: \"#f0c193\"\n    light: \"#af5f1b\"\n\nlogo:\n  dark: docs/assets/logo-dark.svg\n  light: docs/assets/logo-light.svg\n  height: 40\n  href: https://buildwithfern.com/\n\nfavicon: docs/assets/favicon.svg\n```"
+  }
+}

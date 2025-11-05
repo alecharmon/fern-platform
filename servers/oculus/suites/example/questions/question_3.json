@@ -1,8 +1,0 @@
-{
-  "question": "How do I define an API endpoint in Fern Definition?",
-  "ground_truth": "In Fern Definition, define endpoints in YAML with the endpoint name, method (GET/POST/etc), path, request parameters/body, and response type. Example:\n\nservice:\n  endpoints:\n    getUser:\n      method: GET\n      path: /users/{userId}\n      response: User",
-  "metadata": {
-    "category": "api_definition",
-    "difficulty": "intermediate"
-  }
-}

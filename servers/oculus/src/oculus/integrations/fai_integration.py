@@ -32,7 +32,7 @@ async def generate_answer_with_fai(
     domain: str,
     model: str = "claude-4-sonnet-20250514",
     system_prompt: str | None = None,
-) -> str:
+) -> tuple[str, dict[str, str]]:
     _setup_fai_env()
 
     try:
@@ -50,6 +50,19 @@ async def generate_answer_with_fai(
     query_results = await retrieve(question, domain)
     rag_records = [format_record(result) for result in query_results]
 
+    import json
+
+    retrieved_docs = [
+        {
+            "slug": result.get("slug", ""),
+            "title": result.get("title", ""),
+            "content": result.get("content", ""),
+            "score": result.get("score", 0.0),
+        }
+        for result in query_results
+    ]
+    metadata = {"retrieved_documents": json.dumps(retrieved_docs, indent=2)}
+
     if model == "command-a-03-2025":
         output_turns, _ = await get_cohere_response(system_prompt, model, messages, domain, rag_records)
     elif model == "claude-4-sonnet-20250514":
@@ -58,13 +71,16 @@ async def generate_answer_with_fai(
         raise ValueError(f"Unsupported model: {model}")
 
     if output_turns and len(output_turns) > 0:
-        return str(output_turns[0]["text"])
+        text_turns = [turn["text"] for turn in output_turns if turn.get("type") == "text"]
+        return "\n\n".join(text_turns), metadata
 
-    return "ERROR: No response generated"
+    return "ERROR: No response generated", metadata
 
 
-def create_fai_answer_function(domain: str, model: str = "claude-4-sonnet-20250514") -> Callable[[str], str]:
-    def answer_fn(question: str) -> str:
+def create_fai_answer_function(
+    domain: str, model: str = "claude-4-sonnet-20250514"
+) -> Callable[[str], tuple[str, dict[str, str]]]:
+    def answer_fn(question: str) -> tuple[str, dict[str, str]]:
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
@@ -73,6 +89,6 @@ def create_fai_answer_function(domain: str, model: str = "claude-4-sonnet-202505
             finally:
                 loop.close()
         except Exception as e:
-            return f"ERROR: {str(e)}"
+            return f"ERROR: {str(e)}", {}
 
     return answer_fn

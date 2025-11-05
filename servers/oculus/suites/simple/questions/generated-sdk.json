@@ -1,0 +1,11 @@
+{
+  "question": "What is the default timeout configuration for SDKs in different programming languages?",
+  "ground_truth": "The default timeout configuration is 30 seconds for C# and PHP SDKs, and 60 seconds for all other languages.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "generated-sdk",
+    "domain": "buildwithfern.com",
+    "cited_context": "| Timeouts | Configure request timeouts (default: 30 seconds for C# and PHP, 60 seconds for all other languages) | All languages |"
+  }
+}

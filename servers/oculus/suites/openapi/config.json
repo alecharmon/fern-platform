@@ -1,0 +1,11 @@
+{
+  "domain": "elevenlabs.io",
+  "generators": ["openapi"],
+  "evaluators": ["correctness"],
+  "num_questions_generation": 50,
+  "generator_config": {
+    "openapi": {
+      "source_path": "sources/elevenlabs-openapi.json"
+    }
+  }
+}

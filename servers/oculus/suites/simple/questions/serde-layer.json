@@ -1,0 +1,11 @@
+{
+  "question": "How do I configure the TypeScript SDK generator to transform snake_case API field names to camelCase in the generated SDK?",
+  "ground_truth": "To transform snake_case API field names to camelCase in the generated TypeScript SDK, you need to enable the serde layer by setting `noSerdeLayer: false` in your generators.yml configuration. When the serde layer is enabled, the SDK generator will automatically transform all property names from your API to camelCase while including custom serialization code.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "serde-layer",
+    "domain": "buildwithfern.com",
+    "cited_context": "When you turn on the serde layer, (`noSerdeLayer: false`), the TypeScript SDK generator includes custom serialization code that: - Transforms all property names from your API to camelCase - Validates requests and responses at runtime - Supports complex types like `Date` and `Set`. Enable the serde layer when you want idiomatic TypeScript conventions and don't have case-sensitive field conflicts."
+  }
+}

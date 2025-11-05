@@ -55,7 +55,7 @@ select = [
 ignore = []
 
 [tool.ruff.lint.isort]
-known-first-party = ["fai", "tests", "utils"]
+known-first-party = ["oculus"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -71,7 +71,7 @@ force_grid_wrap = 2
 line_length = 120
 profile = "black"
 use_parentheses = true
-known_first_party = ["fai", "tests", "utils"]
+known_first_party = ["oculus"]
 src_paths = ["src"]
 
 [tool.autoflake]

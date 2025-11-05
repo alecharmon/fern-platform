@@ -1,0 +1,11 @@
+{
+  "question": "How do I configure redirects in my Fern documentation to handle bulk redirects using regex patterns?",
+  "ground_truth": "To configure bulk redirects using regex patterns in your Fern documentation, you can use dynamic parameters like `:slug` in the redirects configuration. For example, to redirect all content from an old folder to a new folder while preserving the path structure, use:\n\n```yaml\nredirects:\n  - source: \"/old-folder/:slug*\"\n    destination: \"/new-folder/:slug*\"\n```\n\nThe `:slug*` parameter with an asterisk matches zero or more path segments, capturing everything that follows in the URL. This allows you to redirect entire folder structures while maintaining nested paths. For single segments, use `:slug` without the asterisk.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "what-is-docs-yml",
+    "domain": "buildwithfern.com",
+    "cited_context": "The `redirects` object allows you to redirect traffic from one path to another. You can redirect exact paths or use dynamic patterns with [`regex`](https://www.npmjs.com/package/path-to-regexp) parameters like `:slug` to handle bulk redirects. You can redirect to internal paths within your site or external URLs.\n\n```yml\nredirects:\n  # Exact path redirects\n  - source: \"/old-path\"\n    destination: \"/new-path\"\n  - source: \"/old-folder/path\"\n    destination: \"/new-folder/path\"\n  - source: \"/old-folder/path\"\n    destination: \"https://www.example.com/fern\" # External destination\n  - source: \"/temporary-redirect\"\n    destination: \"/new-location\"\n    permanent: false # Use 307 (temporary) instead of 308 (permanent)\n    \n  # Regex-based redirects\n  - source: \"/old-folder/:slug\" # Matches single segments: /old-folder/foo\n    destination: \"/new-folder/:slug\"   \n  - source: \"/old-folder/:slug*\" # Matches multiple segments: /old-folder/foo/bar/baz \n    destination: \"/new-folder/:slug*\"  \n```\n\nParameters suffixed with an asterisk (`*`) match zero or more path segments, capturing everything that follows in the URL. Use this when redirecting entire folder structures while preserving nested paths."
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "question": "How does Ask Fern handle user permissions and access control when generating responses?",
+  "ground_truth": "Ask Fern automatically respects role-based access control (RBAC) configurations. When users ask questions, the system filters search results based on the user's permissions, ensuring they only see documentation and code chunks they have access to. This filtering happens during the query processing phase, where Ask Fern checks user roles before searching the documentation database and only returns matching documents that the user is authorized to view.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "how-it-works",
+    "domain": "buildwithfern.com",
+    "cited_context": "Ask Fern automatically respects versions, products, and roles, so users only see what's relevant to them. When users ask questions, Ask Fern vectorizes their query and searches the database to find the most relevant documentation and code chunks. If you have role-based access control configured, Ask Fern filters results based on the user's permissions."
+  }
+}

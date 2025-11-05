@@ -1,5 +1,10 @@
-from oculus.utils.anthropic_utils import generate_with_claude
 from pydantic import BaseModel
+
+from oculus.framework.evaluators import (
+    EvaluationResult,
+    register_evaluator,
+)
+from oculus.utils.anthropic_utils import generate_with_claude
 
 
 class EvaluationResponse(BaseModel):
@@ -42,4 +47,23 @@ def evaluate_answer(
         question=question,
         answer=answer,
         ground_truth=ground_truth,
+    )
+
+
+@register_evaluator("correctness")
+def evaluate_correctness(
+    question: str,
+    answer: str,
+    ground_truth: str,
+    model: str = "claude-opus-4-20250514",
+) -> EvaluationResult | None:
+    response = evaluate_answer(question, answer, ground_truth, model)
+
+    if not response:
+        return None
+
+    return EvaluationResult(
+        is_correct=response.is_correct,
+        reason=response.reason,
+        metadata={"evaluator": "correctness", "judge_model": model},
     )

@@ -1,0 +1,11 @@
+{
+  "question": "How do I enable product switching for my documentation site and what are the requirements?",
+  "ground_truth": "Product switching is a Pro and Enterprise feature that allows users to navigate between different products in your documentation. To enable it, you need to: 1) Create a `products` folder inside your `fern` folder, 2) Add a `.yml` file for each product defining its navigation structure, 3) Configure products in your `docs.yml` file by adding them to the `products` list with their display name and path, and 4) Remove any navigation or tabs fields from your main `docs.yml` file as these should now be in product-specific files. To get started with this feature, you need to contact support@buildwithfern.com.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "products",
+    "domain": "buildwithfern.com",
+    "cited_context": "Product switching allows users to seamlessly navigate between different products you offer. This feature is available only for the Pro and Enterprise plans. To get started, reach out to support@buildwithfern.com. Each product can contain its own distinct versions, tabs, sections, pages, and API references. Products can share content as well. To add products to your docs: 1) Define your products by creating a `products` folder inside of your `fern` folder and add a `.yml` file to the `products` folder for each product. 2) Add your product configuration by adding an item to the `products` list in `docs.yml`, specifying the `display-name` and either `path` (for internal products) or `href` (for external products). 3) Remove extra navigation from docs.yml - If your `docs.yml` file includes a `navigation` field or a `tabs` field, be sure to remove. Those fields should now belong in the product-specific `.yml` files."
+  }
+}

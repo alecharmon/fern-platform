@@ -1,0 +1,6 @@
+{
+  "domain": "buildwithfern.com",
+  "num_questions_generation": 40,
+  "generators": ["markdown"],
+  "evaluators": ["correctness"]
+}

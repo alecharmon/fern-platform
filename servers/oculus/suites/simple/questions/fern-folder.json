@@ -1,0 +1,11 @@
+{
+  "question": "How do I initialize a Fern folder with an OpenAPI specification from a web-hosted file?",
+  "ground_truth": "To initialize a Fern folder with an OpenAPI specification from a web-hosted file, run the command: `fern init --openapi https://api.example.com/openapi.yml --organization <YourOrganization>`. This command accepts both JSON and YML formats for OpenAPI specifications. The --organization flag is required to successfully generate your SDK.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "fern-folder",
+    "domain": "buildwithfern.com",
+    "cited_context": "Initialize the fern folder using your OpenAPI Specification. Fern can handle both JSON and YML formats for OpenAPI specifications and the `--openapi` flag accepts either format, so you can use whichever format your API spec is available in. Run one of the following commands based on your spec's location: Web-hosted file: `fern init --openapi https://api.example.com/openapi.yml --organization <YourOrganization>`. `--organization <YourOrganization>` configures your organization name in `fern.config.json`. This is required in order to successfully generate your SDK."
+  }
+}
