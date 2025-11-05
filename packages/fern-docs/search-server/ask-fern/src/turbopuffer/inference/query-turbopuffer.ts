@@ -86,7 +86,7 @@ export async function queryTurbopuffer(
             ? await ns.query({
                   vector,
                   distance_metric: "cosine_distance",
-                  top_k: 1,
+                  top_k: topK,
                   include_attributes: true,
                   filters: queryFilters
               })

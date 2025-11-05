@@ -4,6 +4,7 @@ import type { EmbeddingModel } from "ai";
 import { embed } from "ai";
 
 import { isAuthError, queryTurbopuffer, type TurbopufferQueryResult } from "../turbopuffer";
+import { TOP_K } from "./stream-constants";
 
 export async function runQueryTurbopuffer(
     query: string | null | undefined,
@@ -26,7 +27,7 @@ export async function runQueryTurbopuffer(
     const results = await queryTurbopuffer(query, {
         namespace: opts.namespace,
         apiKey: turbopufferApiKey(),
-        topK: opts.topK ?? 5,
+        topK: opts.topK ?? TOP_K,
         vectorizer: async (text) => {
             const embedding = await embed({
                 model: opts.embeddingModel,
