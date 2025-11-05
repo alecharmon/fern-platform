@@ -56,52 +56,62 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
     }
 
-    const oauthClient = new OryOAuth2Client(config);
-    try {
-        const { access_token, refresh_token } = await oauthClient.getToken(code);
-        const token = OryAccessTokenSchema.parse(await oauthClient.decode(access_token));
-        const fernUser: FernUser = {
-            name: token.ext?.name,
-            email: token.ext?.email
-        };
-        const expires = token.exp == null ? undefined : new Date(token.exp * 1000);
-        // TODO: validate allowlist of domains to prevent open redirects
-        const res = redirectLocation
-            ? FernNextResponse.redirect(req, {
-                  destination: redirectLocation,
-                  allowedDestinations: getAllowedRedirectUrls(config)
-              })
-            : NextResponse.next();
-        cookieJar.set(
-            COOKIE_FERN_TOKEN,
-            await signFernJWT(fernUser),
-            withSecureCookie(withDefaultProtocol(preferPreview(host, domain)), {
-                expires
-            })
-        );
-
-        // TODO: should we have a more specific place to set these cookies (such as inside fern_token, or fern_ory, etc.)?
-        cookieJar.set(
-            COOKIE_ACCESS_TOKEN,
-            access_token,
-            withSecureCookie(withDefaultProtocol(preferPreview(host, domain)), {
-                expires
-            })
-        );
-        if (refresh_token != null) {
+    // if the partner is ory, we should have the env set already
+    if (config.partner === "ory" && "environment" in config) {
+        const oauthClient = new OryOAuth2Client(config);
+        try {
+            const { access_token, refresh_token } = await oauthClient.getToken(code);
+            const token = OryAccessTokenSchema.parse(await oauthClient.decode(access_token));
+            const fernUser: FernUser = {
+                name: token.ext?.name,
+                email: token.ext?.email
+            };
+            const expires = token.exp == null ? undefined : new Date(token.exp * 1000);
+            // TODO: validate allowlist of domains to prevent open redirects
+            const res = redirectLocation
+                ? FernNextResponse.redirect(req, {
+                      destination: redirectLocation,
+                      allowedDestinations: getAllowedRedirectUrls(config)
+                  })
+                : NextResponse.next();
             cookieJar.set(
-                COOKIE_REFRESH_TOKEN,
-                refresh_token,
+                COOKIE_FERN_TOKEN,
+                await signFernJWT(fernUser),
                 withSecureCookie(withDefaultProtocol(preferPreview(host, domain)), {
                     expires
                 })
             );
-        } else {
-            cookieJar.delete(COOKIE_REFRESH_TOKEN);
+
+            // TODO: should we have a more specific place to set these cookies (such as inside fern_token, or fern_ory, etc.)?
+            cookieJar.set(
+                COOKIE_ACCESS_TOKEN,
+                access_token,
+                withSecureCookie(withDefaultProtocol(preferPreview(host, domain)), {
+                    expires
+                })
+            );
+            if (refresh_token != null) {
+                cookieJar.set(
+                    COOKIE_REFRESH_TOKEN,
+                    refresh_token,
+                    withSecureCookie(withDefaultProtocol(preferPreview(host, domain)), {
+                        expires
+                    })
+                );
+            } else {
+                cookieJar.delete(COOKIE_REFRESH_TOKEN);
+            }
+            return res;
+        } catch (error) {
+            console.error("Error getting access token", error);
+            return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
         }
-        return res;
-    } catch (error) {
-        console.error("Error getting access token", error);
-        return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
+    } else {
+        return redirectWithLoginError(
+            req,
+            redirectLocation,
+            "no_environment_present",
+            "Couldn't login, please try again"
+        );
     }
 }

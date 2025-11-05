@@ -112,7 +112,7 @@ const nextConfig: NextConfig = {
     outputFileTracingRoot: isStandalone ? path.join(__dirname, "../../..") : undefined,
 
     // speed up build
-    typescript: { ignoreBuildErrors: true },
+    typescript: { ignoreBuildErrors: false },
     eslint: { ignoreDuringBuilds: true },
 
     skipMiddlewareUrlNormalize: true,

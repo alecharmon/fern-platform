@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     const queryIndexName = getQueryIndexName();
     let result: Response | TurbopufferAuthError;
 
-    if (modelProvider === "anthropic" || modelProvider === "bedrock") {
+    if (modelProvider === "bedrock") {
         result = await runRouteForAnthropic({
             domain,
             chatSource,
@@ -161,14 +161,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Unauthorized error
-    if (result && typeof result === "object" && "error" in result && result.error === "unauthorized") {
+    if (result && isAuthError(result)) {
         return createAuthErrorStreamResponse(result.message);
     }
 
     return result;
 }
 
-function createAuthErrorStreamResponse(errorMessage: string): Response {
+function createAuthErrorStreamResponse(errorMessage: string): NextResponse {
     const assistantQueryId = crypto.randomUUID();
     const encoder = new TextEncoder();
 
@@ -194,7 +194,7 @@ function createAuthErrorStreamResponse(errorMessage: string): Response {
         }
     });
 
-    return new Response(stream, {
+    return new NextResponse(stream, {
         headers: {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
@@ -219,4 +219,8 @@ function getLastUserMessage(messages: UIMessage[]): string {
         }
     }
     return lastUserMessageText;
+}
+
+function isAuthError(result: Response | TurbopufferAuthError): result is TurbopufferAuthError {
+    return Array.isArray(result) === false && "error" in result && result.error === "unauthorized";
 }

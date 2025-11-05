@@ -34,7 +34,7 @@ function generateSubtitle(
     // Build breadcrumb from parents, excluding root
     const breadcrumbParts = entry.parents
         .filter((parent) => parent.type !== "root" && parent.type !== "sidebarRoot")
-        .map((parent) => parent.title)
+        .map((parent) => ("title" in parent ? parent.title : undefined))
         .filter((title): title is string => title != null && title.length > 0);
 
     return breadcrumbParts.length > 0 ? breadcrumbParts.join(" › ") : undefined;
