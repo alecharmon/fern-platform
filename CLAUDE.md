@@ -11,7 +11,7 @@ This is the Fern Platform monorepo containing Fern's documentation platform and 
   - `fern-docs/bundle` - Next.js docs UI application
   - `fern-dashboard/` - Next.js dashboard UI application
   - `commons/` - Shared utilities (docs-auth, docs-loader, docs-server, etc.)
-  - `fdr-sdk/`, `fai-sdk/`, `generator-cli/` - Generated SDK packages
+  - `fdr-sdk/`, `fai-sdk/` - Generated SDK packages
 - `servers/` - Backend services
   - `fdr/` - Fern Definition Registry (Node.js/Express with Prisma)
   - `fai/` - Fern AI service (Python/FastAPI with Poetry)

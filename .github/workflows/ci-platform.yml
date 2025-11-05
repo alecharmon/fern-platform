@@ -95,9 +95,6 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
-      - name: 🧪 Build generator-cli
-        run: pnpm turbo --filter=@fern-api/generator-cli compile
-
       - name: Run tests
         run: pnpm test
         env:

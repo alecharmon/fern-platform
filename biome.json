@@ -379,7 +379,6 @@
         "packages/fern-docs/**/*.tsx",
         "packages/fern-docs/**/*.ts",
         "packages/workers/proxy/src/websocket.ts",
-        "packages/generator-cli/src/**/*.ts",
         "packages/commons/visual-editor-server/src/mongodb-client.ts",
         "servers/fdr-lambda/src/index.ts",
         "scripts/monitor/**/*.ts"
@@ -426,8 +425,7 @@
         "packages/fern-docs/bundle/src/mdx/plugins/rehype-steps.test.ts",
         "servers/fdr/src/__test__/local/s3.test.ts",
         "servers/fdr/src/__test__/local/revalidate.test.ts",
-        "packages/fern-docs/components/src/__test__/CopyToClipboardButton.test.tsx",
-        "packages/generator-cli/src/__test__/pr.test.ts"
+        "packages/fern-docs/components/src/__test__/CopyToClipboardButton.test.tsx"
       ],
       "linter": {
         "rules": {
@@ -532,7 +530,6 @@
     },
     {
       "includes": [
-        "packages/generator-cli/src/__test__/testGenerateReadme.ts",
         "ervers/fdr/src/__test__/unit-tests/transform/testTransformApiDefinitionToDb.test.ts",
         "servers/fdr/src/__test__/unit-tests/transform/testTransformApiDefinitionToDb.test.ts"
       ],
