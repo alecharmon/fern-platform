@@ -82,9 +82,33 @@ export default function PageEditor({ className, filename, initialHtml }: PageEdi
         return unsubscribe;
     }, [filename, subscribeNestedEditorUpdate, handleEditorUpdate]);
 
+    function placeCaretAtFirstTextblock(editor: Editor) {
+        const { doc } = editor.state;
+        let pos: number | null = null;
+        doc.descendants((node, posHere) => {
+            if (node.isTextblock) {
+                pos = posHere + 1;
+                return false;
+            }
+            return true;
+        });
+        if (pos != null) {
+            editor.commands.setTextSelection(pos);
+        } else {
+            editor.commands.setTextSelection(doc.content.size);
+        }
+    }
+
     function onTiptapEditorCreate(props: EditorEvents["create"]) {
         latestTiptapHtml.current = props.editor.getHTML();
         editorRef.current = props.editor;
+
+        requestAnimationFrame(() => {
+            const firstNode = props.editor.state.doc.firstChild;
+            if (firstNode?.type?.name === "custom-element-v2") {
+                placeCaretAtFirstTextblock(props.editor);
+            }
+        });
     }
 
     function onTiptapEditorUpdate(props: EditorEvents["update"]) {
