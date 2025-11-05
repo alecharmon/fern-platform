@@ -36,6 +36,7 @@ export const WebhookExample: React.FC<WebhookExample.Props> = ({ example, slug, 
                         language="json"
                         json={example.payload}
                         slug={slug}
+                        lang={lang}
                     />
                 )}
             </div>

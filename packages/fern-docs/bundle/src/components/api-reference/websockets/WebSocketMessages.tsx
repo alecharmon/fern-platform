@@ -29,10 +29,11 @@ export interface SSEData {
 export interface WebSocketMessagesProps {
     messages: WebSocketMessage[];
     virtualized?: boolean;
+    lang: string;
     // types: Record<string, ResolvedTypeDefinition>;
 }
 
-export const WebSocketMessages: FC<WebSocketMessagesProps> = ({ messages, virtualized }) => {
+export const WebSocketMessages: FC<WebSocketMessagesProps> = ({ messages, virtualized, lang }) => {
     return (
         <Accordion.Root
             type="multiple"
@@ -56,6 +57,7 @@ export const WebSocketMessages: FC<WebSocketMessagesProps> = ({ messages, virtua
                             message={message}
                             index={index}
                             messagesLength={messages.length - 1}
+                            lang={lang}
                         />
                     )}
                     followOutput={"smooth"}
@@ -67,6 +69,7 @@ export const WebSocketMessages: FC<WebSocketMessagesProps> = ({ messages, virtua
                         message={message}
                         index={index}
                         messagesLength={messages.length - 1}
+                        lang={lang}
                     />
                 ))
             )}

@@ -39,6 +39,7 @@ const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props>
                 json={example?.request}
                 slug={node?.slug ?? ""}
                 isResponse={false}
+                lang={lang}
             />
 
             <JsonCodeSnippetExample
@@ -49,6 +50,7 @@ const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props>
                 json={example?.response}
                 slug={node?.slug ?? ""}
                 isResponse={true}
+                lang={lang}
             />
         </div>
     );

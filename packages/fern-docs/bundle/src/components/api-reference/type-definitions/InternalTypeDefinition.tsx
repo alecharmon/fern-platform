@@ -45,7 +45,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
             return (
                 <EnumTypeDefinition
                     elements={shape.values.map((value) => ({
-                        element: <EnumValue key={value.value} enumValue={value} />,
+                        element: <EnumValue key={value.value} enumValue={value} lang={lang} />,
                         searchableString: `${value.value} ${value.description ?? ""}`
                     }))}
                     lang={lang}

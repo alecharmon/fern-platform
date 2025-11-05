@@ -91,6 +91,7 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
                                             onChange={(data) => setMessage(message, data)}
                                             value={formState?.messages[message.type]}
                                             types={context.types}
+                                            lang={lang}
                                         />
                                     </div>
 
@@ -150,7 +151,7 @@ export const PlaygroundWebSocketSessionForm: FC<PlaygroundWebSocketSessionFormPr
                         </div>
                     </div>
                     <FernScrollArea rootClassName="flex-1 rounded-b-[inherit]">
-                        <WebSocketMessagesVirtualized messages={messages} />
+                        <WebSocketMessagesVirtualized messages={messages} lang={lang} />
                     </FernScrollArea>
                 </FernCard>
             </div>

@@ -257,6 +257,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                                             data: event
                                         }
                                     }))}
+                                    lang={lang}
                                 />
                             </FernScrollArea>
                         </TitledExample>
@@ -275,6 +276,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                                             data
                                         }
                                     }))}
+                                    lang={lang}
                                 />
                             </FernScrollArea>
                         </TitledExample>

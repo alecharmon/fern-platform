@@ -126,15 +126,16 @@ export async function WebSocketContent({
                             title={t(lang).apiReference.handshake}
                             tryIt={node != null ? <PlaygroundButtonTray state={node} lang={lang} /> : undefined}
                             disableClipboard={true}
+                            lang={lang}
                         >
                             <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
                                 <HandshakeExample channel={channel} example={example} lang={lang} />
                             </FernScrollArea>
                         </TitledExample>
                         {exampleMessages.length > 0 && (
-                            <TitledExample title={t(lang).apiReference.messages} className="min-h-0 shrink">
+                            <TitledExample title={t(lang).apiReference.messages} className="min-h-0 shrink" lang={lang}>
                                 <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
-                                    <WebSocketMessages messages={exampleMessages} />
+                                    <WebSocketMessages messages={exampleMessages} lang={lang} />
                                 </FernScrollArea>
                             </TitledExample>
                         )}
@@ -169,7 +170,7 @@ export async function WebSocketContent({
                                 <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
                                     <div className="border-border-default rounded-3 -mx-2 flex items-center justify-between border px-2 py-1 transition-colors">
                                         <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} method="WSS" lang={lang} />
-                                        <CopyWithBaseUrl channel={channel} />
+                                        <CopyWithBaseUrl channel={channel} lang={lang} />
                                     </div>
                                 </ApiReferenceClientWrapper>
                             }

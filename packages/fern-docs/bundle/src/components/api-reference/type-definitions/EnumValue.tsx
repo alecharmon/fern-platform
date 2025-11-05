@@ -4,13 +4,14 @@ import React from "react";
 import { Chip } from "@/components/Chip";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
-export function EnumValue({ enumValue }: { enumValue: ApiDefinition.EnumValue }) {
+export function EnumValue({ enumValue, lang }: { enumValue: ApiDefinition.EnumValue; lang: string }) {
     return (
         <Chip
             name={enumValue.value}
             description={
                 enumValue.description && <MdxServerComponentProseSuspense mdx={enumValue.description} size="xs" />
             }
+            lang={lang}
         />
     );
 }
