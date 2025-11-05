@@ -30,6 +30,7 @@ import {
     type TurbopufferRecord
 } from "../index";
 import { getCodeIndexName } from "../turbopuffer/utils/get-turbopuffer-namespace";
+import { estimateTokens, estimateTokensFromArray } from "../utils/estimate-tokens";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";
 import { MAX_QUERY_ATTEMPTS, TOP_K, TOP_K_CODE } from "./stream-constants";
 
@@ -138,6 +139,13 @@ export async function runRouteForAnthropic({
     let timeToFirstToken: number | undefined = undefined;
     let responseText = "";
 
+    const initialSearchResultTokens = estimateTokensFromArray(systemPromptDocuments);
+    let toolCallResultTokens = 0;
+    const toolCallDocumentCounts: { documentationSearch: number; codeSearch: number } = {
+        documentationSearch: 0,
+        codeSearch: 0
+    };
+
     const assistantQueryId = crypto.randomUUID();
 
     const uiMessageStream = createUIMessageStream({
@@ -201,19 +209,18 @@ export async function runRouteForAnthropic({
                                     documentIdsToIgnore.push(hit.id);
                                     if (url != null && !urlsToIgnore.includes(url)) {
                                         urlsToIgnore.push(url);
-                                        if (hit.attributes.document.length > 20000) {
-                                            response.push({
-                                                ...hit.attributes,
-                                                document: hit.attributes.document.slice(0, 20000),
-                                                url
-                                            });
-                                        } else {
-                                            response.push({
-                                                ...hit.attributes,
-                                                document: hit.attributes.document,
-                                                url
-                                            });
-                                        }
+                                        const document =
+                                            hit.attributes.document.length > 20000
+                                                ? hit.attributes.document.slice(0, 20000)
+                                                : hit.attributes.document;
+                                        response.push({
+                                            ...hit.attributes,
+                                            document,
+                                            url
+                                        });
+
+                                        toolCallResultTokens += estimateTokens(document);
+                                        toolCallDocumentCounts.documentationSearch++;
                                         if (response.length >= TOP_K) {
                                             return response;
                                         }
@@ -253,13 +260,19 @@ export async function runRouteForAnthropic({
                                 ];
                             }
 
-                            return result.map((hit) => ({
-                                ...hit.attributes,
-                                document:
+                            return result.map((hit) => {
+                                const document =
                                     hit.attributes.document.length > 20000
                                         ? hit.attributes.document.slice(0, 20000)
-                                        : hit.attributes.document
-                            }));
+                                        : hit.attributes.document;
+
+                                toolCallResultTokens += estimateTokens(document);
+                                toolCallDocumentCounts.codeSearch++;
+                                return {
+                                    ...hit.attributes,
+                                    document
+                                };
+                            });
                         }
                     })
                 },
@@ -327,6 +340,11 @@ export async function runRouteForAnthropic({
                         namespace: turbopufferNamespace,
                         numToolCalls,
                         finishReason: e.finishReason,
+                        estimatedInitialSearchResultTokens: initialSearchResultTokens,
+                        estimatedToolCallResultTokens: toolCallResultTokens,
+                        numInitialSearchResults: searchResults.length,
+                        numDocumentationSearchResults: toolCallDocumentCounts.documentationSearch,
+                        numCodeSearchResults: toolCallDocumentCounts.codeSearch,
                         ...e.usage
                     });
                     e.warnings?.forEach((warning) => {

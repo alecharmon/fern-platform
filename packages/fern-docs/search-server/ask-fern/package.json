@@ -43,6 +43,7 @@
     "ai-fallback": "^1.0.2",
     "es-toolkit": "^1.32.0",
     "gpt-tokenizer": "2.9.0",
+    "js-tiktoken": "^1.0.21",
     "zod": "catalog:"
   },
   "devDependencies": {
