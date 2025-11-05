@@ -381,7 +381,8 @@
         "packages/workers/proxy/src/websocket.ts",
         "packages/generator-cli/src/**/*.ts",
         "packages/commons/visual-editor-server/src/mongodb-client.ts",
-        "servers/fdr-lambda/src/index.ts"
+        "servers/fdr-lambda/src/index.ts",
+        "scripts/monitor/**/*.ts"
       ],
       "linter": {
         "rules": {

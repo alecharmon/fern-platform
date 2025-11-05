@@ -30,7 +30,8 @@ export async function GET(
     const fernToken = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
     const path = req.nextUrl.pathname;
-    const slug = path.replace(MARKDOWN_PATTERN, "");
+    const slugParam = req.nextUrl.searchParams.get("slug");
+    const slug = slugParam ?? path.replace(MARKDOWN_PATTERN, "");
     const cleanSlug = removeLeadingSlash(slug);
 
     const loader = await createCachedDocsLoader(host, domain, fernToken);
