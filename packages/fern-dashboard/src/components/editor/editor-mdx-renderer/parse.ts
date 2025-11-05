@@ -1,4 +1,5 @@
 import { astToMDX, type MdastNodes, type MdxJsxExpressionAttribute, mdxToAST } from "@fern-docs/mdx";
+import { MDX_COMPONENTS } from "@/docs/mdx/components";
 
 import type { AttributeValue, JSXElement, JSXElementChildren, ParsedMarkdownElement } from "./types";
 
@@ -36,9 +37,69 @@ const contentDraggingDisabledComponents = ["Button"];
 // HTML elements that mark boundaries - these and all their children will be treated as terminal/non-editable
 const boundaryElements = ["div", "span", "section", "article", "body", "aside"];
 
+const IGNORED_COMPONENTS = new Set(["InterceptedChildren"]);
+
+/**
+ * Check if a component is supported
+ */
+function isComponentSupported(componentName: string | null | undefined): boolean {
+    if (!componentName) {
+        return true;
+    }
+
+    if (IGNORED_COMPONENTS.has(componentName)) {
+        return true;
+    }
+
+    // lowercase components are HTML elements, which are supported
+    if (componentName === componentName.toLowerCase()) {
+        return true;
+    }
+
+    return Object.hasOwn(MDX_COMPONENTS, componentName);
+}
+
+/**
+ * Replace unsupported components in the AST with a placeholder
+ */
+function replaceUnsupportedComponents(node: MdastNodes): MdastNodes {
+    // Check if this node is an unsupported component
+    if ((node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement") && !isComponentSupported(node.name)) {
+        // Replace with a placeholder that shows what component was unsupported
+        return {
+            type: "mdxJsxFlowElement",
+            name: "UnsupportedContentPlaceholder",
+            attributes: [
+                {
+                    type: "mdxJsxAttribute",
+                    name: "componentName",
+                    value: node.name || "unknown"
+                }
+            ],
+            children: []
+        };
+    }
+
+    // Recursively process children
+    if ("children" in node && node.children && Array.isArray(node.children)) {
+        return {
+            ...node,
+            children: node.children.map((child) => replaceUnsupportedComponents(child)) as any
+        };
+    }
+
+    return node;
+}
+
 export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     // Parse MDX to AST using mdxToAST
     const { mdast } = mdxToAST(mdx);
+
+    // Replace unsupported components before processing
+    const processedMdast = {
+        ...mdast,
+        children: mdast.children.map((child) => replaceUnsupportedComponents(child))
+    };
 
     const result: ParsedMarkdownElement[] = [];
 
@@ -168,7 +229,7 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     }
 
     // Start traversing from the root's children
-    const rootNode = mdast;
+    const rootNode = processedMdast;
     for (const child of rootNode.children) {
         const element = traverse(child);
         // Handle case where traverse returns multiple elements (e.g., paragraph with only images)
