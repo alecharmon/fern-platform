@@ -40,7 +40,8 @@ export function svgResponse(
     status: 200,
     headers: {
       "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
+      "CDN-Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET",
     },
