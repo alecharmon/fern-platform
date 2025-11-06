@@ -18,10 +18,12 @@ const DOCS_PATHNAME_REGEX = /^(\/docs\/[^/]+)\/?([^/]*)\/?$/;
 
 export function DocsSiteNavBarWithOverflow({
     items,
-    siteHasGitHubAppInstalled
+    siteHasGitHubAppInstalled,
+    siteHasConnectedRepo
 }: {
     items: NavItem[];
     siteHasGitHubAppInstalled?: boolean;
+    siteHasConnectedRepo?: boolean;
 }) {
     const orgName = useOrgNameFromPathname();
     const pathname = usePathnameWithoutOrgName();
@@ -58,10 +60,11 @@ export function DocsSiteNavBarWithOverflow({
         if (selectedItem) {
             captureDocsTabViewed(posthog, {
                 tab: selectedItem.title,
-                siteHasGitHubAppInstalled: siteHasGitHubAppInstalled ?? false
+                siteHasGitHubAppInstalled: siteHasGitHubAppInstalled ?? false,
+                siteHasConnectedRepo: siteHasConnectedRepo ?? false
             });
         }
-    }, [items, tabPathname, posthog, siteHasGitHubAppInstalled]);
+    }, [items, tabPathname, posthog, siteHasGitHubAppInstalled, siteHasConnectedRepo]);
 
     const renderNavItem = (item: NavItem, index: number) => {
         const isSelected = tabPathname === item.href;

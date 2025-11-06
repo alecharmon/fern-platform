@@ -14,12 +14,18 @@ export declare namespace DocsSiteNavBarItem {
         title: string;
         href: string;
         siteHasGitHubAppInstalled?: boolean;
+        siteHasConnectedRepo?: boolean;
     }
 }
 
 const DOCS_PATHNAME_REGEX = /^(\/docs\/[^/]+)\/?([^/]*)\/?$/;
 
-export function DocsSiteNavBarItem({ title, href, siteHasGitHubAppInstalled }: DocsSiteNavBarItem.Props) {
+export function DocsSiteNavBarItem({
+    title,
+    href,
+    siteHasGitHubAppInstalled,
+    siteHasConnectedRepo
+}: DocsSiteNavBarItem.Props) {
     const orgName = useOrgNameFromPathname();
     const pathname = usePathnameWithoutOrgName();
     const posthog = usePostHog();
@@ -39,10 +45,11 @@ export function DocsSiteNavBarItem({ title, href, siteHasGitHubAppInstalled }: D
         if (isSelected) {
             captureDocsTabViewed(posthog, {
                 tab: title,
-                siteHasGitHubAppInstalled: siteHasGitHubAppInstalled ?? false
+                siteHasGitHubAppInstalled: siteHasGitHubAppInstalled ?? false,
+                siteHasConnectedRepo: siteHasConnectedRepo ?? false
             });
         }
-    }, [isSelected, posthog, title, siteHasGitHubAppInstalled]);
+    }, [isSelected, posthog, title, siteHasGitHubAppInstalled, siteHasConnectedRepo]);
 
     const className = cn(
         "flex flex-col pl-4 pr-4 transition first:pl-0 last:pr-0",

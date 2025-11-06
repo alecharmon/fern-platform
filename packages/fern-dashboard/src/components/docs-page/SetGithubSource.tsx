@@ -1,8 +1,11 @@
+"use client";
+
 import { useRouter } from "@bprogress/next/app";
 import CheckCircleIcon from "@heroicons/react/24/outline/CheckCircleIcon";
 import ExclamationCircleIcon from "@heroicons/react/24/outline/ExclamationCircleIcon";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
 import type { ValidateGithubRepoAccess } from "@/app/api/validate-github-repo-access/route";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
@@ -11,6 +14,7 @@ import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
 
 import { ErrorEditSourceToast, ErrorInvalidGithubUrlToast, SuccessfulEditSourceToast } from "../editor/EditorToasts";
+import { captureRepoConnected } from "../posthog/events";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -32,6 +36,7 @@ export function SetGithubSourcePopover({
 
     const router = useRouter();
     const queryClient = useQueryClient();
+    const posthog = usePostHog();
 
     useEffect(() => {
         if (isPopoverOpen && initialUrl) {
@@ -91,6 +96,11 @@ export function SetGithubSourcePopover({
 
                 SuccessfulEditSourceToast();
 
+                captureRepoConnected(posthog, {
+                    siteHasGitHubAppInstalled: accessCheckResult?.ok ?? false,
+                    siteHasConnectedRepo: true
+                });
+
                 setInputUrl("");
             } catch (e) {
                 ErrorEditSourceToast();
@@ -99,7 +109,7 @@ export function SetGithubSourcePopover({
                 setIsSaving(false);
             }
         },
-        [docsUrl, queryClient, setIsSaving, router]
+        [docsUrl, queryClient, setIsSaving, router, posthog, accessCheckResult]
     );
 
     const currentNormalized = normalizeGithubUrl(inputUrl);

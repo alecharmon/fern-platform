@@ -3,6 +3,7 @@ import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
 import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
 import { DocsSiteNavBarWithOverflow, type NavItem } from "@/components/docs-page/DocsSiteNavBarWithOverflow";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
@@ -28,11 +29,19 @@ export default async function DocsSiteNavbar({
     }
 
     let siteHasGitHubAppInstalled = false;
+    let siteHasConnectedRepo = false;
     try {
         const githubAuthState = await getGitHubAuthState(parsedDocsUrl, session.accessToken, orgName, session);
         siteHasGitHubAppInstalled = githubAuthState.success !== false && githubAuthState.validationResult.ok;
     } catch (error) {
         console.error("Failed to check GitHub App installation status:", error);
+    }
+
+    try {
+        const githubUrlResult = await getDocsGithubUrl(parsedDocsUrl, session.accessToken);
+        siteHasConnectedRepo = githubUrlResult.success;
+    } catch (error) {
+        console.error("Failed to check if repo is connected:", error);
     }
 
     const navItems: NavItem[] = [
@@ -59,10 +68,15 @@ export default async function DocsSiteNavbar({
                         title={item.title}
                         href={item.href}
                         siteHasGitHubAppInstalled={siteHasGitHubAppInstalled}
+                        siteHasConnectedRepo={siteHasConnectedRepo}
                     />
                 ))}
             </div>
-            <DocsSiteNavBarWithOverflow items={navItems} siteHasGitHubAppInstalled={siteHasGitHubAppInstalled} />
+            <DocsSiteNavBarWithOverflow
+                items={navItems}
+                siteHasGitHubAppInstalled={siteHasGitHubAppInstalled}
+                siteHasConnectedRepo={siteHasConnectedRepo}
+            />
         </>
     );
 }
