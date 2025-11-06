@@ -204,6 +204,10 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
             throw new Error(`Unsupported node type: ${nodeType}`);
         }
 
+        if (positionStart === -1 || positionEnd === -1) {
+            return getToHastDefaultHandler(nodeType)(state, node, parents);
+        }
+
         // Special case: if this is a paragraph that contains only images/imageReferences,
         // treat it as a custom element to avoid nested rendering
         if (nodeType === "paragraph" && node.children && Array.isArray(node.children)) {
@@ -236,7 +240,7 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
     }
 
     // Default handler for custom elements
-    function customElementHandler(_state: ToHastState, node: any, __?: MdastParents) {
+    function customElementHandler(state: ToHastState, node: any, parents?: MdastParents) {
         const { type, name, positionStart, positionEnd } = getNodeInfo(node);
 
         const nodeType = type as CustomElementsType;
@@ -257,6 +261,10 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
                     }
                 };
             }
+        }
+
+        if (positionStart === -1 || positionEnd === -1) {
+            return getToHastDefaultHandler(nodeType as ToHastDefaultHandlersType)?.(state, node, parents) ?? node;
         }
 
         const { content } = getNodeContent(node, rootContent);
@@ -616,15 +624,12 @@ function getNodeInfo(node: any) {
     }
     const positionStart = node.position?.start?.offset;
     const positionEnd = node.position?.end?.offset;
-    if (positionStart == null || positionEnd == null) {
-        throw new Error("mdast node unexpectedly does not have a position");
-    }
 
     return {
         type: node.type as string,
         name: node.name as string | undefined,
-        positionStart: positionStart as number,
-        positionEnd: positionEnd as number
+        positionStart: positionStart ?? -1,
+        positionEnd: positionEnd ?? -1
     };
 }
 
