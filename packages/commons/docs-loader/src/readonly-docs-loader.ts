@@ -634,15 +634,18 @@ const getLanguage = (cacheConfig: Required<CacheConfig>) =>
 
 const getConfig = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
-        // Check in-memory cache first
-        const cacheKey = cacheConfig.cacheKeySuffix
-            ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
-            : `${domainKey}:config`;
-        const inMemoryCached =
-            getFromInMemoryCache<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(cacheKey);
-        if (inMemoryCached != null) {
-            console.debug(`[getConfig] in-memory cache hit for ${domainKey}`);
-            return inMemoryCached;
+        // Skip in-memory cache in local development to ensure fresh CSS/config on hot reload
+        if (!isLocal()) {
+            // Check in-memory cache first
+            const cacheKey = cacheConfig.cacheKeySuffix
+                ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+                : `${domainKey}:config`;
+            const inMemoryCached =
+                getFromInMemoryCache<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(cacheKey);
+            if (inMemoryCached != null) {
+                console.debug(`[getConfig] in-memory cache hit for ${domainKey}`);
+                return inMemoryCached;
+            }
         }
 
         try {
@@ -652,8 +655,13 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
                 cacheConfig.cacheKeySuffix
             );
             if (cached != null) {
-                // Store in in-memory cache for future requests
-                setInMemoryCache(cacheKey, cached);
+                // Store in in-memory cache for future requests (skip in local dev)
+                if (!isLocal()) {
+                    const cacheKey = cacheConfig.cacheKeySuffix
+                        ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+                        : `${domainKey}:config`;
+                    setInMemoryCache(cacheKey, cached);
+                }
                 return cached;
             }
         } catch (error) {
@@ -663,9 +671,14 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
         const response = await loadWithUrl(domainKey);
         const { navigation, root, ...config } = response.definition.config;
 
-        // Store in both Upstash and in-memory cache
+        // Store in Upstash and in-memory cache (skip in-memory in local dev)
         kvSet(domainKey, CACHE_KEY_CONFIG, config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
-        setInMemoryCache(cacheKey, config);
+        if (!isLocal()) {
+            const cacheKey = cacheConfig.cacheKeySuffix
+                ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+                : `${domainKey}:config`;
+            setInMemoryCache(cacheKey, config);
+        }
 
         return config;
     });
