@@ -29,17 +29,17 @@ main();
 `;
 
 exports[`Integration Tests > should generate snippets for multiple languages > csharp-snippet 1`] = `
-"using global::System.Threading.Tasks;
-using Cat;
+"using Cat;
+using System.Threading.Tasks;
 
 namespace Usage;
 
 public class Example
 {
-    public async global::System.Threading.Tasks.Task Do() {
+    public async Task Do() {
         var client = new CatcatcatTreeClient(
             token: "123",
-            clientOptions: new ClientOptions{
+            clientOptions: new ClientOptions {
                 BaseUrl = "https://api.example.com"
             }
         );
