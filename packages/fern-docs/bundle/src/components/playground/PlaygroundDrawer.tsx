@@ -1,7 +1,6 @@
 "use client";
 
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
-import { t } from "@fern-docs/i18n";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useRouter } from "next/navigation";
@@ -11,7 +10,7 @@ import { useUrlParams } from "@/hooks/use-url-params";
 
 import { useHeaderHeight, useViewportSize } from "../hooks/useViewportSize";
 
-export function PlaygroundDrawer({ children, lang }: { children: React.ReactNode; lang: string }) {
+export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
     const [snap, setSnap] = React.useState<number | string | null>(null);
     const { removeUrlParamFromPathname, urlHasParam, addUrlParamToPathname } = useUrlParams();
     const open = urlHasParam("explorer");
@@ -82,7 +81,7 @@ export function PlaygroundDrawer({ children, lang }: { children: React.ReactNode
                         preventCycle
                     />
                     <VisuallyHidden>
-                        <Drawer.Title>{t(lang).apiReference.apiExplorer}</Drawer.Title>
+                        <Drawer.Title>API Explorer</Drawer.Title>
                         <Drawer.Description>
                             Browse, explore, and try out API endpoints without leaving the documentation.
                         </Drawer.Description>
