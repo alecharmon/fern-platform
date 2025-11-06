@@ -4,6 +4,14 @@ import { createEmptyNavigationSnapshot, NAVIGATION_SNAPSHOT_SCHEMA_VERSION, type
 
 export const NAVIGATION_STORAGE_KEY = "fern-navigation-storage:";
 
+export interface BranchMetadata {
+    branchName: string;
+    metadata: {
+        orgName: string;
+        docsUrl: string;
+    };
+}
+
 /**
  * NavigationStorage provides persistence for navigation state across page reloads.
  *
@@ -40,12 +48,13 @@ export class NavigationStorage {
         }
     }
 
-    async init(): Promise<void> {
+    /**
+     * Initializes storage. Optionally preloads a specific branch.
+     * @param branchToPreload - Optional branch name to eagerly load into cache
+     */
+    async init(branchToPreload?: string): Promise<void> {
         if (this.isBufferedStorage(this._storage)) {
-            await this._storage.init();
-
-            // Cleanup nested backups from the infinite nesting bug (one-time cleanup)
-            // This can be removed in a future version after users have had time to clean up
+            await this._storage.init(branchToPreload);
             this.cleanupNestedBackups();
         }
     }
@@ -72,23 +81,10 @@ export class NavigationStorage {
         const parsed = JSON.parse(serialized);
         const currentSchemaVersion: number = parsed.schemaVersion ?? 0;
 
-        // DEBUG: Log schema version detection
-        console.debug(
-            "[NavigationStorage.getStore] Branch:",
-            branchName,
-            "Schema version:",
-            currentSchemaVersion,
-            "Target:",
-            NAVIGATION_SNAPSHOT_SCHEMA_VERSION
-        );
-
         // Run migrations if needed
         if (currentSchemaVersion < NAVIGATION_SNAPSHOT_SCHEMA_VERSION) {
             console.debug(
-                "[NavigationStorage.getStore] Running migration from",
-                currentSchemaVersion,
-                "to",
-                NAVIGATION_SNAPSHOT_SCHEMA_VERSION
+                `[NavigationStorage] Migrating branch "${branchName}" from schema v${currentSchemaVersion} to v${NAVIGATION_SNAPSHOT_SCHEMA_VERSION}`
             );
             // Create backup before migrating (only if one doesn't exist for this version)
             const backupKey = `backup:v${currentSchemaVersion}:${branchName}`;
@@ -121,14 +117,9 @@ export class NavigationStorage {
             }
 
             const migrated = runMigrations(branchName, dataToMigrate, currentSchemaVersion);
-            console.debug(
-                "[NavigationStorage.getStore] Migration complete. New schema version:",
-                migrated.schemaVersion
-            );
 
             // Persist migrated data back to storage
             this.setStore(branchName, migrated.metadata.orgName, migrated.metadata.docsUrl, migrated);
-            console.debug("[NavigationStorage.getStore] Migrated data persisted to storage");
 
             // Clean up old backups after successful migration to prevent storage bloat
             // Keep only the most recent backup (the one we just created)
@@ -137,7 +128,6 @@ export class NavigationStorage {
             return migrated;
         }
 
-        console.debug("[NavigationStorage.getStore] No migration needed, deserializing current version data");
         // Current version - deserialize Maps and Sets
         return {
             ...(parsed as NavigationSnapshot),
@@ -179,17 +169,6 @@ export class NavigationStorage {
                     : data.slugToDocsYmlFilePath
         };
         const serialized = JSON.stringify(serializable);
-        console.debug(
-            "[NavigationStorage.setStore] Saving branch:",
-            branchName,
-            "Schema version:",
-            data.schemaVersion,
-            "Size:",
-            Math.round(serialized.length / 1024),
-            "KB",
-            "PageRegistry entries:",
-            Object.keys(data.pageRegistry).length
-        );
         this._storage.set(branchName, serialized);
     }
 
@@ -252,6 +231,7 @@ export class NavigationStorage {
         const allKeys = this._storage.getAllKeys();
         const backupKeys = allKeys.filter((key) => key.includes(`backup:`) && key.endsWith(`:${branchName}`));
 
+        let removedCount = 0;
         // Remove backups for versions older than the current one
         backupKeys.forEach((key) => {
             // Extract version from key format: "backup:vN:branchName"
@@ -262,10 +242,15 @@ export class NavigationStorage {
                     const cleanKey = getBranchNameFromStorageKey(key);
                     if (cleanKey) {
                         this._storage.remove(cleanKey);
+                        removedCount++;
                     }
                 }
             }
         });
+
+        if (removedCount > 0) {
+            console.debug(`[NavigationStorage] Cleaned up ${removedCount} backup(s) for branch ${branchName}`);
+        }
     }
 
     clear(): void {
@@ -304,19 +289,70 @@ export class NavigationStorage {
         return nestedBackupKeys.length;
     }
 
-    getAllStoredBranches(): NavigationSnapshot[] {
+    /**
+     * Returns just branch names, WITHOUT loading full snapshots into memory.
+     * Much more memory-efficient than getAllStoredBranches().
+     */
+    getAllStoredBranchNames(): string[] {
         this.checkBufferedStorageInitialized();
-        const currentBranchNames = this._storage
-            .getAllKeys()
-            .map((key) => getBranchNameFromStorageKey(key))
-            .filter((key) => key !== undefined)
-            // CRITICAL: Exclude backup keys to prevent infinite nesting of backups
-            // Backup keys have format "backup:v1:branchName" and should never be loaded as branches
-            .filter((key) => !key.startsWith("backup:"));
+        return (
+            this._storage
+                .getAllKeys()
+                .map((key) => getBranchNameFromStorageKey(key))
+                .filter((key) => key !== undefined)
+                // Backup keys have format "backup:v1:branchName" and should never be loaded as branches
+                .filter((key) => !key.startsWith("backup:")) as string[]
+        );
+    }
 
-        const currentBranches = currentBranchNames.map((key) => this.getStore(key));
+    /**
+     * Returns lightweight metadata for all branches WITHOUT loading full snapshots.
+     * For BufferedStorage, loads directly from persistent storage to avoid polluting cache.
+     * Much more memory-efficient than getAllStoredBranches().
+     */
+    async getAllStoredBranchMetadata(): Promise<BranchMetadata[]> {
+        this.checkBufferedStorageInitialized();
+        const branchNames = this.getAllStoredBranchNames();
 
-        return currentBranches.filter((snapshot) => snapshot != null) as NavigationSnapshot[];
+        // For BufferedStorage, use specialized method to bypass cache
+        if (this.isBufferedStorage(this._storage)) {
+            const storage = this._storage as BufferedIndexedDBStorage;
+            const results = await Promise.all(
+                branchNames.map(async (branchName) => {
+                    try {
+                        const metadata = await storage.getMetadataOnly(branchName);
+                        if (!metadata) return null;
+                        return { branchName, metadata };
+                    } catch (error) {
+                        console.error(`Failed to load metadata for branch ${branchName}:`, error);
+                        return null;
+                    }
+                })
+            );
+            return results.filter((item) => item != null) as BranchMetadata[];
+        }
+
+        // For synchronous storage, read directly (already in memory)
+        return branchNames
+            .map((branchName) => {
+                try {
+                    const serialized = this._storage.get(branchName);
+                    if (!serialized) return null;
+
+                    const parsed = JSON.parse(serialized);
+                    return {
+                        branchName,
+                        metadata: {
+                            orgName: parsed.metadata?.orgName ?? "",
+                            docsUrl: parsed.metadata?.docsUrl ?? ""
+                        }
+                    };
+                } catch (error) {
+                    console.error(`Failed to parse metadata for branch ${branchName}:`, error);
+                    return null;
+                }
+            })
+            .filter((item) => item != null) as BranchMetadata[];
     }
 }
 
@@ -341,8 +377,14 @@ interface Storage {
     getAllKeys(): string[];
 }
 
+/**
+ * BufferedStorage extends Storage with asynchronous initialization and optional preloading.
+ * Used for storage backends that require async setup (e.g., IndexedDB).
+ */
 interface BufferedStorage extends Storage {
-    init(): Promise<void>;
+    /** Initialize the storage backend. Optionally preload a specific key into cache. */
+    init(keyToPreload?: string): Promise<void>;
+    /** Check if init() has completed. */
     isInitialized(): boolean;
 }
 
@@ -429,19 +471,22 @@ class MapStorage implements Storage {
 /**
  * BufferedIndexedDBStorage provides a synchronous storage interface backed by IndexedDB.
  *
- * This implementation maintains a in-memory cache of all data to enable synchronous get/set operations while persisting data to IndexedDB in the background for durability.
- *
  * Key features:
- * - Caching: preloads from IndexedDB to memory during initialization
- * - Synchronous API: all read operations return immediately from the in-memory cache
+ * - In-memory cache: stores loaded data for synchronous access
+ * - Lazy loading: only loads requested keys on-demand
+ * - Synchronous API: get/set operations work with in-memory cache
  * - Background persistence: writes are debounced and batched to IndexedDB
- * - Graceful fallback: falls back to memory-only operation if IndexedDB is unavailable
+ * - Graceful fallback: works in-memory-only if IndexedDB is unavailable
+ *
+ * Note: Each instance typically serves a single branch, so cache size is naturally limited.
  */
 class BufferedIndexedDBStorage implements BufferedStorage {
     private readonly dbName = "fern-navigation-storage";
     private readonly storeName = "navigation";
     private readonly version = 1;
     private cache = new Map<string, string>();
+    private availableKeys = new Set<string>();
+    private preloadedKey: string | null = null;
     private db: IDBDatabase | null = null;
     private initPromise: Promise<void> | null = null;
     private pendingWrites = new Map<string, string>();
@@ -458,10 +503,13 @@ class BufferedIndexedDBStorage implements BufferedStorage {
         return this._storageKey + key;
     }
 
-    /** Initializes the storage by opening IndexedDB and preloading all data into the in-memory cache */
-    async init(): Promise<void> {
+    async init(keyToPreload?: string): Promise<void> {
         if (this.initPromise) {
-            return this.initPromise;
+            await this.initPromise;
+            if (keyToPreload) {
+                await this._preloadKey(keyToPreload);
+            }
+            return;
         }
 
         if (!this.isAvailable) {
@@ -470,7 +518,7 @@ class BufferedIndexedDBStorage implements BufferedStorage {
             return Promise.resolve();
         }
 
-        this.initPromise = this._initDB();
+        this.initPromise = this._initDB(keyToPreload);
         return this.initPromise;
     }
 
@@ -479,7 +527,7 @@ class BufferedIndexedDBStorage implements BufferedStorage {
         return this._initialized;
     }
 
-    private async _initDB(): Promise<void> {
+    private async _initDB(keyToPreload?: string): Promise<void> {
         try {
             this.db = await new Promise<IDBDatabase>((resolve, reject) => {
                 const request = indexedDB.open(this.dbName, this.version);
@@ -501,8 +549,42 @@ class BufferedIndexedDBStorage implements BufferedStorage {
                 };
             });
 
-            // Preload all data into cache for synchronous access
-            await this._preloadCache();
+            // Verify store exists before using it - if not, re-initialize
+            // This can happen if user manually cleared the database
+            if (!this.db.objectStoreNames.contains(this.storeName)) {
+                console.warn(
+                    `Object store "${this.storeName}" not found in database version ${this.version}. Re-initializing...`
+                );
+                this.db.close();
+
+                // Delete and recreate database
+                await new Promise<void>((resolve, reject) => {
+                    const deleteRequest = indexedDB.deleteDatabase(this.dbName);
+                    deleteRequest.onsuccess = () => resolve();
+                    deleteRequest.onerror = () =>
+                        reject(new Error(deleteRequest.error?.toString() ?? "Failed to delete database"));
+                });
+
+                // Re-open with same version, which will trigger onupgradeneeded
+                const request = indexedDB.open(this.dbName, this.version);
+                this.db = await new Promise<IDBDatabase>((resolve, reject) => {
+                    request.onerror = () => reject(new Error(request.error?.toString() ?? "IndexedDB failed to open"));
+                    request.onsuccess = () => resolve(request.result);
+                    request.onupgradeneeded = (event) => {
+                        const db = (event.target as IDBOpenDBRequest).result;
+                        if (!db.objectStoreNames.contains(this.storeName)) {
+                            db.createObjectStore(this.storeName);
+                        }
+                    };
+                });
+            }
+
+            await this._preloadKeys();
+
+            if (keyToPreload) {
+                await this._preloadKey(keyToPreload);
+                this.preloadedKey = keyToPreload;
+            }
         } catch (error) {
             console.error("Failed to initialize IndexedDB:", error);
             // Continue with in-memory cache only
@@ -511,8 +593,7 @@ class BufferedIndexedDBStorage implements BufferedStorage {
         }
     }
 
-    /** Preloads all existing data from IndexedDB into the in-memory cache. */
-    private async _preloadCache(): Promise<void> {
+    private async _preloadKeys(): Promise<void> {
         if (!this.db) {
             return;
         }
@@ -527,23 +608,17 @@ class BufferedIndexedDBStorage implements BufferedStorage {
                 request.onerror = () => reject(new Error(request.error?.toString() ?? "IndexedDB operation failed"));
             });
 
-            // Load each key's value into cache
-            await Promise.all(
-                keys.map(async (key) => {
-                    if (typeof key === "string" && key.startsWith(this._storageKey)) {
-                        const value = await this._getFromDB(key);
-                        if (value != null) {
-                            this.cache.set(key, value);
-                        }
-                    }
-                })
-            );
+            // Store only keys, not values
+            keys.forEach((key) => {
+                if (typeof key === "string" && key.startsWith(this._storageKey)) {
+                    this.availableKeys.add(key);
+                }
+            });
         } catch (error) {
-            console.error("Failed to preload cache from IndexedDB:", error);
+            console.error("Failed to preload keys from IndexedDB:", error);
         }
     }
 
-    /** Retrieves a value directly from IndexedDB (bypassing cache). Used during cache preloading. */
     private async _getFromDB(fullKey: string): Promise<string | null> {
         if (!this.db) {
             return null;
@@ -569,7 +644,6 @@ class BufferedIndexedDBStorage implements BufferedStorage {
         }
     }
 
-    /** Schedules a debounced write to IndexedDB to batch multiple updates together. */
     private _scheduleWrite(): void {
         if (this.writeTimer != null) {
             clearTimeout(this.writeTimer);
@@ -577,10 +651,9 @@ class BufferedIndexedDBStorage implements BufferedStorage {
 
         this.writeTimer = setTimeout(() => {
             void this._flushWrites();
-        }, 100); // Debounce writes by 100ms
+        }, 100);
     }
 
-    /** Flushes all pending writes to IndexedDB in a single transaction. */
     private async _flushWrites(): Promise<void> {
         if (!this.db || this.pendingWrites.size === 0) {
             return;
@@ -612,32 +685,58 @@ class BufferedIndexedDBStorage implements BufferedStorage {
         }
     }
 
-    /** Retrieves a value synchronously from the in-memory cache. */
+    /**
+     * Retrieves a value from the in-memory cache.
+     *
+     * Behavior:
+     * - Returns cached value if present
+     * - Returns null if key doesn't exist in IndexedDB
+     * - Throws error only if the explicitly preloaded key exists in IndexedDB but failed to cache
+     */
     get(key: string): string | null {
         const fullKey = this.getFullKey(key);
-        return this.cache.get(fullKey) ?? null;
+        const value = this.cache.get(fullKey);
+
+        // If not in cache but exists in IndexedDB, warn and return null
+        // This handles backup checks during migrations and other incidental key accesses
+        if (!value && this.availableKeys.has(fullKey)) {
+            console.warn(
+                `[BufferedIndexedDBStorage] Key "${key}" exists in IndexedDB but not in cache. ` +
+                    `Returning null. Preloaded key: ${this.preloadedKey ?? "none"}`
+            );
+            return null;
+        }
+
+        return value ?? null;
     }
 
-    /** Sets a value synchronously in the in-memory cache and schedules a background write to IndexedDB. */
+    private _addToCache(fullKey: string, value: string): void {
+        this.cache.set(fullKey, value);
+    }
+
     set(key: string, value: string): void {
         const fullKey = this.getFullKey(key);
-        // Update cache immediately for synchronous access
-        this.cache.set(fullKey, value);
 
-        // Queue write to IndexedDB for persistence
+        this.availableKeys.add(fullKey);
+        this._addToCache(fullKey, value);
+
+        // Track that this key is now accessible (was written, not just preloaded)
+        if (!this.preloadedKey) {
+            this.preloadedKey = key;
+        }
+
         if (this.db) {
             this.pendingWrites.set(fullKey, value);
             this._scheduleWrite();
         }
     }
 
-    /** Removes a value synchronously from the in-memory cache and from IndexedDB. */
     remove(key: string): void {
         const fullKey = this.getFullKey(key);
-        // Remove from cache immediately
+
+        this.availableKeys.delete(fullKey);
         this.cache.delete(fullKey);
 
-        // Remove from IndexedDB immediately (not debounced)
         if (this.db) {
             const transaction = this.db.transaction([this.storeName], "readwrite");
             const store = transaction.objectStore(this.storeName);
@@ -651,9 +750,13 @@ class BufferedIndexedDBStorage implements BufferedStorage {
 
     /** Clears all values with the current storage prefix from both cache and IndexedDB. */
     clear(): void {
-        // Clear only keys with our prefix to avoid affecting other data
-        const keysToDelete = Array.from(this.cache.keys()).filter((k) => k.startsWith(this._storageKey));
-        keysToDelete.forEach((key) => this.cache.delete(key));
+        // Clear from all tracking structures
+        const keysToDelete = Array.from(this.availableKeys).filter((k) => k.startsWith(this._storageKey));
+
+        keysToDelete.forEach((key) => {
+            this.availableKeys.delete(key);
+            this.cache.delete(key);
+        });
 
         if (this.db) {
             const transaction = this.db.transaction([this.storeName], "readwrite");
@@ -669,8 +772,59 @@ class BufferedIndexedDBStorage implements BufferedStorage {
         }
     }
 
-    /** Returns all keys with the current storage prefix from the in-memory cache. */
     getAllKeys(): string[] {
-        return Array.from(this.cache.keys()).filter((k) => k.startsWith(this._storageKey));
+        return Array.from(this.availableKeys);
+    }
+
+    private async _preloadKey(key: string): Promise<void> {
+        const fullKey = this.getFullKey(key);
+
+        if (!this.availableKeys.has(fullKey) || !this.db) {
+            return;
+        }
+
+        try {
+            const value = await this._getFromDB(fullKey);
+            if (value) {
+                this._addToCache(fullKey, value);
+            }
+        } catch (error) {
+            console.error(`Failed to preload key ${key}:`, error);
+        }
+    }
+
+    /**
+     * Loads only metadata from IndexedDB without caching the full snapshot.
+     * Parses the JSON to extract just orgName and docsUrl fields.
+     */
+    async getMetadataOnly(branchName: string): Promise<{ orgName: string; docsUrl: string } | null> {
+        const fullKey = this.getFullKey(branchName);
+
+        if (!this.availableKeys.has(fullKey) || !this.db) {
+            return null;
+        }
+
+        try {
+            const serialized = await this._getFromDB(fullKey);
+            if (!serialized) {
+                return null;
+            }
+
+            const parsed = JSON.parse(serialized);
+            const metadata = parsed?.metadata;
+
+            if (!metadata || typeof metadata !== "object") {
+                console.warn(`Invalid metadata structure for branch ${branchName}`);
+                return null;
+            }
+
+            return {
+                orgName: typeof metadata.orgName === "string" ? metadata.orgName : "",
+                docsUrl: typeof metadata.docsUrl === "string" ? metadata.docsUrl : ""
+            };
+        } catch (error) {
+            console.error(`Failed to load metadata for ${branchName}:`, error);
+            return null;
+        }
     }
 }

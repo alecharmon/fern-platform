@@ -200,8 +200,8 @@ export class NavigationStore {
     }): Promise<void> {
         this._storage = options?.storage || createNavigationBufferedIndexedDBStorage();
 
-        // Initialize storage and wait for it to complete
-        await this._storage.init();
+        // Initialize storage and preload only the current branch to avoid OOM
+        await this._storage.init(this._branchName);
 
         // Only access storage after init is complete
         const storedSnapshot = this._storage.getOrSetStore(this._branchName, this._orgName, this._docsUrl);
