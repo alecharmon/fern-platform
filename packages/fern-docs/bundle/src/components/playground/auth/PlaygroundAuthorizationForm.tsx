@@ -1,4 +1,4 @@
-import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { EndpointContext, WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import type { FC, ReactElement } from "react";
@@ -6,20 +6,20 @@ import type { FC, ReactElement } from "react";
 import { PlaygroundBasicAuthForm } from "./PlaygroundBasicAuthForm";
 import { PlaygroundBearerAuthForm } from "./PlaygroundBearerAuthForm";
 import { PlaygroundHeaderAuthForm } from "./PlaygroundHeaderAuthForm";
-import { PlaygroundOAuthFormServer } from "./PlaygroundOAuthFormServer";
+import { FoundOAuthReferencedEndpointForm } from "./PlaygroundOAuthForm";
 
 interface PlaygroundAuthorizationFormProps {
-    loader: DocsLoader;
-    apiDefinitionId: string;
     auth: APIV1Read.ApiAuth;
+    context: EndpointContext | WebSocketContext;
+    oauthReferencedContext?: EndpointContext;
     disabled: boolean;
     lang: string;
 }
 
 export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> = ({
-    loader,
-    apiDefinitionId,
     auth,
+    context,
+    oauthReferencedContext,
     disabled,
     lang
 }) => {
@@ -33,15 +33,26 @@ export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> =
                     <PlaygroundBasicAuthForm basicAuth={basicAuth} disabled={disabled} lang={lang} />
                 ),
                 header: (header) => <PlaygroundHeaderAuthForm header={header} disabled={disabled} />,
-                oAuth: (oAuth) => (
-                    <PlaygroundOAuthFormServer
-                        loader={loader}
-                        apiDefinitionId={apiDefinitionId}
-                        oAuth={oAuth}
-                        disabled={disabled}
-                        lang={lang}
-                    />
-                ),
+                oAuth: (oAuth) => {
+                    if ("endpoint" in context) {
+                        return visitDiscriminatedUnion(oAuth.value, "type")._visit({
+                            clientCredentials: (clientCredentials) =>
+                                visitDiscriminatedUnion(clientCredentials.value, "type")._visit({
+                                    referencedEndpoint: (referencedEndpoint) => (
+                                        <FoundOAuthReferencedEndpointForm
+                                            context={oauthReferencedContext || context}
+                                            referencedEndpoint={referencedEndpoint}
+                                            disabled={disabled}
+                                            lang={lang}
+                                        />
+                                    ),
+                                    _other: () => false
+                                }),
+                            _other: () => false
+                        });
+                    }
+                    return false;
+                },
                 _other: () => false
             })}
         </ul>

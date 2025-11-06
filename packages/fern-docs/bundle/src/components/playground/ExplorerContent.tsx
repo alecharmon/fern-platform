@@ -2,7 +2,7 @@ import { createPruneKey } from "@fern-api/docs-loader";
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
-import { createEndpointContext, createWebSocketContext } from "@fern-api/fdr-sdk/api-definition";
+import { createEndpointContext, createWebSocketContext, type EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { t } from "@fern-docs/i18n";
 import { ArrowLeft } from "lucide-react";
@@ -57,11 +57,41 @@ export async function ExplorerContent({
     if (node.type === "endpoint") {
         const context = createEndpointContext(node, api);
         if (!context) return null;
-        const authForm = context.auths[0] != null && (
+
+        let oauthReferencedContext: EndpointContext | undefined;
+        const auth = context.auths[0];
+        if (auth?.type === "oAuth") {
+            const oAuthValue = auth.value;
+            if (oAuthValue.type === "clientCredentials") {
+                const clientCredentials = oAuthValue.value;
+                if (clientCredentials.type === "referencedEndpoint") {
+                    const referencedEndpoint = clientCredentials;
+                    try {
+                        const { endpoint, nodes, globalHeaders, authSchemes, types } = await loader.getEndpointById(
+                            node.apiDefinitionId,
+                            referencedEndpoint.endpointId
+                        );
+                        if (endpoint != null && nodes[0] != null) {
+                            oauthReferencedContext = {
+                                node: nodes[0],
+                                endpoint,
+                                globalHeaders,
+                                auths: authSchemes.filter((a) => a.type !== "oAuth"),
+                                types
+                            };
+                        }
+                    } catch (e) {
+                        console.error(`[explorer-content:getEndpointById] ${JSON.stringify(e)}`);
+                    }
+                }
+            }
+        }
+
+        const authForm = auth != null && (
             <PlaygroundAuthorizationFormCard
-                loader={loader}
-                apiDefinitionId={node.apiDefinitionId}
-                auth={context.auths[0]}
+                auth={auth}
+                context={context}
+                oauthReferencedContext={oauthReferencedContext}
                 lang={lang}
             />
         );
@@ -80,12 +110,7 @@ export async function ExplorerContent({
         const context = createWebSocketContext(node, api);
         if (!context) return null;
         const authForm = context.auths[0] != null && (
-            <PlaygroundAuthorizationFormCard
-                loader={loader}
-                apiDefinitionId={node.apiDefinitionId}
-                auth={context.auths[0]}
-                lang={lang}
-            />
+            <PlaygroundAuthorizationFormCard context={context} auth={context.auths[0]} lang={lang} />
         );
         return (
             <ApiDefinitionIdProvider value={node.apiDefinitionId}>

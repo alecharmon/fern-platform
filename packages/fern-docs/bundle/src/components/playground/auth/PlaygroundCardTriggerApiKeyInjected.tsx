@@ -1,5 +1,5 @@
 import type { APIKeyInjectionConfigEnabled } from "@fern-api/docs-auth";
-import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { EndpointContext, WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
@@ -20,8 +20,8 @@ import { PlaygroundAuthorizationForm } from "./PlaygroundAuthorizationForm";
 
 interface PlaygroundCardTriggerApiKeyInjectedProps {
     auth: APIV1Read.ApiAuth;
-    loader: DocsLoader;
-    apiDefinitionId: string;
+    context: EndpointContext | WebSocketContext;
+    oauthReferencedContext?: EndpointContext;
     config: APIKeyInjectionConfigEnabled;
     disabled: boolean;
     toggleOpen: () => void;
@@ -30,8 +30,8 @@ interface PlaygroundCardTriggerApiKeyInjectedProps {
 
 export function PlaygroundCardTriggerApiKeyInjected({
     auth,
-    loader,
-    apiDefinitionId,
+    context,
+    oauthReferencedContext,
     config,
     disabled,
     toggleOpen,
@@ -105,9 +105,9 @@ export function PlaygroundCardTriggerApiKeyInjected({
                 />
                 <div className="-mx-4">
                     <PlaygroundAuthorizationForm
-                        loader={loader}
-                        apiDefinitionId={apiDefinitionId}
+                        context={context}
                         auth={auth}
+                        oauthReferencedContext={oauthReferencedContext}
                         disabled={disabled}
                         lang={lang}
                     />
