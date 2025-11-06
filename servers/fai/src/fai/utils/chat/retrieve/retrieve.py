@@ -12,7 +12,7 @@ from fai.utils.turbopuffer.namespace import (
     get_tpuf_namespace,
 )
 
-DOCUMENT_ATTRIBUTES = ["document", "url", "version", "product", "roles", "title", "keywords"]
+DOCUMENT_ATTRIBUTES = ["chunk", "document", "url", "version", "product", "roles", "title", "keywords"]
 
 
 def _results_to_ranks(items: list[Row]) -> dict[str, int]:
