@@ -30,7 +30,8 @@ export async function WebhookContent({
     hideFeedback,
     pageActionOptions,
     markdownPromise,
-    lang
+    lang,
+    pageActionsStyle = "default"
 }: {
     serialize: MdxSerializer;
     context: ApiDefinition.WebhookContext;
@@ -41,6 +42,7 @@ export async function WebhookContent({
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
+    pageActionsStyle?: "default" | "toolbar";
 }) {
     const { node, webhook, types } = context;
 
@@ -60,6 +62,7 @@ export async function WebhookContent({
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
                     lang={lang}
+                    pageActionsStyle={pageActionsStyle}
                 />
             }
             aside={webhookExample}

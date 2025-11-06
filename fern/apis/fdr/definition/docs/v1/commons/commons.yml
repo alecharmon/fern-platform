@@ -214,6 +214,7 @@ types:
       sidebar: optional<DocsSidebarConfig>
       body: optional<DocsBodyConfig>
       tabs: optional<DocsTabsConfig>
+      page-actions: optional<DocsPageActionsConfig>
       
   DocsSidebarConfig:
     enum:
@@ -229,6 +230,11 @@ types:
     enum:
       - default
       - bubble
+
+  DocsPageActionsConfig:
+    enum:
+      - default
+      - toolbar
 
   DocsSettingsConfig:
     properties:

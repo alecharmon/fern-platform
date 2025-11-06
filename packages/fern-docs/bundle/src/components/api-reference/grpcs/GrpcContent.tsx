@@ -26,7 +26,8 @@ export async function GrpcContent({
     hideFeedback,
     pageActionOptions,
     markdownPromise,
-    lang
+    lang,
+    pageActionsStyle = "default"
 }: {
     serialize: MdxSerializer;
     context: GrpcContext;
@@ -37,6 +38,7 @@ export async function GrpcContent({
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
+    pageActionsStyle?: "default" | "toolbar";
 }) {
     const { node, grpc, types } = context;
 
@@ -61,6 +63,7 @@ export async function GrpcContent({
                         pageActionOptions={pageActionOptions}
                         markdownPromise={markdownPromise}
                         lang={lang}
+                        pageActionsStyle={pageActionsStyle}
                     />
                 }
                 aside={<GrpcContentCodeSnippets node={node} lang={lang} />}

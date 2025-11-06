@@ -51,6 +51,7 @@ export default async function ApiEndpointPage({
     });
 
     const markdownPromise = getMarkdownForPath(node, loader, loader.domain);
+    const pageActionsStyle = config.theme?.["page-actions"] ?? "default";
 
     return (
         <ApiEndpointContent
@@ -64,6 +65,7 @@ export default async function ApiEndpointPage({
             pageActionOptions={pageActionOptions}
             markdownPromise={markdownPromise}
             lang={lang}
+            pageActionsStyle={pageActionsStyle}
         />
     );
 }
@@ -78,7 +80,8 @@ async function ApiEndpointContent({
     hideFeedback,
     pageActionOptions,
     markdownPromise,
-    lang
+    lang,
+    pageActionsStyle
 }: {
     serialize: MdxSerializer;
     node: FernNavigation.NavigationNodeApiLeaf;
@@ -90,6 +93,7 @@ async function ApiEndpointContent({
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
+    pageActionsStyle: "default" | "toolbar";
 }) {
     switch (node.type) {
         case "endpoint": {
@@ -110,6 +114,7 @@ async function ApiEndpointContent({
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
                     lang={lang}
+                    pageActionsStyle={pageActionsStyle}
                 />
             );
         }
@@ -129,6 +134,7 @@ async function ApiEndpointContent({
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
                     lang={lang}
+                    pageActionsStyle={pageActionsStyle}
                 />
             );
         }
@@ -148,6 +154,7 @@ async function ApiEndpointContent({
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
                     lang={lang}
+                    pageActionsStyle={pageActionsStyle}
                 />
             );
         }
@@ -167,6 +174,7 @@ async function ApiEndpointContent({
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}
                     lang={lang}
+                    pageActionsStyle={pageActionsStyle}
                 />
             );
         }

@@ -30,6 +30,7 @@ export * from "./DocsThemeConfig";
 export * from "./DocsSidebarConfig";
 export * from "./DocsBodyConfig";
 export * from "./DocsTabsConfig";
+export * from "./DocsPageActionsConfig";
 export * from "./DocsSettingsConfig";
 export * from "./HttpSnippetsConfig";
 export * from "./HttpSnippetLanguage";

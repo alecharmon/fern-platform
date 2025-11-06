@@ -41,7 +41,8 @@ export async function WebSocketContent({
     hideFeedback,
     pageActionOptions,
     markdownPromise,
-    lang
+    lang,
+    pageActionsStyle = "default"
 }: {
     serialize: MdxSerializer;
     context: WebSocketContext;
@@ -52,6 +53,7 @@ export async function WebSocketContent({
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
+    pageActionsStyle?: "default" | "toolbar";
 }) {
     const { channel, node, types, globalHeaders } = context;
 
@@ -108,6 +110,7 @@ export async function WebSocketContent({
                     slug={node.slug}
                     pageActionOptions={pageActionOptions}
                     lang={lang}
+                    pageActionsStyle={pageActionsStyle}
                 >
                     <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
                         <EndpointUrlWithPlaygroundBaseUrl

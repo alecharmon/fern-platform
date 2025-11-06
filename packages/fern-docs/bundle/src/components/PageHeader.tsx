@@ -28,7 +28,8 @@ export function PageHeader({
     showRssFeedButton,
     filters,
     showBackIcon,
-    lang
+    lang,
+    pageActionsStyle = "default"
 }: {
     slug: string;
     serialize: MdxSerializer;
@@ -42,10 +43,10 @@ export function PageHeader({
     markdownPromise?: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     pageActionOptions?: FernDropdown.PageActionOption[];
     showRssFeedButton?: boolean;
-    // tags for the changelog section
     filters?: string[];
     showBackIcon?: boolean;
     lang: string;
+    pageActionsStyle?: "default" | "toolbar";
 }) {
     return (
         <header className="my-8 space-y-2">
@@ -93,6 +94,7 @@ export function PageHeader({
                                 markdownPromise={markdownPromise}
                                 pageActionOptions={pageActionOptions}
                                 lang={lang}
+                                style={pageActionsStyle}
                             />
                         </div>
                     )}

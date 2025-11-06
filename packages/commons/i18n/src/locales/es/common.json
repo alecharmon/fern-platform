@@ -56,7 +56,8 @@
     "connectToCursor": "Conectar a Cursor",
     "resetTokenToDefault": "Restablecer token a predeterminado",
     "close": "Cerrar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "moreActions": "Más acciones"
   },
   "search": {
     "search": "Buscar",

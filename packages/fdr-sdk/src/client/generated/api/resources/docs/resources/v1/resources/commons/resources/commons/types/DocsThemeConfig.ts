@@ -8,4 +8,5 @@ export interface DocsThemeConfig {
     sidebar: FernRegistry.docs.v1.commons.DocsSidebarConfig | undefined;
     body: FernRegistry.docs.v1.commons.DocsBodyConfig | undefined;
     tabs: FernRegistry.docs.v1.commons.DocsTabsConfig | undefined;
+    "page-actions": FernRegistry.docs.v1.commons.DocsPageActionsConfig | undefined;
 }

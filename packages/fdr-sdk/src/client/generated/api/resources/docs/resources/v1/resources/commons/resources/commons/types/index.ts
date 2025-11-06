@@ -30,6 +30,7 @@ export * from "./DocsThemeConfig.js";
 export * from "./DocsSidebarConfig.js";
 export * from "./DocsBodyConfig.js";
 export * from "./DocsTabsConfig.js";
+export * from "./DocsPageActionsConfig.js";
 export * from "./DocsSettingsConfig.js";
 export * from "./HttpSnippetsConfig.js";
 export * from "./HttpSnippetLanguage.js";

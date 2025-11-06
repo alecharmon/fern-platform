@@ -36,7 +36,8 @@ export async function EndpointContent({
     hideFeedback,
     pageActionOptions,
     markdownPromise,
-    lang
+    lang,
+    pageActionsStyle = "default"
 }: {
     serialize: MdxSerializer;
     showErrors: boolean;
@@ -49,6 +50,7 @@ export async function EndpointContent({
     pageActionOptions?: FernDropdown.PageActionOption[];
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
+    pageActionsStyle?: "default" | "toolbar";
 }) {
     const { node, endpoint, types } = context;
 
@@ -66,6 +68,7 @@ export async function EndpointContent({
                         pageActionOptions={pageActionOptions}
                         markdownPromise={markdownPromise}
                         lang={lang}
+                        pageActionsStyle={pageActionsStyle}
                     >
                         <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
                             <EndpointUrlWithPlaygroundBaseUrl
