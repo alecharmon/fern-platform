@@ -155,6 +155,32 @@ export type DocsYmlBaseContent = Map<DocsYmlFilePath, string> | null;
 export type NavigationSlug = string;
 
 /**
+ * Derives a slug from a file path by extracting the filename without extension.
+ * This mirrors how the FDR SDK derives slugs when they're not explicitly provided.
+ * Examples:
+ *   "docs/products/platform/v2.yml" -> "v2"
+ *   "docs/products/wiki.yml" -> "wiki"
+ */
+function deriveSlugFromPath(path: string): string | null {
+    if (!path || typeof path !== "string") {
+        return null;
+    }
+
+    // Remove ./ prefix if present
+    const normalizedPath = path.startsWith("./") ? path.substring(2) : path;
+
+    // Get the filename without extension
+    const lastSlash = normalizedPath.lastIndexOf("/");
+    const filename = lastSlash >= 0 ? normalizedPath.substring(lastSlash + 1) : normalizedPath;
+
+    // Remove extension
+    const lastDot = filename.lastIndexOf(".");
+    const slug = lastDot >= 0 ? filename.substring(0, lastDot) : filename;
+
+    return slug || null;
+}
+
+/**
  * Builds a mapping from product or version slug to file path by parsing the main docs.yml content.
  * This is used to determine which file contains the navigation to modify when making navigation changes
  */
@@ -173,34 +199,52 @@ export function buildSlugToDocsYmlFilePath(docsYmlContent: DocsYmlBaseContent): 
     try {
         const config = yaml.load(mainContent) as any;
 
-        // Parse products array
+        // Parse products array (including nested versions)
         if (config?.products && Array.isArray(config.products)) {
             for (const product of config.products) {
-                if (
-                    product?.slug &&
-                    product?.path &&
-                    typeof product.slug === "string" &&
-                    typeof product.path === "string"
-                ) {
+                const productPath = product?.path;
+                const productSlug = product?.slug || (productPath ? deriveSlugFromPath(productPath) : null);
+
+                // Register product slug (even if it has nested versions, since the product path points to the default version)
+                if (productSlug && productPath && typeof productSlug === "string" && typeof productPath === "string") {
                     // Normalize path (remove ./ prefix)
-                    const normalizedPath = product.path.startsWith("./") ? product.path.substring(2) : product.path;
-                    map.set(product.slug, normalizedPath);
+                    const normalizedPath = productPath.startsWith("./") ? productPath.substring(2) : productPath;
+                    map.set(productSlug, normalizedPath);
+                }
+
+                // Parse nested versions within this product
+                if (product?.versions && Array.isArray(product.versions)) {
+                    for (const version of product.versions) {
+                        const versionPath = version?.path;
+                        const versionSlug = version?.slug || (versionPath ? deriveSlugFromPath(versionPath) : null);
+
+                        if (
+                            versionSlug &&
+                            versionPath &&
+                            typeof versionSlug === "string" &&
+                            typeof versionPath === "string"
+                        ) {
+                            // Normalize path (remove ./ prefix)
+                            const normalizedPath = versionPath.startsWith("./")
+                                ? versionPath.substring(2)
+                                : versionPath;
+                            map.set(versionSlug, normalizedPath);
+                        }
+                    }
                 }
             }
         }
 
-        // Parse versions array
+        // Parse top-level versions array (for non-product versioned docs)
         if (config?.versions && Array.isArray(config.versions)) {
             for (const version of config.versions) {
-                if (
-                    version?.slug &&
-                    version?.path &&
-                    typeof version.slug === "string" &&
-                    typeof version.path === "string"
-                ) {
+                const versionPath = version?.path;
+                const versionSlug = version?.slug || (versionPath ? deriveSlugFromPath(versionPath) : null);
+
+                if (versionSlug && versionPath && typeof versionSlug === "string" && typeof versionPath === "string") {
                     // Normalize path (remove ./ prefix)
-                    const normalizedPath = version.path.startsWith("./") ? version.path.substring(2) : version.path;
-                    map.set(version.slug, normalizedPath);
+                    const normalizedPath = versionPath.startsWith("./") ? versionPath.substring(2) : versionPath;
+                    map.set(versionSlug, normalizedPath);
                 }
             }
         }
@@ -208,10 +252,13 @@ export function buildSlugToDocsYmlFilePath(docsYmlContent: DocsYmlBaseContent): 
         // Parse tabs array
         if (config?.tabs && Array.isArray(config.tabs)) {
             for (const tab of config.tabs) {
-                if (tab?.slug && tab?.path && typeof tab.slug === "string" && typeof tab.path === "string") {
+                const tabPath = tab?.path;
+                const tabSlug = tab?.slug || (tabPath ? deriveSlugFromPath(tabPath) : null);
+
+                if (tabSlug && tabPath && typeof tabSlug === "string" && typeof tabPath === "string") {
                     // Normalize path (remove ./ prefix)
-                    const normalizedPath = tab.path.startsWith("./") ? tab.path.substring(2) : tab.path;
-                    map.set(tab.slug, normalizedPath);
+                    const normalizedPath = tabPath.startsWith("./") ? tabPath.substring(2) : tabPath;
+                    map.set(tabSlug, normalizedPath);
                 }
             }
         }

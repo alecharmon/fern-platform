@@ -421,5 +421,47 @@ describe("buildDocsYmlContentFromChanges", () => {
             expect(docsYmlResult).toContain("New Page");
             expect(docsYmlResult).toContain("./pages/new.mdx");
         });
+
+        it("should remove pages with paths relative to nested yml files", () => {
+            // Setup: products/platform/v2.yml with pages at ../../pages/platform/
+            const v2Yml = `navigation:
+  - section: Overview
+    contents:
+      - page: Getting Started
+        path: ../../pages/platform/getting-started.mdx
+      - page: Introduction
+        path: ../../pages/platform/introduction.mdx`;
+
+            const snapshot: NavigationSnapshot = {
+                ...createEmptyNavigationSnapshot("test-branch", "test-org", "test-docs-url"),
+                docsYmlBaseContent: new Map([["docs/products/platform/v2.yml", v2Yml]]),
+                navigationChanges: new Map()
+            };
+
+            // Remove the introduction page
+            // Stored path is root-relative: "docs/pages/platform/introduction.mdx"
+            // YAML has it as: "../../pages/platform/introduction.mdx" (relative to docs/products/platform/v2.yml)
+            // Both should resolve to the same absolute path: "docs/pages/platform/introduction.mdx"
+            const changes = new Map<string, NavigationChange>();
+            changes.set("docs/pages/platform/introduction.mdx", {
+                type: "remove_page",
+                sectionTitle: "Overview",
+                pageEntry: { page: "Introduction", path: "docs/pages/platform/introduction.mdx" },
+                docsYmlFilePath: "docs/products/platform/v2.yml",
+                createdAt: Date.now()
+            });
+
+            snapshot.navigationChanges = changes;
+
+            const result = buildDocsYmlContentFromChanges(snapshot);
+            const v2YmlResult = result.get("docs/products/platform/v2.yml") ?? "";
+
+            // The introduction page should be removed
+            expect(v2YmlResult).not.toContain("Introduction");
+            expect(v2YmlResult).not.toContain("../../pages/platform/introduction.mdx");
+            // But the getting started page should still be there
+            expect(v2YmlResult).toContain("Getting Started");
+            expect(v2YmlResult).toContain("../../pages/platform/getting-started.mdx");
+        });
     });
 });

@@ -91,7 +91,8 @@ function _buildDocsYmlContentFromChanges(
                 });
             } else if (change.type === "remove_page" && change.pageEntry) {
                 _applyRemoveOperation(config, {
-                    pageEntry: change.pageEntry
+                    pageEntry: change.pageEntry,
+                    ymlFilePath: filePath
                 });
             }
         }
@@ -111,6 +112,47 @@ function _buildDocsYmlContentFromChanges(
 /** Normalizes a path by removing leading "./" if present */
 function _normalizePath(path: string): string {
     return path.startsWith("./") ? path.slice(2) : path;
+}
+
+/**
+ * Resolves a relative path to an absolute path based on the yml file's directory.
+ * This ensures we can compare paths that are relative to different yml files.
+ *
+ * Examples:
+ *   resolveRelativePath("../../pages/platform/untitled.mdx", "docs/products/platform/v2.yml")
+ *     -> "docs/pages/platform/untitled.mdx"
+ *   resolveRelativePath("./pages/platform/untitled.mdx", "docs.yml")
+ *     -> "pages/platform/untitled.mdx"
+ *   resolveRelativePath("docs/pages/platform/untitled.mdx", "docs/products/platform/v2.yml")
+ *     -> "docs/pages/platform/untitled.mdx" (already absolute, returned as-is)
+ */
+function resolveRelativePath(relativePath: string, ymlFilePath: string): string {
+    // Normalize the path first (removes leading "./")
+    const path = _normalizePath(relativePath);
+
+    // If the path doesn't start with "../", it's already absolute (root-relative)
+    // In this case, return it as-is
+    if (!path.startsWith("../")) {
+        return path;
+    }
+
+    // Path is relative to yml file - resolve it based on the yml file's directory
+    const ymlDir = ymlFilePath.substring(0, ymlFilePath.lastIndexOf("/") + 1) || "";
+    const parts = path.split("/");
+    const ymlDirParts = ymlDir.split("/").filter((p) => p);
+
+    // Count how many levels to go up
+    let i = 0;
+    while (i < parts.length && parts[i] === "..") {
+        ymlDirParts.pop(); // Go up one directory
+        i++;
+    }
+
+    // Combine the resolved directory with the remaining path
+    const remainingPath = parts.slice(i).join("/");
+    const resolved = ymlDirParts.length > 0 ? ymlDirParts.join("/") + "/" + remainingPath : remainingPath;
+
+    return resolved;
 }
 
 /**
@@ -276,7 +318,11 @@ function _addToTabbedNavigation(
 ) {
     if (!docsConfig.navigation) return;
 
-    const tab = _findOrCreateTab(docsConfig.navigation, tabSlug);
+    // Tab slug from navigation tree may be full path like "platform/v-2/guides"
+    // but YAML uses just the tab identifier like "guides"
+    const tabIdentifier = tabSlug.includes("/") ? (tabSlug.split("/").pop() ?? tabSlug) : tabSlug;
+
+    const tab = _findOrCreateTab(docsConfig.navigation, tabIdentifier);
 
     if (sectionTitle == null) {
         if (tab.layout) _addPageToContainer(tab.layout, pageEntry, insertionMode, insertionIndex, ymlFilePath);
@@ -368,41 +414,39 @@ function _addPageToContainer(
 }
 
 /** Removes page entry from all navigation structures */
-function _applyRemoveOperation(docsConfig: DocsYmlConfig, update: { pageEntry: { page: string; path: string } }) {
+function _applyRemoveOperation(
+    docsConfig: DocsYmlConfig,
+    update: { pageEntry: { page: string; path: string }; ymlFilePath: string }
+) {
     const { page, path } = update.pageEntry;
+    const { ymlFilePath } = update;
 
     if (!docsConfig.navigation) {
+        console.warn("[ymlUtils] No navigation array in config");
         return;
     }
 
-    // Remove from root level navigation items
-    docsConfig.navigation = docsConfig.navigation.filter((item) => !_isMatchingPage(item, page, path));
-
-    // Remove from sections and tab layouts
-    docsConfig.navigation.forEach((navItem) => {
-        // Remove from section contents
-        if (navItem.contents) {
-            navItem.contents = navItem.contents.filter((item) => !_isMatchingPage(item, page, path));
-        }
-
-        // Remove from tab layouts
-        if (navItem.layout) {
-            navItem.layout = navItem.layout.filter((layoutItem) => {
-                // Remove direct page items from layout
-                if (layoutItem.page && layoutItem.path) {
-                    return !_isMatchingPage(layoutItem, page, path);
+    // Helper function to recursively remove page from navigation items
+    const removeFromItems = (items: YmlNavigationItem[]): YmlNavigationItem[] => {
+        return items
+            .filter((item) => !_isMatchingPage(item, page, path, ymlFilePath))
+            .map((item) => {
+                // Recursively process section contents
+                if (item.contents) {
+                    item.contents = removeFromItems(item.contents);
                 }
 
-                // Remove from nested section contents in layout
-                if (layoutItem.contents) {
-                    layoutItem.contents = layoutItem.contents.filter((item) => !_isMatchingPage(item, page, path));
+                // Recursively process tab layouts
+                if (item.layout) {
+                    item.layout = removeFromItems(item.layout);
                 }
 
-                // Keep layout sections and other non-page items
-                return true;
+                return item;
             });
-        }
-    });
+    };
+
+    // Apply removal recursively to the entire navigation tree
+    docsConfig.navigation = removeFromItems(docsConfig.navigation);
 }
 
 /** Renames a section in the navigation structure */
@@ -436,14 +480,23 @@ function _applyRenameSectionOperation(
 
     if (tabSlug) {
         // Rename section within a specific tab
-        const tab = docsConfig.navigation.find((item) => item.tab === tabSlug);
+        // Tab slug from navigation tree may be full path like "platform/v-2/guides"
+        // but YAML uses just the tab identifier like "guides"
+        const tabIdentifier = tabSlug.includes("/") ? tabSlug.split("/").pop() : tabSlug;
+
+        const tab = docsConfig.navigation.find((item) => item.tab === tabIdentifier);
         if (tab?.layout) {
             const renamed = renameSectionInArray(tab.layout);
             if (!renamed) {
-                console.warn(`[ymlUtils] Section "${oldTitle}" not found in tab "${tabSlug}"`);
+                console.warn(
+                    `[ymlUtils] Section "${oldTitle}" not found in tab "${tabIdentifier}" (from slug: "${tabSlug}")`
+                );
             }
         } else {
-            console.warn(`[ymlUtils] Tab "${tabSlug}" not found in navigation`);
+            console.warn(
+                `[ymlUtils] Tab "${tabIdentifier}" (from slug: "${tabSlug}") not found in navigation. Available tabs:`,
+                docsConfig.navigation.map((item) => item.tab)
+            );
         }
     } else {
         // Rename section in root navigation
@@ -455,16 +508,26 @@ function _applyRenameSectionOperation(
 }
 
 /** Checks if item matches target page by path or title */
-function _isMatchingPage(item: YmlNavigationItem, targetPage: string, targetPath: string): boolean {
+function _isMatchingPage(
+    item: YmlNavigationItem,
+    targetPage: string,
+    targetPath: string,
+    ymlFilePath: string
+): boolean {
     // Only check page items for matches
     if (!isYmlPageItem(item)) {
         return false;
     }
 
     // If item has a path property, match by path (paths are unique identifiers)
-    // Normalize both paths to handle "./docs/..." vs "docs/..." differences
+    // Resolve both paths to absolute before comparing, since they may be relative to different locations
     if (item.path && targetPath) {
-        return _normalizePath(item.path) === _normalizePath(targetPath);
+        // Resolve item path (which is relative to the yml file)
+        const resolvedItemPath = resolveRelativePath(item.path, ymlFilePath);
+        // Resolve target path (which may be root-relative or yml-relative)
+        const resolvedTargetPath = resolveRelativePath(targetPath, ymlFilePath);
+
+        return resolvedItemPath === resolvedTargetPath;
     }
 
     // Fallback to matching by page title if path is not available

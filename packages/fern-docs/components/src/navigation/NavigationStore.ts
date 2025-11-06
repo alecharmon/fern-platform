@@ -271,7 +271,7 @@ export class NavigationStore {
     /** Renames a section and tracks the change in docs.yml */
     renameSection(sectionId: FernNavigation.NodeId, newTitle: string): void {
         if (!this._rootNode) {
-            console.warn("Cannot rename section: rootNode not available");
+            console.warn("[NavigationStore.renameSection] Cannot rename section: rootNode not available");
             return;
         }
 
@@ -279,12 +279,27 @@ export class NavigationStore {
         const searchResult = findSectionById(this._rootNode, sectionId);
 
         if (!searchResult) {
-            console.warn(`Cannot rename section: node ${sectionId} not found or not a section`);
+            console.warn(
+                `[NavigationStore.renameSection] Cannot rename section: node ${sectionId} not found or not a section`
+            );
             return;
         }
 
         const { section: sectionNode, tabSlug, product, version } = searchResult;
         const oldTitle = sectionNode.title;
+
+        console.log("[NavigationStore.renameSection] Renaming section:", {
+            sectionId,
+            oldTitle,
+            newTitle,
+            tabSlug,
+            hasProduct: !!product,
+            hasVersion: !!version,
+            productSlug: product && FernNavigation.isInternalProductNode(product) ? product.slug : undefined,
+            versionSlug: version?.slug,
+            slugMapSize: this._slugToDocsYmlFilePath?.size,
+            slugMapKeys: this._slugToDocsYmlFilePath ? Array.from(this._slugToDocsYmlFilePath.keys()) : []
+        });
 
         // Update the section title in rootNode
         const updatedRootNode = updateSectionTitle(this._rootNode, sectionId, newTitle);
@@ -309,6 +324,8 @@ export class NavigationStore {
         };
 
         const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(contextForExtraction, this._slugToDocsYmlFilePath);
+
+        console.log("[NavigationStore.renameSection] Determined docsYmlFilePath:", docsYmlFilePath);
 
         // Update all existing add_page changes that reference the old section title
         // This ensures new pages added to a renamed section use the correct section title in docs.yml

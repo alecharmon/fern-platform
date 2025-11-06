@@ -101,14 +101,35 @@ export function extractDocsYmlFilePathFromFoundNode(
 
     // Check if we're in a versioned or tabbed context
     // Priority: currentVersion > currentProduct > currentTab
+    // When both product and version exist, version takes precedence (products with nested versions)
 
-    // 1. Check for version context (most common for multi-file docs)
+    // 1. Check for version context (most common for multi-file docs, including nested versions in products)
     if (foundNode.currentVersion) {
         const versionSlug = foundNode.currentVersion.slug;
-        const filePath = slugToDocsYmlFilePath.get(versionSlug);
+        let filePath = slugToDocsYmlFilePath.get(versionSlug);
+
+        // If exact match not found and slug contains slashes, try the last segment
+        // e.g., "platform/v-2" -> try "v-2" and "v2"
+        if (!filePath && versionSlug.includes("/")) {
+            const lastSegment = versionSlug.split("/").pop();
+            if (lastSegment) {
+                filePath = slugToDocsYmlFilePath.get(lastSegment);
+
+                // Also try with underscores replaced by hyphens or vice versa
+                if (!filePath) {
+                    const normalized = lastSegment.replace(/-/g, "");
+                    filePath = slugToDocsYmlFilePath.get(normalized);
+                }
+            }
+        }
+
         if (filePath) {
             return filePath;
         }
+
+        // If version slug not found, it might actually be a product slug
+        // (this happens when FDR provides a FoundNode with currentVersion pointing to a product)
+        // Try falling through to product check instead of warning here
     }
 
     // 2. Check for product context (for multi-product docs)
@@ -133,6 +154,23 @@ export function extractDocsYmlFilePathFromFoundNode(
             }
         }
 
+        // If we have a version slug that matches the product slug, this might be a product with nested versions
+        // where FDR is providing the product slug as the version slug. Try to find a version that belongs to this product.
+        // Since we don't have a direct product->versions mapping, we'll need to check if any of the available
+        // paths look like they belong to this product (e.g., "docs/products/platform/v2.yml" for product "platform")
+        if (foundNode.currentVersion && foundNode.currentVersion.slug === productSlug) {
+            // Look for any slug in the map that has a path containing the product slug
+            for (const [slug, path] of slugToDocsYmlFilePath.entries()) {
+                // Check if the path contains the product slug as a directory component
+                // e.g., "docs/products/platform/v2.yml" contains "platform"
+                const pathSegments = path.split("/");
+                if (pathSegments.includes(productSlug)) {
+                    // Found a matching version file for this product
+                    return path;
+                }
+            }
+        }
+
         console.warn(
             `[extractDocsYmlFilePathFromFoundNode] No file path found for product slug: "${productSlug}". Available slugs:`,
             Array.from(slugToDocsYmlFilePath.keys())
@@ -149,6 +187,15 @@ export function extractDocsYmlFilePathFromFoundNode(
     }
 
     // Default to main docs.yml if no match found
+    console.warn(
+        "[extractDocsYmlFilePathFromFoundNode] Could not determine file path from context, defaulting to docs.yml. Context:",
+        {
+            hasCurrentVersion: !!foundNode.currentVersion,
+            hasCurrentProduct: !!foundNode.currentProduct,
+            hasCurrentTab: !!foundNode.currentTab,
+            availableSlugs: Array.from(slugToDocsYmlFilePath.keys())
+        }
+    );
     return "docs.yml";
 }
 

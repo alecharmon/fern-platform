@@ -36,6 +36,16 @@ export function findSectionById(
         product?: FernNavigation.ProductNode,
         version?: FernNavigation.VersionNode
     ): boolean => {
+        if (!node) {
+            console.error("[findSectionById] Encountered undefined node during traversal", {
+                sectionId,
+                tab,
+                hasProduct: !!product,
+                hasVersion: !!version
+            });
+            return false;
+        }
+
         if (node.type === "section" && node.id === sectionId) {
             result = { section: node, tabSlug: tab, product, version };
             return true;
@@ -43,22 +53,69 @@ export function findSectionById(
 
         // Handle node types with single child property
         if (node.type === "root" || node.type === "unversioned") {
-            return traverse((node as any).child, tab, product, version);
+            const child = (node as any).child;
+            if (!child) {
+                console.error("[findSectionById] Node has no child property", {
+                    nodeType: node.type,
+                    sectionId
+                });
+                return false;
+            }
+            return traverse(child, tab, product, version);
         }
 
-        // Handle versioned node - track the version
+        // Handle versioned node - it has multiple version children
         if (node.type === "versioned") {
-            return traverse((node as any).child, tab, product, node as any);
+            const children = (node as any).children;
+            if (!children || !Array.isArray(children)) {
+                console.error("[navigationTreeUtils] Versioned node has no children array", {
+                    versionNode: node
+                });
+                return false;
+            }
+            // Traverse each version node
+            for (const versionNode of children) {
+                if (versionNode && versionNode.type === "version") {
+                    // Each version node has a child property
+                    if (traverse(versionNode.child, tab, product, versionNode)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         // Handle product node - track the product
         if (node.type === "product") {
-            return traverse((node as any).child, tab, node as any, version);
+            const child = (node as any).child;
+            if (!child) {
+                console.error("[findSectionById] Product node has no child", {
+                    productNode: node,
+                    sectionId
+                });
+                return false;
+            }
+            return traverse(child, tab, node as any, version);
         }
 
         // Handle tabbed nodes - they have children array
         if (node.type === "tabbed") {
-            for (const child of (node as any).children) {
+            const children = (node as any).children;
+            if (!children) {
+                console.error("[findSectionById] Tabbed node has no children array", {
+                    sectionId
+                });
+                return false;
+            }
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i];
+                if (!child) {
+                    console.error("[findSectionById] Undefined child in tabbed.children", {
+                        childIndex: i,
+                        sectionId
+                    });
+                    continue;
+                }
                 if (traverse(child, tab, product, version)) return true;
             }
             return false;
@@ -71,13 +128,38 @@ export function findSectionById(
             node.type === "section" ||
             node.type === "productgroup"
         ) {
-            for (const child of node.children) {
+            if (!node.children) {
+                console.error("[findSectionById] Node has no children array", {
+                    nodeType: node.type,
+                    nodeId: (node as any).id,
+                    sectionId
+                });
+                return false;
+            }
+            for (let i = 0; i < node.children.length; i++) {
+                const child = node.children[i];
+                if (!child) {
+                    console.error("[findSectionById] Undefined child in children array", {
+                        nodeType: node.type,
+                        nodeId: (node as any).id,
+                        childIndex: i,
+                        sectionId
+                    });
+                    continue;
+                }
                 if (traverse(child, tab, product, version)) return true;
             }
         }
 
         // Handle tab node specially - track the tab slug
         if (node.type === "tab") {
+            if (!node.child) {
+                console.error("[navigationTreeUtils] Tab node has no child", {
+                    tabSlug: node.slug,
+                    tab: node
+                });
+                return false;
+            }
             return traverse(node.child, node.slug, product, version);
         }
 
@@ -110,6 +192,16 @@ export function findPageByPageId(
         product?: FernNavigation.ProductNode,
         version?: FernNavigation.VersionNode
     ): boolean => {
+        if (!node) {
+            console.error("[findPageByPageId] Encountered undefined node during traversal", {
+                pageId,
+                tab,
+                hasProduct: !!product,
+                hasVersion: !!version
+            });
+            return false;
+        }
+
         if (node.type === "page" && node.pageId === pageId) {
             result = { page: node, tabSlug: tab, product, version };
             return true;
@@ -117,17 +209,50 @@ export function findPageByPageId(
 
         // Handle node types with single child property
         if (node.type === "root" || node.type === "unversioned") {
-            return traverse((node as any).child, tab, product, version);
+            const child = (node as any).child;
+            if (!child) {
+                console.error("[findPageByPageId] Node has no child property", {
+                    nodeType: node.type,
+                    pageId
+                });
+                return false;
+            }
+            return traverse(child, tab, product, version);
         }
 
-        // Handle versioned node - track the version
+        // Handle versioned node - it has multiple version children
         if (node.type === "versioned") {
-            return traverse((node as any).child, tab, product, node as any);
+            const children = (node as any).children;
+            if (!children || !Array.isArray(children)) {
+                console.error("[findPageByPageId] Versioned node has no children array", {
+                    versionNode: node,
+                    pageId
+                });
+                return false;
+            }
+            // Traverse each version node
+            for (const versionNode of children) {
+                if (versionNode && versionNode.type === "version") {
+                    // Each version node has a child property
+                    if (traverse(versionNode.child, tab, product, versionNode)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         // Handle product node - track the product
         if (node.type === "product") {
-            return traverse((node as any).child, tab, node as any, version);
+            const child = (node as any).child;
+            if (!child) {
+                console.error("[findPageByPageId] Product node has no child", {
+                    productNode: node,
+                    pageId
+                });
+                return false;
+            }
+            return traverse(child, tab, node as any, version);
         }
 
         // Handle tabbed nodes - they have children array
@@ -153,6 +278,13 @@ export function findPageByPageId(
 
         // Handle tab node specially - track the tab slug
         if (node.type === "tab") {
+            if (!node.child) {
+                console.error("[navigationTreeUtils] Tab node has no child", {
+                    tabSlug: node.slug,
+                    tab: node
+                });
+                return false;
+            }
             return traverse(node.child, node.slug, product, version);
         }
 
@@ -182,6 +314,19 @@ export function updateSectionTitle(
             case "unversioned":
                 return { ...node, child: updateNode(node.child) } as T;
             case "product":
+                return { ...node, child: updateNode((node as any).child) } as T;
+            case "versioned": {
+                // Versioned node has children array of version nodes
+                const versionedNode = node as any;
+                if (versionedNode.children && Array.isArray(versionedNode.children)) {
+                    return {
+                        ...node,
+                        children: versionedNode.children.map((child: any) => updateNode(child))
+                    } as T;
+                }
+                return node;
+            }
+            case "version":
                 return { ...node, child: updateNode((node as any).child) } as T;
             case "tabbed": {
                 const tabbedNode = node as any;
@@ -275,6 +420,19 @@ export function injectPageIntoSection(
             case "unversioned":
                 return { ...node, child: injectNode(node.child) } as T;
             case "product":
+                return { ...node, child: injectNode((node as any).child) } as T;
+            case "versioned": {
+                // Versioned node has children array of version nodes
+                const versionedNode = node as any;
+                if (versionedNode.children && Array.isArray(versionedNode.children)) {
+                    return {
+                        ...node,
+                        children: versionedNode.children.map((child: any) => injectNode(child))
+                    } as T;
+                }
+                return node;
+            }
+            case "version":
                 return { ...node, child: injectNode((node as any).child) } as T;
             case "tabbed": {
                 const tabbedNode = node as any;
