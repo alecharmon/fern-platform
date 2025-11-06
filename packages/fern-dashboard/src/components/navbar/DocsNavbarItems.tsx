@@ -39,7 +39,7 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
                     firstDocsSite != null ? `/docs/${constructDocsUrlParam(getDocsSiteUrl(firstDocsSite))}` : undefined
                 }
             />
-            <DocsNavbarSubItems docsSites={docsSites} />
+            <DocsNavbarSubItems docsSites={docsSites} orgName={orgName} />
         </>
     );
 }

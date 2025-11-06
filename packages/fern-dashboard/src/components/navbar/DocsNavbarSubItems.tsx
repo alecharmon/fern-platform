@@ -1,20 +1,34 @@
-"use client";
+import "server-only";
 
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
-
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
-import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
-
+import { PosthogFeatureFlag } from "../posthog/feature-flags/flags";
+import { FeatureFlaggedServerSide, isFeatureFlagEnabledForUser } from "../posthog/feature-flags/server-side";
 import { NavbarSubItem } from "./NavbarSubItem";
 
-export function DocsNavbarSubItems({ docsSites }: { docsSites: FdrAPI.dashboard.DocsSite[] }) {
-    const orgName = useOrgNameFromPathname();
-
+export async function DocsNavbarSubItems({
+    docsSites,
+    orgName
+}: {
+    docsSites: FdrAPI.dashboard.DocsSite[];
+    orgName: Auth0OrgName;
+}) {
+    const session = await getCurrentSession();
+    if (session == null) {
+        return null;
+    }
+    const isCreateDocsNewSiteEnabled = await isFeatureFlagEnabledForUser(
+        PosthogFeatureFlag.ENABLE_CREATE_DOCS_NEW_SITE,
+        session?.user.sub,
+        orgName
+    );
     return (
         <>
             {docsSites.map((docsSite) => {
@@ -25,12 +39,17 @@ export function DocsNavbarSubItems({ docsSites }: { docsSites: FdrAPI.dashboard.
                 );
             })}
             <Link
-                href={`/${orgName}/docs/new`}
+                href={
+                    isCreateDocsNewSiteEnabled
+                        ? `/${orgName}/docs/new`
+                        : "https://buildwithfern.com/learn/docs/getting-started/quickstart"
+                }
                 className={cn(
                     "hidden md:flex",
                     "flex-1 flex-row gap-2 text-sm transition",
                     "hover:text-primary text-gray-900"
                 )}
+                target={isCreateDocsNewSiteEnabled ? "_self" : "_blank"}
             >
                 <div className="flex w-5 shrink-0 justify-center">
                     <div className="w-px bg-gray-700" />

@@ -1,7 +1,4 @@
 import type { User } from "@auth0/nextjs-auth0/types";
-import { PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { Button } from "../ui/button";
 import { DocsZeroStateButton } from "./DocsZeroStateButton";
 import { DocsZeroStateImage } from "./DocsZeroStateImage";
 
