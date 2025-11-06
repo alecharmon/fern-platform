@@ -137,7 +137,7 @@ export const Image = forwardRef<
                     noZoom: new CheckboxControl({
                         label: "Disable zoom",
                         defaultValue: isImageZoomDisabledProp,
-                        tooltip: "Disables image zoom functionality"
+                        tooltip: "Prevents image zoom on click. Helpful for images that already display at full size."
                     })
                 }}
                 targetRef={imageRef}
