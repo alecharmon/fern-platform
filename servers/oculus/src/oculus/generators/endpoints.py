@@ -202,7 +202,10 @@ def generate_openapi_questions(
 
                 completed += 1
                 if num_questions is not None:
-                    print(f"Progress: {len(questions)}/{num_questions} - Generated questions for {method.upper()} {path}")
+                    print(
+                        f"Progress: {len(questions)}/{num_questions} - "
+                        f"Generated questions for {method.upper()} {path}"
+                    )
                 else:
                     print(f"Progress: {completed}/{total_endpoints} - Generated questions for {method.upper()} {path}")
 

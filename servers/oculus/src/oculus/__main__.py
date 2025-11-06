@@ -14,7 +14,8 @@ from oculus.framework.models import (
     SuiteConfig,
 )
 from oculus.framework.runner import EvaluationRunner
-from oculus.integrations.fai_integration import create_fai_answer_function
+from oculus.integrations.base import create_answer_function
+from oculus.integrations.factory import create_integration, get_default_integration_type
 from oculus.utils.file_utils import (
     load_json,
     save_json,
@@ -99,8 +100,12 @@ def generate_answers_command(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        print(f"Initializing FAI integration for domain: {suite_config.domain}")
-        answer_fn = create_fai_answer_function(domain=suite_config.domain, model=args.model)
+        integration_type = args.integration if hasattr(args, "integration") else get_default_integration_type()
+        print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
+        integration = create_integration(
+            integration_type=integration_type, domain=suite_config.domain, model=args.model
+        )
+        answer_fn = create_answer_function(integration)
 
         runner = EvaluationRunner(
             suite_name=args.suite,
@@ -304,8 +309,12 @@ def run_evaluation(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        print(f"Initializing FAI integration for domain: {suite_config.domain}")
-        answer_fn = create_fai_answer_function(domain=suite_config.domain, model=args.model)
+        integration_type = args.integration if hasattr(args, "integration") else get_default_integration_type()
+        print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
+        integration = create_integration(
+            integration_type=integration_type, domain=suite_config.domain, model=args.model
+        )
+        answer_fn = create_answer_function(integration)
 
         runner = EvaluationRunner(
             suite_name=args.suite,
@@ -386,6 +395,13 @@ Examples:
     answer_parser.add_argument("--suite-path", type=Path, default=None, help="Base path to suites directory")
     answer_parser.add_argument("--run-id", type=str, default=None, help="Unique run identifier")
     answer_parser.add_argument(
+        "--integration",
+        type=str,
+        default=None,
+        choices=["fai-local", "fai-http", "vercel-http"],
+        help="Integration type (defaults to OCULUS_INTEGRATION env var or fai-local)",
+    )
+    answer_parser.add_argument(
         "--model",
         type=str,
         default="claude-4-sonnet-20250514",
@@ -431,6 +447,13 @@ Examples:
     run_parser.add_argument("--suite", type=str, required=True, help="Name of the evaluation suite")
     run_parser.add_argument("--suite-path", type=Path, default=None, help="Base path to suites directory")
     run_parser.add_argument("--run-id", type=str, default=None, help="Unique run identifier")
+    run_parser.add_argument(
+        "--integration",
+        type=str,
+        default=None,
+        choices=["fai-local", "fai-http", "vercel-http"],
+        help="Integration type (defaults to OCULUS_INTEGRATION env var or fai-local)",
+    )
     run_parser.add_argument(
         "--model",
         type=str,
