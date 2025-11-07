@@ -70,6 +70,10 @@ domains.txt
 preview.txt
 last-deploy.txt
 deployment-url.txt
+crawler-results.json
+crawler-summary.txt
+final-comment.txt
+preview_url.txt
 
 # next.js analysis
 analyze

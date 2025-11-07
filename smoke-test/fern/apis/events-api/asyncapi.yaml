@@ -1,0 +1,103 @@
+asyncapi: 2.6.0
+
+info:
+  title: Plant Store Events API
+  version: 1.0.0
+  description: Event-driven API for real-time plant store notifications
+
+servers:
+  production:
+    url: events.plantstore.example.com
+    protocol: ws
+    description: Production WebSocket server
+
+channels:
+  orders:
+    description: Order event notifications
+    subscribe:
+      summary: Subscribe to order events
+      message:
+        oneOf:
+          - $ref: '#/components/messages/OrderCreated'
+          - $ref: '#/components/messages/OrderStatusChanged'
+
+  inventory:
+    description: Inventory update notifications
+    subscribe:
+      summary: Subscribe to inventory events
+      message:
+        $ref: '#/components/messages/StockUpdated'
+
+components:
+  messages:
+    OrderCreated:
+      name: OrderCreated
+      title: Order Created
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderCreatedPayload'
+
+    OrderStatusChanged:
+      name: OrderStatusChanged
+      title: Order Status Changed
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderStatusPayload'
+
+    StockUpdated:
+      name: StockUpdated
+      title: Stock Updated
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/StockPayload'
+
+  schemas:
+    OrderCreatedPayload:
+      type: object
+      properties:
+        orderId:
+          type: string
+        customerId:
+          type: string
+        totalAmount:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - orderId
+        - totalAmount
+        - createdAt
+
+    OrderStatusPayload:
+      type: object
+      properties:
+        orderId:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, shipped, delivered, cancelled]
+        changedAt:
+          type: string
+          format: date-time
+      required:
+        - orderId
+        - status
+        - changedAt
+
+    StockPayload:
+      type: object
+      properties:
+        plantId:
+          type: string
+        plantName:
+          type: string
+        quantity:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - plantId
+        - quantity
+        - updatedAt

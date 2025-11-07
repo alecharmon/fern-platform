@@ -1,9 +1,82 @@
+# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json
+
 instances:
-  - url: https://fern-platform-test.docs.dev.buildwithfern.com
-  - url: https://fern-platform-test.docs.buildwithfern.com
-title: SmokeTest | Documentation
+  - url: smoke-test.docs.buildwithfern.com # update this to {yourorg}.docs.buildwithfern.com
+    # custom-domain: plantstore.dev # specify your custom domain when you are ready to go live
+
+title: Plant Store
+
+layout:
+  searchbar-placement: header
+  page-width: full
+  tabs-placement: header
+
+tabs:
+  home:
+    display-name: Home
+    icon: home
+  guides:
+    display-name: Guides
+    icon: book
+  rest-api:
+    display-name: REST API
+    icon: puzzle
+  test-api:
+    display-name: Test API
+    icon: test-tube
+  events-api:
+    display-name: Events API
+    icon: bolt
+
 navigation:
-  - api: API Reference
+  - tab: home
+    layout:
+      - section: Get Started
+        contents:
+          - page: Welcome
+            path: docs/pages/welcome.mdx
+          - page: Plaintext Test
+            path: docs/pages/plaintext-test.mdx
+  - tab: guides
+    layout:
+      - section: Learn
+        contents:
+          - page: Concepts
+            path: docs/pages/concepts.mdx
+          - page: SDKs
+            path: docs/pages/sdks.mdx
+            slug: sdks
+  - tab: rest-api
+    layout:
+      - api: Rest API
+        api-name: rest-api
+  - tab: events-api
+    layout:
+      - api: Events API
+        api-name: events-api
+navbar-links:
+  - type: minimal
+    text: Fork this repo
+    url: https://github.com/fern-api/docs-starter
+  - type: filled
+    text: Get a demo
+    url: https://buildwithfern.com/contact?utm_campaign=demo&utm_medium=plantstore&utm_source=navbar
+  - type: github
+    value: https://github.com/fern-api/fern
+      
 colors:
-  accentPrimary: '#ffffff'
-  background: '#000000'
+  accentPrimary:
+    dark: "#81C784"
+    light: "#1B5E20"
+
+logo:
+  dark: docs/assets/logo-dark.svg
+  light: docs/assets/logo-light.svg
+  height: 20
+  href: https://buildwithfern.com/?utm_campaign=demo&utm_medium=plantstore&utm_source=logo
+
+favicon: docs/assets/favicon.svg
+
+experimental:
+  mdx-components:
+    - docs/components

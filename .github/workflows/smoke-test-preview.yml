@@ -1,0 +1,79 @@
+name: Smoke Test Preview
+
+on:
+  pull_request:
+    paths:
+      - "smoke-test/fern/**"
+      - "packages/fern-docs/bundle/**"
+      - ".github/workflows/smoke-test-preview.yml"
+  workflow_dispatch:
+
+jobs:
+  generate_preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Fern CLI tool
+        run: npm install -g fern-api
+
+      - name: Generate preview URL
+        id: generate-docs
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_SMOKE_TEST_API_KEY }}
+        run: |
+          cd smoke-test/fern
+          OUTPUT=$(fern generate --docs --preview 2>&1) || true
+          echo "$OUTPUT"
+          URL=$(echo "$OUTPUT" | grep -oP 'Published docs to \K.*(?= \()' || true)
+          echo "Preview URL: $URL"
+          cd ../..
+
+          if [ -z "$URL" ]; then
+            echo "Warning: Failed to extract preview URL from output"
+            echo "🌱 Smoke Test Preview: Failed to generate preview" > preview_url.txt
+          else
+            echo "🌱 Smoke Test Preview: $URL" > preview_url.txt
+          fi
+
+          echo "PREVIEW_URL=$URL" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        if: steps.generate-docs.outputs.PREVIEW_URL != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Puppeteer
+        if: steps.generate-docs.outputs.PREVIEW_URL != ''
+        working-directory: smoke-test
+        run: npm install
+
+      - name: Crawl preview site
+        if: steps.generate-docs.outputs.PREVIEW_URL != ''
+        working-directory: smoke-test
+        run: |
+          node crawler.js "${{ steps.generate-docs.outputs.PREVIEW_URL }}" || true
+
+      - name: Combine results for PR comment
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "## 🌱 Smoke Test Preview" > final-comment.txt
+          echo "" >> final-comment.txt
+          echo "**Preview URL:** ${{ steps.generate-docs.outputs.PREVIEW_URL }}" >> final-comment.txt
+          echo "" >> final-comment.txt
+          if [ -f smoke-test/crawler-summary.txt ]; then
+            cat smoke-test/crawler-summary.txt >> final-comment.txt
+          else
+            echo "⚠️ Crawler did not run or failed to generate results" >> final-comment.txt
+          fi
+
+      - name: Comment URL in PR
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2.4.3
+        with:
+          filePath: final-comment.txt
