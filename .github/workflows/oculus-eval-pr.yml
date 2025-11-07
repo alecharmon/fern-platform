@@ -1,0 +1,287 @@
+name: Oculus Eval on PR
+
+on:
+  pull_request:
+    paths:
+      - 'packages/fern-docs/search-server/ask-fern/**'
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to test against'
+        required: true
+        type: number
+
+concurrency:
+  group: oculus-eval-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: team_6FKOM5nw037hv8g2mTk3gaH7
+  VERCEL_PROJECT_ID: prj_XXWllSgR38im0A8e0cKXjOnMoo07
+
+jobs:
+  run-eval:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Check if comment trigger
+        if: github.event_name == 'issue_comment'
+        id: check_comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body.toLowerCase().trim();
+            const isPR = !!context.payload.issue.pull_request;
+
+            if (!isPR) {
+              console.log('Comment is on an issue, not a PR. Skipping.');
+              core.setOutput('should_run', 'false');
+              return;
+            }
+
+            if (!comment.includes('/run evals')) {
+              console.log('Comment does not contain "/run evals". Skipping.');
+              core.setOutput('should_run', 'false');
+              return;
+            }
+
+            console.log('Comment contains "/run evals" on a PR. Proceeding with eval.');
+            core.setOutput('should_run', 'true');
+
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket'
+            });
+
+      - name: Exit if comment doesn't trigger workflow
+        if: github.event_name == 'issue_comment' && steps.check_comment.outputs.should_run != 'true'
+        run: |
+          echo "Workflow not triggered by comment. Exiting."
+          exit 0
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get PR details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let prNumber, prSha;
+
+            if (context.eventName === 'pull_request') {
+              prNumber = context.payload.pull_request.number;
+              prSha = context.payload.pull_request.head.sha;
+            } else if (context.eventName === 'issue_comment') {
+              prNumber = context.payload.issue.number;
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              prSha = pr.head.sha;
+            } else if (context.eventName === 'workflow_dispatch') {
+              prNumber = ${{ github.event.inputs.pr_number }};
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              prSha = pr.head.sha;
+            } else {
+              throw new Error('Unsupported event type');
+            }
+
+            core.setOutput('number', prNumber);
+            core.setOutput('sha', prSha);
+            console.log(`PR #${prNumber}, SHA: ${prSha}`);
+
+      - name: Wait for prod.ferndocs.com Deployment
+        id: vercel-preview
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maxAttempts = 60;
+            const delayMs = 10000;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              console.log(`Attempt ${attempt}/${maxAttempts}: Checking for prod.ferndocs.com deployment...`);
+
+              const { data: checks } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: '${{ steps.pr.outputs.sha }}',
+                per_page: 100
+              });
+
+              const vercelCheck = checks.check_runs.find(check =>
+                check.name.includes('prod.ferndocs.com') ||
+                check.name.includes('Preview – prod.ferndocs.com') ||
+                (check.app && check.app.slug === 'vercel' && check.details_url && check.details_url.includes('prod-ferndocs'))
+              );
+
+              if (vercelCheck) {
+                console.log(`Found Vercel check: ${vercelCheck.name} (${vercelCheck.status})`);
+
+                if (vercelCheck.status === 'completed') {
+                  if (vercelCheck.conclusion === 'success') {
+                    const deploymentUrl = vercelCheck.details_url;
+
+                    const urlMatch = deploymentUrl.match(/url=([^&]+)/);
+                    const extractedUrl = urlMatch ? decodeURIComponent(urlMatch[1]) : null;
+
+                    if (extractedUrl) {
+                      const previewUrl = `${extractedUrl}/api/fern-docs/preview?host=buildwithfern.com`;
+                      console.log(`Deployment successful! Base URL: ${extractedUrl}`);
+                      console.log(`Preview URL: ${previewUrl}`);
+                      core.setOutput('url', previewUrl);
+                      return;
+                    } else {
+                      console.log('Could not extract deployment URL from check, trying deployment events...');
+
+                      const { data: deployments } = await github.rest.repos.listDeployments({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        sha: '${{ steps.pr.outputs.sha }}',
+                        per_page: 100
+                      });
+
+                      for (const deployment of deployments) {
+                        if (deployment.environment && deployment.environment.toLowerCase().includes('production')) {
+                          const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            deployment_id: deployment.id
+                          });
+
+                          const successStatus = statuses.find(s => s.state === 'success');
+                          if (successStatus && successStatus.environment_url) {
+                            const previewUrl = `${successStatus.environment_url}/api/fern-docs/preview?host=buildwithfern.com`;
+                            console.log(`Found deployment URL: ${successStatus.environment_url}`);
+                            console.log(`Preview URL: ${previewUrl}`);
+                            core.setOutput('url', previewUrl);
+                            return;
+                          }
+                        }
+                      }
+
+                      throw new Error('Deployment completed but could not extract URL');
+                    }
+                  } else {
+                    throw new Error(`Deployment failed with conclusion: ${vercelCheck.conclusion}`);
+                  }
+                }
+              }
+
+              if (attempt < maxAttempts) {
+                console.log(`Waiting ${delayMs/1000}s before next check...`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+              }
+            }
+
+            throw new Error('Timeout waiting for prod.ferndocs.com deployment after 10 minutes');
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Oculus dependencies
+        working-directory: servers/oculus
+        run: poetry install
+
+      - name: Setup FAI dependencies
+        working-directory: servers/fai
+        run: |
+          poetry install
+          echo "PYTHONPATH=$PWD/src:$PYTHONPATH" >> $GITHUB_ENV
+
+      - name: Run Oculus evaluation
+        working-directory: servers/oculus
+        env:
+          VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OCULUS_INTEGRATION: vercel-http
+        run: |
+          mkdir -p results
+          poetry run oculus run \
+            --suite simple \
+            --run-id pr-${{ steps.pr.outputs.number }}-${{ github.run_id }} \
+            --integration vercel-http \
+            --output-dir ./results \
+            --github-output
+
+      - name: Upload results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oculus-results-pr-${{ steps.pr.outputs.number }}
+          path: servers/oculus/results/
+          retention-days: 90
+
+      - name: Comment PR with results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const resultsDir = 'servers/oculus/results';
+            const prNumber = ${{ steps.pr.outputs.number }};
+            const runId = `pr-${prNumber}-${{ github.run_id }}`;
+            const summaryPath = path.join(resultsDir, `github_summary_${runId}.md`);
+
+            if (!fs.existsSync(summaryPath)) {
+              console.log('No summary file found, skipping comment');
+              return;
+            }
+
+            let summary = fs.readFileSync(summaryPath, 'utf8');
+
+            const artifactUrl = `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            summary = summary.replace(
+              'Full results available in workflow artifacts',
+              `[View full results in workflow artifacts](${artifactUrl})`
+            );
+
+            const vercelUrl = '${{ steps.vercel-preview.outputs.url }}';
+            const commentBody = `${summary}\n\n---\n**Tested against:** ${vercelUrl}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('🔍 Oculus Evaluation Results')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }

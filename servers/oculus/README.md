@@ -74,3 +74,20 @@ done
 - `--integration`: One of `fai-local`, `fai-http`, `vercel-http` (defaults to `OCULUS_INTEGRATION` env var or `fai-local`)
 - `--model`: One of `claude-4-sonnet-20250514`, `command-a-03-2025` (default: `claude-4-sonnet-20250514`)
 - `--judge-model`: Claude model for evaluation judging (default: `claude-opus-4-20250514`)
+- `--output-dir`: Directory to save results and GitHub-formatted outputs
+- `--github-output`: Generate GitHub-formatted markdown outputs (requires `--output-dir`)
+
+## GitHub Integration
+
+Oculus can generate GitHub-friendly markdown outputs for use in workflows, PR comments, and job summaries:
+
+```bash
+oculus run --suite simple --output-dir ./results --github-output
+```
+
+This creates:
+- `github_summary_{run_id}.md` - Concise summary for PR comments
+- `github_job_summary_{run_id}.md` - Detailed summary for job summaries
+- `results_{run_id}.json` - Full JSON results
+
+See [GITHUB_INTEGRATION.md](./GITHUB_INTEGRATION.md) for complete workflow examples and integration patterns.

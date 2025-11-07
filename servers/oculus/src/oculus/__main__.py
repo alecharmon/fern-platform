@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -20,6 +21,7 @@ from oculus.utils.file_utils import (
     load_json,
     save_json,
 )
+from oculus.utils.github_formatter import format_github_job_summary, format_github_summary
 
 load_dotenv()
 
@@ -254,6 +256,8 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
             save_json(output_path, run_result.model_dump())
             print(f"Additional output saved to: {output_path}\n")
 
+        _write_github_outputs(args, run_result)
+
         print(f"{'='*60}")
         print("EVALUATION SUMMARY")
         print(f"{'='*60}")
@@ -341,6 +345,8 @@ def run_evaluation(args: argparse.Namespace) -> int:
             save_json(output_path, result.model_dump())
             print(f"\nAdditional output saved to: {output_path}")
 
+        _write_github_outputs(args, result)
+
         return 0
 
     except ImportError as e:
@@ -358,6 +364,35 @@ def run_evaluation(args: argparse.Namespace) -> int:
 
         traceback.print_exc()
         return 1
+
+
+def _write_github_outputs(args: argparse.Namespace, run_result: EvaluationRun) -> None:
+    """Write GitHub-formatted outputs if requested."""
+    if not hasattr(args, "github_output") or not args.github_output:
+        return
+
+    if not args.output_dir:
+        print("Warning: --github-output requires --output-dir, skipping GitHub outputs")
+        return
+
+    output_dir = args.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    summary_path = output_dir / f"github_summary_{run_result.run_id}.md"
+    summary_content = format_github_summary(run_result, full_results_url=None)
+    summary_path.write_text(summary_content)
+    print(f"GitHub summary written to: {summary_path}")
+
+    job_summary_path = output_dir / f"github_job_summary_{run_result.run_id}.md"
+    job_summary_content = format_github_job_summary(run_result)
+    job_summary_path.write_text(job_summary_content)
+    print(f"GitHub job summary written to: {job_summary_path}")
+
+    if os.getenv("GITHUB_STEP_SUMMARY"):
+        step_summary_path = Path(os.getenv("GITHUB_STEP_SUMMARY"))
+        with step_summary_path.open("a") as f:
+            f.write(job_summary_content)
+        print(f"GitHub job summary also appended to: {step_summary_path}")
 
 
 def main() -> int:
@@ -432,6 +467,9 @@ Examples:
     evaluate_parser.add_argument("--max-workers", type=int, default=16, help="Number of parallel workers")
     evaluate_parser.add_argument("--no-skip-existing", action="store_true", help="Re-generate existing evaluations")
     evaluate_parser.add_argument("--output-dir", type=Path, default=None, help="Directory to save results")
+    evaluate_parser.add_argument(
+        "--github-output", action="store_true", help="Generate GitHub-formatted output (requires --output-dir)"
+    )
 
     run_parser = subparsers.add_parser(
         "run",
@@ -467,6 +505,9 @@ Examples:
     run_parser.add_argument("--max-workers", type=int, default=16, help="Number of parallel workers")
     run_parser.add_argument("--no-skip-existing", action="store_true", help="Re-generate existing answers/evaluations")
     run_parser.add_argument("--output-dir", type=Path, default=None, help="Directory to save results")
+    run_parser.add_argument(
+        "--github-output", action="store_true", help="Generate GitHub-formatted output (requires --output-dir)"
+    )
 
     args = parser.parse_args()
 
