@@ -44,6 +44,31 @@ const getHighlighterInstanceImpl = async (language: string): Promise<Highlighter
     // load the themes used by the current language
     await highlighter.loadTheme(THEMES.light[lang] ?? THEMES.light[DEFAULT], THEMES.dark[lang] ?? THEMES.dark[DEFAULT]);
 
+    if (lang === "baml") {
+        const jinjaLoader = additionalLanguages.jinja;
+        if (!highlighter.getLoadedLanguages().includes("jinja") && jinjaLoader) {
+            try {
+                await highlighter.loadLanguage(jinjaLoader);
+            } catch (e) {
+                console.error("Failed to load jinja language for baml:", e);
+            }
+        }
+        if (!highlighter.getLoadedLanguages().includes("python")) {
+            try {
+                await highlighter.loadLanguage("python" as BundledLanguage);
+            } catch (e) {
+                console.error("Failed to load python language for baml:", e);
+            }
+        }
+        if (!highlighter.getLoadedLanguages().includes("typescript")) {
+            try {
+                await highlighter.loadLanguage("typescript" as BundledLanguage);
+            } catch (e) {
+                console.error("Failed to load typescript language for baml:", e);
+            }
+        }
+    }
+
     if (!highlighter.getLoadedLanguages().includes(lang)) {
         try {
             await highlighter.loadLanguage(additionalLanguages[lang] ?? (lang as BundledLanguage | SpecialLanguage));
