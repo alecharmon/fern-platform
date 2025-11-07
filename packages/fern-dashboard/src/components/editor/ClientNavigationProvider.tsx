@@ -10,6 +10,7 @@ export interface ClientNavigationProviderProps {
     orgName: string;
     docsUrl: string;
     latestDocsYmlAndReferences: Map<string, string> | null;
+    fernFolderPath?: string;
 }
 
 export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
@@ -23,6 +24,7 @@ export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
             orgName={props.orgName}
             docsUrl={props.docsUrl}
             latestDocsYmlAndReferences={props.latestDocsYmlAndReferences}
+            fernFolderPath={props.fernFolderPath}
             deletionToastCallback={deletionToastCallback}
         >
             {props.children}

@@ -447,17 +447,21 @@ export class GitHubLoader implements GitLoader {
         // Extract referenced yml file paths
         const referencedPaths = this.extractReferencedYmlPaths(mainDocsYmlContent.result);
 
+        // Get the full path and directory of the main docs.yml file so we can resolve referenced file paths
+        const mainDocsYmlPath = mainDocsYmlContent.metadata.path;
+        const docsYmlDir = mainDocsYmlPath.substring(0, mainDocsYmlPath.lastIndexOf("/"));
+
         // If no referenced files, return map with just the main docs.yml
         if (referencedPaths.length === 0) {
             return {
                 type: "ok",
-                result: docsYmlMap
+                result: docsYmlMap,
+                metadata: {
+                    // Assume the fern folder path is the directory of the root docs.yml file
+                    fernFolderPath: docsYmlDir
+                }
             };
         }
-
-        // Get the full path and directory of the main docs.yml file so we can resolve referenced file paths
-        const mainDocsYmlPath = mainDocsYmlContent.metadata.path;
-        const docsYmlDir = mainDocsYmlPath.substring(0, mainDocsYmlPath.lastIndexOf("/"));
 
         // Use the default branch from the repository if requested
         const targetRef = preferDefaultBranch ? mainDocsYmlContent.metadata.defaultBranch : ref;
@@ -484,7 +488,11 @@ export class GitHubLoader implements GitLoader {
 
         return {
             type: "ok",
-            result: docsYmlMap
+            result: docsYmlMap,
+            metadata: {
+                // Assume the fern folder path is the directory of the root docs.yml file
+                fernFolderPath: docsYmlDir
+            }
         };
     }
 

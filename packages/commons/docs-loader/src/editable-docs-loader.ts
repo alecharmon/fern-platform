@@ -127,6 +127,10 @@ export type GetDocsYmlResult = GetDocsYmlSuccess | DocsYmlError;
 interface GetDocsYmlAndReferencesSuccess {
     type: "ok";
     result: Map<string, string>;
+    metadata: {
+        /** Path to the fern folder (e.g., "fern" or "some/path/fern") */
+        fernFolderPath: string;
+    };
 }
 
 export type GetDocsYmlAndReferencesResult = GetDocsYmlAndReferencesSuccess | DocsYmlError;

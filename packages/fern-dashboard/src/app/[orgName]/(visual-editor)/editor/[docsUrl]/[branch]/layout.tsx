@@ -2,7 +2,6 @@ import "server-only";
 
 import { ThemeProvider } from "next-themes";
 import type React from "react";
-import { Suspense } from "react";
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";
 import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
@@ -70,6 +69,8 @@ export default async function EditorLayout({
         true // preferDefaultBranch = true
     );
     const latestDocsYmlAndReferences = docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.result : null;
+    const fernFolderPath =
+        docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.metadata.fernFolderPath : undefined;
 
     if (docsYmlAndReferences.type !== "ok") {
         console.error(docsYmlAndReferences.error);
@@ -94,6 +95,7 @@ export default async function EditorLayout({
                                 orgName={orgName}
                                 docsUrl={docsUrl}
                                 latestDocsYmlAndReferences={latestDocsYmlAndReferences}
+                                fernFolderPath={fernFolderPath}
                             >
                                 <CurrentPageProvider>
                                     <ClientMDXProvider>

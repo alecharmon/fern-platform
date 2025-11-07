@@ -17,6 +17,7 @@ export interface NavigationStoreProviderProps {
     orgName: string;
     docsUrl: string;
     latestDocsYmlAndReferences: Map<string, string> | null;
+    fernFolderPath?: string;
     deletionToastCallback?: DeletionToastCallback;
 }
 
@@ -26,17 +27,19 @@ export function NavigationStoreProvider({
     orgName,
     docsUrl,
     latestDocsYmlAndReferences,
+    fernFolderPath,
     deletionToastCallback
 }: NavigationStoreProviderProps) {
-    const storeRef = useRef<NavigationStore>(new NavigationStore(branchName, orgName, docsUrl));
+    const storeRef = useRef<NavigationStore>(new NavigationStore(branchName, orgName, docsUrl, fernFolderPath));
 
     if (
         !storeRef.current ||
         storeRef.current.branchName !== branchName ||
         storeRef.current.orgName !== orgName ||
-        storeRef.current.docsUrl !== docsUrl
+        storeRef.current.docsUrl !== docsUrl ||
+        storeRef.current.fernFolderPath !== fernFolderPath
     ) {
-        storeRef.current = new NavigationStore(branchName, orgName, docsUrl);
+        storeRef.current = new NavigationStore(branchName, orgName, docsUrl, fernFolderPath);
     }
 
     useEffect(() => {

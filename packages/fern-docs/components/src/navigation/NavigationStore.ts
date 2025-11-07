@@ -41,6 +41,7 @@ export class NavigationStore {
     private _branchName: string;
     private _orgName: string;
     private _docsUrl: string;
+    private _fernFolderPath: string;
     private _latestSnapshot: NavigationSnapshot;
     private _serverSnapshot: NavigationSnapshot | null = null;
 
@@ -61,10 +62,12 @@ export class NavigationStore {
     private _pageSaveEventListeners = new Set<(event: PageSaveEvent) => void>();
     private _nestedEditorUpdateListeners = new Set<(event: NestedEditorUpdateEvent) => void>();
 
-    constructor(branchName: string, orgName: string, docsUrl: string) {
+    constructor(branchName: string, orgName: string, docsUrl: string, fernFolderPath: string = "fern") {
         this._branchName = branchName;
         this._orgName = orgName;
         this._docsUrl = docsUrl;
+        // Normalize the fern folder path to remove leading and trailing slashes
+        this._fernFolderPath = fernFolderPath.replace(/^\/+|\/+$/g, "");
         this._latestSnapshot = createEmptyNavigationSnapshot(branchName, orgName, docsUrl);
 
         this._pageRegistry = this._latestSnapshot.pageRegistry;
@@ -91,6 +94,11 @@ export class NavigationStore {
     /** Get the docs url */
     get docsUrl(): string {
         return this._docsUrl;
+    }
+
+    /** Get the fern folder path */
+    get fernFolderPath(): string {
+        return this._fernFolderPath;
     }
 
     /** Returns pages from the registry */
@@ -158,7 +166,7 @@ export class NavigationStore {
         return {
             changed: changedFiles,
             deleted: deletedFiles,
-            forCommit: formatCommitFiles(changedFiles, deletedFiles),
+            forCommit: formatCommitFiles(changedFiles, deletedFiles, `${this._fernFolderPath}/`),
             hasChangesToCommit: hasChangesToCommit(changedFiles, this._lastCommittedHash)
         };
     }
