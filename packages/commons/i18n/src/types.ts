@@ -303,9 +303,4 @@ export type Translations = {
         readOnly: string;
         writeOnly: string;
     };
-
-    layoutTypes: {
-        sidebar: string;
-        headerTabs: string;
-    };
 };

@@ -284,9 +284,5 @@
   "accessModifiers": {
     "readOnly": "READ_ONLY",
     "writeOnly": "WRITE_ONLY"
-  },
-  "layoutTypes": {
-    "sidebar": "SIDEBAR",
-    "headerTabs": "HEADER_TABS"
   }
 }

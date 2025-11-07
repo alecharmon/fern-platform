@@ -284,9 +284,5 @@
   "accessModifiers": {
     "readOnly": "SOLO_LECTURA",
     "writeOnly": "SOLO_ESCRITURA"
-  },
-  "layoutTypes": {
-    "sidebar": "BARRA_LATERAL",
-    "headerTabs": "PESTAÑAS_ENCABEZADO"
   }
 }
