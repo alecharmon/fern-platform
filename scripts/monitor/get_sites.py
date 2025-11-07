@@ -49,7 +49,7 @@ for domain in project_domains:
 
 
 # Skip domains in the list below
-skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","docs.staging.paradex.trade","next-remote.ferndocs.com","stable.ferndocs.com","experimental.ferndocs.com", "developers-beta.cash.app", "developers-beta.afterpay.com","partner.tradovate.com"]
+skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","docs.staging.paradex.trade","next-remote.ferndocs.com","stable.ferndocs.com","experimental.ferndocs.com", "developers-beta.cash.app", "developers-beta.afterpay.com","partner.tradovate.com","ddn.ferndocs.com"]
 
 # Write domains out to file
 print(f"Found {len(domains)} domains to check.")
@@ -61,6 +61,6 @@ with open('sites.csv', 'w') as myfile:
         myfile.write(f"{domain},\n")
 
     # Append additional sites
-    print("Adding additional sites from additional_sites.csv")
-    additional_domains = open('additional_sites.csv','r')
+    print("Adding additional sites from scripts/monitor/additional_sites.csv")
+    additional_domains = open('scripts/monitor/additional_sites.csv','r')
     myfile.write(additional_domains.read())
