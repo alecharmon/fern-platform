@@ -2,7 +2,7 @@ import { isToc, type TableOfContentsItem } from "@fern-docs/mdx";
 import { getMDXExport as getMDXExportOriginal, type MDXContentProps } from "mdx-bundler/client";
 
 export function getMDXExport(
-    mdx: { code: string } | undefined,
+    mdx: { code: string; engine?: "esbuild" | "next-remote" | "plaintext" } | undefined,
     useMDXComponents: () => any = () => ({})
 ):
     | {
@@ -13,12 +13,19 @@ export function getMDXExport(
     if (mdx == null) {
         return undefined;
     }
-    return typeof mdx !== "string"
-        ? getMDXExportOriginal(mdx.code, {
-              // allows us to use MDXProvider to pass components to children
-              MdxJsReact: { useMDXComponents }
-          })
-        : undefined;
+
+    if (typeof mdx === "string") {
+        return undefined;
+    }
+
+    if (mdx.engine === "plaintext") {
+        return undefined;
+    }
+
+    return getMDXExportOriginal(mdx.code, {
+        // allows us to use MDXProvider to pass components to children
+        MdxJsReact: { useMDXComponents }
+    });
 }
 
 export function asToc(unknown: unknown): TableOfContentsItem[] {
