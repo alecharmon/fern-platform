@@ -57,6 +57,7 @@ class VercelHTTPIntegration:
                 f"{self.vercel_url}/api/fern-docs/search/v2/chat",
                 headers={
                     "Content-Type": "application/json",
+                    "x-fern-host": self.domain,
                 },
                 json=payload,
                 timeout=120,
