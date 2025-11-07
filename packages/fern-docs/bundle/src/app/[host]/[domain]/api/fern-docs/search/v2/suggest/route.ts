@@ -23,7 +23,8 @@ const BodySchema = z.object({
 });
 
 async function generateSuggestions(domain: string, algoliaSearchKey: string) {
-    const { model: languageModel, provider: _ } = getLanguageModel("claude-4");
+    const modelId = "claude-4.5-haiku";
+    const { model: languageModel, provider: _ } = getLanguageModel(modelId);
 
     const client = searchClient(algoliaAppId(), algoliaSearchKey);
     const response = await client.searchSingleIndex<AlgoliaRecord>({
@@ -41,23 +42,11 @@ async function generateSuggestions(domain: string, algoliaSearchKey: string) {
     try {
         result = await generateObject({
             model: languageModel,
-            mode: "json",
+            mode: "tool",
             abortSignal: AbortSignal.timeout(25000),
             system: `You are a helpful assistant that makes suggestions of questions for the user to ask about the documentation.
 The prompt will be an array of separate search results that are JSON objects.
-Generate exactly 5 questions based on the search results provided.
-Your response must be in the following format:\n\n
-{
-  "suggestions": [
-    "<question_1>",
-    "<question_2>",
-    "<question_3>",
-    "<question_4>",
-    "<question_5>"
-  ]
-}
-\n
-DO NOT include any explanatory text - only return the JSON object.`,
+Generate exactly 5 questions based on the search results provided.`,
             prompt: response.hits
                 .map(
                     (hit) =>
@@ -74,7 +63,7 @@ DO NOT include any explanatory text - only return the JSON object.`,
                 metadata: {
                     domain,
                     indexName: SEARCH_INDEX,
-                    languageModel: "claude-4"
+                    languageModel: modelId
                 }
             }
         });
@@ -84,7 +73,7 @@ DO NOT include any explanatory text - only return the JSON object.`,
             domain,
             error: String(error),
             indexName: SEARCH_INDEX,
-            languageModel: "claude-4"
+            languageModel: modelId
         });
         result = {
             object: {

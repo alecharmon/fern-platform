@@ -5,7 +5,7 @@ import { anthropicApiKey, cohereApiKey } from "@fern-api/docs-server/env-variabl
 import type { LanguageModel } from "ai";
 import { createFallback } from "ai-fallback";
 
-type ModelId = "claude-3.7" | "claude-4" | "claude-4.5";
+type ModelId = "claude-3.7" | "claude-4" | "claude-4.5" | "claude-4.5-haiku";
 export type ModelProvider = "cohere" | "bedrock";
 
 type ModelConfig = {
@@ -24,6 +24,10 @@ const MODEL_CONFIGS: Record<ModelId, ModelConfig> = {
     },
     "claude-4.5": {
         modelId: "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        region: "us-east-1"
+    },
+    "claude-4.5-haiku": {
+        modelId: "us.anthropic.claude-haiku-4-5-20251001-v1:0",
         region: "us-east-1"
     }
 };
