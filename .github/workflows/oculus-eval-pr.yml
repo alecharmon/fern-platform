@@ -27,6 +27,8 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
+      checks: read
+      deployments: read
 
     steps:
       - name: Check if comment trigger
@@ -66,9 +68,6 @@ jobs:
           echo "Workflow not triggered by comment. Exiting."
           exit 0
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Get PR details
         id: pr
         uses: actions/github-script@v7
@@ -88,7 +87,7 @@ jobs:
               });
               prSha = pr.head.sha;
             } else if (context.eventName === 'workflow_dispatch') {
-              prNumber = ${{ github.event.inputs.pr_number }};
+              prNumber = parseInt('${{ github.event.inputs.pr_number }}');
               const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -102,6 +101,11 @@ jobs:
             core.setOutput('number', prNumber);
             core.setOutput('sha', prSha);
             console.log(`PR #${prNumber}, SHA: ${prSha}`);
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
 
       - name: Wait for prod.ferndocs.com Deployment
         id: vercel-preview
@@ -239,7 +243,7 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const resultsDir = 'servers/oculus/results';
-            const prNumber = ${{ steps.pr.outputs.number }};
+            const prNumber = parseInt('${{ steps.pr.outputs.number }}');
             const runId = `pr-${prNumber}-${{ github.run_id }}`;
             const summaryPath = path.join(resultsDir, `github_summary_${runId}.md`);
 
