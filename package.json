@@ -65,8 +65,8 @@
     "vercel:up": "pnpm up -r \"@vercel/*\""
   },
   "resolutions": {
-    "@aa-sdk/core": "^4.31.2",
-    "@account-kit/react": "^4.31.2",
+    "@aa-sdk/core": "^4.40.0",
+    "@account-kit/react": "^4.40.0",
     "@eslint/plugin-kit": "^0.3.3",
     "@fern-fern/fern-cloud-sdk": "^0.0.305",
     "@fern-fern/revalidation-sdk": "^0.0.9",
