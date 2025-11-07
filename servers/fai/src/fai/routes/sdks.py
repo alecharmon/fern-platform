@@ -33,7 +33,7 @@ Version Bump Guidelines:
 
 Message Format (use this exact structure):
 ```
-<type>(<scope>): <short summary>
+<type>: <short summary>
 
 <detailed description of what changed and why it matters>
 
@@ -55,6 +55,8 @@ Message Guidelines:
 - For NO_CHANGE: use type "chore" and state that no functional changes were made
 - Be specific and action-oriented
 - Always end with the "🌿 Generated with Fern" footer
+- NEVER include the literal version "505.503.4455" in the commit message - if you see this placeholder
+  in the diff, describe changes generically (e.g., "added X-Fern-SDK-Version header")
 
 Git Diff:
 {diff}"""
