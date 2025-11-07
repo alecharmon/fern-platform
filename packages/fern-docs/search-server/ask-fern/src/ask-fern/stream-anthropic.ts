@@ -80,6 +80,10 @@ export async function runRouteForAnthropic({
     for (const message of messages) {
         if (message.role === "assistant") {
             message.parts = message.parts.filter((part: UIMessagePart<UIDataTypes, UITools>) => part.type === "text");
+            // Skip assistant messages with no text parts
+            if (message.parts.length === 0) {
+                continue;
+            }
         }
         cleanedMessages.push(message);
     }
