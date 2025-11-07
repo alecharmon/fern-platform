@@ -48,17 +48,29 @@ async function crawlSite(startUrl) {
   // Fetch URLs from sitemap
   const sitemapUrls = await fetchSitemap(baseUrlString);
 
-  // Add specific URLs to test
+  // Add specific URLs to test with expected status codes
   const specificUrls = [
-    `${baseUrlString}/rest-api/rest-api/plant/updates-web-socket?explorer=true`,
-    `${baseUrlString}/events-api/events-api/inventory/inventory?explorer=true`,
-    `${baseUrlString}/rest-api/rest-api/plant/add-plant/llms.txt`,
-    `${baseUrlString}/llms.txt`,
-    `${baseUrlString}/llms-full.txt`,
+    // API explorers
+    { url: `${baseUrlString}/rest-api/rest-api/plant/updates-web-socket?explorer=true`, expectedStatus: 200 },
+    { url: `${baseUrlString}/events-api/events-api/inventory/inventory?explorer=true`, expectedStatus: 200 },
+    // LLMs.txt files
+    { url: `${baseUrlString}/rest-api/rest-api/plant/add-plant/llms.txt`, expectedStatus: 200 },
+    { url: `${baseUrlString}/llms.txt`, expectedStatus: 200 },
+    { url: `${baseUrlString}/llms-full.txt`, expectedStatus: 200 },
+    // API endpoints (some require auth)
+    { url: `${baseUrlString}/api/fern-docs/search/v2/key`, expectedStatus: 200 },
+    { url: `${baseUrlString}/api/fern-docs/get-jwt`, expectedStatus: 401 }, // Expected to require auth
+    { url: `${baseUrlString}/_mcp/server`, expectedStatus: 200 },
   ];
 
-  // Combine sitemap URLs with specific URLs
-  const urlsToVisit = [...sitemapUrls, ...specificUrls];
+  // URL expectations map for easy lookup
+  const urlExpectations = new Map();
+  specificUrls.forEach(({ url, expectedStatus }) => {
+    urlExpectations.set(url, expectedStatus);
+  });
+
+  // Combine sitemap URLs with specific URLs (extract just URLs for crawling)
+  const urlsToVisit = [...sitemapUrls, ...specificUrls.map(s => s.url)];
 
   console.log(`Total URLs to crawl: ${urlsToVisit.length}`);
   console.log(`- From sitemap: ${sitemapUrls.length}`);
@@ -116,7 +128,13 @@ async function crawlSite(startUrl) {
     page.on('console', msg => {
       if (msg.type() === 'error') {
         const errorText = msg.text();
-        if (!shouldIgnoreError(currentUrl, errorText)) {
+        const expectedStatus = urlExpectations.get(currentUrl) || 200;
+
+        // Ignore console errors about expected status codes (e.g., 401 for auth endpoints)
+        const isExpectedStatusError = expectedStatus !== 200 &&
+          errorText.includes(`status of ${expectedStatus}`);
+
+        if (!shouldIgnoreError(currentUrl, errorText) && !isExpectedStatusError) {
           const error = `Console error on ${currentUrl}: ${errorText}`;
           console.error(`  ❌ ${error}`);
           pageErrors.push(error);
@@ -149,18 +167,23 @@ async function crawlSite(startUrl) {
     });
 
     try {
+      // Get expected status code for this URL (default to 200)
+      const expectedStatus = urlExpectations.get(currentUrl) || 200;
+
       // Check if this is a text file (llms.txt) - just do a simple fetch instead of full page load
       if (currentUrl.endsWith('.txt')) {
         console.log(`  Checking text file...`);
         const response = await fetch(currentUrl);
-        if (!response.ok) {
-          const errorMsg = `HTTP ${response.status} for ${currentUrl}`;
+        const actualStatus = response.status;
+
+        if (actualStatus !== expectedStatus) {
+          const errorMsg = `HTTP ${actualStatus} for ${currentUrl} (expected ${expectedStatus})`;
           console.error(`  ❌ ${errorMsg}`);
           pageErrors.push(errorMsg);
           results.failedPages++;
         } else {
           const text = await response.text();
-          console.log(`  ✅ Success (${text.length} bytes)`);
+          console.log(`  ✅ Success (${text.length} bytes, status ${actualStatus})`);
           if (pageErrors.length === 0) {
             results.successfulPages++;
           } else {
@@ -176,14 +199,15 @@ async function crawlSite(startUrl) {
         timeout: 30000
       });
 
-      if (!response || !response.ok()) {
-        const status = response ? response.status() : 'unknown';
-        const errorMsg = `HTTP ${status} for ${currentUrl}`;
+      const actualStatus = response ? response.status() : 0;
+
+      if (!response || actualStatus !== expectedStatus) {
+        const errorMsg = `HTTP ${actualStatus} for ${currentUrl} (expected ${expectedStatus})`;
         console.error(`  ❌ ${errorMsg}`);
         pageErrors.push(errorMsg);
         results.failedPages++;
       } else {
-        console.log(`  ✅ Success`);
+        console.log(`  ✅ Success (status ${actualStatus})`);
 
         if (pageErrors.length === 0) {
           results.successfulPages++;

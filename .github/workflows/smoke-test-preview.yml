@@ -5,6 +5,8 @@ on:
     paths:
       - "smoke-test/fern/**"
       - "packages/fern-docs/bundle/**"
+      - "servers/fdr/**"
+      - "servers/fdr-lambda/**"
       - ".github/workflows/smoke-test-preview.yml"
   workflow_dispatch:
 
@@ -57,10 +59,10 @@ jobs:
         if: steps.generate-docs.outputs.PREVIEW_URL != ''
         working-directory: smoke-test
         run: |
-          node crawler.js "${{ steps.generate-docs.outputs.PREVIEW_URL }}" || true
+          node crawler.js "${{ steps.generate-docs.outputs.PREVIEW_URL }}"
 
       - name: Combine results for PR comment
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && always()
         run: |
           echo "## 🌱 Smoke Test Preview" > final-comment.txt
           echo "" >> final-comment.txt
@@ -73,7 +75,8 @@ jobs:
           fi
 
       - name: Comment URL in PR
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && always()
         uses: thollander/actions-comment-pull-request@v2.4.3
         with:
           filePath: final-comment.txt
+          comment_tag: smoke-test-preview
