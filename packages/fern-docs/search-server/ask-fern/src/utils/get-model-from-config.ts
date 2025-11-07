@@ -5,7 +5,7 @@ import { anthropicApiKey, cohereApiKey } from "@fern-api/docs-server/env-variabl
 import type { LanguageModel } from "ai";
 import { createFallback } from "ai-fallback";
 
-type ModelId = "claude-3.5" | "claude-3.7" | "claude-4" | "claude-4.5";
+type ModelId = "claude-3.7" | "claude-4" | "claude-4.5";
 export type ModelProvider = "cohere" | "bedrock";
 
 type ModelConfig = {
@@ -14,10 +14,6 @@ type ModelConfig = {
 };
 
 const MODEL_CONFIGS: Record<ModelId, ModelConfig> = {
-    "claude-3.5": {
-        modelId: "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
-        region: "us-west-2"
-    },
     "claude-3.7": {
         modelId: "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
         region: "us-east-1"
@@ -34,7 +30,7 @@ const MODEL_CONFIGS: Record<ModelId, ModelConfig> = {
 
 const DEFAULT_MODEL: ModelId = "claude-3.7";
 
-const FALLBACK_ORDER: ModelId[] = ["claude-4.5", "claude-4", "claude-3.7", "claude-3.5"];
+const FALLBACK_ORDER: ModelId[] = ["claude-4.5", "claude-4", "claude-3.7"];
 
 const bedrockByRegion: Record<string, ReturnType<typeof createAmazonBedrock>> = {};
 function getBedrock(region: string) {
