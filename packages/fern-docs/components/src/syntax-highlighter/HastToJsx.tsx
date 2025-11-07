@@ -297,7 +297,7 @@ function wrapTextWithLinks(element: React.ReactElement<TokenProps>, links: Recor
                 href={match.url}
                 target="_self"
                 rel="noopener noreferrer"
-                className="hover:font-semibold"
+                className="fern-code-link"
             >
                 {matchedElements}
             </a>

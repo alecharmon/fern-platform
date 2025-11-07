@@ -63,6 +63,14 @@
     background-color: var(--accent-a4);
   }
 
+  .code-block .fern-code-link {
+    @apply transition-[font-weight];
+  }
+
+  .code-block .fern-code-link:hover {
+    @apply font-semibold;
+  }
+
   .dark .code-block-line-content span {
     color: var(--shiki-dark) !important;
 
