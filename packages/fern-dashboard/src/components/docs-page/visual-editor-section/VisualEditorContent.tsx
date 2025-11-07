@@ -37,12 +37,12 @@ export function VisualEditorContent({
     sourceRepo?: GithubSourceRepo;
     criticalUpdateWarning?: ReactNode;
 }) {
-    // If there's an error, determine how to display it
+    // If there's an error, show warning below header with disabled button
     if (error) {
-        // Show warning in header with preview image below
         return (
             <VisualEditorCard
-                rightContent={
+                rightContent={<GoToEditorButton docsUrl={docsUrl} session={session} disabled />}
+                warningContent={
                     <VisualEditorValidationErrorHandler
                         error={error}
                         githubUrl={githubUrl}
