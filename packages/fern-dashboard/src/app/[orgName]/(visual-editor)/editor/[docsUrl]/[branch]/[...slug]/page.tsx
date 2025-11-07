@@ -39,7 +39,7 @@ export default async function Page({
     const { orgName, docsUrl, branch, slug } = await params;
     const host = await getHostFromHeaders();
 
-    const { githubUrl, session } = await assertAuthAndFetchGithubUrl({
+    const { session } = await assertAuthAndFetchGithubUrl({
         orgName,
         docsUrl: parseDocsUrlParam({ docsUrl })
     });

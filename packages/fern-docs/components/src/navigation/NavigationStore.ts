@@ -327,6 +327,7 @@ export class NavigationStore {
             currentTab: tabSlug ? ({ slug: tabSlug } as any) : undefined,
             currentVersion: version,
             currentProduct: product,
+            currentVariant: undefined, // TODO: add variant support to findSectionById
             isCurrentVersionDefault: false,
             isCurrentProductDefault: false
         };
@@ -613,6 +614,7 @@ export class NavigationStore {
                         currentTab: pageSearchResult.tabSlug ? ({ slug: pageSearchResult.tabSlug } as any) : undefined,
                         currentVersion: pageSearchResult.version,
                         currentProduct: pageSearchResult.product,
+                        currentVariant: undefined, // TODO: add variant support to findPageByPageId
                         isCurrentVersionDefault: false,
                         isCurrentProductDefault: false
                     };

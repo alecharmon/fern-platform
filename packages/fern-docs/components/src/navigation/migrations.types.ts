@@ -31,6 +31,7 @@ export interface PreviousNavigationSnapshots {
                         | "currentTab"
                         | "currentVersion"
                         | "currentProduct"
+                        | "currentVariant"
                         | "isCurrentVersionDefault"
                         | "isCurrentProductDefault"
                     >;

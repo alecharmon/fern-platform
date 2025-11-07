@@ -14,7 +14,7 @@ export default function MonacoEditor({
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         if (typeof window !== "undefined") {
-            loader.init().then(() => {
+            void loader.init().then(() => {
                 setIsLoading(false);
             });
         }

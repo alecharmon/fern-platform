@@ -50,6 +50,7 @@ describe("NavigationStore", () => {
                     currentTab: undefined,
                     currentVersion: undefined,
                     currentProduct: undefined,
+                    currentVariant: undefined,
                     isCurrentVersionDefault: true,
                     isCurrentProductDefault: true
                 }
@@ -85,6 +86,7 @@ describe("NavigationStore", () => {
                     currentTab: undefined,
                     currentVersion: undefined,
                     currentProduct: undefined,
+                    currentVariant: undefined,
                     isCurrentVersionDefault: true,
                     isCurrentProductDefault: true
                 }
@@ -125,6 +127,7 @@ describe("NavigationStore", () => {
                     currentTab: undefined,
                     currentVersion: undefined,
                     currentProduct: undefined,
+                    currentVariant: undefined,
                     isCurrentVersionDefault: true,
                     isCurrentProductDefault: true
                 },
@@ -205,6 +208,7 @@ describe("NavigationStore", () => {
                     currentTab: undefined,
                     currentVersion: undefined,
                     currentProduct: undefined,
+                    currentVariant: undefined,
                     isCurrentVersionDefault: true,
                     isCurrentProductDefault: true
                 }
@@ -236,6 +240,7 @@ describe("NavigationStore", () => {
                     currentTab: undefined,
                     currentVersion: undefined,
                     currentProduct: undefined,
+                    currentVariant: undefined,
                     isCurrentVersionDefault: true,
                     isCurrentProductDefault: true
                 }

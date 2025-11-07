@@ -47,6 +47,7 @@ describe("migrations", () => {
                                 currentTab: undefined,
                                 currentVersion: undefined,
                                 currentProduct: undefined,
+                                currentVariant: undefined,
                                 isCurrentVersionDefault: true,
                                 isCurrentProductDefault: true
                             }
@@ -245,6 +246,7 @@ describe("migrations", () => {
                                     currentTab: undefined,
                                     currentVersion: undefined,
                                     currentProduct: undefined,
+                                    currentVariant: undefined,
                                     isCurrentVersionDefault: true,
                                     isCurrentProductDefault: true
                                 }
@@ -369,6 +371,7 @@ describe("migrations", () => {
                                     currentTab: undefined,
                                     currentVersion: undefined,
                                     currentProduct: undefined,
+                                    currentVariant: undefined,
                                     isCurrentVersionDefault: true,
                                     isCurrentProductDefault: true
                                 }

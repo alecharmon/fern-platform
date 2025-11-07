@@ -22,6 +22,7 @@ export type SerializableFoundNode = Pick<
     | "currentTab"
     | "currentVersion"
     | "currentProduct"
+    | "currentVariant"
     | "isCurrentVersionDefault"
     | "isCurrentProductDefault"
 >;
@@ -36,6 +37,7 @@ export function getSerializableFoundNode(foundNode: FernNavigation.utils.Node.Fo
         currentTab: foundNode.currentTab,
         currentVersion: foundNode.currentVersion,
         currentProduct: foundNode.currentProduct,
+        currentVariant: foundNode.currentVariant,
         isCurrentVersionDefault: foundNode.isCurrentVersionDefault,
         isCurrentProductDefault: foundNode.isCurrentProductDefault
     };

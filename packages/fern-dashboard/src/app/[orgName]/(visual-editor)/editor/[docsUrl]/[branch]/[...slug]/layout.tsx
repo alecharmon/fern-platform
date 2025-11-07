@@ -53,7 +53,7 @@ export default async function VisualEditorPreviewLayout({
 }>) {
     const { orgName, docsUrl, branch } = await params;
 
-    const { githubUrl, session } = await assertAuthAndFetchGithubUrl({
+    const { session } = await assertAuthAndFetchGithubUrl({
         orgName,
         docsUrl: parseDocsUrlParam({ docsUrl })
     });

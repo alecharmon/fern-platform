@@ -160,7 +160,7 @@ export function extractDocsYmlFilePathFromFoundNode(
         // paths look like they belong to this product (e.g., "docs/products/platform/v2.yml" for product "platform")
         if (foundNode.currentVersion && foundNode.currentVersion.slug === productSlug) {
             // Look for any slug in the map that has a path containing the product slug
-            for (const [slug, path] of slugToDocsYmlFilePath.entries()) {
+            for (const [_, path] of slugToDocsYmlFilePath.entries()) {
                 // Check if the path contains the product slug as a directory component
                 // e.g., "docs/products/platform/v2.yml" contains "platform"
                 const pathSegments = path.split("/");

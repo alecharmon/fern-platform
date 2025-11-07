@@ -94,6 +94,7 @@ describe("NavigationStorage", () => {
                             currentTab: undefined,
                             currentVersion: undefined,
                             currentProduct: undefined,
+                            currentVariant: undefined,
                             isCurrentVersionDefault: true,
                             isCurrentProductDefault: true
                         }

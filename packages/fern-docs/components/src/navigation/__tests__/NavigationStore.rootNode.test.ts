@@ -124,6 +124,7 @@ describe("NavigationStore - rootNode management", () => {
                 currentTab: undefined,
                 currentVersion: undefined,
                 currentProduct: undefined,
+                currentVariant: undefined,
                 isCurrentVersionDefault: true,
                 isCurrentProductDefault: true
             },
@@ -183,6 +184,7 @@ describe("NavigationStore - rootNode management", () => {
                 currentTab: undefined,
                 currentVersion: undefined,
                 currentProduct: undefined,
+                currentVariant: undefined,
                 isCurrentVersionDefault: true,
                 isCurrentProductDefault: true
             },
@@ -248,6 +250,7 @@ describe("NavigationStore - rootNode management", () => {
                 currentTab: undefined,
                 currentVersion: undefined,
                 currentProduct: undefined,
+                currentVariant: undefined,
                 isCurrentVersionDefault: true,
                 isCurrentProductDefault: true
             },
@@ -277,6 +280,7 @@ describe("NavigationStore - rootNode management", () => {
                 currentTab: undefined,
                 currentVersion: undefined,
                 currentProduct: undefined,
+                currentVariant: undefined,
                 isCurrentVersionDefault: true,
                 isCurrentProductDefault: true
             },

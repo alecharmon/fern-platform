@@ -194,6 +194,7 @@ function migrateV0ToV1(
                         : undefined,
                 currentVersion: clientPageData?.navigationContext?.currentVersion,
                 currentProduct: clientPageData?.navigationContext?.currentProduct,
+                currentVariant: undefined,
                 isCurrentVersionDefault: clientPageData?.navigationContext?.isCurrentVersionDefault ?? false,
                 isCurrentProductDefault: clientPageData?.navigationContext?.isCurrentProductDefault ?? false
             };
