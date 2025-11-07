@@ -118,70 +118,61 @@ jobs:
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
               console.log(`Attempt ${attempt}/${maxAttempts}: Checking for prod.ferndocs.com deployment...`);
 
-              const { data: checks } = await github.rest.checks.listForRef({
+              // Check GitHub Deployments API
+              const { data: deployments } = await github.rest.repos.listDeployments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: '${{ steps.pr.outputs.sha }}',
+                sha: '${{ steps.pr.outputs.sha }}',
                 per_page: 100
               });
 
-              const vercelCheck = checks.check_runs.find(check =>
-                check.name.includes('prod.ferndocs.com') ||
-                check.name.includes('Preview – prod.ferndocs.com') ||
-                (check.app && check.app.slug === 'vercel' && check.details_url && check.details_url.includes('prod-ferndocs'))
+              console.log(`Found ${deployments.length} deployment(s) for SHA ${{ steps.pr.outputs.sha }}`);
+
+              // Log all environments for debugging
+              if (deployments.length > 0) {
+                console.log('Deployment environments:');
+                deployments.forEach(d => console.log(`  - ${d.environment} (ID: ${d.id})`));
+              }
+
+              // Look for prod.ferndocs.com deployment
+              const prodDeployment = deployments.find(d =>
+                d.environment && (
+                  d.environment === 'Production – prod.ferndocs.com' ||
+                  d.environment === 'Preview – prod.ferndocs.com' ||
+                  d.environment.includes('prod.ferndocs.com')
+                )
               );
 
-              if (vercelCheck) {
-                console.log(`Found Vercel check: ${vercelCheck.name} (${vercelCheck.status})`);
+              if (prodDeployment) {
+                console.log(`Found prod.ferndocs.com deployment (env: ${prodDeployment.environment})`);
 
-                if (vercelCheck.status === 'completed') {
-                  if (vercelCheck.conclusion === 'success') {
-                    const deploymentUrl = vercelCheck.details_url;
+                const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: prodDeployment.id
+                });
 
-                    const urlMatch = deploymentUrl.match(/url=([^&]+)/);
-                    const extractedUrl = urlMatch ? decodeURIComponent(urlMatch[1]) : null;
-
-                    if (extractedUrl) {
-                      const previewUrl = `${extractedUrl}/api/fern-docs/preview?host=buildwithfern.com`;
-                      console.log(`Deployment successful! Base URL: ${extractedUrl}`);
-                      console.log(`Preview URL: ${previewUrl}`);
-                      core.setOutput('url', previewUrl);
-                      return;
-                    } else {
-                      console.log('Could not extract deployment URL from check, trying deployment events...');
-
-                      const { data: deployments } = await github.rest.repos.listDeployments({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        sha: '${{ steps.pr.outputs.sha }}',
-                        per_page: 100
-                      });
-
-                      for (const deployment of deployments) {
-                        if (deployment.environment && deployment.environment.toLowerCase().includes('production')) {
-                          const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
-                            owner: context.repo.owner,
-                            repo: context.repo.repo,
-                            deployment_id: deployment.id
-                          });
-
-                          const successStatus = statuses.find(s => s.state === 'success');
-                          if (successStatus && successStatus.environment_url) {
-                            const previewUrl = `${successStatus.environment_url}/api/fern-docs/preview?host=buildwithfern.com`;
-                            console.log(`Found deployment URL: ${successStatus.environment_url}`);
-                            console.log(`Preview URL: ${previewUrl}`);
-                            core.setOutput('url', previewUrl);
-                            return;
-                          }
-                        }
-                      }
-
-                      throw new Error('Deployment completed but could not extract URL');
-                    }
-                  } else {
-                    throw new Error(`Deployment failed with conclusion: ${vercelCheck.conclusion}`);
-                  }
+                console.log(`Deployment has ${statuses.length} status(es)`);
+                if (statuses.length > 0) {
+                  console.log(`Latest status: ${statuses[0].state}`);
                 }
+
+                const successStatus = statuses.find(s => s.state === 'success');
+                if (successStatus && successStatus.environment_url) {
+                  const previewUrl = `${successStatus.environment_url}`;
+                  console.log(`✓ Deployment ready!`);
+                  console.log(`  Base URL: ${successStatus.environment_url}`);
+                  console.log(`  Preview URL: ${previewUrl}`);
+                  core.setOutput('url', previewUrl);
+                  return;
+                }
+
+                // Check for failure
+                if (statuses.length > 0 && statuses[0].state === 'failure') {
+                  throw new Error(`prod.ferndocs.com deployment failed`);
+                }
+              } else {
+                console.log('prod.ferndocs.com deployment not found yet');
               }
 
               if (attempt < maxAttempts) {
