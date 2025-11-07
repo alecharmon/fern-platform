@@ -1,10 +1,23 @@
 "use client";
 
 import GradientExclamation from "@fern-docs/components/GradientExclamation";
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import ReturnHomeButton from "@/components/ReturnHomeButton";
+import type { ERROR_DIGEST_KEYS } from "@/utils/errors";
 
-export default function Error({ error: _error }: { error: Error & { digest?: string } }) {
+export default function Error({ error }: { error: Error & { digest?: string } }) {
+    // React Error Boundaries require manual Sentry integration because
+    // Sentry's automatic client-side capture doesn't extend to caught React errors
+    // Only report unexpected errors (UNEXPECTED_ERROR digest or no digest at all)
+    useEffect(() => {
+        const isUnexpectedError = !error.digest || (error.digest as ERROR_DIGEST_KEYS) === "UNEXPECTED_ERROR";
+        if (isUnexpectedError) {
+            Sentry.captureException(error);
+        }
+    }, [error]);
+
     return (
         <div className="flex flex-1 flex-col items-center justify-center gap-2">
             <div className="flex h-24 w-24 items-center justify-center">
