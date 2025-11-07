@@ -27,6 +27,10 @@ tabs:
   events-api:
     display-name: Events API
     icon: bolt
+  changelog:
+    display-name: Changelog
+    icon: clock
+    changelog: ./changelog
 
 navigation:
   - tab: home
@@ -54,6 +58,7 @@ navigation:
     layout:
       - api: Events API
         api-name: events-api
+  - tab: changelog
 navbar-links:
   - type: minimal
     text: Fork this repo
