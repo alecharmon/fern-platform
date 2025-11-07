@@ -3008,8 +3008,8 @@ importers:
   packages/snippets:
     dependencies:
       '@fern-api/csharp-dynamic-snippets':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.2
+        version: 0.0.2
       '@fern-api/dynamic-ir-sdk':
         specifier: 61.4.0
         version: 61.4.0
@@ -5859,8 +5859,8 @@ packages:
   '@fern-api/core-utils@0.15.0-rc63':
     resolution: {integrity: sha512-E5g6oPcFLz9ZOTkYH1uF3Le9bw9yFuOft4zNiq0HD2xE/RK2wGn9gYcIgJn/qRT0dB1hBCanHx4KehCMc8Z99w==}
 
-  '@fern-api/csharp-dynamic-snippets@0.0.3':
-    resolution: {integrity: sha512-HIdTWkzfsra96U+Gd3IriW8pyeySyFFGHmGMXoAdOvgWBtzwOjV3Qe1HhQUTueqjbTWUKYHqeHbMeMWXng9A+w==}
+  '@fern-api/csharp-dynamic-snippets@0.0.2':
+    resolution: {integrity: sha512-+e7B1kOn/T6mXrkoZro/cRBGmg+N//EqczT4VFP+oGw23WOJxyG3bnYwWw45UMLAku18MM+8Z9RHieBuFERjQg==}
 
   '@fern-api/dynamic-ir-sdk@61.4.0':
     resolution: {integrity: sha512-pJ8oswOmhVBi7I7OnFXndb2TqXMKweQby1/YmbJi8Usp/c+mFwEvnCYfvTvj6an34mG1k7HiS4ACZHtDp/SMJw==}
@@ -23957,7 +23957,7 @@ snapshots:
       strip-ansi: 7.1.0
       ua-parser-js: 1.0.37
 
-  '@fern-api/csharp-dynamic-snippets@0.0.3': {}
+  '@fern-api/csharp-dynamic-snippets@0.0.2': {}
 
   '@fern-api/dynamic-ir-sdk@61.4.0': {}
 

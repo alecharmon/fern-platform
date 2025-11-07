@@ -4,22 +4,22 @@ exports[`backfillSnippets > should backfill dynamic snippets for all languages 1
 {
   "csharp": [
     {
-      "code": "using Cat;
-using System.Threading.Tasks;
+      "code": "using global::System.Threading.Tasks;
+using Cat;
 
 namespace Usage;
 
 public class Example
 {
-    public async Task Do() {
+    public async global::System.Threading.Tasks.Task Do() {
         var client = new CatcatcatTreeClient(
-            clientOptions: new ClientOptions {
+            clientOptions: new ClientOptions{
                 BaseUrl = "https://api.example.com/v1"
             }
         );
 
         await client.Users.CreateUserAsync(
-            new CreateUserRequest {
+            new CreateUserRequest{
                 Name = "John Doe",
                 Email = "john.doe@example.com",
                 Password = "securePassword123",
