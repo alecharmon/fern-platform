@@ -69,6 +69,7 @@ export function createApiReferenceNode(node: Partial<ApiReferenceNode>): ApiRefe
         noindex: undefined,
         overviewPageId: undefined,
         pointsTo: undefined,
+        postmanCollectionUrl: undefined,
         children: [],
         ...node
     };
