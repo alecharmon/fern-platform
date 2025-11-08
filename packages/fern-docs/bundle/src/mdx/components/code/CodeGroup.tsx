@@ -12,16 +12,19 @@ import { useProgrammingLanguage } from "@/state/language";
 
 import { unwrapChildren } from "../../common/unwrap-children";
 import { CodeBlock, toSyntaxHighlighterProps } from "./CodeBlock";
+import { CodeBlockFeedbackButton } from "./CodeBlockFeedbackButton";
 import { applyTemplates, Template, useTemplate } from "./Template";
 
 export function CodeGroup({
     children,
     template: templateProp,
-    tooltips: tooltipsProp
+    tooltips: tooltipsProp,
+    disableAnalytics
 }: {
     children: React.ReactNode;
     template?: Record<string, string>;
     tooltips?: Record<string, React.ReactNode>;
+    disableAnalytics?: boolean;
 }) {
     const isDarkCode = useIsDarkCode();
 
@@ -125,10 +128,28 @@ export function CodeGroup({
                         </HorizontalOverflowMask>
                     </Tabs.List>
 
-                    <CopyToClipboardButton
-                        className="ml-2 mr-1"
-                        content={() => applyTemplates(items[selectedTabIndex]?.props.code ?? "", template)}
-                    />
+                    <div className="flex items-center gap-1 ml-2 mr-1">
+                        <CodeBlockFeedbackButton
+                            code={applyTemplates(items[selectedTabIndex]?.props.code ?? "", template)}
+                            language={items[selectedTabIndex]?.props.language}
+                            disableAnalytics={disableAnalytics}
+                            activeTab={{
+                                title:
+                                    items[selectedTabIndex]?.props.title ??
+                                    items[selectedTabIndex]?.props.filename ??
+                                    getDisplayNameWithCount(
+                                        items[selectedTabIndex]?.props.language,
+                                        items,
+                                        selectedTabIndex
+                                    ),
+                                index: selectedTabIndex,
+                                language: items[selectedTabIndex]?.props.for ?? items[selectedTabIndex]?.props.language
+                            }}
+                        />
+                        <CopyToClipboardButton
+                            content={() => applyTemplates(items[selectedTabIndex]?.props.code ?? "", template)}
+                        />
+                    </div>
                 </div>
             </div>
             {items.map((item, idx) => (

@@ -10,6 +10,8 @@ type CodeBlockWithClipboardButtonProps = {
     className?: string;
     expandable?: boolean;
     language?: string;
+    showFeedbackButton?: boolean;
+    feedbackButton?: React.ReactNode;
 };
 
 export const CodeBlockWithClipboardButton: React.FC<PropsWithChildren<CodeBlockWithClipboardButtonProps>> = ({
@@ -17,7 +19,9 @@ export const CodeBlockWithClipboardButton: React.FC<PropsWithChildren<CodeBlockW
     children,
     className,
     expandable,
-    language
+    language,
+    showFeedbackButton = true,
+    feedbackButton
 }) => {
     return (
         <div
@@ -27,25 +31,11 @@ export const CodeBlockWithClipboardButton: React.FC<PropsWithChildren<CodeBlockW
             )}
         >
             {children}
-            {expandable && (
-                <ExpandCodeButton
-                    className={cn(
-                        "fern-expand-button absolute z-20",
-                        "opacity-0 backdrop-blur transition group-hover:opacity-100",
-                        "right-9 top-2"
-                    )}
-                    content={code}
-                    language={language}
-                />
-            )}
-            <CopyToClipboardButton
-                className={cn(
-                    "fern-copy-button absolute z-20",
-                    "opacity-0 backdrop-blur transition group-hover:opacity-100",
-                    "right-2 top-2"
-                )}
-                content={code}
-            />
+            <div className="absolute right-2 top-2 z-20 flex items-center gap-1 opacity-0 backdrop-blur transition group-hover:opacity-100">
+                {expandable && <ExpandCodeButton className="fern-expand-button" content={code} language={language} />}
+                {showFeedbackButton && feedbackButton}
+                <CopyToClipboardButton className="fern-copy-button" content={code} />
+            </div>
         </div>
     );
 };

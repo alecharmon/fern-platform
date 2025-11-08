@@ -11,6 +11,7 @@ import { type ComponentProps, type ReactNode, type RefObject, useEffect, useRef 
 
 import { useIsDarkCode } from "@/state/dark-code";
 
+import { CodeBlockFeedbackButton } from "./CodeBlockFeedbackButton";
 import { applyTemplates, useTemplate } from "./Template";
 
 export function CodeBlock(props: {
@@ -56,7 +57,8 @@ export function CodeBlock(props: {
      * maps exact string matches in the code to URLs, creating clickable links
      */
     links?: Record<string, string>;
-    lang: string;
+    lang?: string;
+    disableAnalytics?: boolean;
 }) {
     const {
         className,
@@ -66,7 +68,8 @@ export function CodeBlock(props: {
         language = "plaintext",
         template: templateProp,
         tooltips: tooltipsProp,
-        lang
+        lang = "en",
+        disableAnalytics = false
     } = props;
     const isDarkCode = useIsDarkCode();
     // TODO: once this is in beta, we can add expandable logic for any code block greater than 20 lines
@@ -108,18 +111,26 @@ export function CodeBlock(props: {
                                 </span>
                             </div>
                         </div>
-                        {expandable && (
-                            <ExpandCodeButton
-                                className={cn("fern-expand-button absolute right-9 z-20")}
-                                content={code}
+                        <div className="flex items-center gap-1">
+                            {expandable && (
+                                <ExpandCodeButton
+                                    className={cn("fern-expand-button z-20")}
+                                    content={code}
+                                    language={language}
+                                />
+                            )}
+                            <CodeBlockFeedbackButton
+                                className="z-20"
+                                code={code}
                                 language={language}
+                                disableAnalytics={disableAnalytics}
                             />
-                        )}
-                        <CopyToClipboardButton
-                            className="ml-2 mr-1"
-                            content={() => applyTemplates(code, template)}
-                            lang={lang}
-                        />
+                            <CopyToClipboardButton
+                                className="mr-1"
+                                content={() => applyTemplates(code, template)}
+                                lang={lang}
+                            />
+                        </div>
                     </div>
                 </div>
                 <FernSyntaxHighlighter
@@ -141,6 +152,14 @@ export function CodeBlock(props: {
             className={cn({ "bg-card-solid dark": isDarkCode }, className)}
             expandable={expandable}
             language={language}
+            feedbackButton={
+                <CodeBlockFeedbackButton
+                    className="fern-feedback-button"
+                    code={code}
+                    language={language}
+                    disableAnalytics={disableAnalytics}
+                />
+            }
         >
             <FernSyntaxHighlighter
                 {...toSyntaxHighlighterProps({
