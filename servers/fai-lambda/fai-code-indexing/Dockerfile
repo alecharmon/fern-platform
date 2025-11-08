@@ -11,6 +11,7 @@ RUN pip3 install poetry
 
 COPY fai-code-indexing/pyproject.toml fai-code-indexing/poetry.lock* ./
 
+# Updated 2025-11-07: Added fern-fai-sdk dependency
 RUN poetry config virtualenvs.create false && \
     poetry install --only main --no-root
 

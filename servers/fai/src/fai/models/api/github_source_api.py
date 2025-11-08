@@ -30,7 +30,7 @@ class ReindexGithubResponse(BaseModel):
 
 
 class IndexingCallbackRequest(BaseModel):
-    session_id: str = Field(description="Session ID from the code indexing operation")
+    session_id: str | None = Field(description="Session ID from the code indexing operation")
     status: str = Field(description="Status of indexing operation: 'success' or 'failed'")
 
 

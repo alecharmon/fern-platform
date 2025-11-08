@@ -15,6 +15,8 @@ import httpx
 from shared.utils.validation import validate_body_param_or_throw
 
 from .operations import (
+    analyze_repositories_for_domain,
+    index_markdown_for_domain,
     run_code_search_tool_call,
     setup_repos_for_domain,
 )
@@ -37,9 +39,9 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     try:
         body = json.loads(event.get("body", "{}"))
         domain = validate_body_param_or_throw(body, "domain")
-        event_type: Literal["codeSearch", "indexRepo", "executeCommand"] = validate_body_param_or_throw(
-            body, "eventType"
-        )
+        event_type: Literal[
+            "codeSearch", "indexRepo", "indexRepoMarkdown", "executeCommand"
+        ] = validate_body_param_or_throw(body, "eventType")
 
         if event_type == "executeCommand":
             command = validate_body_param_or_throw(body, "command")
@@ -70,12 +72,15 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         elif event_type == "indexRepo":
             repo_urls = validate_body_param_or_throw(body, "repoUrls", list[str])
             callback_url = validate_body_param_or_throw(body, "callbackUrl")
-            setup_result = asyncio.run(setup_repos_for_domain(domain=domain, repo_urls=repo_urls))
+            asyncio.run(setup_repos_for_domain(domain=domain, repo_urls=repo_urls))
+
+            analysis_result = asyncio.run(analyze_repositories_for_domain(domain=domain))
+            logger.info(f"Analysis completed for {domain} repositories")
 
             try:
                 callback_data = {
-                    "session_id": setup_result.session_id,
-                    "status": setup_result.status,
+                    "session_id": analysis_result.session_id,
+                    "status": analysis_result.status,
                 }
                 asyncio.run(_post_callback(callback_url, callback_data))
                 logger.info(f"Successfully posted callback to {callback_url}")
@@ -86,7 +91,31 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                 "message": f"Successfully indexed {len(repo_urls)} repositories",
                 "timestamp": datetime.now(UTC).isoformat(),
                 "requestId": context.aws_request_id,
-                "session_id": setup_result.session_id,
+                "session_id": analysis_result.session_id,
+            }
+
+        elif event_type == "indexRepoMarkdown":
+            repo_urls = validate_body_param_or_throw(body, "repoUrls", list[str])
+            callback_url = validate_body_param_or_throw(body, "callbackUrl")
+            asyncio.run(setup_repos_for_domain(domain=domain, repo_urls=repo_urls))
+
+            indexing_result = asyncio.run(index_markdown_for_domain(domain=domain, repo_urls=repo_urls))
+            logger.info(f"Indexing completed for {domain} repositories")
+            try:
+                callback_data = {
+                    "session_id": None,
+                    "status": indexing_result.status,
+                }
+                asyncio.run(_post_callback(callback_url, callback_data))
+                logger.info(f"Successfully posted callback to {callback_url}")
+            except Exception as callback_error:
+                logger.error(f"Failed to post callback: {str(callback_error)}", exc_info=True)
+
+            response_body = {
+                "message": f"Indexed markdown for {len(repo_urls)} repositories",
+                "timestamp": datetime.now(UTC).isoformat(),
+                "requestId": context.aws_request_id,
+                "status": indexing_result.status,
             }
 
         elif event_type == "codeSearch":

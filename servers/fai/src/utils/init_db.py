@@ -4,6 +4,7 @@ from fai.db import (
     Base,
     engine,
 )
+from fai.models.db.code_db import CodeDb  # noqa: F401
 from fai.models.db.conversation_report_db import ConversationReportDb  # noqa: F401
 from fai.models.db.discord_integration_db import DiscordIntegrationDb  # noqa: F401
 from fai.models.db.discord_message_cache_db import DiscordMessageCacheDb  # noqa: F401
@@ -20,6 +21,7 @@ from fai.models.db.slack_editing_session_db import SlackEditingSessionDb  # noqa
 from fai.models.db.slack_integration_db import SlackIntegrationDb  # noqa: F401
 from fai.models.db.slack_message_cache_db import SlackMessageCacheDb  # noqa: F401
 from fai.models.db.slack_message_classification_db import SlackMessageClassificationDb  # noqa: F401
+from fai.models.db.website_db import WebsiteDb  # noqa: F401
 
 
 async def init() -> None:

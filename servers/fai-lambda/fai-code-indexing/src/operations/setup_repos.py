@@ -2,7 +2,6 @@ import logging
 
 from ..models import SetupRepoResult
 from ..utils.git import clone_repo_to_domain
-from .analysis import analyze_repositories_for_domain
 
 logger = logging.getLogger()
 
@@ -22,12 +21,9 @@ async def setup_repos_for_domain(domain: str, repo_urls: list[str]) -> SetupRepo
     for repo_url in repo_urls:
         await clone_repo_to_domain(domain=domain, repo_url=repo_url)
 
-    analysis_result = await analyze_repositories_for_domain(domain=domain)
-    logger.info(f"Analysis completed for domain {domain} repositories")
-
     return SetupRepoResult(
         domain=domain,
-        session_id=analysis_result.session_id,
-        status=analysis_result.status,
-        error=analysis_result.error,
+        session_id=None,
+        status="success",
+        error=None,
     )

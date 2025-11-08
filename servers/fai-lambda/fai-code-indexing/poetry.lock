@@ -344,6 +344,24 @@ test = ["certifi (>=2024)", "cryptography-vectors (==46.0.3)", "pretend (>=0.7)"
 test-randomorder = ["pytest-randomly"]
 
 [[package]]
+name = "fern-fai-sdk"
+version = "0.1.1"
+description = ""
+optional = false
+python-versions = "<4.0,>=3.8"
+groups = ["main"]
+files = [
+    {file = "fern_fai_sdk-0.1.1-py3-none-any.whl", hash = "sha256:dcf8c135fc139836f4edc21c8a8d9132787791defdd65ed3141a782021b965a6"},
+    {file = "fern_fai_sdk-0.1.1.tar.gz", hash = "sha256:1022b3a9943c83efdd1f7a6d9c3907c1dc0bdb792c4e1e01f6dd3ebc23f64295"},
+]
+
+[package.dependencies]
+httpx = ">=0.21.2"
+pydantic = ">=1.9.2"
+pydantic-core = ">=2.18.2"
+typing_extensions = ">=4.0.0"
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -1232,4 +1250,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "553cb6004c4af45c300754ce7144b7ca50c262ff14096f8d508c2f84ca91fec4"
+content-hash = "4c7d8dd42eb393f26aa652b5f0e344ad1afd3b6f71c0a2bc7c5c7aef984151e3"
