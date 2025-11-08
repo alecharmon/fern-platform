@@ -82,7 +82,37 @@
   }
 
   .fern-sidebar-link-title {
-    overflow-wrap: anywhere !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+
+    &.marquee-active {
+      text-overflow: clip;
+    }
+  }
+
+  .fern-sidebar-link-title-inner {
+    display: inline;
+    will-change: transform;
+    transform: translateX(0);
+
+    &.is-marquee {
+      display: inline-block;
+      animation: fern-sidebar-marquee var(--marquee-duration, 4s) linear forwards;
+    }
+  }
+
+  @keyframes fern-sidebar-marquee {
+    to {
+      transform: translateX(var(--marquee-translate, 0));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fern-sidebar-link-title-inner.is-marquee {
+      animation: none;
+    }
   }
 
   .fern-sidebar-group {
