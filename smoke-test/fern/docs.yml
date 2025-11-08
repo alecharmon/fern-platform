@@ -41,6 +41,8 @@ navigation:
             path: docs/pages/welcome.mdx
           - page: Plaintext Test
             path: docs/pages/plaintext-test.mdx
+          - page: External Dependency Test
+            path: docs/pages/external-dependency-test.mdx
   - tab: guides
     layout:
       - section: Learn
