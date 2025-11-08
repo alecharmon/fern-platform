@@ -57,7 +57,8 @@
     "resetTokenToDefault": "Token auf Standard zurücksetzen",
     "close": "Schließen",
     "cancel": "Abbrechen",
-    "moreActions": "Weitere Aktionen"
+    "moreActions": "Weitere Aktionen",
+    "moreOptions": "Weitere Optionen"
   },
   "search": {
     "search": "Suchen",

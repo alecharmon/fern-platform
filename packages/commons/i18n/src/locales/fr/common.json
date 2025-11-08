@@ -57,7 +57,8 @@
     "resetTokenToDefault": "Réinitialiser le jeton par défaut",
     "close": "Fermer",
     "cancel": "Annuler",
-    "moreActions": "Plus d'actions"
+    "moreActions": "Plus d'actions",
+    "moreOptions": "Plus d'options"
   },
   "search": {
     "search": "Rechercher",

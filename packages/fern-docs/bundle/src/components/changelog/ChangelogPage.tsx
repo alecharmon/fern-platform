@@ -122,6 +122,7 @@ export async function ChangelogPageOverview({
     lang: string;
 }) {
     const page = node.overviewPageId != null ? await loader.getPage(node.overviewPageId) : undefined;
+    const config = await loader.getConfig();
 
     let mdx: Awaited<ReturnType<MdxSerializer>> | undefined;
     let serializationError: Error | undefined;
@@ -154,6 +155,7 @@ export async function ChangelogPageOverview({
                         ? Promise.resolve({ content: page.markdown, contentType: "markdown" as const })
                         : undefined
                 }
+                pageActionsStyle={config.theme?.["page-actions"] ?? "default"}
             />
             {serializationError ? (
                 <MdxErrorPanel error={serializationError} />

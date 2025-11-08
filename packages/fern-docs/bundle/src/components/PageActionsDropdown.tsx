@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { t } from "@fern-docs/i18n";
@@ -11,7 +12,6 @@ import { Fragment, useState } from "react";
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { useIsAskAiEnabled } from "@/state/search";
 import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
-
 import { OpenAISearchOption, Separator } from "./PageActionsDropdownOptions";
 
 export function PageActionsDropdown({
@@ -108,6 +108,9 @@ export function PageActionsDropdown({
 
             const { value, label, href } = option;
 
+            const baseClassName =
+                "px-2 py-1 rounded-2 text-(color:--grayscale-a11) whitespace-nowrap hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors";
+
             if (value === "copy-page") {
                 return (
                     <button
@@ -119,7 +122,8 @@ export function PageActionsDropdown({
                             });
                             void handleCopyPage();
                         }}
-                        className="hover:underline text-(color:--grayscale-a11) whitespace-nowrap"
+                        className={baseClassName}
+                        title={t(lang).tooltips?.copyPageMarkdown ?? "Copy this page as Markdown for LLMs"}
                     >
                         {showCopied ? t(lang).buttons.copied : t(lang).buttons.copyPage}
                     </button>
@@ -131,7 +135,8 @@ export function PageActionsDropdown({
                     <button
                         key={value}
                         onClick={handleAskAI}
-                        className="hover:underline text-(color:--grayscale-a11) whitespace-nowrap"
+                        className={baseClassName}
+                        title={t(lang).tooltips?.askQuestion ?? "Ask a question about this page"}
                     >
                         {label}
                     </button>
@@ -151,7 +156,29 @@ export function PageActionsDropdown({
                                 page_location: window.location.pathname
                             });
                         }}
-                        className="hover:underline text-(color:--grayscale-a11) whitespace-nowrap"
+                        className={baseClassName}
+                        title={t(lang).tooltips?.viewMarkdown ?? "View this page as plain text"}
+                    >
+                        {label}
+                    </a>
+                );
+            }
+
+            if (value === "open-claude" && href) {
+                return (
+                    <a
+                        key={value}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                            capturePosthogEventInternal("page_actions_dropdown", {
+                                type: value,
+                                page_location: window.location.pathname
+                            });
+                        }}
+                        className={baseClassName}
+                        title={t(lang).tooltips?.openClaude ?? "Ask questions about this page"}
                     >
                         {label}
                     </a>
@@ -171,7 +198,8 @@ export function PageActionsDropdown({
                                 page_location: window.location.pathname
                             });
                         }}
-                        className="hover:underline text-(color:--grayscale-a11) whitespace-nowrap"
+                        className={baseClassName}
+                        title={label}
                     >
                         {label}
                     </a>
@@ -187,7 +215,8 @@ export function PageActionsDropdown({
                             page_location: window.location.pathname
                         });
                     }}
-                    className="hover:underline text-(color:--grayscale-a11) whitespace-nowrap"
+                    className={baseClassName}
+                    title={label}
                 >
                     {label}
                 </button>
@@ -201,16 +230,53 @@ export function PageActionsDropdown({
             return null;
         }
 
+        const rankingOrder = [
+            "open-ai-search",
+            "copy-page",
+            "view-as-markdown",
+            "open-claude",
+            "open-chatgpt",
+            "open-cursor"
+        ];
+
+        const sortedItems = [...items].sort((a, b) => {
+            const aIndex = rankingOrder.indexOf(a.value);
+            const bIndex = rankingOrder.indexOf(b.value);
+
+            if (aIndex !== -1 && bIndex !== -1) {
+                return aIndex - bIndex;
+            }
+
+            if (aIndex !== -1) {
+                return -1;
+            }
+
+            if (bIndex !== -1) {
+                return 1;
+            }
+
+            return 0;
+        });
+
         const MAX_VISIBLE = 3;
-        const visibleItems = items.slice(0, MAX_VISIBLE);
-        const overflowItems = items.slice(MAX_VISIBLE);
+        const visibleItems = sortedItems.slice(0, MAX_VISIBLE);
+        const overflowItems = sortedItems.slice(MAX_VISIBLE);
 
         return (
-            <div className="fern-page-actions flex flex-wrap items-center text-sm">
+            <div
+                className={cn(
+                    "fern-page-actions flex flex-wrap items-center text-sm mt-4 -ml-2",
+                    style === "toolbar" && "fern-toolbar"
+                )}
+            >
                 {visibleItems.map((item, i) => (
                     <Fragment key={item.value}>
                         {i > 0 && (
-                            <span aria-hidden="true" className="px-1 text-(color:--grayscale-a8)">
+                            <span
+                                aria-hidden="true"
+                                className="text-(color:--grayscale-a8)"
+                                style={{ margin: "0 8px" }}
+                            >
                                 |
                             </span>
                         )}
@@ -220,7 +286,11 @@ export function PageActionsDropdown({
                 {overflowItems.length > 0 && (
                     <>
                         {visibleItems.length > 0 && (
-                            <span aria-hidden="true" className="px-1 text-(color:--grayscale-a8)">
+                            <span
+                                aria-hidden="true"
+                                className="text-(color:--grayscale-a8)"
+                                style={{ margin: "0 8px" }}
+                            >
                                 |
                             </span>
                         )}
@@ -232,9 +302,9 @@ export function PageActionsDropdown({
                         >
                             <button
                                 aria-label={t(lang).buttons.moreActions}
-                                className="px-1 text-(color:--grayscale-a11)"
+                                className="size-6 rounded-2 text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center justify-center"
                             >
-                                …
+                                <ChevronDown className="size-icon" />
                             </button>
                         </FernDropdown>
                     </>

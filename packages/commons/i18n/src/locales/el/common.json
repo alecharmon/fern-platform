@@ -57,7 +57,8 @@
     "resetTokenToDefault": "Επαναφορά token στην προεπιλογή",
     "close": "Κλείσιμο",
     "cancel": "Ακύρωση",
-    "moreActions": "Περισσότερες ενέργειες"
+    "moreActions": "Περισσότερες ενέργειες",
+    "moreOptions": "Περισσότερες επιλογές"
   },
   "search": {
     "search": "Αναζήτηση",

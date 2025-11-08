@@ -86,6 +86,7 @@ export async function LayoutEvaluator({
             }
             tags={availability && <AvailabilityBadge availability={availability} rounded />}
             lang={lang}
+            pageActionsStyle={config.theme?.["page-actions"] ?? "default"}
         />
     );
 

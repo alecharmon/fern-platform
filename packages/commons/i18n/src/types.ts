@@ -58,6 +58,8 @@ export type Translations = {
         resetTokenToDefault: string;
         close: string;
         cancel: string;
+        moreActions: string;
+        moreOptions: string;
     };
 
     search: {

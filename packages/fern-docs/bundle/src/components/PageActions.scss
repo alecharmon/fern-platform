@@ -1,5 +1,5 @@
 @layer components {
-  .fern-page-actions {
+  .fern-page-actions:not(.fern-toolbar) {
     @apply ring-border-default rounded-2 flex ring-1;
 
     > *:not(:last-child) {
@@ -7,5 +7,9 @@
 
       margin-right: -1px;
     }
+  }
+  
+  .fern-page-actions.fern-toolbar {
+    @apply gap-1;
   }
 }

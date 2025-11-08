@@ -88,7 +88,7 @@ export function PageHeader({
                         )}
                         {tags}
                     </div>
-                    {pageActionOptions && (
+                    {pageActionOptions && pageActionsStyle === "default" && (
                         <div className="hidden md:flex">
                             <PageActionsDropdown
                                 markdownPromise={markdownPromise}
@@ -121,6 +121,17 @@ export function PageHeader({
                         <PageFilters filters={filters} lang={lang} />
                     </div>
                 </>
+            )}
+
+            {pageActionOptions && pageActionsStyle === "toolbar" && (
+                <div className="flex">
+                    <PageActionsDropdown
+                        markdownPromise={markdownPromise}
+                        pageActionOptions={pageActionOptions}
+                        lang={lang}
+                        style={pageActionsStyle}
+                    />
+                </div>
             )}
 
             {children}

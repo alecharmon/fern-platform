@@ -57,7 +57,8 @@
     "resetTokenToDefault": "토큰을 기본값으로 재설정",
     "close": "닫기",
     "cancel": "취소",
-    "moreActions": "더 많은 작업"
+    "moreActions": "더 많은 작업",
+    "moreOptions": "더 많은 옵션"
   },
   "search": {
     "search": "검색",

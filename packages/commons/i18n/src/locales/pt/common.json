@@ -57,7 +57,8 @@
     "resetTokenToDefault": "Redefinir token para o padrão",
     "close": "Fechar",
     "cancel": "Cancelar",
-    "moreActions": "Mais ações"
+    "moreActions": "Mais ações",
+    "moreOptions": "Mais opções"
   },
   "search": {
     "search": "Pesquisar",

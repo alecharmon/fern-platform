@@ -57,7 +57,8 @@
     "resetTokenToDefault": "トークンをデフォルトにリセット",
     "close": "閉じる",
     "cancel": "キャンセル",
-    "moreActions": "その他のアクション"
+    "moreActions": "その他のアクション",
+    "moreOptions": "その他のオプション"
   },
   "search": {
     "search": "検索",

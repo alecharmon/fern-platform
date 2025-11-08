@@ -57,7 +57,8 @@
     "resetTokenToDefault": "Ripristina il token predefinito",
     "close": "Chiudi",
     "cancel": "Annulla",
-    "moreActions": "Altre azioni"
+    "moreActions": "Altre azioni",
+    "moreOptions": "Altre opzioni"
   },
   "search": {
     "search": "Cerca",

@@ -57,7 +57,8 @@
     "resetTokenToDefault": "Token'ı varsayılana sıfırla",
     "close": "Kapat",
     "cancel": "İptal",
-    "moreActions": "Daha fazla işlem"
+    "moreActions": "Daha fazla işlem",
+    "moreOptions": "Daha fazla seçenek"
   },
   "search": {
     "search": "Ara",

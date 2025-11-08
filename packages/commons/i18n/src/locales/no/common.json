@@ -57,7 +57,8 @@
     "resetTokenToDefault": "Tilbakestill token til standard",
     "close": "Lukk",
     "cancel": "Avbryt",
-    "moreActions": "Flere handlinger"
+    "moreActions": "Flere handlinger",
+    "moreOptions": "Flere valg"
   },
   "search": {
     "search": "Søk",
