@@ -41,29 +41,29 @@ export class Code {
 
     /**
      * @param {string} domain
-     * @param {FernAI.CreateCodeRequest} request
+     * @param {FernAI.CreateCodeRecordRequest} request
      * @param {Code.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.code.createCode("domain", {
+     *     await client.code.createCodeRecord("domain", {
      *         document: "document"
      *     })
      */
-    public createCode(
+    public createCodeRecord(
         domain: string,
-        request: FernAI.CreateCodeRequest,
+        request: FernAI.CreateCodeRecordRequest,
         requestOptions?: Code.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.CreateCodeResponse[]> {
-        return core.HttpResponsePromise.fromPromise(this.__createCode(domain, request, requestOptions));
+    ): core.HttpResponsePromise<FernAI.CreateCodeRecordResponse[]> {
+        return core.HttpResponsePromise.fromPromise(this.__createCodeRecord(domain, request, requestOptions));
     }
 
-    private async __createCode(
+    private async __createCodeRecord(
         domain: string,
-        request: FernAI.CreateCodeRequest,
+        request: FernAI.CreateCodeRecordRequest,
         requestOptions?: Code.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.CreateCodeResponse[]>> {
+    ): Promise<core.WithRawResponse<FernAI.CreateCodeRecordResponse[]>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -87,7 +87,7 @@ export class Code {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.CreateCodeResponse[], rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.CreateCodeRecordResponse[], rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -125,29 +125,29 @@ export class Code {
 
     /**
      * @param {string} domain
-     * @param {FernAI.CreateCodeRequest[]} request
+     * @param {FernAI.CreateCodeRecordRequest[]} request
      * @param {Code.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.code.batchCreateCode("domain", [{
+     *     await client.code.batchCreateCodeRecords("domain", [{
      *             document: "document"
      *         }])
      */
-    public batchCreateCode(
+    public batchCreateCodeRecords(
         domain: string,
-        request: FernAI.CreateCodeRequest[],
+        request: FernAI.CreateCodeRecordRequest[],
         requestOptions?: Code.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.CreateCodeResponse[]> {
-        return core.HttpResponsePromise.fromPromise(this.__batchCreateCode(domain, request, requestOptions));
+    ): core.HttpResponsePromise<FernAI.CreateCodeRecordResponse[]> {
+        return core.HttpResponsePromise.fromPromise(this.__batchCreateCodeRecords(domain, request, requestOptions));
     }
 
-    private async __batchCreateCode(
+    private async __batchCreateCodeRecords(
         domain: string,
-        request: FernAI.CreateCodeRequest[],
+        request: FernAI.CreateCodeRecordRequest[],
         requestOptions?: Code.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.CreateCodeResponse[]>> {
+    ): Promise<core.WithRawResponse<FernAI.CreateCodeRecordResponse[]>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -171,7 +171,7 @@ export class Code {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.CreateCodeResponse[], rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.CreateCodeRecordResponse[], rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -215,21 +215,21 @@ export class Code {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.code.getCodeById("domain", "code_id")
+     *     await client.code.getCodeRecordById("domain", "code_id")
      */
-    public getCodeById(
+    public getCodeRecordById(
         domain: string,
         codeId: string,
         requestOptions?: Code.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.GetCodeResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getCodeById(domain, codeId, requestOptions));
+    ): core.HttpResponsePromise<FernAI.GetCodeRecordResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getCodeRecordById(domain, codeId, requestOptions));
     }
 
-    private async __getCodeById(
+    private async __getCodeRecordById(
         domain: string,
         codeId: string,
         requestOptions?: Code.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.GetCodeResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.GetCodeRecordResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -250,7 +250,7 @@ export class Code {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.GetCodeResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.GetCodeRecordResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -288,30 +288,30 @@ export class Code {
 
     /**
      * @param {string} domain
-     * @param {FernAI.GetCodeRequest} request
+     * @param {FernAI.GetCodeRecordsRequest} request
      * @param {Code.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.code.getCode("domain", {
+     *     await client.code.getCodeRecords("domain", {
      *         page: 1,
      *         limit: 1
      *     })
      */
-    public getCode(
+    public getCodeRecords(
         domain: string,
-        request: FernAI.GetCodeRequest = {},
+        request: FernAI.GetCodeRecordsRequest = {},
         requestOptions?: Code.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.GetCodeEntriesResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getCode(domain, request, requestOptions));
+    ): core.HttpResponsePromise<FernAI.GetCodeRecordsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getCodeRecords(domain, request, requestOptions));
     }
 
-    private async __getCode(
+    private async __getCodeRecords(
         domain: string,
-        request: FernAI.GetCodeRequest = {},
+        request: FernAI.GetCodeRecordsRequest = {},
         requestOptions?: Code.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.GetCodeEntriesResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.GetCodeRecordsResponse>> {
         const { page, limit } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (page != null) {
@@ -342,7 +342,7 @@ export class Code {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.GetCodeEntriesResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.GetCodeRecordsResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -380,29 +380,29 @@ export class Code {
 
     /**
      * @param {string} domain
-     * @param {FernAI.DeleteCodeRequest} request
+     * @param {FernAI.DeleteCodeRecordRequest} request
      * @param {Code.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.code.deleteCodeById("domain", {
+     *     await client.code.deleteCodeRecordById("domain", {
      *         code_id: "code_id"
      *     })
      */
-    public deleteCodeById(
+    public deleteCodeRecordById(
         domain: string,
-        request: FernAI.DeleteCodeRequest,
+        request: FernAI.DeleteCodeRecordRequest,
         requestOptions?: Code.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.DeleteCodeResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__deleteCodeById(domain, request, requestOptions));
+    ): core.HttpResponsePromise<FernAI.DeleteCodeRecordResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteCodeRecordById(domain, request, requestOptions));
     }
 
-    private async __deleteCodeById(
+    private async __deleteCodeRecordById(
         domain: string,
-        request: FernAI.DeleteCodeRequest,
+        request: FernAI.DeleteCodeRecordRequest,
         requestOptions?: Code.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.DeleteCodeResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.DeleteCodeRecordResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -426,7 +426,7 @@ export class Code {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.DeleteCodeResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.DeleteCodeRecordResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -469,19 +469,19 @@ export class Code {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.code.deleteAllCode("domain")
+     *     await client.code.deleteAllCodeRecords("domain")
      */
-    public deleteAllCode(
+    public deleteAllCodeRecords(
         domain: string,
         requestOptions?: Code.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.DeleteCodeResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__deleteAllCode(domain, requestOptions));
+    ): core.HttpResponsePromise<FernAI.DeleteCodeRecordResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteAllCodeRecords(domain, requestOptions));
     }
 
-    private async __deleteAllCode(
+    private async __deleteAllCodeRecords(
         domain: string,
         requestOptions?: Code.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.DeleteCodeResponse>> {
+    ): Promise<core.WithRawResponse<FernAI.DeleteCodeRecordResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -502,7 +502,7 @@ export class Code {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.DeleteCodeResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.DeleteCodeRecordResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {

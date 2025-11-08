@@ -6,6 +6,10 @@ from datetime import (
 from typing import Any
 
 from fai.models.api.chat_api import PostChatCompletionRequest
+from fai.models.api.code_api import (
+    CreateCodeRecordRequest,
+    DeleteCodeRecordRequest,
+)
 from fai.models.api.document_api import (
     CreateDocumentRequest,
     DeleteDocumentRequest,
@@ -95,6 +99,37 @@ class DeleteDocumentRequestFactory:
     @classmethod
     def build(cls, document_id: str) -> DeleteDocumentRequest:
         return DeleteDocumentRequest(document_id=document_id)
+
+
+class CreateCodeRequestFactory:
+    @classmethod
+    def build(
+        cls,
+        document: str | None = None,
+        chunk: str | None = None,
+        title: str | None = None,
+        url: str | None = None,
+        version: str | None = None,
+        product: str | None = None,
+        keywords: list[str] | None = None,
+        authed: bool | None = None,
+    ) -> CreateCodeRecordRequest:
+        return CreateCodeRecordRequest(
+            document=document or "def hello():\n    return 'Hello, World!'",
+            chunk=chunk,
+            title=title or "Test Code",
+            url=url or "https://github.com/example/repo/blob/main/hello.py",
+            version=version,
+            product=product,
+            keywords=keywords or ["python", "function"],
+            authed=authed,
+        )
+
+
+class DeleteCodeRequestFactory:
+    @classmethod
+    def build(cls, code_id: str) -> DeleteCodeRecordRequest:
+        return DeleteCodeRecordRequest(code_id=code_id)
 
 
 class CreateGuidanceRequestFactory:

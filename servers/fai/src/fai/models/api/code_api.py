@@ -7,7 +7,7 @@ from fai.models.api.commons.pagination import PaginationResponse
 from fai.models.types.code_types import Code
 
 
-class CreateCodeRequest(BaseModel):
+class CreateCodeRecordRequest(BaseModel):
     document: str = Field(
         description="The content of the code document that will be returned to Ask Fern during retrieval."
     )
@@ -49,71 +49,27 @@ class CreateCodeRequest(BaseModel):
     )
 
 
-class CreateCodeResponse(BaseModel):
+class CreateCodeRecordResponse(BaseModel):
     code_id: str = Field(description="The unique identifier of the created code entry")
 
 
-class DeleteCodeRequest(BaseModel):
+class DeleteCodeRecordRequest(BaseModel):
     code_id: str = Field(description="The unique identifier of the code to delete")
 
 
-class UpdateCodeRequest(BaseModel):
-    document: str | None = Field(
-        default=None,
-        description=(
-            "The updated content of the code that will be returned to Ask Fern during retrieval. "
-            "If not provided, this field will remain unchanged."
-        ),
-    )
-    chunk: str | None = Field(
-        default=None,
-        description=(
-            "The updated textual content that should be vectorized when indexing the code. "
-            "If not provided, this field will remain unchanged."
-        ),
-    )
-    title: str | None = Field(
-        default=None,
-        description="The updated title of the code. If not provided, this field will remain unchanged.",
-    )
-    url: str | None = Field(
-        default=None, description="The updated url of the code. If not provided, this field will remain unchanged."
-    )
-    version: str | None = Field(
-        default=None,
-        description="The updated version of the code. If not provided, this field will remain unchanged.",
-    )
-    product: str | None = Field(
-        default=None,
-        description="The updated product of the code. If not provided, this field will remain unchanged.",
-    )
-    keywords: list[str] | None = Field(
-        default=None,
-        description="The updated keywords of the code. If not provided, this field will remain unchanged.",
-    )
-    authed: bool | None = Field(
-        default=None,
-        description="The updated authed status of the code. If not provided, this field will remain unchanged.",
-    )
-
-
-class UpdateCodeResponse(BaseModel):
-    code: Code = Field(description="The updated code")
-
-
-class DeleteCodeResponse(BaseModel):
+class DeleteCodeRecordResponse(BaseModel):
     success: bool = Field(description="Whether the code was successfully deleted")
 
 
-class GetCodeResponse(BaseModel):
+class GetCodeRecordResponse(BaseModel):
     document: Code = Field(description="The requested code")
 
 
-class GetCodeEntriesRequest(BaseModel):
+class GetCodeRecordsRequest(BaseModel):
     page: int | None = Field(default=None, description="The page number for pagination")
     limit: int | None = Field(default=None, description="The number of code entries per page")
 
 
-class GetCodeEntriesResponse(BaseModel):
+class GetCodeRecordsResponse(BaseModel):
     documents: list[Code] = Field(description="List of code entries for the domain")
     pagination: PaginationResponse = Field(description="Pagination information for the code list")

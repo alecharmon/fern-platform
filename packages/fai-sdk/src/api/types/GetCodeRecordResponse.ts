@@ -4,7 +4,7 @@
 
 import * as FernAI from "../index.js";
 
-export interface GetCodeResponse {
+export interface GetCodeRecordResponse {
     /** The requested code */
     document: FernAI.Code;
 }

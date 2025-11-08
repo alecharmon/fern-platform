@@ -1,2 +1,2 @@
-export { type GetCodeRequest } from "./GetCodeRequest.js";
-export { type DeleteCodeRequest } from "./DeleteCodeRequest.js";
+export { type GetCodeRecordsRequest } from "./GetCodeRecordsRequest.js";
+export { type DeleteCodeRecordRequest } from "./DeleteCodeRecordRequest.js";

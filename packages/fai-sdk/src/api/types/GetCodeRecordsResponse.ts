@@ -4,7 +4,7 @@
 
 import * as FernAI from "../index.js";
 
-export interface GetCodeEntriesResponse {
+export interface GetCodeRecordsResponse {
     /** List of code entries for the domain */
     documents: FernAI.Code[];
     /** Pagination information for the code list */

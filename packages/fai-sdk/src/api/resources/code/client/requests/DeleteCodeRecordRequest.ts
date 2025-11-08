@@ -8,7 +8,7 @@
  *         code_id: "code_id"
  *     }
  */
-export interface DeleteCodeRequest {
+export interface DeleteCodeRecordRequest {
     /** The unique identifier of the code to delete */
     code_id: string;
 }

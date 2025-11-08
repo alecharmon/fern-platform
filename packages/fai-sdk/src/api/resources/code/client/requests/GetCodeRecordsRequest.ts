@@ -9,7 +9,7 @@
  *         limit: 1
  *     }
  */
-export interface GetCodeRequest {
+export interface GetCodeRecordsRequest {
     /** The page number for pagination */
     page?: number;
     /** The number of code entries per page */
