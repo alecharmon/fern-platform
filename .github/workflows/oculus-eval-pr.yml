@@ -2,6 +2,7 @@ name: Oculus Eval on PR
 
 on:
   pull_request:
+    types: [opened]
     paths:
       - 'packages/fern-docs/search-server/ask-fern/**'
   issue_comment:
