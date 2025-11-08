@@ -36,23 +36,42 @@ export function PropertyContainer({
 }: {
     children: React.ReactNode;
 } & React.ComponentProps<"div">) {
-    const { collapsible } = useTypeDefinitionContext();
+    const { collapsible, anchorIdParts } = useTypeDefinitionContext();
     const isActive = useIsActive();
     const ref = React.useRef<HTMLDivElement>(null);
-    React.useEffect(() => {
+
+    const isActiveWithBackwardCompat = React.useMemo(() => {
         if (isActive) {
+            return true;
+        }
+
+        if (typeof window === "undefined" || anchorIdParts.length === 0) {
+            return false;
+        }
+
+        const currentAnchor = window.location.hash.slice(1);
+        if (!currentAnchor) {
+            return false;
+        }
+
+        const lastPart = anchorIdParts[anchorIdParts.length - 1];
+        return currentAnchor === lastPart;
+    }, [isActive, anchorIdParts]);
+
+    React.useEffect(() => {
+        if (isActiveWithBackwardCompat) {
             isomorphicRequestIdleCallback(() => {
                 ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             }, 150);
         }
-    }, [isActive]);
+    }, [isActiveWithBackwardCompat]);
     return (
         <SectionContainer
             ref={ref}
             {...props}
             className={cn("m-3 space-y-3", { "mx-0": !collapsible }, props.className, {
                 "before:bg-(color:--accent-a3) before:rounded-1 before:absolute before:-inset-2 before:z-[-1] before:content-['']":
-                    isActive
+                    isActiveWithBackwardCompat
             })}
         >
             {children}
