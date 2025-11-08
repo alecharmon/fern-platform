@@ -32,6 +32,7 @@ import { CodeBlocks } from "./code/CodeBlocks";
 import { CodeGroup } from "./code/CodeGroup";
 import { Template } from "./code/Template";
 import { Column, ColumnGroup } from "./columns";
+import { Copy } from "./copy";
 import { Download } from "./download";
 import { Feature } from "./feature";
 import { Frame } from "./frame";
@@ -75,6 +76,7 @@ const FERN_COMPONENTS = {
     CodeGroup,
     Column,
     ColumnGroup,
+    Copy,
     Download,
     EndpointRequestSnippet,
     EndpointResponseSnippet,
