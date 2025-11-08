@@ -45,7 +45,7 @@
     "format:yaml:check": "prettier --check \"**/*.{yml,yaml}\"",
     "format:yaml:fix": "prettier --write \"**/*.{yml,yaml}\"",
     "preinstall": "npx only-allow pnpm",
-    "lint": "pnpm lint:biome && pnpm lint:style && pnpm format:check",
+    "lint": "pnpm lint:biome && pnpm lint:eslint && pnpm lint:style && pnpm format:check",
     "lint:biome": "biome lint --error-on-warnings",
     "lint:biome:fix": "biome format --fix",
     "lint:eslint": "turbo lint:eslint",
@@ -53,6 +53,7 @@
     "lint:fix": "pnpm root-package:fix && pnpm lint:biome:fix && pnpm lint:style:fix && pnpm format",
     "lint:style": "turbo lint:style",
     "lint:style:fix": "turbo lint:style:fix",
+    "lint:i18n": "pnpm eslint --config eslint.i18n.config.mjs \"packages/fern-docs/**/*.{ts,tsx}\" --quiet",
     "playwright:build": "turbo --filter='playwright-*' --filter='@fern-docs/local-preview-bundle' build",
     "playwright:test": "pnpm exec playwright test",
     "publish": "pnpm -r --filter=!private --parallel exec -- npm publish --access public",
@@ -115,6 +116,7 @@
     "webpack": "catalog:"
   },
   "dependencies": {
+    "eslint-plugin-i18n": "^2.4.0",
     "fern-api": "0.57.0"
   },
   "devDependencies": {
@@ -135,6 +137,7 @@
     "@types/node": "catalog:",
     "@typescript-eslint/eslint-plugin": "8.25.0",
     "@typescript-eslint/parser": "8.25.0",
+    "@typescript-eslint/utils": "8.25.0",
     "@typescript/vfs": "^1.6.1",
     "@yarnpkg/sdks": "^3.2.0",
     "chalk": "^5.4.1",
@@ -146,6 +149,7 @@
     "eslint-config-prettier": "^10.0.2",
     "eslint-config-turbo": "^2.4.3",
     "eslint-plugin-deprecation": "^3.0.0",
+    "eslint-plugin-i18next": "^6.1.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.1.0",
