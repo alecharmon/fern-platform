@@ -8,30 +8,43 @@ export interface FolderProps {
     defaultOpen?: boolean;
     children?: React.ReactNode;
     className?: string;
+    href?: string;
 }
 
-export function Folder({ name, defaultOpen = false, children, className }: FolderProps) {
+export function Folder({ name, defaultOpen = false, children, className, href }: FolderProps) {
     const [isOpen, setIsOpen] = useState(defaultOpen);
+
+    const folderIcon = isOpen ? (
+        <FolderOpen className="size-4 flex-shrink-0 text-(color:--grayscale-a11)" />
+    ) : (
+        <FolderIcon className="size-4 flex-shrink-0 text-(color:--grayscale-a11)" />
+    );
 
     return (
         <div className={cn("select-none", className)}>
-            <button
-                type="button"
-                onClick={() => setIsOpen(!isOpen)}
+            <div
                 data-state={isOpen ? "open" : "closed"}
-                aria-expanded={isOpen}
                 className={cn(
-                    "fern-accordion-trigger w-full text-left flex items-center gap-2 p-1 rounded-3/2 cursor-pointer transition-colors hover:bg-(color:--grayscale-a4) hover:transition-none"
+                    "fern-accordion-trigger group w-full text-left flex items-center gap-2 p-1 rounded-3/2 transition-colors hover:bg-(color:--grayscale-a4) hover:transition-none"
                 )}
             >
-                <ChevronRight className="fern-accordion-trigger-arrow" />
-                {isOpen ? (
-                    <FolderOpen className="size-4 flex-shrink-0 text-(color:--grayscale-a11)" />
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-expanded={isOpen}
+                    className="cursor-pointer"
+                >
+                    <ChevronRight className="fern-accordion-trigger-arrow" />
+                </button>
+                {folderIcon}
+                {href ? (
+                    <a href={href} className={cn("text-default", "group-hover:underline")}>
+                        {name}
+                    </a>
                 ) : (
-                    <FolderIcon className="size-4 flex-shrink-0 text-(color:--grayscale-a11)" />
+                    <span className="text-default">{name}</span>
                 )}
-                <span className="text-default">{name}</span>
-            </button>
+            </div>
             {isOpen && children && (
                 <div className="relative ml-2 pl-2 space-y-1 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:border-l before:border-border-default">
                     {children}
