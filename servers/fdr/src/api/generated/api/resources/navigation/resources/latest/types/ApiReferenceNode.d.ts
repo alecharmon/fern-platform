@@ -12,4 +12,6 @@ export interface ApiReferenceNode extends FernRegistry.navigation.latest.WithNod
     changelog: FernRegistry.navigation.latest.ChangelogNode | undefined;
     /** Settings for the api playground that affects all endpoints. */
     playground: FernRegistry.navigation.latest.PlaygroundSettings | undefined;
+    /** URL to a Postman collection for this API reference. */
+    postmanCollectionUrl: string | undefined;
 }

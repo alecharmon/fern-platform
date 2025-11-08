@@ -107,6 +107,7 @@ export class ApiReferenceNavigationConverter {
                 availability: undefined,
                 pointsTo,
                 playground: undefined,
+                postmanCollectionUrl: undefined,
                 authed: undefined,
                 viewers: undefined,
                 orphaned: undefined,

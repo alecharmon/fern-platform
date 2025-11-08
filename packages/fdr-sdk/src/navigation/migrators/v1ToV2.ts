@@ -498,6 +498,7 @@ export class FernNavigationV1ToLatest {
             children: node.children.map((child) => this.#apiPackageChild(child, [...parents, node])),
             changelog: node.changelog ? this.changelog(node.changelog, [...parents, node]) : undefined,
             playground: node.playground,
+            postmanCollectionUrl: node.postmanCollectionUrl,
             title: node.title,
             slug,
             canonicalSlug,

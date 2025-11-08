@@ -18,4 +18,6 @@ export interface ApiReferenceNode
     changelog: FernRegistry.navigation.v1.ChangelogNode | undefined;
     /** Settings for the api playground that affects all endpoints. */
     playground: FernRegistry.navigation.v1.PlaygroundSettings | undefined;
+    /** URL to a Postman collection for this API reference. */
+    postmanCollectionUrl: string | undefined;
 }
