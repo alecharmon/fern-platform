@@ -8,7 +8,8 @@ import * as FernAI from "../../../../index.js";
  * @example
  *     {
  *         domain: "domain",
- *         org_name: "org_name"
+ *         org_name: "org_name",
+ *         preview: true
  *     }
  */
 export interface ToggleAskAiRequest {

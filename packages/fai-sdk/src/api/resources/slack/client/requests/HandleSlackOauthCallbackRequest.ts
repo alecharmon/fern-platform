@@ -5,7 +5,8 @@
 /**
  * @example
  *     {
- *         code: "code"
+ *         code: "code",
+ *         state: "state"
  *     }
  */
 export interface HandleSlackOauthCallbackRequest {

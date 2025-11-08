@@ -4,7 +4,10 @@
 
 /**
  * @example
- *     {}
+ *     {
+ *         page: 1,
+ *         limit: 1
+ *     }
  */
 export interface GetDocumentsRequest {
     /** The page number for pagination */

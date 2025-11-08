@@ -381,7 +381,10 @@ export class Guidance {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.guidance.getGuidances("domain")
+     *     await client.guidance.getGuidances("domain", {
+     *         page: 1,
+     *         limit: 1
+     *     })
      */
     public getGuidances(
         domain: string,

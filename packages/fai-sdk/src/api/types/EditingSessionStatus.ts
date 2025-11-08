@@ -5,8 +5,9 @@
 /**
  * Status of an editing session.
  */
-export type EditingSessionStatus = "waiting" | "active" | "interrupted" | "completed";
+export type EditingSessionStatus = "startup" | "waiting" | "active" | "interrupted" | "completed";
 export const EditingSessionStatus = {
+    Startup: "startup",
     Waiting: "waiting",
     Active: "active",
     Interrupted: "interrupted",

@@ -4,7 +4,10 @@
 
 /**
  * @example
- *     {}
+ *     {
+ *         start_date: "2024-01-15T09:30:00Z",
+ *         end_date: "2024-01-15T09:30:00Z"
+ *     }
  */
 export interface GetConversationResolutionRequest {
     /** The start date of the period to retrieve resolution metrics for */

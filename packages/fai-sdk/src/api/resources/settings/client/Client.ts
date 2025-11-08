@@ -476,7 +476,8 @@ export class Settings {
      * @example
      *     await client.settings.toggleAskAi({
      *         domain: "domain",
-     *         org_name: "org_name"
+     *         org_name: "org_name",
+     *         preview: true
      *     })
      */
     public toggleAskAi(

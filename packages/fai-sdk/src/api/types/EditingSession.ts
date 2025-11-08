@@ -11,6 +11,7 @@ export interface EditingSession {
     base_branch: string;
     working_branch: string;
     pr_url?: string;
+    queue_url?: string;
     status: FernAI.EditingSessionStatus;
     created_at: string;
     updated_at: string;

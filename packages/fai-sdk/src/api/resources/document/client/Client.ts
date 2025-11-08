@@ -555,7 +555,10 @@ export class Document {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.document.getDocuments("domain")
+     *     await client.document.getDocuments("domain", {
+     *         page: 1,
+     *         limit: 1
+     *     })
      */
     public getDocuments(
         domain: string,

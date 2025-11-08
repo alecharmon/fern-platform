@@ -47,7 +47,11 @@ export class Analytics {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.analytics.getAnalyticsHistogram("domain")
+     *     await client.analytics.getAnalyticsHistogram("domain", {
+     *         start_date: "2024-01-15T09:30:00Z",
+     *         end_date: "2024-01-15T09:30:00Z",
+     *         group_by: "DAY"
+     *     })
      */
     public getAnalyticsHistogram(
         domain: string,
@@ -141,7 +145,10 @@ export class Analytics {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.analytics.generateAllInsights()
+     *     await client.analytics.generateAllInsights({
+     *         start_date: "2024-01-15T09:30:00Z",
+     *         end_date: "2024-01-15T09:30:00Z"
+     *     })
      */
     public generateAllInsights(
         request: FernAI.GenerateAllInsightsRequest = {},
@@ -440,7 +447,10 @@ export class Analytics {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.analytics.getConversationResolution("domain")
+     *     await client.analytics.getConversationResolution("domain", {
+     *         start_date: "2024-01-15T09:30:00Z",
+     *         end_date: "2024-01-15T09:30:00Z"
+     *     })
      */
     public getConversationResolution(
         domain: string,

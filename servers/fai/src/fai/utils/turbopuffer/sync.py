@@ -10,6 +10,7 @@ from turbopuffer import (
 )
 from turbopuffer.types.row import Row
 
+from fai.models.db.code_db import CodeDb
 from fai.models.db.document_db import DocumentDb
 from fai.models.db.guidance_db import GuidanceDb
 from fai.models.db.slack_context_db import SlackContextDb
@@ -20,6 +21,7 @@ from fai.settings import (
     VARIABLES,
 )
 from fai.utils.turbopuffer.namespace import (
+    get_code_index_name,
     get_document_index_name,
     get_guidance_index_name,
     get_slack_context_index_name,
@@ -118,6 +120,85 @@ async def sync_document_db_to_tpuf(domain: str, db: AsyncSession) -> None:
                 LOGGER.info(f"Wrote {len(documents)} documents to {target_namespace_id}")
             else:
                 LOGGER.info(f"No documents to write to {target_namespace_id}")
+
+
+async def sync_code_to_tpuf(domain: str, code_ids: list[str], db: AsyncSession) -> None:
+    if not code_ids:
+        LOGGER.info("No code IDs provided for sync, skipping")
+        return
+
+    code_records = await db.execute(select(CodeDb).where(CodeDb.domain == domain, CodeDb.id.in_(code_ids)))
+    code_records = code_records.scalars().all()
+
+    if not code_records:
+        LOGGER.warning(f"No code found for IDs {code_ids} in domain {domain}")
+        return
+
+    async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
+        async with AsyncTurbopuffer(
+            region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+            api_key=VARIABLES.TURBOPUFFER_API_KEY,
+        ) as tpuf_client:
+            target_namespace_id = get_tpuf_namespace(domain, get_code_index_name())
+            target_ns = tpuf_client.namespace(target_namespace_id)
+
+            tbuf_records = []
+            for code in code_records:
+                tbuf_records.append(await code.to_tpuf_record(openai_client))
+
+            await target_ns.write(
+                upsert_rows=[jsonable_encoder(record) for record in tbuf_records],
+                distance_metric="cosine_distance",
+                schema=get_data_index_tpuf_schema(),
+            )
+            LOGGER.info(f"Upserted {len(code_records)} code records to {target_namespace_id}")
+
+
+async def delete_code_from_tpuf(domain: str, code_ids: list[str]) -> None:
+    if not code_ids:
+        LOGGER.info("No code IDs provided for deletion, skipping")
+        return
+
+    async with AsyncTurbopuffer(
+        region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+        api_key=VARIABLES.TURBOPUFFER_API_KEY,
+    ) as tpuf_client:
+        target_namespace_id = get_tpuf_namespace(domain, get_code_index_name())
+        target_ns = tpuf_client.namespace(target_namespace_id)
+
+        for code_id in code_ids:
+            await target_ns.write(delete_by_filter=["id", "Eq", code_id])
+
+        LOGGER.info(f"Deleted {len(code_ids)} code records from {target_namespace_id}")
+
+
+async def sync_code_db_to_tpuf(domain: str, db: AsyncSession) -> None:
+    code_records = await db.execute(select(CodeDb).where(CodeDb.domain == domain))
+    code_records = code_records.scalars().all()
+    async with AsyncOpenAI(api_key=VARIABLES.OPENAI_API_KEY) as openai_client:
+        async with AsyncTurbopuffer(
+            region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+            api_key=VARIABLES.TURBOPUFFER_API_KEY,
+        ) as tpuf_client:
+            target_namespace_id = get_tpuf_namespace(domain, get_code_index_name())
+            target_ns = tpuf_client.namespace(target_namespace_id)
+            try:
+                await target_ns.delete_all()
+            except Exception:
+                LOGGER.info(f"No code to delete from {target_namespace_id}")
+            tbuf_records = []
+            for code in code_records:
+                tbuf_records.append(await code.to_tpuf_record(openai_client))
+
+            if tbuf_records:
+                await target_ns.write(
+                    upsert_rows=[jsonable_encoder(record) for record in tbuf_records],
+                    distance_metric="cosine_distance",
+                    schema=get_data_index_tpuf_schema(),
+                )
+                LOGGER.info(f"Wrote {len(code_records)} code records to {target_namespace_id}")
+            else:
+                LOGGER.info(f"No code to write to {target_namespace_id}")
 
 
 async def sync_guidance_db_to_tpuf(domain: str, db: AsyncSession) -> None:

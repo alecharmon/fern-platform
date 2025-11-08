@@ -28,5 +28,9 @@ def get_website_index_name() -> str:
     return DataIndexNames.WEBSITE.value
 
 
+def get_code_index_name() -> str:
+    return DataIndexNames.CODE.value
+
+
 def get_query_index_name() -> str:
     return QUERY_INDEX_NAME

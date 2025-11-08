@@ -7,6 +7,7 @@ import * as core from "./core/index.js";
 import { mergeHeaders } from "./core/headers.js";
 import { Analytics } from "./api/resources/analytics/client/Client.js";
 import { Chat } from "./api/resources/chat/client/Client.js";
+import { Code } from "./api/resources/code/client/Client.js";
 import { Conversation } from "./api/resources/conversation/client/Client.js";
 import { Discord } from "./api/resources/discord/client/Client.js";
 import { Document } from "./api/resources/document/client/Client.js";
@@ -21,6 +22,9 @@ import { Scribe } from "./api/resources/scribe/client/Client.js";
 import { Sdks } from "./api/resources/sdks/client/Client.js";
 import { Settings } from "./api/resources/settings/client/Client.js";
 import { Slack } from "./api/resources/slack/client/Client.js";
+import { Sources } from "./api/resources/sources/client/Client.js";
+import { Upstash } from "./api/resources/upstash/client/Client.js";
+import { Website } from "./api/resources/website/client/Client.js";
 
 export declare namespace FernAIClient {
     export interface Options {
@@ -50,6 +54,7 @@ export class FernAIClient {
     protected readonly _options: FernAIClient.Options;
     protected _analytics: Analytics | undefined;
     protected _chat: Chat | undefined;
+    protected _code: Code | undefined;
     protected _conversation: Conversation | undefined;
     protected _discord: Discord | undefined;
     protected _document: Document | undefined;
@@ -64,6 +69,9 @@ export class FernAIClient {
     protected _sdks: Sdks | undefined;
     protected _settings: Settings | undefined;
     protected _slack: Slack | undefined;
+    protected _sources: Sources | undefined;
+    protected _upstash: Upstash | undefined;
+    protected _website: Website | undefined;
 
     constructor(_options: FernAIClient.Options = {}) {
         this._options = {
@@ -85,6 +93,10 @@ export class FernAIClient {
 
     public get chat(): Chat {
         return (this._chat ??= new Chat(this._options));
+    }
+
+    public get code(): Code {
+        return (this._code ??= new Code(this._options));
     }
 
     public get conversation(): Conversation {
@@ -141,5 +153,17 @@ export class FernAIClient {
 
     public get slack(): Slack {
         return (this._slack ??= new Slack(this._options));
+    }
+
+    public get sources(): Sources {
+        return (this._sources ??= new Sources(this._options));
+    }
+
+    public get upstash(): Upstash {
+        return (this._upstash ??= new Upstash(this._options));
+    }
+
+    public get website(): Website {
+        return (this._website ??= new Website(this._options));
     }
 }

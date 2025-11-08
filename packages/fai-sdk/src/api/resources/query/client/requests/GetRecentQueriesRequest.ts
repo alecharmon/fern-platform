@@ -4,7 +4,14 @@
 
 /**
  * @example
- *     {}
+ *     {
+ *         page: 1,
+ *         limit: 1,
+ *         cutoff_time: "2024-01-15T09:30:00Z",
+ *         include_assistant: true,
+ *         start_date: "2024-01-15T09:30:00Z",
+ *         end_date: "2024-01-15T09:30:00Z"
+ *     }
  */
 export interface GetRecentQueriesRequest {
     /** The page number for pagination */

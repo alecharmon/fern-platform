@@ -6,7 +6,11 @@ import * as FernAI from "../../../../index.js";
 
 /**
  * @example
- *     {}
+ *     {
+ *         start_date: "2024-01-15T09:30:00Z",
+ *         end_date: "2024-01-15T09:30:00Z",
+ *         group_by: "DAY"
+ *     }
  */
 export interface GetAnalyticsHistogramRequest {
     /** The start date of the period to retrieve analytics for */

@@ -140,7 +140,14 @@ export class Query {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.query.getRecentQueries("domain")
+     *     await client.query.getRecentQueries("domain", {
+     *         page: 1,
+     *         limit: 1,
+     *         cutoff_time: "2024-01-15T09:30:00Z",
+     *         include_assistant: true,
+     *         start_date: "2024-01-15T09:30:00Z",
+     *         end_date: "2024-01-15T09:30:00Z"
+     *     })
      */
     public getRecentQueries(
         domain: string,

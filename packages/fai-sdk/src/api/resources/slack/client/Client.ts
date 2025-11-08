@@ -309,7 +309,8 @@ export class Slack {
      *
      * @example
      *     await client.slack.handleSlackOauthCallback({
-     *         code: "code"
+     *         code: "code",
+     *         state: "state"
      *     })
      */
     public handleSlackOauthCallback(
