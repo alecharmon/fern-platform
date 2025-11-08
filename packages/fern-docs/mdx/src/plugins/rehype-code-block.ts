@@ -1,6 +1,5 @@
 // inspired by https://github.com/remcohaszing/hast-util-properties-to-mdx-jsx-attributes
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { compact, flatten } from "es-toolkit/array";
 import { escape } from "es-toolkit/string";
 import type { Root as HastRoot } from "hast";
@@ -15,7 +14,6 @@ import type { Unified } from "../unified";
 interface RehypeCodeBlockOptions {
     loader?: {
         getLanguage: () => Promise<string | undefined>;
-        getSettings: () => Promise<FdrAPI.docs.v1.commons.DocsSettingsConfig | undefined>;
     };
 }
 
@@ -129,14 +127,9 @@ export const rehypeCodeBlock: Unified.Plugin<[RehypeCodeBlockOptions?], HastRoot
                     (async () => {
                         try {
                             const lang = await loader.getLanguage();
-                            const settings = await loader.getSettings();
-                            const disableAnalytics = settings?.disableAnalytics ?? false;
 
                             if (lang && isMdxJsxElementHast(replacement)) {
                                 replacement.attributes.push(unknownToMdxJsxAttribute("lang", lang));
-                                replacement.attributes.push(
-                                    unknownToMdxJsxAttribute("disableAnalytics", disableAnalytics)
-                                );
                             }
                         } catch (e) {
                             console.error("Could not get language from loader", e);

@@ -18,13 +18,11 @@ import { applyTemplates, Template, useTemplate } from "./Template";
 export function CodeGroup({
     children,
     template: templateProp,
-    tooltips: tooltipsProp,
-    disableAnalytics
+    tooltips: tooltipsProp
 }: {
     children: React.ReactNode;
     template?: Record<string, string>;
     tooltips?: Record<string, React.ReactNode>;
-    disableAnalytics?: boolean;
 }) {
     const isDarkCode = useIsDarkCode();
 
@@ -132,7 +130,6 @@ export function CodeGroup({
                         <CodeBlockFeedbackButton
                             code={applyTemplates(items[selectedTabIndex]?.props.code ?? "", template)}
                             language={items[selectedTabIndex]?.props.language}
-                            disableAnalytics={disableAnalytics}
                             activeTab={{
                                 title:
                                     items[selectedTabIndex]?.props.title ??

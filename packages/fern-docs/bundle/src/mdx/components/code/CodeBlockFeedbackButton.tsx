@@ -14,7 +14,6 @@ export declare namespace CodeBlockFeedbackButton {
         className?: string;
         code?: string;
         language?: string;
-        disableAnalytics?: boolean;
         activeTab?: {
             title: string;
             index: number;
@@ -27,7 +26,6 @@ export const CodeBlockFeedbackButton: React.FC<CodeBlockFeedbackButton.Props> = 
     className,
     code,
     language,
-    disableAnalytics,
     activeTab
 }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -37,9 +35,6 @@ export const CodeBlockFeedbackButton: React.FC<CodeBlockFeedbackButton.Props> = 
     }
 
     const handleFeedbackSubmit = (feedback: { message: string; code: string; language?: string }) => {
-        if (disableAnalytics) {
-            return;
-        }
         track("code_block_feedback_submitted", {
             message: feedback.message,
             language: feedback.language,
@@ -55,9 +50,6 @@ export const CodeBlockFeedbackButton: React.FC<CodeBlockFeedbackButton.Props> = 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
         if (open) {
-            if (disableAnalytics) {
-                return;
-            }
             track("code_block_feedback_opened", {
                 language,
                 code,
