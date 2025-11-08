@@ -9,6 +9,7 @@ import { t } from "@fern-docs/i18n";
 import { makeToc, type TableOfContentsItem, toTree } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/compat";
 import { notFound } from "next/navigation";
+import { MdxErrorPanel } from "@/components/mdx-error-panel";
 import { PageHeader } from "@/components/PageHeader";
 import { Markdown } from "@/mdx/components/Markdown";
 import { MdxContent } from "@/mdx/components/MdxContent";
@@ -121,10 +122,19 @@ export async function ChangelogPageOverview({
     lang: string;
 }) {
     const page = node.overviewPageId != null ? await loader.getPage(node.overviewPageId) : undefined;
-    const mdx = await serialize(page?.markdown, {
-        filename: page?.filename,
-        slug: node.slug
-    });
+
+    let mdx: Awaited<ReturnType<MdxSerializer>> | undefined;
+    let serializationError: Error | undefined;
+
+    try {
+        mdx = await serialize(page?.markdown, {
+            filename: page?.filename,
+            slug: node.slug
+        });
+    } catch (error) {
+        console.error("[ChangelogPageOverview] MDX serialization failed:", error);
+        serializationError = error instanceof Error ? error : new Error(String(error));
+    }
 
     return (
         <>
@@ -145,7 +155,11 @@ export async function ChangelogPageOverview({
                         : undefined
                 }
             />
-            <Markdown mdx={mdx} fallback={page?.markdown} engine={mdx?.engine} />
+            {serializationError ? (
+                <MdxErrorPanel error={serializationError} />
+            ) : (
+                <Markdown mdx={mdx} fallback={page?.markdown} engine={mdx?.engine} />
+            )}
         </>
     );
 }
@@ -160,15 +174,36 @@ export async function ChangelogPageEntry({
     node: FernNavigation.ChangelogEntryNode;
 }) {
     const page = await loader.getPage(node.pageId);
-    const mdx = await serialize(page.markdown, {
-        filename: page.filename,
-        slug: node.slug
-    });
 
-    const title = await serialize(mdx?.frontmatter?.title, {
-        filename: page.filename,
-        slug: node.slug
-    });
+    let mdx: Awaited<ReturnType<MdxSerializer>> | undefined;
+    let serializationError: Error | undefined;
+
+    try {
+        mdx = await serialize(page.markdown, {
+            filename: page.filename,
+            slug: node.slug
+        });
+    } catch (error) {
+        console.error("[ChangelogPageEntry] MDX serialization failed:", error);
+        serializationError = error instanceof Error ? error : new Error(String(error));
+    }
+
+    let title: Awaited<ReturnType<MdxSerializer>> | undefined;
+
+    if (!serializationError) {
+        try {
+            title = await serialize(mdx?.frontmatter?.title, {
+                filename: page.filename,
+                slug: node.slug
+            });
+        } catch (error) {
+            console.error("[ChangelogPageEntry] Title serialization failed:", error);
+        }
+    }
+
+    if (serializationError) {
+        return <MdxErrorPanel error={serializationError} />;
+    }
 
     return (
         <Markdown

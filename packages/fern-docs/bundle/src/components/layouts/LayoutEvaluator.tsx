@@ -6,6 +6,7 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 import type React from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 import { MdxAside } from "@/mdx/bundler/component";
 import { MdxContent } from "@/mdx/components/MdxContent";
@@ -13,6 +14,7 @@ import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
 import { BuiltWithFern } from "../built-with-fern";
+import { MdxErrorPanel } from "../mdx-error-panel";
 import { constructPageOptions } from "../PageActionsDropdownOptions";
 import { PageHeader } from "../PageHeader";
 import { FooterLayout } from "./FooterLayout";
@@ -37,11 +39,20 @@ export async function LayoutEvaluator({
     availability?: Availability;
 }) {
     const { filename, markdown, editThisPageUrl } = await loader.getPage(pageId);
-    const mdx = await serialize(markdown, {
-        filename,
-        toc: true,
-        slug
-    });
+
+    let mdx: Awaited<ReturnType<MdxSerializer>> | undefined;
+    let serializationError: Error | undefined;
+
+    try {
+        mdx = await serialize(markdown, {
+            filename,
+            toc: true,
+            slug
+        });
+    } catch (error) {
+        console.error("[LayoutEvaluator] MDX serialization failed:", error);
+        serializationError = error instanceof Error ? error : new Error(String(error));
+    }
 
     const exports = getMDXExport(mdx);
     const toc = asToc(exports?.toc);
@@ -99,14 +110,20 @@ export async function LayoutEvaluator({
                 pageHeader={pageHeader}
                 aside={
                     mdx && exports?.Aside ? (
-                        <MdxAside code={mdx.code} jsxElements={mdx.jsxElements} engine={mdx?.engine} />
+                        <ErrorBoundary>
+                            <MdxAside code={mdx.code} jsxElements={mdx.jsxElements} engine={mdx?.engine} />
+                        </ErrorBoundary>
                     ) : undefined
                 }
                 footer={footer}
                 builtWithFern={<BuiltWithFern className="mx-auto my-8 w-fit" />}
                 lang={lang}
             >
-                <MdxContent mdx={mdx} fallback={markdown} engine={mdx?.engine} />
+                {serializationError ? (
+                    <MdxErrorPanel error={serializationError} />
+                ) : (
+                    <MdxContent mdx={mdx} fallback={markdown} engine={mdx?.engine} />
+                )}
             </AbstractLayoutEvaluatorContent>
         </>
     );
