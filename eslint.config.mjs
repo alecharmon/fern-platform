@@ -7,6 +7,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import unusedImports from "eslint-plugin-unused-imports";
 import vitest from "eslint-plugin-vitest";
 import tseslint from "typescript-eslint";
+import * as fernDocsPlugin from "./packages/eslint-plugin-fern-docs/src/index.js";
 
 const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
@@ -202,6 +203,15 @@ export default [
       rules: {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-base-to-string": "off",
+      },
+    },
+    {
+      files: ["packages/fern-docs/**/*.{ts,tsx}"],
+      plugins: {
+        "fern-docs": fernDocsPlugin,
+      },
+      rules: {
+        "fern-docs/require-i18n-translations": "error",
       },
     },
     {

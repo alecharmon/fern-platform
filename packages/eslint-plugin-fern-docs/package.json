@@ -1,0 +1,13 @@
+{
+  "name": "eslint-plugin-fern-docs",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "dependencies": {
+    "@typescript-eslint/utils": "^8.0.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=8.0.0"
+  }
+}
