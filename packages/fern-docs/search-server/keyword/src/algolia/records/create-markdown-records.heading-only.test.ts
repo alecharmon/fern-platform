@@ -108,7 +108,8 @@ All headings above are empty.
     });
 
     it("should use chunkIndex + 1 for page_position when content is chunked", () => {
-        const largeContent = "A".repeat(60_000);
+        const line = "A".repeat(1000);
+        const largeContent = Array.from({ length: 52 }, () => line).join("\n");
 
         const markdown = `
 # Large Section
@@ -128,7 +129,7 @@ Some more content.
 
         const pagePositions = largeSectionRecords.map((r) => r.page_position).sort((a, b) => (a ?? 0) - (b ?? 0));
         expect(pagePositions).toEqual([1, 2]);
-    }, 90000);
+    });
 
     it("should maintain hierarchy for heading-only records", () => {
         const markdown = `
