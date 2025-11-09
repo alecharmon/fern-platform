@@ -4,10 +4,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import type { FeedbackEntry } from "@/app/actions/getFeedback";
 
+import { ColumnHeaderWithFilter } from "./ColumnHeaderWithFilter";
+
 export const columns: ColumnDef<FeedbackEntry>[] = [
     {
         accessorKey: "currentUrl",
-        header: () => <div className="pl-0">Current URL</div>,
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Current URL" className="pl-0" />,
         cell: ({ row }) => {
             const url = row.getValue("currentUrl") as string;
             return (
@@ -15,19 +17,31 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
                     {url}
                 </div>
             );
+        },
+        filterFn: (row, id, value) => {
+            const cellValue = String(row.getValue(id)).toLowerCase();
+            return cellValue.includes(String(value).toLowerCase());
         }
     },
     {
         accessorKey: "wasHelpful",
-        header: "Helpful?",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Helpful?" />,
         cell: ({ row }) => {
             const wasHelpful = row.getValue("wasHelpful") as boolean;
             return <div style={{ fontFamily: "Berkeley Mono, monospace" }}>{wasHelpful ? "True" : "False"}</div>;
+        },
+        filterFn: (row, id, value) => {
+            if (value === "") return true;
+            const cellValue = row.getValue(id) as boolean;
+            const filterValue = String(value).toLowerCase();
+            if (filterValue === "true") return cellValue === true;
+            if (filterValue === "false") return cellValue === false;
+            return true;
         }
     },
     {
         accessorKey: "selection",
-        header: "Reason",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Reason" />,
         cell: ({ row }) => {
             let selection = row.getValue("selection") as string;
             selection = selection.replaceAll("-", " ");
@@ -38,25 +52,32 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
                     {sentenceCased}
                 </div>
             );
+        },
+        filterFn: (row, id, value) => {
+            const cellValue = String(row.getValue(id)).toLowerCase().replaceAll("-", " ");
+            return cellValue.includes(String(value).toLowerCase());
         }
     },
     {
-        accessorKey: "userFeedback",
+        accessorFn: (row) => (row.userFeedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs"),
         id: "channel",
-        header: "Channel",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Channel" />,
         cell: ({ row }) => {
-            const feedback = row.original.userFeedback as string;
-            const channel = feedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
+            const channel = row.getValue("channel") as string;
             return (
                 <div className="truncate" title={channel} style={{ fontFamily: "GT Planar, sans-serif" }}>
                     {channel}
                 </div>
             );
+        },
+        filterFn: (row, id, value) => {
+            const cellValue = String(row.getValue(id)).toLowerCase();
+            return cellValue.includes(String(value).toLowerCase());
         }
     },
     {
         accessorKey: "location",
-        header: "Location",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Location" />,
         cell: ({ row }) => {
             const location = row.getValue("location") as string;
             return (
@@ -64,11 +85,15 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
                     {location}
                 </div>
             );
+        },
+        filterFn: (row, id, value) => {
+            const cellValue = String(row.getValue(id)).toLowerCase();
+            return cellValue.includes(String(value).toLowerCase());
         }
     },
     {
         accessorKey: "date",
-        header: "Date",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Date" />,
         cell: ({ row }) => {
             const date = new Date(row.getValue("date") as string);
             return (
@@ -80,6 +105,15 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
                     })}
                 </div>
             );
+        },
+        filterFn: (row, id, value) => {
+            const date = new Date(row.getValue(id) as string);
+            const formattedDate = date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            });
+            return formattedDate.toLowerCase().includes(String(value).toLowerCase());
         }
     }
 ];

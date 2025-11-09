@@ -3,6 +3,8 @@
 import {
     flexRender,
     getCoreRowModel,
+    getFacetedRowModel,
+    getFacetedUniqueValues,
     getFilteredRowModel,
     getSortedRowModel,
     useReactTable
@@ -53,7 +55,9 @@ export function FeedbackTable({
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel()
+        getFilteredRowModel: getFilteredRowModel(),
+        getFacetedRowModel: getFacetedRowModel(),
+        getFacetedUniqueValues: getFacetedUniqueValues()
     });
 
     const handleExport = () => {
