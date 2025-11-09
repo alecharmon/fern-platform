@@ -121,6 +121,11 @@ jobs:
           echo "Preview API URL: $PREVIEW_API_URL"
           echo "Vercel Base URL: $VERCEL_URL"
 
+          # Set up preview cookie and save to file for reuse
+          echo "Setting up preview cookie..."
+          curl -c /tmp/preview-cookies.txt -L "$PREVIEW_API_URL" > /dev/null 2>&1
+          echo "Cookie saved to /tmp/preview-cookies.txt"
+
           # The crawler will visit the preview API URL first to set cookies
           # Then crawl from the base URL
           echo "🌱 Smoke Test Preview: $PREVIEW_API_URL" > preview_url.txt
@@ -149,6 +154,33 @@ jobs:
         working-directory: smoke-test
         run: |
           node crawler.js "${{ steps.generate-docs.outputs.PREVIEW_URL }}"
+
+      - name: Test content negotiation with Accept header
+        if: steps.generate-docs.outputs.PREVIEW_URL != ''
+        env:
+          VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
+        run: |
+          echo "Testing Accept: text/plain header for content negotiation..."
+
+          # Reuse preview cookie from previous step
+          echo "Using existing preview cookie from /tmp/preview-cookies.txt"
+
+          # Test base URL with Accept: text/plain header
+          echo "Testing ${VERCEL_URL} with Accept: text/plain"
+          RESPONSE=$(curl -b /tmp/preview-cookies.txt -H "Accept: text/plain" -s -i "${VERCEL_URL}/" 2>&1)
+
+          # Extract content-type header
+          CONTENT_TYPE=$(echo "$RESPONSE" | grep -i "^content-type:" | head -1 | cut -d' ' -f2- | tr -d '\r')
+
+          echo "Response Content-Type: $CONTENT_TYPE"
+
+          # Check if content-type contains text/plain
+          if echo "$CONTENT_TYPE" | grep -q "text/plain"; then
+            echo "✅ Content negotiation working: returned text/plain"
+          else
+            echo "❌ Content negotiation failed: expected text/plain, got $CONTENT_TYPE"
+            exit 1
+          fi
 
       - name: Combine results for PR comment
         if: github.event_name == 'pull_request' && always()
