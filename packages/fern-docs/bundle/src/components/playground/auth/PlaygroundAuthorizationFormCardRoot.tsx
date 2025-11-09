@@ -5,16 +5,21 @@ import type { EndpointContext, WebSocketContext } from "@fern-api/fdr-sdk/api-de
 import { Button } from "@fern-docs/components/button";
 import { FernCollapse } from "@fern-docs/components/FernCollapse";
 import { t } from "@fern-docs/i18n";
-import { useBooleanState } from "@fern-ui/react-commons";
 import { noop } from "es-toolkit/function";
 import { useAtom, useSetAtom } from "jotai";
+import { RESET } from "jotai/utils";
 import React, { useEffect, useRef } from "react";
 import { useApiKeyInjectionConfig, useInjectedApiKey } from "@/components/services/useApiKeyInjectionConfig";
 import {
+    PLAYGROUND_AUTH_FORM_OPEN_ATOM,
+    PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM,
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
+    PLAYGROUND_AUTH_STATE_HEADER_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
+    PLAYGROUND_SELECTED_AUTH_TYPE_ATOM,
     useResolvedPlaygroundState
 } from "@/state/playground";
+import { getAuthKey } from "../utils";
 import { PlaygroundCardTriggerApiKeyInjected } from "./PlaygroundCardTriggerApiKeyInjected";
 import { PlaygroundCardTriggerManual } from "./PlaygroundCardTriggerManual";
 
@@ -24,32 +29,72 @@ const PlaygroundAuthorizationFormCardCtx = React.createContext<{
     toggleOpen: () => void;
     resetForm: () => void;
     apiKey: string | null;
+    authIndex: number;
+    auth: APIV1Read.ApiAuth | null;
+    totalAuthCount: number;
+    allAuths: APIV1Read.ApiAuth[];
 }>({
     open: false,
     setOpen: noop,
     toggleOpen: noop,
     resetForm: noop,
-    apiKey: null
+    apiKey: null,
+    authIndex: 0,
+    auth: null,
+    totalAuthCount: 1,
+    allAuths: []
 });
 
-export function PlaygroundAuthorizationFormCardRoot({ children }: { children: React.ReactNode }) {
-    const openState = useBooleanState(false);
+export function PlaygroundAuthorizationFormCardRoot({
+    children,
+    authIndex = 0,
+    auth,
+    totalAuthCount = 1,
+    allAuthTypes = [],
+    allAuths = []
+}: {
+    children: React.ReactNode;
+    authIndex?: number;
+    auth: APIV1Read.ApiAuth;
+    totalAuthCount?: number;
+    allAuthTypes?: string[];
+    allAuths?: APIV1Read.ApiAuth[];
+}) {
+    const [open, setOpen] = useAtom(PLAYGROUND_AUTH_FORM_OPEN_ATOM);
 
     const [bearerAuth, setBearerAuth] = useAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
+    const setBearerAuthAtom = useSetAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
+    const setBasicAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM);
+    const setHeaderAuth = useSetAtom(PLAYGROUND_AUTH_STATE_HEADER_ATOM);
     const setOAuth = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
     const apiKey = useInjectedApiKey();
     const resolvedState = useResolvedPlaygroundState();
     const prevTokenRef = useRef<string | undefined>(resolvedState?.auth?.bearer_token);
 
-    const handleResetBearerAuth = () => {
-        setBearerAuth({ token: resolvedState?.auth?.bearer_token ?? apiKey ?? "" });
-        setOAuth((prev) => ({ ...prev, userSuppliedAccessToken: "" }));
+    const handleResetAuth = () => {
+        // Reset the current auth type based on what this card represents
+        switch (auth.type) {
+            case "bearerAuth":
+                setBearerAuthAtom({ token: resolvedState?.auth?.bearer_token ?? apiKey ?? "" });
+                setOAuth((prev) => ({ ...prev, userSuppliedAccessToken: "" }));
+                break;
+            case "basicAuth":
+                setBasicAuth(RESET);
+                break;
+            case "header":
+                setHeaderAuth(RESET);
+                break;
+            case "oAuth":
+                setOAuth(RESET);
+                break;
+        }
     };
 
-    // only update bearer auth if the resolved environment value actually changes
+    // Only update bearer auth when the resolved environment value actually changes
+    // Don't overwrite user-entered values on mount
     useEffect(() => {
         const currentToken = resolvedState?.auth?.bearer_token;
-        if (currentToken && currentToken !== prevTokenRef.current) {
+        if (currentToken !== undefined && currentToken !== prevTokenRef.current) {
             setBearerAuth({ token: currentToken });
             prevTokenRef.current = currentToken;
         }
@@ -58,11 +103,15 @@ export function PlaygroundAuthorizationFormCardRoot({ children }: { children: Re
     return (
         <PlaygroundAuthorizationFormCardCtx.Provider
             value={{
-                open: openState.value,
-                setOpen: openState.setValue,
-                toggleOpen: openState.toggleValue,
-                resetForm: handleResetBearerAuth,
-                apiKey: bearerAuth.token ?? ""
+                open,
+                setOpen,
+                toggleOpen: () => setOpen((prev) => !prev),
+                resetForm: handleResetAuth,
+                apiKey: bearerAuth.token ?? "",
+                authIndex,
+                auth,
+                totalAuthCount,
+                allAuths
             }}
         >
             <div className="relative">{children}</div>
@@ -79,25 +128,35 @@ export function PlaygroundAuthorizationCardTrigger({
     disabled,
     context,
     oauthReferencedContext,
-    lang
+    lang,
+    allAuths
 }: {
     auth: APIV1Read.ApiAuth;
     disabled: boolean;
     context: EndpointContext | WebSocketContext;
     oauthReferencedContext?: EndpointContext;
     lang: string;
+    allAuths?: APIV1Read.ApiAuth[];
 }) {
-    const { open, toggleOpen } = usePlaygroundAuthorizationFormCard();
+    const { open, toggleOpen, allAuths: contextAllAuths } = usePlaygroundAuthorizationFormCard();
     const apiKeyInjection = useApiKeyInjectionConfig();
+    const authsToUse = allAuths || contextAllAuths;
+
+    // Find the auth key for the current auth scheme
+    const currentAuthWithKey = context.authsWithKeys.find((a) => a.scheme === auth);
+    const authKey = currentAuthWithKey ? getAuthKey(currentAuthWithKey) : "unknown";
+
     return apiKeyInjection.enabled ? (
         <PlaygroundCardTriggerApiKeyInjected
             auth={auth}
+            authKey={authKey}
             config={apiKeyInjection}
             context={context}
             oauthReferencedContext={oauthReferencedContext}
             disabled={disabled}
             toggleOpen={toggleOpen}
             lang={lang}
+            allAuths={authsToUse}
         />
     ) : (
         <PlaygroundCardTriggerManual
@@ -106,6 +165,7 @@ export function PlaygroundAuthorizationCardTrigger({
             isOpen={open}
             toggleOpen={toggleOpen}
             lang={lang}
+            allAuthsWithKeys={context.authsWithKeys}
         />
     );
 }

@@ -103,8 +103,8 @@ export async function EndpointContent({
                 }
                 footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
             >
-                <PlaygroundKeyboardTrigger />
-                <MdxServerComponentProseSuspense mdx={endpoint.description} />
+                <PlaygroundKeyboardTrigger key="keyboard-trigger" />
+                <MdxServerComponentProseSuspense key="description" mdx={endpoint.description} />
             </ReferenceLayout>
         </EndpointContextProvider>
     );

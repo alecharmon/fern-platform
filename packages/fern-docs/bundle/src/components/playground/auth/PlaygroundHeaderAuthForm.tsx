@@ -12,19 +12,25 @@ import { PLAYGROUND_AUTH_STATE_HEADER_ATOM, PLAYGROUND_RESOLVED_STATE_ATOM } fro
 
 import { PasswordInputGroup } from "../PasswordInputGroup";
 
-function headerAtom(headerName: string) {
+// Create a unique storage key by combining auth key and header name
+export function getHeaderStorageKey(authKey: string, headerName: string): string {
+    return `${authKey}:${headerName}`;
+}
+
+function headerAtom(authKey: string, headerName: string) {
+    const storageKey = getHeaderStorageKey(authKey, headerName);
     return atom(
-        (get) => get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[headerName],
+        (get) => get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[storageKey],
         (_get, set, change: SetStateAction<string> | typeof RESET) => {
             set(PLAYGROUND_AUTH_STATE_HEADER_ATOM, ({ headers }) => {
-                const nextHeaderValue = typeof change === "function" ? change(headers[headerName] ?? "") : change;
+                const nextHeaderValue = typeof change === "function" ? change(headers[storageKey] ?? "") : change;
                 if (nextHeaderValue === RESET) {
                     return {
                         // note: this will remove all undefined values from the object
                         headers: JSON.parse(
                             JSON.stringify({
                                 ...headers,
-                                [headerName]: undefined
+                                [storageKey]: undefined
                             })
                         )
                     };
@@ -32,7 +38,7 @@ function headerAtom(headerName: string) {
                 return {
                     headers: {
                         ...headers,
-                        [headerName]: nextHeaderValue
+                        [storageKey]: nextHeaderValue
                     }
                 };
             });
@@ -40,9 +46,10 @@ function headerAtom(headerName: string) {
     );
 }
 
-function isHeaderResettableAtom(headerName: string) {
+function isHeaderResettableAtom(authKey: string, headerName: string) {
+    const storageKey = getHeaderStorageKey(authKey, headerName);
     return atom((get) => {
-        const inputHeader = get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[headerName];
+        const inputHeader = get(PLAYGROUND_AUTH_STATE_HEADER_ATOM).headers[storageKey];
         const injectedHeader = get(PLAYGROUND_RESOLVED_STATE_ATOM)?.headers?.[headerName];
         return injectedHeader != null && injectedHeader !== inputHeader;
     });
@@ -50,14 +57,18 @@ function isHeaderResettableAtom(headerName: string) {
 
 export function PlaygroundHeaderAuthForm({
     header,
+    authKey,
     disabled
 }: {
     header: APIV1Read.HeaderAuth;
+    authKey: string;
     disabled?: boolean;
 }): ReactElement<any> {
-    const [value, setValue] = useAtom(useMemoOne(() => headerAtom(header.headerWireValue), [header.headerWireValue]));
+    const [value, setValue] = useAtom(
+        useMemoOne(() => headerAtom(authKey, header.headerWireValue), [authKey, header.headerWireValue])
+    );
     const isResettable = useAtomValue(
-        useMemoOne(() => isHeaderResettableAtom(header.headerWireValue), [header.headerWireValue])
+        useMemoOne(() => isHeaderResettableAtom(authKey, header.headerWireValue), [authKey, header.headerWireValue])
     );
 
     return (

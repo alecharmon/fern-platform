@@ -74,14 +74,14 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
     return (
         <>
             {error != null && (
-                <Callout intent="error">
+                <Callout key="error-callout" intent="error">
                     <div className="text-base">{error}</div>
                 </Callout>
             )}
 
-            {authForm}
+            <div key="auth-form">{authForm}</div>
 
-            <div className="col-span-2 space-y-8">
+            <div key="params-form" className="col-span-2 space-y-8">
                 {headers.length > 0 && (
                     <div>
                         <div className="mb-4 px-4">
@@ -140,7 +140,7 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
                 )}
             </div>
 
-            <hr />
+            <hr key="divider" />
         </>
     );
 };

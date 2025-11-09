@@ -632,4 +632,4 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-      description: API key authentication
+      description: API key authentication - see https://buildwithfern.com/learn/docs/getting-started/overview to get your API key

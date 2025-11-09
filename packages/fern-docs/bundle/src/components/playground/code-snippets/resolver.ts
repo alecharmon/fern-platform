@@ -1,6 +1,8 @@
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { unknownToString } from "@fern-api/ui-core-utils";
+import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
+import { PLAYGROUND_SELECTED_AUTH_TYPE_ATOM } from "@/state/playground";
 
 import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
 import { buildAuthHeaders } from "../utils";
@@ -19,7 +21,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
         authState: PlaygroundAuthState,
         formState: PlaygroundEndpointRequestFormState,
         playgroundEnvironment: string | undefined,
-        setOAuthValue: (value: (prev: any) => any) => void
+        setOAuthValue: (value: (prev: any) => any) => void,
+        selectedAuth?: APIV1Read.ApiAuth,
+        authKey?: string
     ): PlaygroundCodeSnippetResolver {
         return new PlaygroundCodeSnippetResolver(
             this.context,
@@ -28,7 +32,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
             false,
             this.isSnippetTemplatesEnabled,
             playgroundEnvironment,
-            setOAuthValue
+            setOAuthValue,
+            selectedAuth,
+            authKey
         );
     }
 
@@ -36,7 +42,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
         authState: PlaygroundAuthState,
         formState: PlaygroundEndpointRequestFormState,
         playgroundEnvironment: string | undefined,
-        setOAuthValue: (value: (prev: any) => any) => void
+        setOAuthValue: (value: (prev: any) => any) => void,
+        selectedAuth?: APIV1Read.ApiAuth,
+        authKey?: string
     ): PlaygroundCodeSnippetResolver {
         return new PlaygroundCodeSnippetResolver(
             this.context,
@@ -45,7 +53,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
             true,
             this.isSnippetTemplatesEnabled,
             playgroundEnvironment,
-            setOAuthValue
+            setOAuthValue,
+            selectedAuth,
+            authKey
         );
     }
 }
@@ -73,12 +83,15 @@ export class PlaygroundCodeSnippetResolver {
         private isAuthHeadersRedacted: boolean,
         public isSnippetTemplatesEnabled: boolean,
         private baseUrl: string | undefined,
-        setOAuthValue: (value: (prev: any) => any) => void
+        setOAuthValue: (value: (prev: any) => any) => void,
+        selectedAuth?: APIV1Read.ApiAuth,
+        authKey?: string
     ) {
+        // Use the selected auth if provided, otherwise fall back to first auth
+        const auth = selectedAuth ?? this.context.auths[0];
+
         const authHeaders = buildAuthHeaders(
-            this.context.auths[0] != null && shouldRenderAuth(this.context.endpoint, this.context.auths[0])
-                ? this.context.auths[0]
-                : undefined,
+            auth != null && shouldRenderAuth(this.context.endpoint, auth) ? auth : undefined,
             authState,
             { redacted: isAuthHeadersRedacted },
             {
@@ -86,7 +99,8 @@ export class PlaygroundCodeSnippetResolver {
                 endpoint: this.context.endpoint,
                 baseUrl: this.baseUrl,
                 setValue: setOAuthValue
-            }
+            },
+            authKey
         );
 
         this.headers = { ...authHeaders, ...formState.headers };

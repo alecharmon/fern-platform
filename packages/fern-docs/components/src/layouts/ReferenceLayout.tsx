@@ -51,10 +51,14 @@ export const ReferenceLayout = React.forwardRef<
                     )}
                     <Prose className="mb-12 space-y-12">
                         <div className="mb-12 space-y-12">
-                            {children}
-                            {isMobile && <section className="fern-layout-reference-aside">{aside}</section>}
-                            {reference}
-                            {footer}
+                            {children && <div key="children">{children}</div>}
+                            {isMobile && (
+                                <section key="mobile-aside" className="fern-layout-reference-aside">
+                                    {aside}
+                                </section>
+                            )}
+                            {reference && <div key="reference">{reference}</div>}
+                            {footer && <div key="footer">{footer}</div>}
                         </div>
                     </Prose>
                 </div>

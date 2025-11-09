@@ -6,7 +6,7 @@ import { t } from "@fern-docs/i18n";
 import { useAtom, useAtomValue } from "jotai/react";
 import { RESET } from "jotai/utils";
 import { User } from "lucide-react";
-import { type ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect, useRef } from "react";
 import {
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_ATOM,
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_IS_RESETTABLE_ATOM,
@@ -31,11 +31,24 @@ export function PlaygroundBasicAuthForm({
     const isPasswordResettable = useAtomValue(PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_IS_RESETTABLE_ATOM);
 
     const resolvedState = useResolvedPlaygroundState();
+    const prevUsernameRef = useRef<string | undefined>(resolvedState?.auth?.basic?.username);
+    const prevPasswordRef = useRef<string | undefined>(resolvedState?.auth?.basic?.password);
 
-    // if the resolved state changes (on env update), update the auth state
+    // Only update auth state when the resolved state actually changes (e.g., environment change)
+    // Don't overwrite user-entered values on mount
     useEffect(() => {
-        setUsername(resolvedState?.auth?.basic?.username ?? "");
-        setPassword(resolvedState?.auth?.basic?.password ?? "");
+        const currentUsername = resolvedState?.auth?.basic?.username;
+        const currentPassword = resolvedState?.auth?.basic?.password;
+
+        if (currentUsername !== undefined && currentUsername !== prevUsernameRef.current) {
+            setUsername(currentUsername);
+            prevUsernameRef.current = currentUsername;
+        }
+
+        if (currentPassword !== undefined && currentPassword !== prevPasswordRef.current) {
+            setPassword(currentPassword);
+            prevPasswordRef.current = currentPassword;
+        }
     }, [resolvedState?.auth?.basic?.username, resolvedState?.auth?.basic?.password, setUsername, setPassword]);
 
     return (

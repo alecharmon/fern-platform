@@ -5,14 +5,19 @@ import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { t } from "@fern-docs/i18n";
-import { useSetAtom } from "jotai";
-import { type ReactElement, useRef } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { type ReactElement, useMemo, useRef } from "react";
 import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
 import { useProgrammingLanguage } from "@/state/language";
-import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_AUTH_STATE_OAUTH_ATOM } from "@/state/playground";
+import {
+    PLAYGROUND_AUTH_STATE_ATOM,
+    PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
+    PLAYGROUND_SELECTED_AUTH_TYPE_ATOM
+} from "@/state/playground";
 import { PlaygroundCodeSnippetResolverBuilder } from "../code-snippets/resolver";
 import { PlaygroundRequestPreview } from "../PlaygroundRequestPreview";
 import type { PlaygroundEndpointRequestFormState } from "../types";
+import { getAuthKey } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import {
     type DynamicSnippetLanguage,
@@ -72,6 +77,34 @@ export function PlaygroundEndpointRequestCard({
     const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
     const dynamicPreviewRef = useRef<PlaygroundDynamicRequestPreviewRef>(null);
+    const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
+
+    // Determine which auth to use based on the selected auth type, and get its key
+    const { selectedAuth, authKey } = useMemo(() => {
+        if (context.authsWithKeys.length === 0) {
+            return { selectedAuth: undefined, authKey: undefined };
+        }
+
+        // If a specific auth type is selected, find it
+        if (selectedAuthType) {
+            const selectedAuthWithKey = context.authsWithKeys.find(
+                (authWithKey) => getAuthKey(authWithKey) === selectedAuthType
+            );
+            if (selectedAuthWithKey) {
+                return {
+                    selectedAuth: selectedAuthWithKey.scheme,
+                    authKey: getAuthKey(selectedAuthWithKey)
+                };
+            }
+        }
+
+        // Default to the first auth
+        const firstAuth = context.authsWithKeys[0];
+        return {
+            selectedAuth: firstAuth?.scheme,
+            authKey: firstAuth ? getAuthKey(firstAuth) : undefined
+        };
+    }, [context.authsWithKeys, selectedAuthType]);
 
     const hasDynamicIr = Object.keys(dynamicIRsByLanguage ?? {}).length > 0;
     const isHeadRequest = context.endpoint.method === "HEAD";
@@ -142,7 +175,9 @@ export function PlaygroundEndpointRequestCard({
                                 authState,
                                 formState,
                                 baseUrl,
-                                setOAuthValue
+                                setOAuthValue,
+                                selectedAuth,
+                                authKey
                             );
                             return resolver.resolve(getFallbackRequestType());
                         }}

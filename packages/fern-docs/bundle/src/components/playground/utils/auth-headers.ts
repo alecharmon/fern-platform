@@ -3,7 +3,7 @@ import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { decodeJwt } from "jose";
 import { noop } from "ts-essentials";
-
+import { getHeaderStorageKey } from "../auth/PlaygroundHeaderAuthForm";
 import type { PlaygroundAuthState } from "../types";
 import {
     type OAuthClientCredentialReferencedEndpointLoginFlowProps,
@@ -18,7 +18,8 @@ export function buildAuthHeaders(
     oAuthClientCredentialReferencedEndpointLoginFlowProps?: Omit<
         OAuthClientCredentialReferencedEndpointLoginFlowProps,
         "referencedEndpoint"
-    >
+    >,
+    authKey?: string
 ): Record<string, string> {
     const headers: Record<string, string> = {};
 
@@ -35,8 +36,11 @@ export function buildAuthHeaders(
                 headers.Authorization = `Bearer ${token}`;
             },
             header: (header) => {
-                // pluck the value from the headers object (avoid inheriting all the other headers)
-                let value = authState.header?.headers[header.headerWireValue] ?? "";
+                // pluck the value from the headers object using the scoped storage key
+                const storageKey = authKey
+                    ? getHeaderStorageKey(authKey, header.headerWireValue)
+                    : header.headerWireValue;
+                let value = authState.header?.headers[storageKey] ?? "";
                 if (redacted) {
                     value = obfuscateSecret(value);
                 }

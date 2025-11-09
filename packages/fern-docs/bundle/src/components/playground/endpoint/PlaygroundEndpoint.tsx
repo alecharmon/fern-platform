@@ -9,13 +9,14 @@ import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { failed, type Loadable, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { useEventCallback } from "@fern-ui/react-commons";
 import { mapValues } from "es-toolkit/object";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { SendHorizonal } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
+    PLAYGROUND_SELECTED_AUTH_TYPE_ATOM,
     usePlaygroundEndpointFormState,
     useResolvedPlaygroundState
 } from "@/state/playground";
@@ -26,7 +27,12 @@ import { executeProxyRest } from "../fetch-utils/executeProxyRest";
 import { executeProxyStream } from "../fetch-utils/executeProxyStream";
 import type { ProxyRequest } from "../types";
 import type { PlaygroundResponse } from "../types/playgroundResponse";
-import { buildAuthHeaders, getInitialEndpointRequestFormStateWithExample, serializeFormStateBody } from "../utils";
+import {
+    buildAuthHeaders,
+    getAuthKey,
+    getInitialEndpointRequestFormStateWithExample,
+    serializeFormStateBody
+} from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { isLocal } from "../utils/utils";
 import { PlaygroundEndpointContent } from "./PlaygroundEndpointContent";
@@ -46,8 +52,35 @@ export const PlaygroundEndpoint = ({
     lang: string;
 }) => {
     const resolvedPlaygroundState = useResolvedPlaygroundState();
-    const { node, endpoint, auths } = context;
-    const auth = auths[0];
+    const { node, endpoint } = context;
+    const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
+
+    // Determine which auth to use based on the selected auth type, and get its key
+    const { auth, authKey } = useMemo(() => {
+        if (context.authsWithKeys.length === 0) {
+            return { auth: undefined, authKey: undefined };
+        }
+
+        // If a specific auth type is selected, find it
+        if (selectedAuthType) {
+            const selectedAuthWithKey = context.authsWithKeys.find(
+                (authWithKey) => getAuthKey(authWithKey) === selectedAuthType
+            );
+            if (selectedAuthWithKey) {
+                return {
+                    auth: selectedAuthWithKey.scheme,
+                    authKey: getAuthKey(selectedAuthWithKey)
+                };
+            }
+        }
+
+        // Default to the first auth
+        const firstAuth = context.authsWithKeys[0];
+        return {
+            auth: firstAuth?.scheme,
+            authKey: firstAuth ? getAuthKey(firstAuth) : undefined
+        };
+    }, [context.authsWithKeys, selectedAuthType]);
 
     const isDisableProxy = disableProxy || isLocal();
 
@@ -88,6 +121,7 @@ export const PlaygroundEndpoint = ({
                     .map((part) => (part.type === "pathParameter" ? `:${part.value}` : part.value))
                     .join("")
             });
+
             const authHeaders = buildAuthHeaders(
                 auth,
                 jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM),
@@ -99,7 +133,8 @@ export const PlaygroundEndpoint = ({
                     endpoint,
                     baseUrl,
                     setValue: setOAuthValue
-                }
+                },
+                authKey
             );
             const headers = {
                 ...authHeaders,

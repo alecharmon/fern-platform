@@ -6,15 +6,20 @@ import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { t } from "@fern-docs/i18n";
 import { usePrevious } from "@fern-ui/react-commons";
+import { useAtomValue } from "jotai";
 import { Wifi, WifiOff } from "lucide-react";
-import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import { type FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import urlJoin from "url-join";
-import { PLAYGROUND_AUTH_STATE_ATOM, usePlaygroundWebsocketFormState } from "@/state/playground";
+import {
+    PLAYGROUND_AUTH_STATE_ATOM,
+    PLAYGROUND_SELECTED_AUTH_TYPE_ATOM,
+    usePlaygroundWebsocketFormState
+} from "@/state/playground";
 
 import { usePlaygroundSettings } from "../../hooks/usePlaygroundSettings";
 import { PlaygroundEndpointPath } from "../endpoint/PlaygroundEndpointPath";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
-import { buildAuthHeaders } from "../utils";
+import { buildAuthHeaders, getAuthKey } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { PlaygroundWebSocketContent } from "./PlaygroundWebSocketContent";
 
@@ -30,6 +35,34 @@ interface PlaygroundWebSocketProps {
 export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, authForm, lang }) => {
     const [formState, setFormState] = usePlaygroundWebsocketFormState(context);
     const websocketMessageLimit = usePlaygroundSettings(context.node.id)?.["limit-websocket-messages-per-connection"];
+    const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
+
+    // Determine which auth to use based on the selected auth type, and get its key
+    const { selectedAuth, authKey } = useMemo(() => {
+        if (context.authsWithKeys.length === 0) {
+            return { selectedAuth: undefined, authKey: undefined };
+        }
+
+        // If a specific auth type is selected, find it
+        if (selectedAuthType) {
+            const selectedAuthWithKey = context.authsWithKeys.find(
+                (authWithKey) => getAuthKey(authWithKey) === selectedAuthType
+            );
+            if (selectedAuthWithKey) {
+                return {
+                    selectedAuth: selectedAuthWithKey.scheme,
+                    authKey: getAuthKey(selectedAuthWithKey)
+                };
+            }
+        }
+
+        // Default to the first auth
+        const firstAuth = context.authsWithKeys[0];
+        return {
+            selectedAuth: firstAuth?.scheme,
+            authKey: firstAuth ? getAuthKey(firstAuth) : undefined
+        };
+    }, [context.authsWithKeys, selectedAuthType]);
 
     const [connectedState, setConnectedState] = useState<"opening" | "opened" | "closed">("closed");
     const { pushMessage, clearMessages } = useWebsocketMessages(context.node.id);
@@ -93,9 +126,15 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
 
             socket.current.onopen = () => {
                 const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
-                const authHeaders = buildAuthHeaders(context.auths[0], authState, {
-                    redacted: false
-                });
+                const authHeaders = buildAuthHeaders(
+                    selectedAuth,
+                    authState,
+                    {
+                        redacted: false
+                    },
+                    undefined,
+                    authKey
+                );
                 const headers = {
                     ...authHeaders,
                     ...formState.headers
@@ -144,7 +183,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
     }, [
         baseUrl,
         context.channel.path,
-        context.auths,
+        selectedAuth,
         formState.pathParameters,
         formState.queryParameters,
         formState.headers,

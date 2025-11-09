@@ -13,23 +13,29 @@ import { Callout } from "@/mdx/components/callout";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
     PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM,
-    PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM
+    PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
+    PLAYGROUND_AUTH_STATE_HEADER_ATOM
 } from "@/state/playground";
 import { useApiRoute } from "../../hooks/useApiRoute";
+import { getAuthKey } from "../utils";
 import { PlaygroundAuthorizationForm } from "./PlaygroundAuthorizationForm";
+import { getHeaderStorageKey } from "./PlaygroundHeaderAuthForm";
 
 interface PlaygroundCardTriggerApiKeyInjectedProps {
     auth: APIV1Read.ApiAuth;
+    authKey: string;
     context: EndpointContext | WebSocketContext;
     oauthReferencedContext?: EndpointContext;
     config: APIKeyInjectionConfigEnabled;
     disabled: boolean;
     toggleOpen: () => void;
     lang: string;
+    allAuths?: APIV1Read.ApiAuth[];
 }
 
 export function PlaygroundCardTriggerApiKeyInjected({
     auth,
+    authKey,
     context,
     oauthReferencedContext,
     config,
@@ -52,6 +58,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
 
     const setBearerAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
     const setBasicAuth = useSetAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_ATOM);
+    const setHeaderAuth = useSetAtom(PLAYGROUND_AUTH_STATE_HEADER_ATOM);
 
     // TODO change this to on-login
     useEffect(() => {
@@ -64,7 +71,15 @@ export function PlaygroundCardTriggerApiKeyInjected({
                 password: apiKey.split(":")[1]
             });
         }
-    }, [apiKey, setBearerAuth, setBasicAuth, auth]);
+        if (apiKey != null && auth.type === "header") {
+            const storageKey = getHeaderStorageKey(authKey, auth.headerWireValue);
+            setHeaderAuth({
+                headers: {
+                    [storageKey]: apiKey
+                }
+            });
+        }
+    }, [apiKey, setBearerAuth, setBasicAuth, setHeaderAuth, auth, authKey]);
 
     const handleResetAuth = () => {
         setBearerAuth({ token: apiKey ?? "" });
@@ -72,6 +87,14 @@ export function PlaygroundCardTriggerApiKeyInjected({
             username: apiKey?.split(":")[0] ?? "",
             password: apiKey?.split(":")[1] ?? ""
         });
+        if (auth.type === "header") {
+            const storageKey = getHeaderStorageKey(authKey, auth.headerWireValue);
+            setHeaderAuth({
+                headers: {
+                    [storageKey]: apiKey ?? ""
+                }
+            });
+        }
     };
 
     const redirectOrOpenAuthForm = () => {
@@ -107,6 +130,7 @@ export function PlaygroundCardTriggerApiKeyInjected({
                     <PlaygroundAuthorizationForm
                         context={context}
                         auth={auth}
+                        authKey={authKey}
                         oauthReferencedContext={oauthReferencedContext}
                         disabled={disabled}
                         lang={lang}

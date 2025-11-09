@@ -36,7 +36,7 @@ export async function EndpointContentLeft({
 
     return (
         <>
-            <TypeDefinitionAnchorPart part="request">
+            <TypeDefinitionAnchorPart key="request" part="request">
                 {showAuth && auths.length > 0 && (
                     <TypeDefinitionAnchorPart part="auth">
                         <EndpointAuthSection auths={auths} lang={lang} />
@@ -107,7 +107,7 @@ export async function EndpointContentLeft({
                     )
                 ) : null}
             </TypeDefinitionAnchorPart>
-            <TypeDefinitionResponse>
+            <TypeDefinitionResponse key="response">
                 <TypeDefinitionAnchorPart part="response">
                     {endpoint.responses?.[0] != null ? (
                         endpoint.responses.length > 1 ? (

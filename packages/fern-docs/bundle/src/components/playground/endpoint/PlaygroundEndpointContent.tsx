@@ -44,9 +44,9 @@ export function PlaygroundEndpointContent({
 
     const form = (
         <div className="mx-auto w-full max-w-5xl space-y-6 pt-6 max-sm:pt-0 sm:pb-20">
-            {authForm}
+            <div key="auth-form">{authForm}</div>
 
-            <div className="col-span-2 space-y-8">
+            <div key="endpoint-form" className="col-span-2 space-y-8">
                 <PlaygroundEndpointForm
                     context={context}
                     formState={formState}
@@ -56,6 +56,7 @@ export function PlaygroundEndpointContent({
             </div>
 
             <PlaygroundEndpointFormButtons
+                key="form-buttons"
                 node={context.node}
                 resetWithExample={resetWithExample}
                 resetWithoutExample={resetWithoutExample}

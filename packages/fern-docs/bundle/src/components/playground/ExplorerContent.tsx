@@ -59,9 +59,9 @@ export async function ExplorerContent({
         if (!context) return null;
 
         let oauthReferencedContext: EndpointContext | undefined;
-        const auth = context.auths[0];
-        if (auth?.type === "oAuth") {
-            const oAuthValue = auth.value;
+        const firstAuth = context.auths[0];
+        if (firstAuth?.type === "oAuth") {
+            const oAuthValue = firstAuth.value;
             if (oAuthValue.type === "clientCredentials") {
                 const clientCredentials = oAuthValue.value;
                 if (clientCredentials.type === "referencedEndpoint") {
@@ -77,6 +77,7 @@ export async function ExplorerContent({
                                 endpoint,
                                 globalHeaders,
                                 auths: authSchemes.filter((a) => a.type !== "oAuth"),
+                                authsWithKeys: [], // OAuth referenced endpoints don't need authsWithKeys
                                 types
                             };
                         }
@@ -87,9 +88,8 @@ export async function ExplorerContent({
             }
         }
 
-        const authForm = auth != null && (
+        const authForm = context.authsWithKeys.length > 0 && (
             <PlaygroundAuthorizationFormCard
-                auth={auth}
                 context={context}
                 oauthReferencedContext={oauthReferencedContext}
                 lang={lang}
@@ -109,8 +109,8 @@ export async function ExplorerContent({
     } else if (node.type === "webSocket") {
         const context = createWebSocketContext(node, api);
         if (!context) return null;
-        const authForm = context.auths[0] != null && (
-            <PlaygroundAuthorizationFormCard context={context} auth={context.auths[0]} lang={lang} />
+        const authForm = context.authsWithKeys.length > 0 && (
+            <PlaygroundAuthorizationFormCard context={context} lang={lang} />
         );
         return (
             <ApiDefinitionIdProvider value={node.apiDefinitionId}>

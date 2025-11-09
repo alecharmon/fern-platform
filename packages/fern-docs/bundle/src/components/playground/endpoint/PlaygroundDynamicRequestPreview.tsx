@@ -7,7 +7,7 @@ import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter"
 import { t } from "@fern-docs/i18n";
 import { useAtomValue } from "jotai";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
-import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
+import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_SELECTED_AUTH_TYPE_ATOM } from "@/state/playground";
 
 import type { PlaygroundEndpointRequestFormState } from "../types";
 import { returnSelectedOption } from "../utils/parse-auth-options";
@@ -33,6 +33,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
 >(({ context, formState, requestType, dynamicIRsByLanguage, lang }, ref) => {
     const [code, setCode] = useState<string>(t(lang).status.loading);
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+    const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
     const [baseURL] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
     useImperativeHandle(
@@ -213,7 +214,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         };
 
         generateCode();
-    }, [requestType, memoizedGenerators, formState, baseURL, authState]);
+    }, [requestType, memoizedGenerators, formState, baseURL, authState, selectedAuthType, lang]);
 
     return (
         <FernSyntaxHighlighter

@@ -60,6 +60,19 @@ export const PLAYGROUND_AUTH_STATE_ATOM = atomWithStorageValidation<PlaygroundAu
     }
 );
 
+/**
+ * Stores the selected auth type key (from authSchemes map in API definition).
+ * Used to remember which auth scheme the user prefers across different endpoints.
+ */
+export const PLAYGROUND_SELECTED_AUTH_TYPE_ATOM = atomWithStorage<string | null>(
+    "playground-selected-auth-type",
+    null,
+    undefined,
+    {
+        getOnInit: true
+    }
+);
+
 export const PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM = atom(
     (get) => ({
         token:
@@ -208,6 +221,8 @@ export const PLAYGROUND_AUTH_STATE_OAUTH_ATOM = atom(
         });
     }
 );
+
+export const PLAYGROUND_AUTH_FORM_OPEN_ATOM = atom<boolean>(false);
 
 const playgroundFormStateFamily = atomFamily((nodeId: FernNavigation.NodeId) => {
     const formStateAtom = atomWithStorage<PlaygroundRequestFormState | undefined>(nodeId, undefined, undefined, {

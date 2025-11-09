@@ -2,6 +2,7 @@ import type { EndpointNode, GrpcNode, TypeId, WebhookNode, WebSocketNode } from 
 import type {
     ApiDefinition,
     AuthScheme,
+    AuthSchemeId,
     EndpointDefinition,
     EndpointId,
     ObjectProperty,
@@ -11,11 +12,17 @@ import type {
 } from "./latest";
 import { prune } from "./prune";
 
+export type AuthSchemeWithKey = {
+    key: AuthSchemeId;
+    scheme: AuthScheme;
+};
+
 export type EndpointContext = {
     node: EndpointNode;
     endpoint: EndpointDefinition;
     globalHeaders: ObjectProperty[];
     auths: AuthScheme[];
+    authsWithKeys: AuthSchemeWithKey[];
     types: Record<TypeId, TypeDefinition>;
 };
 
@@ -35,6 +42,13 @@ export function createEndpointContext(
         node,
         endpoint,
         auths: endpoint.auth?.map((id) => api.auths[id]).filter((auth): auth is AuthScheme => auth != null) ?? [],
+        authsWithKeys:
+            endpoint.auth
+                ?.map((id) => {
+                    const scheme = api.auths[id];
+                    return scheme ? { key: id, scheme } : null;
+                })
+                .filter((item): item is AuthSchemeWithKey => item != null) ?? [],
         globalHeaders: api.globalHeaders ?? [],
         types: api.types
     };
@@ -45,6 +59,7 @@ export type WebSocketContext = {
     channel: WebSocketChannel;
     globalHeaders: ObjectProperty[];
     auths: AuthScheme[];
+    authsWithKeys: AuthSchemeWithKey[];
     types: Record<TypeId, TypeDefinition>;
 };
 
@@ -64,6 +79,13 @@ export function createWebSocketContext(
         node,
         channel,
         auths: channel.auth?.map((id) => api.auths[id]).filter((auth): auth is AuthScheme => auth != null) ?? [],
+        authsWithKeys:
+            channel.auth
+                ?.map((id) => {
+                    const scheme = api.auths[id];
+                    return scheme ? { key: id, scheme } : null;
+                })
+                .filter((item): item is AuthSchemeWithKey => item != null) ?? [],
         globalHeaders: api.globalHeaders ?? [],
         types: api.types
     };

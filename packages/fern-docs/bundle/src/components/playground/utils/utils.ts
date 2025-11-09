@@ -6,6 +6,7 @@ import {
     unwrapObjectType,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
+import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { isPlainObject, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { uniqBy } from "es-toolkit/array";
 
@@ -150,3 +151,13 @@ export function isValidFile(file: any): file is File {
 export const isLocal = () => {
     return process.env.NEXT_PUBLIC_IS_LOCAL === "1";
 };
+
+/**
+ * Gets the auth key from an AuthSchemeWithKey object.
+ * Auth keys come from the authSchemes map in the API definition
+ * (e.g., "bearerAuth", "api_key", "webhook_signature").
+ * These keys are guaranteed to be unique.
+ */
+export function getAuthKey(authWithKey: { key: string | number }): string {
+    return String(authWithKey.key);
+}

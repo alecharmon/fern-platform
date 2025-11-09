@@ -10,6 +10,7 @@ import { FoundOAuthReferencedEndpointForm } from "./PlaygroundOAuthForm";
 
 interface PlaygroundAuthorizationFormProps {
     auth: APIV1Read.ApiAuth;
+    authKey: string;
     context: EndpointContext | WebSocketContext;
     oauthReferencedContext?: EndpointContext;
     disabled: boolean;
@@ -18,6 +19,7 @@ interface PlaygroundAuthorizationFormProps {
 
 export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> = ({
     auth,
+    authKey,
     context,
     oauthReferencedContext,
     disabled,
@@ -32,7 +34,7 @@ export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> =
                 basicAuth: (basicAuth) => (
                     <PlaygroundBasicAuthForm basicAuth={basicAuth} disabled={disabled} lang={lang} />
                 ),
-                header: (header) => <PlaygroundHeaderAuthForm header={header} disabled={disabled} />,
+                header: (header) => <PlaygroundHeaderAuthForm header={header} authKey={authKey} disabled={disabled} />,
                 oAuth: (oAuth) => {
                     if ("endpoint" in context) {
                         return visitDiscriminatedUnion(oAuth.value, "type")._visit({
