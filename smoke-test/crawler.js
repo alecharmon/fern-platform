@@ -1,18 +1,20 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-async function fetchSitemap(baseUrl) {
+async function fetchSitemap(baseUrl, page) {
   try {
     const sitemapUrl = `${baseUrl}/sitemap.xml`;
     console.log(`Fetching sitemap from ${sitemapUrl}`);
 
-    const response = await fetch(sitemapUrl);
-    if (!response.ok) {
-      console.warn(`Failed to fetch sitemap: ${response.status}`);
+    // Use Puppeteer page to fetch sitemap so it has the preview cookie
+    const response = await page.goto(sitemapUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    if (!response || response.status() !== 200) {
+      console.warn(`Failed to fetch sitemap: ${response ? response.status() : 'no response'}`);
       return [];
     }
 
-    const xml = await response.text();
+    const xml = await page.content();
     // Extract URLs from sitemap (simple regex approach)
     const urlMatches = xml.matchAll(/<loc>(.*?)<\/loc>/g);
     const urls = Array.from(urlMatches).map(match => match[1]);
@@ -45,8 +47,23 @@ async function crawlSite(startUrl) {
   const baseUrl = new URL(startUrl);
   const baseUrlString = `${baseUrl.protocol}//${baseUrl.hostname}`;
 
-  // Fetch URLs from sitemap
-  const sitemapUrls = await fetchSitemap(baseUrlString);
+  // Create a page to set up cookies by visiting the preview API URL
+  console.log(`Setting up preview connection: ${startUrl}`);
+  const setupPage = await browser.newPage();
+
+  // Visit the preview API URL to get the cookie (it will redirect to base URL)
+  try {
+    await setupPage.goto(startUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    console.log('Preview cookie established');
+  } catch (error) {
+    console.warn(`Warning: Failed to set up preview connection: ${error.message}`);
+  }
+
+  // Fetch URLs from sitemap (using the same page so it has the cookie)
+  const sitemapUrls = await fetchSitemap(baseUrlString, setupPage);
+
+  // Close the setup page
+  await setupPage.close();
 
   // Add specific URLs to test with expected status codes
   const specificUrls = [
@@ -57,6 +74,8 @@ async function crawlSite(startUrl) {
     { url: `${baseUrlString}/rest-api/rest-api/plant/add-plant/llms.txt`, expectedStatus: 200 },
     { url: `${baseUrlString}/llms.txt`, expectedStatus: 200 },
     { url: `${baseUrlString}/llms-full.txt`, expectedStatus: 200 },
+    // LLMs.txt via content negotiation (Accept: text/plain)
+    { url: `${baseUrlString}`, expectedStatus: 200, headers: { 'Accept': 'text/plain' }, expectedContentType: 'text/plain' },
     // API endpoints (some require auth)
     { url: `${baseUrlString}/api/fern-docs/search/v2/key`, expectedStatus: 200 },
     { url: `${baseUrlString}/api/fern-docs/get-jwt`, expectedStatus: 401 }, // Expected to require auth
@@ -65,8 +84,8 @@ async function crawlSite(startUrl) {
 
   // URL expectations map for easy lookup
   const urlExpectations = new Map();
-  specificUrls.forEach(({ url, expectedStatus }) => {
-    urlExpectations.set(url, expectedStatus);
+  specificUrls.forEach(({ url, expectedStatus, headers, expectedContentType }) => {
+    urlExpectations.set(url, { expectedStatus, headers, expectedContentType });
   });
 
   // Combine sitemap URLs with specific URLs (extract just URLs for crawling)
@@ -87,6 +106,7 @@ async function crawlSite(startUrl) {
 
   const ignoredErrorMessages = [
     'Failed to load resource: the server responded with a status of 404 ()',
+    'Failed to load resource: the server responded with a status of 415 ()',  // Unsupported Media Type (from Accept header on resources)
     'Refused to execute script from',
     'Minified React error #418',
   ];
@@ -101,6 +121,11 @@ async function crawlSite(startUrl) {
 
     // Check if message matches any ignored error messages
     if (ignoredErrorMessages.some(msg => message.includes(msg))) {
+      return true;
+    }
+
+    // Expected error for external-dependency-test page (tests error boundary)
+    if (url.includes('external-dependency-test') && message.includes('[error-boundary-fallback]')) {
       return true;
     }
 
@@ -121,6 +146,12 @@ async function crawlSite(startUrl) {
 
     console.log(`\nCrawling (${results.totalPages}): ${currentUrl}`);
 
+    // Log custom headers if any
+    const expectations = urlExpectations.get(currentUrl) || { expectedStatus: 200 };
+    if (expectations.headers) {
+      console.log(`  Custom headers: ${JSON.stringify(expectations.headers)}`);
+    }
+
     const page = await browser.newPage();
     const pageErrors = [];
 
@@ -128,7 +159,7 @@ async function crawlSite(startUrl) {
     page.on('console', msg => {
       if (msg.type() === 'error') {
         const errorText = msg.text();
-        const expectedStatus = urlExpectations.get(currentUrl) || 200;
+        const expectedStatus = expectations.expectedStatus;
 
         // Ignore console errors about expected status codes (e.g., 401 for auth endpoints)
         const isExpectedStatusError = expectedStatus !== 200 &&
@@ -166,34 +197,25 @@ async function crawlSite(startUrl) {
       }
     });
 
+    const expectedStatus = expectations.expectedStatus;
+    const customHeaders = expectations.headers;
+    const expectedContentType = expectations.expectedContentType;
+
     try {
-      // Get expected status code for this URL (default to 200)
-      const expectedStatus = urlExpectations.get(currentUrl) || 200;
 
-      // Check if this is a text file (llms.txt) - just do a simple fetch instead of full page load
-      if (currentUrl.endsWith('.txt')) {
-        console.log(`  Checking text file...`);
-        const response = await fetch(currentUrl);
-        const actualStatus = response.status;
-
-        if (actualStatus !== expectedStatus) {
-          const errorMsg = `HTTP ${actualStatus} for ${currentUrl} (expected ${expectedStatus})`;
-          console.error(`  ❌ ${errorMsg}`);
-          pageErrors.push(errorMsg);
-          results.failedPages++;
-        } else {
-          const text = await response.text();
-          console.log(`  ✅ Success (${text.length} bytes, status ${actualStatus})`);
-          if (pageErrors.length === 0) {
-            results.successfulPages++;
-          } else {
-            results.failedPages++;
-          }
-        }
-        await page.close();
-        continue;
+      // Set custom headers if specified
+      if (customHeaders) {
+        // Add cache-busting header to bypass Vercel edge cache
+        const headersWithCacheBust = {
+          ...customHeaders,
+          'Cache-Control': 'no-cache'
+        };
+        await page.setExtraHTTPHeaders(headersWithCacheBust);
+        // Disable cache for pages with custom headers to ensure we get the actual response
+        await page.setCacheEnabled(false);
       }
 
+      // Use Puppeteer for all requests (including text files) to maintain cookies
       const response = await page.goto(currentUrl, {
         waitUntil: 'networkidle2',
         timeout: 30000
@@ -201,18 +223,64 @@ async function crawlSite(startUrl) {
 
       const actualStatus = response ? response.status() : 0;
 
-      if (!response || actualStatus !== expectedStatus) {
+      // Log response headers for debugging
+      if (response) {
+        const responseHeaders = response.headers();
+        console.log(`  Response: ${actualStatus} ${response.statusText()}`);
+        console.log(`  Content-Type: ${responseHeaders['content-type'] || 'none'}`);
+        if (customHeaders || expectedContentType) {
+          // Log all response headers for requests with special expectations
+          console.log(`  All response headers: ${JSON.stringify(responseHeaders, null, 2)}`);
+        }
+      }
+
+      // 304 Not Modified is treated as success (means it was cached from a previous request)
+      const isSuccess = actualStatus === expectedStatus || (expectedStatus === 200 && actualStatus === 304);
+
+      // Check status code
+      if (!response || !isSuccess) {
         const errorMsg = `HTTP ${actualStatus} for ${currentUrl} (expected ${expectedStatus})`;
         console.error(`  ❌ ${errorMsg}`);
         pageErrors.push(errorMsg);
         results.failedPages++;
       } else {
-        console.log(`  ✅ Success (status ${actualStatus})`);
+        // Check content-type if specified
+        if (expectedContentType) {
+          const actualContentType = response.headers()['content-type'] || '';
+          if (!actualContentType.includes(expectedContentType)) {
+            const errorMsg = `Wrong Content-Type for ${currentUrl}: got "${actualContentType}", expected "${expectedContentType}"`;
+            console.error(`  ❌ ${errorMsg}`);
+            pageErrors.push(errorMsg);
+            results.failedPages++;
+          } else {
+            // Check if this is a text file for simpler success logging
+            if (currentUrl.endsWith('.txt') || expectedContentType === 'text/plain') {
+              const content = await page.content();
+              console.log(`  ✅ Success (${content.length} bytes, status ${actualStatus}, content-type: ${actualContentType})`);
+            } else {
+              console.log(`  ✅ Success (status ${actualStatus}, content-type: ${actualContentType})`);
+            }
 
-        if (pageErrors.length === 0) {
-          results.successfulPages++;
+            if (pageErrors.length === 0) {
+              results.successfulPages++;
+            } else {
+              results.failedPages++;
+            }
+          }
         } else {
-          results.failedPages++;
+          // No content-type check needed
+          if (currentUrl.endsWith('.txt')) {
+            const content = await page.content();
+            console.log(`  ✅ Success (${content.length} bytes, status ${actualStatus})`);
+          } else {
+            console.log(`  ✅ Success (status ${actualStatus})`);
+          }
+
+          if (pageErrors.length === 0) {
+            results.successfulPages++;
+          } else {
+            results.failedPages++;
+          }
         }
       }
     } catch (error) {
@@ -221,6 +289,12 @@ async function crawlSite(startUrl) {
       pageErrors.push(errorMsg);
       results.failedPages++;
       results.pageErrors.push({ url: currentUrl, error: error.message });
+    }
+
+    // Clear custom headers and re-enable cache for next page
+    if (expectations && expectations.headers) {
+      await page.setExtraHTTPHeaders({});
+      await page.setCacheEnabled(true);
     }
 
     await page.close();

@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      deployments: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,26 +24,114 @@ jobs:
       - name: Install Fern CLI tool
         run: npm install -g fern-api
 
-      - name: Generate preview URL
-        id: generate-docs
+      - name: Upload smoke test content to FDR
+        id: fern-preview
         env:
           FERN_TOKEN: ${{ secrets.FERN_SMOKE_TEST_API_KEY }}
         run: |
           cd smoke-test/fern
-          OUTPUT=$(fern generate --docs --preview 2>&1) || true
+          # Upload docs content to FDR and get the preview host
+          OUTPUT=$(fern generate --docs --preview 2>&1)
           echo "$OUTPUT"
-          URL=$(echo "$OUTPUT" | grep -oP 'Published docs to \K.*(?= \()' || true)
-          echo "Preview URL: $URL"
-          cd ../..
+          PREVIEW_URL=$(echo "$OUTPUT" | grep -oP 'Published docs to \K.*(?= \()' || true)
 
-          if [ -z "$URL" ]; then
-            echo "Warning: Failed to extract preview URL from output"
-            echo "🌱 Smoke Test Preview: Failed to generate preview" > preview_url.txt
-          else
-            echo "🌱 Smoke Test Preview: $URL" > preview_url.txt
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "Error: Failed to extract preview URL from Fern output"
+            exit 1
           fi
 
-          echo "PREVIEW_URL=$URL" >> $GITHUB_OUTPUT
+          # Extract host from the preview URL (remove https://)
+          SMOKE_TEST_HOST=$(echo "$PREVIEW_URL" | sed 's|https://||')
+          echo "Smoke test host: $SMOKE_TEST_HOST"
+          echo "SMOKE_TEST_HOST=$SMOKE_TEST_HOST" >> $GITHUB_OUTPUT
+          cd ../..
+
+      - name: Wait for prod.ferndocs.com Deployment
+        id: vercel-preview
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maxAttempts = 60;  // 60 attempts × 15 seconds = 15 minutes
+            const delayMs = 15000;  // 15 seconds
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              console.log(`Attempt ${attempt}/${maxAttempts}: Looking for Vercel bot comment...`);
+
+              // Get comments on the PR
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              // Find the Vercel bot comment
+              const vercelComment = comments.find(comment =>
+                comment.user.login === 'vercel[bot]' &&
+                comment.body.includes('prod.ferndocs.com')
+              );
+
+              if (vercelComment) {
+                console.log('Found Vercel bot comment');
+
+                // Parse the comment body to find the prod.ferndocs.com preview URL
+                // Look for the markdown table row with prod.ferndocs.com
+                const lines = vercelComment.body.split('\n');
+                for (const line of lines) {
+                  if (line.includes('prod.ferndocs.com') && line.includes('Preview')) {
+                    // Extract URL from markdown link format [Preview](url)
+                    const match = line.match(/\[Preview\]\((https:\/\/[^)]+)\)/);
+                    if (match) {
+                      const previewUrl = match[1];
+                      console.log(`✓ Found prod.ferndocs.com preview URL: ${previewUrl}`);
+
+                      // Check if deployment is ready (not building)
+                      if (line.includes('Ready') || line.includes('![Ready]')) {
+                        console.log('Deployment is ready!');
+                        core.setOutput('url', previewUrl);
+                        return;
+                      } else {
+                        console.log('Deployment exists but not ready yet, waiting...');
+                      }
+                    }
+                  }
+                }
+              } else {
+                console.log('Vercel bot comment not found yet');
+              }
+
+              if (attempt < maxAttempts) {
+                console.log(`Waiting ${delayMs/1000}s before next check...`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+              }
+            }
+
+            throw new Error('Timeout waiting for prod.ferndocs.com deployment after 15 minutes');
+
+      - name: Setup preview connection
+        id: generate-docs
+        if: steps.vercel-preview.outputs.url != ''
+        env:
+          VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
+          SMOKE_TEST_HOST: ${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}
+        run: |
+          # Build the preview API URL
+          PREVIEW_API_URL="${VERCEL_URL}/api/fern-docs/preview?host=${SMOKE_TEST_HOST}"
+          echo "Preview API URL: $PREVIEW_API_URL"
+          echo "Vercel Base URL: $VERCEL_URL"
+
+          # The crawler will visit the preview API URL first to set cookies
+          # Then crawl from the base URL
+          echo "🌱 Smoke Test Preview: $PREVIEW_API_URL" > preview_url.txt
+          echo "PREVIEW_URL=$PREVIEW_API_URL" >> $GITHUB_OUTPUT
+
+      - name: Skip message for workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "⚠️ Smoke test cannot run via workflow_dispatch because Vercel preview URL is not available."
+          echo "This workflow is designed to run on pull_request events only."
+          echo "🌱 Smoke Test Preview: Skipped (workflow_dispatch)" > preview_url.txt
 
       - name: Setup Node.js
         if: steps.generate-docs.outputs.PREVIEW_URL != ''
@@ -66,7 +155,10 @@ jobs:
         run: |
           echo "## 🌱 Smoke Test Preview" > final-comment.txt
           echo "" >> final-comment.txt
-          echo "**Preview URL:** ${{ steps.generate-docs.outputs.PREVIEW_URL }}" >> final-comment.txt
+          echo "Testing branch changes with smoke test content:" >> final-comment.txt
+          echo "" >> final-comment.txt
+          echo "- **Smoke Test Content (from FDR):** https://${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}" >> final-comment.txt
+          echo "- **Branch's Docs Platform (Vercel):** ${{ steps.generate-docs.outputs.PREVIEW_URL }}" >> final-comment.txt
           echo "" >> final-comment.txt
           if [ -f smoke-test/crawler-summary.txt ]; then
             cat smoke-test/crawler-summary.txt >> final-comment.txt
