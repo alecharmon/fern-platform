@@ -163,6 +163,7 @@ export function PlaygroundCardTriggerManual({
                             options={dropdownOptions}
                             onValueChange={handleAuthChange}
                             lang={lang}
+                            maxHelperTextWidth={320}
                         >
                             <button type="button" className="flex items-center gap-2 text-left">
                                 <Key className="h-4 w-4" />

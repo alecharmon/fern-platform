@@ -86,6 +86,7 @@ export declare namespace FernDropdown {
         radioGroupProps?: ComponentProps<typeof DropdownMenu.RadioGroup>;
         searchable?: boolean;
         lang: string;
+        maxHelperTextWidth?: number; // max width for helper text in pixels
     }
 }
 
@@ -109,7 +110,8 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
             triggerAsChild = true,
             radioGroupProps = {},
             searchable = false,
-            lang
+            lang,
+            maxHelperTextWidth
         },
         ref
     ): ReactElement => {
@@ -255,6 +257,7 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
                                                 value={value}
                                                 dropdownMenuElement={dropdownMenuElement}
                                                 container={container}
+                                                maxHelperTextWidth={maxHelperTextWidth}
                                             />
                                         ) : option.type === "product" ? (
                                             <FernProductItem key={option.id} option={option} dense={option.dense} />
@@ -301,12 +304,14 @@ function FernDropdownItemValue({
     option,
     value,
     dropdownMenuElement,
-    container
+    container,
+    maxHelperTextWidth
 }: {
     option: FernDropdown.ValueOption;
     value: string | undefined;
     dropdownMenuElement: ReactElement | undefined;
     container?: HTMLElement;
+    maxHelperTextWidth?: number;
 }) {
     const helperTextRef = useRef<HTMLDivElement>(null);
     const activeRef = useRef<HTMLButtonElement & HTMLAnchorElement>(null);
@@ -331,7 +336,11 @@ function FernDropdownItemValue({
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <div className={option.labelClassName}>{option.label ?? option.value}</div>
                     {option.helperText != null && (
-                        <div className="text-start text-xs leading-snug opacity-60" ref={helperTextRef}>
+                        <div
+                            className="text-start text-xs leading-snug opacity-60"
+                            style={maxHelperTextWidth ? { maxWidth: `${maxHelperTextWidth}px` } : undefined}
+                            ref={helperTextRef}
+                        >
                             {option.helperText}
                         </div>
                     )}
