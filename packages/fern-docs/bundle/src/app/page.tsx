@@ -1,3 +1,4 @@
+/*eslint i18next/no-literal-string: off*/
 export default function RootPage() {
     return (
         <div

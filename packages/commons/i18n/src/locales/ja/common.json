@@ -21,7 +21,11 @@
     "generatedOAuthToken": "生成されたOAuthトークン",
     "userSuppliedBearerToken": "ユーザー提供のBearerトークン",
     "provideTokenManually": "トークンを手動で提供",
-    "resetTokenToDefault": "トークンをデフォルトにリセット"
+    "resetTokenToDefault": "トークンをデフォルトにリセット",
+    "enterUsername": "ユーザー名を入力...",
+    "enterPassword": "パスワードを入力...",
+    "prefix": "プレフィックス",
+    "enterValue": "値を入力..."
   },
   "buttons": {
     "sendRequest": "リクエストを送信",
@@ -58,7 +62,12 @@
     "close": "閉じる",
     "cancel": "キャンセル",
     "moreActions": "その他のアクション",
-    "moreOptions": "その他のオプション"
+    "moreOptions": "その他のオプション",
+    "submit": "送信",
+    "submitting": "送信中...",
+    "resetToTheDefaultValue": "デフォルト値にリセット",
+    "generate": "生成",
+    "retry": "再試行"
   },
   "search": {
     "search": "検索",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "ダークテーマに変更",
     "changeThemeToSystem": "システムテーマに変更",
     "filterTo": "フィルター",
-    "removeFilter": "フィルターを削除"
+    "removeFilter": "フィルターを削除",
+    "noResultsFoundFor": "結果が見つかりませんでした",
+    "assistant": "アシスタント",
+    "askAIAQuestion": "AIに質問する...",
+    "anErrorOccurredResetConvo": "エラーが発生しました - クリックして会話をリセットしてください。",
+    "hiIAmAnAIAssistant": "こんにちは、私はドキュメントやその他のコンテンツにアクセスできるAIアシスタントです。",
+    "youCanToggleThisPane": "ヒント：このペインは次の方法で切り替えることができます",
+    "thinking": "考え中",
+    "footnotes": "脚注",
+    "addFilter": "フィルターを追加",
+    "closeSearch": "検索を閉じる",
+    "searchOurDocumentation": "ドキュメントを検索する。"
   },
   "apiReference": {
     "apiReference": "APIリファレンス",
@@ -111,7 +131,10 @@
     "authenticated": "認証済み",
     "time": "時間",
     "size": "サイズ",
-    "failed": "失敗"
+    "failed": "失敗",
+    "authType": "認証タイプ",
+    "deprecated": "非推奨",
+    "required": "必須"
   },
   "playground": {
     "cannotSendToLocalhost": "localhostにリクエストを送信できません",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "このエンドポイントはファイルを返します。",
     "thisEndpointReturnsNothing": "このエンドポイントは何も返しません。",
     "thisEndpointSendsTextResponses": "このエンドポイントは長時間のHTTP接続を介してテキストレスポンスを送信します。",
-    "return200Status": "データが正常に受信されたことを示すために200ステータスを返します。"
+    "return200Status": "データが正常に受信されたことを示すために200ステータスを返します。",
+    "thisEndpointReturnsAudio": "このエンドポイントはaudio/mpegファイルを返します。"
   },
   "status": {
     "loading": "読み込み中...",
@@ -170,7 +194,11 @@
     "anotherReason": "その他の理由",
     "yesOkayToFollowUp": "はい、メールでのフォローアップは問題ありません。",
     "yes": "はい",
-    "no": "いいえ"
+    "no": "いいえ",
+    "reportIncorrectCode": "誤ったコードを報告",
+    "whatIsWrongWithThisCodeExample": "このコード例の何が間違っていますか？",
+    "helpUsImproveByReportingCodeExample": "このコード例の何が間違っているかを報告して、ドキュメントの改善にご協力ください。",
+    "weHaveBeenNotified": "通知を受け取りましたので、次回修正いたします。"
   },
   "feedbackQuality": {
     "accurate": "正確",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "env-localレスポンスでポートが見つかりません",
     "objectExtendsNonObject": "オブジェクトが非オブジェクトを継承しています",
     "typeDefinitionContextNotFound": "ツリー内にTypeDefinitionContext.Providerが見つかりません",
-    "error": "エラー"
+    "error": "エラー",
+    "wereYouLookingForOneOfThese": "これらのいずれかをお探しでしたか？",
+    "anErrorOccurred": "エラーが発生しました。"
   },
   "navigation": {
     "upNext": "次へ",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "CursorにMCPサーバーをインストール",
     "subscribeViaRss": "RSS経由で購読",
     "openInChatGPT": "ChatGPTで開く",
-    "openInClaude": "Claudeで開く"
+    "openInClaude": "Claudeで開く",
+    "developerFriendlyDocs": "APIの開発者向けドキュメント",
+    "buildWith": "で構築"
   },
   "environments": {
     "prod": "本番",

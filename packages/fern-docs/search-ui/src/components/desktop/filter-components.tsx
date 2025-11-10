@@ -62,7 +62,7 @@ export const FilterDropdownMenu = ({
             </DropdownMenuTrigger>
             <DropdownMenuPortal>
                 <DropdownMenuContent className="z-[9999] min-w-[200px]">
-                    <DropdownMenuLabel>Add Filter</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t(lang).search.addFilter}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                         {options.map((filter) => (
@@ -121,7 +121,7 @@ export const AddFilterButton = ({
             </DropdownMenuTrigger>
             <DropdownMenuPortal>
                 <DropdownMenuContent className="z-[9999] min-w-[200px]">
-                    <DropdownMenuLabel>Add Filter</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t(lang).search.addFilter}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                         {options.map((filter) => (

@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Genererad OAuth-token",
     "userSuppliedBearerToken": "Användarangiven bearer-token",
     "provideTokenManually": "Ange token manuellt",
-    "resetTokenToDefault": "Återställ token till standard"
+    "resetTokenToDefault": "Återställ token till standard",
+    "enterUsername": "Ange användarnamn...",
+    "enterPassword": "Ange lösenord...",
+    "prefix": "Prefix",
+    "enterValue": "Ange värde..."
   },
   "buttons": {
     "sendRequest": "Skicka förfrågan",
@@ -58,7 +62,12 @@
     "close": "Stäng",
     "cancel": "Avbryt",
     "moreActions": "Fler åtgärder",
-    "moreOptions": "Fler val"
+    "moreOptions": "Fler val",
+    "submit": "Skicka in",
+    "submitting": "Skickar in...",
+    "resetToTheDefaultValue": "Återställ till standardvärdet",
+    "generate": "Generera",
+    "retry": "Försök igen"
   },
   "search": {
     "search": "Sök",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Byt till mörkt tema",
     "changeThemeToSystem": "Byt till systemtema",
     "filterTo": "Filtrera till",
-    "removeFilter": "Ta bort filter"
+    "removeFilter": "Ta bort filter",
+    "noResultsFoundFor": "Inga resultat hittades för",
+    "assistant": "Assistent",
+    "askAIAQuestion": "Ställ en fråga till AI...",
+    "anErrorOccurredResetConvo": "Ett fel uppstod - klicka för att återställa konversationen.",
+    "hiIAmAnAIAssistant": "Hej, jag är en AI-assistent med tillgång till dokumentation och annat innehåll.",
+    "youCanToggleThisPane": "Tips: Du kan växla denna panel med",
+    "thinking": "Tänker",
+    "footnotes": "Fotnoter",
+    "addFilter": "Lägg till filter",
+    "closeSearch": "Stäng sökning",
+    "searchOurDocumentation": "Sök i vår dokumentation."
   },
   "apiReference": {
     "apiReference": "API-referens",
@@ -111,7 +131,10 @@
     "authenticated": "Autentiserad",
     "time": "Tid",
     "size": "Storlek",
-    "failed": "Misslyckades"
+    "failed": "Misslyckades",
+    "authType": "Autentiseringstyp",
+    "deprecated": "Föråldrad",
+    "required": "Obligatorisk"
   },
   "playground": {
     "cannotSendToLocalhost": "Kan inte skicka förfrågningar till localhost",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "Denna endpoint returnerar en fil.",
     "thisEndpointReturnsNothing": "Denna endpoint returnerar ingenting.",
     "thisEndpointSendsTextResponses": "Denna endpoint skickar textsvar över en långvarig HTTP-anslutning.",
-    "return200Status": "Returnera en 200-status för att indikera att data togs emot framgångsrikt."
+    "return200Status": "Returnera en 200-status för att indikera att data togs emot framgångsrikt.",
+    "thisEndpointReturnsAudio": "Denna endpoint returnerar en audio/mpeg-fil."
   },
   "status": {
     "loading": "Laddar...",
@@ -170,7 +194,11 @@
     "anotherReason": "En annan anledning",
     "yesOkayToFollowUp": "Ja, det är okej att följa upp via e-post.",
     "yes": "Ja",
-    "no": "Nej"
+    "no": "Nej",
+    "reportIncorrectCode": "Rapportera felaktig kod",
+    "whatIsWrongWithThisCodeExample": "Vad är fel med detta kodexempel?",
+    "helpUsImproveByReportingCodeExample": "Hjälp oss att förbättra vår dokumentation genom att rapportera vad som är fel med detta kodexempel.",
+    "weHaveBeenNotified": "Vi har blivit meddelade så att vi kan åtgärda detta till nästa gång."
   },
   "feedbackQuality": {
     "accurate": "Korrekt",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "Ingen port hittades i env-local-svar",
     "objectExtendsNonObject": "Objektet utökar ett icke-objekt",
     "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider hittades inte i trädet",
-    "error": "Fel"
+    "error": "Fel",
+    "wereYouLookingForOneOfThese": "Letade du efter någon av dessa?",
+    "anErrorOccurred": "Ett fel uppstod."
   },
   "navigation": {
     "upNext": "Nästa",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Installera MCP-server på Cursor",
     "subscribeViaRss": "Prenumerera via RSS",
     "openInChatGPT": "Öppna i ChatGPT",
-    "openInClaude": "Öppna i Claude"
+    "openInClaude": "Öppna i Claude",
+    "developerFriendlyDocs": "Utvecklarvänlig dokumentation för ditt API",
+    "buildWith": "Bygg med"
   },
   "environments": {
     "prod": "Prod",

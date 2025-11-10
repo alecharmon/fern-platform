@@ -121,6 +121,7 @@ export function FoundOAuthReferencedEndpointForm({
                                 value={value.accessToken}
                                 disabled={true}
                                 className="text-(color:--grayscale-a11)"
+                                lang={lang}
                             />
                         </li>
                     )}
@@ -146,6 +147,7 @@ export function FoundOAuthReferencedEndpointForm({
                             autoComplete="off"
                             data-1p-ignore="true"
                             disabled={disabled}
+                            lang={lang}
                         />
                     </li>
                 </>

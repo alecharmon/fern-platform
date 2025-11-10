@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Generiertes OAuth-Token",
     "userSuppliedBearerToken": "Vom Benutzer bereitgestelltes Bearer-Token",
     "provideTokenManually": "Token manuell bereitstellen",
-    "resetTokenToDefault": "Token auf Standard zurücksetzen"
+    "resetTokenToDefault": "Token auf Standard zurücksetzen",
+    "enterUsername": "Benutzernamen eingeben...",
+    "enterPassword": "Passwort eingeben...",
+    "prefix": "Präfix",
+    "enterValue": "Wert eingeben..."
   },
   "buttons": {
     "sendRequest": "Anfrage senden",
@@ -58,7 +62,12 @@
     "close": "Schließen",
     "cancel": "Abbrechen",
     "moreActions": "Weitere Aktionen",
-    "moreOptions": "Weitere Optionen"
+    "moreOptions": "Weitere Optionen",
+    "submit": "Absenden",
+    "submitting": "Wird gesendet...",
+    "resetToTheDefaultValue": "Auf Standardwert zurücksetzen",
+    "generate": "Generieren",
+    "retry": "Erneut versuchen"
   },
   "search": {
     "search": "Suchen",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Zu dunklem Design wechseln",
     "changeThemeToSystem": "Zu System-Design wechseln",
     "filterTo": "Filtern nach",
-    "removeFilter": "Filter entfernen"
+    "removeFilter": "Filter entfernen",
+    "noResultsFoundFor": "Keine Ergebnisse gefunden für",
+    "assistant": "Assistent",
+    "askAIAQuestion": "Stellen Sie der KI eine Frage...",
+    "anErrorOccurredResetConvo": "Ein Fehler ist aufgetreten - klicken Sie, um das Gespräch zurückzusetzen.",
+    "hiIAmAnAIAssistant": "Hallo, ich bin ein KI-Assistent mit Zugriff auf Dokumentation und andere Inhalte.",
+    "youCanToggleThisPane": "Tipp: Sie können diesen Bereich umschalten mit",
+    "thinking": "Denke nach",
+    "footnotes": "Fußnoten",
+    "addFilter": "Filter hinzufügen",
+    "closeSearch": "Suche schließen",
+    "searchOurDocumentation": "Durchsuchen Sie unsere Dokumentation."
   },
   "apiReference": {
     "apiReference": "API-Referenz",
@@ -111,7 +131,10 @@
     "authenticated": "Authentifiziert",
     "time": "Zeit",
     "size": "Größe",
-    "failed": "Fehlgeschlagen"
+    "failed": "Fehlgeschlagen",
+    "authType": "Auth-Typ",
+    "deprecated": "Veraltet",
+    "required": "Erforderlich"
   },
   "playground": {
     "cannotSendToLocalhost": "Anfragen an localhost können nicht gesendet werden",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "Dieser Endpunkt gibt eine Datei zurück.",
     "thisEndpointReturnsNothing": "Dieser Endpunkt gibt nichts zurück.",
     "thisEndpointSendsTextResponses": "Dieser Endpunkt sendet Textantworten über eine langlebige HTTP-Verbindung.",
-    "return200Status": "Geben Sie einen 200-Status zurück, um anzuzeigen, dass die Daten erfolgreich empfangen wurden."
+    "return200Status": "Geben Sie einen 200-Status zurück, um anzuzeigen, dass die Daten erfolgreich empfangen wurden.",
+    "thisEndpointReturnsAudio": "Dieser Endpunkt gibt eine audio/mpeg-Datei zurück."
   },
   "status": {
     "loading": "Wird geladen...",
@@ -170,7 +194,11 @@
     "anotherReason": "Ein anderer Grund",
     "yesOkayToFollowUp": "Ja, Sie können per E-Mail nachfassen.",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "reportIncorrectCode": "Fehlerhaften Code melden",
+    "whatIsWrongWithThisCodeExample": "Was ist falsch mit diesem Codebeispiel?",
+    "helpUsImproveByReportingCodeExample": "Helfen Sie uns, unsere Dokumentation zu verbessern, indem Sie melden, was mit diesem Codebeispiel nicht stimmt.",
+    "weHaveBeenNotified": "Wir wurden benachrichtigt, damit wir dies beim nächsten Mal beheben können."
   },
   "feedbackQuality": {
     "accurate": "Genau",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "Kein Port in env-local-Antwort gefunden",
     "objectExtendsNonObject": "Objekt erweitert Nicht-Objekt",
     "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider wurde im Baum nicht gefunden",
-    "error": "Fehler"
+    "error": "Fehler",
+    "wereYouLookingForOneOfThese": "Haben Sie nach einem dieser gesucht?",
+    "anErrorOccurred": "Ein Fehler ist aufgetreten"
   },
   "navigation": {
     "upNext": "Als Nächstes",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "MCP-Server auf Cursor installieren",
     "subscribeViaRss": "Via RSS abonnieren",
     "openInChatGPT": "In ChatGPT öffnen",
-    "openInClaude": "In Claude öffnen"
+    "openInClaude": "In Claude öffnen",
+    "developerFriendlyDocs": "Entwicklerfreundliche Dokumentation für Ihre API",
+    "buildWith": "Erstellen mit"
   },
   "environments": {
     "prod": "Prod",

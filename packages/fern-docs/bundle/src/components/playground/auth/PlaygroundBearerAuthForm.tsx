@@ -83,6 +83,7 @@ export function PlaygroundBearerAuthForm({
                     disabled={disabled}
                     resettable={isBearerTokenResettable}
                     onClickReset={() => setValue(RESET)}
+                    lang={lang}
                 />
             </li>
         );
@@ -103,6 +104,7 @@ export function PlaygroundBearerAuthForm({
                     disabled={disabled}
                     resettable={isBearerTokenResettable}
                     onClickReset={() => setValue(RESET)}
+                    lang={lang}
                 />
             </div>
         </li>

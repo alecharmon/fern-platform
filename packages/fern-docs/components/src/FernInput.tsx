@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@fern-docs/i18n";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { isEqual } from "es-toolkit/predicate";
@@ -38,10 +39,11 @@ export interface FernInputProps extends Omit<ComponentPropsWithoutRef<"input">, 
      * Callback to call when the reset button is clicked
      */
     onClickReset?: () => void;
+    lang: string;
 }
 
 export const FernInput = forwardRef<HTMLInputElement, FernInputProps>(function FernInput(
-    { className, inputClassName, onValueChange, leftIcon, rightElement, resettable, onClickReset, ...props },
+    { className, inputClassName, onValueChange, leftIcon, rightElement, resettable, onClickReset, lang, ...props },
     forwardedRef
 ) {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -78,6 +80,7 @@ export const FernInput = forwardRef<HTMLInputElement, FernInputProps>(function F
                     })
                 }
                 resettable={resettable}
+                lang={lang}
             >
                 {rightElement}
             </FernInputRightElement>
@@ -101,13 +104,15 @@ function FernInputRightElement({
     value,
     defaultValue,
     onReset,
-    resettable
+    resettable,
+    lang
 }: {
     children?: React.ReactNode;
     value?: string;
     defaultValue?: string;
     onReset: () => void;
     resettable?: boolean;
+    lang: string;
 }) {
     if (resettable && defaultValue != null && !isEqual(value, defaultValue)) {
         return (
@@ -115,7 +120,7 @@ function FernInputRightElement({
                 <FernTooltip
                     content={
                         <div className="space-y-2">
-                            <p>Reset to the default value:</p>
+                            <p>{t(lang).buttons.resetToTheDefaultValue}</p>
                             <p className="break-all">
                                 <code>{defaultValue}</code>
                             </p>

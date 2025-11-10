@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Generert OAuth-token",
     "userSuppliedBearerToken": "Brukerlevert bearer-token",
     "provideTokenManually": "Oppgi token manuelt",
-    "resetTokenToDefault": "Tilbakestill token til standard"
+    "resetTokenToDefault": "Tilbakestill token til standard",
+    "enterUsername": "Skriv inn brukernavn...",
+    "enterPassword": "Skriv inn passord...",
+    "prefix": "Prefiks",
+    "enterValue": "Skriv inn verdi..."
   },
   "buttons": {
     "sendRequest": "Send forespørsel",
@@ -58,7 +62,12 @@
     "close": "Lukk",
     "cancel": "Avbryt",
     "moreActions": "Flere handlinger",
-    "moreOptions": "Flere valg"
+    "moreOptions": "Flere valg",
+    "submit": "Send inn",
+    "submitting": "Sender inn...",
+    "resetToTheDefaultValue": "Tilbakestill til standardverdi",
+    "generate": "Generer",
+    "retry": "Prøv igjen"
   },
   "search": {
     "search": "Søk",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Bytt til mørkt tema",
     "changeThemeToSystem": "Bytt til systemtema",
     "filterTo": "Filtrer til",
-    "removeFilter": "Fjern filter"
+    "removeFilter": "Fjern filter",
+    "noResultsFoundFor": "Ingen resultater funnet for",
+    "assistant": "Assistent",
+    "askAIAQuestion": "Still AI et spørsmål...",
+    "anErrorOccurredResetConvo": "En feil oppstod - klikk for å tilbakestille samtalen.",
+    "hiIAmAnAIAssistant": "Hei, jeg er en AI-assistent med tilgang til dokumentasjon og annet innhold.",
+    "youCanToggleThisPane": "Tips: Du kan veksle dette panelet med",
+    "thinking": "Tenker",
+    "footnotes": "Fotnoter",
+    "addFilter": "Legg til filter",
+    "closeSearch": "Lukk søk",
+    "searchOurDocumentation": "Søk i vår dokumentasjon."
   },
   "apiReference": {
     "apiReference": "API-referanse",
@@ -111,7 +131,10 @@
     "authenticated": "Autentisert",
     "time": "Tid",
     "size": "Størrelse",
-    "failed": "Mislyktes"
+    "failed": "Mislyktes",
+    "authType": "Autentiseringstype",
+    "deprecated": "Utdatert",
+    "required": "Påkrevd"
   },
   "playground": {
     "cannotSendToLocalhost": "Kan ikke sende forespørsler til localhost",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "Dette endepunktet returnerer en fil.",
     "thisEndpointReturnsNothing": "Dette endepunktet returnerer ingenting.",
     "thisEndpointSendsTextResponses": "Dette endepunktet sender tekstresponser over en langvarig HTTP-tilkobling.",
-    "return200Status": "Returner en 200-status for å indikere at dataene ble mottatt vellykket."
+    "return200Status": "Returner en 200-status for å indikere at dataene ble mottatt vellykket.",
+    "thisEndpointReturnsAudio": "Dette endepunktet returnerer en audio/mpeg-fil."
   },
   "status": {
     "loading": "Laster...",
@@ -170,7 +194,11 @@
     "anotherReason": "En annen grunn",
     "yesOkayToFollowUp": "Ja, det er greit å følge opp per e-post.",
     "yes": "Ja",
-    "no": "Nei"
+    "no": "Nei",
+    "reportIncorrectCode": "Rapporter feil kode",
+    "whatIsWrongWithThisCodeExample": "Hva er galt med dette kodeeksemplet?",
+    "helpUsImproveByReportingCodeExample": "Hjelp oss med å forbedre dokumentasjonen ved å rapportere hva som er galt med dette kodeeksemplet.",
+    "weHaveBeenNotified": "Vi har blitt varslet slik at vi kan fikse det til neste gang."
   },
   "feedbackQuality": {
     "accurate": "Nøyaktig",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "Ingen port funnet i env-local-respons",
     "objectExtendsNonObject": "Objekt utvider ikke-objekt",
     "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider ikke funnet i tre",
-    "error": "Feil"
+    "error": "Feil",
+    "wereYouLookingForOneOfThese": "Var du på utkikk etter en av disse?",
+    "anErrorOccurred": "En feil oppstod."
   },
   "navigation": {
     "upNext": "Neste",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Installer MCP-server på Cursor",
     "subscribeViaRss": "Abonner via RSS",
     "openInChatGPT": "Åpne i ChatGPT",
-    "openInClaude": "Åpne i Claude"
+    "openInClaude": "Åpne i Claude",
+    "developerFriendlyDocs": "Utviklervennlig dokumentasjon for din API",
+    "buildWith": "Bygg med"
   },
   "environments": {
     "prod": "Prod",

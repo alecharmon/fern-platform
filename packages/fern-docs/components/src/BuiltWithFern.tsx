@@ -1,21 +1,20 @@
+import { t } from "@fern-docs/i18n";
 import { useIsHovering } from "@fern-ui/react-commons";
-
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { type ComponentPropsWithoutRef, forwardRef } from "react";
 import { cn } from "./cn";
 import { FernLogo, FernLogoFill } from "./FernLogo";
 import { FernTooltip, FernTooltipProvider } from "./FernTooltip";
 
-const BUILT_WITH_FERN_TOOLTIP_CONTENT = "Developer-friendly docs for your API";
-
 type BuiltWithFernProps = Omit<ComponentPropsWithoutRef<"a">, "href"> & {
     utmCampaign?: string;
     utmMedium?: string;
     utmSource?: string;
+    lang: string;
 };
 
 export const BuiltWithFern = forwardRef<HTMLAnchorElement, BuiltWithFernProps>(
-    ({ utmCampaign, utmMedium, utmSource, ...props }, ref) => {
+    ({ utmCampaign, utmMedium, utmSource, lang, ...props }, ref) => {
         const { isHovering, onPointerEnter, onPointerLeave, onPointerMove, onPointerOver } = useIsHovering();
 
         const url = new URL("https://buildwithfern.com");
@@ -31,7 +30,7 @@ export const BuiltWithFern = forwardRef<HTMLAnchorElement, BuiltWithFernProps>(
 
         return (
             <FernTooltipProvider>
-                <FernTooltip content={BUILT_WITH_FERN_TOOLTIP_CONTENT} side="top">
+                <FernTooltip content={t(lang).documentation.developerFriendlyDocs} side="top">
                     <a
                         ref={ref}
                         {...props}
@@ -42,7 +41,9 @@ export const BuiltWithFern = forwardRef<HTMLAnchorElement, BuiltWithFernProps>(
                         onPointerEnter={composeEventHandlers(props.onPointerEnter, onPointerEnter)}
                         onPointerMove={composeEventHandlers(props.onPointerMove, onPointerMove)}
                     >
-                        <span className="text-(color:--grayscale-a11) whitespace-nowrap text-xs">Built with</span>
+                        <span className="text-(color:--grayscale-a11) whitespace-nowrap text-xs">
+                            {t(lang).documentation.buildWith}
+                        </span>
                         <FernLogo
                             fill={isHovering ? FernLogoFill.Default : FernLogoFill.Muted}
                             className="transition"

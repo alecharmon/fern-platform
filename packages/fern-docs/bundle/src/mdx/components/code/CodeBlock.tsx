@@ -119,12 +119,7 @@ export function CodeBlock(props: {
                                     language={language}
                                 />
                             )}
-                            <CodeBlockFeedbackButton
-                                className="z-20"
-                                code={code}
-                                language={language}
-                                disableAnalytics={disableAnalytics}
-                            />
+                            <CodeBlockFeedbackButton className="z-20" code={code} language={language} lang={lang} />
                             <CopyToClipboardButton
                                 className="mr-1"
                                 content={() => applyTemplates(code, template)}
@@ -153,12 +148,7 @@ export function CodeBlock(props: {
             expandable={expandable}
             language={language}
             feedbackButton={
-                <CodeBlockFeedbackButton
-                    className="fern-feedback-button"
-                    code={code}
-                    language={language}
-                    disableAnalytics={disableAnalytics}
-                />
+                <CodeBlockFeedbackButton className="fern-feedback-button" code={code} language={language} lang={lang} />
             }
         >
             <FernSyntaxHighlighter

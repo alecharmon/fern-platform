@@ -167,6 +167,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     onValueChange={onChange}
                                     onAudioData={onChange}
                                     placeholder={string.default}
+                                    lang={lang}
                                 />
                             ) : primitive.value.type === "string" && primitive.value.format === "password" ? (
                                 <PasswordInputGroup
@@ -179,6 +180,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     maxLength={string.maxLength}
                                     minLength={string.minLength}
                                     pattern={string.regex}
+                                    lang={lang}
                                 />
                             ) : primitive.value.type === "string" && property?.key === "idempotency_key" ? (
                                 <IdempotentInputGroup
@@ -186,6 +188,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     className="w-full"
                                     value={typeof value === "string" ? value : ""}
                                     onValueChange={onChange}
+                                    lang={lang}
                                 />
                             ) : (
                                 <FernInput
@@ -200,6 +203,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     // TODO: add validation UX feedback
                                     pattern={string.regex}
                                     disabled={disabled}
+                                    lang={lang}
                                 />
                             )}
                         </span>
@@ -380,6 +384,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
                                 disabled={disabled}
+                                lang={lang}
                             />
                         </span>
                     </WithLabel>
@@ -404,6 +409,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                                 onValueChange={onChange}
                                 disabled={disabled}
+                                lang={lang}
                             />
                         </span>
                     </WithLabel>
@@ -451,6 +457,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
                                 disabled={disabled}
+                                lang={lang}
                             />
                         </span>
                     </WithLabel>

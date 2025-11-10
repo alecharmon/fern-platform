@@ -1,3 +1,5 @@
+/*eslint i18next/no-literal-string: off*/
+
 import { cn } from "@fern-docs/components/cn";
 import type { ReactNode } from "react";
 

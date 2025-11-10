@@ -71,7 +71,6 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
                             );
 
                             const { disableExplorerProxy } = await loader.getSettings();
-                            const lang = await loader.getLanguage();
 
                             node.attributes.push(
                                 unknownToMdxJsxAttribute("endpointDefinition", endpoint),
@@ -79,8 +78,7 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
                                 unknownToMdxJsxAttribute("globalHeaders", globalHeaders ?? []),
                                 unknownToMdxJsxAttribute("authSchemes", authSchemes ?? []),
                                 unknownToMdxJsxAttribute("endpointSlugs", slugs),
-                                unknownToMdxJsxAttribute("disableProxy", disableExplorerProxy),
-                                unknownToMdxJsxAttribute("lang", lang)
+                                unknownToMdxJsxAttribute("disableProxy", disableExplorerProxy)
                             );
                         } catch (e) {
                             console.error(

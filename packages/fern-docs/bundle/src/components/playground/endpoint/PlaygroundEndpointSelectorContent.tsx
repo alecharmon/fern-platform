@@ -107,6 +107,7 @@ export const PlaygroundEndpointSelectorContent = forwardRef<HTMLDivElement, Play
                                 )
                             }
                             placeholder={t(lang).search.searchForEndpoints}
+                            lang={lang}
                         />
                     </div>
                     <FernScrollArea

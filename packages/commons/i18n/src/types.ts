@@ -22,6 +22,10 @@ export type Translations = {
         userSuppliedBearerToken: string;
         provideTokenManually: string;
         resetTokenToDefault: string;
+        enterUsername: string;
+        enterPassword: string;
+        prefix: string;
+        enterValue: string;
     };
 
     buttons: {
@@ -60,6 +64,11 @@ export type Translations = {
         cancel: string;
         moreActions: string;
         moreOptions: string;
+        submit: string;
+        submitting: string;
+        resetToTheDefaultValue: string;
+        generate: string;
+        retry: string;
     };
 
     search: {
@@ -77,6 +86,17 @@ export type Translations = {
         changeThemeToSystem: string;
         filterTo: string;
         removeFilter: string;
+        noResultsFoundFor: string;
+        assistant: string;
+        askAIAQuestion: string;
+        anErrorOccurredResetConvo: string;
+        hiIAmAnAIAssistant: string;
+        youCanToggleThisPane: string;
+        thinking: string;
+        footnotes: string;
+        addFilter: string;
+        closeSearch: string;
+        searchOurDocumentation: string;
     };
 
     apiReference: {
@@ -115,6 +135,9 @@ export type Translations = {
         time: string;
         size: string;
         failed: string;
+        authType: string;
+        deprecated: string;
+        required: string;
     };
 
     playground: {
@@ -146,6 +169,7 @@ export type Translations = {
         thisEndpointReturnsNothing: string;
         thisEndpointSendsTextResponses: string;
         return200Status: string;
+        thisEndpointReturnsAudio: string;
     };
 
     status: {
@@ -178,6 +202,10 @@ export type Translations = {
         yesOkayToFollowUp: string;
         yes: string;
         no: string;
+        reportIncorrectCode: string;
+        whatIsWrongWithThisCodeExample: string;
+        helpUsImproveByReportingCodeExample: string;
+        weHaveBeenNotified: string;
     };
 
     feedbackQuality: {
@@ -220,6 +248,8 @@ export type Translations = {
         objectExtendsNonObject: string;
         typeDefinitionContextNotFound: string;
         error: string;
+        wereYouLookingForOneOfThese: string;
+        anErrorOccurred: string;
     };
 
     navigation: {
@@ -242,6 +272,8 @@ export type Translations = {
         subscribeViaRss: string;
         openInChatGPT: string;
         openInClaude: string;
+        developerFriendlyDocs: string;
+        buildWith: string;
     };
 
     environments: {

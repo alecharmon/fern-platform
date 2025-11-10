@@ -34,7 +34,9 @@ export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> =
                 basicAuth: (basicAuth) => (
                     <PlaygroundBasicAuthForm basicAuth={basicAuth} disabled={disabled} lang={lang} />
                 ),
-                header: (header) => <PlaygroundHeaderAuthForm header={header} authKey={authKey} disabled={disabled} />,
+                header: (header) => (
+                    <PlaygroundHeaderAuthForm header={header} authKey={authKey} disabled={disabled} lang={lang} />
+                ),
                 oAuth: (oAuth) => {
                     if ("endpoint" in context) {
                         return visitDiscriminatedUnion(oAuth.value, "type")._visit({

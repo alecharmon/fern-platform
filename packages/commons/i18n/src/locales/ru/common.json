@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Сгенерированный OAuth-токен",
     "userSuppliedBearerToken": "Bearer-токен, предоставленный пользователем",
     "provideTokenManually": "Предоставить токен вручную",
-    "resetTokenToDefault": "Сбросить токен к значению по умолчанию"
+    "resetTokenToDefault": "Сбросить токен к значению по умолчанию",
+    "enterUsername": "Введите имя пользователя...",
+    "enterPassword": "Введите пароль...",
+    "prefix": "Префикс",
+    "enterValue": "Введите значение..."
   },
   "buttons": {
     "sendRequest": "Отправить запрос",
@@ -58,7 +62,12 @@
     "close": "Закрыть",
     "cancel": "Отменить",
     "moreActions": "Дополнительные действия",
-    "moreOptions": "Дополнительные опции"
+    "moreOptions": "Дополнительные опции",
+    "submit": "Отправить",
+    "submitting": "Отправка...",
+    "resetToTheDefaultValue": "Сбросить к значению по умолчанию",
+    "generate": "Сгенерировать",
+    "retry": "Повторить попытку"
   },
   "search": {
     "search": "Поиск",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Изменить тему на тёмную",
     "changeThemeToSystem": "Изменить тему на системную",
     "filterTo": "Фильтровать по",
-    "removeFilter": "Удалить фильтр"
+    "removeFilter": "Удалить фильтр",
+    "noResultsFoundFor": "Результаты не найдены для",
+    "assistant": "Ассистент",
+    "askAIAQuestion": "Задайте вопрос ИИ...",
+    "anErrorOccurredResetConvo": "Произошла ошибка - нажмите, чтобы сбросить разговор.",
+    "hiIAmAnAIAssistant": "Здравствуйте, я ИИ-ассистент с доступом к документации и другому контенту.",
+    "youCanToggleThisPane": "Подсказка: Вы можете переключать эту панель с помощью",
+    "thinking": "Думаю",
+    "footnotes": "Сноски",
+    "addFilter": "Добавить фильтр",
+    "closeSearch": "Закрыть поиск",
+    "searchOurDocumentation": "Поиск по нашей документации."
   },
   "apiReference": {
     "apiReference": "Справочник API",
@@ -111,7 +131,10 @@
     "authenticated": "Аутентифицирован",
     "time": "Время",
     "size": "Размер",
-    "failed": "Не удалось"
+    "failed": "Не удалось",
+    "authType": "Тип аутентификации",
+    "deprecated": "Устарело",
+    "required": "Обязательный"
   },
   "playground": {
     "cannotSendToLocalhost": "Невозможно отправить запросы на localhost",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "Этот эндпоинт возвращает файл.",
     "thisEndpointReturnsNothing": "Этот эндпоинт ничего не возвращает.",
     "thisEndpointSendsTextResponses": "Этот эндпоинт отправляет текстовые ответы по долгоживущему HTTP-соединению.",
-    "return200Status": "Верните статус 200, чтобы указать, что данные были успешно получены."
+    "return200Status": "Верните статус 200, чтобы указать, что данные были успешно получены.",
+    "thisEndpointReturnsAudio": "Этот эндпоинт возвращает файл audio/mpeg."
   },
   "status": {
     "loading": "Загрузка...",
@@ -170,7 +194,11 @@
     "anotherReason": "Другая причина",
     "yesOkayToFollowUp": "Да, можно связаться по электронной почте.",
     "yes": "Да",
-    "no": "Нет"
+    "no": "Нет",
+    "reportIncorrectCode": "Сообщить о неправильном коде",
+    "whatIsWrongWithThisCodeExample": "Что не так с этим примером кода?",
+    "helpUsImproveByReportingCodeExample": "Помогите нам улучшить документацию, сообщив, что не так с этим примером кода.",
+    "weHaveBeenNotified": "Мы были уведомлены, чтобы исправить это в следующий раз."
   },
   "feedbackQuality": {
     "accurate": "Точно",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "Порт не найден в ответе env-local",
     "objectExtendsNonObject": "Объект расширяет не-объект",
     "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider не найден в дереве",
-    "error": "Ошибка"
+    "error": "Ошибка",
+    "wereYouLookingForOneOfThese": "Вы искали что-то из этого?",
+    "anErrorOccurred": "Произошла ошибка."
   },
   "navigation": {
     "upNext": "Далее",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Установить сервер MCP на Cursor",
     "subscribeViaRss": "Подписаться через RSS",
     "openInChatGPT": "Открыть в ChatGPT",
-    "openInClaude": "Открыть в Claude"
+    "openInClaude": "Открыть в Claude",
+    "developerFriendlyDocs": "Дружественная для разработчиков документация вашего API",
+    "buildWith": "Создать с помощью"
   },
   "environments": {
     "prod": "Прод",

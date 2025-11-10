@@ -1,5 +1,5 @@
 import { Button } from "@fern-docs/components/button";
-
+import { t } from "@fern-docs/i18n";
 import * as Dialog from "@radix-ui/react-dialog";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -10,20 +10,25 @@ import { FERN_SEARCH_DIALOG_ID, FERN_SEARCH_DIALOG_OVERLAY_ID } from "../../cons
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { DesktopCommandAfterInput } from "./desktop-command";
 
-function DialogCloseEsc({ className }: { className?: string }) {
+function DialogCloseEsc({ className, lang }: { className?: string; lang: string }) {
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <Dialog.DialogClose asChild>
-                        <Button size="xs" variant="outline" className={className} aria-label="Close search">
+                        <Button
+                            size="xs"
+                            variant="outline"
+                            className={className}
+                            aria-label={t(lang).search.closeSearch}
+                        >
                             <kbd>Esc</kbd>
                         </Button>
                     </Dialog.DialogClose>
                 </TooltipTrigger>
                 <TooltipPortal>
                     <TooltipContent>
-                        <p>Close search</p>
+                        <p>{t(lang).search.closeSearch}</p>
                     </TooltipContent>
                 </TooltipPortal>
             </Tooltip>
@@ -31,10 +36,10 @@ function DialogCloseEsc({ className }: { className?: string }) {
     );
 }
 
-function DialogCloseX({ className }: { className?: string }) {
+function DialogCloseX({ className, lang }: { className?: string; lang: string }) {
     return (
         <Dialog.DialogClose asChild>
-            <Button size="icon" variant="outline" className={className} aria-label="Close search">
+            <Button size="icon" variant="outline" className={className} aria-label={t(lang).search.closeSearch}>
                 <X />
             </Button>
         </Dialog.DialogClose>
@@ -46,12 +51,14 @@ export const DesktopSearchDialog = memo(
         asChild,
         trigger,
         afterInput,
+        lang,
         ...rest
     }: PropsWithChildren<
         {
             trigger?: ReactNode;
             asChild?: boolean;
             afterInput?: ReactNode;
+            lang: string;
         } & ComponentPropsWithoutRef<typeof Dialog.Root>
     >) => {
         return (
@@ -61,8 +68,8 @@ export const DesktopSearchDialog = memo(
                 <DesktopCommandAfterInput>
                     {afterInput || (
                         <>
-                            <DialogCloseEsc className="pointer-coarse:hidden shrink-0" />
-                            <DialogCloseX className="pointer-coarse:flex hidden shrink-0" />
+                            <DialogCloseEsc className="pointer-coarse:hidden shrink-0" lang={lang} />
+                            <DialogCloseX className="pointer-coarse:flex hidden shrink-0" lang={lang} />
                         </>
                     )}
                 </DesktopCommandAfterInput>
@@ -71,8 +78,8 @@ export const DesktopSearchDialog = memo(
                     <Dialog.Overlay id={FERN_SEARCH_DIALOG_OVERLAY_ID} />
 
                     <VisuallyHidden>
-                        <Dialog.Title>Search</Dialog.Title>
-                        <Dialog.Description>Search our documentation.</Dialog.Description>
+                        <Dialog.Title>{t(lang).search.search}</Dialog.Title>
+                        <Dialog.Description>{t(lang).search.searchOurDocumentation}</Dialog.Description>
                     </VisuallyHidden>
 
                     <Dialog.Content

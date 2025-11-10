@@ -1,5 +1,5 @@
 import { cn } from "@fern-docs/components/cn";
-
+import { t } from "@fern-docs/i18n";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import {
@@ -20,8 +20,9 @@ export const DesktopCommandRoot = forwardRef<
         onEscapeKeyDown?: KeyboardEventHandler<HTMLDivElement>;
         onPopState?: KeyboardEventHandler<HTMLDivElement>;
         escapeKeyShouldPopState?: boolean;
+        lang: string;
     }
->(({ children, onEscapeKeyDown, onPopState, escapeKeyShouldPopState, ...props }, forwardedRef) => {
+>(({ children, onEscapeKeyDown, onPopState, escapeKeyShouldPopState, lang, ...props }, forwardedRef) => {
     const ref = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
     const [inputError, setInputError] = useState<string | null | undefined>(null);
@@ -32,7 +33,7 @@ export const DesktopCommandRoot = forwardRef<
     return (
         <CommandUxProvider setInputRef={setInputRef} inputError={inputError} setInputError={setInputError}>
             <Command.Root
-                label="Search"
+                label={t(lang).search.search}
                 ref={composeRefs(forwardedRef, ref)}
                 {...props}
                 onKeyDown={composeEventHandlers(

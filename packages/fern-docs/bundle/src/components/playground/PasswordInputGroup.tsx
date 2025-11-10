@@ -19,6 +19,7 @@ export const PasswordInputGroup = forwardRef<HTMLInputElement, FernInputProps>((
                     props.rightElement
                 )
             }
+            lang={props.lang}
         />
     );
 });

@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Oluşturulan OAuth Token",
     "userSuppliedBearerToken": "Kullanıcı Tarafından Sağlanan Bearer Token",
     "provideTokenManually": "Token'ı manuel olarak sağla",
-    "resetTokenToDefault": "Token'ı varsayılana sıfırla"
+    "resetTokenToDefault": "Token'ı varsayılana sıfırla",
+    "enterUsername": "Kullanıcı adını girin...",
+    "enterPassword": "Şifreyi girin...",
+    "prefix": "Ön ek",
+    "enterValue": "Değer girin..."
   },
   "buttons": {
     "sendRequest": "İstek gönder",
@@ -58,7 +62,12 @@
     "close": "Kapat",
     "cancel": "İptal",
     "moreActions": "Daha fazla işlem",
-    "moreOptions": "Daha fazla seçenek"
+    "moreOptions": "Daha fazla seçenek",
+    "submit": "Gönder",
+    "submitting": "Gönderiliyor...",
+    "resetToTheDefaultValue": "Varsayılan değere sıfırla",
+    "generate": "Oluştur",
+    "retry": "Tekrar dene"
   },
   "search": {
     "search": "Ara",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Temayı koyuya değiştir",
     "changeThemeToSystem": "Temayı sisteme değiştir",
     "filterTo": "Filtrele",
-    "removeFilter": "Filtreyi kaldır"
+    "removeFilter": "Filtreyi kaldır",
+    "noResultsFoundFor": "Sonuç bulunamadı",
+    "assistant": "Asistan",
+    "askAIAQuestion": "Yapay zekaya bir soru sorun...",
+    "anErrorOccurredResetConvo": "Bir hata oluştu - konuşmayı sıfırlamak için tıklayın.",
+    "hiIAmAnAIAssistant": "Merhaba, dokümantasyona ve diğer içeriklere erişimi olan bir yapay zeka asistanıyım.",
+    "youCanToggleThisPane": "İpucu: Bu paneli şununla değiştirebilirsiniz",
+    "thinking": "Düşünüyor",
+    "footnotes": "Dipnotlar",
+    "addFilter": "Filtre ekle",
+    "closeSearch": "Aramayı kapat",
+    "searchOurDocumentation": "Dokümantasyonumuzu arayın."
   },
   "apiReference": {
     "apiReference": "API Referansı",
@@ -111,7 +131,10 @@
     "authenticated": "Kimliği doğrulanmış",
     "time": "Zaman",
     "size": "Boyut",
-    "failed": "Başarısız"
+    "failed": "Başarısız",
+    "authType": "Kimlik doğrulama türü",
+    "deprecated": "Kullanımdan kaldırıldı",
+    "required": "Zorunlu"
   },
   "playground": {
     "cannotSendToLocalhost": "Localhost'a istek gönderilemez",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "Bu endpoint bir dosya döndürür.",
     "thisEndpointReturnsNothing": "Bu endpoint hiçbir şey döndürmez.",
     "thisEndpointSendsTextResponses": "Bu endpoint uzun süreli bir HTTP bağlantısı üzerinden metin yanıtları gönderir.",
-    "return200Status": "Verilerin başarıyla alındığını belirtmek için 200 durumu döndürün."
+    "return200Status": "Verilerin başarıyla alındığını belirtmek için 200 durumu döndürün.",
+    "thisEndpointReturnsAudio": "Bu endpoint bir audio/mpeg dosyası döndürür."
   },
   "status": {
     "loading": "Yükleniyor...",
@@ -170,7 +194,11 @@
     "anotherReason": "Başka bir neden",
     "yesOkayToFollowUp": "Evet, e-posta ile takip etmekte sakınca yok.",
     "yes": "Evet",
-    "no": "Hayır"
+    "no": "Hayır",
+    "reportIncorrectCode": "Hatalı kodu bildir",
+    "whatIsWrongWithThisCodeExample": "Bu kod örneğinde ne yanlış?",
+    "helpUsImproveByReportingCodeExample": "Bu kod örneğinde neyin yanlış olduğunu bildirerek dokümantasyonumuzu iyileştirmemize yardımcı olun.",
+    "weHaveBeenNotified": "Bir dahaki sefere düzeltebilmemiz için bilgilendirilmiş olduk."
   },
   "feedbackQuality": {
     "accurate": "Doğru",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "Env-local yanıtında port bulunamadı",
     "objectExtendsNonObject": "Nesne, nesne olmayan bir şeyi genişletiyor",
     "typeDefinitionContextNotFound": "Ağaçta TypeDefinitionContext.Provider bulunamadı",
-    "error": "Hata"
+    "error": "Hata",
+    "wereYouLookingForOneOfThese": "Bunlardan birini mi arıyordunuz?",
+    "anErrorOccurred": "Bir hata oluştu."
   },
   "navigation": {
     "upNext": "Sıradaki",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Cursor'a MCP sunucusunu yükle",
     "subscribeViaRss": "RSS ile abone ol",
     "openInChatGPT": "ChatGPT'de aç",
-    "openInClaude": "Claude'da aç"
+    "openInClaude": "Claude'da aç",
+    "developerFriendlyDocs": "API'niz için geliştirici dostu dokümantasyon",
+    "buildWith": "İle oluştur"
   },
   "environments": {
     "prod": "Prod",

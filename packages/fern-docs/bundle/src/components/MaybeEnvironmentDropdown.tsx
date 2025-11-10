@@ -119,6 +119,7 @@ export function MaybeEnvironmentDropdown({
                             "font-mono",
                             small ? "text-xs" : "text-sm"
                         )}
+                        lang={lang}
                     />
                 </span>
             ) : (

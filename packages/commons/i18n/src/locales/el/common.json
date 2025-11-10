@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Δημιουργημένο OAuth Token",
     "userSuppliedBearerToken": "Bearer Token που παρέχεται από χρήστη",
     "provideTokenManually": "Παροχή token χειροκίνητα",
-    "resetTokenToDefault": "Επαναφορά token στην προεπιλογή"
+    "resetTokenToDefault": "Επαναφορά token στην προεπιλογή",
+    "enterUsername": "Εισαγάγετε όνομα χρήστη...",
+    "enterPassword": "Εισαγάγετε κωδικό πρόσβασης...",
+    "prefix": "Πρόθεμα",
+    "enterValue": "Εισαγάγετε τιμή..."
   },
   "buttons": {
     "sendRequest": "Αποστολή αιτήματος",
@@ -58,7 +62,12 @@
     "close": "Κλείσιμο",
     "cancel": "Ακύρωση",
     "moreActions": "Περισσότερες ενέργειες",
-    "moreOptions": "Περισσότερες επιλογές"
+    "moreOptions": "Περισσότερες επιλογές",
+    "submit": "Υποβολή",
+    "submitting": "Υποβάλλεται...",
+    "resetToTheDefaultValue": "Επαναφορά στην προεπιλεγμένη τιμή",
+    "generate": "Δημιουργία",
+    "retry": "Επανάληψη"
   },
   "search": {
     "search": "Αναζήτηση",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Αλλαγή θέματος σε σκούρο",
     "changeThemeToSystem": "Αλλαγή θέματος σε σύστημα",
     "filterTo": "Φιλτράρισμα σε",
-    "removeFilter": "Αφαίρεση φίλτρου"
+    "removeFilter": "Αφαίρεση φίλτρου",
+    "noResultsFoundFor": "Δεν βρέθηκαν αποτελέσματα για",
+    "assistant": "Βοηθός",
+    "askAIAQuestion": "Ρωτήστε το AI μια ερώτηση...",
+    "anErrorOccurredResetConvo": "Προέκυψε σφάλμα - κάντε κλικ για επαναφορά της συνομιλίας.",
+    "hiIAmAnAIAssistant": "Γεια, είμαι ένας βοηθός AI με πρόσβαση σε τεκμηρίωση και άλλο περιεχόμενο.",
+    "youCanToggleThisPane": "Συμβουλή: Μπορείτε να εναλλάξετε αυτό το παράθυρο με",
+    "thinking": "Σκέφτομαι",
+    "footnotes": "Υποσημειώσεις",
+    "addFilter": "Προσθήκη φίλτρου",
+    "closeSearch": "Κλείσιμο αναζήτησης",
+    "searchOurDocumentation": "Αναζητήστε στην τεκμηρίωσή μας."
   },
   "apiReference": {
     "apiReference": "Αναφορά API",
@@ -111,7 +131,10 @@
     "authenticated": "Ταυτοποιημένος",
     "time": "Χρόνος",
     "size": "Μέγεθος",
-    "failed": "Απέτυχε"
+    "failed": "Απέτυχε",
+    "authType": "Τύπος ελέγχου ταυτότητας",
+    "deprecated": "Παρωχημένο",
+    "required": "Απαιτούμενο"
   },
   "playground": {
     "cannotSendToLocalhost": "Δεν είναι δυνατή η αποστολή αιτημάτων στο localhost",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "Αυτό το endpoint επιστρέφει ένα αρχείο.",
     "thisEndpointReturnsNothing": "Αυτό το endpoint δεν επιστρέφει τίποτα.",
     "thisEndpointSendsTextResponses": "Αυτό το endpoint στέλνει αποκρίσεις κειμένου μέσω μιας μακράς σύνδεσης HTTP.",
-    "return200Status": "Επιστρέψτε κατάσταση 200 για να υποδείξετε ότι τα δεδομένα ελήφθησαν με επιτυχία."
+    "return200Status": "Επιστρέψτε κατάσταση 200 για να υποδείξετε ότι τα δεδομένα ελήφθησαν με επιτυχία.",
+    "thisEndpointReturnsAudio": "Αυτό το endpoint επιστρέφει ένα αρχείο audio/mpeg."
   },
   "status": {
     "loading": "Φόρτωση...",
@@ -170,7 +194,11 @@
     "anotherReason": "Άλλος λόγος",
     "yesOkayToFollowUp": "Ναι, μπορείτε να επικοινωνήσετε μέσω email.",
     "yes": "Ναι",
-    "no": "Όχι"
+    "no": "Όχι",
+    "reportIncorrectCode": "Αναφορά εσφαλμένου κώδικα",
+    "whatIsWrongWithThisCodeExample": "Τι είναι λάθος με αυτό το παράδειγμα κώδικα;",
+    "helpUsImproveByReportingCodeExample": "Βοηθήστε μας να βελτιώσουμε την τεκμηρίωσή μας αναφέροντας τι είναι λάθος με αυτό το παράδειγμα κώδικα.",
+    "weHaveBeenNotified": "Έχουμε ενημερωθεί ώστε να το διορθώσουμε για την επόμενη φορά."
   },
   "feedbackQuality": {
     "accurate": "Ακριβής",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "Δεν βρέθηκε θύρα στην απόκριση env-local",
     "objectExtendsNonObject": "Το αντικείμενο επεκτείνει μη αντικείμενο",
     "typeDefinitionContextNotFound": "Το TypeDefinitionContext.Provider δεν βρέθηκε στο δέντρο",
-    "error": "Σφάλμα"
+    "error": "Σφάλμα",
+    "wereYouLookingForOneOfThese": "Ψάχνατε για κάποιο από αυτά;",
+    "anErrorOccurred": "Προέκυψε σφάλμα."
   },
   "navigation": {
     "upNext": "Επόμενο",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Εγκατάσταση διακομιστή MCP στο Cursor",
     "subscribeViaRss": "Εγγραφή μέσω RSS",
     "openInChatGPT": "Άνοιγμα στο ChatGPT",
-    "openInClaude": "Άνοιγμα στο Claude"
+    "openInClaude": "Άνοιγμα στο Claude",
+    "developerFriendlyDocs": "Φιλική προς τους προγραμματιστές τεκμηρίωση για το API σας",
+    "buildWith": "Δημιουργία με"
   },
   "environments": {
     "prod": "Παραγωγή",

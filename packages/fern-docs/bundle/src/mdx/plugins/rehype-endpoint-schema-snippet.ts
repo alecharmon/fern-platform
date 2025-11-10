@@ -61,12 +61,10 @@ export const rehypeEndpointSchemaSnippets: Unified.Plugin<[{ loader: DocsLoader 
                                 apiDefinitionId,
                                 endpoint.id
                             );
-                            const lang = await loader.getLanguage();
 
                             node.attributes.push(
                                 unknownToMdxJsxAttribute("endpointDefinition", endpointDefinition),
-                                unknownToMdxJsxAttribute("types", types),
-                                unknownToMdxJsxAttribute("lang", lang)
+                                unknownToMdxJsxAttribute("types", types)
                             );
                         } catch (e) {
                             console.error(`Could not find endpoint for ${method} ${path} ${props.example}`, e);

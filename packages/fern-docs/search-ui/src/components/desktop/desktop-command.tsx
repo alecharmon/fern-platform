@@ -55,7 +55,7 @@ const DesktopCommand = forwardRef<
 
     return (
         <DesktopCommandRoot
-            label="Search"
+            label={t(lang).search.search}
             {...props}
             ref={composeRefs(forwardedRef, ref)}
             onPopState={composeEventHandlers(onPopState, handlePopFilters, {
@@ -64,6 +64,7 @@ const DesktopCommand = forwardRef<
             escapeKeyShouldPopState={filters.length > 0}
             data-fern-search="desktop-command"
             data-mode={"search"}
+            lang={lang}
         >
             <DesktopCommandContent asChild={asChild} lang={lang}>
                 {children}

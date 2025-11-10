@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@fern-docs/i18n";
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import { cn } from "./cn";
@@ -12,6 +13,7 @@ export declare namespace CodeBlockFeedbackButton {
         code?: string;
         language?: string;
         onFeedbackSubmit?: (feedback: { message: string; code: string; language?: string }) => void;
+        lang: string;
     }
 }
 
@@ -19,7 +21,8 @@ export const CodeBlockFeedbackButton: React.FC<CodeBlockFeedbackButton.Props> = 
     className,
     code,
     language,
-    onFeedbackSubmit
+    onFeedbackSubmit,
+    lang
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -29,7 +32,7 @@ export const CodeBlockFeedbackButton: React.FC<CodeBlockFeedbackButton.Props> = 
 
     return (
         <FernTooltipProvider>
-            <FernTooltip content="Report incorrect code">
+            <FernTooltip content={t(lang).feedback.reportIncorrectCode}>
                 <Button
                     className={cn("fern-feedback-button", className)}
                     onClick={(e) => {
@@ -50,6 +53,7 @@ export const CodeBlockFeedbackButton: React.FC<CodeBlockFeedbackButton.Props> = 
                     open={isOpen}
                     onOpenChange={setIsOpen}
                     onSubmit={onFeedbackSubmit}
+                    lang={lang}
                 />
             )}
         </FernTooltipProvider>
@@ -62,6 +66,7 @@ interface CodeBlockFeedbackModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit?: (feedback: { message: string; code: string; language?: string }) => void;
+    lang: string;
 }
 
 const CodeBlockFeedbackModal: React.FC<CodeBlockFeedbackModalProps> = ({
@@ -69,7 +74,8 @@ const CodeBlockFeedbackModal: React.FC<CodeBlockFeedbackModalProps> = ({
     language,
     open,
     onOpenChange,
-    onSubmit
+    onSubmit,
+    lang
 }) => {
     const [message, setMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,25 +109,25 @@ const CodeBlockFeedbackModal: React.FC<CodeBlockFeedbackModalProps> = ({
                 className="bg-card-solid border-border-default rounded-2 w-full max-w-md border p-6 shadow-xl"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className="text-lg font-semibold mb-4">Report incorrect code</h2>
+                <h2 className="text-lg font-semibold mb-4">{t(lang).feedback.reportIncorrectCode}</h2>
                 <p className="text-(color:--grayscale-a11) text-sm mb-4">
-                    Help us improve our documentation by reporting what's wrong with this code example.
+                    {t(lang).feedback.helpUsImproveByReportingCodeExample}
                 </p>
                 <form onSubmit={handleSubmit}>
                     <textarea
                         className="bg-card-background border-border-default rounded-2 w-full border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary"
                         rows={4}
-                        placeholder="What's wrong with this code example?"
+                        placeholder={t(lang).feedback.whatIsWrongWithThisCodeExample}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         autoFocus
                     />
                     <div className="mt-4 flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Cancel
+                            {t(lang).buttons.cancel}
                         </Button>
                         <Button type="submit" variant="default" disabled={!message.trim() || isSubmitting}>
-                            {isSubmitting ? "Submitting..." : "Submit"}
+                            {isSubmitting ? t(lang).buttons.submitting : t(lang).buttons.submit}
                         </Button>
                     </div>
                 </form>

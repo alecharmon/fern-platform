@@ -168,6 +168,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
                                     placeholder="yourname@email.com"
                                     value={email}
                                     onValueChange={setEmail}
+                                    lang={lang}
                                 />
                             )}
                         </FernCheckbox>

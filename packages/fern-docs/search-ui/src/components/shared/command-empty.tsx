@@ -1,10 +1,10 @@
+import { t } from "@fern-docs/i18n";
 import { type ComponentProps, forwardRef } from "react";
-
 import { useSearchHits } from "../../hooks/use-search-hits";
 import * as Command from "../cmdk";
 
-export const CommandEmpty = forwardRef<HTMLDivElement, ComponentProps<typeof Command.Empty>>(
-    ({ children, ...props }, ref) => {
+export const CommandEmpty = forwardRef<HTMLDivElement, ComponentProps<typeof Command.Empty> & { lang: string }>(
+    ({ children, lang, ...props }, ref) => {
         const query = Command.useCommandState((state) => state.search);
         const items = useSearchHits();
 
@@ -30,7 +30,7 @@ export const CommandEmpty = forwardRef<HTMLDivElement, ComponentProps<typeof Com
                         ...props.style
                     }}
                 >
-                    No results found for &ldquo;{query}&rdquo;.
+                    {t(lang).search.noResultsFoundFor} &ldquo;{query}&rdquo;.
                 </div>
             )
         );

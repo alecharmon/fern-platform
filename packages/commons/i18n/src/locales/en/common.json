@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Generated OAuth Token",
     "userSuppliedBearerToken": "User Supplied Bearer Token",
     "provideTokenManually": "Provide token manually",
-    "resetTokenToDefault": "Reset token to default"
+    "resetTokenToDefault": "Reset token to default",
+    "enterUsername": "Enter username...",
+    "enterPassword": "Enter password...",
+    "prefix": "Prefix",
+    "enterValue": "Enter value..."
   },
   "buttons": {
     "sendRequest": "Send Request",
@@ -58,7 +62,12 @@
     "close": "Close",
     "cancel": "Cancel",
     "moreActions": "More actions",
-    "moreOptions": "More options"
+    "moreOptions": "More options",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "resetToTheDefaultValue": "Reset to the default value",
+    "generate": "Generate",
+    "retry": "Retry"
   },
   "search": {
     "search": "Search",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Change theme to dark",
     "changeThemeToSystem": "Change theme to system",
     "filterTo": "Filter to",
-    "removeFilter": "Remove filter"
+    "removeFilter": "Remove filter",
+    "noResultsFoundFor": "No results found for",
+    "assistant": "Assistant",
+    "askAIAQuestion": "Ask AI a question...",
+    "anErrorOccurredResetConvo": "An error occurred - click to reset the conversation.",
+    "hiIAmAnAIAssistant": "Hi, I'm an AI assistant with access to documentation and other content.",
+    "youCanToggleThisPane": "Tip: You can toggle this pane with",
+    "thinking": "Thinking",
+    "footnotes": "Footnotes",
+    "addFilter": "Add Filter",
+    "closeSearch": "Close search",
+    "searchOurDocumentation": "Search our documentation."
   },
   "apiReference": {
     "apiReference": "API Reference",
@@ -111,7 +131,10 @@
     "authenticated": "Authenticated",
     "time": "Time",
     "size": "Size",
-    "failed": "Failed"
+    "failed": "Failed",
+    "authType": "Auth Type",
+    "deprecated": "Deprecated",
+    "required": "Required"
   },
   "playground": {
     "cannotSendToLocalhost": "Cannot send requests to localhost",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "This endpoint returns a file.",
     "thisEndpointReturnsNothing": "This endpoint returns nothing.",
     "thisEndpointSendsTextResponses": "This endpoint sends text responses over a long-lived HTTP connection.",
-    "return200Status": "Return a 200 status to indicate that the data was received successfully."
+    "return200Status": "Return a 200 status to indicate that the data was received successfully.",
+    "thisEndpointReturnsAudio": "This endpoint returns an audio/mpeg file."
   },
   "status": {
     "loading": "Loading...",
@@ -170,7 +194,11 @@
     "anotherReason": "Another reason",
     "yesOkayToFollowUp": "Yes, it's okay to follow up by email.",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "reportIncorrectCode": "Report incorrect code",
+    "whatIsWrongWithThisCodeExample": "What's wrong with this code example?",
+    "helpUsImproveByReportingCodeExample": "Help us improve our documentation by reporting what's wrong with this code example.",
+    "weHaveBeenNotified": "We've been notified so we can fix this for next time."
   },
   "feedbackQuality": {
     "accurate": "Accurate",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "No port found in env-local response",
     "objectExtendsNonObject": "Object extends non-object",
     "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider not found in tree",
-    "error": "Error"
+    "error": "Error",
+    "wereYouLookingForOneOfThese": "Were you looking for one of these?",
+    "anErrorOccurred": "An error occurred."
   },
   "navigation": {
     "upNext": "Up next",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Install MCP server on Cursor",
     "subscribeViaRss": "Subscribe via RSS",
     "openInChatGPT": "Open in ChatGPT",
-    "openInClaude": "Open in Claude"
+    "openInClaude": "Open in Claude",
+    "developerFriendlyDocs": "Developer-friendly docs for your API",
+    "buildWith": "Build with"
   },
   "environments": {
     "prod": "Prod",

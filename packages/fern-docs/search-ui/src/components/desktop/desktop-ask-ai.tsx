@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@fern-docs/i18n";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { type ComponentPropsWithoutRef, forwardRef, type ReactNode, useRef } from "react";
@@ -59,7 +60,7 @@ export const DesktopCommandWithAskAI = forwardRef<
 
         return (
             <DesktopCommandRoot
-                label={"Search"}
+                label={t(lang).search.search}
                 {...props}
                 ref={composeRefs(forwardedRef, ref)}
                 shouldFilter={true}
@@ -71,6 +72,7 @@ export const DesktopCommandWithAskAI = forwardRef<
                 escapeKeyShouldPopState={filters.length > 0}
                 data-fern-search="desktop-command"
                 data-mode={"search"}
+                lang={lang}
             >
                 <DesktopCommandContent asChild={asChild} lang={lang}>
                     <CommandAskAIGroup

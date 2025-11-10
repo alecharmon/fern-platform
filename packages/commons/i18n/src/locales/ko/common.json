@@ -21,7 +21,11 @@
     "generatedOAuthToken": "생성된 OAuth 토큰",
     "userSuppliedBearerToken": "사용자 제공 Bearer 토큰",
     "provideTokenManually": "토큰을 수동으로 제공",
-    "resetTokenToDefault": "토큰을 기본값으로 재설정"
+    "resetTokenToDefault": "토큰을 기본값으로 재설정",
+    "enterUsername": "사용자 이름 입력...",
+    "enterPassword": "비밀번호 입력...",
+    "prefix": "접두사",
+    "enterValue": "값 입력..."
   },
   "buttons": {
     "sendRequest": "요청 보내기",
@@ -58,7 +62,12 @@
     "close": "닫기",
     "cancel": "취소",
     "moreActions": "더 많은 작업",
-    "moreOptions": "더 많은 옵션"
+    "moreOptions": "더 많은 옵션",
+    "submit": "제출",
+    "submitting": "제출 중...",
+    "resetToTheDefaultValue": "기본값으로 재설정",
+    "generate": "생성",
+    "retry": "재시도"
   },
   "search": {
     "search": "검색",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "어두운 테마로 변경",
     "changeThemeToSystem": "시스템 테마로 변경",
     "filterTo": "필터링",
-    "removeFilter": "필터 제거"
+    "removeFilter": "필터 제거",
+    "noResultsFoundFor": "결과를 찾을 수 없습니다",
+    "assistant": "도우미",
+    "askAIAQuestion": "AI에게 질문하기...",
+    "anErrorOccurredResetConvo": "오류가 발생했습니다 - 클릭하여 대화를 재설정하세요.",
+    "hiIAmAnAIAssistant": "안녕하세요, 저는 문서 및 기타 콘텐츠에 액세스할 수 있는 AI 도우미입니다.",
+    "youCanToggleThisPane": "팁: 이 창을 다음으로 전환할 수 있습니다",
+    "thinking": "생각 중",
+    "footnotes": "각주",
+    "addFilter": "필터 추가",
+    "closeSearch": "검색 닫기",
+    "searchOurDocumentation": "문서를 검색하세요."
   },
   "apiReference": {
     "apiReference": "API 레퍼런스",
@@ -111,7 +131,10 @@
     "authenticated": "인증됨",
     "time": "시간",
     "size": "크기",
-    "failed": "실패"
+    "failed": "실패",
+    "authType": "인증 유형",
+    "deprecated": "더 이상 사용되지 않음",
+    "required": "필수"
   },
   "playground": {
     "cannotSendToLocalhost": "localhost로 요청을 보낼 수 없습니다",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "이 엔드포인트는 파일을 반환합니다.",
     "thisEndpointReturnsNothing": "이 엔드포인트는 아무것도 반환하지 않습니다.",
     "thisEndpointSendsTextResponses": "이 엔드포인트는 장기 HTTP 연결을 통해 텍스트 응답을 보냅니다.",
-    "return200Status": "데이터가 성공적으로 수신되었음을 나타내기 위해 200 상태를 반환합니다."
+    "return200Status": "데이터가 성공적으로 수신되었음을 나타내기 위해 200 상태를 반환합니다.",
+    "thisEndpointReturnsAudio": "이 엔드포인트는 audio/mpeg 파일을 반환합니다."
   },
   "status": {
     "loading": "로딩 중...",
@@ -170,7 +194,11 @@
     "anotherReason": "다른 이유",
     "yesOkayToFollowUp": "네, 이메일로 후속 조치해도 괜찮습니다.",
     "yes": "예",
-    "no": "아니오"
+    "no": "아니오",
+    "reportIncorrectCode": "잘못된 코드 신고",
+    "whatIsWrongWithThisCodeExample": "이 코드 예제의 문제점은 무엇인가요?",
+    "helpUsImproveByReportingCodeExample": "이 코드 예제의 문제점을 신고하여 문서 개선에 도움을 주세요.",
+    "weHaveBeenNotified": "다음번에 수정할 수 있도록 알림을 받았습니다."
   },
   "feedbackQuality": {
     "accurate": "정확함",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "env-local 응답에서 포트를 찾을 수 없습니다",
     "objectExtendsNonObject": "객체가 비객체를 확장합니다",
     "typeDefinitionContextNotFound": "트리에서 TypeDefinitionContext.Provider를 찾을 수 없습니다",
-    "error": "오류"
+    "error": "오류",
+    "wereYouLookingForOneOfThese": "이 중 하나를 찾고 계셨나요?",
+    "anErrorOccurred": "오류가 발생했습니다."
   },
   "navigation": {
     "upNext": "다음",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Cursor에 MCP 서버 설치",
     "subscribeViaRss": "RSS로 구독",
     "openInChatGPT": "ChatGPT에서 열기",
-    "openInClaude": "Claude에서 열기"
+    "openInClaude": "Claude에서 열기",
+    "developerFriendlyDocs": "API를 위한 개발자 친화적 문서",
+    "buildWith": "구축 도구"
   },
   "environments": {
     "prod": "운영",

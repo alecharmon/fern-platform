@@ -1,6 +1,7 @@
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { Badge } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
+import { t } from "@fern-docs/i18n";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { groupBy } from "es-toolkit/array";
@@ -8,13 +9,12 @@ import type { Element as HastElement } from "hast";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect } from "react";
 import { CONTINUE, EXIT, visit } from "unist-util-visit";
-
 import type { AskFernRecordHit } from "../../types";
 import { PageIcon } from "../icons/page";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { useChatbotTurnContext } from "./turn-context";
 
-export function FootnoteSup({ node }: { node?: HastElement }) {
+export function FootnoteSup({ node, lang }: { node?: HastElement; lang: string }) {
     const { footnotesAtom } = useChatbotTurnContext();
     const footnotes = useAtomValue(footnotesAtom);
 
@@ -112,11 +112,13 @@ function selectFootnoteLinks(node: HastElement): { id: string; href: string }[] 
 export function FootnotesSection({
     node,
     searchResults,
-    className
+    className,
+    lang
 }: {
     node: HastElement;
     searchResults: AskFernRecordHit[];
     className?: string;
+    lang: string;
 }) {
     const { footnotesAtom } = useChatbotTurnContext();
     const [footnotes, setFootnotes] = useAtom(footnotesAtom);
@@ -138,7 +140,7 @@ export function FootnotesSection({
     return (
         <section data-footnotes className={cn("not-prose", className)}>
             <VisuallyHidden asChild>
-                <h6>Footnotes</h6>
+                <h6>{t(lang).search.footnotes}</h6>
             </VisuallyHidden>
             <div className="flex flex-wrap gap-1">
                 {footnotes.map(({ ids, url, title, icon, type, api_type }, index) => (

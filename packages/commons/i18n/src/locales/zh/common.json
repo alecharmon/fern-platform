@@ -21,7 +21,11 @@
     "generatedOAuthToken": "已生成的 OAuth 令牌",
     "userSuppliedBearerToken": "用户提供的 Bearer 令牌",
     "provideTokenManually": "手动提供令牌",
-    "resetTokenToDefault": "将令牌重置为默认值"
+    "resetTokenToDefault": "将令牌重置为默认值",
+    "enterUsername": "输入用户名...",
+    "enterPassword": "输入密码...",
+    "prefix": "前缀",
+    "enterValue": "输入值..."
   },
   "buttons": {
     "sendRequest": "发送请求",
@@ -58,7 +62,12 @@
     "close": "关闭",
     "cancel": "取消",
     "moreActions": "更多操作",
-    "moreOptions": "更多选项"
+    "moreOptions": "更多选项",
+    "submit": "提交",
+    "submitting": "提交中...",
+    "resetToTheDefaultValue": "重置为默认值",
+    "generate": "生成",
+    "retry": "重试"
   },
   "search": {
     "search": "搜索",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "切换到深色主题",
     "changeThemeToSystem": "切换到系统主题",
     "filterTo": "筛选至",
-    "removeFilter": "移除筛选器"
+    "removeFilter": "移除筛选器",
+    "noResultsFoundFor": "未找到相关结果",
+    "assistant": "助手",
+    "askAIAQuestion": "向 AI 提问...",
+    "anErrorOccurredResetConvo": "发生错误 - 点击重置对话。",
+    "hiIAmAnAIAssistant": "您好，我是一个可以访问文档和其他内容的 AI 助手。",
+    "youCanToggleThisPane": "提示：您可以使用以下方式切换此面板",
+    "thinking": "思考中",
+    "footnotes": "脚注",
+    "addFilter": "添加筛选器",
+    "closeSearch": "关闭搜索",
+    "searchOurDocumentation": "搜索我们的文档。"
   },
   "apiReference": {
     "apiReference": "API 参考",
@@ -111,7 +131,10 @@
     "authenticated": "已验证",
     "time": "时间",
     "size": "大小",
-    "failed": "失败"
+    "failed": "失败",
+    "authType": "认证类型",
+    "deprecated": "已弃用",
+    "required": "必需"
   },
   "playground": {
     "cannotSendToLocalhost": "无法向 localhost 发送请求",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "此端点返回一个文件。",
     "thisEndpointReturnsNothing": "此端点不返回任何内容。",
     "thisEndpointSendsTextResponses": "此端点通过长连接 HTTP 连接发送文本响应。",
-    "return200Status": "返回 200 状态以表示数据已成功接收。"
+    "return200Status": "返回 200 状态以表示数据已成功接收。",
+    "thisEndpointReturnsAudio": "此端点返回一个 audio/mpeg 文件。"
   },
   "status": {
     "loading": "加载中...",
@@ -170,7 +194,11 @@
     "anotherReason": "其他原因",
     "yesOkayToFollowUp": "是的，可以通过电子邮件跟进。",
     "yes": "是",
-    "no": "否"
+    "no": "否",
+    "reportIncorrectCode": "报告错误代码",
+    "whatIsWrongWithThisCodeExample": "此代码示例有什么问题？",
+    "helpUsImproveByReportingCodeExample": "通过报告此代码示例的问题来帮助我们改进文档。",
+    "weHaveBeenNotified": "我们已收到通知，以便下次修复此问题。"
   },
   "feedbackQuality": {
     "accurate": "准确",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "在 env-local 响应中未找到端口",
     "objectExtendsNonObject": "对象扩展非对象",
     "typeDefinitionContextNotFound": "在树中未找到 TypeDefinitionContext.Provider",
-    "error": "错误"
+    "error": "错误",
+    "wereYouLookingForOneOfThese": "您是否在寻找以下内容之一？",
+    "anErrorOccurred": "发生错误。"
   },
   "navigation": {
     "upNext": "接下来",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "在 Cursor 上安装 MCP 服务器",
     "subscribeViaRss": "通过 RSS 订阅",
     "openInChatGPT": "在 ChatGPT 中打开",
-    "openInClaude": "在 Claude 中打开"
+    "openInClaude": "在 Claude 中打开",
+    "developerFriendlyDocs": "适合开发者的 API 文档",
+    "buildWith": "使用以下工具构建"
   },
   "environments": {
     "prod": "生产",

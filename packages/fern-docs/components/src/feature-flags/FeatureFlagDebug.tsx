@@ -1,3 +1,4 @@
+/*eslint i18next/no-literal-string: off*/
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import type { PropsWithChildren } from "react";
 

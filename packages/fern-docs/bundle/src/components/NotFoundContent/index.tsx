@@ -59,9 +59,7 @@ export default function NotFoundContent({ lang }: { lang: string }) {
                 <GradientExclamation />
                 <div className="flex flex-col text-center gap-2">
                     <h1>{t(lang).errors.pageNotFound}</h1>
-                    <p className="text-(color:--grayscale-a9)">
-                        We&apos;ve been notified so we can fix this for next time.
-                    </p>
+                    <p className="text-(color:--grayscale-a9)">{t(lang).feedback.weHaveBeenNotified}</p>
                 </div>
 
                 {isLoading && requestedPath && requestedPath !== "/" && (
@@ -71,7 +69,7 @@ export default function NotFoundContent({ lang }: { lang: string }) {
                 {!isLoading && suggestedRoutes.length > 0 && (
                     <div className="flex flex-col items-center gap-3 max-w-md w-full px-4">
                         <p className="text-sm text-(color:--grayscale-a11) font-medium">
-                            Were you looking for one of these?
+                            {t(lang).errors.wereYouLookingForOneOfThese}
                         </p>
                         <div className="flex flex-col gap-2 w-full">
                             {suggestedRoutes.map((route) => (

@@ -28,14 +28,18 @@ export function HeaderTabsRoot({
                 showSearchBar && (
                     <div className="flex max-w-[640px] flex-row gap-2">
                         <SearchV2Trigger
-                            aria-label="Search"
+                            aria-label={t(lang).search.search}
                             className="max-w-sidebar-width overflow-hidden"
                             isSearchInSidebar={false}
                             placeholder={searchPlaceholder}
                             lang={lang}
                         />
                         {isAskAiEnabled && (
-                            <SearchPanelTrigger aria-label="Ask AI" isSearchInSidebar={false} lang={lang} />
+                            <SearchPanelTrigger
+                                aria-label={t(lang).search.askAI}
+                                isSearchInSidebar={false}
+                                lang={lang}
+                            />
                         )}
                     </div>
                 )

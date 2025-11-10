@@ -3,6 +3,7 @@
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { FERN_SEARCH_BUTTON_ID } from "@fern-docs/components/constants";
+import { t } from "@fern-docs/i18n";
 import { DesktopSearchButton } from "@fern-docs/search-ui";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { atom, useAtomValue, useSetAtom } from "jotai";
@@ -67,7 +68,7 @@ export const SearchV2Trigger = React.memo(function SearchV2Trigger(
     const isInitialized = useAtomValue(searchInitializedAtom);
     const toggleSearchDialog = useToggleSearchDialog();
     const isLocalEnvironment = isLocal();
-    const placeholder = props.placeholder ?? "Search";
+    const placeholder = props.placeholder ?? t(props.lang).search.search;
 
     return (
         <DesktopSearchButton

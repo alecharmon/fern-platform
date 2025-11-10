@@ -1,7 +1,7 @@
 import { cn } from "@fern-docs/components/cn";
 import { Prose } from "@fern-docs/components/mdx/prose";
+import { t } from "@fern-docs/i18n";
 import type React from "react";
-
 import { FernAnchor } from "@/components/FernAnchor";
 
 export const ParamField: React.FC<
@@ -25,9 +25,23 @@ export const ParamField: React.FC<
         initialValue?: any;
         /** @deprecated unused Mintlify prop */
         placeholder?: string;
+        lang: string;
     }> &
         ({ query: string } | { path: string } | { body: string } | { header: string })
-> = ({ type, default: defaultProp, required, deprecated, toc, className, children, id, title, last, ...props }) => {
+> = ({
+    type,
+    default: defaultProp,
+    required,
+    deprecated,
+    toc,
+    className,
+    children,
+    id,
+    title,
+    last,
+    lang = "en",
+    ...props
+}) => {
     // use title prop if available, otherwise fall back to extracting from props
     const name =
         title ||
@@ -47,9 +61,13 @@ export const ParamField: React.FC<
                 )}
                 <div className="fern-api-property-meta">
                     <span>{type}</span>
-                    {defaultProp && <span>Defaults to {defaultProp}</span>}
-                    {deprecated && <span className="text-(color:--amber-a11)">Deprecated</span>}
-                    {required && <span className="text-(color:--red-a11)">Required</span>}
+                    {defaultProp && (
+                        <span>
+                            {t(lang).playground.defaultsTo} {defaultProp}
+                        </span>
+                    )}
+                    {deprecated && <span className="text-(color:--amber-a11)">{t(lang).apiReference.deprecated}</span>}
+                    {required && <span className="text-(color:--red-a11)">{t(lang).apiReference.required}</span>}
                 </div>
             </div>
             {children && <Prose size="sm">{children}</Prose>}

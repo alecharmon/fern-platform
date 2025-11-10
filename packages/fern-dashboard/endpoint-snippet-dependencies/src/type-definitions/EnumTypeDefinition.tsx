@@ -41,6 +41,7 @@ export function EnumTypeDefinition({ elements, ChipSizeProvider }: EnumTypeDefin
                 style={{ flex: 1, backgroundColor: "transparent" }}
                 leftIcon={<Search className="text-(color:--grayscale-a11) size-4" />}
                 rightElement={<FernButton icon={<X />} variant="minimal" />}
+                lang="en" // TODO: add language
             />
         </div>
     );

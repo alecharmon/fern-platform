@@ -18,11 +18,13 @@ import { applyTemplates, Template, useTemplate } from "./Template";
 export function CodeGroup({
     children,
     template: templateProp,
-    tooltips: tooltipsProp
+    tooltips: tooltipsProp,
+    lang = "en"
 }: {
     children: React.ReactNode;
     template?: Record<string, string>;
     tooltips?: Record<string, React.ReactNode>;
+    lang: string;
 }) {
     const isDarkCode = useIsDarkCode();
 
@@ -142,6 +144,7 @@ export function CodeGroup({
                                 index: selectedTabIndex,
                                 language: items[selectedTabIndex]?.props.for ?? items[selectedTabIndex]?.props.language
                             }}
+                            lang={lang}
                         />
                         <CopyToClipboardButton
                             content={() => applyTemplates(items[selectedTabIndex]?.props.code ?? "", template)}

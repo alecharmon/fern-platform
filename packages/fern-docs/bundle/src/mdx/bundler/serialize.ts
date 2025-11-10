@@ -45,12 +45,12 @@ import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
 import { rehypeCollectJsx } from "../plugins/rehype-collect-jsx";
-import { rehypeCopy } from "../plugins/rehype-copy";
 import { rehypeEndpointExampleSnippets } from "../plugins/rehype-endpoint-example-snippets";
 import { rehypeEndpointSchemaSnippets } from "../plugins/rehype-endpoint-schema-snippet";
 import { rehypeExtractAsides } from "../plugins/rehype-extract-asides";
 import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
 import { rehypeFiles } from "../plugins/rehype-files";
+import { rehypeLang } from "../plugins/rehype-lang";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
 import { rehypeParamField } from "../plugins/rehype-param-field";
@@ -178,7 +178,7 @@ async function serializeMdxImpl(
                 rehypeKatex,
                 [rehypeFiles, { files: remoteFiles }],
                 rehypeMdxClassStyle,
-                [rehypeCodeBlock, { loader }],
+                rehypeCodeBlock,
                 rehypeSteps,
                 rehypeAccordions,
                 rehypeTable,
@@ -222,7 +222,7 @@ async function serializeMdxImpl(
                 [rehypeEndpointExampleSnippets, { loader }],
                 [rehypeSchema, { loader }],
                 [rehypeRunnableEndpoint, { loader }],
-                [rehypeCopy, { loader }],
+                [rehypeLang, { loader }],
                 [
                     rehypeMigrateJsx,
                     {

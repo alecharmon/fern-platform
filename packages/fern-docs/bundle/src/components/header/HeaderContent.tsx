@@ -55,13 +55,13 @@ export function HeaderContent({
             searchBar={
                 <div className="flex w-full max-w-[640px] flex-row gap-2">
                     <SearchV2Trigger
-                        aria-label="Search"
+                        aria-label={t(lang).search.search}
                         className="fern-header-search-bar flex-1 overflow-hidden"
                         isSearchInSidebar={false}
                         placeholder={searchPlaceholder}
                         lang={lang}
                     />
-                    {isAskAiEnabled && <SearchPanelTrigger aria-label="Ask AI" lang={lang} />}
+                    {isAskAiEnabled && <SearchPanelTrigger aria-label={t(lang).search.askAI} lang={lang} />}
                 </div>
             }
             themeSwitch={<ThemeSwitch iconOnly variant="ghost" className="ml-2" lang={lang} />}

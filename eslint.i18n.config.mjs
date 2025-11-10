@@ -15,6 +15,9 @@ export default tseslint.config(
       "**/out",
       "**/lib",
       "**/node_modules",
+      "**/*.stories.{ts,tsx}",
+      "**/*.test.{ts,tsx}",
+      "**/.storybook/**",
     ],
   },
   {

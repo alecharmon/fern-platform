@@ -21,6 +21,7 @@ interface MaybeEnvironmentDropdownProps {
     options?: APIV1Read.Environment[];
     editable?: boolean;
     isEditingEnvironment: useBooleanState.Return;
+    lang?: string;
 }
 
 export function MaybeEnvironmentDropdown({
@@ -31,7 +32,8 @@ export function MaybeEnvironmentDropdown({
     small,
     options,
     editable,
-    isEditingEnvironment
+    isEditingEnvironment,
+    lang = "en"
 }: MaybeEnvironmentDropdownProps): ReactElement<any> | null {
     const [selectedEnvironmentId, setSelectedEnvironmentId] = useAtom(SELECTED_ENVIRONMENT_ID_ATOM);
     const [_selectedEnvironmentUrl, setSelectedEnvironmentUrl] = useAtom(SELECTED_ENVIRONMENT_URL_ATOM);
@@ -112,6 +114,7 @@ export function MaybeEnvironmentDropdown({
                             "font-mono",
                             small ? "text-xs" : "text-sm"
                         )}
+                        lang={lang}
                     />
                 </span>
             ) : (
@@ -131,7 +134,7 @@ export function MaybeEnvironmentDropdown({
                                 }}
                                 value={selectedEnvironmentId ?? environmentId}
                                 // TODO: support language in dashboard
-                                lang={"en"}
+                                lang={lang}
                             >
                                 <FernButton
                                     style={{ pointerEvents: "auto" }}

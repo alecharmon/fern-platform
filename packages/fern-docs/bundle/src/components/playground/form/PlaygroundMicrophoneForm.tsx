@@ -13,9 +13,14 @@ import { WaveformAnimation } from "./PlaygroundWaveformAnimation";
 
 export interface PlaygroundMicrophoneFormProps extends FernInputProps {
     onAudioData?: (base64Data: string) => void;
+    lang: string;
 }
 
-export function PlaygroundMicrophoneForm({ onAudioData, ...props }: PlaygroundMicrophoneFormProps): ReactElement<any> {
+export function PlaygroundMicrophoneForm({
+    onAudioData,
+    lang,
+    ...props
+}: PlaygroundMicrophoneFormProps): ReactElement<any> {
     const [{ isRecording, elapsedTime, volume, audioUrl }, { startRecording, stopRecording }] = useAudioRecorder(
         ({ base64 }) => onAudioData?.(base64)
     );
@@ -34,7 +39,7 @@ export function PlaygroundMicrophoneForm({ onAudioData, ...props }: PlaygroundMi
                                     exit={{ opacity: 0, y: 10 }}
                                     className="w-full"
                                 >
-                                    <FernInput {...props} className="w-full" disabled={props.disabled} />
+                                    <FernInput {...props} className="w-full" disabled={props.disabled} lang={lang} />
                                 </m.div>
                             )}
                         </AnimatePresence>

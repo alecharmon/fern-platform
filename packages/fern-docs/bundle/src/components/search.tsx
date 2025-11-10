@@ -149,7 +149,7 @@ export const SearchV2 = React.memo(function SearchV2({
         <>
             <DefaultDesktopBackButton />
             <CommandGroupFilters lang={lang} />
-            <CommandEmpty />
+            <CommandEmpty lang={lang} />
             <CommandSearchHits onSelect={handleNavigate} prefetch={(path) => router.prefetch(path)} domain={domain} />
             <CommandActions>
                 <CommandTheme
@@ -175,7 +175,7 @@ export const SearchV2 = React.memo(function SearchV2({
                 fetchFacets={facetFetcher}
                 initialFilters={shouldApplyVersionFilter ? { "version.title": currentVersion } : undefined}
             >
-                <DesktopSearchDialog open={open} onOpenChange={setOpen}>
+                <DesktopSearchDialog open={open} onOpenChange={setOpen} lang={lang}>
                     <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl" lang={lang}>
                         {children}
                     </DesktopCommand>
@@ -194,7 +194,7 @@ export const SearchV2 = React.memo(function SearchV2({
             initialFilters={shouldApplyVersionFilter ? { "version.title": currentVersion } : undefined}
             analyticsTags={disableAnalytics ? [] : ["search-v2-dialog"]}
         >
-            <DesktopSearchDialog open={open} onOpenChange={setOpen}>
+            <DesktopSearchDialog open={open} onOpenChange={setOpen} lang={lang}>
                 {isAskAiEnabled ? (
                     <DesktopCommandWithAskAI
                         useConversationId={() => conversationIdHook}

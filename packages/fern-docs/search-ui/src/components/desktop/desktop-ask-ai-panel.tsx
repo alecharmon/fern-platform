@@ -150,6 +150,7 @@ export const DesktopAskAiPanel = forwardRef<
                     minWidth: `${MIN_ASK_FERN_PANEL_WIDTH - 48}px`
                 }}
                 className=""
+                lang={lang}
             >
                 <DesktopAskAIContent
                     useConversationId={useConversationId}
@@ -456,7 +457,7 @@ const DesktopAskAIChat = ({
                             lineHeight: "24px"
                         }}
                     >
-                        Assistant
+                        {t(lang).search.assistant}
                     </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -571,6 +572,7 @@ const DesktopAskAIChat = ({
                     domain={domain}
                     renderActions={renderActions}
                     messageQueryIds={messageQueryIds}
+                    lang={lang}
                 >
                     {suggestionsApi && <Suggestions api={suggestionsApi} body={body} headers={headers} askAI={askAI} />}
                 </AskAICommandItems>
@@ -642,7 +644,7 @@ const AskAIComposer = forwardRef<
                         id={FERN_ASK_AI_PANEL_INPUT_ID}
                         ref={composeRefs(forwardedRef, inputRef)}
                         autoFocus
-                        placeholder="Ask AI a question..."
+                        placeholder={t(lang).search.askAIAQuestion}
                         minLines={1}
                         lineHeight={18}
                         maxLines={8}
@@ -712,7 +714,7 @@ const AskAIComposer = forwardRef<
                             isOverLimit
                                 ? `Message must be ${MAX_AI_CHAT_MESSAGE_LENGTH} characters or fewer`
                                 : error
-                                  ? "An error occurred - click to reset the conversation."
+                                  ? t(lang).search.anErrorOccurredResetConvo
                                   : undefined
                         }
                         side="top"
@@ -762,6 +764,7 @@ const AskAICommandItems = memo<{
     domain: string;
     renderActions?: (message: SqueezedMessage, queryId?: string) => ReactNode;
     messageQueryIds?: Record<string, string>;
+    lang: string;
 }>(
     ({
         messages,
@@ -775,7 +778,8 @@ const AskAICommandItems = memo<{
         prefetch,
         domain,
         renderActions,
-        messageQueryIds = {}
+        messageQueryIds = {},
+        lang
     }): ReactElement<any> => {
         const messagesWithNewLines = ensureMessagePartsHaveNewLines(messages);
         const squeezedMessages = squeezeMessages(messagesWithNewLines);
@@ -816,7 +820,7 @@ const AskAICommandItems = memo<{
                                     fontSize: "14px"
                                 }}
                             >
-                                Hi, I&apos;m an AI assistant with access to documentation and other content.
+                                {t(lang).search.hiIAmAnAIAssistant}
                             </p>
                             <div
                                 style={{
@@ -824,7 +828,7 @@ const AskAICommandItems = memo<{
                                 }}
                                 className="flex flex-row items-center gap-1"
                             >
-                                <p>Tip: you can toggle this pane with</p>
+                                <p>{t(lang).search.youCanToggleThisPane}</p>
                                 <CommandKbd className="" />
                                 <p>+</p>
                                 <ForwardSlashKbd className="" />
@@ -883,6 +887,7 @@ const AskAICommandItems = memo<{
                                                                             node={node}
                                                                             searchResults={searchResults}
                                                                             className="hidden"
+                                                                            lang={lang}
                                                                         />
                                                                     );
                                                                 }
@@ -913,7 +918,7 @@ const AskAICommandItems = memo<{
                                                 )}
                                                 {isLastMessage && isLoading && (
                                                     <p className="text-(color:--grayscale-a10) thinking-dots">
-                                                        Thinking
+                                                        {t(lang).search.thinking}
                                                     </p>
                                                 )}
                                                 {(!isLastMessage || !isLoading) &&
@@ -933,10 +938,10 @@ const AskAICommandItems = memo<{
                 {error && (
                     <div className="flex flex-col items-center justify-center gap-2 p-2">
                         <div className="flex items-center justify-center gap-2">
-                            <p className="text-(color:--red-a10)">An error occurred.</p>
+                            <p className="text-(color:--red-a10)">{t(lang).errors.anErrorOccurred}</p>
                             <Button variant="outline" onClick={() => regenerate()}>
                                 <RotateCcw />
-                                Retry
+                                {t(lang).buttons.retry}
                             </Button>
                         </div>
                         <p className="text-(color:--grayscale-a10) text-center text-sm">

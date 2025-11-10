@@ -58,11 +58,13 @@ function isHeaderResettableAtom(authKey: string, headerName: string) {
 export function PlaygroundHeaderAuthForm({
     header,
     authKey,
-    disabled
+    disabled,
+    lang
 }: {
     header: APIV1Read.HeaderAuth;
     authKey: string;
     disabled?: boolean;
+    lang: string;
 }): ReactElement<any> {
     const [value, setValue] = useAtom(
         useMemoOne(() => headerAtom(authKey, header.headerWireValue), [authKey, header.headerWireValue])
@@ -85,6 +87,7 @@ export function PlaygroundHeaderAuthForm({
                     disabled={disabled}
                     resettable={isResettable}
                     onClickReset={() => setValue(RESET)}
+                    lang={lang}
                 />
             </div>
         </li>

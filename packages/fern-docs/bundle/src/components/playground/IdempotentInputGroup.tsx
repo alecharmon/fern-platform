@@ -1,5 +1,6 @@
 import { Button } from "@fern-docs/components/button";
 import { FernInput, type FernInputProps } from "@fern-docs/components/FernInput";
+import { t } from "@fern-docs/i18n";
 import { randomBytes } from "crypto-browserify";
 import { forwardRef } from "react";
 
@@ -15,9 +16,10 @@ export const IdempotentInputGroup = forwardRef<HTMLInputElement, FernInputProps>
             {...props}
             rightElement={
                 <Button variant="ghostMinimal" onClick={() => props.onValueChange?.(generateIdempotencyKey())}>
-                    Generate
+                    {t(props.lang).buttons.generate}
                 </Button>
             }
+            lang={props.lang}
         />
     );
 });

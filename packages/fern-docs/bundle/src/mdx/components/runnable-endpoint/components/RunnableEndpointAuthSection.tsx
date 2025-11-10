@@ -60,7 +60,9 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                 onClick={() => openState(!open)}
                 className="text-(color:--grayscale-a11) mb-2 flex w-full items-center justify-between text-sm font-medium hover:text-(color:--grayscale-a12) transition-colors"
             >
-                <h5 className="text-(color:--grayscale-a11) text-sm font-medium">Authentication</h5>
+                <h5 className="text-(color:--grayscale-a11) text-sm font-medium">
+                    {t(lang).apiReference.authentication}
+                </h5>
                 <ChevronDown
                     className={cn("size-4 transition-transform duration-200", open ? "rotate-180" : "rotate-0")}
                 />
@@ -70,7 +72,9 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                     <div className="space-y-3">
                         {hasMultipleSchemes && (
                             <div className="space-y-2">
-                                <label className="text-text-secondary text-xs font-medium">Auth Type</label>
+                                <label className="text-text-secondary text-xs font-medium">
+                                    {t(lang).apiReference.authType}
+                                </label>
                                 <Select.Root
                                     value={getAuthSchemeValue(selectedAuthIndex)}
                                     onValueChange={(value) => {
@@ -129,10 +133,10 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                             </div>
                         )}
                         {visitDiscriminatedUnion(selectedAuth)._visit({
-                            bearerAuth: () => <BearerAuthFields />,
-                            basicAuth: () => <BasicAuthFields />,
-                            header: (header) => <HeaderAuthFields header={header} />,
-                            oAuth: () => <BearerAuthFields label="OAuth Token" />,
+                            bearerAuth: () => <BearerAuthFields label={t(lang).auth.bearerToken} lang={lang} />,
+                            basicAuth: () => <BasicAuthFields lang={lang} />,
+                            header: (header) => <HeaderAuthFields header={header} lang={lang} />,
+                            oAuth: () => <BearerAuthFields label={t(lang).auth.oauthToken} lang={lang} />,
                             _other: () => null
                         })}
                     </div>
@@ -142,7 +146,7 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
     );
 }
 
-function BearerAuthFields({ label = "Bearer Token" }: { label?: string }) {
+function BearerAuthFields({ label = "Bearer Token", lang }: { label?: string; lang: string }) {
     const [bearerAuth, setBearerAuth] = useAtom(PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM);
 
     return (
@@ -153,40 +157,43 @@ function BearerAuthFields({ label = "Bearer Token" }: { label?: string }) {
                 onValueChange={(value) => setBearerAuth({ token: value })}
                 placeholder="Enter token..."
                 className="font-mono"
+                lang={lang}
             />
         </div>
     );
 }
 
-function BasicAuthFields() {
+function BasicAuthFields({ lang }: { lang: string }) {
     const [username, setUsername] = useAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_USERNAME_ATOM);
     const [password, setPassword] = useAtom(PLAYGROUND_AUTH_STATE_BASIC_AUTH_PASSWORD_ATOM);
 
     return (
         <>
             <div className="space-y-2">
-                <label className="text-text-secondary text-xs font-medium">Username</label>
+                <label className="text-text-secondary text-xs font-medium">{t(lang).auth.username}</label>
                 <FernInput
                     value={username}
                     onValueChange={setUsername}
-                    placeholder="Enter username..."
+                    placeholder={t(lang).auth.enterUsername}
                     className="font-mono"
+                    lang={lang}
                 />
             </div>
             <div className="space-y-2">
-                <label className="text-text-secondary text-xs font-medium">Password</label>
+                <label className="text-text-secondary text-xs font-medium">{t(lang).auth.password}</label>
                 <PasswordInputGroup
                     value={password}
                     onValueChange={setPassword}
-                    placeholder="Enter password..."
+                    placeholder={t(lang).auth.enterPassword}
                     className="font-mono"
+                    lang={lang}
                 />
             </div>
         </>
     );
 }
 
-function HeaderAuthFields({ header }: { header: Extract<AuthScheme, { type: "header" }> }) {
+function HeaderAuthFields({ header, lang }: { header: Extract<AuthScheme, { type: "header" }>; lang: string }) {
     const [headerAuth, setHeaderAuth] = useAtom(PLAYGROUND_AUTH_STATE_HEADER_ATOM);
     const headerValue = headerAuth.headers[header.headerWireValue] ?? "";
 
@@ -194,7 +201,11 @@ function HeaderAuthFields({ header }: { header: Extract<AuthScheme, { type: "hea
         <div className="space-y-2">
             <label className="text-text-secondary text-xs font-medium">
                 {header.headerWireValue}
-                {header.prefix && <span className="text-text-tertiary ml-1">(prefix: {header.prefix})</span>}
+                {header.prefix && (
+                    <span className="text-text-tertiary ml-1">
+                        ({t(lang).auth.prefix}: {header.prefix})
+                    </span>
+                )}
             </label>
             <PasswordInputGroup
                 value={headerValue}
@@ -206,8 +217,9 @@ function HeaderAuthFields({ header }: { header: Extract<AuthScheme, { type: "hea
                         }
                     })
                 }
-                placeholder="Enter value..."
+                placeholder={t(lang).auth.enterValue}
                 className="font-mono"
+                lang={lang}
             />
         </div>
     );

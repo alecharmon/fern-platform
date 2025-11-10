@@ -21,7 +21,11 @@
     "generatedOAuthToken": "Wygenerowany token OAuth",
     "userSuppliedBearerToken": "Token bearer dostarczony przez użytkownika",
     "provideTokenManually": "Podaj token ręcznie",
-    "resetTokenToDefault": "Zresetuj token do wartości domyślnej"
+    "resetTokenToDefault": "Zresetuj token do wartości domyślnej",
+    "enterUsername": "Wprowadź nazwę użytkownika...",
+    "enterPassword": "Wprowadź hasło...",
+    "prefix": "Prefiks",
+    "enterValue": "Wprowadź wartość..."
   },
   "buttons": {
     "sendRequest": "Wyślij żądanie",
@@ -58,7 +62,12 @@
     "close": "Zamknij",
     "cancel": "Anuluj",
     "moreActions": "Więcej działań",
-    "moreOptions": "Więcej opcji"
+    "moreOptions": "Więcej opcji",
+    "submit": "Prześlij",
+    "submitting": "Przesyłanie...",
+    "resetToTheDefaultValue": "Zresetuj do wartości domyślnej",
+    "generate": "Generuj",
+    "retry": "Spróbuj ponownie"
   },
   "search": {
     "search": "Szukaj",
@@ -74,7 +83,18 @@
     "changeThemeToDark": "Zmień motyw na ciemny",
     "changeThemeToSystem": "Zmień motyw na systemowy",
     "filterTo": "Filtruj do",
-    "removeFilter": "Usuń filtr"
+    "removeFilter": "Usuń filtr",
+    "noResultsFoundFor": "Nie znaleziono wyników dla",
+    "assistant": "Asystent",
+    "askAIAQuestion": "Zadaj pytanie AI...",
+    "anErrorOccurredResetConvo": "Wystąpił błąd - kliknij, aby zresetować rozmowę.",
+    "hiIAmAnAIAssistant": "Cześć, jestem asystentem AI z dostępem do dokumentacji i innych treści.",
+    "youCanToggleThisPane": "Wskazówka: Możesz przełączać ten panel za pomocą",
+    "thinking": "Myślenie",
+    "footnotes": "Przypisy",
+    "addFilter": "Dodaj filtr",
+    "closeSearch": "Zamknij wyszukiwanie",
+    "searchOurDocumentation": "Przeszukaj naszą dokumentację."
   },
   "apiReference": {
     "apiReference": "Dokumentacja API",
@@ -111,7 +131,10 @@
     "authenticated": "Uwierzytelniony",
     "time": "Czas",
     "size": "Rozmiar",
-    "failed": "Niepowodzenie"
+    "failed": "Niepowodzenie",
+    "authType": "Typ uwierzytelniania",
+    "deprecated": "Przestarzałe",
+    "required": "Wymagany"
   },
   "playground": {
     "cannotSendToLocalhost": "Nie można wysyłać żądań do localhost",
@@ -140,7 +163,8 @@
     "thisEndpointReturnsFile": "Ten endpoint zwraca plik.",
     "thisEndpointReturnsNothing": "Ten endpoint nie zwraca niczego.",
     "thisEndpointSendsTextResponses": "Ten endpoint wysyła odpowiedzi tekstowe przez długotrwałe połączenie HTTP.",
-    "return200Status": "Zwróć status 200, aby wskazać, że dane zostały pomyślnie odebrane."
+    "return200Status": "Zwróć status 200, aby wskazać, że dane zostały pomyślnie odebrane.",
+    "thisEndpointReturnsAudio": "Ten endpoint zwraca plik audio/mpeg."
   },
   "status": {
     "loading": "Ładowanie...",
@@ -170,7 +194,11 @@
     "anotherReason": "Inny powód",
     "yesOkayToFollowUp": "Tak, można się ze mną skontaktować przez e-mail.",
     "yes": "Tak",
-    "no": "Nie"
+    "no": "Nie",
+    "reportIncorrectCode": "Zgłoś nieprawidłowy kod",
+    "whatIsWrongWithThisCodeExample": "Co jest nie tak z tym przykładem kodu?",
+    "helpUsImproveByReportingCodeExample": "Pomóż nam ulepszyć dokumentację, zgłaszając, co jest nie tak z tym przykładem kodu.",
+    "weHaveBeenNotified": "Zostaliśmy powiadomieni, aby móc to naprawić następnym razem."
   },
   "feedbackQuality": {
     "accurate": "Dokładny",
@@ -210,7 +238,9 @@
     "noPortFoundInEnvLocal": "Nie znaleziono portu w odpowiedzi env-local",
     "objectExtendsNonObject": "Obiekt rozszerza nie-obiekt",
     "typeDefinitionContextNotFound": "TypeDefinitionContext.Provider nie znaleziono w drzewie",
-    "error": "Błąd"
+    "error": "Błąd",
+    "wereYouLookingForOneOfThese": "Czy szukałeś jednego z nich?",
+    "anErrorOccurred": "Wystąpił błąd."
   },
   "navigation": {
     "upNext": "Następny",
@@ -230,7 +260,9 @@
     "installMcpServerOnCursor": "Zainstaluj serwer MCP na Cursor",
     "subscribeViaRss": "Subskrybuj przez RSS",
     "openInChatGPT": "Otwórz w ChatGPT",
-    "openInClaude": "Otwórz w Claude"
+    "openInClaude": "Otwórz w Claude",
+    "developerFriendlyDocs": "Przyjazna dla programistów dokumentacja twojego API",
+    "buildWith": "Zbuduj z"
   },
   "environments": {
     "prod": "Prod",

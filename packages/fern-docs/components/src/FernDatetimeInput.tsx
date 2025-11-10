@@ -9,6 +9,7 @@ export interface FernDatetimeInputProps extends ComponentProps<"input"> {
     resettable?: boolean;
     value?: string;
     defaultValue?: string;
+    lang: string;
 }
 
 /**
@@ -40,7 +41,7 @@ function utcDate(date: string) {
 }
 
 export const FernDatetimeInput = forwardRef<HTMLInputElement, FernDatetimeInputProps>(
-    ({ value, defaultValue, onValueChange, ...props }, ref) => {
+    ({ value, defaultValue, onValueChange, lang, ...props }, ref) => {
         return (
             <FernInput
                 {...props}
@@ -50,6 +51,7 @@ export const FernDatetimeInput = forwardRef<HTMLInputElement, FernDatetimeInputP
                     onValueChange?.(utcDate(value));
                 }}
                 ref={ref}
+                lang={lang}
             />
         );
     }

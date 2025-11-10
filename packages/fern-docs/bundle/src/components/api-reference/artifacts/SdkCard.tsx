@@ -1,3 +1,4 @@
+/*eslint i18next/no-literal-string: off*/
 "use client";
 
 import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";

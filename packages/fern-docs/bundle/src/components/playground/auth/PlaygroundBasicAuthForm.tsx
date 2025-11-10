@@ -81,6 +81,7 @@ export function PlaygroundBasicAuthForm({
                         disabled={disabled}
                         resettable={isPasswordResettable}
                         onClickReset={() => setPassword(RESET)}
+                        lang={lang}
                     />
                 </div>
             </li>
