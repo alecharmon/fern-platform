@@ -4,7 +4,6 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import {
     FERN_DOCS_BUILDWITHFERN_COM,
     FERN_DOCS_DEV_BUILDWITHFERN_COM,
-    FERN_DOCS_FERNDOCS_APP,
     FERN_DOCS_STAGING_BUILDWITHFERN_COM,
     withoutStaging
 } from "@fern-api/docs-utils";
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
                 (domain) =>
                     !domain.endsWith(`.${FERN_DOCS_BUILDWITHFERN_COM}`) &&
                     !domain.endsWith(`.${FERN_DOCS_STAGING_BUILDWITHFERN_COM}`) &&
-                    !domain.endsWith(`.${FERN_DOCS_DEV_BUILDWITHFERN_COM}`) 
+                    !domain.endsWith(`.${FERN_DOCS_DEV_BUILDWITHFERN_COM}`)
             )
             .map(withoutStaging)
     );
