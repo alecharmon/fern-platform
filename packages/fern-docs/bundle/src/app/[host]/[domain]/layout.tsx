@@ -20,10 +20,9 @@ import {
     getCustomerAnalytics as deprecated_getCustomerAnalytics,
     getLaunchDarklySettings
 } from "@fern-docs/edge-config";
-import { Analytics } from "@vercel/analytics/next";
 import { getEnv } from "@vercel/functions";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { compact } from "es-toolkit/array";
+import Script from "next/script";
 import type { Metadata } from "next/types";
 import React from "react";
 import { preload } from "react-dom";
@@ -101,8 +100,16 @@ export default async function Layout({
                 <SetBasePath value={basePath || "/"} />
                 {!isSelfHosted() && !settings.disableAnalytics && (
                     <>
-                        <Analytics />
-                        <SpeedInsights />
+                        <Script
+                            data-endpoint={`${basePath ?? ""}/_vercel/insights`}
+                            src={`${basePath ?? ""}/_vercel/insights/script.js`}
+                            defer
+                        />
+                        <Script
+                            data-endpoint={`${basePath ?? ""}/_vercel/speed-insights/vitals`}
+                            src={`${basePath ?? ""}/_vercel/speed-insights/script.js`}
+                            defer
+                        />
                     </>
                 )}
                 {/** HACKHACK: this is a hack to set the logo text to "Docs" for Cohere, this needs to be moved into docs.yml */}
