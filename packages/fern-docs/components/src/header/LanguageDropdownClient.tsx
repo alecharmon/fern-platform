@@ -16,11 +16,11 @@ export interface LanguageDropdownItem {
 export function LanguageDropdownClient({
     languages,
     useDenseLayout = false,
-    lang = "en"
+    lang
 }: {
     languages: LanguageDropdownItem[];
     useDenseLayout?: boolean;
-    lang?: string;
+    lang: string;
 }) {
     const isDesktop = useIsDesktop();
     const [currentLanguage, setCurrentLanguage] = useState<string>(lang);

@@ -20,7 +20,7 @@ export async function LanguageDropdown({
     loader: DocsLoader;
     useDenseLayout?: boolean;
     nodeSlug?: string;
-    lang?: string;
+    lang: string;
 }) {
     const config = await loader.getConfig();
 
@@ -28,10 +28,12 @@ export async function LanguageDropdown({
         return null;
     }
 
+    const normalizedNodeSlug = nodeSlug ? decodeURIComponent(nodeSlug) : undefined;
+    const removedLanguagePrefix = normalizedNodeSlug ? removeLanguagePrefix(lang, normalizedNodeSlug) : undefined;
     const languageOptions: LanguageDropdownItem[] = config.languages.map((language) => ({
         language,
         label: getLanguageLabel(language),
-        slug: `/${language}${nodeSlug ? `/${decodeURIComponent(nodeSlug)}` : ""}`
+        slug: removedLanguagePrefix ? `/${language}/${removedLanguagePrefix}` : `/${language}`
     }));
 
     return <LanguageDropdownClient languages={languageOptions} useDenseLayout={useDenseLayout} lang={lang} />;
@@ -78,4 +80,11 @@ function getLanguageLabel(language: string): string {
     // };
 
     return languageLabels[language] ?? language.toUpperCase();
+}
+
+function removeLanguagePrefix(lang: string, slug: string): string {
+    if (slug.startsWith(`${lang}`)) {
+        return slug.slice(lang.length + 1);
+    }
+    return slug;
 }
