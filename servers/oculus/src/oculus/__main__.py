@@ -463,7 +463,7 @@ Examples:
         "--run-id", type=str, required=True, help="Unique run identifier for answers to evaluate"
     )
     evaluate_parser.add_argument(
-        "--judge-model", type=str, default="claude-opus-4-20250514", help="Claude model for judging"
+        "--judge-model", type=str, default="claude-sonnet-4-5-20250929", help="Claude model for judging"
     )
     evaluate_parser.add_argument("--max-workers", type=int, default=16, help="Number of parallel workers")
     evaluate_parser.add_argument("--no-skip-existing", action="store_true", help="Re-generate existing evaluations")
@@ -501,7 +501,7 @@ Examples:
         help="Model to use for answer generation",
     )
     run_parser.add_argument(
-        "--judge-model", type=str, default="claude-opus-4-20250514", help="Claude model for judging"
+        "--judge-model", type=str, default="claude-sonnet-4-5-20250929", help="Claude model for judging"
     )
     run_parser.add_argument("--max-workers", type=int, default=16, help="Number of parallel workers")
     run_parser.add_argument("--no-skip-existing", action="store_true", help="Re-generate existing answers/evaluations")

@@ -221,7 +221,7 @@ class EvaluationRunner:
         self,
         questions: list[Question],
         answers: list[Answer],
-        judge_model: str = "claude-opus-4-20250514",
+        judge_model: str = "claude-sonnet-4-5-20250929",
         skip_existing: bool = True,
     ) -> list[Evaluation]:
         question_map = {q.question: q for q in questions}
@@ -363,7 +363,7 @@ class EvaluationRunner:
         self,
         answer_fn: Callable[[str], tuple[str, dict[str, str]]],
         model_name: str = "fai",
-        judge_model: str = "claude-opus-4-20250514",
+        judge_model: str = "claude-sonnet-4-5-20250929",
         skip_existing: bool = True,
     ) -> EvaluationRun:
         print(f"\n{'='*60}")

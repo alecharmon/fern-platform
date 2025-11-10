@@ -38,7 +38,7 @@ def evaluate_answer(
     question: str,
     answer: str,
     ground_truth: str,
-    model: str = "claude-opus-4-20250514",
+    model: str = "claude-sonnet-4-5-20250929",
 ) -> EvaluationResponse | None:
     return generate_with_claude(
         response_type=EvaluationResponse,
@@ -55,7 +55,7 @@ def evaluate_correctness(
     question: str,
     answer: str,
     ground_truth: str,
-    model: str = "claude-opus-4-20250514",
+    model: str = "claude-sonnet-4-5-20250929",
     **kwargs,
 ) -> EvaluationResult | None:
     response = evaluate_answer(question, answer, ground_truth, model)
