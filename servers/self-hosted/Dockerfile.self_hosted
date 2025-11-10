@@ -130,14 +130,12 @@ RUN log "Setting up Next.js app..." && \
     tar -xzf docs_bundle.tar.gz -C /nextapp && \
     cd /nextapp && \
     node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
-    log "Installing esbuild..." && \
-    pnpm add esbuild 2>&1 | add-timestamps && \
     # Install esbuild globally to ensure it's available everywhere
-    cd /nextapp && \
-    pnpm add -g esbuild 2>&1 | add-timestamps && \
+    npm i -g esbuild@0.25.9 2>&1 | add-timestamps && \
     # Ensure Next.js cache directory exists and is writable for restricted mode
     mkdir -p /nextapp/packages/fern-docs/bundle/.next/cache && \
-    chmod -R 777 /nextapp/packages/fern-docs/bundle/.next
+    chmod -R 777 /nextapp/packages/fern-docs/bundle/.next && \
+    mv /tmp/npm-global/lib/node_modules/esbuild /nextapp/node_modules/
 
 # ----------- End nextapp setup -------------
 
