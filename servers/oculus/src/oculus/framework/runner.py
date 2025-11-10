@@ -3,19 +3,24 @@ import json
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from oculus.framework.evaluators import (
+    BinaryEvaluationResult,
     EvaluationResult,
+    ScaledEvaluationResult,
     get_evaluator,
 )
 from oculus.framework.generators import get_generator
 from oculus.framework.models import (
     Answer,
+    BinaryEvaluatorResult,
     Evaluation,
     EvaluationMetrics,
     EvaluationRun,
     GeneratorConfig,
     Question,
+    ScaledEvaluatorResult,
 )
 from oculus.utils.docs_definition import get_docs_definition_for_domain
 from oculus.utils.file_utils import (
@@ -108,7 +113,7 @@ class EvaluationRunner:
                     gen_config = {"source_path": self.generator_config.openapi.source_path}
 
             try:
-                kwargs = {
+                kwargs: dict[str, Any] = {
                     "questions_dir": self.questions_dir,
                     "num_questions": self.num_questions_generation,
                 }
@@ -260,13 +265,11 @@ class EvaluationRunner:
                     answer=answer.answer,
                     ground_truth="UNKNOWN",
                     is_correct=False,
-                    reason="No ground truth available",
                     metadata=answer.metadata,
                 )
 
             evaluator_results: list[tuple[str, EvaluationResult]] = []
             all_correct = True
-            reasons = []
 
             for evaluator_name in self.evaluators:
                 evaluator_fn = get_evaluator(evaluator_name)
@@ -290,16 +293,13 @@ class EvaluationRunner:
 
                     if eval_result:
                         evaluator_results.append((evaluator_name, eval_result))
-                        all_correct = all_correct and eval_result.is_correct
-                        reasons.append(f"[{evaluator_name}] {eval_result.reason}")
+                        all_correct = all_correct and eval_result.is_passing()
                     else:
                         all_correct = False
-                        reasons.append(f"[{evaluator_name}] Evaluation failed")
 
                 except Exception as e:
                     print(f"Error running evaluator '{evaluator_name}' on answer {idx}: {e}")
                     all_correct = False
-                    reasons.append(f"[{evaluator_name}] ERROR: {str(e)}")
 
             if not evaluator_results:
                 return idx, Evaluation(
@@ -307,24 +307,34 @@ class EvaluationRunner:
                     answer=answer.answer,
                     ground_truth=question_obj.ground_truth,
                     is_correct=False,
-                    reason="No evaluators ran successfully",
                     metadata=answer.metadata,
                 )
 
-            combined_metadata = {**answer.metadata}
+            # Convert EvaluationResult to structured EvaluatorResult
+            structured_evaluator_results: dict[str, BinaryEvaluatorResult | ScaledEvaluatorResult] = {}
             for evaluator_name, result in evaluator_results:
-                combined_metadata[f"evaluator_{evaluator_name}_result"] = (
-                    "correct" if result.is_correct else "incorrect"
-                )
-                combined_metadata[f"evaluator_{evaluator_name}_reason"] = result.reason
+                if isinstance(result, BinaryEvaluationResult):
+                    structured_evaluator_results[evaluator_name] = BinaryEvaluatorResult(
+                        is_passing=result.is_passing(),
+                        reason=result.reason,
+                    )
+                elif isinstance(result, ScaledEvaluationResult):
+                    structured_evaluator_results[evaluator_name] = ScaledEvaluatorResult(
+                        is_passing=result.is_passing(),
+                        reason=result.reason,
+                        score=result.score,
+                        min_score=result.min_score,
+                        max_score=result.max_score,
+                        passing_threshold=result.passing_threshold,
+                    )
 
             return idx, Evaluation(
                 question=answer.question,
                 answer=answer.answer,
                 ground_truth=question_obj.ground_truth,
                 is_correct=all_correct,
-                reason="; ".join(reasons),
-                metadata=combined_metadata,
+                metadata=answer.metadata,
+                evaluator_results=structured_evaluator_results,
             )
 
         total = len(pending_answers)
@@ -353,10 +363,36 @@ class EvaluationRunner:
         total_correct = sum(1 for e in evaluations if e.is_correct)
         accuracy = total_correct / total_questions if total_questions > 0 else 0.0
 
+        # Calculate per-evaluator statistics
+        evaluator_pass_rates: dict[str, float] = {}
+        evaluator_avg_scores: dict[str, float] = {}
+
+        # Collect all evaluator names
+        evaluator_names: set[str] = set()
+        for evaluation in evaluations:
+            evaluator_names.update(evaluation.evaluator_results.keys())
+
+        for evaluator_name in evaluator_names:
+            # Calculate pass rate
+            results_for_evaluator = [
+                e.evaluator_results[evaluator_name] for e in evaluations if evaluator_name in e.evaluator_results
+            ]
+            if results_for_evaluator:
+                passing_count = sum(1 for r in results_for_evaluator if r.is_passing)
+                evaluator_pass_rates[evaluator_name] = passing_count / len(results_for_evaluator)
+
+                # Calculate average score for scaled evaluators
+                scaled_results = [r for r in results_for_evaluator if isinstance(r, ScaledEvaluatorResult)]
+                if scaled_results:
+                    avg_score = sum(r.score for r in scaled_results) / len(scaled_results)
+                    evaluator_avg_scores[evaluator_name] = avg_score
+
         return EvaluationMetrics(
             total_questions=total_questions,
             total_correct=total_correct,
             accuracy=accuracy,
+            evaluator_pass_rates=evaluator_pass_rates,
+            evaluator_avg_scores=evaluator_avg_scores,
         )
 
     def run(

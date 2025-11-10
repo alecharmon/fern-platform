@@ -1,7 +1,8 @@
 import json
+from typing import Any
 
 from oculus.framework.evaluators import (
-    EvaluationResult,
+    BinaryEvaluationResult,
     register_evaluator,
 )
 
@@ -43,9 +44,12 @@ def check_citations_match(
 def evaluate_citation(
     expected_citations: list[str] | None = None,
     actual_sources: list[dict[str, str | None]] | None = None,
-    **kwargs,
-) -> EvaluationResult | None:
-    normalized_urls_set = {normalize_url(s["url"]) for s in actual_sources if s.get("url")}
+    **kwargs: Any,
+) -> BinaryEvaluationResult | None:
+    if not expected_citations or not actual_sources:
+        return None
+
+    normalized_urls_set = {normalize_url(url) for s in actual_sources if (url := s.get("url")) and isinstance(url, str)}
 
     found_citations, missing_citations = check_citations_match(expected_citations, normalized_urls_set)
 
@@ -67,7 +71,7 @@ def evaluate_citation(
         "actual_sources": json.dumps([s.get("url") or s.get("slug") or s.get("title") for s in actual_sources]),
     }
 
-    return EvaluationResult(
+    return BinaryEvaluationResult(
         is_correct=is_correct,
         reason=reason,
         metadata=metadata,

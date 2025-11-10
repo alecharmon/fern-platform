@@ -44,8 +44,6 @@ def format_github_summary(run: EvaluationRun, full_results_url: str | None = Non
             lines.append(f"**{i}. {_escape_markdown(evaluation.question)}**")
             lines.append(f"- ❌ **Expected:** {_escape_markdown(_truncate(evaluation.ground_truth, 150))}")
             lines.append(f"- ❌ **Got:** {_escape_markdown(_truncate(evaluation.answer, 150))}")
-            if evaluation.reason:
-                lines.append(f"- **Reason:** {_escape_markdown(_truncate(evaluation.reason, 200))}")
             lines.append("")
 
         if len(failed_evals) > 10:
@@ -79,6 +77,20 @@ def format_github_job_summary(run: EvaluationRun) -> str:
     lines.append(f"- **Correct Answers:** {run.metrics.total_correct}")
     lines.append(f"- **Accuracy:** {run.metrics.accuracy:.2%}")
     lines.append("")
+
+    if run.metrics.evaluator_pass_rates:
+        lines.append("## Evaluator Breakdown")
+        lines.append("")
+        lines.append("| Evaluator | Pass Rate | Avg Score |")
+        lines.append("|-----------|-----------|-----------|")
+        for evaluator_name in sorted(run.metrics.evaluator_pass_rates.keys()):
+            pass_rate = run.metrics.evaluator_pass_rates[evaluator_name]
+            avg_score_str = ""
+            if evaluator_name in run.metrics.evaluator_avg_scores:
+                avg_score = run.metrics.evaluator_avg_scores[evaluator_name]
+                avg_score_str = f"{avg_score:.2f}"
+            lines.append(f"| {evaluator_name} | {pass_rate:.1%} | {avg_score_str} |")
+        lines.append("")
 
     category_stats = _calculate_category_stats(run)
     if category_stats:
@@ -119,9 +131,17 @@ def format_github_job_summary(run: EvaluationRun) -> str:
             lines.append("**Model Answer:**")
             lines.append(f"> {_escape_markdown(evaluation.answer)}")
             lines.append("")
-            if evaluation.reason:
-                lines.append("**Evaluation Reason:**")
-                lines.append(f"> {_escape_markdown(evaluation.reason)}")
+
+            if evaluation.evaluator_results:
+                lines.append("**Evaluator Results:**")
+                for eval_name, eval_result in evaluation.evaluator_results.items():
+                    from oculus.framework.models import ScaledEvaluatorResult
+
+                    status = "✅" if eval_result.is_passing else "❌"
+                    score_info = ""
+                    if isinstance(eval_result, ScaledEvaluatorResult):
+                        score_info = f" ({eval_result.score}/{eval_result.max_score})"
+                    lines.append(f"- {status} **{eval_name}**{score_info}: {_escape_markdown(eval_result.reason)}")
                 lines.append("")
 
             metadata = evaluation.metadata

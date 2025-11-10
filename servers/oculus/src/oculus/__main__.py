@@ -7,6 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 import oculus.evaluators.citation  # noqa: F401
+import oculus.evaluators.coherence  # noqa: F401
 import oculus.evaluators.correctness  # noqa: F401
 import oculus.generators.endpoints  # noqa: F401
 import oculus.generators.markdown  # noqa: F401
@@ -389,8 +390,9 @@ def _write_github_outputs(args: argparse.Namespace, run_result: EvaluationRun) -
     job_summary_path.write_text(job_summary_content)
     print(f"GitHub job summary written to: {job_summary_path}")
 
-    if os.getenv("GITHUB_STEP_SUMMARY"):
-        step_summary_path = Path(os.getenv("GITHUB_STEP_SUMMARY"))
+    github_step_summary = os.getenv("GITHUB_STEP_SUMMARY")
+    if github_step_summary:
+        step_summary_path = Path(github_step_summary)
         with step_summary_path.open("a") as f:
             f.write(job_summary_content)
         print(f"GitHub job summary also appended to: {step_summary_path}")

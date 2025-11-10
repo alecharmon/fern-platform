@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -41,6 +43,30 @@ class Answer(BaseModel):
     metadata: dict[str, str] = Field(default_factory=dict)
 
 
+class EvaluatorResult(BaseModel):
+    """Result from a single evaluator stored in Evaluation."""
+
+    is_passing: bool
+    reason: str
+    result_type: Literal["binary", "scaled"]
+
+
+class BinaryEvaluatorResult(EvaluatorResult):
+    """Binary pass/fail result from an evaluator."""
+
+    result_type: Literal["binary"] = "binary"
+
+
+class ScaledEvaluatorResult(EvaluatorResult):
+    """Scaled result (e.g., 1-3 or 1-5) from an evaluator."""
+
+    result_type: Literal["scaled"] = "scaled"
+    score: int
+    min_score: int
+    max_score: int
+    passing_threshold: int
+
+
 class Evaluation(BaseModel):
     """Result of evaluating an answer against ground truth."""
 
@@ -48,8 +74,8 @@ class Evaluation(BaseModel):
     answer: str
     ground_truth: str
     is_correct: bool
-    reason: str
     metadata: dict[str, str] = Field(default_factory=dict)
+    evaluator_results: dict[str, BinaryEvaluatorResult | ScaledEvaluatorResult] = Field(default_factory=dict)
 
 
 class EvaluationRun(BaseModel):
@@ -68,3 +94,5 @@ class EvaluationMetrics(BaseModel):
     total_questions: int
     total_correct: int
     accuracy: float
+    evaluator_pass_rates: dict[str, float] = Field(default_factory=dict)
+    evaluator_avg_scores: dict[str, float] = Field(default_factory=dict)

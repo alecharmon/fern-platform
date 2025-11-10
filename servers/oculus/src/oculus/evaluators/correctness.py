@@ -1,7 +1,9 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 from oculus.framework.evaluators import (
-    EvaluationResult,
+    BinaryEvaluationResult,
     register_evaluator,
 )
 from oculus.utils.anthropic_utils import generate_with_claude
@@ -56,14 +58,14 @@ def evaluate_correctness(
     answer: str,
     ground_truth: str,
     model: str = "claude-sonnet-4-5-20250929",
-    **kwargs,
-) -> EvaluationResult | None:
+    **kwargs: Any,
+) -> BinaryEvaluationResult | None:
     response = evaluate_answer(question, answer, ground_truth, model)
 
     if not response:
         return None
 
-    return EvaluationResult(
+    return BinaryEvaluationResult(
         is_correct=response.is_correct,
         reason=response.reason,
         metadata={"evaluator": "correctness", "judge_model": model},
