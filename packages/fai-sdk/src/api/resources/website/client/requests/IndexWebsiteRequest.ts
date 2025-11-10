@@ -15,7 +15,7 @@ export interface IndexWebsiteRequest {
     domain_filter?: string;
     /** Path prefix to restrict crawling (e.g., '/docs'). Only URLs starting with this will be crawled. */
     path_filter?: string;
-    /** Regex pattern to filter URLs (e.g., 'https://example\.com/(docs|api)/.*'). */
+    /** Regex pattern to filter URLs (e.g., `https://example\.com/(docs|api)/.*`). */
     url_pattern?: string;
     /** Size of text chunks for splitting documents */
     chunk_size?: number;
