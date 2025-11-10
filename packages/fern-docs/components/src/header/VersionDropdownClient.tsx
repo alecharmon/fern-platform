@@ -38,34 +38,38 @@ export function VersionDropdownClient({
     const isDesktop = useIsDesktop();
     const currentVersionId = useCurrentVersionId();
     const currentVersionSlug = useCurrentVersionSlug();
+
+    const visibleVersions = versions.filter((version) => !version.hidden || version.versionId === currentVersionId);
+
     const currentVersion =
-        versions.find((version) => version.versionId === currentVersionId) ??
+        visibleVersions.find((version) => version.versionId === currentVersionId) ??
         fallbackVersion ??
-        versions.find((version) => version.default);
+        visibleVersions.find((version) => version.default);
 
     return (
         <FernLinkDropdown
             value={currentVersionId}
-            options={versions.map(({ icon, versionId, title, availability, slug, defaultSlug, authed, hidden }) => ({
-                type: "value",
-                label: (
-                    <div className="flex items-center gap-2">
-                        {title}
-                        {availability != null ? <AvailabilityBadge availability={availability} size="sm" /> : null}
-                    </div>
-                ),
-                value: versionId,
-                disabled: availability == null,
-                href: slugToHref(
-                    pickVersionSlug({
-                        currentVersionSlug,
-                        defaultSlug,
-                        slug
-                    })
-                ),
-                icon: authed ? <Lock className="text-(color:--grayscale-a9) size-4 self-center" /> : icon,
-                className: hidden ? "opacity-50" : undefined
-            }))}
+            options={visibleVersions.map(
+                ({ icon, versionId, title, availability, slug, defaultSlug, authed, hidden }) => ({
+                    type: "value",
+                    label: (
+                        <div className="flex items-center gap-2">
+                            {title}
+                            {availability != null ? <AvailabilityBadge availability={availability} size="sm" /> : null}
+                        </div>
+                    ),
+                    value: versionId,
+                    disabled: availability == null,
+                    href: slugToHref(
+                        pickVersionSlug({
+                            currentVersionSlug,
+                            defaultSlug,
+                            slug
+                        })
+                    ),
+                    icon: authed ? <Lock className="text-(color:--grayscale-a9) size-4 self-center" /> : icon
+                })
+            )}
             contentProps={{
                 "data-testid": "version-dropdown-content"
             }}
