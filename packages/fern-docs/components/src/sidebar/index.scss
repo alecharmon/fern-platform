@@ -90,6 +90,12 @@
     &.marquee-active {
       text-overflow: clip;
     }
+
+    &.wrap-mode {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-overflow: clip;
+    }
   }
 
   .fern-sidebar-link-title-inner {

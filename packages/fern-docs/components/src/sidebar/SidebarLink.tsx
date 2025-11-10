@@ -11,7 +11,9 @@ import React, {
     type HTMLAttributeAnchorTarget,
     type PropsWithChildren,
     type ReactNode,
-    useRef
+    useEffect,
+    useRef,
+    useState
 } from "react";
 import { cn } from "../cn";
 import { FernLink } from "../FernLink";
@@ -75,7 +77,18 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
     const containerRef = useRef<HTMLSpanElement>(null);
     const contentRef = useRef<HTMLSpanElement>(null);
 
+    const [isBreakable, setIsBreakable] = useState(false);
+
+    // biome-ignore lint/correctness/useExhaustiveDependencies: title is needed to re-evaluate when title prop changes (important-comment)
+    useEffect(() => {
+        const text = contentRef.current?.textContent ?? "";
+        setIsBreakable(/[ \t\r\n]/.test(text));
+    }, [title]);
+
     const handleMouseEnter = () => {
+        if (isBreakable) {
+            return;
+        }
         const container = containerRef.current;
         const content = contentRef.current;
         if (!container || !content) {
@@ -170,7 +183,7 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
             >
                 {icon}
                 <span
-                    className="fern-sidebar-link-title mr-auto w-full"
+                    className={cn("fern-sidebar-link-title mr-auto w-full", isBreakable && "wrap-mode")}
                     ref={containerRef}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
@@ -199,7 +212,7 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
             >
                 {icon}
                 <span
-                    className="fern-sidebar-link-title mr-auto w-full"
+                    className={cn("fern-sidebar-link-title mr-auto w-full", isBreakable && "wrap-mode")}
                     ref={containerRef}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
