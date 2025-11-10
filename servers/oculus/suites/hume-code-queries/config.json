@@ -1,0 +1,4 @@
+{
+  "domain": "hume-discord-ai.docs.buildwithfern.com",
+  "evaluators": ["correctness"]
+}

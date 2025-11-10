@@ -1,0 +1,11 @@
+{
+  "question": "how do I reduce background noise and reduce echos in the React SDK?",
+  "ground_truth": "To reduce background noise and echoes in the React SDK, you can use the audioConstraints option when connecting to EVI (1). These constraints are automatically enabled by default, but you can customize them if needed.\n\nGood news: Echo cancellation and noise suppression are enabled by default! The React SDK automatically sets:\n`echoCancellation: true` - Reduces echo from the input\n`noiseSuppression: true` - Suppresses background noise\n`autoGainControl: true` - Automatically adjusts microphone gain\n\nHere's how you can explicitly configure these settings when connecting:\n\n```import { useVoice } from '@humeai/voice-react';\n\nexport function StartCall({ accessToken }: { accessToken: string }) {\n  const { connect } = useVoice();\n\n  return (\n    <button\n      onClick={() => {\n        void connect({\n          auth: { type: 'accessToken', value: accessToken },\n          configId: '<YOUR_CONFIG_ID>',\n          audioConstraints: {\n            echoCancellation: true,    // Reduce echo (default: true)\n            noiseSuppression: true,    // Suppress background noise (default: true)\n            autoGainControl: true      // Auto-adjust microphone gain (default: true)\n          }\n        });\n      }}\n    >\n      Start Call\n    </button>\n  );\n}```\n\n\nAdditional audio quality improvements:\n\nThe React SDK also uses AudioWorklet for better audio quality by default (1). If you experience performance issues on older browsers (like Safari 17.5), you can disable it:\n\n```<VoiceProvider enableAudioWorklet={false}>\n  {/* Your components */}\n</VoiceProvider>```\n\n\nThese audio processing features work at the browser level and should significantly improve your audio quality with minimal configuration required!",
+  "metadata": {
+    "category": "code",
+    "source": "manual",
+    "slug": "reduce-noise-echo-react-sdk",
+    "domain": "hume-discord-ai.docs.buildwithfern.com",
+    "cited_context": "https://github.com/HumeAI/hume-react-sdk/blob/main/packages/react/README.md"
+  }
+}
