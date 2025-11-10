@@ -4,7 +4,6 @@ import { compact } from "es-toolkit/array";
 import React from "react";
 
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
-
 import { PropertyContainer, TypeDefinitionAnchor } from "../endpoints/TypeDefinitionAnchor";
 import { PropertyKey } from "./PropertyKey";
 import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible } from "./TypeDefinitionContext";

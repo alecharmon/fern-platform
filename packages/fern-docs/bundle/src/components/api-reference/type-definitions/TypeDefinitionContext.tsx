@@ -29,6 +29,15 @@ export function useTypeDefinitionContext(): TypeDefinitionContextValue {
     return useContext(TypeDefinitionContext)();
 }
 
+export function useOptionalTypeDefinitionContext(): TypeDefinitionContextValue | undefined {
+    const contextFn = useContext(TypeDefinitionContext);
+    try {
+        return contextFn();
+    } catch {
+        return undefined;
+    }
+}
+
 export function TypeDefinitionRoot({
     children,
     types,

@@ -42,7 +42,6 @@ export const FernCollapseWithButton: FC<PropsWithChildren<FernCollapseWithButton
         const checkWidth = () => {
             if (containerRef.current && isOpen) {
                 const width = containerRef.current.getBoundingClientRect().width;
-                console.log("[FernCollapse] Width:", width, "isOpen:", isOpen, "collapsible:", collapsible);
 
                 if (width < MIN_WIDTH_TRIGGER) {
                     setIsWidthConstrained(true);

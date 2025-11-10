@@ -1,10 +1,14 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import { useCopyToClipboard } from "@fern-ui/react-commons";
 import { compact } from "es-toolkit/array";
+import { Copy, Info } from "lucide-react";
 import React from "react";
 
+import { jsonPropertyPathToString } from "../examples/JsonPropertyPath";
 import { PropertyKey } from "./PropertyKey";
-import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible } from "./TypeDefinitionContext";
+import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible, useTypeDefinitionContext } from "./TypeDefinitionContext";
 import { type PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 
 export interface ObjectPropertyProps {
@@ -169,11 +173,47 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     TypeDefinitionAnchor,
     MdxRenderer
 }: PropertyRendererProps) {
+    const { jsonPropertyPath } = useTypeDefinitionContext();
+    const fullPath = jsonPropertyPathToString(jsonPropertyPath);
+    const showTooltip = jsonPropertyPath.length > 1;
+
+    const { copyToClipboard } = useCopyToClipboard(fullPath);
+
     const child = (
         <PropertyContainer>
             <TypeDefinitionAnchor sideOffset={6}>
                 {icon}
                 {name != null && <PropertyKey className="fern-api-property-key">{name}</PropertyKey>}
+                {showTooltip && (
+                    <FernTooltipProvider delayDuration={0}>
+                        <FernTooltip
+                            content={
+                                <div className="flex items-center gap-2">
+                                    <span className="break-all text-left">{fullPath}</span>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            void copyToClipboard?.();
+                                        }}
+                                        className="hover:text-(color:--accent-a11) text-(color:--grayscale-a11) shrink-0 transition-colors"
+                                        aria-label="Copy property path"
+                                    >
+                                        <Copy className="size-3.5" />
+                                    </button>
+                                </div>
+                            }
+                            side="right"
+                            sideOffset={6}
+                        >
+                            <button
+                                className="text-(color:--grayscale-a9) hover:text-(color:--grayscale-a11) ml-1 inline-flex items-center transition-colors"
+                                aria-label="Show property path"
+                            >
+                                <Info className="size-3.5" />
+                            </button>
+                        </FernTooltip>
+                    </FernTooltipProvider>
+                )}
                 {typeShorthand}
                 {availability != null && <AvailabilityBadge availability={availability} size="sm" rounded />}
             </TypeDefinitionAnchor>

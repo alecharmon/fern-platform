@@ -1,27 +1,76 @@
 "use client";
 
+import { slugToHref } from "@fern-api/docs-utils";
 import { cn } from "@fern-docs/components/cn";
 import { isomorphicRequestIdleCallback } from "@fern-ui/react-commons";
 import React from "react";
 
 import { FernAnchor } from "@/components/FernAnchor";
 
-import { useHref, useIsActive, useTypeDefinitionContext } from "../type-definitions/TypeDefinitionContext";
+import {
+    useIsActive,
+    useOptionalTypeDefinitionContext,
+    useTypeDefinitionContext
+} from "../type-definitions/TypeDefinitionContext";
 
 export function TypeDefinitionAnchor({ children, sideOffset }: { children: React.ReactNode; sideOffset?: number }) {
-    const href = useHref();
+    const context = useOptionalTypeDefinitionContext();
+
+    const handlePointerEnter = React.useCallback(() => {
+        if (context?.slug != null) {
+            window.dispatchEvent(
+                new CustomEvent(`property-hover-on:${context.slug}:${context.isResponse ? "response" : "request"}`, {
+                    detail: context.jsonPropertyPath
+                })
+            );
+        }
+    }, [context]);
+
+    const handlePointerLeave = React.useCallback(() => {
+        if (context?.slug != null) {
+            window.dispatchEvent(
+                new CustomEvent(`property-hover-off:${context.slug}:${context.isResponse ? "response" : "request"}`, {
+                    detail: context.jsonPropertyPath
+                })
+            );
+        }
+    }, [context]);
+
+    if (context != null) {
+        const href = `${slugToHref(context.slug)}${context.anchorIdParts.length > 0 ? `#${context.anchorIdParts.join(".")}` : ""}`;
+        return (
+            <FernAnchor href={href} sideOffset={sideOffset} asChild>
+                <div
+                    className="inline-flex items-center gap-2"
+                    onPointerEnter={handlePointerEnter}
+                    onPointerLeave={handlePointerLeave}
+                >
+                    {children}
+                </div>
+            </FernAnchor>
+        );
+    }
+
     return (
-        <FernAnchor href={href} sideOffset={sideOffset} asChild>
-            <div className="inline-flex items-baseline gap-2">{children}</div>
-        </FernAnchor>
+        <div
+            className="inline-flex items-center gap-2"
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={handlePointerLeave}
+        >
+            {children}
+        </div>
     );
 }
 
 export const SectionContainer = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
     ({ children, ...props }, ref) => {
-        const href = useHref();
+        const context = useOptionalTypeDefinitionContext();
+        const id =
+            context != null
+                ? `${slugToHref(context.slug)}${context.anchorIdParts.length > 0 ? `#${context.anchorIdParts.join(".")}` : ""}`
+                : undefined;
         return (
-            <div id={href} ref={ref} {...props} className={cn("relative", props.className)}>
+            <div id={id} ref={ref} {...props} className={cn("relative", props.className)}>
                 {children}
             </div>
         );
