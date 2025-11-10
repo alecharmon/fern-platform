@@ -49,6 +49,15 @@ types:
 
   AuthSchemeId: string
 
+  MultipleAuthType:
+    docs: |
+      Represents a set of auth schemes that must ALL be satisfied (AND relationship).
+      Used in multiAuth to express OR-of-AND security requirements.
+    properties:
+      schemes:
+        type: list<AuthSchemeId>
+        docs: List of auth scheme IDs that must all be satisfied for this auth option.
+
   EndpointIdentifier:
     properties:
       path: EndpointPathLiteral

@@ -256,6 +256,7 @@ function transformEndpoint({
         // htmlDescription,
         authed: writeShape.auth,
         authV2: writeShape.authV2,
+        multiAuth: writeShape.multiAuth,
         // descriptionContainsMarkdown: true,
         snippetTemplates: snippets.getSnippetTemplateForEndpoint({
             endpointPath: getEndpointPathAsString(writeShape),

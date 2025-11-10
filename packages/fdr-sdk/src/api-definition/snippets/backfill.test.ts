@@ -33,6 +33,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -131,6 +132,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -228,6 +230,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -327,6 +330,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -461,6 +465,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -583,6 +588,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -762,6 +768,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -954,6 +961,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1079,6 +1087,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1218,6 +1227,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1335,6 +1345,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1390,6 +1401,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1440,6 +1452,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1495,6 +1508,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1552,6 +1566,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1606,6 +1621,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1664,6 +1680,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {
@@ -1716,6 +1733,7 @@ describe("backfillSnippets", () => {
                     displayName: undefined,
                     operationId: undefined,
                     auth: undefined,
+                    multiAuth: undefined,
                     defaultEnvironment: undefined,
                     environments: [
                         {

@@ -103,6 +103,7 @@ export function transformEndpoint({
         // htmlDescription: dbShape.htmlDescription,
         authed: dbShape.authed ?? false,
         authV2: dbShape.authV2,
+        multiAuth: dbShape.multiAuth,
         // descriptionContainsMarkdown: dbShape.descriptionContainsMarkdown,
         snippetTemplates: dbShape.snippetTemplates,
         protocol: dbShape.protocol,

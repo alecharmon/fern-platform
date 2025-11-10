@@ -150,6 +150,7 @@ export class ApiDefinitionV1ToLatest {
             method: v1.method,
             path: v1.path.parts.filter((part) => part.value !== ""),
             auth: v1.authV2 ? v1.authV2 : v1.authed ? [AUTH_SCHEME_ID] : undefined,
+            multiAuth: v1.multiAuth,
             defaultEnvironment: v1.defaultEnvironment,
             environments: v1.environments,
             pathParameters: this.migrateParameters(v1.path.pathParameters),

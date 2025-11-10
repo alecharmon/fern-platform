@@ -498,6 +498,7 @@ main();
       "id": "buyPhoneNumber",
       "includeInApiExplorer": undefined,
       "method": "POST",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [
@@ -759,6 +760,7 @@ main();
       "id": "createContact",
       "includeInApiExplorer": undefined,
       "method": "POST",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [
@@ -977,6 +979,7 @@ main();
       "id": "getBrand",
       "includeInApiExplorer": undefined,
       "method": "GET",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [
@@ -1199,6 +1202,7 @@ main();
       "id": "getContact",
       "includeInApiExplorer": undefined,
       "method": "GET",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [
@@ -1449,6 +1453,7 @@ main();
       "id": "getConversation",
       "includeInApiExplorer": undefined,
       "method": "POST",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [
@@ -1702,6 +1707,7 @@ main();
       "id": "searchPhoneNumbers",
       "includeInApiExplorer": undefined,
       "method": "POST",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [
@@ -1986,6 +1992,7 @@ main();
       "id": "sendMms",
       "includeInApiExplorer": undefined,
       "method": "POST",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [
@@ -2253,6 +2260,7 @@ main();
       "id": "sendSms",
       "includeInApiExplorer": undefined,
       "method": "POST",
+      "multiAuth": undefined,
       "namespace": undefined,
       "operationId": undefined,
       "path": [

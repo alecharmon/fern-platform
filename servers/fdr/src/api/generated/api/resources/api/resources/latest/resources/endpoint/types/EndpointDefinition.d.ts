@@ -9,6 +9,7 @@ export interface EndpointDefinition extends FernRegistry.api.latest.WithDescript
     displayName: string | undefined;
     operationId: string | undefined;
     auth: FernRegistry.AuthSchemeId[] | undefined;
+    multiAuth: FernRegistry.MultipleAuthType[] | undefined;
     defaultEnvironment: FernRegistry.EnvironmentId | undefined;
     environments: FernRegistry.api.latest.Environment[] | undefined;
     pathParameters: FernRegistry.api.latest.ObjectProperty[] | undefined;

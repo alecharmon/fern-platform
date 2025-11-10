@@ -4,8 +4,8 @@
 import * as FernRegistry from "../../../../../../../../../index";
 export interface DbEndpointDefinition extends FernRegistry.api.v1.WithDescription, FernRegistry.api.v1.WithAvailability {
     authed: boolean | undefined;
-    /** List of auth scheme IDs that apply to this endpoint. Empty list means no auth required. */
     authV2: FernRegistry.AuthSchemeId[] | undefined;
+    multiAuth: FernRegistry.MultipleAuthType[] | undefined;
     defaultEnvironment: FernRegistry.EnvironmentId | undefined;
     environments: FernRegistry.api.v1.Environment[] | undefined;
     method: FernRegistry.HttpMethod;

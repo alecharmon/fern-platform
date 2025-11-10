@@ -17,7 +17,8 @@ types:
         docs: When this is true, the api definition will have a union for auth
       authV2:
         type: optional<list<rootCommons.AuthSchemeId>>
-        docs: List of auth scheme IDs that apply to this endpoint. Empty list means no auth required.
+      multiAuth:
+        type: optional<list<rootCommons.MultipleAuthType>>
       defaultEnvironment: optional<rootCommons.EnvironmentId>
       environments: list<commons.Environment>
       method: rootCommons.HttpMethod
