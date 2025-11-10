@@ -105,7 +105,7 @@ export function CreateIncidentPage() {
                 body: JSON.stringify({
                     name: form.name,
                     idempotencyKey,
-                    severityId: form.severityId || undefined,
+                    severityId: form.severityId,
                     visibility: "public",
                     summary: form.summary || undefined
                 })
@@ -142,12 +142,29 @@ export function CreateIncidentPage() {
             setForm((prev) => ({ ...prev, [field]: e.target.value }));
         };
 
+    const shortSeverityDescriptions: Record<string, string> = {
+        Minor: "Low impact; fix during business hours.",
+        Major: "Impact to users or your team that requires timely attention.",
+        Critical: "Outage or regression requiring immediate response."
+    };
+
     return (
         <div className="flex flex-1 flex-col items-center gap-4">
-            <h1 className="mx-auto mt-6 w-full max-w-[750px] text-2xl font-bold sm:mt-8 md:mt-10">Create Incident</h1>
+            <div className="mx-auto w-full max-w-[750px]">
+                <div className="mb-3 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold">Create Incident</h1>
+                    <div
+                        className="flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5"
+                        style={{ backgroundColor: "color-mix(in srgb, var(--primary) 10%, transparent)" }}
+                    >
+                        <div className="mb-0.5 text-sm leading-none text-primary">Enterprise Feature</div>
+                    </div>
+                </div>
+            </div>
 
             <div className="mx-auto w-full max-w-[750px] text-gray-900">
-                Create a new incident in incident.io to track and manage issues.
+                Track and manage issues affecting your use of Fern. Once submitted, a Fern engineer will follow up
+                through your dedicated Slack or Teams channel.
             </div>
 
             {success && (
@@ -177,16 +194,16 @@ export function CreateIncidentPage() {
             )}
 
             <form onSubmit={(e) => void handleSubmit(e)} className="mx-auto w-full max-w-[750px] space-y-4">
-                <div className="rounded-xl border border-border bg-gray-100 p-6">
+                <div className="rounded-xl border border-border bg-gray-100 p-4">
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="name" className="mb-2 block text-sm font-semibold text-gray-1100">
-                                Incident Name *
+                                Incident Name
                             </label>
+                            <div className="mb-2 text-sm text-gray-800">A descriptive title for your incident.</div>
                             <Input
                                 id="name"
                                 type="text"
-                                placeholder="e.g., API Outage on Production"
                                 value={form.name}
                                 onChange={handleInputChange("name")}
                                 required
@@ -198,9 +215,11 @@ export function CreateIncidentPage() {
                             <label htmlFor="summary" className="mb-2 block text-sm font-semibold text-gray-1100">
                                 Summary
                             </label>
+                            <div className="mb-2 text-sm text-gray-800">
+                                Describe what happened, when it occurred, and how it's impacting your team or users.
+                            </div>
                             <textarea
                                 id="summary"
-                                placeholder="Provide a brief description of the incident..."
                                 value={form.summary}
                                 onChange={handleInputChange("summary")}
                                 disabled={isSubmitting}
@@ -216,20 +235,40 @@ export function CreateIncidentPage() {
                             {loadingSeverities ? (
                                 <div className="text-sm text-gray-800">Loading severities...</div>
                             ) : severities.length > 0 ? (
-                                <select
-                                    id="severityId"
-                                    value={form.severityId}
-                                    onChange={handleInputChange("severityId")}
-                                    disabled={isSubmitting}
-                                    className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input shadow-xs flex h-9 w-full min-w-0 rounded-md border bg-white px-3 py-1 text-base outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/30 focus-visible:ring-[3px] sm:text-sm"
-                                >
-                                    <option value="">Select a severity (optional)</option>
-                                    {severities.map((severity) => (
-                                        <option key={severity.id} value={severity.id}>
-                                            {severity.name}
+                                <div className="relative">
+                                    <select
+                                        id="severityId"
+                                        value={form.severityId}
+                                        onChange={handleInputChange("severityId")}
+                                        disabled={isSubmitting}
+                                        required
+                                        className="file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input shadow-xs flex h-9 w-full min-w-0 appearance-none rounded-md border bg-white px-3 py-1 pr-8 text-base outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/30 focus-visible:ring-[3px] sm:text-sm"
+                                    >
+                                        <option value="" disabled hidden>
+                                            Select a severity
                                         </option>
-                                    ))}
-                                </select>
+                                        {severities.map((severity) => (
+                                            <option key={severity.id} value={severity.id}>
+                                                {severity.name} –{" "}
+                                                {shortSeverityDescriptions[severity.name] ?? severity.description}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <svg
+                                        className="pointer-events-none absolute right-[6px] top-1/2 h-4 w-4 -translate-y-1/2 text-gray-800"
+                                        aria-hidden="true"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </div>
                             ) : (
                                 <div className="space-y-2">
                                     <div className="text-sm text-gray-800">
@@ -266,10 +305,10 @@ export function CreateIncidentPage() {
                         }}
                         disabled={isSubmitting}
                     >
-                        Clear
+                        Reset form
                     </Button>
-                    <Button type="submit" disabled={isSubmitting || !form.name}>
-                        {isSubmitting ? "Creating..." : "Create Incident"}
+                    <Button type="submit" disabled={isSubmitting || !form.name || !form.severityId}>
+                        {isSubmitting ? "Submitting..." : "Submit Incident"}
                     </Button>
                 </div>
             </form>
