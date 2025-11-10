@@ -1,14 +1,18 @@
 import type { User } from "@auth0/nextjs-auth0/types";
+
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+
 import { DocsZeroStateButton } from "./DocsZeroStateButton";
 import { DocsZeroStateImage } from "./DocsZeroStateImage";
 
 export declare namespace DocsZeroState {
     export interface Props {
         user: User;
+        orgName?: Auth0OrgName;
     }
 }
 
-export async function DocsZeroState({ user }: DocsZeroState.Props) {
+export async function DocsZeroState({ user, orgName }: DocsZeroState.Props) {
     let welcomeString = "Welcome";
     const firstName = getFirstName(user);
     if (firstName != null) {
@@ -22,9 +26,11 @@ export async function DocsZeroState({ user }: DocsZeroState.Props) {
             <div className="mt-12">
                 <div className="flex flex-col gap-4">
                     <DocsZeroStateImage />
-                    <div className="flex justify-center">
-                        <DocsZeroStateButton />
-                    </div>
+                    {orgName && (
+                        <div className="flex justify-center">
+                            <DocsZeroStateButton orgName={orgName} />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

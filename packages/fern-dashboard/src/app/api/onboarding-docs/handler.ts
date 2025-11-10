@@ -267,24 +267,21 @@ async function publishDocsWithFernCli(
     fernToken?: string
 ): Promise<{ url: string; output: string }> {
     try {
-        // Install fern-api globally and run fern generate --docs
-        // Set FERN_TOKEN environment variable if provided
+        // Run fern generate --docs using npx (works in serverless environments)
+        // Set FERN_TOKEN and npm cache directory for Vercel compatibility
         const env = {
             ...process.env,
-            ...(fernToken && { FERN_TOKEN: fernToken })
+            ...(fernToken && { FERN_TOKEN: fernToken }),
+            // Set npm cache to /tmp for serverless environments (no home directory)
+            npm_config_cache: "/tmp/.npm",
+            NPM_CONFIG_CACHE: "/tmp/.npm"
         };
 
-        // Install fern-api globally
-        await execAsync("npm install -g fern-api", {
-            cwd: projectDir,
-            timeout: 60000 // 60 second timeout for installation
-        });
-
-        // Run fern generate --docs
+        // Use npx to run fern-api without global installation (Vercel-compatible)
         // Use echo "y" to bypass interactive confirmation prompt
-        const { stdout, stderr } = await execAsync('echo "y" | fern generate --docs', {
+        const { stdout, stderr } = await execAsync('echo "y" | npx fern-api generate --docs', {
             cwd: projectDir,
-            timeout: 120000, // 120 second timeout (2 minutes) for docs generation
+            timeout: 180000, // 180 second timeout (3 minutes) for download + generation
             env,
             shell: true
         });

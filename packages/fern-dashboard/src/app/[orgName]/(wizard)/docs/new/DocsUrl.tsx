@@ -20,6 +20,7 @@ export default function DocsUrl({ value, onChange }: DocsUrlProps) {
         setLocalValue(value);
     }, [value]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: onChange is intentionally omitted to prevent infinite loop
     useEffect(() => {
         // Reset validation state when input changes
         setIsAvailable(null);
@@ -56,7 +57,7 @@ export default function DocsUrl({ value, onChange }: DocsUrlProps) {
         }, 500); // 500ms debounce
 
         return () => clearTimeout(timeoutId);
-    }, [localValue, onChange]);
+    }, [localValue]);
 
     return (
         <div className="flex flex-col gap-2">

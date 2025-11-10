@@ -17,7 +17,7 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
     });
     if (!response.ok) {
         console.warn("Failed to get docs sites for org: ", JSON.stringify(response.error, null, 2));
-        return <DocsZeroState user={session.user} />;
+        return <DocsZeroState user={session.user} orgName={orgName} />;
     }
 
     const docsSites = response.docsSites;
@@ -27,5 +27,5 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
         redirect(`/${orgName}/docs/${constructDocsUrlParam(getDocsSiteUrl(firstDocsSite))}`);
     }
 
-    return <DocsZeroState user={session.user} />;
+    return <DocsZeroState user={session.user} orgName={orgName} />;
 }
