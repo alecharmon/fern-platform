@@ -178,7 +178,9 @@ export const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentPro
     const context = useTooltipContext();
     const ref = useMergeRefs([context.refs.setFloating, propRef]);
 
-    if (!context.open) return null;
+    if (!context.open) {
+        return null;
+    }
 
     const content = (
         <div

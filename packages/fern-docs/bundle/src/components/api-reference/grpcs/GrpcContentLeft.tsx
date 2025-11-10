@@ -107,7 +107,9 @@ function isGrpcTypeAlias(
 ): item is GrpcTypeAlias {
     const hasAliasId = item.body?.type === "alias" && item.body.value?.type === "id";
     const isGrpc = protocolType === "grpc";
-    if (!hasAliasId || !isGrpc) return false;
+    if (!hasAliasId || !isGrpc) {
+        return false;
+    }
 
     if ("contentType" in item) {
         return item.contentType === "application/proto";
@@ -117,9 +119,17 @@ function isGrpcTypeAlias(
 }
 
 function isStreaming(protocol: ApiDefinition.Protocol | undefined, location: "request" | "response"): boolean {
-    if (protocol?.type !== "grpc") return false;
-    if (protocol.methodType === "BIDIRECTIONAL_STREAM") return true;
-    if (location === "request" && protocol.methodType === "CLIENT_STREAM") return true;
-    if (location === "response" && protocol.methodType === "SERVER_STREAM") return true;
+    if (protocol?.type !== "grpc") {
+        return false;
+    }
+    if (protocol.methodType === "BIDIRECTIONAL_STREAM") {
+        return true;
+    }
+    if (location === "request" && protocol.methodType === "CLIENT_STREAM") {
+        return true;
+    }
+    if (location === "response" && protocol.methodType === "SERVER_STREAM") {
+        return true;
+    }
     return false;
 }

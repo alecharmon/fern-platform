@@ -61,7 +61,7 @@ export default function PageNode(props: PageNode.Props) {
             // Set current filename so @devPanel knows about the current page
             setCurrentFilename(initialPageData.filename);
         }
-    }, [hydrated, initialPageData, registerPage, setCurrentFilename]);
+    }, [initialPageData, registerPage, setCurrentFilename]);
 
     if (!initialPageData || !foundNode) {
         // TODO: show a loading state

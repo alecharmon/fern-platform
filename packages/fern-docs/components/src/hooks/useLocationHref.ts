@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: hook is disabled in SSG mode */
 
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { useSearchParams } from "next/navigation";
@@ -32,6 +33,8 @@ export function useLocationHref(hydrationSafe = false) {
 
     const pathname = useCurrentPathname();
     const searchParams = useSearchParams();
+
+    // biome-ignore lint/correctness/useExhaustiveDependencies: reset the locationHref when the pathname or searchParams changes
     useEffect(() => {
         setLocationHref(window.location.href);
     }, [pathname, searchParams]);

@@ -18,7 +18,9 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 export const ShortcutDisplay: React.FC<{ shortcuts: string[] }> = ({ shortcuts }) => {
-    if (shortcuts.length === 0) return null;
+    if (shortcuts.length === 0) {
+        return null;
+    }
 
     return (
         <div>

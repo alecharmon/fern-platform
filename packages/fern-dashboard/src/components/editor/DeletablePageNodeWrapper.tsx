@@ -57,7 +57,9 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
 
     const handlePageClick = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
-        if (!params) return;
+        if (!params) {
+            return;
+        }
 
         const { orgName, docsUrl, branch } = params as {
             orgName: string;

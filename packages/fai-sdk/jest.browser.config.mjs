@@ -4,7 +4,7 @@ export default {
     testEnvironment: "<rootDir>/tests/BrowserTestEnvironment.ts",
     testMatch: ["**/tests/**/*.browser.test.ts"],
     moduleNameMapper: {
-        "^(\\.{1,2}/.*)\\.js$": "$1",
+        "^(\\.{1,2}/.*)\\.js$": "$1"
     },
-    passWithNoTests: true,
+    passWithNoTests: true
 };

@@ -51,7 +51,7 @@ export interface GithubAuthContext {
     repoData: RepoData;
 }
 
-export type AuthenticatedHandler<TAdditionalContext = {}, TValidatedBody = undefined> = (
+export type AuthenticatedHandler<TAdditionalContext, TValidatedBody = undefined> = (
     req: NextRequest,
     context: GithubAuthContext & TAdditionalContext,
     ...args: TValidatedBody extends undefined ? [] : [TValidatedBody]

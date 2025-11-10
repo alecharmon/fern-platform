@@ -3,7 +3,6 @@
 import { FernButton } from "@fern-docs/components/FernButton";
 import { t } from "@fern-docs/i18n";
 import { Rss } from "lucide-react";
-import React from "react";
 
 export function RSSFeedButton({ lang }: { lang: string }) {
     const getRssUrl = () => {

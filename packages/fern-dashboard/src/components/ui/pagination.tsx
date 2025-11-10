@@ -82,9 +82,15 @@ const __generatePageNumbers = (currentPage: number, totalPages: number, maxVisib
     start = Math.max(2, end - windowSize + 1);
 
     pages.push(1);
-    if (start > 2) pages.push("ellipsis");
-    for (let i = start; i <= end; i++) pages.push(i);
-    if (end < totalPages - 1) pages.push("ellipsis");
+    if (start > 2) {
+        pages.push("ellipsis");
+    }
+    for (let i = start; i <= end; i++) {
+        pages.push(i);
+    }
+    if (end < totalPages - 1) {
+        pages.push("ellipsis");
+    }
     pages.push(totalPages);
 
     return pages;

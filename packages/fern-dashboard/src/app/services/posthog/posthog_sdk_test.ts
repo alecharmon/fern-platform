@@ -563,7 +563,7 @@ async function runInteractive() {
 }
 
 async function main() {
-    const { values, positionals } = parseArgs({
+    const { values } = parseArgs({
         args: process.argv.slice(2),
         options: {
             help: {

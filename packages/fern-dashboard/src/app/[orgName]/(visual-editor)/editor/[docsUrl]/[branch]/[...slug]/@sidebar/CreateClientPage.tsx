@@ -41,7 +41,7 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
     const params = useParams();
 
     const navigationSnapshot = useNavigation();
-    const { registeredPages, createClientPage, rootNode, version } = navigationSnapshot;
+    const { registeredPages, createClientPage, rootNode } = navigationSnapshot;
 
     // Get all sections from the navigation tree (including nested ones)
     // Use rootNode from NavigationStore instead of baseFoundNode.sidebar to get live updates (e.g., renames)
@@ -58,7 +58,7 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
         return sections;
         // Note: version dependency ensures re-computation when store updates (e.g., section renames).
         // Depending only on rootNode may not trigger re-computation due to React's dependency comparison.
-    }, [version, rootNode, baseFoundNode.sidebar, baseFoundNode.currentTab]);
+    }, [rootNode, baseFoundNode.sidebar, baseFoundNode.currentTab]);
 
     // Set default section on first load
     useEffect(() => {
@@ -76,7 +76,9 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
     // Field-specific errors for real-time validation
     const errors = useMemo(() => {
         const validatePageTitle = () => {
-            if (!pageTitle) return "Page title is required";
+            if (!pageTitle) {
+                return "Page title is required";
+            }
 
             if (pageTitle !== pageTitle.trim()) {
                 return "Page title cannot have leading or trailing spaces";
@@ -86,12 +88,16 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
         };
 
         const validateSection = () => {
-            if (!selectedSection) return "Please select a section";
+            if (!selectedSection) {
+                return "Please select a section";
+            }
             return null;
         };
 
         const validateSlug = () => {
-            if (!finalSlug) return "Invalid page title - cannot generate slug";
+            if (!finalSlug) {
+                return "Invalid page title - cannot generate slug";
+            }
 
             if (finalSlug !== finalSlug.trim()) {
                 return "Slug cannot have leading or trailing spaces";
@@ -218,7 +224,9 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
         <Popover
             open={isPopoverOpen && !disabled}
             onOpenChange={(open: boolean) => {
-                if (disabled) return;
+                if (disabled) {
+                    return;
+                }
                 setIsPopoverOpen(open);
                 if (!open) {
                     resetForm();

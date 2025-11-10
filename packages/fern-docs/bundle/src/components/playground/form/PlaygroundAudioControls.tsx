@@ -45,7 +45,9 @@ export function PlaygroundAudioControls({ audioUrl, fileName = "recording.webm" 
     };
 
     const handlePlayPause = async () => {
-        if (!audioRef.current || !audioUrl) return;
+        if (!audioRef.current || !audioUrl) {
+            return;
+        }
 
         if (isPlaying) {
             audioRef.current.pause();
@@ -58,7 +60,9 @@ export function PlaygroundAudioControls({ audioUrl, fileName = "recording.webm" 
     };
 
     const handleDownload = () => {
-        if (!audioUrl) return;
+        if (!audioUrl) {
+            return;
+        }
         const a = document.createElement("a");
         a.href = audioUrl;
         a.download = fileName;
@@ -67,7 +71,9 @@ export function PlaygroundAudioControls({ audioUrl, fileName = "recording.webm" 
         document.body.removeChild(a);
     };
 
-    if (!audioUrl) return null;
+    if (!audioUrl) {
+        return null;
+    }
 
     return (
         <div className="flex items-center gap-2">

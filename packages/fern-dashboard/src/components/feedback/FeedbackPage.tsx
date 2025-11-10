@@ -37,11 +37,11 @@ export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
         refetchOnWindowFocus: false
     });
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when selectedFeedback changes
     useEffect(() => {
         if (selectedFeedback) {
             setContent(<FeedbackSidePanel feedback={selectedFeedback} onClose={clear} />);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedFeedback]);
 
     const handleDateRangeChange = (newDateRange: DateRangeOptions) => {

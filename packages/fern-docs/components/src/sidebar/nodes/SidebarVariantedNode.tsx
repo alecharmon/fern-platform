@@ -5,7 +5,7 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronsUpDown } from "lucide-react";
 import type { ReactNode } from "react";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { cn } from "../../cn";
 import { FernLink } from "../../FernLink";

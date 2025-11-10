@@ -237,13 +237,17 @@ const AccordionImpl = React.forwardRef<AccordionImplElement, AccordionImplProps>
         const isDirectionLTR = direction === "ltr";
 
         const handleKeyDown = composeEventHandlers(props.onKeyDown, (event) => {
-            if (!ACCORDION_KEYS.includes(event.key)) return;
+            if (!ACCORDION_KEYS.includes(event.key)) {
+                return;
+            }
             const target = event.target as HTMLElement;
             const triggerCollection = getItems().filter((item) => !item.ref.current?.disabled);
             const triggerIndex = triggerCollection.findIndex((item) => item.ref.current === target);
             const triggerCount = triggerCollection.length;
 
-            if (triggerIndex === -1) return;
+            if (triggerIndex === -1) {
+                return;
+            }
 
             // Prevents page scroll while user is navigating
             event.preventDefault();

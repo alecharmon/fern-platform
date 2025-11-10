@@ -85,19 +85,7 @@ export function PRTitleEditor({
                 setIsSaving(false);
             }
         },
-        [
-            owner,
-            repo,
-            branch,
-            site,
-            serverTitle,
-            gitPrUrl,
-            setLocalTitle,
-            setPrTitle,
-            baseBranch,
-            isEditingDisabled,
-            orgName
-        ]
+        [owner, repo, branch, site, serverTitle, gitPrUrl, setPrTitle, baseBranch, isEditingDisabled, orgName]
     );
 
     const handleKeyDown = useCallback(

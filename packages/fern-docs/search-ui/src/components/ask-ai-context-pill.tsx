@@ -10,7 +10,9 @@ export const AskAiContextPill = ({
     onRemove?: () => void;
     onSelectHit?: (path: string) => void;
 }): ReactNode => {
-    if (!pageContext) return null;
+    if (!pageContext) {
+        return null;
+    }
 
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();

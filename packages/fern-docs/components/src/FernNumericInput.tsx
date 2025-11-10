@@ -85,6 +85,7 @@ export const FernNumericInput = forwardRef<HTMLInputElement, FernNumericInputPro
         }, 1000);
     });
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on unmount
     useEffect(() => {
         return () => {
             handleClearInterval();

@@ -107,9 +107,10 @@ export function CreateRedirectModal({
         } finally {
             setIsLoading(false);
         }
-    }, [destinationPath, orgName, docsUrl, githubUrl, sourcePath, baseBranch, onOpenChange]);
+    }, [destinationPath, orgName, docsUrl, githubUrl, sourcePath, baseBranch]);
 
     // Reset highlighted index when suggestions change
+    // biome-ignore lint/correctness/useExhaustiveDependencies: reset highlighted index when suggestions change
     useEffect(() => {
         setHighlightedIndex(0);
     }, [filteredSuggestions]);

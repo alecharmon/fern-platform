@@ -67,13 +67,13 @@ export async function DocsSiteImageServer({ docsSite }: DocsSiteImageServer.Prop
             <>
                 {lightImageUrl && darkImageUrl ? (
                     <>
-                        {/*eslint-disable-next-line @next/next/no-img-element */}
+                        {/* biome-ignore lint/performance/noImgElement: false positive */}
                         <img
                             src={lightImageUrl}
                             alt="docs homepage"
                             className="flex-1 object-cover object-top block dark:hidden"
                         />
-                        {/*eslint-disable-next-line @next/next/no-img-element */}
+                        {/* biome-ignore lint/performance/noImgElement: false positive */}
                         <img
                             src={darkImageUrl}
                             alt="docs homepage"
@@ -82,7 +82,7 @@ export async function DocsSiteImageServer({ docsSite }: DocsSiteImageServer.Prop
                     </>
                 ) : (
                     <>
-                        {/*eslint-disable-next-line @next/next/no-img-element */}
+                        {/* biome-ignore lint/performance/noImgElement: false positive */}
                         <img
                             src={lightImageUrl || darkImageUrl || ""}
                             alt="docs homepage"

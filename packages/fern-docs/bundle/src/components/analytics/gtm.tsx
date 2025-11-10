@@ -38,7 +38,9 @@ export default function GoogleTagManager(props: GTMParams): ReactNode {
 
     const inserted = React.useRef(false);
     useServerInsertedHTML(() => {
-        if (inserted.current) return null;
+        if (inserted.current) {
+            return null;
+        }
         inserted.current = true;
         return (
             <script

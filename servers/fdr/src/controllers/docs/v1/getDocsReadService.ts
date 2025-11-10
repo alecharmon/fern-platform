@@ -7,10 +7,9 @@ import {
     type DocsV1Read,
     FdrAPI,
     FernNavigation,
-    migrateDocsDbDefinition,
-    visitDbNavigationConfig
+    migrateDocsDbDefinition
 } from "@fern-api/fdr-sdk";
-import { AuthType, type IndexSegment } from "@prisma/client";
+import { AuthType } from "@prisma/client";
 import { keyBy } from "es-toolkit/array";
 import { mapValues } from "es-toolkit/object";
 

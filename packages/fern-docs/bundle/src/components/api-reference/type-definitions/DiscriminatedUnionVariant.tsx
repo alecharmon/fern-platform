@@ -1,7 +1,6 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
 import { compact } from "es-toolkit/array";
-import React from "react";
 
 import { PropertyWithShape } from "./ObjectProperty";
 import { TypeDefinitionPathPart } from "./TypeDefinitionContext";

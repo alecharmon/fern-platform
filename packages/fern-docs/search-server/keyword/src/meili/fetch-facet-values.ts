@@ -27,7 +27,9 @@ export async function fetchFacetValuesFromMeili(opts: {
     const meiliFilters = uniqueFilters
         .map((f) => {
             const [facet, value] = f.split(":");
-            if (!value) return null;
+            if (!value) {
+                return null;
+            }
             // Escape single quotes in value
             const safeValue = value.replace(/'/g, "\\'");
             return `${facet} = '${safeValue}'`;

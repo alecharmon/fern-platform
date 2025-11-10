@@ -1,6 +1,5 @@
 import { DEFAULT_LOGO_HEIGHT } from "@fern-api/docs-utils";
 import type { LogoConfiguration } from "@fern-api/docs-utils/types/logo-configuration";
-import React from "react";
 import { cn } from "../cn";
 import { FernImage } from "../FernImage";
 

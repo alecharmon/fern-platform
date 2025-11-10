@@ -105,7 +105,9 @@ function findMatches(
 
     for (const pattern of sortedKeys) {
         const url = links[pattern];
-        if (!url) continue;
+        if (!url) {
+            continue;
+        }
 
         const regex = parsePatternToRegex(pattern);
         let match: RegExpExecArray | null;
@@ -137,7 +139,9 @@ function buildCharToChildMap(texts: string[]): { childIndex: number; offsetInChi
 
     for (let i = 0; i < texts.length; i++) {
         const text = texts[i];
-        if (!text) continue;
+        if (!text) {
+            continue;
+        }
         for (let j = 0; j < text.length; j++) {
             charToChild.push({ childIndex: i, offsetInChild: j });
         }
@@ -156,7 +160,9 @@ function addChildBeforeMatch(
     childIndex: number,
     offsetInChild: number
 ): void {
-    if (offsetInChild === 0) return;
+    if (offsetInChild === 0) {
+        return;
+    }
 
     const child = childArray[childIndex];
     const childText = texts[childIndex];
@@ -184,7 +190,9 @@ function addChildAfterMatch(
     const child = childArray[childIndex];
     const childText = texts[childIndex];
 
-    if (!childText || offsetInChild >= childText.length - 1) return;
+    if (!childText || offsetInChild >= childText.length - 1) {
+        return;
+    }
 
     if (typeof child === "string") {
         const afterText = child.substring(offsetInChild + 1);
@@ -270,7 +278,9 @@ function wrapTextWithLinks(element: React.ReactElement<TokenProps>, links: Recor
         const startInfo = charToChild[match.start];
         const endInfo = charToChild[match.end - 1];
 
-        if (!startInfo || !endInfo) continue;
+        if (!startInfo || !endInfo) {
+            continue;
+        }
 
         // Add any children before this match
         while (currentChildIndex < startInfo.childIndex) {

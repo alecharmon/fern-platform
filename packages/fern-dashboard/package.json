@@ -168,6 +168,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
     "dotenv": "^17.2.3",
     "dotenv-cli": "^6.0.0",
     "glslify-import": "^3.1.0",

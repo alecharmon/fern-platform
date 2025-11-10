@@ -6,7 +6,6 @@ import {
     unwrapObjectType,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
-import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { isPlainObject, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { uniqBy } from "es-toolkit/array";
 

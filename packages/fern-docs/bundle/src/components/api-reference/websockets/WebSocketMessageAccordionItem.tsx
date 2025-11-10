@@ -7,7 +7,7 @@ import { useFernCollapseOverflow } from "@fern-docs/components/FernCollapse";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter/FernSyntaxHighlighter";
 import * as Accordion from "@radix-ui/react-accordion";
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
-import React, { type FC } from "react";
+import type { FC } from "react";
 import type { WebSocketMessage } from "./WebSocketMessages";
 
 export interface WebSocketMessageAccordionItemProps {

@@ -34,7 +34,9 @@ export default function UploadImage({
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file) {
+            return;
+        }
 
         // Create a local preview immediately
         const localPreview = URL.createObjectURL(file);
@@ -81,6 +83,7 @@ export default function UploadImage({
                     onClick={() => fileInputRef.current?.click()}
                 >
                     {previewUrl ? (
+                        // biome-ignore lint/performance/noImgElement: false positive
                         <img src={previewUrl} alt={label} className="h-full w-full object-contain rounded-lg" />
                     ) : (
                         <div className="text-gray-900">

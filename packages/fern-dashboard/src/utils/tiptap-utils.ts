@@ -62,7 +62,9 @@ export const parseShortcutKeys = (props: {
 }) => {
     const { shortcutKeys, delimiter = "+", capitalize = true } = props;
 
-    if (!shortcutKeys) return [];
+    if (!shortcutKeys) {
+        return [];
+    }
 
     return shortcutKeys
         .split(delimiter)
@@ -77,7 +79,9 @@ export const parseShortcutKeys = (props: {
  * @returns boolean indicating if the mark exists in the schema
  */
 export const isMarkInSchema = (markName: string, editor: Editor | null): boolean => {
-    if (!editor?.schema) return false;
+    if (!editor?.schema) {
+        return false;
+    }
     return editor.schema.spec.marks.get(markName) !== undefined;
 };
 
@@ -88,7 +92,9 @@ export const isMarkInSchema = (markName: string, editor: Editor | null): boolean
  * @returns boolean indicating if the node exists in the schema
  */
 export const isNodeInSchema = (nodeName: string, editor: Editor | null): boolean => {
-    if (!editor?.schema) return false;
+    if (!editor?.schema) {
+        return false;
+    }
     return editor.schema.spec.nodes.get(nodeName) !== undefined;
 };
 
@@ -98,7 +104,9 @@ export const isNodeInSchema = (nodeName: string, editor: Editor | null): boolean
  * @returns boolean indicating if the focus was moved
  */
 export function focusNextNode(editor: Editor) {
-    if (editor.isDestroyed) return false;
+    if (editor.isDestroyed) {
+        return false;
+    }
 
     const { state, view } = editor;
     const { doc, selection } = state;
@@ -151,7 +159,9 @@ export function isValidPosition(pos: number | null | undefined): pos is number {
  * @returns True if at least one of the extensions is available, false otherwise
  */
 export function isExtensionAvailable(editor: Editor | null, extensionNames: string | string[]): boolean {
-    if (!editor) return false;
+    if (!editor) {
+        return false;
+    }
 
     const names = Array.isArray(extensionNames) ? extensionNames : [extensionNames];
 
@@ -201,7 +211,9 @@ export function findNodePosition(props: {
 }): { pos: number; node: TiptapNode } | null {
     const { editor, node, nodePos } = props;
 
-    if (!editor?.state?.doc) return null;
+    if (!editor?.state?.doc) {
+        return null;
+    }
 
     // Zero is valid position
     const hasValidNode = node !== undefined && node != null;
@@ -250,12 +262,16 @@ export function findNodePosition(props: {
  * @returns boolean indicating if the selected node matches any of the specified types
  */
 export function isNodeTypeSelected(editor: Editor | null, types: string[] = []): boolean {
-    if (!editor?.state.selection) return false;
+    if (!editor?.state.selection) {
+        return false;
+    }
 
     const { state } = editor;
     const { selection } = state;
 
-    if (selection.empty) return false;
+    if (selection.empty) {
+        return false;
+    }
 
     if (selection instanceof NodeSelection) {
         const node = selection.node;

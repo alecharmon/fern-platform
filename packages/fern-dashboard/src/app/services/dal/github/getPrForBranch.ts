@@ -41,7 +41,7 @@ export const getPrForBranch = cache(
 
         try {
             await assertUserHasOrganizationAccess(session.accessToken, orgName);
-        } catch (error) {
+        } catch (_error) {
             return {
                 success: false,
                 error: `User is not a member of the specified organization: ${orgName}`

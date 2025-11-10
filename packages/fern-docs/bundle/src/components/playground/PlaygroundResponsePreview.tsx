@@ -22,6 +22,7 @@ export const PlaygroundResponsePreview: FC<PlaygroundResponsePreviewProps> = ({ 
     // const [shouldScroll, setShouldScroll] = useState(true);
 
     // Scroll to bottom if shouldScroll is true
+    // biome-ignore lint/correctness/useExhaustiveDependencies: update scroll position when response.type or responseJson changes
     useEffect(() => {
         const { current } = viewportRef;
         if (current && response.type === "stream") {

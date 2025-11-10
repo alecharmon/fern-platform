@@ -98,7 +98,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                 displayName: undefined
             });
         }
-    }, [activeSessionMessageCount, pushMessage, websocketMessageLimit]);
+    }, [activeSessionMessageCount, pushMessage, websocketMessageLimit, lang]);
 
     const settings = usePlaygroundSettings();
 
@@ -189,7 +189,8 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
         formState.headers,
         pushMessage,
         activeSessionMessageCount,
-        websocketMessageLimit
+        websocketMessageLimit,
+        authKey
     ]);
 
     const handleSendMessage = useCallback(

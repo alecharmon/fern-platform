@@ -121,7 +121,9 @@ function useFileUpload(options: UploadOptions) {
                 abortController.signal
             );
 
-            if (!url) throw new Error("Upload failed: No URL returned");
+            if (!url) {
+                throw new Error("Upload failed: No URL returned");
+            }
 
             if (!abortController.signal.aborted) {
                 setFileItems((prev) =>
@@ -274,7 +276,9 @@ interface MediaUploadPreviewProps {
  */
 const MediaUploadPreview: React.FC<MediaUploadPreviewProps> = ({ fileItem }) => {
     const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return "0 Bytes";
+        if (bytes === 0) {
+            return "0 Bytes";
+        }
         const k = 1024;
         const sizes = ["Bytes", "KB", "MB", "GB"];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -331,7 +335,7 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
     const { fileItems, uploadFiles } = useFileUpload(uploadOptions);
 
     const isImage = (file: File): boolean => {
-        if (file.type && file.type.startsWith("image/")) {
+        if (file.type?.startsWith("image/")) {
             return true;
         }
         const fileName = (file.name || "").toLowerCase();
@@ -339,7 +343,7 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
     };
 
     const isVideo = (file: File): boolean => {
-        if (file.type && file.type.startsWith("video/")) {
+        if (file.type?.startsWith("video/")) {
             return true;
         }
         const fileName = (file.name || "").toLowerCase();
@@ -474,10 +478,6 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
 
     const isKnownVideoEmbed = (url: string): boolean => {
         return getEmbedInfo(url) !== null;
-    };
-
-    const isVideoUrl = (url: string): boolean => {
-        return isDirectVideoFileUrl(url) || isKnownVideoEmbed(url);
     };
 
     // Handles URL submission via input field in URL tab

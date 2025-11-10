@@ -50,6 +50,7 @@ export default function ReferringDomainsTable({ docsUrl, dateRange, includeInter
 
                 return (
                     <span className="flex items-center gap-2">
+                        {/** biome-ignore lint/performance/noImgElement: false positive */}
                         <img
                             src={getFavicon(item.domain)}
                             alt=""

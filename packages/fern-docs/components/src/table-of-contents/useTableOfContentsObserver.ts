@@ -138,7 +138,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
             root.removeEventListener("scroll", measure);
             window.removeEventListener("resize", measure);
         };
-    }, [ids, measure, root]);
+    }, [measure, root]);
 
     return measure;
 }

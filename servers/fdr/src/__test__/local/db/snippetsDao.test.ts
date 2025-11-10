@@ -183,7 +183,7 @@ it("snippets dao", async () => {
     expect(snippet).not.toEqual(undefined);
     expect(snippet.type).toEqual("python");
 
-    if (snippet.type != "python") {
+    if (snippet.type !== "python") {
         throw new Error("expected a python snippet");
     }
     expect(snippet.sdk.package).toEqual("acme");
@@ -296,7 +296,7 @@ it("snippets dao with example id", async () => {
     expect(snippet).not.toEqual(undefined);
     expect(snippet.type).toEqual("python");
 
-    if (snippet.type != "python") {
+    if (snippet.type !== "python") {
         throw new Error("expected a python snippet");
     }
     expect(snippet.sdk.package).toEqual("acme");
@@ -336,7 +336,7 @@ it("snippets dao with example id", async () => {
     expect(snippet2).not.toEqual(undefined);
     expect(snippet2.type).toEqual("python");
 
-    if (snippet2.type != "python") {
+    if (snippet2.type !== "python") {
         throw new Error("expected a python snippet2");
     }
     expect(snippet2.sdk.package).toEqual("acme");

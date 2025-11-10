@@ -18,10 +18,10 @@ export function useApiPageCenterElement(
     const shouldUpdateSlug = !skip && isInView;
     const router = useRouter();
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when shouldUpdateSlug or slug changes
     useEffect(() => {
         if (shouldUpdateSlug) {
             router.replace(slugToHref(slug), { scroll: false });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [shouldUpdateSlug, slug]);
 }

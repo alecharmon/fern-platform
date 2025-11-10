@@ -249,7 +249,9 @@ function colorizeLog(line: string): string {
 }
 
 async function streamLogs(): Promise<void> {
-    if (!SHOW_LOGS) return;
+    if (!SHOW_LOGS) {
+        return;
+    }
 
     const logStream = execa("docker", ["logs", "-f", CONTAINER_NAME]);
 
@@ -288,7 +290,9 @@ async function collectDockerStats(): Promise<DockerStats | null> {
 
         const parseMemory = (mem: string): number => {
             const match = mem.match(/^([\d.]+)([KMGT]i?B)?$/i);
-            if (!match) return 0;
+            if (!match) {
+                return 0;
+            }
 
             const value = parseFloat(match[1]);
             const unit = match[2]?.toUpperCase() || "B";
@@ -353,7 +357,7 @@ async function measureStartup(): Promise<PerformanceMetrics> {
     console.log(chalk.yellow("\n⏱️  Measuring startup performance...\n"));
 
     // Start log streaming if requested
-    streamLogs();
+    await streamLogs();
 
     // Start stats collection if requested
     let statsInterval: NodeJS.Timeout | undefined;
@@ -361,7 +365,9 @@ async function measureStartup(): Promise<PerformanceMetrics> {
         console.log(chalk.dim("📊 Stats collection enabled\n"));
         statsInterval = setInterval(async () => {
             const stats = await collectDockerStats();
-            if (stats) dockerStats.push(stats);
+            if (stats) {
+                dockerStats.push(stats);
+            }
         }, 1000);
     }
 
@@ -697,11 +703,17 @@ async function main() {
 
             // Color code based on service name
             let color = chalk.white;
-            if (serviceName.toLowerCase().includes("postgres")) color = chalk.blue;
-            else if (serviceName.toLowerCase().includes("minio")) color = chalk.yellow;
-            else if (serviceName.toLowerCase().includes("meili")) color = chalk.magenta;
-            else if (serviceName.toLowerCase().includes("fdr")) color = chalk.cyan;
-            else if (serviceName.toLowerCase().includes("docs")) color = chalk.green;
+            if (serviceName.toLowerCase().includes("postgres")) {
+                color = chalk.blue;
+            } else if (serviceName.toLowerCase().includes("minio")) {
+                color = chalk.yellow;
+            } else if (serviceName.toLowerCase().includes("meili")) {
+                color = chalk.magenta;
+            } else if (serviceName.toLowerCase().includes("fdr")) {
+                color = chalk.cyan;
+            } else if (serviceName.toLowerCase().includes("docs")) {
+                color = chalk.green;
+            }
 
             console.log(`    ${color("●")} ${serviceName.padEnd(20)} ${chalk.bold(timeStr)}`);
         }

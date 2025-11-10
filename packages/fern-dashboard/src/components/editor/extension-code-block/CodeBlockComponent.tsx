@@ -67,9 +67,12 @@ export function createCodeBlockComponent() {
             };
         }, [props.editor, props.getPos, props.node.nodeSize]);
 
+        // biome-ignore lint/correctness/useExhaustiveDependencies: also runs when selectionTick changes
         const isSelectionInside = useMemo(() => {
             const pos = props.getPos();
-            if (typeof pos !== "number") return false;
+            if (typeof pos !== "number") {
+                return false;
+            }
             const sel = props.editor.state.selection;
             const start = pos + 1; // first content position
             const end = pos + props.node.nodeSize - 1; // last content position
@@ -89,8 +92,12 @@ export function createCodeBlockComponent() {
                 e.preventDefault();
                 const pos = props.getPos();
 
-                if (props.editor.isDestroyed) return;
-                if (typeof pos !== "number") return;
+                if (props.editor.isDestroyed) {
+                    return;
+                }
+                if (typeof pos !== "number") {
+                    return;
+                }
 
                 const docSize = props.editor.state.doc.content.size;
                 const targetPos = Math.min(Math.max(pos + 1, 0), docSize);

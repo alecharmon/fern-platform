@@ -61,7 +61,9 @@ export function templateTransformer(templateVariables?: Set<string>): ShikiTrans
                                     // Still collecting opening braces
                                     const extracted = extractOpenBraces(tokenContent);
                                     openBraces += extracted;
-                                    if (openBraces.length > 2) openBraces = openBraces.substring(0, 2);
+                                    if (openBraces.length > 2) {
+                                        openBraces = openBraces.substring(0, 2);
+                                    }
 
                                     if (openBraces === "{{") {
                                         // Now extract any variable part that might be in this token
@@ -154,7 +156,9 @@ function processTokensWithTemplates(
 
     for (let i = 0; i < tokens.length; i++) {
         const token = tokens[i];
-        if (!token) continue;
+        if (!token) {
+            continue;
+        }
 
         tokenStartChars[i] = charIndex;
         const tokenLength = token.content.length;
@@ -177,11 +181,15 @@ function processTokensWithTemplates(
         const endTokenIndex = charToTokenMap.get(template.endIndex - 1) ?? tokens.length - 1;
 
         // Skip invalid indices
-        if (startTokenIndex >= tokens.length || endTokenIndex >= tokens.length) continue;
+        if (startTokenIndex >= tokens.length || endTokenIndex >= tokens.length) {
+            continue;
+        }
 
         const startToken = tokens[startTokenIndex];
         const endToken = tokens[endTokenIndex];
-        if (!startToken || !endToken) continue;
+        if (!startToken || !endToken) {
+            continue;
+        }
 
         if (startTokenIndex === endTokenIndex) {
             // Template is contained within a single token
@@ -292,7 +300,9 @@ function extractOpenBraces(content: string): string {
     for (const char of content) {
         if (char === "{") {
             result += "{";
-            if (result.length === 2) break;
+            if (result.length === 2) {
+                break;
+            }
         } else if (result.length > 0) {
             break;
         }
@@ -328,7 +338,9 @@ function extractCloseBraces(content: string): string {
     for (const char of content) {
         if (char === "}") {
             result += "}";
-            if (result.length === 2) break;
+            if (result.length === 2) {
+                break;
+            }
         } else if (result.length > 0) {
             result = "";
         }

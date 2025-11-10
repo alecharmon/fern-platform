@@ -55,8 +55,12 @@ describe("getDocsDomainEdge", () => {
         vi.resetAllMocks();
         mocks.mockGetNextPublicDocsDomain.mockReturnValue(undefined);
         mocks.mockCleanHost.mockImplementation((host: string | null | undefined) => {
-            if (!host) return undefined;
-            if (host.includes("localhost") || host.includes("127.0.0.1")) return undefined;
+            if (!host) {
+                return undefined;
+            }
+            if (host.includes("localhost") || host.includes("127.0.0.1")) {
+                return undefined;
+            }
             return host.replace(/^https?:\/\//, "").replace(/\/$/, "");
         });
     });

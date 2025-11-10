@@ -54,16 +54,28 @@ export default function SelectDate({ value, onChange, className }: SelectDatePro
 
     // Always derive custom values from the current value prop
     const getCurrentCount = useCallback(() => {
-        if (value.type === "last_n_days") return value.days;
-        if (value.type === "last_n_weeks") return value.weeks;
-        if (value.type === "last_n_months") return value.months;
+        if (value.type === "last_n_days") {
+            return value.days;
+        }
+        if (value.type === "last_n_weeks") {
+            return value.weeks;
+        }
+        if (value.type === "last_n_months") {
+            return value.months;
+        }
         return 7;
     }, [value]);
 
     const getCurrentUnit = useCallback((): DateUnit => {
-        if (value.type === "last_n_days") return "days";
-        if (value.type === "last_n_weeks") return "weeks";
-        if (value.type === "last_n_months") return "months";
+        if (value.type === "last_n_days") {
+            return "days";
+        }
+        if (value.type === "last_n_weeks") {
+            return "weeks";
+        }
+        if (value.type === "last_n_months") {
+            return "months";
+        }
         return "days";
     }, [value]);
 
@@ -71,6 +83,7 @@ export default function SelectDate({ value, onChange, className }: SelectDatePro
     const [customUnit, setCustomUnit] = useState<DateUnit>(getCurrentUnit());
 
     // Update custom values whenever value prop changes
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when value changes
     React.useEffect(() => {
         setCustomCount(getCurrentCount());
         setCustomUnit(getCurrentUnit());
@@ -87,10 +100,18 @@ export default function SelectDate({ value, onChange, className }: SelectDatePro
 
     // Display value
     const getDisplayValue = () => {
-        if (currentPreset) return currentPreset.label;
-        if (value.type === "last_n_days") return `Last ${value.days} days`;
-        if (value.type === "last_n_weeks") return `Last ${value.weeks} weeks`;
-        if (value.type === "last_n_months") return `Last ${value.months} months`;
+        if (currentPreset) {
+            return currentPreset.label;
+        }
+        if (value.type === "last_n_days") {
+            return `Last ${value.days} days`;
+        }
+        if (value.type === "last_n_weeks") {
+            return `Last ${value.weeks} weeks`;
+        }
+        if (value.type === "last_n_months") {
+            return `Last ${value.months} months`;
+        }
         return "Select range";
     };
 

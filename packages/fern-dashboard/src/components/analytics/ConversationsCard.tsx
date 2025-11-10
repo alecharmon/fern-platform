@@ -94,9 +94,15 @@ export function ConversationsCard({
     const { total_conversations, resolved_conversations, unresolved_conversations, resolution_rate } = resolutionData;
 
     const getResolutionRateColor = () => {
-        if (resolution_rate === 0) return "";
-        if (resolution_rate > 80) return "text-primary";
-        if (resolution_rate >= 60) return "text-yellow-1100";
+        if (resolution_rate === 0) {
+            return "";
+        }
+        if (resolution_rate > 80) {
+            return "text-primary";
+        }
+        if (resolution_rate >= 60) {
+            return "text-yellow-1100";
+        }
         return "text-destructive";
     };
 

@@ -3,7 +3,7 @@ import { once } from "es-toolkit/function";
 
 import { FernNavigation } from "./..";
 import { pruneVersionNode } from "./utils/pruneVersionNode";
-import { isProductNode, isVersionNode, type NavigationNodeWithMetadata } from "./versions";
+import { isProductNode, type NavigationNodeWithMetadata } from "./versions";
 
 interface NavigationNodeWithMetadataAndParents {
     node: FernNavigation.NavigationNodeWithMetadata;

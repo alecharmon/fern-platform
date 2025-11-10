@@ -35,7 +35,9 @@ export async function getValidPagePaths(docsUrl: string): Promise<{
         const paths: string[] = [];
 
         const extractPaths = (node: unknown, basePath: string = ""): void => {
-            if (!node || typeof node !== "object") return;
+            if (!node || typeof node !== "object") {
+                return;
+            }
 
             const nodeObj = node as Record<string, unknown>;
 

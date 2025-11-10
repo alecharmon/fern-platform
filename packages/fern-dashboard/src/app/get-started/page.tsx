@@ -7,7 +7,7 @@ import { SidepanelProvider } from "@/components/layout/SidepanelContext";
 import HeaderLayout from "../[orgName]/(homepage)/@header/default";
 import { getCurrentSession } from "../services/auth0/getCurrentSession";
 
-export default async function Page({ params }: { params: Promise<{}> }) {
+export default async function Page({ params }: { params: Promise<object> }) {
     const session = await getCurrentSession();
     if (session == null) {
         redirect("/");

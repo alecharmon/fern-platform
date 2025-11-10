@@ -4,7 +4,7 @@ import { useNavigation } from "@fern-docs/components/navigation";
 import { getChangedNodesFromHtml } from "@fern-docs/mdx";
 import type { Transaction } from "@tiptap/pm/state";
 import type { Editor, EditorEvents } from "@tiptap/react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { hasChangedContentInTransaction } from "@/components/editor/utils";

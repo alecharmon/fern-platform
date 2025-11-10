@@ -16,7 +16,6 @@ import {
     PLAYGROUND_AUTH_STATE_BEARER_TOKEN_ATOM,
     PLAYGROUND_AUTH_STATE_HEADER_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
-    PLAYGROUND_SELECTED_AUTH_TYPE_ATOM,
     useResolvedPlaygroundState
 } from "@/state/playground";
 import { getAuthKey } from "../utils";

@@ -85,7 +85,9 @@ export function Announcement({
 
     const inserted = React.useRef(false);
     useServerInsertedHTML(() => {
-        if (inserted.current) return null;
+        if (inserted.current) {
+            return null;
+        }
         inserted.current = true;
         return (
             announcement && (

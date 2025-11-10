@@ -4,8 +4,6 @@ import { getChildren } from "./getChildren";
 import type { NavigationNode } from "./NavigationNode";
 import type { NavigationNodeParent } from "./NavigationNodeParent";
 
-const SKIP = "skip" as const;
-
 /**
  * Traverse the navigation tree in a depth-first manner (pre-order).
  */

@@ -295,14 +295,17 @@ function _addToRootNavigation(
     insertionIndex?: number,
     ymlFilePath?: DocsYmlFilePath
 ) {
-    if (!docsConfig.navigation) return;
+    if (!docsConfig.navigation) {
+        return;
+    }
 
     if (sectionTitle == null) {
         _addPageToContainer(docsConfig.navigation, pageEntry, insertionMode, insertionIndex, ymlFilePath);
     } else {
         const section = _findOrCreateSection(docsConfig.navigation, sectionTitle);
-        if (section.contents)
+        if (section.contents) {
             _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex, ymlFilePath);
+        }
     }
 }
 
@@ -316,7 +319,9 @@ function _addToTabbedNavigation(
     insertionIndex?: number,
     ymlFilePath?: DocsYmlFilePath
 ) {
-    if (!docsConfig.navigation) return;
+    if (!docsConfig.navigation) {
+        return;
+    }
 
     // Tab slug from navigation tree may be full path like "platform/v-2/guides"
     // but YAML uses just the tab identifier like "guides"
@@ -325,12 +330,15 @@ function _addToTabbedNavigation(
     const tab = _findOrCreateTab(docsConfig.navigation, tabIdentifier);
 
     if (sectionTitle == null) {
-        if (tab.layout) _addPageToContainer(tab.layout, pageEntry, insertionMode, insertionIndex, ymlFilePath);
+        if (tab.layout) {
+            _addPageToContainer(tab.layout, pageEntry, insertionMode, insertionIndex, ymlFilePath);
+        }
     } else {
         if (tab.layout) {
             const section = _findOrCreateSection(tab.layout, sectionTitle);
-            if (section.contents)
+            if (section.contents) {
                 _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex, ymlFilePath);
+            }
         }
     }
 }

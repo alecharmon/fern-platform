@@ -1,7 +1,5 @@
 "use client";
 
-import { FernVenusApi } from "@fern-api/venus-api-sdk";
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -13,8 +11,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger
+    DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 

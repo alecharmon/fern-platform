@@ -20,6 +20,7 @@ export default function PageTitle({ className, filename, initialText }: PageTitl
 
     const { updatePageFrontmatter, subscribePageSaveEvent } = useNavigation();
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: if filename changes, we want to reset the text
     useEffect(() => {
         setText(initialText ?? "");
     }, [filename, initialText]);
@@ -31,7 +32,7 @@ export default function PageTitle({ className, filename, initialText }: PageTitl
         });
 
         return unsubscribe;
-    }, [filename, subscribePageSaveEvent]);
+    }, [subscribePageSaveEvent]);
 
     function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         const nextText = e.target.value;

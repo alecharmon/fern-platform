@@ -45,7 +45,9 @@ export class GitHubLoader implements GitLoader {
     constructor(githubUrl: string) {
         this.getOctokitInstance = async () => {
             const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
-            if (!owner || !repo) return null;
+            if (!owner || !repo) {
+                return null;
+            }
 
             const result = await getFernBotOctokitForRepo(owner, repo);
             return result.ok ? result.octokit : null;

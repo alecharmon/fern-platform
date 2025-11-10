@@ -49,7 +49,9 @@ app.prepare()
         });
 
         createServer(app).listen(port, (err?: any) => {
-            if (err) throw err;
+            if (err) {
+                throw err;
+            }
             console.log(`> Ready on ${baseUrl}`);
         });
     })

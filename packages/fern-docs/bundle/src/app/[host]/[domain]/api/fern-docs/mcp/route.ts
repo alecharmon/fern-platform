@@ -103,7 +103,9 @@ async function createHandler(host: string, domain: string): Promise<McpHandler> 
                         const decoder = new TextDecoder();
                         while (true) {
                             const { done, value } = await reader.read();
-                            if (done) break;
+                            if (done) {
+                                break;
+                            }
                             answer += decoder.decode(value, { stream: true });
                         }
 

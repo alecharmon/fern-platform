@@ -51,6 +51,7 @@ export const Feedback: FC<FeedbackProps> = ({
     const currentPathname = useCurrentPathname();
     const pathname = pathnameProp ?? currentPathname;
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when pathname changes
     useEffect(() => {
         setSent(false);
         setIsHelpful(undefined);
@@ -128,8 +129,7 @@ export const Feedback: FC<FeedbackProps> = ({
             toast.success(t(lang).feedback.thankYouForFeedback);
             setSent(true);
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [isHelpful, metadata, defaultFeedbackQuestion, feedbackSource, type]
+        [isHelpful, metadata, defaultFeedbackQuestion, feedbackSource, type, faiClient.feedback.createFeedback, lang]
     );
 
     useKeyboardPress({

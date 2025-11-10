@@ -710,7 +710,7 @@ export function generateOpenApiFromWebhookContext(
     if (webhook.payloads && webhook.payloads.length > 0) {
         if (webhook.payloads.length === 1) {
             const payload = webhook.payloads[0];
-            if (payload && payload.shape) {
+            if (payload?.shape) {
                 operation.requestBody = {
                     description: typeof payload.description === "string" ? payload.description : undefined,
                     content: {
@@ -722,7 +722,7 @@ export function generateOpenApiFromWebhookContext(
             }
         } else {
             const payloadSchemas = webhook.payloads
-                .filter((p) => p && p.shape)
+                .filter((p) => p?.shape)
                 .map((p) => convertToOpenApiSchema(p.shape!, context as unknown as EndpointContext));
 
             if (payloadSchemas.length > 0) {

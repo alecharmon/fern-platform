@@ -32,11 +32,19 @@ export function compareVersions(version: string, versionToCompareAgainst: string
     const v1 = parseVersion(version);
     const v2 = parseVersion(versionToCompareAgainst);
 
-    if (v1.major < v2.major) return true;
-    if (v1.major > v2.major) return false;
+    if (v1.major < v2.major) {
+        return true;
+    }
+    if (v1.major > v2.major) {
+        return false;
+    }
 
-    if (v1.minor < v2.minor) return true;
-    if (v1.minor > v2.minor) return false;
+    if (v1.minor < v2.minor) {
+        return true;
+    }
+    if (v1.minor > v2.minor) {
+        return false;
+    }
 
     return v1.patch < v2.patch;
 }

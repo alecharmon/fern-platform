@@ -116,7 +116,9 @@ export function findSectionById(
                     });
                     continue;
                 }
-                if (traverse(child, tab, product, version)) return true;
+                if (traverse(child, tab, product, version)) {
+                    return true;
+                }
             }
             return false;
         }
@@ -147,7 +149,9 @@ export function findSectionById(
                     });
                     continue;
                 }
-                if (traverse(child, tab, product, version)) return true;
+                if (traverse(child, tab, product, version)) {
+                    return true;
+                }
             }
         }
 
@@ -258,7 +262,9 @@ export function findPageByPageId(
         // Handle tabbed nodes - they have children array
         if (node.type === "tabbed") {
             for (const child of (node as any).children) {
-                if (traverse(child, tab, product, version)) return true;
+                if (traverse(child, tab, product, version)) {
+                    return true;
+                }
             }
             return false;
         }
@@ -272,7 +278,9 @@ export function findPageByPageId(
             node.type === "apiPackage"
         ) {
             for (const child of node.children) {
-                if (traverse(child, tab, product, version)) return true;
+                if (traverse(child, tab, product, version)) {
+                    return true;
+                }
             }
         }
 
@@ -391,7 +399,9 @@ export function injectPageIntoSection(
 
     const injectNode = <T extends FernNavigation.NavigationNode>(node: T): T => {
         // If already injected, just return the node
-        if (injected) return node;
+        if (injected) {
+            return node;
+        }
 
         // If this is the target parent section, add the page
         if (node.type === "section" && node.id === parentSectionId) {

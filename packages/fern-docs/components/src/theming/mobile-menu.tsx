@@ -43,6 +43,7 @@ export function MobileMenu({
 
     // Close the sidebar when the path changes
     const currentPath = useCurrentPathname();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when currentPath changes
     React.useEffect(() => {
         setOpen(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -55,7 +56,9 @@ export function MobileMenu({
 
     // shift the main content when the sidebar is open
     useMotionValueEvent(x, "change", (value) => {
-        if (!mainRef.current) return;
+        if (!mainRef.current) {
+            return;
+        }
         mainRef.current.style.willChange = "transform";
         const translateX = Math.min(0, calculateWidth(value, getSidebarWidth()));
         mainRef.current.style.transform = `translateX(${translateX}px)`;
@@ -63,7 +66,9 @@ export function MobileMenu({
 
     const opacity = useTransform(x, (value) => {
         const width = getSidebarWidth();
-        if (width <= 0) return 0;
+        if (width <= 0) {
+            return 0;
+        }
         return (-1 * calculateWidth(value, width)) / width;
     });
 
@@ -71,10 +76,14 @@ export function MobileMenu({
 
     // reset the transform when the menu is closed
     useIsomorphicLayoutEffect(() => {
-        if (!mainRef.current) return;
+        if (!mainRef.current) {
+            return;
+        }
 
         const setTransform = (width: number) => {
-            if (!mainRef.current) return;
+            if (!mainRef.current) {
+                return;
+            }
             if (open) {
                 setIsLocked(true);
                 const transform = Math.min(0, calculateWidth(x.get(), width));
@@ -90,6 +99,7 @@ export function MobileMenu({
     }, [open]);
 
     // reset the transform when the component unmounts
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
     React.useEffect(
         () => () => {
             if (mainRef.current) {
@@ -189,7 +199,7 @@ export function MobileMenu({
             document.removeEventListener("pointermove", handlePointerMove);
             document.removeEventListener("selectionchange", handleCancelDrag);
         };
-    }, [dragControls, open, setOpen, isSidePanelOpen]);
+    }, [open, setOpen, isSidePanelOpen]);
 
     return (
         <RemoveScroll
@@ -296,6 +306,8 @@ function calculateWidth(value: number | string, sidebarWidth: number) {
 
 function getSidebarWidth() {
     const sidebar = document.getElementById(FERN_SIDEBAR_ID);
-    if (!sidebar) return 0;
+    if (!sidebar) {
+        return 0;
+    }
     return sidebar.clientWidth;
 }

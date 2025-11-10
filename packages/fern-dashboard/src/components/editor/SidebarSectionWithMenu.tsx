@@ -22,6 +22,7 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
     const [buttonTop, setButtonTop] = useState<number | null>(null);
     const [isHovered, setIsHovered] = useState(false);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when title or isHovered changes
     useLayoutEffect(() => {
         if (containerRef.current) {
             const expandIndicator = containerRef.current.querySelector(".expand-indicator");

@@ -56,7 +56,9 @@ export async function ExplorerContent({
 
     if (node.type === "endpoint") {
         const context = createEndpointContext(node, api);
-        if (!context) return null;
+        if (!context) {
+            return null;
+        }
 
         let oauthReferencedContext: EndpointContext | undefined;
         const firstAuth = context.auths[0];
@@ -108,7 +110,9 @@ export async function ExplorerContent({
         );
     } else if (node.type === "webSocket") {
         const context = createWebSocketContext(node, api);
-        if (!context) return null;
+        if (!context) {
+            return null;
+        }
         const authForm = context.authsWithKeys.length > 0 && (
             <PlaygroundAuthorizationFormCard context={context} lang={lang} />
         );

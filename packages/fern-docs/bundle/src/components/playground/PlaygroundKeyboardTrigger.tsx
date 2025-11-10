@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 
 import { useUrlParams } from "@/hooks/use-url-params";
@@ -8,7 +8,6 @@ import { useUrlParams } from "@/hooks/use-url-params";
 export function PlaygroundKeyboardTrigger() {
     const router = useRouter();
     const { urlHasParam, addUrlParamToPathname, removeUrlParamFromPathname } = useUrlParams();
-    const pathname = usePathname();
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
@@ -31,7 +30,7 @@ export function PlaygroundKeyboardTrigger() {
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [handleKeyDown, pathname]);
+    }, [handleKeyDown]);
 
     return null;
 }

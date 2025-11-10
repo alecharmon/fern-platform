@@ -23,6 +23,7 @@ export function useLocalBranches() {
         }
     }, []);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
     useEffect(() => {
         void fetchAllBranches();
     }, []);

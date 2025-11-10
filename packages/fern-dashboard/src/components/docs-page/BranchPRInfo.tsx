@@ -14,7 +14,9 @@ import { Skeleton } from "../ui/skeleton";
 const getDisplayNameFromBranch = (branch: string) => {
     // Extracts date from branch name format: YYYY-MM-DD-*
     const dateMatch = branch.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (!dateMatch) return "Untitled session";
+    if (!dateMatch) {
+        return "Untitled session";
+    }
 
     const [_, year, month, day] = dateMatch;
     return `Untitled session: ${month}-${day}-${year}`;

@@ -1,8 +1,6 @@
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { unknownToString } from "@fern-api/ui-core-utils";
-import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
-import { PLAYGROUND_SELECTED_AUTH_TYPE_ATOM } from "@/state/playground";
 
 import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
 import { buildAuthHeaders } from "../utils";

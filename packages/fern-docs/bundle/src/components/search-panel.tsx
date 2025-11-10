@@ -101,7 +101,9 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
 
     React.useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            if (!isResizing) return;
+            if (!isResizing) {
+                return;
+            }
 
             const vw = window.innerWidth;
             const newWidth = vw - e.clientX;
@@ -124,7 +126,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [setIsResizing, setWidth, isResizing, width]);
+    }, [setIsResizing, setWidth, isResizing]);
 
     React.useEffect(() => {
         const handleToggleSize = (event: CustomEvent) => {
@@ -178,9 +180,9 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
 
     const setInitialized = useSetAtom(searchPanelInitializedAtom);
     // initialize the search dialog when the data is loaded
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when data changes
     React.useEffect(() => {
         setInitialized(data != null);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
     const facetFetcher = React.useCallback(

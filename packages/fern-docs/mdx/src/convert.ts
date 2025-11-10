@@ -23,8 +23,6 @@ import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
 import { visit } from "unist-util-visit";
 
-import type { MdxJsxElement } from "./mdast";
-
 // Options for how yaml is written to the frontmatter
 const FRONTMATTER_YAML_OPTIONS: yaml.DumpOptions = {
     noRefs: true,

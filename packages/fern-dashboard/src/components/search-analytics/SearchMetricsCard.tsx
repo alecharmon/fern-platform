@@ -18,6 +18,7 @@ export function SearchMetricsCard({ title, value, isLoading, error, tooltip }: S
     const countUpAnimRef = useRef<any>(null);
     const previousValueRef = useRef<number>(0);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when value, isLoading, and error change
     useEffect(() => {
         // Only initialize CountUp when we have data and it's not loading
         if (!isLoading && !error && countupRef.current) {
@@ -33,7 +34,9 @@ export function SearchMetricsCard({ title, value, isLoading, error, tooltip }: S
     }, [value, isLoading, error]);
 
     async function initCountUp() {
-        if (!countupRef.current) return;
+        if (!countupRef.current) {
+            return;
+        }
 
         try {
             const countUpModule = await import("countup.js");

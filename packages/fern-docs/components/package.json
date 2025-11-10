@@ -158,7 +158,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/react-test-renderer": "^19",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "catalog:",
     "chromatic": "^11.26.1",
     "depcheck": "catalog:",
     "eslint-plugin-storybook": "^9.1.6",

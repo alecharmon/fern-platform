@@ -1,7 +1,7 @@
 import { cn } from "@fern-docs/components/cn";
 
 import { Kbd } from "@fern-docs/components/kbd";
-import { memo, ReactNode } from "react";
+import { memo } from "react";
 
 export const CommandKbd = memo(({ className }: { className?: string }) => {
     return (

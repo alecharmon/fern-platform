@@ -1,9 +1,4 @@
 {
-  "ignores": [
-    "@fern-platform/configs",
-    "@types/node",
-    "@types/react",
-    "typescript"
-  ],
+  "ignores": ["@fern-platform/configs", "@types/node", "@types/react", "typescript"],
   "ignore-patterns": ["dist"]
 }

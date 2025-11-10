@@ -24,7 +24,9 @@ async function fromReadableStream(stream: ReadableStream<Uint8Array>): Promise<s
     let toret = "";
     while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+            break;
+        }
         toret += new TextDecoder().decode(value);
     }
     return toret;
@@ -210,7 +212,9 @@ describe("rest", () => {
         const readStream = async (delay: number) => {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const { done, value } = await reader!.read();
-            if (done) return result;
+            if (done) {
+                return result;
+            }
             result += decoder.decode(value, { stream: true });
             return new Promise((resolve) => setTimeout(() => resolve(result), delay));
         };

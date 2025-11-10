@@ -2,7 +2,6 @@
 
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import dynamic from "next/dynamic";
-import React from "react";
 
 import { PosthogProvider } from "./posthog-provider";
 

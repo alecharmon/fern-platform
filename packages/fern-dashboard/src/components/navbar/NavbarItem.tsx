@@ -50,7 +50,9 @@ export const NavbarItem = ({
     const [isMobile, setIsMobile] = React.useState(false);
 
     const handleMouseEnter = () => {
-        if (isMobile) return;
+        if (isMobile) {
+            return;
+        }
         setIsHovered(true);
         setHoverAnimating(true);
         if (hoverTimeoutRef.current != null) {
@@ -63,7 +65,9 @@ export const NavbarItem = ({
     };
 
     const handleMouseLeave = () => {
-        if (isMobile) return;
+        if (isMobile) {
+            return;
+        }
         setIsHovered(false);
     };
 

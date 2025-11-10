@@ -52,8 +52,12 @@ export interface UseEmojiTriggerConfig {
  * Checks if emoji trigger can be added in the current editor state
  */
 export function canAddEmojiTrigger(editor: Editor | null): boolean {
-    if (!editor?.isEditable) return false;
-    if (isNodeTypeSelected(editor, ["image"])) return false;
+    if (!editor?.isEditable) {
+        return false;
+    }
+    if (isNodeTypeSelected(editor, ["image"])) {
+        return false;
+    }
 
     return true;
 }
@@ -160,8 +164,12 @@ export function addEmojiTrigger(
     node?: Node | null,
     nodePos?: number | null
 ): boolean {
-    if (!editor?.isEditable) return false;
-    if (!canAddEmojiTrigger(editor)) return false;
+    if (!editor?.isEditable) {
+        return false;
+    }
+    if (!canAddEmojiTrigger(editor)) {
+        return false;
+    }
 
     try {
         const { $from } = editor.state.selection;
@@ -184,7 +192,9 @@ export function addEmojiTrigger(
 export function shouldShowButton(props: { editor: Editor | null; hideWhenUnavailable: boolean }): boolean {
     const { editor, hideWhenUnavailable } = props;
 
-    if (!editor?.isEditable) return false;
+    if (!editor?.isEditable) {
+        return false;
+    }
 
     if (hideWhenUnavailable && !editor.isActive("code")) {
         return canAddEmojiTrigger(editor);
@@ -245,7 +255,9 @@ export function useEmojiTrigger(config?: UseEmojiTriggerConfig) {
     const canAddTrigger = canAddEmojiTrigger(editor);
 
     React.useEffect(() => {
-        if (!editor) return;
+        if (!editor) {
+            return;
+        }
 
         const handleSelectionUpdate = () => {
             setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }));
@@ -261,7 +273,9 @@ export function useEmojiTrigger(config?: UseEmojiTriggerConfig) {
     }, [editor, hideWhenUnavailable]);
 
     const handleAddTrigger = React.useCallback(() => {
-        if (!editor) return false;
+        if (!editor) {
+            return false;
+        }
 
         const success = addEmojiTrigger(editor, trigger, node, nodePos);
         if (success) {

@@ -110,6 +110,7 @@ export function AnalyticsPageClient({
         void fetchQueriesData();
     }, [baseDocsUrl, currentPage, timeRange, cutoffTime, pageCache]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: timeRange and cutoffTime are dependencies of the effect
     useEffect(() => {
         setPageCache({});
         setCurrentPage(1);
@@ -151,6 +152,7 @@ export function AnalyticsPageClient({
         };
     }, []);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: setContent and clear are dependencies of the effect
     useEffect(() => {
         if (selectedConversation) {
             setContent(
@@ -166,7 +168,6 @@ export function AnalyticsPageClient({
             );
         }
         // Intentionally omit setContent/clear to avoid unstable ref loops
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedConversation, isConversationLoading]);
 
     return (

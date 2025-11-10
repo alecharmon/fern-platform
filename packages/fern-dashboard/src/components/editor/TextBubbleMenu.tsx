@@ -40,17 +40,30 @@ export default function TextBubbleMenu() {
         };
     }, []);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when editor.state.selection changes
     const currentNodeType = useMemo((): NodeType => {
-        if (!editor) return "paragraph";
-        if (editor.isActive("heading", { level: 1 })) return "heading1";
-        if (editor.isActive("heading", { level: 2 })) return "heading2";
-        if (editor.isActive("heading", { level: 3 })) return "heading3";
-        if (editor.isActive("heading", { level: 4 })) return "heading4";
+        if (!editor) {
+            return "paragraph";
+        }
+        if (editor.isActive("heading", { level: 1 })) {
+            return "heading1";
+        }
+        if (editor.isActive("heading", { level: 2 })) {
+            return "heading2";
+        }
+        if (editor.isActive("heading", { level: 3 })) {
+            return "heading3";
+        }
+        if (editor.isActive("heading", { level: 4 })) {
+            return "heading4";
+        }
         return "paragraph";
     }, [editor?.state.selection]);
 
     function setNodeType(nodeType: NodeType) {
-        if (!editor) return;
+        if (!editor) {
+            return;
+        }
 
         if (nodeType === "paragraph") {
             editor.chain().focus().setParagraph().run();
@@ -63,7 +76,9 @@ export default function TextBubbleMenu() {
 
     function menuItemClickHandler(action: TextBubbleMenuAction) {
         return () => {
-            if (!editor) return;
+            if (!editor) {
+                return;
+            }
 
             switch (action) {
                 case "toggleBold":

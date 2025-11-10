@@ -2,7 +2,7 @@
 
 import type { MDXComponents } from "@fern-docs/mdx";
 import dynamic from "next/dynamic";
-import React, { type ComponentProps } from "react";
+import type { ComponentProps } from "react";
 
 import { UnsupportedContentDisplayOnly } from "@/components/editor/UnsupportedContent";
 import { ErrorBoundary, ErrorBoundaryFallback } from "@/docs/components/error-boundary";

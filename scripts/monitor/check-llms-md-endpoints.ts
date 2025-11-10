@@ -29,7 +29,7 @@ interface IncidentState {
     [key: string]: string; // domain+endpoint -> incident_id
 }
 
-interface Incident {
+interface _Incident {
     id: string;
     name: string;
     permalink: string;
@@ -51,7 +51,7 @@ const MAX_RETRIES = 5;
 
 const INCIDENT_STATUS_MONITORING = "01HR85VFNXWH1H6976YCEJ5XJB";
 const INCIDENT_STATUS_CANCELED = "01HR85VFNXMV8SBQ3FRPMDBCST";
-const INCIDENT_STATUS_CLOSED = "01HR85VFNXJPF6TXWYTXA6NBS2";
+const _INCIDENT_STATUS_CLOSED = "01HR85VFNXJPF6TXWYTXA6NBS2";
 const INCIDENT_SEVERITY_MINOR = "01HR85VFNX9NYZG6B5Z40K8Y9V";
 
 const TERMINAL_INCIDENT_STATES = ["declined", "merged", "canceled", "learning", "closed"];

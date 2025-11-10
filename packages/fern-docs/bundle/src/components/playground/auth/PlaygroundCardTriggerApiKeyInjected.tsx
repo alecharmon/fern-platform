@@ -17,7 +17,6 @@ import {
     PLAYGROUND_AUTH_STATE_HEADER_ATOM
 } from "@/state/playground";
 import { useApiRoute } from "../../hooks/useApiRoute";
-import { getAuthKey } from "../utils";
 import { PlaygroundAuthorizationForm } from "./PlaygroundAuthorizationForm";
 import { getHeaderStorageKey } from "./PlaygroundHeaderAuthForm";
 

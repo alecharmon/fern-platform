@@ -23,11 +23,11 @@ export function CardGroupProvider({ children }: { children: React.ReactNode }) {
 
     const registerCard = useCallback(() => {
         setRegisteredCards((prev) => prev + 1);
-    }, [setRegisteredCards]);
+    }, []);
 
     const unregisterCard = useCallback(() => {
         setRegisteredCards((prev) => prev - 1);
-    }, [setRegisteredCards]);
+    }, []);
 
     const value: CardGroupContextValue = {
         registerCard,

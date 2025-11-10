@@ -31,11 +31,17 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
             return <div style={{ fontFamily: "Berkeley Mono, monospace" }}>{wasHelpful ? "True" : "False"}</div>;
         },
         filterFn: (row, id, value) => {
-            if (value === "") return true;
+            if (value === "") {
+                return true;
+            }
             const cellValue = row.getValue(id) as boolean;
             const filterValue = String(value).toLowerCase();
-            if (filterValue === "true") return cellValue === true;
-            if (filterValue === "false") return cellValue === false;
+            if (filterValue === "true") {
+                return cellValue === true;
+            }
+            if (filterValue === "false") {
+                return cellValue === false;
+            }
             return true;
         }
     },

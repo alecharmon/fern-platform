@@ -90,7 +90,9 @@ export const FernSyntaxHighlighterTokens = memo(
                         const scrollArea = scrollAreaRef.current;
 
                         const firstLineElement = scrollArea.querySelector(".code-block-line");
-                        if (!firstLineElement || !(firstLineElement instanceof HTMLElement)) return;
+                        if (!firstLineElement || !(firstLineElement instanceof HTMLElement)) {
+                            return;
+                        }
 
                         scrollArea.scrollTo({
                             top: Math.max(0, lineNumber * firstLineElement.offsetHeight),

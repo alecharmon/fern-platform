@@ -26,7 +26,6 @@ export default async function HeaderLayout({
         return null;
     }
     const { name, email, picture } = session.user;
-    const { accessToken } = session;
 
     return (
         <div className="flex justify-between gap-4 p-4">

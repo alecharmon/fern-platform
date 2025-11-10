@@ -113,14 +113,11 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
 
     const measure = useTableOfContentsObserver(
         allAnchors,
-        useCallback(
-            (id: string | undefined) => {
-                if (!anchorJustSet) {
-                    setAnchorInView(id);
-                }
-            },
-            [setAnchorInView]
-        )
+        useCallback((id: string | undefined) => {
+            if (!anchorJustSet) {
+                setAnchorInView(id);
+            }
+        }, [])
     );
 
     useEffect(() => {

@@ -11,16 +11,15 @@ const useWillUnmount = <TCallback extends (...args: any[]) => void>(
     const mountRef = useRef(false);
     const [handler, setHandler] = createHandlerSetter<undefined>(callback);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
     useLayoutEffect(() => {
         mountRef.current = true;
 
         return () => {
             if (typeof handler?.current === "function" && mountRef.current) {
-                // eslint-disable-next-line react-hooks/exhaustive-deps
                 handler.current();
             }
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return setHandler;

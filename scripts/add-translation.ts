@@ -108,16 +108,4 @@ function updateLocaleFiles(category: string, key: string, fieldName: string) {
     }
 }
 
-function extractCategories(typesContent: string): string[] {
-    const categoryRegex = /^\s+(\w+):\s*\{/gm;
-    const categories: string[] = [];
-    let match;
-
-    while ((match = categoryRegex.exec(typesContent)) !== null) {
-        categories.push(match[1]);
-    }
-
-    return categories;
-}
-
 main();

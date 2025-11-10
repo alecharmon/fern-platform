@@ -24,7 +24,9 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file) {
+            return;
+        }
 
         setIsUploading(true);
 

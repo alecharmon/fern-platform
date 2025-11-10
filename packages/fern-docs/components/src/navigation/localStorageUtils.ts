@@ -160,7 +160,9 @@ function _sanitizeName(name: string) {
  */
 export function _generateShortSubHashForUserId(sub: string): string {
     const [, idPart] = sub.split("|"); // grab part after |
-    if (!idPart) throw new Error("Invalid sub format");
+    if (!idPart) {
+        throw new Error("Invalid sub format");
+    }
 
     // Use md5 hash since it's fast, we don't need to be secure here
     const hash = createHash("md5").update(idPart).digest("hex");

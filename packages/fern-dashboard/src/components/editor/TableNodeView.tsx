@@ -11,7 +11,9 @@ export default function TableNodeView({ editor, deleteNode, getPos }: NodeViewPr
     const disabled = useEditingDisabled();
 
     const handleAdd = (type: "row" | "col") => {
-        if (disabled) return;
+        if (disabled) {
+            return;
+        }
         const pos = getPos();
         if (typeof pos === "number") {
             const table = editor.state.doc.nodeAt(pos);

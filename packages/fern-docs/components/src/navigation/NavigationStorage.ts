@@ -270,7 +270,9 @@ export class NavigationStorage {
         // Find keys with multiple "backup:" prefixes (nested backups)
         const nestedBackupKeys = allKeys.filter((key) => {
             const branchName = getBranchNameFromStorageKey(key);
-            if (!branchName) return false;
+            if (!branchName) {
+                return false;
+            }
 
             // Count occurrences of "backup:" - if more than 1, it's nested
             const backupCount = (branchName.match(/backup:/g) || []).length;
@@ -321,7 +323,9 @@ export class NavigationStorage {
                 branchNames.map(async (branchName) => {
                     try {
                         const metadata = await storage.getMetadataOnly(branchName);
-                        if (!metadata) return null;
+                        if (!metadata) {
+                            return null;
+                        }
                         return { branchName, metadata };
                     } catch (error) {
                         console.error(`Failed to load metadata for branch ${branchName}:`, error);
@@ -337,7 +341,9 @@ export class NavigationStorage {
             .map((branchName) => {
                 try {
                     const serialized = this._storage.get(branchName);
-                    if (!serialized) return null;
+                    if (!serialized) {
+                        return null;
+                    }
 
                     const parsed = JSON.parse(serialized);
                     return {
@@ -396,7 +402,9 @@ class LocalStorage implements Storage {
     }
 
     private safeOperation<T>(operation: () => T, fallback: T): T {
-        if (!this.isAvailable) return fallback;
+        if (!this.isAvailable) {
+            return fallback;
+        }
         try {
             return operation();
         } catch (error) {

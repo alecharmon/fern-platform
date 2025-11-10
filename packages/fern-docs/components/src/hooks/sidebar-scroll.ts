@@ -12,7 +12,9 @@ let justScrolledTo: string | undefined;
 export function useRestoreSidebarScrollPosition() {
     useIsomorphicLayoutEffect(() => {
         const container = document.getElementById(FERN_SIDEBAR_SCROLL_AREA_ID);
-        if (!container) return;
+        if (!container) {
+            return;
+        }
         // @ts-expect-error - window._FERN_SIDEBAR_SCROLL_RESTORATION is a custom property
         container.scrollTop = window._FERN_SIDEBAR_SCROLL_RESTORATION ?? 0;
     }, []);
@@ -24,6 +26,7 @@ export function useRestoreSidebarScrollPosition() {
  * when the sidebar is re-mounted.
  */
 export function useDismountMeasureSidebarScrollPosition(ref: React.RefObject<HTMLDivElement | null>) {
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
     React.useEffect(() => {
         const current = ref.current;
         // @ts-expect-error - window._FERN_SIDEBAR_SCROLL_RESTORATION is a custom property
@@ -62,12 +65,16 @@ export function useScrollSidebarNodeIntoView(ref: React.RefObject<HTMLElement | 
     useIsomorphicLayoutEffect(() => {
         const scrollTo = () => {
             const container = document.getElementById(FERN_SIDEBAR_SCROLL_AREA_ID);
-            if (!container) return;
+            if (!container) {
+                return;
+            }
             // @ts-expect-error - window._FERN_SIDEBAR_SCROLL_RESTORATION is a custom property
             container.scrollTop = window._FERN_SIDEBAR_SCROLL_RESTORATION ?? 0;
 
             const element = ref.current;
-            if (!element) return;
+            if (!element) {
+                return;
+            }
 
             const containerBounds = container.getBoundingClientRect();
             const elementBounds = element.getBoundingClientRect();

@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment node
+ */
 import { serializeMdx } from "../bundler/serialize";
 
 vi.mock("server-only", () => ({}));

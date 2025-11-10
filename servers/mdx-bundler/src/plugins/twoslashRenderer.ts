@@ -13,10 +13,14 @@ export function twoslashRenderer(): TwoslashRenderer {
         shikiOptions: ShikiTransformerContextCommon["options"],
         info: { text?: string; docs?: string }
     ) {
-        if (!info.text) return [];
+        if (!info.text) {
+            return [];
+        }
 
         const text = processHoverInfo(info.text) ?? info.text;
-        if (!text.trim()) return [];
+        if (!text.trim()) {
+            return [];
+        }
 
         const themedContent = (
             (
@@ -68,7 +72,9 @@ export function twoslashRenderer(): TwoslashRenderer {
         nodeStaticInfo(info, node) {
             const themedContent = hightlightPopupContent(this.codeToHast, this.options, info);
 
-            if (!themedContent.length) return node;
+            if (!themedContent.length) {
+                return node;
+            }
 
             return {
                 type: "element",
@@ -98,7 +104,9 @@ export function twoslashRenderer(): TwoslashRenderer {
         },
 
         nodeQuery(info, node) {
-            if (!info.text) return {};
+            if (!info.text) {
+                return {};
+            }
 
             const themedContent = hightlightPopupContent(this.codeToHast, this.options, info);
 
@@ -136,8 +144,9 @@ export function twoslashRenderer(): TwoslashRenderer {
         },
 
         nodeCompletion(query, node) {
-            if (node.type !== "text")
+            if (node.type !== "text") {
                 throw new Error(`[shiki-twoslash] nodeCompletion only works on text nodes, got ${node.type}`);
+            }
 
             const leftPart = query.completionsPrefix || "";
             const rightPart = node.value.slice(leftPart.length || 0);
@@ -305,8 +314,11 @@ export function processHoverInfo(type: string) {
         .trim();
 
     // Add `type` or `function` keyword if needed
-    if (content.match(regexType)) content = `type ${content}`;
-    else if (content.match(regexFunction)) content = `function ${content}`;
+    if (content.match(regexType)) {
+        content = `type ${content}`;
+    } else if (content.match(regexFunction)) {
+        content = `function ${content}`;
+    }
 
     return content;
 }

@@ -9,7 +9,9 @@ export function twoslasher() {
         try {
             return twoslasher_(...parameters);
         } catch (e) {
-            if (!parameters[0].includes("@allowErrors")) throw e;
+            if (!parameters[0].includes("@allowErrors")) {
+                throw e;
+            }
             const error = e as Error;
             const lines = parameters[0].split("\n");
             const line = lines.length - 1;

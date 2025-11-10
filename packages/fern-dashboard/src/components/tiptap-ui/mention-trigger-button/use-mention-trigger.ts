@@ -52,11 +52,17 @@ export interface UseMentionTriggerConfig {
  * Checks if a mention can be inserted in the current editor state
  */
 export function canInsertMention(editor: Editor | null, node?: Node | null, nodePos?: number | null): boolean {
-    if (!editor?.isEditable) return false;
-    if (isNodeTypeSelected(editor, ["image"])) return false;
+    if (!editor?.isEditable) {
+        return false;
+    }
+    if (isNodeTypeSelected(editor, ["image"])) {
+        return false;
+    }
 
     if (node || isValidPosition(nodePos)) {
-        if (isValidPosition(nodePos) && nodePos != null && nodePos >= 0) return true;
+        if (isValidPosition(nodePos) && nodePos != null && nodePos >= 0) {
+            return true;
+        }
 
         if (node) {
             const foundPos = findNodePosition({ editor, node });
@@ -170,8 +176,12 @@ export function addMentionTrigger(
     node?: Node | null,
     nodePos?: number | null
 ): boolean {
-    if (!editor?.isEditable) return false;
-    if (!canInsertMention(editor, node, nodePos)) return false;
+    if (!editor?.isEditable) {
+        return false;
+    }
+    if (!canInsertMention(editor, node, nodePos)) {
+        return false;
+    }
 
     try {
         const { $from } = editor.state.selection;
@@ -199,7 +209,9 @@ export function shouldShowButton(props: {
 }): boolean {
     const { editor, hideWhenUnavailable, node, nodePos } = props;
 
-    if (!editor?.isEditable) return false;
+    if (!editor?.isEditable) {
+        return false;
+    }
 
     if (hideWhenUnavailable && !editor.isActive("code")) {
         return canInsertMention(editor, node, nodePos);
@@ -260,7 +272,9 @@ export function useMentionTrigger(config?: UseMentionTriggerConfig) {
     const canInsert = canInsertMention(editor, node, nodePos);
 
     React.useEffect(() => {
-        if (!editor) return;
+        if (!editor) {
+            return;
+        }
 
         const handleSelectionUpdate = () => {
             setIsVisible(shouldShowButton({ editor, hideWhenUnavailable, node, nodePos }));
@@ -276,7 +290,9 @@ export function useMentionTrigger(config?: UseMentionTriggerConfig) {
     }, [editor, hideWhenUnavailable, node, nodePos]);
 
     const handleMention = React.useCallback(() => {
-        if (!editor) return false;
+        if (!editor) {
+            return false;
+        }
 
         const success = addMentionTrigger(editor, trigger, node, nodePos);
         if (success) {

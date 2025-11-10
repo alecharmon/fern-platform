@@ -84,7 +84,7 @@ export function EndpointContextProvider({
                 }
             }
         },
-        [responseByStatusCode, setSelectedResponse]
+        [responseByStatusCode]
     );
 
     const setStatusCode = React.useCallback(
@@ -105,6 +105,7 @@ export function EndpointContextProvider({
 
     const currentAnchor = useCurrentAnchor();
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when currentAnchor changes
     React.useEffect(() => {
         const statusCodeOrName = maybeGetErrorStatusCodeOrNameFromAnchor(currentAnchor);
         if (statusCodeOrName != null) {
@@ -117,7 +118,6 @@ export function EndpointContextProvider({
                 setStatusCode(error.statusCode);
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentAnchor]);
 
     const selectedError = endpoint.errors?.find(
@@ -152,10 +152,8 @@ export function EndpointContextProvider({
             selectedError,
             handleSelectError,
             selectedResponse,
-            setSelectedResponse,
             setSelectedResponseByStatusCode,
             selectedRequest,
-            setSelectedRequest,
             selectedExample,
             examplesByStatusCode,
             examplesByKeyAndStatusCode,

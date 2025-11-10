@@ -7,7 +7,9 @@ export default function NodeHoverHandle() {
     const { editor } = useCurrentEditor();
     const currentNodePosRef = useRef<number | null>(null);
 
-    if (!editor) return null;
+    if (!editor) {
+        return null;
+    }
 
     // Retrieve the editor ID to tag drag events with their origin editor
     const editorIdFromAttrs = (editor.options.editorProps as any)?.attributes?.["data-editor-id"];
@@ -15,11 +17,15 @@ export default function NodeHoverHandle() {
     const editorId = editorIdFromAttrs || editorIdFromDom || "";
 
     const handleInsertBlockBelow = () => {
-        if (currentNodePosRef.current === null || !editor) return;
+        if (currentNodePosRef.current === null || !editor) {
+            return;
+        }
 
         const pos = currentNodePosRef.current;
         const node = editor.state.doc.nodeAt(pos);
-        if (!node) return;
+        if (!node) {
+            return;
+        }
 
         const insertPos = pos + node.nodeSize;
 
@@ -59,7 +65,9 @@ export default function NodeHoverHandle() {
                             (window as any).__fernDraggingEditorId = editorId;
                             event.dataTransfer?.setData("editor-id", editorId);
                             event.dataTransfer?.setData("application/x-tiptap-dnd", "1");
-                            if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+                            if (event.dataTransfer) {
+                                event.dataTransfer.effectAllowed = "move";
+                            }
                         } catch {}
                     }}
                     onDragEnd={() => {

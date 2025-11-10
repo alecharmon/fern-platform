@@ -55,7 +55,7 @@ export default function WaveformComplex({
         return () => {
             IO.disconnect();
         };
-    }, [canvasWrapper]);
+    }, []);
 
     return (
         <LazyMotion features={domAnimation} strict>

@@ -4,7 +4,7 @@ import express from "express";
 import { Agent, setGlobalDispatcher } from "undici";
 
 import { register } from "./api";
-import { FdrApplication, getConfig } from "./app";
+import { getConfig } from "./app";
 import { createFdrApplication } from "./app/FdrApplication";
 import { getApiLatestService } from "./controllers/api/getApiLatestService";
 import { getReadApiService } from "./controllers/api/getApiReadService";

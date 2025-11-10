@@ -88,19 +88,19 @@ export class CliVersionsDaoImpl implements CliVersionsDao {
             where: {
                 nonce: {
                     gte:
-                        versionRanges.fromVersion.type == "inclusive"
+                        versionRanges.fromVersion.type === "inclusive"
                             ? noncifySemanticVersion(versionRanges.fromVersion.value)
                             : undefined,
                     gt:
-                        versionRanges.fromVersion.type == "exclusive"
+                        versionRanges.fromVersion.type === "exclusive"
                             ? noncifySemanticVersion(versionRanges.fromVersion.value)
                             : undefined,
                     lte:
-                        versionRanges.toVersion.type == "inclusive"
+                        versionRanges.toVersion.type === "inclusive"
                             ? noncifySemanticVersion(versionRanges.toVersion.value)
                             : undefined,
                     lt:
-                        versionRanges.toVersion.type == "exclusive"
+                        versionRanges.toVersion.type === "exclusive"
                             ? noncifySemanticVersion(versionRanges.toVersion.value)
                             : undefined
                 }

@@ -78,7 +78,7 @@ export class FaiDiscordDeployStack extends Stack {
         snsTopic.addSubscription(new EmailSubscription("alerts@buildwithfern.com"));
 
         const environmentResources =
-            environmentType == EnvironmentType.Prod
+            environmentType === EnvironmentType.Prod
                 ? {
                       cpu: 1024,
                       memoryLimitMiB: 2048,
@@ -114,7 +114,7 @@ export class FaiDiscordDeployStack extends Stack {
             securityGroups: [discordSg],
             assignPublicIp: true,
             enableECSManagedTags: true,
-            enableExecuteCommand: environmentType != EnvironmentType.Prod,
+            enableExecuteCommand: environmentType !== EnvironmentType.Prod,
             cloudMapOptions:
                 cloudMapNamespace != null
                     ? {

@@ -68,8 +68,7 @@ export function CodeBlock(props: {
         language = "plaintext",
         template: templateProp,
         tooltips: tooltipsProp,
-        lang = "en",
-        disableAnalytics = false
+        lang = "en"
     } = props;
     const isDarkCode = useIsDarkCode();
     // TODO: once this is in beta, we can add expandable logic for any code block greater than 20 lines
@@ -88,7 +87,7 @@ export function CodeBlock(props: {
             // Convert to 0-based index
             current.scrollToLine(props.startLine - 1);
         }
-    }, [props.startLine, viewportRef]);
+    }, [props.startLine]);
 
     if (!code) {
         return null;

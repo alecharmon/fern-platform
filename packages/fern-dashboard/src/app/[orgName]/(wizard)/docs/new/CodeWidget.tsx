@@ -62,6 +62,7 @@ export default function CodeWidget({ wizardFormData }: CodeWidgetProps) {
                 <div className="flex min-w-[150px] max-w-[150px] items-center gap-2">
                     {logoUrl ? (
                         <div className="flex items-center gap-2">
+                            {/* biome-ignore lint/performance/noImgElement: false positive */}
                             <img src={logoUrl} alt={companyName} className="h-6 w-auto rounded-lg object-contain" />
                             {companyName && (
                                 <span className="text-sm text-gray-700 dark:text-white">{companyName}</span>
@@ -159,6 +160,7 @@ export default function CodeWidget({ wizardFormData }: CodeWidgetProps) {
 
                         {/* Hero image placeholder */}
                         <div className="mb-8 h-32 w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-200 dark:border-gray-800 dark:bg-gray-400">
+                            {/* biome-ignore lint/performance/noImgElement: false positive */}
                             <img src="/leaves.png" alt="Hero" className="h-full w-full object-cover" />
                         </div>
 

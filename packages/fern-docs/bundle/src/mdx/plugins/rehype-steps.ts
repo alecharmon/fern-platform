@@ -76,9 +76,15 @@ function migrateStepGroup(node: Hast.MdxJsxElement) {
                 isHastElement(child) ? child.tagName : isMdxJsxElementHast(child) ? child.name?.toLowerCase() : null
             )
             .map((rank) => {
-                if (rank === "h1") return 1;
-                if (rank === "h2") return 2;
-                if (rank === "h3") return 3;
+                if (rank === "h1") {
+                    return 1;
+                }
+                if (rank === "h2") {
+                    return 2;
+                }
+                if (rank === "h3") {
+                    return 3;
+                }
                 return undefined;
             })
             .filter(isNonNullish)

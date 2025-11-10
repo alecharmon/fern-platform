@@ -173,7 +173,9 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
     };
 
     const getButtonText = () => {
-        if (isEnabled == null) return "Loading...";
+        if (isEnabled == null) {
+            return "Loading...";
+        }
         return isEnabled ? "Disable" : "Enable";
     };
 

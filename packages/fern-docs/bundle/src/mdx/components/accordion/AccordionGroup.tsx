@@ -38,6 +38,7 @@ export function AccordionGroup({ children, className }: AccordionGroupProps) {
         [items]
     );
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when anchor or updatedUrl changes
     React.useEffect(() => {
         if (anchor != null && !updatedUrl) {
             const parentAccordion = findParentAccordion(anchor);
@@ -54,8 +55,8 @@ export function AccordionGroup({ children, className }: AccordionGroupProps) {
                     setIsProgrammaticUpdate(false);
                 }, 100);
             }
-        } // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [anchor]);
+        }
+    }, [anchor, updatedUrl]);
 
     const handleValueChange = React.useCallback(
         (nextActiveTabs: string[]) => {

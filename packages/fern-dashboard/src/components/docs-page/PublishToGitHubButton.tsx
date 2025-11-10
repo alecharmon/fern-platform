@@ -19,7 +19,7 @@ export function PublishToGitHubButton({ docsUrl, docsSiteName }: PublishToGitHub
     const [githubRepoUrl, setGithubRepoUrl] = useState<string | null>(null);
     const [currentOwner, setCurrentOwner] = useState<string | null>(null);
     const [repoName, setRepoName] = useState<string | null>(null);
-    const [isPublishing, setIsPublishing] = useState(false);
+    const [_isPublishing, setIsPublishing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
@@ -70,7 +70,7 @@ export function PublishToGitHubButton({ docsUrl, docsSiteName }: PublishToGitHub
         void checkStatus();
     }, [docsUrl]);
 
-    const handlePublish = async () => {
+    const _handlePublish = async () => {
         setIsPublishing(true);
         setError(null);
 
@@ -149,7 +149,7 @@ export function PublishToGitHubButton({ docsUrl, docsSiteName }: PublishToGitHub
         // Extract the new owner from the URL
         const urlParts = newRepoUrl.replace("https://github.com/", "").split("/");
         if (urlParts.length >= 2) {
-            setCurrentOwner(urlParts[0]);
+            setCurrentOwner(urlParts[0] ?? null);
             // Repo name stays the same
         }
     };

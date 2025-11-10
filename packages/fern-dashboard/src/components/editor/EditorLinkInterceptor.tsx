@@ -23,7 +23,9 @@ export function EditorLinkInterceptor() {
             const target = event.target as HTMLElement;
             const link = target.closest("a");
 
-            if (!link) return;
+            if (!link) {
+                return;
+            }
 
             // Check if the click is within our target containers (preview, dropdowns, or editor)
             const isInTargetContainer =

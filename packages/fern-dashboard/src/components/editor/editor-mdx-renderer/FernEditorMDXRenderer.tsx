@@ -327,7 +327,8 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
         expressionAttributes,
         debouncedOnUpdate,
         docsUrl,
-        branch
+        branch,
+        onUpdate
     ]);
 
     // Outer provider: EditorComponentProvider (no providedChildren/appendChildrenMdx here)
@@ -471,14 +472,18 @@ const FernEditorMDXRendererInternal = ({
 
 // Helper function to apply proper indentation to MDX content
 function applyIndentation(mdx: string, indentLevel: number): string {
-    if (indentLevel === 0) return mdx;
+    if (indentLevel === 0) {
+        return mdx;
+    }
 
     const indent = "  ".repeat(indentLevel);
     return mdx
         .split("\n")
         .map((line, index, lines) => {
             // Don't indent empty lines
-            if (!line.trim()) return "";
+            if (!line.trim()) {
+                return "";
+            }
 
             // Don't indent the first line if it's an opening tag
             if (index === 0 && line.trim().startsWith("<")) {

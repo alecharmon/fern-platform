@@ -36,27 +36,6 @@ interface AnalyticsMiniTableProps<T extends Record<string, any>> {
 
 type SortDirection = "asc" | "desc";
 
-function TruncatedText({ text, className, maxLength = 45 }: { text: string; className?: string; maxLength?: number }) {
-    const needsTooltip = text.length > maxLength;
-
-    if (!needsTooltip) {
-        return <span className={className}>{text}</span>;
-    }
-
-    const charsToShow = maxLength - 3;
-    const startChars = Math.ceil(charsToShow / 2);
-    const endChars = Math.floor(charsToShow / 2);
-    const truncatedText = text.slice(0, startChars) + "..." + text.slice(-endChars);
-
-    return (
-        <WebAnalyticsTooltipProvider>
-            <WebAnalyticsTooltip content={text} delayDuration={500}>
-                <span className={className}>{truncatedText}</span>
-            </WebAnalyticsTooltip>
-        </WebAnalyticsTooltipProvider>
-    );
-}
-
 export default function AnalyticsMiniTable<T extends Record<string, any>>({
     title,
     data,

@@ -19,7 +19,7 @@ export function generateWebhookExample({
         return {
             payload: generateWebhookPayloadExample(webhookDefinition.payload.type, resolveTypeById)
         };
-    } catch (e) {
+    } catch (_e) {
         throw new Error();
     }
 }

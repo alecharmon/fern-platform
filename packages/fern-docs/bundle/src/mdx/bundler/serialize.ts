@@ -497,7 +497,9 @@ const removeCodeBlocks = (content: string): string => {
         // look backwards for opening tag
         for (let i = twoSlashLineIndex; i >= 0; i--) {
             const line = lines[i]?.trim();
-            if (!line) continue;
+            if (!line) {
+                continue;
+            }
 
             if (line === "<CodeBlocks>") {
                 if (codeBlockDepth === 0) {
@@ -519,7 +521,9 @@ const removeCodeBlocks = (content: string): string => {
         // look forwards for closing tag
         for (let i = twoSlashLineIndex; i < lines.length; i++) {
             const line = lines[i]?.trim();
-            if (!line) continue;
+            if (!line) {
+                continue;
+            }
 
             if (line === "</CodeBlocks>") {
                 if (codeBlockDepth === 0) {

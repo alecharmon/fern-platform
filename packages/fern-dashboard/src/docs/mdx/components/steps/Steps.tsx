@@ -1,7 +1,7 @@
 import { Button } from "@fern-docs/components/button";
 import { cn } from "@fern-docs/components/cn";
 import { CirclePlusIcon } from "lucide-react";
-import React, {
+import {
     type ComponentProps,
     createContext,
     type ReactElement,

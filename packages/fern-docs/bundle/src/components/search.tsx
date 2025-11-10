@@ -127,6 +127,7 @@ export const SearchV2 = React.memo(function SearchV2({
 
     const setInitialized = useSetAtom(searchInitializedAtom);
     // initialize the search dialog when the data is loaded
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when data changes
     React.useEffect(() => {
         setInitialized(data != null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,6 +135,7 @@ export const SearchV2 = React.memo(function SearchV2({
 
     // close the search dialog when the pathname changes
     const pathname = useCurrentPathname();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when pathname changes
     React.useEffect(() => {
         setOpen(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps

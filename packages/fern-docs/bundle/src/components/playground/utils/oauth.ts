@@ -70,26 +70,26 @@ export const oAuthClientCredentialReferencedEndpointLoginFlow = async ({
                         isLoggedIn: true,
                         loggedInStartingToken: accessToken
                     }));
-                    setTimeout(() => closeContainer && closeContainer(), 500);
+                    setTimeout(() => closeContainer?.(), 500);
                 } catch (e) {
                     console.error(`[oauth] ${JSON.stringify(e)}`);
-                    closeContainer && closeContainer();
+                    closeContainer?.();
                 }
             } else {
-                setDisplayFailedLogin && setDisplayFailedLogin(true);
+                setDisplayFailedLogin?.(true);
             }
         },
         string: () => {
-            setDisplayFailedLogin && setDisplayFailedLogin(true);
+            setDisplayFailedLogin?.(true);
         },
         file: () => {
-            setDisplayFailedLogin && setDisplayFailedLogin(true);
+            setDisplayFailedLogin?.(true);
         },
         stream: () => {
-            setDisplayFailedLogin && setDisplayFailedLogin(true);
+            setDisplayFailedLogin?.(true);
         },
         _other: () => {
-            setDisplayFailedLogin && setDisplayFailedLogin(true);
+            setDisplayFailedLogin?.(true);
         }
     });
 };

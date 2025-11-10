@@ -50,7 +50,9 @@ const Item = (props: { item: SuggestionItem; isSelected: boolean; onSelect: () =
 
     React.useEffect(() => {
         const selector = document.querySelector('[data-selector="tiptap-slash-dropdown-menu"]');
-        if (!itemRef.current || !isSelected || !selector) return;
+        if (!itemRef.current || !isSelected || !selector) {
+            return;
+        }
 
         const overflow = getElementOverflowPosition(itemRef.current, selector as HTMLElement);
 

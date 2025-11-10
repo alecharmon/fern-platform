@@ -8,7 +8,7 @@ import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { t } from "@fern-docs/i18n";
 import type { useBooleanState } from "@fern-ui/react-commons";
 import { useAtom } from "jotai";
-import React, { type ReactElement, useEffect, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 import { useApiDefinitionIdFromContext } from "@/contexts/ApiDefinitionIdContext";
 import { SELECTED_ENVIRONMENT_ID_ATOM, useSelectedEnvironmentUrlAtom } from "@/state/environment";
 

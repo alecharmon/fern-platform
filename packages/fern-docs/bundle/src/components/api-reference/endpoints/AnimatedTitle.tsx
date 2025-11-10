@@ -4,6 +4,7 @@ export const AnimatedTitle: FC<{ children: string }> = ({ children: nextChild })
     const [displayText, setDisplayText] = useState(nextChild);
     const [prevChild, setPrevChild] = useState(nextChild);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when nextChild changes
     useEffect(() => {
         if (prevChild !== nextChild) {
             const commonPrefix = getCommonPrefix(prevChild, nextChild);

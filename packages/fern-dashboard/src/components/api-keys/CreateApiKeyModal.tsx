@@ -28,6 +28,7 @@ export function CreateApiKeyModal({ open, onOpenChange }: CreateApiKeyModalProps
     const [error, setError] = useState<string | null>(null);
 
     // Generate API key when modal opens
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when open and org changes
     useEffect(() => {
         if (open && org) {
             handleCreateKey();
@@ -35,7 +36,9 @@ export function CreateApiKeyModal({ open, onOpenChange }: CreateApiKeyModalProps
     }, [open, org]);
 
     const handleCreateKey = async () => {
-        if (!org) return;
+        if (!org) {
+            return;
+        }
 
         setIsLoading(true);
         setError(null);

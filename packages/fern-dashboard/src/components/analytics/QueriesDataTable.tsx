@@ -2,7 +2,6 @@
 
 import type { FernAI } from "@fern-api/fai-sdk";
 import {
-    type Cell,
     type ColumnDef,
     flexRender,
     getCoreRowModel,
@@ -53,25 +52,6 @@ export function QueriesDataTable<TData, TValue>({
             });
             onSelectConversation(conversation);
         };
-    }
-
-    function renderCell(cell: Cell<TData, TValue>) {
-        return (
-            <TableCell
-                key={cell.id}
-                className={
-                    cell.column.id === "conversation"
-                        ? "pl-0"
-                        : cell.column.id === "created_at"
-                          ? "w-32"
-                          : cell.column.id === "message_count" || cell.column.id === "source"
-                            ? "w-24"
-                            : undefined
-                }
-            >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </TableCell>
-        );
     }
 
     return (

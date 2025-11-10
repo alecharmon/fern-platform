@@ -14,6 +14,7 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
     const [failedToLoad, setFailedToLoad] = useState(false);
     const [serverLoaded, setServerLoaded] = useState(false);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: no dependencies needed
     useEffect(() => {
         let ws: WebSocket | null = null;
         let connectionTimeout: NodeJS.Timeout | null = null;

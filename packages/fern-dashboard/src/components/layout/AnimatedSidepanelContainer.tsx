@@ -30,15 +30,18 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
         setHasContent(directHasElements || directHasNonEmptyText);
     }, []);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: run when children changes or breakpoint changes
     React.useLayoutEffect(() => {
         // Ensure we re-check content whenever children or layout (mobile/desktop) might change
         checkHasContent();
-    }, [checkHasContent, children]);
+    }, [checkHasContent, children, isMobile]);
 
     React.useEffect(() => {
         // Attach observers to the current content node; reattach when layout switches
         const node = contentRef.current;
-        if (!node) return;
+        if (!node) {
+            return;
+        }
         const resizeObserver = new ResizeObserver(() => {
             checkHasContent();
         });
@@ -55,7 +58,7 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
             resizeObserver.disconnect();
             mutationObserver.disconnect();
         };
-    }, [checkHasContent, isMobile]);
+    }, [checkHasContent]);
 
     React.useLayoutEffect(() => {
         // Align breakpoint with Tailwind's lg (min-width: 1024px) => mobile is < 1024px
@@ -81,11 +84,6 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
             void mql.matches;
         };
     }, []);
-
-    React.useLayoutEffect(() => {
-        // Re-evaluate content presence when breakpoint changes
-        checkHasContent();
-    }, [checkHasContent, isMobile]);
 
     if (isMobile) {
         const show = hasContent;

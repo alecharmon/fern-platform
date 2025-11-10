@@ -1,7 +1,7 @@
 import { AvailabilityBadge, HttpMethodBadge } from "@fern-docs/components/badges";
 import type { FacetsResponse } from "@fern-docs/search-keyword";
 import { type FacetName, SEARCHABLE_FACET_ATTRIBUTES } from "@fern-docs/search-keyword/types";
-import React, { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import type { FilterOption } from "../types";
 

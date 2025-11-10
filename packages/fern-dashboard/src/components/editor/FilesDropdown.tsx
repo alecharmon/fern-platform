@@ -47,8 +47,12 @@ export function FilesDropdown() {
 
         // Sort yml files, putting docs.yml first
         ymlFiles.sort((a, b) => {
-            if (a === "docs.yml") return -1;
-            if (b === "docs.yml") return 1;
+            if (a === "docs.yml") {
+                return -1;
+            }
+            if (b === "docs.yml") {
+                return 1;
+            }
             return a.localeCompare(b);
         });
 
@@ -172,7 +176,9 @@ export function FilesDropdown() {
 
     const truncateFilename = (filename: string) => {
         const maxLength = 24;
-        if (filename.length <= maxLength) return filename;
+        if (filename.length <= maxLength) {
+            return filename;
+        }
 
         const parts = filename.split("/");
         if (parts.length > 2) {

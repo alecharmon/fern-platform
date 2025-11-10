@@ -2,7 +2,7 @@ import { useNavigation } from "@fern-docs/components/navigation";
 import type { Transaction } from "@tiptap/pm/state";
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import { useParams } from "next/navigation";
-import React, { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 import FernEditorMDXRenderer from "@/components/editor/editor-mdx-renderer/FernEditorMDXRenderer";
 import { ErrorBoundary } from "@/docs/components/error-boundary";

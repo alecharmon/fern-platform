@@ -5,18 +5,9 @@ import type { FacetFilter, FacetName, FacetsResponse } from "@fern-docs/search-k
 import { useLazyRef } from "@fern-ui/react-commons";
 import { type LiteClient, liteClient } from "algoliasearch/lite";
 import { uniq } from "es-toolkit/array";
-import {
-    createContext,
-    type PropsWithChildren,
-    type ReactNode,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo
-} from "react";
+import { createContext, type PropsWithChildren, type ReactNode, useContext, useEffect, useMemo } from "react";
 import { Configure } from "react-instantsearch";
 import { InstantSearchNext } from "react-instantsearch-nextjs";
-import { preload } from "swr";
 import useSWRImmutable from "swr/immutable";
 
 import { toAlgoliaFacetFilters } from "../../utils/facet-filters";

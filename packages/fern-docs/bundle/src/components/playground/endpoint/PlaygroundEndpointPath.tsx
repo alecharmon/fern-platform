@@ -136,7 +136,9 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                                 arrayFormat: "repeat"
                             });
 
-                            if (!queryString) return null;
+                            if (!queryString) {
+                                return null;
+                            }
 
                             const pairs = queryString.split("&").map((pair) => {
                                 const [key, value] = pair.split("=");

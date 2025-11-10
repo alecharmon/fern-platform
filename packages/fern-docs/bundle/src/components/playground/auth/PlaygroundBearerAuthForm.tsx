@@ -44,7 +44,7 @@ export function PlaygroundBearerAuthForm({
         const token = value.token;
         const options = parseAuthOptions(token);
         setAuthOptions(options);
-    }, [value.token, setValue]);
+    }, [value.token]);
 
     if (authOptions.length > 0) {
         return (

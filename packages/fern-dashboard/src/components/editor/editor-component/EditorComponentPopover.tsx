@@ -80,9 +80,12 @@ export function EditorComponentPopoverProvider<T extends AttributeConfig>({
     const [values, setValues] = useState<AttributeValues<T>>(getInitialValues);
 
     // Add mouse move listener to track distance from target
+    // biome-ignore lint/correctness/useExhaustiveDependencies: TODO fix this
     useEffect(() => {
         const element = targetRef?.current;
-        if (!element) return;
+        if (!element) {
+            return;
+        }
 
         const handleMouseMove = (e: MouseEvent) => {
             const rect = element.getBoundingClientRect();
@@ -394,8 +397,7 @@ export function EditorComponentPopoverButton<T extends AttributeConfig>({
     className?: string;
     disableDelete?: boolean;
 }) {
-    const { attributes, values, setValues, isOpen, setIsOpen, isWithinThreshold, buttonAlwaysVisible } =
-        useEditorComponentPopover<T>();
+    const { attributes, values, setValues, isOpen, setIsOpen, isWithinThreshold } = useEditorComponentPopover<T>();
     const [tempValues, setTempValues] = useState<AttributeValues<T>>(values);
 
     const { updateKeyedAttributes, deleteSelf } = useEditorComponent();

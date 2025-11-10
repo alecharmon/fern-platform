@@ -7,7 +7,6 @@ import { useLocalBranches } from "@/hooks/useLocalBranches";
 import { useLocalBranchesForSite } from "@/hooks/useLocalBranchesForSite";
 import type { DocsUrl } from "@/utils/types";
 import { BranchListItem } from "./BranchListItem";
-import { BranchListSkeleton } from "./BranchListSkeleton";
 import { VEPreviewImage } from "./VEPreviewImage";
 
 export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRepo?: GithubSourceRepo }) {

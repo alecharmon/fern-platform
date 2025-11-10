@@ -2,7 +2,7 @@ import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
 import type { FacetFilter, FacetName, FacetsResponse } from "@fern-docs/search-keyword";
 import { useDeepCompareEffectNoCheck } from "@fern-ui/react-commons";
 import type React from "react";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { preload } from "swr";
 
 import { isFacetName } from "../../types";

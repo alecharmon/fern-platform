@@ -84,7 +84,9 @@ describe("llms.txt route - authed root behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }
@@ -125,7 +127,9 @@ describe("llms.txt route - authed root behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }
@@ -166,7 +170,9 @@ describe("llms.txt route - authed root behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }
@@ -207,7 +213,9 @@ describe("llms.txt route - authed root behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }

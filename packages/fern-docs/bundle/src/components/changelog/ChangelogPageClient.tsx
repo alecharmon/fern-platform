@@ -97,6 +97,7 @@ export default function ChangelogPageClient({
      * Scroll to the top of the page when navigating to a new page of the changelog
      */
     const scrollBody = useAtomValue(SCROLL_BODY_ATOM);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when page changes
     useEffect(() => {
         const element = document.getElementById(window.location.hash.slice(1));
 
@@ -110,7 +111,6 @@ export default function ChangelogPageClient({
         } else {
             scrollBody?.scrollTo(0, 0);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
     const visibleEntries = chunkedEntries[page - 1] ?? EMPTY_ARRAY;

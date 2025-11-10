@@ -130,7 +130,9 @@ export function convertAuthOptionsToToken(options: AuthOption[]): string {
     let token = "[";
     for (let i = 0; i < options.length; i++) {
         const option = options[i];
-        if (!option) continue;
+        if (!option) {
+            continue;
+        }
         token += `{${option.key}: ${option.value}, 'selected': ${option.selected}}`;
         // add comma only if not the last option
         if (i < options.length - 1) {

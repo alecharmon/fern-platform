@@ -5,7 +5,7 @@ const path = require("path");
 
 const extensionMap = {
     ".js": ".mjs",
-    ".d.ts": ".d.mts",
+    ".d.ts": ".d.mts"
 };
 const oldExtensions = Object.keys(extensionMap);
 
@@ -57,7 +57,7 @@ async function updateFileContents(file) {
         // Handle dynamic imports (yield import, await import, regular import())
         const dynamicRegex = new RegExp(
             `(yield\\s+import|await\\s+import|import)\\s*\\(\\s*['"](\\.\\.\?\\/[^'"]+)(\\${oldExt})['"]\\s*\\)`,
-            "g",
+            "g"
         );
         newContent = newContent.replace(dynamicRegex, `$1("$2${newExt}")`);
     }

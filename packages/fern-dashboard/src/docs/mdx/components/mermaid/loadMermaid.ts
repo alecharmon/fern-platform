@@ -5,7 +5,9 @@ let mermaidPromise: Promise<Mermaid> | null = null;
 const MERMAID_LOCATION = "https://cdn.jsdelivr.net/npm/mermaid@11.12.0/dist/mermaid.min.js";
 
 export function loadMermaid(): Promise<Mermaid> {
-    if (mermaidPromise) return mermaidPromise;
+    if (mermaidPromise) {
+        return mermaidPromise;
+    }
 
     mermaidPromise = new Promise((resolve, reject) => {
         if (typeof window === "undefined") {

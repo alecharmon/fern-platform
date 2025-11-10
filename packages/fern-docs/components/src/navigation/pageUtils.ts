@@ -372,8 +372,14 @@ export function getClientPageDefaultFilename(slug: string): string {
 /** Generates MDX frontmatter block from configuration */
 export function createMdxFrontmatter(config: { title?: string; slug?: string; subtitle?: string }): string {
     const lines = [];
-    if (config.title) lines.push(`title: ${config.title}`);
-    if (config.subtitle) lines.push(`subtitle: ${config.subtitle}`);
-    if (config.slug) lines.push(`slug: ${config.slug}`);
+    if (config.title) {
+        lines.push(`title: ${config.title}`);
+    }
+    if (config.subtitle) {
+        lines.push(`subtitle: ${config.subtitle}`);
+    }
+    if (config.slug) {
+        lines.push(`slug: ${config.slug}`);
+    }
     return `---\n${lines.join("\n")}\n---\n\n`;
 }

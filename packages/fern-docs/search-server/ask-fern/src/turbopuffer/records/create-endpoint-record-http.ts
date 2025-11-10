@@ -1,4 +1,3 @@
-import { slugToHref } from "@fern-api/docs-utils";
 import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
 import {
     createDelimitedRolesetString,

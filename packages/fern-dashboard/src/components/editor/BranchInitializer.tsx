@@ -66,7 +66,7 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
                 setBranchFailed(true);
                 setBranchFailureReason("An unexpected error occurred while creating the branch.");
             });
-    }, [orgName, site, owner, repo, branch, baseBranch]);
+    }, [orgName, site, owner, repo, branch, baseBranch, createBranchMutation, setBranchFailed, setBranchFailureReason]);
 
     return null;
 }

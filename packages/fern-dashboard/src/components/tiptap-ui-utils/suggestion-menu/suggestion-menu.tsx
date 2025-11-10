@@ -63,10 +63,7 @@ export const SuggestionMenu = ({
     });
 
     const internalSuggestionPropsRef = React.useRef(internalSuggestionProps);
-
-    React.useEffect(() => {
-        internalSuggestionPropsRef.current = internalSuggestionProps;
-    }, [internalSuggestionProps]);
+    internalSuggestionPropsRef.current = internalSuggestionProps;
 
     const closePopup = React.useCallback(() => {
         setShow(false);

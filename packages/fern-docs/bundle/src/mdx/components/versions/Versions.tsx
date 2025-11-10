@@ -2,7 +2,7 @@ import { cn } from "@fern-docs/components/cn";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ChevronDown } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { unwrapChildren } from "../../common/unwrap-children";
 

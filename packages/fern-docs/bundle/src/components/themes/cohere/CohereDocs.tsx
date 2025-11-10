@@ -91,6 +91,7 @@ export default function CohereDocs({
     const isSidePanelOpen = useIsSearchPanelOpen();
     const isSidePanelResizing = useIsSearchPanelResizing();
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when pathname changes
     useEffect(() => {
         scrollAreaRef.current?.scrollTo(0, 0);
     }, [pathname]);

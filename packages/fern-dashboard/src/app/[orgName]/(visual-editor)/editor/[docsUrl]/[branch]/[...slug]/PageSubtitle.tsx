@@ -21,6 +21,7 @@ export default function PageSubtitle({ className, filename, initialText }: PageS
 
     const { updatePageFrontmatter, subscribePageSaveEvent } = useNavigation();
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: if filename changes, we want to reset the text
     useEffect(() => {
         setText(initialText ?? "");
     }, [filename, initialText]);
@@ -32,7 +33,7 @@ export default function PageSubtitle({ className, filename, initialText }: PageS
         });
 
         return unsubscribe;
-    }, [filename, subscribePageSaveEvent]);
+    }, [subscribePageSaveEvent]);
 
     function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         const nextText = e.target.value;

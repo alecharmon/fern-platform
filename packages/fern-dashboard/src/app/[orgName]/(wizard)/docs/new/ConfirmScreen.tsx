@@ -26,12 +26,14 @@ export default function ConfirmScreen({
     onPublishToGithub
 }: ConfirmScreenProps) {
     const orgName = useOrgNameFromPathname();
-    const [copied, setCopied] = useState(false);
+    const [_copied, setCopied] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
     const fullUrl = `${docsUrl}.docs.buildwithfern.com`;
 
     const handlePublishToGithub = async () => {
-        if (!onPublishToGithub) return;
+        if (!onPublishToGithub) {
+            return;
+        }
 
         setIsPublishing(true);
         try {

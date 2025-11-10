@@ -50,7 +50,7 @@ export async function checkUserBelongsToOrg({
         if (fernOrgResponse.ok && fernOrgResponse.body) {
             return;
         }
-    } catch (error) {
+    } catch (_error) {
         // Continue to check specific org
     }
 

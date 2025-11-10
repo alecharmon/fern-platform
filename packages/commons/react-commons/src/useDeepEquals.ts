@@ -36,7 +36,7 @@ export function useDeepCompareMemoize<T>(value: T): T {
         signalRef.current += 1;
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: signalRef.current is a dependency of the memoization
     return React.useMemo(() => ref.current, [signalRef.current]);
 }
 
@@ -44,11 +44,11 @@ export function useDeepCompareEffect(callback: EffectCallback, dependencies: Dep
     if (process.env.NODE_ENV !== "production") {
         checkDeps(dependencies);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: dependencies are memoized
     return React.useEffect(callback, useDeepCompareMemoize(dependencies));
 }
 
 export function useDeepCompareEffectNoCheck(callback: EffectCallback, dependencies: DependencyList): UseEffectReturn {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: dependencies are memoized
     return React.useEffect(callback, useDeepCompareMemoize(dependencies));
 }

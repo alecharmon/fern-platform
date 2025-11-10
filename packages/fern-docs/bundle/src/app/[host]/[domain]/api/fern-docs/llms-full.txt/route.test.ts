@@ -97,7 +97,9 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }
@@ -140,7 +142,9 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }
@@ -206,7 +210,9 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }
@@ -258,7 +264,9 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }
@@ -382,7 +390,9 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         if (reader) {
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    break;
+                }
                 content += decoder.decode(value, { stream: true });
             }
         }

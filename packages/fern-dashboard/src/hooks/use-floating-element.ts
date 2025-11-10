@@ -59,9 +59,10 @@ export function useFloatingElement(
 
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when referencePos changes
     React.useEffect(() => {
         update();
-    }, [referencePos, update]);
+    }, [referencePos]);
 
     React.useEffect(() => {
         if (referencePos == null) {

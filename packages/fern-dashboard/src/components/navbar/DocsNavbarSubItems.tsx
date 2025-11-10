@@ -10,7 +10,7 @@ import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { cn } from "@/utils/utils";
 import { PosthogFeatureFlag } from "../posthog/feature-flags/flags";
-import { FeatureFlaggedServerSide, isFeatureFlagEnabledForUser } from "../posthog/feature-flags/server-side";
+import { isFeatureFlagEnabledForUser } from "../posthog/feature-flags/server-side";
 import { NavbarSubItem } from "./NavbarSubItem";
 
 export async function DocsNavbarSubItems({

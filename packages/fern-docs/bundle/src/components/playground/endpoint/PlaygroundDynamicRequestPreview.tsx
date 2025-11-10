@@ -166,6 +166,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         }
     }, [dynamicIRsByLanguage, context.endpoint.method, context.endpoint.path]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: also runs when selectedAuthType changes
     useEffect(() => {
         const generateCode = () => {
             try {
@@ -214,7 +215,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         };
 
         generateCode();
-    }, [requestType, memoizedGenerators, formState, baseURL, authState, selectedAuthType, lang]);
+    }, [requestType, memoizedGenerators, formState, baseURL, authState, lang, selectedAuthType]);
 
     return (
         <FernSyntaxHighlighter

@@ -10,7 +10,9 @@ export function findBestMatch(
     validPaths: string[],
     threshold: number = 0.4
 ): { path: string; score: number } | null {
-    if (validPaths.length === 0) return null;
+    if (validPaths.length === 0) {
+        return null;
+    }
 
     // Configure Fuse.js for path matching
     const fuse = new Fuse(validPaths, {
@@ -25,12 +27,16 @@ export function findBestMatch(
 
     const results = fuse.search(invalidPath);
 
-    if (results.length === 0) return null;
+    if (results.length === 0) {
+        return null;
+    }
 
     // Fuse returns score where 0 is perfect match, 1 is no match
     // Convert to our format where 1 is perfect match, 0 is no match
     const bestResult = results[0];
-    if (!bestResult) return null;
+    if (!bestResult) {
+        return null;
+    }
 
     return {
         path: bestResult.item,
@@ -47,7 +53,9 @@ export function findTopMatches(
     topN: number = 10,
     threshold: number = 0.3
 ): { path: string; score: number }[] {
-    if (validPaths.length === 0) return [];
+    if (validPaths.length === 0) {
+        return [];
+    }
 
     const fuse = new Fuse(validPaths, {
         includeScore: true,

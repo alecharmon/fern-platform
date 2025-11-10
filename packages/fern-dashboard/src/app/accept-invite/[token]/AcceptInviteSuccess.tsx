@@ -15,6 +15,7 @@ interface AcceptInviteSuccessProps {
 export default function AcceptInviteSuccess({ orgName, userId }: AcceptInviteSuccessProps) {
     const router = useRouter();
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: refresh when userId or orgName changes
     useEffect(() => {
         const handleRevalidation = async () => {
             router.refresh();

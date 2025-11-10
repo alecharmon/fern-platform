@@ -707,7 +707,9 @@ export class NavigationStore {
         const newRegistry: PageRegistry = {};
 
         Object.entries(this._pageRegistry).forEach(([filename, entry]) => {
-            if (!entry) return;
+            if (!entry) {
+                return;
+            }
 
             if (entry.isMarkedForDeletion) {
                 // Skip deleted pages - don't add them to newRegistry

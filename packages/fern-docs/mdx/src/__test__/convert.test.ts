@@ -117,7 +117,9 @@ describe("mdxToHtml and htmlToMdx", () => {
     it("mdxToHtml: complex file snapshot", async () => {
         const result = mdxToHtml(complexMdx);
         const snapshotDir = path.join(__dirname, "__snapshots__");
-        if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+        if (!existsSync(snapshotDir)) {
+            mkdirSync(snapshotDir);
+        }
         const file = path.join(snapshotDir, "complex-mdxToHtml.json");
         writeFileSync(file, JSON.stringify(result, null, 2));
         await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
@@ -127,7 +129,9 @@ describe("mdxToHtml and htmlToMdx", () => {
         const { html, frontmatter } = mdxToHtml(complexMdx);
         const mdxResult = htmlToMdx(html, { frontmatter });
         const snapshotDir = path.join(__dirname, "__snapshots__");
-        if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+        if (!existsSync(snapshotDir)) {
+            mkdirSync(snapshotDir);
+        }
         const file = path.join(snapshotDir, "complex-htmlToMdx.json");
         writeFileSync(file, JSON.stringify(mdxResult, null, 2));
         await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
@@ -363,7 +367,9 @@ describe("Fixture files", () => {
         it("mdxToHtml: faq.mdx file snapshot", async () => {
             const result = mdxToHtml(faqMdx);
             const snapshotDir = path.join(__dirname, "__snapshots__");
-            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            if (!existsSync(snapshotDir)) {
+                mkdirSync(snapshotDir);
+            }
             const file = path.join(snapshotDir, "faq-mdxToHtml.json");
             writeFileSync(file, JSON.stringify(result, null, 2));
             await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
@@ -373,7 +379,9 @@ describe("Fixture files", () => {
             const { html, frontmatter } = mdxToHtml(faqMdx);
             const mdxResult = htmlToMdx(html, { frontmatter });
             const snapshotDir = path.join(__dirname, "__snapshots__");
-            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            if (!existsSync(snapshotDir)) {
+                mkdirSync(snapshotDir);
+            }
             const file = path.join(snapshotDir, "faq-htmlToMdx.json");
             writeFileSync(file, JSON.stringify(mdxResult, null, 2));
             await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
@@ -382,7 +390,9 @@ describe("Fixture files", () => {
         it("mdxToHtml: landing-page.mdx file snapshot", async () => {
             const result = mdxToHtml(landingPageMdx);
             const snapshotDir = path.join(__dirname, "__snapshots__");
-            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            if (!existsSync(snapshotDir)) {
+                mkdirSync(snapshotDir);
+            }
             const file = path.join(snapshotDir, "landing-page-mdxToHtml.json");
             writeFileSync(file, JSON.stringify(result, null, 2));
             await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
@@ -392,7 +402,9 @@ describe("Fixture files", () => {
             const { html, frontmatter } = mdxToHtml(landingPageMdx);
             const mdxResult = htmlToMdx(html, { frontmatter });
             const snapshotDir = path.join(__dirname, "__snapshots__");
-            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            if (!existsSync(snapshotDir)) {
+                mkdirSync(snapshotDir);
+            }
             const file = path.join(snapshotDir, "landing-page-htmlToMdx.json");
             writeFileSync(file, JSON.stringify(mdxResult, null, 2));
             await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);
@@ -401,7 +413,9 @@ describe("Fixture files", () => {
         it("mdxToHtml: advanced-features.mdx file snapshot", async () => {
             const result = mdxToHtml(advancedFeaturesMdx);
             const snapshotDir = path.join(__dirname, "__snapshots__");
-            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            if (!existsSync(snapshotDir)) {
+                mkdirSync(snapshotDir);
+            }
             const file = path.join(snapshotDir, "advanced-features-mdxToHtml.json");
             writeFileSync(file, JSON.stringify(result, null, 2));
             await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(file);
@@ -411,7 +425,9 @@ describe("Fixture files", () => {
             const { html, frontmatter } = mdxToHtml(advancedFeaturesMdx);
             const mdxResult = htmlToMdx(html, { frontmatter });
             const snapshotDir = path.join(__dirname, "__snapshots__");
-            if (!existsSync(snapshotDir)) mkdirSync(snapshotDir);
+            if (!existsSync(snapshotDir)) {
+                mkdirSync(snapshotDir);
+            }
             const file = path.join(snapshotDir, "advanced-features-htmlToMdx.json");
             writeFileSync(file, JSON.stringify(mdxResult, null, 2));
             await expect(JSON.stringify(mdxResult, null, 2)).toMatchFileSnapshot(file);

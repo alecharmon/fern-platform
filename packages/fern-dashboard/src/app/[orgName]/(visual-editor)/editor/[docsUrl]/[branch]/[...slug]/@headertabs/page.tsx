@@ -22,7 +22,7 @@ export default async function HeaderTabsPage({
         return null;
     }
     const host = await getHostFromHeaders();
-    const { githubUrl } = await assertAuthAndFetchGithubUrl({
+    await assertAuthAndFetchGithubUrl({
         orgName,
         docsUrl: parseDocsUrlParam({ docsUrl })
     });

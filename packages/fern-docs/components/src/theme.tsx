@@ -56,7 +56,9 @@ function ThemeColorStyle({ lightThemeColor, darkThemeColor }: { lightThemeColor?
     const currentThemeColor =
         resolvedTheme === "dark" ? (darkThemeColor ?? lightThemeColor) : (lightThemeColor ?? darkThemeColor);
     useServerInsertedHTML(() => {
-        if (inserted.current) return null;
+        if (inserted.current) {
+            return null;
+        }
         inserted.current = true;
         return (
             <React.Fragment key="__fern-inserted-theme-colors">

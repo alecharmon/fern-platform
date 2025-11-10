@@ -66,10 +66,18 @@ export function filterSuggestionItems(items: SuggestionItem[], query: string) {
             const aTitle = a.title.toLowerCase();
             const bTitle = b.title.toLowerCase();
 
-            if (aTitle === normalizedQuery && bTitle !== normalizedQuery) return -1;
-            if (bTitle === normalizedQuery && aTitle !== normalizedQuery) return 1;
-            if (aTitle.startsWith(normalizedQuery) && !bTitle.startsWith(normalizedQuery)) return -1;
-            if (bTitle.startsWith(normalizedQuery) && !aTitle.startsWith(normalizedQuery)) return 1;
+            if (aTitle === normalizedQuery && bTitle !== normalizedQuery) {
+                return -1;
+            }
+            if (bTitle === normalizedQuery && aTitle !== normalizedQuery) {
+                return 1;
+            }
+            if (aTitle.startsWith(normalizedQuery) && !bTitle.startsWith(normalizedQuery)) {
+                return -1;
+            }
+            if (bTitle.startsWith(normalizedQuery) && !aTitle.startsWith(normalizedQuery)) {
+                return 1;
+            }
 
             return 0;
         });

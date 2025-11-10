@@ -105,7 +105,7 @@ export function InstallGithubAppButton({
 
         document.addEventListener("visibilitychange", handleVisibilityChange);
         return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-    }, [clicked, pageIsActive, checkIfRepoIsValid]);
+    }, [pageIsActive, checkIfRepoIsValid]);
 
     // Cleanup on unmount
     useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 
 interface CSSConfig {
     inline?: string[];

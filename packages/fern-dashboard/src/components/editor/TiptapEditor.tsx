@@ -99,7 +99,9 @@ const extensions = [
         addKeyboardShortcuts() {
             return {
                 "Mod-a": ({ editor }) => {
-                    if (editor.isDestroyed) return false;
+                    if (editor.isDestroyed) {
+                        return false;
+                    }
 
                     // If we're inside a table cell, override the default to only select the cell content
                     // AI generated:
@@ -239,7 +241,9 @@ export default function TiptapEditor({
                             // Call preventDefault so browser respects dropEffect
                             e.preventDefault();
                             try {
-                                if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+                                if (e.dataTransfer) {
+                                    e.dataTransfer.dropEffect = "none";
+                                }
                             } catch {}
                             e.stopPropagation();
                             // Add CSS class to body for cursor display

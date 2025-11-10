@@ -78,12 +78,18 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
     const handleMouseEnter = () => {
         const container = containerRef.current;
         const content = contentRef.current;
-        if (!container || !content) return;
+        if (!container || !content) {
+            return;
+        }
 
-        if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+            return;
+        }
 
         const delta = Math.ceil(container.scrollWidth - container.clientWidth);
-        if (delta <= 0) return;
+        if (delta <= 0) {
+            return;
+        }
 
         const pxPerSec = 90;
         const duration = Math.max(0.8, delta / pxPerSec);
@@ -97,7 +103,9 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
     const handleMouseLeave = () => {
         const container = containerRef.current;
         const content = contentRef.current;
-        if (!content || !container) return;
+        if (!content || !container) {
+            return;
+        }
         content.classList.remove("is-marquee");
         content.style.removeProperty("--marquee-translate");
         content.style.removeProperty("--marquee-duration");

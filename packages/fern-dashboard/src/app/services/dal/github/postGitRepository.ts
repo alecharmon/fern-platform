@@ -196,7 +196,7 @@ export default async function postGitRepository(request: {
                 ref: "heads/main"
             });
             parentCommitSha = mainBranchResponse.data.object.sha;
-        } catch (error) {
+        } catch (_error) {
             console.warn("No parent commit found, creating initial commit");
         }
 

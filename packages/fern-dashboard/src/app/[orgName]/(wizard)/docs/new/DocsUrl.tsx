@@ -56,7 +56,7 @@ export default function DocsUrl({ value, onChange }: DocsUrlProps) {
         }, 500); // 500ms debounce
 
         return () => clearTimeout(timeoutId);
-    }, [localValue]);
+    }, [localValue, onChange]);
 
     return (
         <div className="flex flex-col gap-2">

@@ -176,7 +176,9 @@ export const PlaygroundEndpoint = ({
 
                     while (true) {
                         const { done, value } = await reader.read();
-                        if (done) break;
+                        if (done) {
+                            break;
+                        }
                         chunks.push(value);
                     }
 
@@ -255,7 +257,7 @@ export const PlaygroundEndpoint = ({
             );
             setResponse(failed(e));
         }
-    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue, isDisableProxy]);
+    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue, isDisableProxy, authKey]);
 
     const settings = usePlaygroundSettings();
 

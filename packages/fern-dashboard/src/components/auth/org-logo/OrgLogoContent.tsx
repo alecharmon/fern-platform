@@ -21,7 +21,7 @@ export function OrgLogoContent({ organization }: OrgLogoContent.Props) {
     }
 
     return (
-        // eslint-disable-next-line @next/next/no-img-element
+        // biome-ignore lint/performance/noImgElement: false positive
         <img
             src={organization.branding.logo_url}
             alt={`${organization.display_name} logo`}

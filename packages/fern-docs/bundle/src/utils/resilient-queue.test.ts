@@ -297,11 +297,9 @@ describe("ResilientQueue", () => {
 
     it("should exponentially back off on retries", async () => {
         const retryTimestamps: number[] = [];
-        let attemptCount = 0;
 
         const queue = new ResilientQueue({
             processItem: async () => {
-                attemptCount++;
                 retryTimestamps.push(Date.now());
                 throw new Error("Always fails");
             },

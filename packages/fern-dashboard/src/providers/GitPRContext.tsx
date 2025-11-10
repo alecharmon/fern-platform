@@ -115,7 +115,7 @@ export function GitPRProvider({
         } finally {
             setIsLoading(false);
         }
-    }, [owner, repo, site, branch, baseBranch, orgName]);
+    }, [owner, repo, branch, baseBranch, orgName]);
 
     // Fetch PR information when component mounts or dependencies change
     useEffect(() => {

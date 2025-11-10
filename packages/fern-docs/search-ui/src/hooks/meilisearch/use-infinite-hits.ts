@@ -23,7 +23,7 @@ interface MeilisearchHit {
 }
 
 // eslint-disable-next-line unused-imports/no-unused-vars
-interface MeilisearchResponse {
+interface _MeilisearchResponse {
     hits: MeilisearchHit[];
     query: string;
     processingTimeMs: number;
@@ -44,7 +44,7 @@ export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits>
     const [allHits, setAllHits] = useState<AlgoliaRecordHit[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
-    const [totalHits, setTotalHits] = useState(0);
+    const [_totalHits, setTotalHits] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [results, setResults] = useState<any>();
 
@@ -63,7 +63,9 @@ export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits>
     function buildFilterString(filters: readonly FacetFilter[]): string | undefined {
         // FacetFilter[] is an array of { facet: string, value: string }
         // We want to build a Meilisearch filter string like: 'facet = "value"'
-        if (!filters || filters.length === 0) return undefined;
+        if (!filters || filters.length === 0) {
+            return undefined;
+        }
         const filterClauses: string[] = [];
         for (const filter of filters) {
             const { facet, value } = filter;
@@ -71,7 +73,9 @@ export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits>
                 filterClauses.push(`${facet} = "${value}"`);
             }
         }
-        if (filterClauses.length === 0) return undefined;
+        if (filterClauses.length === 0) {
+            return undefined;
+        }
         return filterClauses.join(" AND ");
     }
 

@@ -114,6 +114,9 @@ catalogs:
     '@types/react-dom':
       specifier: 19.0.4
       version: 19.0.4
+    '@vitejs/plugin-react':
+      specifier: ^4.3.4
+      version: 4.3.4
     depcheck:
       specifier: ^1.4.7
       version: 1.4.7
@@ -385,6 +388,9 @@ importers:
       rollup:
         specifier: ^4.34.8
         version: 4.35.0
+      sort-package-json:
+        specifier: ^3.4.0
+        version: 3.4.0
       styled-jsx:
         specifier: ^5.1.6
         version: 5.1.7(@babel/core@7.28.4)(react@19.0.0)
@@ -1490,6 +1496,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.0.4(@types/react@19.0.10)
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 4.3.4(vite@6.3.6(@types/node@22.18.8)(jiti@2.4.2)(less@4.2.0)(lightningcss@1.30.1)(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0))
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -1780,6 +1789,9 @@ importers:
       '@vercel/speed-insights':
         specifier: ^1.2.0
         version: 1.2.0(next@15.5.4(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.0))(react@19.0.0)(svelte@5.19.2)
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 4.3.4(vite@6.3.6(@types/node@22.18.8)(jiti@2.4.2)(less@4.2.0)(lightningcss@1.30.1)(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0))
       ai:
         specifier: 5.0.0-beta.2
         version: 5.0.0-beta.2(zod@3.25.49)
@@ -2311,7 +2323,7 @@ importers:
         specifier: ^19
         version: 19.0.0
       '@vitejs/plugin-react':
-        specifier: ^4.3.4
+        specifier: 'catalog:'
         version: 4.3.4(vite@6.3.6(@types/node@22.18.8)(jiti@2.4.2)(less@4.2.0)(lightningcss@1.30.1)(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0))
       chromatic:
         specifier: ^11.26.1
@@ -15225,6 +15237,9 @@ packages:
   git-hooks-list@3.1.0:
     resolution: {integrity: sha512-LF8VeHeR7v+wAbXqfgRlTSX/1BJR9Q1vEMR8JAz1cEg6GX07+zyj3sAdDvYjj/xnlIfVuGgj4qBei1K3hKH+PA==}
 
+  git-hooks-list@4.1.1:
+    resolution: {integrity: sha512-cmP497iLq54AZnv4YRAEMnEyQ1eIn4tGKbmswqwmFV4GBnAqE8NLtWxxdXa++AalfgL5EBH4IxTPyquEuGY/jA==}
+
   github-slugger@2.0.0:
     resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
 
@@ -20091,6 +20106,11 @@ packages:
 
   sort-package-json@2.14.0:
     resolution: {integrity: sha512-xBRdmMjFB/KW3l51mP31dhlaiFmqkHLfWTfZAno8prb/wbDxwBPWFpxB16GZbiPbYr3wL41H8Kx22QIDWRe8WQ==}
+    hasBin: true
+
+  sort-package-json@3.4.0:
+    resolution: {integrity: sha512-97oFRRMM2/Js4oEA9LJhjyMlde+2ewpZQf53pgue27UkbEXfHJnDzHlUxQ/DWUkzqmp7DFwJp8D+wi/TYeQhpA==}
+    engines: {node: '>=20'}
     hasBin: true
 
   source-map-js@1.2.1:
@@ -38353,6 +38373,8 @@ snapshots:
 
   git-hooks-list@3.1.0: {}
 
+  git-hooks-list@4.1.1: {}
+
   github-slugger@2.0.0: {}
 
   glob-parent@5.1.2:
@@ -44590,6 +44612,16 @@ snapshots:
       detect-newline: 4.0.1
       get-stdin: 9.0.0
       git-hooks-list: 3.1.0
+      is-plain-obj: 4.1.0
+      semver: 7.7.2
+      sort-object-keys: 1.1.3
+      tinyglobby: 0.2.15
+
+  sort-package-json@3.4.0:
+    dependencies:
+      detect-indent: 7.0.1
+      detect-newline: 4.0.1
+      git-hooks-list: 4.1.1
       is-plain-obj: 4.1.0
       semver: 7.7.2
       sort-object-keys: 1.1.3

@@ -48,7 +48,9 @@ export function ColumnHeaderWithFilter<TData, TValue>({
     }, [column]);
 
     const filteredValues = useMemo(() => {
-        if (!filterValue) return uniqueValues;
+        if (!filterValue) {
+            return uniqueValues;
+        }
         const searchLower = filterValue.toLowerCase();
         return uniqueValues.filter((value) => value.toLowerCase().includes(searchLower));
     }, [uniqueValues, filterValue]);

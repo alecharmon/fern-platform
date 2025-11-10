@@ -6,9 +6,31 @@
     "useIgnoreFile": false
   },
   "files": {
-    "includes": ["**"],
-    "ignoreUnknown": false,
-    "maxSize": 80000000
+    "includes": [
+      "**/*.{js,jsx,ts,tsx,mjs,mts}",
+      "**/*.{json,md,mdx}",
+      "!**/.husky",
+      "!**/.next",
+      "!**/.pnp*",
+      "!**/.turbo",
+      "!**/.venv",
+      "!**/.yarn",
+      "!**/__snapshots__",
+      "!**/__test__/output/**/*",
+      "!**/build",
+      "!**/dist",
+      "!**/fixtures/**/*",
+      "!**/generated",
+      "!**/lib",
+      "!**/node_modules",
+      "!**/openapi.json",
+      "!**/*.{yaml,yml}",
+      "!.eslintrc.js",
+      "!packages/fai-sdk/src",
+      "!packages/fdr-lambda-sdk/src",
+      "!servers/oculus/suites/**/*"
+    ],
+    "ignoreUnknown": true
   },
   "formatter": {
     "enabled": true,
@@ -27,49 +49,26 @@
     "rules": {
       "recommended": false,
       "complexity": {
-        "noAdjacentSpacesInRegex": "error",
-        "noBannedTypes": "off",
+        "noBannedTypes": "error",
         "noExtraBooleanCast": "error",
-        "noStaticOnlyClass": "error",
         "noUselessCatch": "error",
         "noUselessConstructor": "error",
         "noUselessEscapeInRegex": "error",
         "noUselessThisAlias": "error",
         "noUselessTypeConstraint": "error",
-        "useOptionalChain": "off"
+        "useOptionalChain": "error"
       },
       "correctness": {
-        "noChildrenProp": "error",
-        "noConstAssign": "error",
-        "noConstantCondition": "error",
-        "noEmptyCharacterClassInRegex": "error",
-        "noEmptyPattern": "error",
-        "noGlobalObjectCalls": "error",
-        "noInnerDeclarations": "error",
-        "noInvalidConstructorSuper": "error",
-        "noNonoctalDecimalEscape": "error",
-        "noPrecisionLoss": "error",
-        "noSelfAssign": "error",
-        "noSetterReturn": "error",
-        "noSwitchDeclarations": "error",
         "noUndeclaredVariables": "error",
-        "noUnreachable": "error",
-        "noUnreachableSuper": "error",
-        "noUnsafeFinally": "error",
-        "noUnsafeOptionalChaining": "error",
-        "noUnusedImports": "off",
-        "noUnusedLabels": "error",
-        "noUnusedVariables": "off",
-        "useExhaustiveDependencies": "off",
-        "useHookAtTopLevel": "error",
-        "useIsNan": "error",
-        "useJsxKeyInIterable": "error",
-        "useValidForDirection": "error",
-        "useValidTypeof": "error",
-        "useYield": "error"
+        "noUnusedVariables": {
+          "level": "error",
+          "options": {
+            "ignoreRestSiblings": true
+          }
+        },
+        "noUnusedImports": "error"
       },
       "security": {
-        "noBlankTarget": "error",
         "noDangerouslySetInnerHtmlWithChildren": "error"
       },
       "style": {
@@ -97,7 +96,6 @@
             ]
           }
         },
-        "useArrayLiterals": "error",
         "useAsConstAssertion": "error",
         "useBlockStatements": "error",
         "useImportType": "error",
@@ -105,68 +103,22 @@
       },
       "suspicious": {
         "noAssignInExpressions": "off",
-        "noAsyncPromiseExecutor": "error",
-        "noCatchAssign": "error",
-        "noClassAssign": "error",
-        "noCommentText": "error",
-        "noCompareNegZero": "error",
         "noConfusingVoidType": "off",
         "noConsole": "error",
-        "noControlCharactersInRegex": "error",
-        "noDebugger": "error",
-        "noDoubleEquals": "off",
-        "noDuplicateCase": "error",
-        "noDuplicateClassMembers": "error",
-        "noDuplicateElseIf": "error",
-        "noDuplicateJsxProps": "error",
-        "noDuplicateObjectKeys": "error",
-        "noDuplicateParameters": "error",
+        "noDoubleEquals": "error",
         "noEmptyBlockStatements": "off",
         "noEmptyInterface": "off",
         "noExplicitAny": "off",
         "noExportsInTest": "error",
         "noExtraNonNullAssertion": "error",
-        "noFallthroughSwitchClause": "error",
         "noFocusedTests": "error",
-        "noFunctionAssign": "error",
-        "noGlobalAssign": "error",
-        "noImportAssign": "error",
         "noIrregularWhitespace": "error",
-        "noMisleadingCharacterClass": "error",
-        "noMisleadingInstantiator": "error",
-        "noMisplacedAssertion": "error",
         "noPrototypeBuiltins": "error",
-        "noRedeclare": "error",
         "noShadowRestrictedNames": "off",
         "noSkippedTests": "warn",
-        "noSparseArray": "error",
-        "noUnsafeDeclarationMerging": "error",
-        "noUnsafeNegation": "error",
-        "noWith": "error",
-        "useGetterReturn": "error"
+        "noWith": "error"
       }
-    },
-    "includes": [
-      "**",
-      "**/*.js",
-      "**/*.jsx",
-      "**",
-      "!.eslintrc.js",
-      "!**/lib",
-      "!**/build",
-      "!**/dist",
-      "!**/.yarn",
-      "!**/.husky",
-      "!**/.turbo",
-      "!**/node_modules",
-      "!**/generated",
-      "!**/__snapshots__",
-      "!**/.pnp*",
-      "!**/*.yml",
-      "!**/*.yaml",
-      "!packages/fern-docs/bundle/src/mdx/components/accordion/AccordionGroup.tsx",
-      "!.venv/*"
-    ]
+    }
   },
   "javascript": {
     "globals": ["expect", "describe", "it", "beforeEach", "test", "beforeAll"],
@@ -190,49 +142,68 @@
   "overrides": [
     {
       "includes": [
-        "**/*.test.ts",
+        "packages/fern-dashboard/**/*",
+        "packages/fern-docs/bundle/**/*",
+        "packages/fern-docs/icons-cdn/**/*"
+      ],
+      "linter": {
+        "domains": {
+          "next": "recommended"
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/commons/docs-loader/**/*",
+        "packages/commons/docs-server/**/*",
+        "packages/commons/react-commons/**/*",
+        "packages/fern-dashboard/**/*",
+        "packages/fern-docs/bundle/**/*",
+        "packages/fern-docs/components/**/*",
+        "packages/fern-docs/icons-cdn/**/*"
+      ],
+      "linter": {
+        "domains": {
+          "react": "recommended"
+        }
+      }
+    },
+    {
+      "includes": [
         "**/*.spec.ts",
-        "**/__test__/testHelpers.ts",
-        "servers/self-hosted/scripts/perf-test.ts"
+        "**/*.test.ts",
+        "**/__test__/**/*",
+        "packages/cdk/scripts/**/*",
+        "packages/cdk/**/*",
+        "packages/commons/docs-loader/src/readonly-docs-loader.ts",
+        "packages/commons/docs-server/**/*",
+        "packages/commons/docs-utils/src/getRedirectForPath.ts",
+        "packages/commons/github/src/**/*",
+        "packages/commons/react-commons/src/useWhyDidYouUpdate.ts",
+        "packages/commons/visual-editor-server/src/mongodb-client.ts",
+        "packages/commons/visual-editor-server/src/visual-editor-storage.ts",
+        "packages/fai-sdk/**/*",
+        "packages/fdr-sdk/src/**/*",
+        "packages/fern-dashboard/**/*",
+        "packages/fern-docs/**/*",
+        "packages/workers/proxy/src/websocket.ts",
+        "scripts/monitor/**/*.ts",
+        "servers/fern-bot/**/*",
+        "servers/fdr-deploy/scripts/fdr-deploy-stack.ts",
+        "servers/fdr-lambda/src/index.ts",
+        "servers/fdr/src/services/revalidator/RevalidatorService.ts",
+        "servers/mdx-bundler/src/plugins/rehype-code-block.ts",
+        "servers/mdx-bundler/src/serialize.ts",
+        "servers/mdx-bundler/src/server.ts",
+        "servers/self-hosted/scripts/generate-encryption-key.js",
+        "servers/self-hosted/scripts/perf-test.ts",
+        "smoke-test/**/*",
+        "tests/**/*"
       ],
       "linter": {
         "rules": {
           "suspicious": {
             "noConsole": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["*.ts", "*.tsx", "*.mts", "*.cts"],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "noArguments": "error"
-          },
-          "correctness": {
-            "noConstAssign": "off",
-            "noGlobalObjectCalls": "off",
-            "noInvalidBuiltinInstantiation": "off",
-            "noInvalidConstructorSuper": "off",
-            "noSetterReturn": "off",
-            "noUndeclaredVariables": "off",
-            "noUnreachable": "off",
-            "noUnreachableSuper": "off"
-          },
-          "style": {
-            "useConst": "error"
-          },
-          "suspicious": {
-            "noDuplicateClassMembers": "off",
-            "noDuplicateObjectKeys": "off",
-            "noDuplicateParameters": "off",
-            "noFunctionAssign": "off",
-            "noImportAssign": "off",
-            "noRedeclare": "off",
-            "noUnsafeNegation": "off",
-            "noVar": "error",
-            "useGetterReturn": "off"
           }
         }
       }
@@ -242,154 +213,6 @@
       "formatter": {
         "indentStyle": "space",
         "indentWidth": 2
-      }
-    },
-    {
-      "includes": [
-        "**/*.schema.json",
-        "**/__test__/**/*.json",
-        "**/__snapshots__",
-        "**/fixtures/**/*.json",
-        "seed/**/*",
-        "docker/seed/**",
-        "**/*.yaml",
-        "**/*.yml",
-        "**/*.mdx",
-        "**/*.md",
-        "**/*.py",
-        "**/*.rb",
-        "**/*.java",
-        "**/*.js",
-        "**/*.zip",
-        "**/*.cjs",
-        "**/*.mjs",
-        "**/*.snap",
-        "**/*.props",
-        "**/*.lock",
-        "**/*.gradle",
-        "**/*.bat",
-        "**/*.sh",
-        "*.d.ts",
-        ".yarn",
-        ".turbo",
-        "**/.turbo/**",
-        "node_modules",
-        ".turbo",
-        ".nx",
-        "**/node_modules/**",
-        "**/.venv/**",
-        "**/.mypy_cache/**",
-        "packages/**/build/**",
-        "packages/**/lib/**",
-        "packages/**/dist/**",
-        "packages/**/tsconfig*tsbuildinfo",
-        "packages/**/out/**",
-        "packages/**/generated/**",
-        "servers/**/lib/**",
-        "servers/**/dist/**",
-        "servers/**/generated/**",
-        "**/.next/**",
-        "next-env.d.ts",
-        ".vercel",
-        ".DS_Store",
-        "*.swp",
-        "npm-debug.log*",
-        "yarn-debug.log*",
-        "yarn-error.log*",
-        "lerna-debug.log*",
-        ".yarn/*",
-        "!.yarn/cache",
-        "!.yarn/patches",
-        "!.yarn/plugins",
-        "!.yarn/releases",
-        "!.yarn/sdks",
-        "!.yarn/versions",
-        "packages/**/generated",
-        ".env*.local",
-        ".vercel",
-        "**/.idea/*",
-        ".python-version",
-        ".php-cs-fixer.cache",
-        ".cursor",
-        ".claude",
-        "CLAUDE.md",
-        "**/.preview/",
-        ".yarn-cache",
-        ".pnpm-cache",
-        "packages/fern-docs/icons-cdn/**/*.json",
-        "packages/fern-docs/icons-cdn/**/*.ts",
-        "packages/fai-sdk/**",
-        "packages/fdr-lambda-sdk/**",
-        "fern/apis/fai/openapi.json",
-        "**/.local-sdk-output/**",
-        "servers/oculus/**",
-        "servers/fai/**",
-        "servers/fai-discord/**",
-        "servers/fai-lambda/**",
-        "servers/fai-lambda-deploy/**"
-      ],
-      "linter": {
-        "enabled": false
-      },
-      "assist": {
-        "enabled": false
-      },
-      "formatter": {
-        "enabled": false
-      }
-    },
-    {
-      "includes": [
-        "packages/fern-docs/components/src/index.css",
-        "packages/fern-docs/bundle/.next/static/css/058d87a17a63d230.css",
-        "servers/fdr/src/controllers/docs/v2/getDocsWriteV2Service.ts"
-      ],
-      "linter": {
-        "enabled": false
-      },
-      "assist": {
-        "enabled": false
-      },
-      "formatter": {
-        "enabled": false
-      }
-    },
-    {
-      "includes": [
-        "packages/commons/docs-server/**",
-        "packages/cdk/scripts/zipLocalBundle.ts",
-        "servers/self-hosted/src/__test__/setupSharedDocker.ts",
-        "packages/commons/docs-loader/src/readonly-docs-loader.ts",
-        "packages/commons/docs-utils/src/getRedirectForPath.ts",
-        "servers/self-hosted/src/__test__/setupSelfHostedDocs.ts",
-        "packages/cdk/scripts/setupLocalBundle.ts",
-        "servers/self-hosted/src/__test__/setupMultinodeDocs.ts",
-        "packages/commons/github/src/*.ts",
-        "servers/mdx-bundler/src/server.ts",
-        "servers/mdx-bundler/src/serialize.ts",
-        "packages/commons/react-commons/src/useWhyDidYouUpdate.ts",
-        "packages/commons/visual-editor-server/src/visual-editor-storage.ts",
-        "servers/mdx-bundler/src/plugins/rehype-code-block.ts",
-        "servers/fern-bot/**/*.ts",
-        "packages/fdr-sdk/src/**/*.ts",
-        "packages/fern-dashboard/**/*.tsx",
-        "packages/fern-dashboard/**/*.ts",
-        "servers/fdr-deploy/scripts/fdr-deploy-stack.ts",
-        "servers/fdr/src/services/revalidator/RevalidatorService.ts",
-        "servers/fdr/src/__test__/local/setupMockFdr.ts",
-        "packages/fern-docs/**/*.tsx",
-        "packages/fern-docs/**/*.ts",
-        "packages/workers/proxy/src/websocket.ts",
-        "packages/commons/visual-editor-server/src/mongodb-client.ts",
-        "servers/fdr-lambda/src/index.ts",
-        "scripts/monitor/**/*.ts"
-      ],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off"
-          }
-        }
       }
     },
     {
@@ -419,14 +242,14 @@
     {
       "includes": [
         "packages/commons/docs-server/src/generateFernColors.test.ts",
-        "servers/fern-bot/src/__test__/grpc-proxy.test.ts",
         "packages/commons/github/src/__test__/getLatestTag.test.ts",
         "packages/fern-docs/bundle/src/mdx/bundler/serialize.test.ts",
-        "servers/fdr/src/services/s3/__test__/s3.test.ts",
         "packages/fern-docs/bundle/src/mdx/plugins/rehype-steps.test.ts",
-        "servers/fdr/src/__test__/local/s3.test.ts",
+        "packages/fern-docs/components/src/__test__/CopyToClipboardButton.test.tsx",
+        "servers/fern-bot/src/__test__/grpc-proxy.test.ts",
         "servers/fdr/src/__test__/local/revalidate.test.ts",
-        "packages/fern-docs/components/src/__test__/CopyToClipboardButton.test.tsx"
+        "servers/fdr/src/__test__/local/s3.test.ts",
+        "servers/fdr/src/services/s3/__test__/s3.test.ts"
       ],
       "linter": {
         "rules": {
@@ -438,13 +261,13 @@
     },
     {
       "includes": [
-        "servers/fdr/src/db/snippets/SdkIdFactory.ts",
         "packages/commons/docs-server/src/FernNextResponse.ts",
         "packages/commons/docs-utils/src/changelog.ts",
         "packages/commons/fdr-utils/src/definition-object-factory.ts",
         "packages/fdr-sdk/src/api-definition/typeid-visitor.ts",
         "packages/fdr-sdk/src/navigation/ApiTypeIdVisitor.ts",
-        "packages/fern-docs/bundle/src/server/FernNextResponse.ts"
+        "packages/fern-docs/bundle/src/server/FernNextResponse.ts",
+        "servers/fdr/src/db/snippets/SdkIdFactory.ts"
       ],
       "linter": {
         "rules": {
@@ -468,42 +291,6 @@
       }
     },
     {
-      "includes": [
-        "packages/fern-docs/search-ui/src/components/search/useSearchBox.ts",
-        "packages/fern-docs/search-ui/src/hooks/use-search-hits.ts",
-        "packages/fern-docs/components/src/hooks/useLocationHref.ts",
-        "packages/commons/react-commons/src/useResizeObserver.ts"
-      ],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "useHookAtTopLevel": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "servers/mdx-bundler/src/plugins/*.ts",
-        "servers/self-hosted/scripts/perf-test.ts",
-        "packages/fern-dashboard/src/**/*.ts",
-        "packages/fern-dashboard/src/**/*.tsx",
-        "packages/fern-docs/**/*.tsx",
-        "packages/fern-docs/**/*.ts",
-        "packages/workers/proxy/test/index.spec.ts",
-        "packages/commons/docs-server/src/xfernhost/edge.test.ts",
-        "packages/fai-sdk/src/core/url/join.ts",
-        "packages/commons/docs-utils/src/isLikelyBrowser.ts"
-      ],
-      "linter": {
-        "rules": {
-          "style": {
-            "useBlockStatements": "off"
-          }
-        }
-      }
-    },
-    {
       "includes": ["packages/fern-dashboard/src/utils/tiptap-utils.ts"],
       "linter": {
         "rules": {
@@ -515,11 +302,11 @@
     },
     {
       "includes": [
-        "servers/fdr/src/__test__/local/services/docsCache.test.ts",
         "packages/fern-docs/bundle/src/mdx/plugins/rehype-links.test.ts",
-        "servers/fdr/src/__test__/local/services/docs.test.ts",
+        "servers/fdr/src/__test__/local/services/api.test.ts",
         "servers/fdr/src/__test__/local/services/diff.test.ts",
-        "servers/fdr/src/__test__/local/services/api.test.ts"
+        "servers/fdr/src/__test__/local/services/docs.test.ts",
+        "servers/fdr/src/__test__/local/services/docsCache.test.ts"
       ],
       "linter": {
         "rules": {
@@ -530,10 +317,7 @@
       }
     },
     {
-      "includes": [
-        "ervers/fdr/src/__test__/unit-tests/transform/testTransformApiDefinitionToDb.test.ts",
-        "servers/fdr/src/__test__/unit-tests/transform/testTransformApiDefinitionToDb.test.ts"
-      ],
+      "includes": ["servers/fdr/src/__test__/unit-tests/transform/testTransformApiDefinitionToDb.test.ts"],
       "linter": {
         "rules": {
           "suspicious": {

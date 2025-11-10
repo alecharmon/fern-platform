@@ -25,7 +25,7 @@ import {
 } from "@fern-api/fdr-sdk/api-definition";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
-import { getEnv, invalidateByTag, waitUntil } from "@vercel/functions";
+import { getEnv, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
 import { mapValues } from "es-toolkit/object";
 import { escapeRegExp } from "es-toolkit/string";

@@ -14,7 +14,9 @@ export default function TableRowActionsMenu(props: NodeViewProps) {
 
     const isHeaderRow = useMemo(() => {
         const pos = getPos();
-        if (pos === undefined) return true;
+        if (pos === undefined) {
+            return true;
+        }
         const resolvedPos = editor.state.doc.resolve(pos);
 
         const index = resolvedPos.index(resolvedPos.depth);

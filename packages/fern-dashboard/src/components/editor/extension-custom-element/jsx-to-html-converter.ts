@@ -98,7 +98,9 @@ function convertStyleObjects(content: string): string {
             .filter((style: string) => style.includes(":"))
             .map((style: string) => {
                 const [property, value] = style.split(":").map((s: string) => s.trim());
-                if (!property || !value) return "";
+                if (!property || !value) {
+                    return "";
+                }
                 const cssProperty = camelToKebabCase(property);
                 const cssValue = value.replace(/['"]/g, "").replace(/;$/, "");
                 return `${cssProperty}: ${cssValue}`;

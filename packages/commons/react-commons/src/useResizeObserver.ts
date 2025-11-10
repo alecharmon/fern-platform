@@ -1,10 +1,8 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: hook is disabled in SSG mode */
 
 import fastdom from "fastdom";
-import { type RefObject, useEffect, useMemo, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 import { noop } from "ts-essentials";
-
-import { useEventCallback } from "./useEventCallback";
 
 export function useResizeObserver(
     ref: RefObject<HTMLElement | null>,
@@ -18,25 +16,24 @@ export function useResizeObserver(
     // use fastdom to batch measure calls and avoid layout thrashing
     const cancelMeasure = useRef<() => void>(noop);
 
-    // use event callback to avoid creating a new observer on every render
-    const innerMeasure = useEventCallback((entries: ResizeObserverEntry[]) => {
-        fastdom.clear(cancelMeasure.current);
-        cancelMeasure.current = fastdom.measure(() => measure(entries));
-    });
-
     // this should be a stable reference
-    const resizeObserver = useMemo(() => new ResizeObserver(innerMeasure), [innerMeasure]);
+    const resizeObserver = useRef(
+        new ResizeObserver((entries: ResizeObserverEntry[]) => {
+            fastdom.clear(cancelMeasure.current);
+            cancelMeasure.current = fastdom.measure(() => measure(entries));
+        })
+    );
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
     useEffect(() => {
         if (ref.current) {
-            resizeObserver.disconnect();
-            resizeObserver.observe(ref.current);
+            resizeObserver.current.disconnect();
+            resizeObserver.current.observe(ref.current);
         }
 
         // cleanup on unmount
         return () => {
-            resizeObserver.disconnect();
+            resizeObserver.current.disconnect();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [resizeObserver]);
+    }, []);
 }

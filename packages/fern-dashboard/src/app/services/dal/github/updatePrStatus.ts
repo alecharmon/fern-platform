@@ -106,7 +106,7 @@ export default async function updatePrStatus(request: {
                 let prNumber: number | undefined;
                 let prUrl: string | undefined;
 
-                if (cachedPrInfo != null && cachedPrInfo.success && cachedPrInfo.nodeId) {
+                if (cachedPrInfo?.success && cachedPrInfo.nodeId) {
                     prNodeId = cachedPrInfo.nodeId;
                     prNumber = cachedPrInfo.prNumber;
                     prUrl = cachedPrInfo.prUrl;

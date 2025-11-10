@@ -139,8 +139,6 @@ async function displayTopSearches(analytics: any, dateRange: any, limit: number,
         const percentage = search.percentage ? formatPercentage(search.percentage) : "0.00%";
 
         // Visual bar for percentage
-        const barLength = Math.round(((search.percentage || 0) / 100) * 20);
-        const bar = colors.green + "█".repeat(barLength) + colors.reset;
 
         console.log(
             `   ${colors.cyan}${rank}${colors.reset}  ` +
@@ -353,7 +351,7 @@ async function runInteractive() {
                     await displayTimeSeries(analytics, dateRange, tag || undefined);
                     break;
                 case "5": {
-                    const newTag = await rl.question(
+                    await rl.question(
                         colors.yellow + "🏷️  Enter new tag filter (leave empty to clear): " + colors.reset
                     );
                     // Update tag variable

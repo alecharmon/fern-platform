@@ -1,8 +1,3 @@
-/**
- * @vitest-environment jsdom
- */
-import React from "react";
-
 import "@testing-library/jest-dom";
 
 import type { PathPart } from "@fern-api/fdr-sdk/api-definition";

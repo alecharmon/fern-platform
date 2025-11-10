@@ -1,5 +1,3 @@
-import React from "react";
-
 import { cn } from "@/utils/utils";
 
 export function AnalyticsHistogramSkeleton({ className }: { className?: string }) {

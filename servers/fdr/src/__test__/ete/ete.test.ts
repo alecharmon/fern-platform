@@ -2,8 +2,6 @@ import { describe, it } from "vitest";
 
 const PORT = 8080;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 describe("FDR container tests", () => {
     it("check health", async () => {
         const response = await fetch(`http://0.0.0.0:${PORT}/health`);

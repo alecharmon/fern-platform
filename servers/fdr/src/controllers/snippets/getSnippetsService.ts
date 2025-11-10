@@ -44,8 +44,8 @@ export function getSnippetsService(app: FdrApplication): SnippetsService {
                 // specified, you'll need to go leverage the legacy route (path + method).
                 if (
                     req.body.endpoint.identifierOverride == null ||
-                    snippetsForEndpoint == undefined ||
-                    snippetsForEndpoint.length == 0
+                    snippetsForEndpoint == null ||
+                    snippetsForEndpoint.length === 0
                 ) {
                     const snippetsForEndpointPath = response.snippets[req.body.endpoint.path];
                     if (snippetsForEndpointPath === undefined) {

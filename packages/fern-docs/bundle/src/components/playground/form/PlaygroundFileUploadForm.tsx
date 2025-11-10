@@ -27,6 +27,7 @@ export interface PlaygroundFileUploadFormProps {
 export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
     ({ id, propertyKey, type, isOptional, onValueChange, value, allowAudioRecording = true, lang }) => {
         // Remove invalid files
+        // biome-ignore lint/correctness/useExhaustiveDependencies: only run when value changes
         useEffect(() => {
             if (value != null) {
                 const hasInvalidFiles = value.some((f) => !isValidFile(f));
@@ -37,7 +38,6 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                     }, 0);
                 }
             }
-            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [value]);
 
         const [drag, setDrag] = useState(false);

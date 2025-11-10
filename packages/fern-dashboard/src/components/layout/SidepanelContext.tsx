@@ -17,6 +17,7 @@ export function SidepanelProvider({ children }: { children: ReactNode }) {
     const [content, setContent] = useState<SidepanelContent>(null);
     const pathname = usePathname();
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: reset content when pathname changes
     useEffect(() => {
         setContent(null);
     }, [pathname]);

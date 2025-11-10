@@ -48,7 +48,7 @@ const useDebouncedCallback = <TCallback extends (...args: any[]) => void>(
         debounced.current?.cancel();
     });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: dependencies are memoized
     return useCallback(debounced.current, dependencies ?? []) as any;
 };
 

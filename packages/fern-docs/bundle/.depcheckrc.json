@@ -23,7 +23,8 @@
     "glslify-loader",
     "raw-loader",
     "tailwindcss",
-    "express"
+    "express",
+    "jsdom"
   ],
   "ignore-patterns": ["dist"]
 }

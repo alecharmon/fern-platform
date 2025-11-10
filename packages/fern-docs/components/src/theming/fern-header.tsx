@@ -10,7 +10,9 @@ export function FernHeader(props: React.ComponentPropsWithoutRef<"header">) {
 
     const inserted = React.useRef(false);
     useServerInsertedHTML(() => {
-        if (inserted.current) return null;
+        if (inserted.current) {
+            return null;
+        }
         inserted.current = true;
 
         // TODO: this needs to be re-run if the announcement banner is removed.
@@ -32,10 +34,14 @@ export function FernHeader(props: React.ComponentPropsWithoutRef<"header">) {
     });
 
     React.useEffect(() => {
-        if (!ref.current) return;
+        if (!ref.current) {
+            return;
+        }
 
         const resizeObserver = new ResizeObserver(([entry]) => {
-            if (entry == null) return;
+            if (entry == null) {
+                return;
+            }
             const headerHeight = entry.contentRect.height;
             document.documentElement.style.setProperty("--header-height", `${headerHeight}px`);
         });

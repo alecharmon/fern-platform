@@ -2,7 +2,6 @@ import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import type { ReactElement } from "react";
-import React from "react";
 
 import { PropertyWithShape } from "./ObjectProperty";
 import type { PropertyLocation } from "./TypeReferenceDefinitions";

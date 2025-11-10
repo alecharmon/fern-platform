@@ -28,26 +28,37 @@ export const rehypeInlineShiki: Plugin<[RehypeInlineShikiOptions], Root> = (
     const langs = options.langs || Object.keys(bundledLanguages);
 
     return async (tree) => {
-        if (promise === undefined)
+        if (promise === undefined) {
             promise = getSingletonHighlighter({
                 themes: themeNames,
                 langs
             });
+        }
         const highlighter = await promise;
         return visit(tree, "element", (node, index, parent) => {
-            if (node.tagName !== "code") return;
+            if (node.tagName !== "code") {
+                return;
+            }
 
             const firstChild = node.children[0];
-            if (firstChild?.type !== "text") return;
+            if (firstChild?.type !== "text") {
+                return;
+            }
             const match = firstChild.value.match(inlineShikiRegex);
-            if (!match) return;
+            if (!match) {
+                return;
+            }
 
             const [, code, lang] = match;
-            if (!code || !lang) return;
+            if (!code || !lang) {
+                return;
+            }
             const hast = highlighter.codeToHast(code, { ...options, lang });
 
             const inlineCode = (hast.children[0] as Element).children[0];
-            if (!inlineCode) return;
+            if (!inlineCode) {
+                return;
+            }
 
             parent?.children.splice(index ?? 0, 1, inlineCode);
         });

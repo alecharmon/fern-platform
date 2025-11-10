@@ -72,7 +72,7 @@ export function useExampleSelection(
                 responseIndex: undefined
             };
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // biome-ignore lint/correctness/useExhaustiveDependencies: only run when examplesByLanguageKeyAndStatusCode or initialExampleId changes
         useDeepCompareMemoize([examplesByLanguageKeyAndStatusCode, initialExampleId])
     );
 

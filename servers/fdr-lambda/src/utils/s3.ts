@@ -18,8 +18,6 @@ interface S3Config {
 }
 
 // Initialize S3 clients lazily
-// @ts-expect-error - publicDocsS3Client is initialized but not yet used
-let publicDocsS3Client: S3Client | undefined;
 let privateDocsS3Client: S3Client | undefined;
 let dbDocsDefinitionS3Client: S3Client | undefined;
 let s3Config: S3Config | undefined;
@@ -34,11 +32,6 @@ export function initializeS3(config: S3Config): void {
                   secretAccessKey: config.awsSecretAccessKey
               }
             : undefined;
-
-    publicDocsS3Client = new S3Client({
-        region: config.publicDocsS3BucketRegion,
-        credentials
-    });
 
     privateDocsS3Client = new S3Client({
         region: config.privateDocsS3BucketRegion,
@@ -114,7 +107,7 @@ export async function getDocsDefinitionFromS3(domain: string): Promise<DocsV2Rea
         const docsDefinition = JSON.parse(bodyString) as DocsV2Read.LoadDocsForUrlResponse;
 
         return docsDefinition;
-    } catch (error) {
+    } catch (_error) {
         return null;
     }
 }

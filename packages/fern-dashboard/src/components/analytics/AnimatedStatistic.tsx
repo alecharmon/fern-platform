@@ -23,6 +23,7 @@ export function AnimatedStatistic({
     const countUpAnimRef = useRef<any>(null);
     const previousValueRef = useRef<number>(0);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only value is a dependency of the effect
     useEffect(() => {
         initCountUp();
 
@@ -34,7 +35,9 @@ export function AnimatedStatistic({
     }, [value]);
 
     async function initCountUp() {
-        if (!countupRef.current) return;
+        if (!countupRef.current) {
+            return;
+        }
 
         try {
             const countUpModule = await import("countup.js");

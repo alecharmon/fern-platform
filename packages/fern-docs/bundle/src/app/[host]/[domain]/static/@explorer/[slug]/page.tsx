@@ -10,7 +10,7 @@ import {
 } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { permanentRedirect, RedirectType, redirect } from "next/navigation";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
 import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
 import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";

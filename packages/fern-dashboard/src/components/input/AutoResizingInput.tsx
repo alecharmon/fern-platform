@@ -27,6 +27,7 @@ export function AutoResizingInput({
         textarea.style.height = `${Math.ceil(height)}px`;
     };
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when value changes
     useLayoutEffect(() => {
         const textarea = textareaRef.current;
         if (textarea) {
@@ -34,9 +35,12 @@ export function AutoResizingInput({
         }
     }, [value]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
     useEffect(() => {
         const textarea = textareaRef.current;
-        if (!textarea) return;
+        if (!textarea) {
+            return;
+        }
 
         let unmounted = false;
 

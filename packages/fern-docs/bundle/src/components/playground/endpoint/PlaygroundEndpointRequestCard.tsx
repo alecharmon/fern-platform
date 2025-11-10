@@ -111,8 +111,12 @@ export function PlaygroundEndpointRequestCard({
     const shouldUseDynamicSnippets = dynamicIRsByLanguage?.[requestType as DynamicSnippetLanguage] && !isHeadRequest;
 
     const getFallbackRequestType = (): "curl" | "typescript" | "python" => {
-        if (requestType === "typescript") return "typescript";
-        if (requestType === "python") return "python";
+        if (requestType === "typescript") {
+            return "typescript";
+        }
+        if (requestType === "python") {
+            return "python";
+        }
         return "curl";
     };
 

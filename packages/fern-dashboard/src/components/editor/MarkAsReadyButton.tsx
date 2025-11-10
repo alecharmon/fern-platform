@@ -1,5 +1,4 @@
 import { CheckIcon } from "lucide-react";
-import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { useUpdatePrStatus } from "@/hooks/useUpdatePrStatus";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { Button } from "../ui/button";

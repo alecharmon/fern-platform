@@ -9,7 +9,7 @@ export function NavbarWithOverflow({ children }: { children: React.ReactNode }) 
     const containerRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(99);
+    const [_visibleCount, setVisibleCount] = useState(99);
 
     useEffect(() => {
         setMounted(true);

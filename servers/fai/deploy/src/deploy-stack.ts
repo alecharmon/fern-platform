@@ -90,7 +90,7 @@ export class FernAiDeployStack extends Stack {
         snsTopic.addSubscription(new EmailSubscription("alerts@buildwithfern.com"));
 
         const environmentResources =
-            environmentType == EnvironmentType.Prod
+            environmentType === EnvironmentType.Prod
                 ? {
                       cpu: 2048,
                       memoryLimitMiB: 4096,
@@ -125,7 +125,7 @@ export class FernAiDeployStack extends Stack {
             enableECSManagedTags: true,
             // Remove this before a prod release, but also adding this check just in case
             // This will allow us to run `aws ecs execute-command` and ideally SSH onto the task/container
-            enableExecuteCommand: environmentType != EnvironmentType.Prod,
+            enableExecuteCommand: environmentType !== EnvironmentType.Prod,
             protocol: ApplicationProtocol.HTTPS,
             certificate,
             domainZone: HostedZone.fromHostedZoneAttributes(this, "zoneId", {
@@ -220,7 +220,7 @@ export class FernAiDeployStack extends Stack {
 }
 
 function getServiceDomainName(environmentType: EnvironmentType, environmentInfo: EnvironmentInfo) {
-    if (environmentType == EnvironmentType.Prod) {
+    if (environmentType === EnvironmentType.Prod) {
         return `fai.${environmentInfo.route53Info.hostedZoneName}`;
     }
     return `fai-${environmentType.toLowerCase()}.${environmentInfo.route53Info.hostedZoneName}`;

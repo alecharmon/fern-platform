@@ -91,7 +91,7 @@ export class AsyncApiYamlFormatter {
 }
 
 function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): AsyncAPIDocument {
-    const { websocket, globalHeaders, apiDefinition } = context;
+    const { websocket, globalHeaders } = context;
 
     const channelPath = ApiDefinition.toCurlyBraceEndpointPathLiteral(websocket.path);
 
