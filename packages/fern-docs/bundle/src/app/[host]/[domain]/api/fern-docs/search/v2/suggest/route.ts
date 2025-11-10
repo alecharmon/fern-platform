@@ -24,7 +24,7 @@ const BodySchema = z.object({
 
 async function generateSuggestions(domain: string, algoliaSearchKey: string) {
     const modelId = "claude-4.5-haiku";
-    const { model: languageModel, provider: _ } = getLanguageModel(modelId);
+    const { model: languageModel, provider: _ } = getLanguageModel(modelId, { forStructuredOutput: true });
 
     const client = searchClient(algoliaAppId(), algoliaSearchKey);
     const response = await client.searchSingleIndex<AlgoliaRecord>({

@@ -6,11 +6,15 @@ import type { LanguageModel } from "ai";
 import { createFallback } from "ai-fallback";
 
 type ModelId = "claude-3.7" | "claude-4" | "claude-4.5" | "claude-4.5-haiku";
-export type ModelProvider = "cohere" | "bedrock";
+export type ModelProvider = "cohere" | "bedrock" | "anthropic";
 
 type ModelConfig = {
     modelId: string;
     region: string;
+};
+
+type AnthropicModelConfig = {
+    modelId: string;
 };
 
 const MODEL_CONFIGS: Record<ModelId, ModelConfig> = {
@@ -29,6 +33,26 @@ const MODEL_CONFIGS: Record<ModelId, ModelConfig> = {
     "claude-4.5-haiku": {
         modelId: "us.anthropic.claude-haiku-4-5-20251001-v1:0",
         region: "us-east-1"
+    }
+};
+
+/**
+ * Direct Anthropic API model IDs for structured output use cases.
+ * Bedrock doesn't support tool mode properly for structured outputs,
+ * so we use direct Anthropic API which provides native support.
+ */
+const ANTHROPIC_MODEL_CONFIGS: Record<ModelId, AnthropicModelConfig> = {
+    "claude-3.7": {
+        modelId: "claude-3-7-sonnet-20250219"
+    },
+    "claude-4": {
+        modelId: "claude-sonnet-4-20250514"
+    },
+    "claude-4.5": {
+        modelId: "claude-sonnet-4-5-20250929"
+    },
+    "claude-4.5-haiku": {
+        modelId: "claude-haiku-4-5-20251001"
     }
 };
 
@@ -57,7 +81,28 @@ function buildOrderedModels(primary: ModelId): ModelId[] {
     return [primary, ...FALLBACK_ORDER.filter((m) => m !== primary)];
 }
 
-export function getLanguageModel(model: string | undefined): {
+// For structured output, use direct Anthropic API (no fallback)
+function getModelForStructuredOutput(requested: ModelId): {
+    model: LanguageModel;
+    provider: ModelProvider;
+} {
+    const anthropic = createAnthropic({ apiKey: anthropicApiKey() });
+    const cfg = ANTHROPIC_MODEL_CONFIGS[requested];
+    if (!cfg) {
+        throw new Error(
+            `Model ${requested} not configured for structured output. Available models: ${Object.keys(ANTHROPIC_MODEL_CONFIGS).join(", ")}`
+        );
+    }
+    return {
+        model: anthropic(cfg.modelId),
+        provider: "anthropic"
+    };
+}
+
+export function getLanguageModel(
+    model: string | undefined,
+    options?: { forStructuredOutput?: boolean }
+): {
     model: LanguageModel;
     provider: ModelProvider;
 } {
@@ -68,6 +113,12 @@ export function getLanguageModel(model: string | undefined): {
     }
 
     const requested = resolveModelId(model);
+
+    if (options?.forStructuredOutput) {
+        return getModelForStructuredOutput(requested);
+    }
+
+    // For regular chat/streaming, use Bedrock with fallbacks
     const ordered = buildOrderedModels(requested);
 
     const bedrockModels = ordered.map((id) => {
