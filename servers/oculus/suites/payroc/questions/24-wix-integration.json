@@ -1,0 +1,10 @@
+{
+  "question": "will payroc integrate into wix website?",
+  "ground_truth": "Based on the documentation I have access to, Wix is not specifically mentioned as a pre-integrated ecommerce platform. The training data lists integrations with **Shopify, OpenCart, WooCommerce, Magento, and more**, but Wix isn't explicitly called out.\n\nHowever, Payroc offers several integration options that **could potentially work** with a Wix website:\n\n1. **Hosted Payment Page** - A fully customizable, PCI-compliant embedded payment page that can be integrated into your website\n2. **Payment Links** - Create one-time or reusable payment links that can be hosted on your website\n3. **Gateway API** - If Wix supports custom payment gateway integrations, you could potentially integrate via Payroc's RESTful API\n\nSince this isn't explicitly documented in the materials I have access to, I'd recommend:\n\n- **Contacting Payroc directly** to confirm whether there's a Wix integration available or in development\n- Checking if Wix supports custom payment gateway integrations that would allow you to use Payroc's API\n\nYou can [contact the Payroc team](https://payroc.com/contacts/) to discuss your specific Wix integration requirements and explore the best solution for your needs.\n\nIs there a specific payment acceptance method (in-person, online checkout, etc.) you're looking to implement on your Wix site?",
+  "metadata": {
+    "category": "integration",
+    "source": "manual",
+    "slug": "24-wix-integration",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

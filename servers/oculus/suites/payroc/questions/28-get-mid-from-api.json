@@ -1,0 +1,10 @@
+{
+  "question": "is there a way to get MID from the API?",
+  "ground_truth": "Based on the training data I have access to, I can see that `merchantId` appears in the API, particularly in the **List Transactions** method where you can filter transactions by `merchantId`. The **Retrieve Transaction** method also mentions returning information about the \"merchant\" and processing account that ran the transaction.\n\nHowever, I don't see a specific endpoint documented in my training data that's dedicated to retrieving merchant details or MID directly.\n\nTo help you better, could you clarify:\n\n1. **What context do you have?** Do you have a `processingTerminalId`, `paymentId`, or `transactionId`?\n2. **What's your use case?** Are you trying to:\n   - Retrieve your own merchant's MID?\n   - Look up merchant information from a transaction?\n   - Something else?\n\nIf you have a transaction or payment ID, the merchant information might be included in those responses. Alternatively, if you know your `processingTerminalId`, the [Retrieve Processing Terminal](https://docs.payroc.com/api/schema/boarding/processing-terminals/retrieve) endpoint might provide related merchant account information.\n\nCould you provide more details about what you're trying to accomplish?",
+  "metadata": {
+    "category": "api",
+    "source": "manual",
+    "slug": "28-get-mid-from-api",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

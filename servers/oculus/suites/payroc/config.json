@@ -1,0 +1,4 @@
+{
+  "domain": "payroc.docs.buildwithfern.com",
+  "evaluators": ["correctness"]
+}

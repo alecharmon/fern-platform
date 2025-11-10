@@ -1,0 +1,10 @@
+{
+  "question": "$idempotency_key how i get this key?",
+  "ground_truth": "The `Idempotency-Key` is **not retrieved** from Payroc - **you generate it yourself** for each request.\n\n## Requirements:\n\n- **Format:** Must be a UUID v4 (Universally Unique Identifier version 4)\n- **Uniqueness:** Generate a new unique UUID v4 for each distinct request\n- **Purpose:** Prevents duplicate processing if you accidentally send the same request multiple times\n\n## How to generate:\n\nMost programming languages have built-in libraries to generate UUID v4 values. For example:\n\n**C#:**\n```csharp\nstring idempotencyKey = Guid.NewGuid().ToString();\n// Example: \"8e03978e-40d5-43e8-bc93-6894a57f9324\"\n```\n\n**JavaScript:**\n```javascript\nconst { v4: uuidv4 } = require('uuid');\nconst idempotencyKey = uuidv4();\n```\n\n**Python:**\n```python\nimport uuid\nidempotency_key = str(uuid.uuid4())\n```\n\n## Usage in requests:\n\nInclude it as a header in POST and PATCH requests:\n\n```bash\ncurl -H \"Idempotency-Key: 8abc1de23-f4a5-6789-bcd0-12e345678901\"\n```\n\nFor more details about how idempotency works with the Payroc API, see: https://docs.payroc.com/api/idempotency",
+  "metadata": {
+    "category": "api",
+    "source": "manual",
+    "slug": "21-idempotency-key",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "question": "how i get serial number",
+  "ground_truth": "To help you get the serial number, I need to know a bit more about your setup. Are you:\n\n1. **Using a physical payment device** (IDTech or Ingenico)?\n2. **Testing with the Payroc Cloud Simulator**?\n\n**If you're using a physical payment device:**\n\nThe serial number is output in the logs when you start the middleware:\n\n- **For IDTech devices:**\n  - On Windows: Double-click the `start-idtech.bat` batch file\n  - On Linux: Run `./start-idtech.sh`\n\n- **For Ingenico devices:**\n  - On Windows: Double-click the `start-ingenico.bat` batch file  \n  - On Linux: Run `./start-ingenico.sh`\n\nThe serial number will appear in the console logs. You'll need this serial number to integrate with Payroc Cloud.\n\n**If you're using the Payroc Cloud Simulator:**\n\nWhen you access the simulator at https://cloud.uat.payroc.com, it assigns a unique mock serial number to your browser session. After entering your credentials, select **Copy S/N and Continue** to get the mock serial number.\n\nWhich setup are you using, and I can provide more specific guidance?",
+  "metadata": {
+    "category": "api",
+    "source": "manual",
+    "slug": "22-get-serial-number",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

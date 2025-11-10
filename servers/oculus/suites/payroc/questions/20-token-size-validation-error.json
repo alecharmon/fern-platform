@@ -1,0 +1,10 @@
+{
+  "question": "I am trying to process a payment and I am getting this error... '{\"type\":\"Errors | Payroc | Documentation\",\"title\":\"Bad request\",\"status\":400,\"detail\":\"One or more validation errors occurred, see error section for more info\",\"errors\": [{\"parameter\":\"paymentMethod.token\",\"detail\":\"Below minimum\",\"message\":\"'token' size must be between 128 and 128. You entered MREF_d682071f-64db-4475-899f-179bfc3aab2eaW.\"}]}'",
+  "ground_truth": "I can see the issue here. You're trying to use what appears to be a **secureTokenId** (`MREF_d682071f-64db-4475-899f-179bfc3aab2eaW`) in the `paymentMethod.token` field, but that's not the correct token to use.\n\n## The Issue\n\nThere are two different identifiers associated with secure tokens:\n\n1. **secureTokenId** - This is the merchant-created reference ID (what you have: `MREF_d682071f-64db-4475-899f-179bfc3aab2eaW`)\n2. **token** - This is the gateway-assigned token that you use in payment requests\n\n## The Solution\n\nWhen you created the secure token, the response included both values. You need to use the **token** field, not the **secureTokenId**. The token should:\n- Be 12-19 characters long\n- Start with `296753`\n- Look something like: `2967538502417872`\n\n## Example\n\nFrom the secure token creation response:\n```json\n{\n  \"secureTokenId\": \"MREF_...\",  // Don't use this in payments\n  \"token\": \"2967538502417872\",    // Use THIS in your payment request\n  ...\n}\n```\n\nYou should retrieve the secure token first if you don't have the gateway-assigned token value. Use the [Get Secure Token](https://docs.payroc.com/api/schema/payments/secure-tokens/get) endpoint with your `secureTokenId` to get the full token details, including the correct `token` value to use in your payment request.\n\nDoes this clarify the issue? Do you need help retrieving the token value?",
+  "metadata": {
+    "category": "api",
+    "source": "manual",
+    "slug": "20-token-size-validation-error",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

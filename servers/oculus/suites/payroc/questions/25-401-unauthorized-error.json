@@ -1,0 +1,10 @@
+{
+  "question": "What causes a 401 Unauthorized Error?",
+  "ground_truth": "A **401 Unauthorized Error** in the Payroc API occurs when we can't verify your identity. \n\n## Common Causes\n\nThe most common reason for this error is that your **Bearer token has expired**. \n\n## Error Response\n\nWhen you receive a 401 error, the response will look like this:\n\n```json\n{\n  \"type\": \"Unauthorized\",\n  \"title\": \"unauthorized\",\n  \"status\": 401,\n  \"detail\": \"Your identity could not be verified\"\n}\n```\n\n## Resolution\n\nTo resolve this error:\n\n1. **Check your Bearer token** - Ensure you're including a valid Bearer token in your Authorization header\n2. **Request a new token** - If your token has expired, you'll need to authenticate again to obtain a fresh token\n\nThe authentication should be in the format: `Authorization: Bearer <token>`\n\nYou can find more details about authentication at https://docs.payroc.com/api/authentication\n\nIs there anything specific about authentication or token management you'd like to know more about?",
+  "metadata": {
+    "category": "api",
+    "source": "manual",
+    "slug": "25-401-unauthorized-error",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

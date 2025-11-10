@@ -1,0 +1,10 @@
+{
+  "question": "Hi Payroc Support Team, I'm currently testing integration in the UAT sandbox environment. While authenticated successfully and able to reach the endpoints, I'm receiving error responses when attempting to create a payment: 403 Forbidden — \"You do not have the required permissions to perform this action\" \n\nCould you please confirm whether my UAT merchant account has the necessary permissions enabled for the Create Payment API endpoint (POST /v1/payments)? If not, please enable this functionality so I can proceed with testing.",
+  "ground_truth": "Thank you for reaching out about this 403 Forbidden error in the UAT environment.\n\nBased on what you've described, it sounds like you've successfully:\n- Generated a Bearer token via the Identity Service\n- Reached the API endpoints\n\nHowever, a 403 error specifically indicates a permissions issue at the account level, which suggests your UAT merchant account may need configuration updates to enable payment creation functionality.\n\n**This type of account-level permission configuration is not something I can assist with directly**, as it requires access to your merchant account settings.\n\nPlease contact the Payroc Integration Support team at **[integrationsupport@payroc.com](mailto:integrationsupport@payroc.com)** with the following information:\n\n- Your UAT merchant account details or Processing Terminal ID\n- The specific endpoint you're trying to access: `POST /v1/payments`\n- The error message you're receiving (403 Forbidden)\n- Confirmation that you can successfully authenticate and obtain a Bearer token\n\nThey will be able to verify your account permissions and enable the Create Payment functionality for your UAT environment so you can proceed with testing.\n\nIs there anything else about the API integration itself that I can help clarify while you wait for the permissions to be enabled?",
+  "metadata": {
+    "category": "api",
+    "source": "manual",
+    "slug": "23-uat-403-permissions",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

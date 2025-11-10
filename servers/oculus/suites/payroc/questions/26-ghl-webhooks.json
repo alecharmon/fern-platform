@@ -1,0 +1,10 @@
+{
+  "question": "hi i want to integrate payroc payment form in ghl so i can recive payment using payroc and want's to send sucess and failer mesage using webhooks",
+  "ground_truth": "Hi! I'd be happy to help you integrate Payroc payments. Let me clarify a few things to guide you in the right direction:\n\n## Payment Form Integration\n\nFor embedding a payment form, you'll want to use **Hosted Fields**. This allows you to add secure payment fields directly into your webpage/platform while Payroc handles the security and compliance.\n\nHere's how it works:\n1. You create a form with Hosted Fields on your page\n2. The customer enters payment details\n3. Payroc returns a single-use token\n4. You use that token to process the payment via the Payments API\n\n[Learn more about Hosted Fields](https://docs.payroc.com/guides/integrate/hosted-fields)\n\n## Important Clarification on Webhooks\n\nI need to clarify something important: **Hosted Fields uses JavaScript events** (not webhooks) to communicate success/failure:\n- **submissionSuccess event** - fires when a single-use token is created\n- **error event** - fires when there are errors with the form\n\nThese happen in the browser, not as server-to-server webhooks.\n\n## Webhook Notifications\n\nFor server-to-server webhook notifications, Payroc supports **Event Subscriptions**. However, based on the current documentation, webhooks are only available for these specific boarding events:\n- `processingAccount.status.changed`\n- `terminalOrder.status.changed`\n\n[Learn more about Event Subscriptions](https://docs.payroc.com/guides/integrate/event-subscriptions)\n\n## Questions for You\n\nTo better assist you:\n1. Do you want to handle payment success/failure in the browser (JavaScript) or do you need server-side webhooks?\n2. Are you looking to get notified about payment transaction results specifically?\n\nCan you provide more details about your GHL integration approach?",
+  "metadata": {
+    "category": "integration",
+    "source": "manual",
+    "slug": "26-ghl-webhooks",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

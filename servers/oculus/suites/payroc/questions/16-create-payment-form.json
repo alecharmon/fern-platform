@@ -1,0 +1,10 @@
+{
+  "question": "create a form for the payment",
+  "ground_truth": "I'll help you create a payment form using Payroc Hosted Fields. First, I need to clarify a few things:\n\n1. **What payment type do you want to accept?**\n   - Card payments\n   - ACH (bank account - US)\n   - PAD (bank account - Canada)\n\n2. **What's your goal?**\n   - Run a sale (immediate payment)\n   - Save customer payment details for later\n   - Update existing saved payment details\n\n## Quick Overview\n\nCreating a payment form with Hosted Fields involves:\n\n1. **Authentication** - Generate a session token\n2. **Add HTML** - Add the form structure to your webpage\n3. **Add JavaScript** - Configure Hosted Fields with your session token\n4. **Handle the response** - Subscribe to events to receive the single-use token\n\n**Note:** Hosted Fields reduces your PCI-DSS compliance requirements since we host the sensitive payment fields securely.\n\n## Before You Begin\n\nYou'll need:\n- Your merchant's **processing terminal ID**\n- A **session token** (generated fresh for each page load - expires after 10 minutes)\n\nOnce you tell me which payment type and transaction type you need, I can provide you with the specific HTML and JavaScript code examples.\n\nWould you like to start with card payments for running a sale? Or do you have a different requirement?\n\nFor detailed documentation, see: https://docs.payroc.com/guides/integrate/hosted-fields/set-up-hosted-fields",
+  "metadata": {
+    "category": "integration",
+    "source": "manual",
+    "slug": "16-create-payment-form",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

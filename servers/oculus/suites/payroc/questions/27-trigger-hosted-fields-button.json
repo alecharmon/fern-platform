@@ -1,0 +1,10 @@
+{
+  "question": "how can i trigger hosted fields button outside hosted fields?",
+  "ground_truth": "Based on the training data I have, I can see that Hosted Fields includes a submit button configuration within the JavaScript setup, like this:\n\n```js\nsubmit: {\n  target: \"#submit-button\",\n  value: \"Pay Now\"\n}\n```\n\nHowever, I don't have specific documentation about programmatically triggering the Hosted Fields submit button from outside the form (e.g., using a custom external button).\n\nTo help you better, could you clarify:\n\n1. **Are you trying to use your own custom button** instead of the Hosted Fields submit button?\n2. **Do you want to trigger submission via JavaScript** when some other event occurs?\n3. **What payment type** are you using (card, ACH, or PAD)?\n\nThe Hosted Fields implementation I have documented shows the standard configuration where the submit button is part of the fields configuration. If you need to trigger submission programmatically, this may require using specific methods on the `hostedFields` instance (like `cardForm` in the examples), but I don't have those methods documented in my current training data.\n\nYou may want to check the complete Hosted Fields API reference at https://docs.payroc.com/guides/integrate/hosted-fields for additional methods that might be available on the Hosted Fields instance.",
+  "metadata": {
+    "category": "integration",
+    "source": "manual",
+    "slug": "27-trigger-hosted-fields-button",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}

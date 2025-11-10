@@ -1,0 +1,10 @@
+{
+  "question": "when submitting a support case, what is the dba field?",
+  "ground_truth": "Based on the training data, **DBA** stands for **\"Doing Business As\"** and refers to the public-facing name of a business. It's also known as:\n- An assumed name\n- A fictitious business name  \n- A trade name\n\nThis is the name that a business operates under, which may be different from its legal registered name.\n\nFor example, if a company is legally registered as \"John Doe Enterprises LLC\" but operates restaurants under the name \"Joe's Diner,\" then \"Joe's Diner\" would be the DBA.\n\nHowever, I should note that while the training data extensively covers DBA in the context of the Payroc API (such as when creating processing accounts or merchant platforms), it doesn't specifically cover support case submission forms or procedures. If you need specific guidance on what to enter in the DBA field when submitting a support case to Payroc, you may want to contact Payroc support directly for clarification on their support case requirements.\n\nIs there anything else about the Payroc API or merchant setup process I can help you with?",
+  "metadata": {
+    "category": "support",
+    "source": "manual",
+    "slug": "17-support-case-dba-field",
+    "domain": "payroc.docs.buildwithfern.com"
+  }
+}
