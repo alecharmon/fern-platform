@@ -7,4 +7,5 @@ import * as FernRegistry from "../../../../../../../../../index.js";
 export interface QueryParameter extends FernRegistry.api.v1.WithDescription, FernRegistry.api.v1.WithAvailability {
     key: string;
     type: FernRegistry.api.v1.register.TypeReference;
+    explode: boolean | undefined;
 }

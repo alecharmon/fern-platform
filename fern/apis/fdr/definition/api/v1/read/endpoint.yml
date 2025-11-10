@@ -66,6 +66,8 @@ types:
     properties:
       key: rootCommons.PropertyKey
       type: type.TypeReference
+      explode:
+        type: optional<boolean>
 
   QueryParameter:
     extends:
@@ -74,6 +76,8 @@ types:
     properties:
       key: string
       type: type.TypeReference
+      explode:
+        type: optional<boolean>
 
   Header:
     extends:
