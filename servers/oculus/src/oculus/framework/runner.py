@@ -1,4 +1,5 @@
 import concurrent.futures
+import json
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +22,25 @@ from oculus.utils.file_utils import (
     load_json,
     save_json,
 )
+
+
+def _parse_sources_from_answer(answer: Answer) -> list[dict[str, str | None]] | None:
+    """
+    Parse sources from answer metadata.
+
+    Returns list of dicts with 'url', 'slug', 'title' keys, or None if not found.
+    """
+    if "sources" not in answer.metadata:
+        return None
+
+    try:
+        sources = json.loads(answer.metadata["sources"])
+        if isinstance(sources, list):
+            return sources
+    except (json.JSONDecodeError, TypeError):
+        pass
+
+    return None
 
 
 class EvaluationRunner:
@@ -256,11 +276,16 @@ class EvaluationRunner:
                     continue
 
                 try:
+                    # Parse sources for citation evaluator
+                    actual_sources = _parse_sources_from_answer(answer)
+
                     eval_result: EvaluationResult | None = evaluator_fn(
-                        answer.question,
-                        answer.answer,
-                        question_obj.ground_truth,
-                        judge_model,
+                        question=answer.question,
+                        answer=answer.answer,
+                        ground_truth=question_obj.ground_truth,
+                        model=judge_model,
+                        expected_citations=question_obj.expected_citations,
+                        actual_sources=actual_sources,
                     )
 
                     if eval_result:

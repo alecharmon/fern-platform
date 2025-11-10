@@ -6,6 +6,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+import oculus.evaluators.citation  # noqa: F401
 import oculus.evaluators.correctness  # noqa: F401
 import oculus.generators.endpoints  # noqa: F401
 import oculus.generators.markdown  # noqa: F401

@@ -56,6 +56,7 @@ def evaluate_correctness(
     answer: str,
     ground_truth: str,
     model: str = "claude-opus-4-20250514",
+    **kwargs,
 ) -> EvaluationResult | None:
     response = evaluate_answer(question, answer, ground_truth, model)
 

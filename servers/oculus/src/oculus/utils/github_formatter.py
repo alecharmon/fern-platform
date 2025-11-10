@@ -11,8 +11,7 @@ def format_github_summary(run: EvaluationRun, full_results_url: str | None = Non
     lines.append("## 🔍 Oculus Evaluation Results")
     lines.append("")
     lines.append(
-        f"**Suite:** `{run.suite}` | **Run ID:** `{run.run_id}` | "
-        f"**Timestamp:** {_format_timestamp(run.timestamp)}"
+        f"**Suite:** `{run.suite}` | **Run ID:** `{run.run_id}` | " f"**Timestamp:** {_format_timestamp(run.timestamp)}"
     )
     lines.append("")
 

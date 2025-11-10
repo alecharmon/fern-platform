@@ -1,6 +1,5 @@
 """Tests for Vercel HTTP integration."""
 
-
 from oculus.integrations.vercel_http import VercelHTTPIntegration
 
 

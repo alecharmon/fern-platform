@@ -5,7 +5,10 @@
     "category": "code",
     "source": "manual",
     "slug": "integrate-voice-to-voice-react",
-    "domain": "hume-discord-ai.docs.buildwithfern.com",
-    "cited_context": "https://github.com/HumeAI/hume-react-sdk/blob/main/packages/react/README.md, https://hume-discord-ai.docs.buildwithfern.com/docs/speech-to-speech-evi/configuration/voice"
-  }
+    "domain": "hume-discord-ai.docs.buildwithfern.com"
+  },
+  "expected_citations": [
+    "https://github.com/HumeAI/hume-react-sdk/blob/main/packages/react/README.md",
+    "https://hume-discord-ai.docs.buildwithfern.com/docs/speech-to-speech-evi/configuration/voice"
+  ]
 }
