@@ -2,8 +2,6 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { GithubRepoValidationError } from "@/app/services/dal/github/validators";
 import { getValidationErrorMessage } from "@/utils/errors";
 import type { DocsUrl } from "@/utils/types";
-import { ConnectGithubRepoButton } from "../ConnectGithubRepoButton";
-import { InstallGithubAppButton } from "../InstallGithubAppButton";
 import { WarningNote } from "../WarningNote";
 
 interface ValidationErrorHandlerProps {
@@ -21,7 +19,7 @@ export function VisualEditorValidationErrorHandler({
 }: ValidationErrorHandlerProps) {
     switch (error.type) {
         case "FERN_BOT_NOT_INSTALLED":
-            return <InstallGithubAppButton orgName={orgName} docsUrl={docsUrl} githubUrl={githubUrl} />;
+            return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
         case "MALFORMED_GITHUB_URL":
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
@@ -33,7 +31,7 @@ export function VisualEditorValidationErrorHandler({
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
         case "REPO_NOT_CONNECTED":
-            return <ConnectGithubRepoButton docsUrl={docsUrl} variant="default" size="default" />;
+            return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
         case "FERN_CONFIG_JSON_MISSING":
             return (

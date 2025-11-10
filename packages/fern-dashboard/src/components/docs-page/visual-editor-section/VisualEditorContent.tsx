@@ -7,7 +7,9 @@ import type { GithubRepoValidationError } from "@/app/services/dal/github/valida
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";
 import { BranchList } from "../BranchList";
+import { ConnectGithubRepoButton } from "../ConnectGithubRepoButton";
 import { GoToEditorButton } from "../GoToEditorButton";
+import { InstallGithubAppButton } from "../InstallGithubAppButton";
 import { VEPreviewImage } from "../VEPreviewImage";
 import { VisualEditorCard } from "./VisualEditorCard";
 import { VisualEditorValidationErrorHandler } from "./VisualEditorValidationErrorHandler";
@@ -37,30 +39,42 @@ export function VisualEditorContent({
     sourceRepo?: GithubSourceRepo;
     criticalUpdateWarning?: ReactNode;
 }) {
-    // If there's an error, show warning below header with disabled button
-    if (error) {
-        return (
-            <VisualEditorCard
-                rightContent={<GoToEditorButton docsUrl={docsUrl} session={session} disabled />}
-                warningContent={
+    const rightContent: ReactNode =
+        error?.type === "REPO_NOT_CONNECTED" ? (
+            // If repo is not connected, show connect repo button
+            <ConnectGithubRepoButton docsUrl={docsUrl} variant="default" size="default" />
+        ) : error?.type === "FERN_BOT_NOT_INSTALLED" ? (
+            // If fern bot is not installed, show install fern bot button
+            <InstallGithubAppButton docsUrl={docsUrl} githubUrl={githubUrl} orgName={orgName} />
+        ) : (
+            // Else, show editor button – should be disabled for all errors
+            <GoToEditorButton docsUrl={docsUrl} session={session} disabled={!!error} />
+        );
+
+    return (
+        <VisualEditorCard
+            rightContent={rightContent}
+            warningContent={
+                // Don't show warning note for specific errors
+                error && error.type !== "REPO_NOT_CONNECTED" && error.type !== "FERN_BOT_NOT_INSTALLED" ? (
                     <VisualEditorValidationErrorHandler
                         error={error}
                         githubUrl={githubUrl}
                         orgName={orgName}
                         docsUrl={docsUrl}
                     />
-                }
-            >
+                ) : null
+            }
+        >
+            {error ? (
+                // When there's an error, show preview image
                 <VEPreviewImage />
-            </VisualEditorCard>
-        );
-    }
-
-    // Validation passed! Show the card with the Go to Editor button
-    return (
-        <VisualEditorCard rightContent={<GoToEditorButton docsUrl={docsUrl} session={session} />}>
-            {criticalUpdateWarning}
-            <BranchList docsUrl={docsUrl} sourceRepo={sourceRepo} />
+            ) : (
+                <>
+                    {criticalUpdateWarning}
+                    <BranchList docsUrl={docsUrl} sourceRepo={sourceRepo} />
+                </>
+            )}
         </VisualEditorCard>
     );
 }
