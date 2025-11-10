@@ -46,8 +46,7 @@ export async function POST(request: NextRequest) {
                 (domain) =>
                     !domain.endsWith(`.${FERN_DOCS_BUILDWITHFERN_COM}`) &&
                     !domain.endsWith(`.${FERN_DOCS_STAGING_BUILDWITHFERN_COM}`) &&
-                    !domain.endsWith(`.${FERN_DOCS_DEV_BUILDWITHFERN_COM}`) &&
-                    !domain.endsWith(`.${FERN_DOCS_FERNDOCS_APP}`)
+                    !domain.endsWith(`.${FERN_DOCS_DEV_BUILDWITHFERN_COM}`) 
             )
             .map(withoutStaging)
     );
