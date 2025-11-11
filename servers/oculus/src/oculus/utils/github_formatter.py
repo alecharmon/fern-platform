@@ -1,7 +1,7 @@
-from collections import defaultdict
 from datetime import datetime
 
 from oculus.framework.models import EvaluationRun
+from oculus.framework.statistics import calculate_category_stats_from_run
 
 
 def format_github_summary(run: EvaluationRun, full_results_url: str | None = None) -> str:
@@ -23,7 +23,7 @@ def format_github_summary(run: EvaluationRun, full_results_url: str | None = Non
     )
     lines.append("")
 
-    category_stats = _calculate_category_stats(run)
+    category_stats = calculate_category_stats_from_run(run)
     if category_stats:
         lines.append("### Breakdown by Category")
         lines.append("| Category | Correct | Total | Accuracy |")
@@ -92,7 +92,7 @@ def format_github_job_summary(run: EvaluationRun) -> str:
             lines.append(f"| {evaluator_name} | {pass_rate:.1%} | {avg_score_str} |")
         lines.append("")
 
-    category_stats = _calculate_category_stats(run)
+    category_stats = calculate_category_stats_from_run(run)
     if category_stats:
         lines.append("## Category Breakdown")
         lines.append("")
@@ -157,19 +157,6 @@ def format_github_job_summary(run: EvaluationRun) -> str:
         lines.append("")
 
     return "\n".join(lines)
-
-
-def _calculate_category_stats(run: EvaluationRun) -> dict[str, dict[str, int]]:
-    """Calculate statistics by category."""
-    stats: dict[str, dict[str, int]] = defaultdict(lambda: {"correct": 0, "total": 0})
-
-    for evaluation in run.results:
-        category = evaluation.metadata.get("category", "unknown")
-        stats[category]["total"] += 1
-        if evaluation.is_correct:
-            stats[category]["correct"] += 1
-
-    return dict(stats)
 
 
 def _format_timestamp(timestamp_str: str) -> str:

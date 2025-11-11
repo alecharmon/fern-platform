@@ -22,6 +22,7 @@ from oculus.framework.models import (
     Question,
     ScaledEvaluatorResult,
 )
+from oculus.framework.statistics import calculate_metrics
 from oculus.utils.docs_definition import get_docs_definition_for_domain
 from oculus.utils.file_utils import (
     load_json,
@@ -359,41 +360,7 @@ class EvaluationRunner:
         return [evaluation for _, evaluation in evaluations]
 
     def calculate_metrics(self, evaluations: list[Evaluation]) -> EvaluationMetrics:
-        total_questions = len(evaluations)
-        total_correct = sum(1 for e in evaluations if e.is_correct)
-        accuracy = total_correct / total_questions if total_questions > 0 else 0.0
-
-        # Calculate per-evaluator statistics
-        evaluator_pass_rates: dict[str, float] = {}
-        evaluator_avg_scores: dict[str, float] = {}
-
-        # Collect all evaluator names
-        evaluator_names: set[str] = set()
-        for evaluation in evaluations:
-            evaluator_names.update(evaluation.evaluator_results.keys())
-
-        for evaluator_name in evaluator_names:
-            # Calculate pass rate
-            results_for_evaluator = [
-                e.evaluator_results[evaluator_name] for e in evaluations if evaluator_name in e.evaluator_results
-            ]
-            if results_for_evaluator:
-                passing_count = sum(1 for r in results_for_evaluator if r.is_passing)
-                evaluator_pass_rates[evaluator_name] = passing_count / len(results_for_evaluator)
-
-                # Calculate average score for scaled evaluators
-                scaled_results = [r for r in results_for_evaluator if isinstance(r, ScaledEvaluatorResult)]
-                if scaled_results:
-                    avg_score = sum(r.score for r in scaled_results) / len(scaled_results)
-                    evaluator_avg_scores[evaluator_name] = avg_score
-
-        return EvaluationMetrics(
-            total_questions=total_questions,
-            total_correct=total_correct,
-            accuracy=accuracy,
-            evaluator_pass_rates=evaluator_pass_rates,
-            evaluator_avg_scores=evaluator_avg_scores,
-        )
+        return calculate_metrics(evaluations)
 
     def run(
         self,
