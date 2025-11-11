@@ -117,7 +117,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const end = Date.now();
 
         track("turbopuffer_reindex", {
-            embeddingModel: embeddingModel.modelId,
+            embeddingModel: embeddingModel.valueOf().toString(),
             durationMs: end - start,
             domain,
             namespace,
@@ -141,7 +141,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         console.error(`[turbopuffer] ${JSON.stringify(error)}`);
 
         track("turbopuffer_reindex_error", {
-            embeddingModel: embeddingModel.modelId,
+            embeddingModel: embeddingModel.valueOf().toString(),
             domain,
             namespace,
             error: String(error)

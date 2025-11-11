@@ -39,7 +39,7 @@
     "@fern-docs/search-keyword": "workspace:*",
     "@fern-docs/search-utils": "workspace:*",
     "@turbopuffer/turbopuffer": "^0.5.11",
-    "ai": "5.0.0-beta.2",
+    "ai": "5.0.86",
     "ai-fallback": "^1.0.2",
     "es-toolkit": "^1.32.0",
     "gpt-tokenizer": "2.9.0",

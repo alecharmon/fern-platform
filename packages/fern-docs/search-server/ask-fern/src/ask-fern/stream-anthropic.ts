@@ -281,7 +281,7 @@ export async function runRouteForAnthropic({
                     })
                 },
                 onChunk: (chunk) => {
-                    if (chunk.chunk.type === "text" && chunk.chunk.text.length > 0) {
+                    if (chunk.chunk.type === "text-delta" && chunk.chunk.text.length > 0) {
                         if (timeToFirstToken == null) {
                             timeToFirstToken = Date.now() - start;
                         }
@@ -337,7 +337,7 @@ export async function runRouteForAnthropic({
                     track("ask_ai", {
                         languageModel: activeLanguageModel,
                         provider: activeModelProvider,
-                        embeddingModel: embeddingModel.modelId,
+                        embeddingModel: embeddingModel.valueOf().toString(),
                         durationMs: end - start,
                         timeToFirstToken,
                         domain,

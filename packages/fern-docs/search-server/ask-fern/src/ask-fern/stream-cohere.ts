@@ -143,7 +143,7 @@ export async function runRouteForCohere({
                             }
                         });
                     }
-                    if (chunk.chunk.type === "text" && chunk.chunk.text.length > 0) {
+                    if (chunk.chunk.type === "text-delta" && chunk.chunk.text.length > 0) {
                         if (timeToFirstToken == null) {
                             timeToFirstToken = Date.now() - start;
                         }
@@ -193,7 +193,7 @@ export async function runRouteForCohere({
                     }
                     track("ask_ai", {
                         languageModel: languageModel.valueOf().toString(),
-                        embeddingModel: embeddingModel.modelId,
+                        embeddingModel: embeddingModel.valueOf().toString(),
                         durationMs: end - start,
                         domain,
                         namespace: turbopufferNamespace,

@@ -67,7 +67,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@upstash/qstash": "^2.8.2",
-    "ai": "5.0.0-beta.2",
+    "ai": "5.0.86",
     "cssnano": "^6.0.3",
     "jotai": "catalog:",
     "next": "catalog:",
@@ -81,7 +81,7 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "ai": "5.0.0-beta.2",
+    "ai": "5.0.86",
     "jotai": "^2",
     "next": "catalog:",
     "react": "^19",

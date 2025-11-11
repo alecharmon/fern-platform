@@ -217,7 +217,8 @@
     ],
     "overrides": {
       "vite": "^6.1.6",
-      "webpack-bundle-analyzer>ws": "^7.5.10"
+      "webpack-bundle-analyzer>ws": "^7.5.10",
+      "@walletconnect/logger": "3.0.0"
     }
   },
   "nextBundleAnalysis": {
