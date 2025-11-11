@@ -6,7 +6,7 @@ import type { FeedbackEntry } from "@/app/actions/getFeedback";
 
 import { ColumnHeaderWithFilter } from "./ColumnHeaderWithFilter";
 
-export const columns: ColumnDef<FeedbackEntry>[] = [
+export const codeIssuesColumns: ColumnDef<FeedbackEntry>[] = [
     {
         accessorKey: "currentUrl",
         header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Current URL" className="pl-0" />,
@@ -24,65 +24,50 @@ export const columns: ColumnDef<FeedbackEntry>[] = [
         }
     },
     {
-        accessorKey: "wasHelpful",
-        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Helpful?" />,
+        accessorKey: "language",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Language" />,
         cell: ({ row }) => {
-            const wasHelpful = row.getValue("wasHelpful") as boolean;
-            return <div style={{ fontFamily: "Berkeley Mono, monospace" }}>{wasHelpful ? "True" : "False"}</div>;
-        },
-        filterFn: (row, id, value) => {
-            if (value === "") {
-                return true;
-            }
-            const cellValue = row.getValue(id) as boolean;
-            const filterValue = String(value).toLowerCase();
-            if (filterValue === "true") {
-                return cellValue === true;
-            }
-            if (filterValue === "false") {
-                return cellValue === false;
-            }
-            return true;
-        }
-    },
-    {
-        accessorKey: "selection",
-        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Reason" />,
-        cell: ({ row }) => {
-            let selection = row.getValue("selection") as string;
-            selection = selection.replaceAll("-", " ");
-
-            const sentenceCased = selection.charAt(0).toUpperCase() + selection.slice(1).toLowerCase();
+            const language = (row.getValue("language") as string) || "Unknown";
             return (
-                <div className="truncate" title={sentenceCased} style={{ fontFamily: "GT Planar, sans-serif" }}>
-                    {sentenceCased}
+                <div className="truncate" title={language} style={{ fontFamily: "GT Planar, sans-serif" }}>
+                    {language}
                 </div>
             );
         },
         filterFn: (row, id, value) => {
-            const cellValue = String(row.getValue(id)).toLowerCase().replaceAll("-", " ");
+            const cellValue = String(row.getValue(id) || "Unknown").toLowerCase();
             return cellValue.includes(String(value).toLowerCase());
         }
     },
     {
-        accessorFn: (row) => {
-            if (row.feedbackType === "code_block") {
-                return "Code Block";
-            }
-            return row.userFeedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
-        },
-        id: "channel",
-        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Channel" />,
+        accessorKey: "code",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="Code" />,
         cell: ({ row }) => {
-            const channel = row.getValue("channel") as string;
+            const code = (row.getValue("code") as string) || "Unknown";
             return (
-                <div className="truncate" title={channel} style={{ fontFamily: "GT Planar, sans-serif" }}>
-                    {channel}
+                <div className="truncate" title={code} style={{ fontFamily: "Berkeley Mono, monospace" }}>
+                    {code}
                 </div>
             );
         },
         filterFn: (row, id, value) => {
-            const cellValue = String(row.getValue(id)).toLowerCase();
+            const cellValue = String(row.getValue(id) || "Unknown").toLowerCase();
+            return cellValue.includes(String(value).toLowerCase());
+        }
+    },
+    {
+        accessorKey: "userFeedback",
+        header: ({ column }) => <ColumnHeaderWithFilter column={column} title="User Feedback" />,
+        cell: ({ row }) => {
+            const feedback = (row.getValue("userFeedback") as string) || "";
+            return (
+                <div className="truncate" title={feedback} style={{ fontFamily: "GT Planar, sans-serif" }}>
+                    {feedback}
+                </div>
+            );
+        },
+        filterFn: (row, id, value) => {
+            const cellValue = String(row.getValue(id) || "").toLowerCase();
             return cellValue.includes(String(value).toLowerCase());
         }
     },

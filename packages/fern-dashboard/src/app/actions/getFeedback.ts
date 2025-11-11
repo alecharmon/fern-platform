@@ -63,6 +63,9 @@ export interface FeedbackEntry {
     browser: string;
     operatingSystem: string;
     userFeedback: string;
+    feedbackType?: string;
+    language?: string;
+    code?: string;
 }
 
 export interface GetFeedbackResponse {

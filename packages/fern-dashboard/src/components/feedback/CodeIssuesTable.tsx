@@ -19,12 +19,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/utils/utils";
 
 import { BORDER_STYLES } from "../analytics/AnalyticsPageClient";
+import { codeIssuesColumns } from "./CodeIssuesColumnDef";
 import { exportFeedbackToCSV } from "./exportFeedbackToCSV";
-import { columns } from "./FeedbackColumnDef";
 import { FeedbackTableHeader } from "./FeedbackTableHeader";
 
-interface FeedbackTableProps {
-    feedback: FeedbackEntry[];
+interface CodeIssuesTableProps {
+    codeIssues: FeedbackEntry[];
     isLoading: boolean;
     error: Error | null;
     dateRange: DateRangeOptions;
@@ -38,8 +38,8 @@ interface FeedbackTableProps {
     onPageChange: (page: number) => void;
 }
 
-export function FeedbackTable({
-    feedback,
+export function CodeIssuesTable({
+    codeIssues,
     isLoading,
     error,
     dateRange,
@@ -47,12 +47,12 @@ export function FeedbackTable({
     onRowClick,
     pagination,
     onPageChange
-}: FeedbackTableProps) {
+}: CodeIssuesTableProps) {
     const [isExporting, setIsExporting] = useState(false);
 
     const table = useReactTable({
-        data: feedback,
-        columns,
+        data: codeIssues,
+        columns: codeIssuesColumns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
@@ -65,7 +65,7 @@ export function FeedbackTable({
         try {
             const allRows = table.getFilteredRowModel().rows;
             const feedbackToExport = allRows.map((row) => row.original);
-            exportFeedbackToCSV(feedbackToExport, "feedback-export");
+            exportFeedbackToCSV(feedbackToExport, "code-issues-export");
         } catch (error) {
             console.error("Failed to export CSV:", error);
         } finally {
@@ -78,7 +78,7 @@ export function FeedbackTable({
             <div
                 className={cn(BORDER_STYLES, "border-gray-0 flex h-[400px] w-full items-center justify-center border")}
             >
-                <p className="text-red-500">Error loading feedback: {error.message}</p>
+                <p className="text-red-500">Error loading code issues: {error.message}</p>
             </div>
         );
     }
@@ -87,6 +87,7 @@ export function FeedbackTable({
         <div className={cn(BORDER_STYLES, "border-gray-0 w-full overflow-hidden border")}>
             <FeedbackTableHeader
                 table={table}
+                title="Code Issues"
                 dateRange={dateRange}
                 setDateRange={setDateRange}
                 onExport={handleExport}
@@ -104,15 +105,13 @@ export function FeedbackTable({
                                         className={cn(
                                             header.column.id === "date"
                                                 ? "w-32 px-2"
-                                                : header.column.id === "wasHelpful"
-                                                  ? "w-24"
+                                                : header.column.id === "language"
+                                                  ? "w-32"
                                                   : header.column.id === "location"
                                                     ? "w-48"
                                                     : header.column.id === "currentUrl"
                                                       ? "pl-0"
-                                                      : header.column.id === "channel"
-                                                        ? "w-28"
-                                                        : undefined
+                                                      : undefined
                                         )}
                                     >
                                         {header.isPlaceholder
@@ -126,7 +125,7 @@ export function FeedbackTable({
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell colSpan={codeIssuesColumns.length} className="h-24 text-center">
                                     Loading...
                                 </TableCell>
                             </TableRow>
@@ -149,30 +148,7 @@ export function FeedbackTable({
                                                             {row.original.currentUrl}
                                                         </div>
                                                         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-1000">
-                                                            <span>
-                                                                {row.original.wasHelpful ? "Helpful" : "Not helpful"}
-                                                            </span>
-                                                            <span>•</span>
-                                                            <span>
-                                                                {row.original.selection
-                                                                    .replaceAll("-", " ")
-                                                                    .charAt(0)
-                                                                    .toUpperCase() +
-                                                                    row.original.selection
-                                                                        .replaceAll("-", " ")
-                                                                        .slice(1)
-                                                                        .toLowerCase()}
-                                                            </span>
-                                                            <span>•</span>
-                                                            <span>
-                                                                {row.original.feedbackType === "code_block"
-                                                                    ? "Code Block"
-                                                                    : row.original.userFeedback?.startsWith(
-                                                                            "[Ask Fern]"
-                                                                        )
-                                                                      ? "Ask Fern"
-                                                                      : "Docs"}
-                                                            </span>
+                                                            <span>{row.original.language || "Unknown"}</span>
                                                             <span>•</span>
                                                             <span>{row.original.location}</span>
                                                             <span>•</span>
@@ -202,13 +178,11 @@ export function FeedbackTable({
                                                     "hidden md:table-cell",
                                                     cell.column.id === "date"
                                                         ? "w-32 px-2"
-                                                        : cell.column.id === "wasHelpful"
-                                                          ? "w-24"
+                                                        : cell.column.id === "language"
+                                                          ? "w-32"
                                                           : cell.column.id === "location"
                                                             ? "w-48"
-                                                            : cell.column.id === "channel"
-                                                              ? "w-28"
-                                                              : undefined
+                                                            : undefined
                                                 )}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -219,8 +193,8 @@ export function FeedbackTable({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No feedback submissions found.
+                                <TableCell colSpan={codeIssuesColumns.length} className="h-24 text-center">
+                                    No code issues found.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -229,7 +203,7 @@ export function FeedbackTable({
             </div>
             <div className="flex items-center justify-between border-t px-4 py-3">
                 <div className="text-sm text-gray-600">
-                    Page {pagination.page} • Showing {feedback.length} {feedback.length === 1 ? "entry" : "entries"}
+                    Page {pagination.page} • Showing {codeIssues.length} {codeIssues.length === 1 ? "issue" : "issues"}
                 </div>
                 <div className="flex gap-2">
                     <Button

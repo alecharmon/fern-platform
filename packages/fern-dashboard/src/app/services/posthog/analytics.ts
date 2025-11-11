@@ -788,12 +788,15 @@ export class AnalyticsService {
             browser: string;
             operatingSystem: string;
             userFeedback: string;
+            feedbackType?: string;
+            language?: string;
+            code?: string;
         }[]
     > {
         const { limit = 100, offset = 0 } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
-        const query = `
+        const pageFeedbackQuery = `
       SELECT
         to_date(timestamp) as date,
         CONCAT(
@@ -816,20 +819,67 @@ export class AnalyticsService {
         END as device,
         COALESCE(properties.$browser, 'Unknown') as browser,
         COALESCE(properties.$os, 'Unknown') as os,
-        COALESCE(properties.message, '') as user_feedback
+        COALESCE(properties.message, '') as user_feedback,
+        'page' as feedback_type,
+        '' as language,
+        '' as code,
+        timestamp
       FROM events
       WHERE
         event = 'feedback_submitted'
         AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
         ${whereClause}
+    `;
+
+        const codeBlockFeedbackQuery = `
+      SELECT
+        to_date(timestamp) as date,
+        CONCAT(
+          COALESCE(properties.$geoip_city_name, ''),
+          CASE
+            WHEN properties.$geoip_city_name IS NOT NULL AND properties.$geoip_country_name IS NOT NULL
+            THEN ' '
+            ELSE ''
+          END,
+          COALESCE(properties.$geoip_country_name, 'Unknown')
+        ) as location,
+        false as was_helpful,
+        'Code Block Issue' as selection,
+        COALESCE(properties.$current_url, '') as current_url,
+        CASE
+          WHEN properties.$device_type = 'Mobile' THEN 'Mobile'
+          WHEN properties.$device_type = 'Tablet' THEN 'Tablet'
+          WHEN properties.$device_type = 'Desktop' THEN 'Desktop'
+          ELSE 'Unknown'
+        END as device,
+        COALESCE(properties.$browser, 'Unknown') as browser,
+        COALESCE(properties.$os, 'Unknown') as os,
+        COALESCE(properties.message, '') as user_feedback,
+        'code_block' as feedback_type,
+        COALESCE(properties.language, 'Unknown') as language,
+        COALESCE(properties.code, '') as code,
+        timestamp
+      FROM events
+      WHERE
+        event = 'code_block_feedback_submitted'
+        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        ${whereClause}
+    `;
+
+        const combinedQuery = `
+      SELECT * FROM (
+        ${pageFeedbackQuery}
+        UNION ALL
+        ${codeBlockFeedbackQuery}
+      )
       ORDER BY timestamp DESC
       LIMIT ${limit}
       OFFSET ${offset}
     `;
 
         const response = await this.client.query<
-            [string, string, boolean, string, string, string, string, string, string]
-        >(query, {
+            [string, string, boolean, string, string, string, string, string, string, string, string, string, string]
+        >(combinedQuery, {
             name: `feedback-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
         });
 
@@ -842,7 +892,10 @@ export class AnalyticsService {
             device: row[5],
             browser: row[6],
             operatingSystem: row[7],
-            userFeedback: row[8]
+            userFeedback: row[8],
+            feedbackType: row[9],
+            language: row[10],
+            code: row[11]
         }));
     }
 

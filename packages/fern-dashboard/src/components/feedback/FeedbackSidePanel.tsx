@@ -14,7 +14,12 @@ export function FeedbackSidePanel({ feedback, onClose }: FeedbackSidePanelProps)
         feedback.selection.replaceAll("-", " ").charAt(0).toUpperCase() +
         feedback.selection.replaceAll("-", " ").slice(1).toLowerCase();
 
-    const channel = feedback.userFeedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
+    const isCodeBlockFeedback = feedback.feedbackType === "code_block";
+    const channel = isCodeBlockFeedback
+        ? "Code Block"
+        : feedback.userFeedback?.startsWith("[Ask Fern]")
+          ? "Ask Fern"
+          : "Docs";
     const message = feedback.userFeedback?.startsWith("[Ask Fern] ")
         ? feedback.userFeedback.slice(11)
         : feedback.userFeedback?.trim() === "[Ask Fern]"
@@ -58,16 +63,22 @@ export function FeedbackSidePanel({ feedback, onClose }: FeedbackSidePanelProps)
                     </a>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                    <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
-                        Was this page helpful?
-                    </h3>
-                    <p className="text-sm">{feedback.wasHelpful ? "Yes" : "No"}</p>
-                </div>
+                {!isCodeBlockFeedback && (
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
+                            Was this page helpful?
+                        </h3>
+                        <p className="text-sm">{feedback.wasHelpful ? "Yes" : "No"}</p>
+                    </div>
+                )}
 
                 <div className="flex flex-col gap-2">
                     <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
-                        {feedback.wasHelpful ? "What did the user like?" : "What went wrong for the user?"}
+                        {isCodeBlockFeedback
+                            ? "Issue Type"
+                            : feedback.wasHelpful
+                              ? "What did the user like?"
+                              : "What went wrong for the user?"}
                     </h3>
                     <p className="text-sm">{sentenceCasedSelection}</p>
                 </div>
@@ -79,12 +90,32 @@ export function FeedbackSidePanel({ feedback, onClose }: FeedbackSidePanelProps)
                     <p className="text-sm">{channel}</p>
                 </div>
 
+                {isCodeBlockFeedback && feedback.language && (
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
+                            Language
+                        </h3>
+                        <p className="text-sm">{feedback.language}</p>
+                    </div>
+                )}
+
                 {message && (
                     <div className="flex flex-col gap-2">
                         <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
                             User Message
                         </h3>
                         <p className="whitespace-pre-wrap text-sm">{message}</p>
+                    </div>
+                )}
+
+                {isCodeBlockFeedback && feedback.code && (
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-gray-1100 text-sm" style={{ fontFamily: "Berkeley Mono, monospace" }}>
+                            Code Snippet
+                        </h3>
+                        <pre className="whitespace-pre-wrap text-sm bg-gray-100 p-3 rounded overflow-x-auto">
+                            <code>{feedback.code}</code>
+                        </pre>
                     </div>
                 )}
 
