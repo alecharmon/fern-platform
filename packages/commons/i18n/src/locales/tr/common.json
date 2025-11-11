@@ -95,7 +95,9 @@
     "footnotes": "Dipnotlar",
     "addFilter": "Filtre ekle",
     "closeSearch": "Aramayı kapat",
-    "searchOurDocumentation": "Dokümantasyonumuzu arayın."
+    "searchOurDocumentation": "Dokümantasyonumuzu arayın.",
+    "filters": "Filtreler",
+    "theme": "Temalar"
   },
   "apiReference": {
     "apiReference": "API Referansı",

@@ -98,6 +98,8 @@ export type Translations = {
         addFilter: string;
         closeSearch: string;
         searchOurDocumentation: string;
+        filters: string;
+        theme: string;
     };
 
     apiReference: {

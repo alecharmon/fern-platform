@@ -95,7 +95,9 @@
     "footnotes": "Przypisy",
     "addFilter": "Dodaj filtr",
     "closeSearch": "Zamknij wyszukiwanie",
-    "searchOurDocumentation": "Przeszukaj naszą dokumentację."
+    "searchOurDocumentation": "Przeszukaj naszą dokumentację.",
+    "filters": "Filtry",
+    "theme": "Motyw"
   },
   "apiReference": {
     "apiReference": "Dokumentacja API",

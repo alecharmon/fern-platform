@@ -95,7 +95,9 @@
     "footnotes": "Fotnoter",
     "addFilter": "Legg til filter",
     "closeSearch": "Lukk søk",
-    "searchOurDocumentation": "Søk i vår dokumentasjon."
+    "searchOurDocumentation": "Søk i vår dokumentasjon.",
+    "filters": "Filtre",
+    "theme": "Tema"
   },
   "apiReference": {
     "apiReference": "API-referanse",

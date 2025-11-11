@@ -95,7 +95,9 @@
     "footnotes": "脚注",
     "addFilter": "フィルターを追加",
     "closeSearch": "検索を閉じる",
-    "searchOurDocumentation": "ドキュメントを検索する。"
+    "searchOurDocumentation": "ドキュメントを検索する。",
+    "filters": "フィルター",
+    "theme": "テーマ"
   },
   "apiReference": {
     "apiReference": "APIリファレンス",

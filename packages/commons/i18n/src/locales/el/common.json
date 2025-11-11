@@ -95,7 +95,9 @@
     "footnotes": "Υποσημειώσεις",
     "addFilter": "Προσθήκη φίλτρου",
     "closeSearch": "Κλείσιμο αναζήτησης",
-    "searchOurDocumentation": "Αναζητήστε στην τεκμηρίωσή μας."
+    "searchOurDocumentation": "Αναζητήστε στην τεκμηρίωσή μας.",
+    "filters": "Φίλτρα",
+    "theme": "Θέμα"
   },
   "apiReference": {
     "apiReference": "Αναφορά API",

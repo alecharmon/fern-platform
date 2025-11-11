@@ -95,7 +95,9 @@
     "footnotes": "Сноски",
     "addFilter": "Добавить фильтр",
     "closeSearch": "Закрыть поиск",
-    "searchOurDocumentation": "Поиск по нашей документации."
+    "searchOurDocumentation": "Поиск по нашей документации.",
+    "filters": "Фильтры",
+    "theme": "Тема"
   },
   "apiReference": {
     "apiReference": "Справочник API",

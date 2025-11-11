@@ -15,7 +15,7 @@ export const CommandGroupTheme = forwardRef<
     }
 
     return (
-        <Command.Group heading="Theme" ref={ref} {...props}>
+        <Command.Group heading={t(lang).search.theme} ref={ref} {...props}>
             <Command.Item
                 value="change theme to light"
                 onSelect={() => setTheme("light")}

@@ -95,7 +95,9 @@
     "footnotes": "Footnotes",
     "addFilter": "Add Filter",
     "closeSearch": "Close search",
-    "searchOurDocumentation": "Search our documentation."
+    "searchOurDocumentation": "Search our documentation.",
+    "filters": "Filters",
+    "theme": "Theme"
   },
   "apiReference": {
     "apiReference": "API Reference",

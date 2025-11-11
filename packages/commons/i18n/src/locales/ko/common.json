@@ -95,7 +95,9 @@
     "footnotes": "각주",
     "addFilter": "필터 추가",
     "closeSearch": "검색 닫기",
-    "searchOurDocumentation": "문서를 검색하세요."
+    "searchOurDocumentation": "문서를 검색하세요.",
+    "filters": "필터",
+    "theme": "테마"
   },
   "apiReference": {
     "apiReference": "API 레퍼런스",

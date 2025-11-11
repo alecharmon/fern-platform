@@ -24,7 +24,7 @@ export const CommandGroupFilters = forwardRef<
     }
 
     return (
-        <Command.Group ref={ref} heading="Filters" {...props}>
+        <Command.Group ref={ref} heading={t(lang).search.filters} {...props}>
             {options.map((filter) => (
                 <Command.Item
                     key={`${filter.facet}:"${filter.value}"`}

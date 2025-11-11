@@ -95,7 +95,9 @@
     "footnotes": "Notes de bas de page",
     "addFilter": "Ajouter un filtre",
     "closeSearch": "Fermer la recherche",
-    "searchOurDocumentation": "Recherchez dans notre documentation."
+    "searchOurDocumentation": "Recherchez dans notre documentation.",
+    "filters": "Filtres",
+    "theme": "Thème"
   },
   "apiReference": {
     "apiReference": "Référence API",

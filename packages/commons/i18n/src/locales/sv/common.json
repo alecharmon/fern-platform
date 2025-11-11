@@ -95,7 +95,9 @@
     "footnotes": "Fotnoter",
     "addFilter": "Lägg till filter",
     "closeSearch": "Stäng sökning",
-    "searchOurDocumentation": "Sök i vår dokumentation."
+    "searchOurDocumentation": "Sök i vår dokumentation.",
+    "filters": "Filter",
+    "theme": "Tema"
   },
   "apiReference": {
     "apiReference": "API-referens",

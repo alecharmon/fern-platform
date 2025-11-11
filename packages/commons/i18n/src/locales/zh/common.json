@@ -95,7 +95,9 @@
     "footnotes": "脚注",
     "addFilter": "添加筛选器",
     "closeSearch": "关闭搜索",
-    "searchOurDocumentation": "搜索我们的文档。"
+    "searchOurDocumentation": "搜索我们的文档。",
+    "filters": "筛选器",
+    "theme": "主题"
   },
   "apiReference": {
     "apiReference": "API 参考",
