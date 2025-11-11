@@ -1,0 +1,13 @@
+{
+    "question": "How do i do an inquiry just for the government ID?",
+    "ground_truth": "To create an inquiry specifically for verifying a government ID, you can set up an Inquiry Template that focuses solely on Government ID Verification. This template will automatically collect all ID types by default, including US driver’s licenses and state IDs. You can modify the accepted ID types as needed. The process typically involves a Barcode Check, which requires both the front and back of the ID to be collected. This setup improves extraction accuracy and overall user experience. If you want to implement this, you can customize the Inquiry theme to match your company's branding and user experience. Additionally, you can configure workflows to automatically review verification results and apply your decision rules. If the verification fails or requires additional review, a manual review case can be created.",
+    "metadata": {
+      "category": "eval_suite",
+      "source": "manual",
+      "slug": "government-id-inquiry",
+      "domain": "persona-demo-docs.docs.buildwithfern.com"
+    },
+    "expected_citations": [
+      "https://help.withpersona.com/articles/1dS7AaCL1XdfSivBVZhrOt/"
+    ]
+  }

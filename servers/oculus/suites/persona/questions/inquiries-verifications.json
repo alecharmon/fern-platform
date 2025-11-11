@@ -1,0 +1,13 @@
+{
+    "question": "How are Inquiries different than Verifications?",
+    "ground_truth": "Inquiries and Verifications are two distinct components within Persona's identity verification process:\n 1. Inquiry: An Inquiry represents a single instance of an individual going through an identity verification flow. It involves collecting information from the user, which is then used to perform various checks. An Inquiry can contain one or more Verifications, each of which performs specific checks on the provided information. \n 2. Verification: A Verification is a series of checks run against the information entered by the end user during an Inquiry. These checks determine whether the information meets the required criteria. If the information passes the necessary checks, the Inquiry is considered successful. \n In summary, an Inquiry is the overall process that includes multiple Verifications, each focusing on different aspects of the identity verification, such as Government ID Verification, Selfie Verification, etc.",
+    "metadata": {
+      "category": "eval_suite",
+      "source": "manual",
+      "slug": "inquiries-verifications",
+      "domain": "persona-demo-docs.docs.buildwithfern.com"
+    },
+    "expected_citations": [
+      "https://help.withpersona.com/articles/14hgKH7lZo9b6ja7tRJobW/"
+    ]
+  }

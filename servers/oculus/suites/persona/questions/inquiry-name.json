@@ -1,0 +1,13 @@
+{
+    "question": "when i create an inuqiry why doesnt it have a name? Does it need to have a name?",
+    "ground_truth": "When you create an inquiry, it doesn't automatically have a name because naming is not a required attribute for inquiries. Instead, inquiries are identified by unique IDs. However, you can assign a name to an inquiry if you find it helpful for organizational purposes or to easily identify specific inquiries within your system. Assigning a name can be done by including a reference ID or note when creating the inquiry via the API. It's not mandatory for an inquiry to have a name, but using reference IDs can help in linking inquiries to specific users or accounts, which can be beneficial for tracking and managing inquiries more effectively.",
+    "metadata": {
+      "category": "eval_suite",
+      "source": "manual",
+      "slug": "inquiry-name",
+      "domain": "persona-demo-docs.docs.buildwithfern.com"
+    },
+    "expected_citations": [
+      "https://docs.withpersona.com/api-reference/inquiries/create-an-inquiry"
+    ]
+  }

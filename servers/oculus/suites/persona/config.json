@@ -1,0 +1,5 @@
+{
+    "domain": "persona-demo-docs.docs.buildwithfern.com",
+    "evaluators": ["correctness", "coherence", "conciseness", "citation"]
+  }
+  

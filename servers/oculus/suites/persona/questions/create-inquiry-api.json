@@ -1,0 +1,13 @@
+{
+    "question": "please help to to Create inquiry via API with prefilled parameters. show me the curl command",
+    "ground_truth": "To create an inquiry via API with prefilled parameters using a curl command, you can use the following example:\\n```curl --request POST \\\r\n  --url https:\/\/api.withpersona.com\/api\/v1\/inquiries \\\r\n  --header 'Persona-Version: 2023-01-05' \\\r\n  --header 'accept: application\/json' \\\r\n  --header 'authorization: Bearer persona_sandbox_YOURAPIKEY' \\\r\n  --header 'content-type: application\/json' \\\r\n  --data \\\"{\r\n    \\\"data\\\": {\r\n      \\\"attributes\\\": {\r\n        \\\"inquiry-template-id\\\": \\\"itmpl_YOURTEMPLATEID\\\",\r\n        \\\"fields\\\": {\r\n          \\\"name-first\\\": \\\"Ruby\\\",\r\n          \\\"name-last\\\": \\\"Lee\\\"\r\n        }\r\n      }\r\n    }'\r\n  }'```\\n Replace YOURAPIKEY with your actual API key and itmpl_YOURTEMPLATEID with your specific inquiry template ID. This command will create an inquiry with the first name \"Ruby\" and last name \"Lee\" prefilled.",
+    "metadata": {
+      "category": "eval_suite",
+      "source": "manual",
+      "slug": "create-inquiry-api",
+      "domain": "persona-demo-docs.docs.buildwithfern.com"
+    },
+    "expected_citations": [
+      "https://docs.withpersona.com/api-quickstart-tutorial"
+    ]
+  }

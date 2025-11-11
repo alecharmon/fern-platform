@@ -1,0 +1,14 @@
+{
+    "question": "how to make a field in a graph query?",
+    "ground_truth": "To create a field in a graph query within Persona, you can follow these steps: \n1. Define the Graph Query: You need to create a POST request to the graph queries resource. Specify the graph query template you want to use and the parameters it needs. This involves setting up a parameter-map that includes all the parameter names defined in your graph query template along with the values you want to pass in\n2. Specify Fields: Use the fields parameter to dynamically preset inquiry field values. This allows you to prefill form values, and you only need to include keys for form fields you want prefilled \n3. Run the Query: Once you have defined your query, you can run it. The results will be displayed in the Graph Explorer canvas, where you can see clusters of connected nodes\n 4. Save and Use the Query: You can save the current query as a Query Template for future use. This makes it easier to run similar queries without redefining the parameters each time. By following these steps, you can effectively create and manage fields in a graph query using Persona's tools. If you need more detailed guidance, you might want to explore the Graph Explorer interface and its features.",
+    "metadata": {
+      "category": "eval_suite",
+      "source": "manual",
+      "slug": "graph-query-field",
+      "domain": "persona-demo-docs.docs.buildwithfern.com"
+    },
+    "expected_citations": [
+      "https://docs.withpersona.com/running-graph-queries",
+      "https://help.withpersona.com/articles/7DbcO4qiCbn4aY0Oc5iO8W/"
+    ]
+  }
