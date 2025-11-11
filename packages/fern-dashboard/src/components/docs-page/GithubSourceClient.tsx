@@ -36,33 +36,43 @@ export function GithubSourceClient({
             {isLoading ? (
                 <Skeleton className="h-4 w-24" />
             ) : (
-                <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
                         {githubUrl ? (
                             <>
-                                <GithubLogo />
-                                <a href={githubUrl} className="dashboard-link" target="_blank">
-                                    <span className="truncate">{getRepoDisplayNameFromUrl(githubUrl)}</span>
+                                <div className="flex-shrink-0">
+                                    <GithubLogo />
+                                </div>
+                                {/* dashboard-link uses inline-flex which prevents truncate from working – block is required for ellipsis */}
+                                <a href={githubUrl} className="dashboard-link !block truncate min-w-0" target="_blank">
+                                    {getRepoDisplayNameFromUrl(githubUrl)}
                                 </a>
-                                <SetGithubSourcePopover
-                                    docsUrl={docsUrl}
-                                    setIsSaving={setIsSaving}
-                                    initialUrl={githubUrl}
-                                >
-                                    <Button size="sm" variant="ghost" disabled={isSaving} className="h-6 px-2 text-xs">
-                                        {isSaving ? (
-                                            <>
-                                                <Loader2 className="mr-1 size-3 animate-spin" />
-                                                Saving...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Pencil className="mr-1 size-3" />
-                                                Edit
-                                            </>
-                                        )}
-                                    </Button>
-                                </SetGithubSourcePopover>
+                                <div className="flex-shrink-0">
+                                    <SetGithubSourcePopover
+                                        docsUrl={docsUrl}
+                                        setIsSaving={setIsSaving}
+                                        initialUrl={githubUrl}
+                                    >
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            disabled={isSaving}
+                                            className="h-6 px-2 text-xs"
+                                        >
+                                            {isSaving ? (
+                                                <>
+                                                    <Loader2 className="mr-1 size-3 animate-spin" />
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Pencil className="mr-1 size-3" />
+                                                    Edit
+                                                </>
+                                            )}
+                                        </Button>
+                                    </SetGithubSourcePopover>
+                                </div>
                             </>
                         ) : (
                             <ConnectGithubRepoButton
