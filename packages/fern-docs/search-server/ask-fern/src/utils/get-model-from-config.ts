@@ -72,9 +72,10 @@ function getBedrock(region: string) {
     return bedrockByRegion[region];
 }
 
-function resolveModelId(model: string | undefined): ModelId {
+function resolveModelId(model: string | undefined, forStructuredOutput: boolean = false): ModelId {
     const m = (model ?? DEFAULT_MODEL) as ModelId;
-    return (Object.keys(MODEL_CONFIGS) as ModelId[]).includes(m) ? m : DEFAULT_MODEL;
+    const configs = forStructuredOutput ? ANTHROPIC_MODEL_CONFIGS : MODEL_CONFIGS;
+    return (Object.keys(configs) as ModelId[]).includes(m) ? m : DEFAULT_MODEL;
 }
 
 function buildOrderedModels(primary: ModelId): ModelId[] {
@@ -112,7 +113,7 @@ export function getLanguageModel(
         return { model: cohere("command-a-03-2025"), provider: "cohere" };
     }
 
-    const requested = resolveModelId(model);
+    const requested = resolveModelId(model, options?.forStructuredOutput);
 
     if (options?.forStructuredOutput) {
         return getModelForStructuredOutput(requested);
