@@ -1,5 +1,5 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import type { AuthSchemeWithKey } from "@fern-api/fdr-sdk/api-definition";
+import type { AuthOptionEntry, AuthSchemeWithKey } from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { SemanticBadge } from "@fern-docs/components/badges";
@@ -71,6 +71,7 @@ interface PlaygroundCardTriggerManualProps {
     isOpen: boolean;
     lang: string;
     allAuthsWithKeys?: AuthSchemeWithKey[];
+    allAuthOptionEntries?: AuthOptionEntry[];
 }
 
 export function PlaygroundCardTriggerManual({
@@ -79,12 +80,13 @@ export function PlaygroundCardTriggerManual({
     toggleOpen,
     isOpen,
     lang,
-    allAuthsWithKeys = []
+    allAuthsWithKeys = [],
+    allAuthOptionEntries = []
 }: PlaygroundCardTriggerManualProps): ReactElement<any> | false {
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+    const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
     const setSelectedAuthType = useSetAtom(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
 
-    // Find the auth key for the current auth scheme
     const currentAuthWithKey = allAuthsWithKeys.find((a) => a.scheme === auth);
     const authKey = currentAuthWithKey ? getAuthKey(currentAuthWithKey) : "unknown";
 
@@ -95,14 +97,12 @@ export function PlaygroundCardTriggerManual({
     const getAuthButtonCopy = (authItem: APIV1Read.ApiAuth) =>
         visitDiscriminatedUnion(authItem)._visit({
             bearerAuth: (bearer) => {
-                // Show custom token name if provided
                 return bearer.tokenName
                     ? `${t(lang).auth.enterBearerToken} (${bearer.tokenName})`
                     : t(lang).auth.enterBearerToken;
             },
             basicAuth: () => t(lang).auth.enterUsernameAndPassword,
             header: (header) => {
-                // Always show header name since it's useful context
                 return `${t(lang).auth.enterCredentials} (${header.headerWireValue})`;
             },
             oAuth: () => t(lang).auth.enterCredentials,
@@ -111,36 +111,72 @@ export function PlaygroundCardTriggerManual({
 
     const authButtonCopy = getAuthButtonCopy(auth);
     const authed = isAuthed(auth, authState, authKey);
-    const hasMultipleAuths = allAuthsWithKeys.length > 1;
 
-    // Generate display info for all auth schemes using the same function as the endpoint page
-    const authDisplays = allAuthsWithKeys.map((authWithKey) => ({
-        authWithKey,
-        display: authSchemeToDisplay(authWithKey.scheme, lang)
-    }));
+    const authEntries =
+        allAuthOptionEntries.length > 0
+            ? allAuthOptionEntries
+            : allAuthsWithKeys.map((authWithKey) => ({
+                  key: getAuthKey(authWithKey),
+                  schemeIds: [authWithKey.key],
+                  schemes: [authWithKey.scheme],
+                  label: authSchemeToDisplay(authWithKey.scheme, lang).name
+              }));
 
-    // Check if there are duplicate names that need qualifiers
+    const hasMultipleAuths = authEntries.length > 1;
+
+    const dropdownValue = selectedAuthType ?? authEntries[0]?.key ?? authKey;
+
+    const authDisplays = authEntries.map((entry) => entry.schemes.map((scheme) => authSchemeToDisplay(scheme, lang)));
+
     const nameCounts = new Map<string, number>();
-    authDisplays.forEach(({ display }) => {
-        nameCounts.set(display.name, (nameCounts.get(display.name) || 0) + 1);
+    authDisplays.flat().forEach(({ name }) => {
+        nameCounts.set(name, (nameCounts.get(name) || 0) + 1);
     });
 
-    // Use the auth keys from the API definition - guaranteed to be unique
-    const dropdownOptions = authDisplays.map(({ authWithKey, display }) => {
-        const needsQualifier = (nameCounts.get(display.name) || 0) > 1;
-        const label = needsQualifier ? `${display.name} (${display.typeShorthand})` : display.name;
+    const dropdownOptions = authEntries.map((entry, entryIndex) => {
+        const displays = authDisplays[entryIndex];
+
+        if (displays.length === 1) {
+            const display = displays[0];
+            const needsQualifier = (nameCounts.get(display.name) || 0) > 1;
+            const label = needsQualifier ? `${display.name} (${display.typeShorthand})` : display.name;
+
+            return {
+                type: "value" as const,
+                label,
+                helperText: linkifyText(display.description),
+                value: entry.key
+            };
+        }
+
+        const label = (
+            <div key={entry.key} className="flex flex-col gap-0.5">
+                {displays.map((display, i) => {
+                    const needsQualifier = (nameCounts.get(display.name) || 0) > 1;
+                    const name = needsQualifier ? `${display.name} (${display.typeShorthand})` : display.name;
+                    return <div key={i}>{name}</div>;
+                })}
+            </div>
+        );
+
+        const helperText = (
+            <div key={`${entry.key}-helper`} className="flex flex-col gap-1">
+                {displays.map((display, i) => (
+                    <div key={i}>{linkifyText(display.description)}</div>
+                ))}
+            </div>
+        );
 
         return {
             type: "value" as const,
             label,
-            helperText: linkifyText(display.description),
-            value: getAuthKey(authWithKey)
+            helperText,
+            value: entry.key
         };
     });
 
     const handleAuthChange = (authKey: string) => {
         setSelectedAuthType(authKey);
-        // Auto-open the form when switching auth methods
         if (!isOpen) {
             toggleOpen();
         }
@@ -159,11 +195,11 @@ export function PlaygroundCardTriggerManual({
                 <div className="flex w-full items-center gap-2">
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <FernDropdown
-                            value={authKey}
+                            value={dropdownValue}
                             options={dropdownOptions}
                             onValueChange={handleAuthChange}
                             lang={lang}
-                            maxHelperTextWidth={320}
+                            contentProps={{ style: { minWidth: "360px" } }}
                         >
                             <button type="button" className="flex items-center gap-2 text-left">
                                 <Key className="h-4 w-4" />

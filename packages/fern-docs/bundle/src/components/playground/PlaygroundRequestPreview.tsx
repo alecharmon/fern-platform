@@ -29,38 +29,69 @@ export const PlaygroundRequestPreview: FC<PlaygroundRequestPreviewProps> = ({ co
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
-    // Determine which auth to use based on the selected auth type, and get its key
-    const { selectedAuth, authKey } = useMemo(() => {
-        if (context.authsWithKeys.length === 0) {
-            return { selectedAuth: undefined, authKey: undefined };
+    const { selectedAuth, authKey, selectedAuthSchemes, selectedAuthKeys } = useMemo(() => {
+        const authEntries =
+            context.authOptionEntries.length > 0
+                ? context.authOptionEntries
+                : context.authsWithKeys.map((authWithKey) => ({
+                      key: getAuthKey(authWithKey),
+                      schemeIds: [authWithKey.key],
+                      schemes: [authWithKey.scheme],
+                      label: String(authWithKey.key)
+                  }));
+
+        if (authEntries.length === 0) {
+            return {
+                selectedAuth: undefined,
+                authKey: undefined,
+                selectedAuthSchemes: undefined,
+                selectedAuthKeys: undefined
+            };
         }
 
-        // If a specific auth type is selected, find it
+        let selectedEntry = authEntries[0];
         if (selectedAuthType) {
-            const selectedAuthWithKey = context.authsWithKeys.find(
-                (authWithKey) => getAuthKey(authWithKey) === selectedAuthType
-            );
-            if (selectedAuthWithKey) {
-                return {
-                    selectedAuth: selectedAuthWithKey.scheme,
-                    authKey: getAuthKey(selectedAuthWithKey)
-                };
+            const entry = authEntries.find((e) => e.key === selectedAuthType);
+            if (entry) {
+                selectedEntry = entry;
             }
         }
 
-        // Default to the first auth
-        const firstAuth = context.authsWithKeys[0];
         return {
-            selectedAuth: firstAuth?.scheme,
-            authKey: firstAuth ? getAuthKey(firstAuth) : undefined
+            selectedAuth: selectedEntry.schemes[0],
+            authKey: String(selectedEntry.schemeIds[0]),
+            selectedAuthSchemes: selectedEntry.schemes,
+            selectedAuthKeys: selectedEntry.schemeIds.map((id) => String(id))
         };
-    }, [context.authsWithKeys, selectedAuthType]);
+    }, [context.authOptionEntries, context.authsWithKeys, selectedAuthType]);
 
     const builder = useMemo(() => new PlaygroundCodeSnippetResolverBuilder(context, true), [context]);
 
     const resolver = useMemo(
-        () => oAuthValue && builder.createRedacted(authState, formState, baseUrl, setOAuthValue, selectedAuth, authKey),
-        [authState, builder, formState, oAuthValue, baseUrl, setOAuthValue, selectedAuth, authKey]
+        () =>
+            oAuthValue &&
+            builder.createRedacted(
+                authState,
+                formState,
+                baseUrl,
+                setOAuthValue,
+                selectedAuth,
+                authKey,
+                selectedAuthSchemes,
+                selectedAuthKeys
+            ),
+        [
+            authState,
+            builder,
+            formState,
+            oAuthValue,
+            baseUrl,
+            setOAuthValue,
+            selectedAuth,
+            authKey,
+            selectedAuthSchemes,
+            selectedAuthKeys
+        ]
     );
     const code = useSnippet(resolver, requestType);
 

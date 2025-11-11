@@ -7,7 +7,6 @@ import { useAtomValue } from "jotai";
 import type React from "react";
 import { type ReactElement, useMemo } from "react";
 import { PLAYGROUND_SELECTED_AUTH_TYPE_ATOM } from "@/state/playground";
-import { getAuthKey } from "../utils";
 
 import { PlaygroundAuthorizationForm } from "./PlaygroundAuthorizationForm";
 import {
@@ -42,83 +41,53 @@ export function PlaygroundAuthorizationFormCard({
 }: PlaygroundAuthorizationFormCardProps): ReactElement<any> | null {
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
 
-    // Determine which auth to show based on the selected auth type, and get its key
-    const { auth, authKey } = useMemo(() => {
-        if (context.authsWithKeys.length === 0) {
-            return { auth: undefined, authKey: undefined };
+    // Determine which auth group to show based on the selected auth type
+    const selectedAuthEntry = useMemo(() => {
+        const entries =
+            context.authOptionEntries.length > 0
+                ? context.authOptionEntries
+                : context.authsWithKeys.map((authWithKey) => ({
+                      key: String(authWithKey.key),
+                      schemeIds: [authWithKey.key],
+                      schemes: [authWithKey.scheme],
+                      label: String(authWithKey.key)
+                  }));
+
+        if (entries.length === 0) {
+            return null;
         }
 
         // If a specific auth type is selected, find it
         if (selectedAuthType) {
-            const selectedAuthWithKey = context.authsWithKeys.find(
-                (authWithKey) => getAuthKey(authWithKey) === selectedAuthType
-            );
-            if (selectedAuthWithKey) {
-                return {
-                    auth: selectedAuthWithKey.scheme,
-                    authKey: getAuthKey(selectedAuthWithKey)
-                };
+            const entry = entries.find((e) => e.key === selectedAuthType);
+            if (entry) {
+                return entry;
             }
         }
 
-        // Default to the first auth
-        const firstAuth = context.authsWithKeys[0];
-        return {
-            auth: firstAuth?.scheme,
-            authKey: firstAuth ? getAuthKey(firstAuth) : undefined
-        };
-    }, [context.authsWithKeys, selectedAuthType]);
+        // Default to the first entry
+        return entries[0];
+    }, [context.authOptionEntries, context.authsWithKeys, selectedAuthType]);
 
-    if (!auth || !authKey) {
+    if (!selectedAuthEntry || selectedAuthEntry.schemes.length === 0) {
         return null;
     }
-    let oauthForm: React.ReactNode = null;
 
-    if (auth.type === "oAuth" && "endpoint" in context) {
-        oauthForm = visitDiscriminatedUnion(auth.value, "type")._visit({
-            clientCredentials: (clientCredentials) =>
-                visitDiscriminatedUnion(clientCredentials.value, "type")._visit({
-                    referencedEndpoint: (referencedEndpoint) => {
-                        if (oauthReferencedContext) {
-                            return (
-                                <ul className="list-none px-4">
-                                    <FoundOAuthReferencedEndpointForm
-                                        context={oauthReferencedContext}
-                                        referencedEndpoint={referencedEndpoint}
-                                        disabled={disabled}
-                                        lang={lang}
-                                    />
-                                </ul>
-                            );
-                        }
-                        return (
-                            <ul className="list-none px-4">
-                                <PlaygroundBearerAuthForm
-                                    bearerAuth={{ tokenName: "token", description: undefined }}
-                                    disabled={disabled}
-                                    lang={lang}
-                                />
-                            </ul>
-                        );
-                    },
-                    _other: () => null
-                }),
-            _other: () => null
-        });
-    }
+    const firstAuth = selectedAuthEntry.schemes[0];
 
     return (
         <PlaygroundAuthorizationFormCardRoot
             authIndex={authIndex}
-            auth={auth}
+            auth={firstAuth}
             totalAuthCount={totalAuthCount}
             allAuthTypes={allAuthTypes}
             allAuths={allAuths}
+            authGroupSchemes={selectedAuthEntry.schemes}
         >
             <PlaygroundAuthorizationCardTrigger
                 key="trigger"
                 context={context}
-                auth={auth}
+                auth={firstAuth}
                 oauthReferencedContext={oauthReferencedContext}
                 disabled={disabled}
                 lang={lang}
@@ -126,18 +95,59 @@ export function PlaygroundAuthorizationFormCard({
             />
             <PlaygroundAuthorizationFormCardContent key="content">
                 <div className="fern-dropdown max-h-full">
-                    {oauthForm || (
-                        <PlaygroundAuthorizationForm
-                            auth={auth}
-                            authKey={authKey}
-                            context={context}
-                            oauthReferencedContext={oauthReferencedContext}
-                            disabled={disabled}
-                            lang={lang}
-                        />
-                    )}
+                    {selectedAuthEntry.schemes.map((auth, index) => {
+                        const authKey = String(selectedAuthEntry.schemeIds[index]);
+
+                        let oauthForm: React.ReactNode = null;
+                        if (auth.type === "oAuth" && "endpoint" in context) {
+                            oauthForm = visitDiscriminatedUnion(auth.value, "type")._visit({
+                                clientCredentials: (clientCredentials) =>
+                                    visitDiscriminatedUnion(clientCredentials.value, "type")._visit({
+                                        referencedEndpoint: (referencedEndpoint) => {
+                                            if (oauthReferencedContext) {
+                                                return (
+                                                    <ul key={index} className="list-none px-4">
+                                                        <FoundOAuthReferencedEndpointForm
+                                                            context={oauthReferencedContext}
+                                                            referencedEndpoint={referencedEndpoint}
+                                                            disabled={disabled}
+                                                            lang={lang}
+                                                        />
+                                                    </ul>
+                                                );
+                                            }
+                                            return (
+                                                <ul key={index} className="list-none px-4">
+                                                    <PlaygroundBearerAuthForm
+                                                        bearerAuth={{ tokenName: "token", description: undefined }}
+                                                        disabled={disabled}
+                                                        lang={lang}
+                                                    />
+                                                </ul>
+                                            );
+                                        },
+                                        _other: () => null
+                                    }),
+                                _other: () => null
+                            });
+                        }
+
+                        return (
+                            oauthForm || (
+                                <PlaygroundAuthorizationForm
+                                    key={index}
+                                    auth={auth}
+                                    authKey={authKey}
+                                    context={context}
+                                    oauthReferencedContext={oauthReferencedContext}
+                                    disabled={disabled}
+                                    lang={lang}
+                                />
+                            )
+                        );
+                    })}
                     <div className="flex justify-end gap-2 p-4 pt-2">
-                        {auth.type !== "oAuth" && <PlaygroundAuthorizationFormCardCloseButton lang={lang} />}
+                        {firstAuth.type !== "oAuth" && <PlaygroundAuthorizationFormCardCloseButton lang={lang} />}
                         <PlaygroundAuthorizationFormCardResetButton lang={lang} />
                     </div>
                 </div>

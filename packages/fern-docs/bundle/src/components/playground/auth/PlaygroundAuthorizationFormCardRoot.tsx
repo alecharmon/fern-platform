@@ -50,7 +50,8 @@ export function PlaygroundAuthorizationFormCardRoot({
     auth,
     totalAuthCount = 1,
     allAuthTypes = [],
-    allAuths = []
+    allAuths = [],
+    authGroupSchemes = []
 }: {
     children: React.ReactNode;
     authIndex?: number;
@@ -58,6 +59,7 @@ export function PlaygroundAuthorizationFormCardRoot({
     totalAuthCount?: number;
     allAuthTypes?: string[];
     allAuths?: APIV1Read.ApiAuth[];
+    authGroupSchemes?: APIV1Read.ApiAuth[];
 }) {
     const [open, setOpen] = useAtom(PLAYGROUND_AUTH_FORM_OPEN_ATOM);
 
@@ -71,21 +73,25 @@ export function PlaygroundAuthorizationFormCardRoot({
     const prevTokenRef = useRef<string | undefined>(resolvedState?.auth?.bearer_token);
 
     const handleResetAuth = () => {
-        // Reset the current auth type based on what this card represents
-        switch (auth.type) {
-            case "bearerAuth":
-                setBearerAuthAtom({ token: resolvedState?.auth?.bearer_token ?? apiKey ?? "" });
-                setOAuth((prev) => ({ ...prev, userSuppliedAccessToken: "" }));
-                break;
-            case "basicAuth":
-                setBasicAuth(RESET);
-                break;
-            case "header":
-                setHeaderAuth(RESET);
-                break;
-            case "oAuth":
-                setOAuth(RESET);
-                break;
+        const schemesToReset = authGroupSchemes.length > 0 ? authGroupSchemes : [auth];
+
+        const hasBearer = schemesToReset.some((scheme) => scheme.type === "bearerAuth");
+        const hasBasic = schemesToReset.some((scheme) => scheme.type === "basicAuth");
+        const hasHeader = schemesToReset.some((scheme) => scheme.type === "header");
+        const hasOAuth = schemesToReset.some((scheme) => scheme.type === "oAuth");
+
+        if (hasBearer) {
+            setBearerAuthAtom({ token: resolvedState?.auth?.bearer_token ?? apiKey ?? "" });
+            setOAuth((prev) => ({ ...prev, userSuppliedAccessToken: "" }));
+        }
+        if (hasBasic) {
+            setBasicAuth(RESET);
+        }
+        if (hasHeader) {
+            setHeaderAuth(RESET);
+        }
+        if (hasOAuth) {
+            setOAuth(RESET);
         }
     };
 
@@ -141,7 +147,6 @@ export function PlaygroundAuthorizationCardTrigger({
     const apiKeyInjection = useApiKeyInjectionConfig();
     const authsToUse = allAuths || contextAllAuths;
 
-    // Find the auth key for the current auth scheme
     const currentAuthWithKey = context.authsWithKeys.find((a) => a.scheme === auth);
     const authKey = currentAuthWithKey ? getAuthKey(currentAuthWithKey) : "unknown";
 
@@ -165,6 +170,7 @@ export function PlaygroundAuthorizationCardTrigger({
             toggleOpen={toggleOpen}
             lang={lang}
             allAuthsWithKeys={context.authsWithKeys}
+            allAuthOptionEntries={context.authOptionEntries}
         />
     );
 }

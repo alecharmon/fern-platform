@@ -55,32 +55,36 @@ export const PlaygroundEndpoint = ({
     const { node, endpoint } = context;
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
 
-    // Determine which auth to use based on the selected auth type, and get its key
-    const { auth, authKey } = useMemo(() => {
-        if (context.authsWithKeys.length === 0) {
-            return { auth: undefined, authKey: undefined };
+    // Determine which auth schemes to use based on the selected auth type
+    const { authSchemes, authKeys } = useMemo(() => {
+        const authEntries =
+            context.authOptionEntries.length > 0
+                ? context.authOptionEntries
+                : context.authsWithKeys.map((authWithKey) => ({
+                      key: getAuthKey(authWithKey),
+                      schemeIds: [authWithKey.key],
+                      schemes: [authWithKey.scheme],
+                      label: String(authWithKey.key)
+                  }));
+
+        if (authEntries.length === 0) {
+            return { authSchemes: [], authKeys: [] };
         }
 
         // If a specific auth type is selected, find it
+        let selectedEntry = authEntries[0];
         if (selectedAuthType) {
-            const selectedAuthWithKey = context.authsWithKeys.find(
-                (authWithKey) => getAuthKey(authWithKey) === selectedAuthType
-            );
-            if (selectedAuthWithKey) {
-                return {
-                    auth: selectedAuthWithKey.scheme,
-                    authKey: getAuthKey(selectedAuthWithKey)
-                };
+            const entry = authEntries.find((e) => e.key === selectedAuthType);
+            if (entry) {
+                selectedEntry = entry;
             }
         }
 
-        // Default to the first auth
-        const firstAuth = context.authsWithKeys[0];
         return {
-            auth: firstAuth?.scheme,
-            authKey: firstAuth ? getAuthKey(firstAuth) : undefined
+            authSchemes: selectedEntry.schemes,
+            authKeys: selectedEntry.schemeIds.map((id) => String(id))
         };
-    }, [context.authsWithKeys, selectedAuthType]);
+    }, [context.authsWithKeys, context.authOptionEntries, selectedAuthType]);
 
     const isDisableProxy = disableProxy || isLocal();
 
@@ -122,20 +126,29 @@ export const PlaygroundEndpoint = ({
                     .join("")
             });
 
-            const authHeaders = buildAuthHeaders(
-                auth,
-                jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM),
-                {
-                    redacted: false
-                },
-                {
-                    formState,
-                    endpoint,
-                    baseUrl,
-                    setValue: setOAuthValue
-                },
-                authKey
-            );
+            let authHeaders: Record<string, string> = {};
+            const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
+
+            for (let i = 0; i < authSchemes.length; i++) {
+                const auth = authSchemes[i];
+                const authKey = authKeys[i];
+                const headers = buildAuthHeaders(
+                    auth,
+                    authState,
+                    {
+                        redacted: false
+                    },
+                    {
+                        formState,
+                        endpoint,
+                        baseUrl,
+                        setValue: setOAuthValue
+                    },
+                    authKey
+                );
+                authHeaders = { ...authHeaders, ...headers };
+            }
+
             const headers = {
                 ...authHeaders,
                 ...mapValues(formState.headers ?? {}, (value) => unknownToString(value))
@@ -257,7 +270,7 @@ export const PlaygroundEndpoint = ({
             );
             setResponse(failed(e));
         }
-    }, [endpoint, node.title, node.slug, auth, formState, baseUrl, setOAuthValue, isDisableProxy, authKey]);
+    }, [endpoint, node.title, node.slug, authSchemes, authKeys, formState, baseUrl, setOAuthValue, isDisableProxy]);
 
     const settings = usePlaygroundSettings();
 

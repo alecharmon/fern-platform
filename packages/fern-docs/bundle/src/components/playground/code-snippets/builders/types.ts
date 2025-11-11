@@ -1,5 +1,6 @@
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildEndpointUrl, wrapOpenRPCRequest } from "@fern-api/fdr-sdk/api-definition";
+import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 
 import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../../types";
 
@@ -11,7 +12,8 @@ export abstract class PlaygroundCodeSnippetBuilder {
         protected formState: PlaygroundEndpointRequestFormState,
         protected authState: PlaygroundAuthState,
         protected baseUrl: string | undefined,
-        protected redacted: boolean
+        protected redacted: boolean,
+        protected selectedAuthSchemes?: APIV1Read.ApiAuth[]
     ) {
         // TODO: wire through the environment from hook
         this.url = buildEndpointUrl({

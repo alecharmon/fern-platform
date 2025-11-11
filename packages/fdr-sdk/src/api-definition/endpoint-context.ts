@@ -17,14 +17,115 @@ export type AuthSchemeWithKey = {
     scheme: AuthScheme;
 };
 
+export type AuthOptionEntry = {
+    key: string;
+    schemeIds: AuthSchemeId[];
+    schemes: AuthScheme[];
+    label: string;
+};
+
 export type EndpointContext = {
     node: EndpointNode;
     endpoint: EndpointDefinition;
     globalHeaders: ObjectProperty[];
     auths: AuthScheme[];
     authsWithKeys: AuthSchemeWithKey[];
+    authOptions: AuthScheme[][];
+    authOptionEntries: AuthOptionEntry[];
     types: Record<TypeId, TypeDefinition>;
 };
+
+function getAuthSchemeLabel(scheme: AuthScheme): string {
+    if (scheme.type === "basicAuth") {
+        return "Basic Auth";
+    }
+    if (scheme.type === "bearerAuth") {
+        return "Bearer";
+    }
+    if (scheme.type === "header") {
+        return scheme.prefix || "API Key";
+    }
+    if (scheme.type === "oAuth") {
+        return "OAuth";
+    }
+    return "Auth";
+}
+
+function constructAuthOptions(
+    endpoint: EndpointDefinition,
+    authsMap: Record<AuthSchemeId, AuthScheme>
+): AuthScheme[][] {
+    if (endpoint.multiAuth != null && endpoint.multiAuth.length > 0) {
+        return endpoint.multiAuth
+            .map((multiAuthGroup) =>
+                multiAuthGroup.schemes
+                    .map((schemeId) => authsMap[schemeId])
+                    .filter((scheme): scheme is AuthScheme => scheme != null)
+            )
+            .filter((group) => group.length > 0);
+    }
+
+    if (endpoint.auth != null && endpoint.auth.length > 0) {
+        return endpoint.auth
+            .map((schemeId) => {
+                const scheme = authsMap[schemeId];
+                return scheme ? [scheme] : null;
+            })
+            .filter((group): group is AuthScheme[] => group != null);
+    }
+
+    return [];
+}
+
+function constructAuthOptionEntries(
+    endpoint: EndpointDefinition,
+    authsMap: Record<AuthSchemeId, AuthScheme>
+): AuthOptionEntry[] {
+    if (endpoint.multiAuth != null && endpoint.multiAuth.length > 0) {
+        return endpoint.multiAuth
+            .map((multiAuthGroup) => {
+                const schemeIds = multiAuthGroup.schemes;
+                const schemes = schemeIds
+                    .map((schemeId) => authsMap[schemeId])
+                    .filter((scheme): scheme is AuthScheme => scheme != null);
+
+                if (schemes.length === 0) {
+                    return null;
+                }
+
+                const sortedSchemeIds = [...schemeIds].sort();
+                const key = schemes.length === 1 ? String(schemeIds[0]) : `multi:${sortedSchemeIds.join("+")}`;
+                const label = schemes.map(getAuthSchemeLabel).join(" + ");
+
+                return {
+                    key,
+                    schemeIds,
+                    schemes,
+                    label
+                };
+            })
+            .filter((entry): entry is AuthOptionEntry => entry != null);
+    }
+
+    if (endpoint.auth != null && endpoint.auth.length > 0) {
+        return endpoint.auth
+            .map((schemeId) => {
+                const scheme = authsMap[schemeId];
+                if (!scheme) {
+                    return null;
+                }
+                return {
+                    key: String(schemeId),
+                    schemeIds: [schemeId],
+                    schemes: [scheme],
+                    label: getAuthSchemeLabel(scheme)
+                };
+            })
+            .filter((entry): entry is AuthOptionEntry => entry != null);
+    }
+
+    return [];
+}
 
 export function createEndpointContext(
     node: EndpointNode | undefined,
@@ -49,6 +150,8 @@ export function createEndpointContext(
                     return scheme ? { key: id, scheme } : null;
                 })
                 .filter((item): item is AuthSchemeWithKey => item != null) ?? [],
+        authOptions: constructAuthOptions(endpoint, api.auths),
+        authOptionEntries: constructAuthOptionEntries(endpoint, api.auths),
         globalHeaders: api.globalHeaders ?? [],
         types: api.types
     };
@@ -60,8 +163,50 @@ export type WebSocketContext = {
     globalHeaders: ObjectProperty[];
     auths: AuthScheme[];
     authsWithKeys: AuthSchemeWithKey[];
+    authOptions: AuthScheme[][];
+    authOptionEntries: AuthOptionEntry[];
     types: Record<TypeId, TypeDefinition>;
 };
+
+function constructWebSocketAuthOptions(
+    channel: WebSocketChannel,
+    authsMap: Record<AuthSchemeId, AuthScheme>
+): AuthScheme[][] {
+    if (channel.auth != null && channel.auth.length > 0) {
+        return channel.auth
+            .map((schemeId) => {
+                const scheme = authsMap[schemeId];
+                return scheme ? [scheme] : null;
+            })
+            .filter((group): group is AuthScheme[] => group != null);
+    }
+
+    return [];
+}
+
+function constructWebSocketAuthOptionEntries(
+    channel: WebSocketChannel,
+    authsMap: Record<AuthSchemeId, AuthScheme>
+): AuthOptionEntry[] {
+    if (channel.auth != null && channel.auth.length > 0) {
+        return channel.auth
+            .map((schemeId) => {
+                const scheme = authsMap[schemeId];
+                if (!scheme) {
+                    return null;
+                }
+                return {
+                    key: String(schemeId),
+                    schemeIds: [schemeId],
+                    schemes: [scheme],
+                    label: getAuthSchemeLabel(scheme)
+                };
+            })
+            .filter((entry): entry is AuthOptionEntry => entry != null);
+    }
+
+    return [];
+}
 
 export function createWebSocketContext(
     node: WebSocketNode | undefined,
@@ -86,6 +231,8 @@ export function createWebSocketContext(
                     return scheme ? { key: id, scheme } : null;
                 })
                 .filter((item): item is AuthSchemeWithKey => item != null) ?? [],
+        authOptions: constructWebSocketAuthOptions(channel, api.auths),
+        authOptionEntries: constructWebSocketAuthOptionEntries(channel, api.auths),
         globalHeaders: api.globalHeaders ?? [],
         types: api.types
     };

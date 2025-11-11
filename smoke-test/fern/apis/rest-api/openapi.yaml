@@ -381,6 +381,45 @@ paths:
                     id: 1
                     username: "john_doe"
                     email: "john@example.com"
+  /store/premium/inventory:
+    get:
+      tags:
+        - store
+      summary: Get premium inventory
+      description: |
+        Retrieve premium plant inventory. This endpoint demonstrates OR-of-AND security semantics.
+        Requires EITHER (bearerAuth AND api_key) OR (basicAuth AND api_key).
+      operationId: getPremiumInventory
+      security:
+        - bearerAuth: []
+          api_key: []
+        - basicAuth: []
+          api_key: []
+      responses:
+        "200":
+          description: Premium inventory retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlantResponse"
+              examples:
+                exampleResponse:
+                  summary: Premium inventory list
+                  value:
+                    - id: 201
+                      name: "Rare Orchid"
+                      status: "available"
+                      tags: ["premium", "exotic"]
+                    - id: 202
+                      name: "Bonsai Tree"
+                      status: "available"
+                      tags: ["premium", "decorative"]
+        "401":
+          description: Unauthorized - missing or invalid authentication
+        "403":
+          description: Forbidden - insufficient permissions
 webhooks:
   orderStatusChanged:
     post:

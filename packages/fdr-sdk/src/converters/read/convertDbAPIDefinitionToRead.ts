@@ -1,6 +1,7 @@
 import assertNever from "@fern-api/ui-core-utils/assertNever";
 
 import type { APIV1Db, APIV1Read } from "../../client";
+import { AuthSchemeId } from "../../client/generated/api/resources/commons/types/AuthSchemeId";
 
 export function convertDbAPIDefinitionsToRead(dbApiDefinitions: Record<string, APIV1Db.DbApiDefinition>) {
     return Object.fromEntries(
@@ -103,12 +104,33 @@ export function transformEndpoint({
         // htmlDescription: dbShape.htmlDescription,
         authed: dbShape.authed ?? false,
         authV2: dbShape.authV2,
-        multiAuth: dbShape.multiAuth,
+        multiAuth: constructMultiAuth(dbShape),
         // descriptionContainsMarkdown: dbShape.descriptionContainsMarkdown,
         snippetTemplates: dbShape.snippetTemplates,
         protocol: dbShape.protocol,
         includeInApiExplorer: dbShape.includeInApiExplorer ?? true
     };
+}
+
+function constructMultiAuth(dbShape: APIV1Db.DbEndpointDefinition): APIV1Read.MultipleAuthType[] | undefined {
+    if (dbShape.multiAuth != null) {
+        return dbShape.multiAuth;
+    }
+
+    if (dbShape.authV2 != null) {
+        if (dbShape.authV2.length === 0) {
+            return [];
+        }
+        return dbShape.authV2.map((authSchemeId) => ({
+            schemes: [authSchemeId]
+        }));
+    }
+
+    if (dbShape.authed === true) {
+        return [{ schemes: [AuthSchemeId("default")] }];
+    }
+
+    return undefined;
 }
 
 function transformErrorsV2(dbShape: APIV1Db.DbEndpointDefinition): APIV1Read.ErrorDeclarationV2[] | undefined {

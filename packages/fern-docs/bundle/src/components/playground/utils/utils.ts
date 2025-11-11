@@ -160,3 +160,16 @@ export const isLocal = () => {
 export function getAuthKey(authWithKey: { key: string | number }): string {
     return String(authWithKey.key);
 }
+
+/**
+ * Gets a composite auth group key from an array of auth scheme IDs.
+ * For single schemes, returns the scheme ID as-is.
+ * For multiple schemes, returns a composite key like "multi:api_key+bearerAuth".
+ */
+export function getAuthGroupKey(schemeIds: string[]): string {
+    if (schemeIds.length === 1) {
+        return schemeIds[0] ?? "";
+    }
+    const sortedIds = [...schemeIds].sort();
+    return `multi:${sortedIds.join("+")}`;
+}

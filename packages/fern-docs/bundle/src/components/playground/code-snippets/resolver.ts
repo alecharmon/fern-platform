@@ -21,7 +21,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
         playgroundEnvironment: string | undefined,
         setOAuthValue: (value: (prev: any) => any) => void,
         selectedAuth?: APIV1Read.ApiAuth,
-        authKey?: string
+        authKey?: string,
+        selectedAuthSchemes?: APIV1Read.ApiAuth[],
+        selectedAuthKeys?: string[]
     ): PlaygroundCodeSnippetResolver {
         return new PlaygroundCodeSnippetResolver(
             this.context,
@@ -32,7 +34,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
             playgroundEnvironment,
             setOAuthValue,
             selectedAuth,
-            authKey
+            authKey,
+            selectedAuthSchemes,
+            selectedAuthKeys
         );
     }
 
@@ -42,7 +46,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
         playgroundEnvironment: string | undefined,
         setOAuthValue: (value: (prev: any) => any) => void,
         selectedAuth?: APIV1Read.ApiAuth,
-        authKey?: string
+        authKey?: string,
+        selectedAuthSchemes?: APIV1Read.ApiAuth[],
+        selectedAuthKeys?: string[]
     ): PlaygroundCodeSnippetResolver {
         return new PlaygroundCodeSnippetResolver(
             this.context,
@@ -53,7 +59,9 @@ export class PlaygroundCodeSnippetResolverBuilder {
             playgroundEnvironment,
             setOAuthValue,
             selectedAuth,
-            authKey
+            authKey,
+            selectedAuthSchemes,
+            selectedAuthKeys
         );
     }
 }
@@ -83,23 +91,49 @@ export class PlaygroundCodeSnippetResolver {
         private baseUrl: string | undefined,
         setOAuthValue: (value: (prev: any) => any) => void,
         selectedAuth?: APIV1Read.ApiAuth,
-        authKey?: string
+        authKey?: string,
+        selectedAuthSchemes?: APIV1Read.ApiAuth[],
+        selectedAuthKeys?: string[]
     ) {
-        // Use the selected auth if provided, otherwise fall back to first auth
-        const auth = selectedAuth ?? this.context.auths[0];
+        const authSchemes =
+            selectedAuthSchemes && selectedAuthSchemes.length > 0
+                ? selectedAuthSchemes
+                : selectedAuth
+                  ? [selectedAuth]
+                  : this.context.auths.length > 0
+                    ? [this.context.auths[0]]
+                    : [];
 
-        const authHeaders = buildAuthHeaders(
-            auth != null && shouldRenderAuth(this.context.endpoint, auth) ? auth : undefined,
-            authState,
-            { redacted: isAuthHeadersRedacted },
-            {
-                formState,
-                endpoint: this.context.endpoint,
-                baseUrl: this.baseUrl,
-                setValue: setOAuthValue
-            },
-            authKey
-        );
+        this.selectedAuthSchemes = authSchemes;
+
+        const authKeys =
+            selectedAuthKeys && selectedAuthKeys.length > 0
+                ? selectedAuthKeys
+                : authKey
+                  ? [authKey]
+                  : authSchemes.map(() => undefined);
+
+        let authHeaders: Record<string, string> = {};
+
+        for (let i = 0; i < authSchemes.length; i++) {
+            const auth = authSchemes[i];
+            const key = authKeys[i];
+            if (auth != null && shouldRenderAuth(this.context.endpoint, auth)) {
+                const headers = buildAuthHeaders(
+                    auth,
+                    authState,
+                    { redacted: isAuthHeadersRedacted },
+                    {
+                        formState,
+                        endpoint: this.context.endpoint,
+                        baseUrl: this.baseUrl,
+                        setValue: setOAuthValue
+                    },
+                    key
+                );
+                authHeaders = { ...authHeaders, ...headers };
+            }
+        }
 
         this.headers = { ...authHeaders, ...formState.headers };
 
@@ -108,6 +142,8 @@ export class PlaygroundCodeSnippetResolver {
         }
     }
 
+    private selectedAuthSchemes: APIV1Read.ApiAuth[];
+
     public toCurl(): string {
         const formState = { ...this.formState, headers: this.headers };
         return new CurlSnippetBuilder(
@@ -115,7 +151,8 @@ export class PlaygroundCodeSnippetResolver {
             formState,
             this.authState,
             this.baseUrl,
-            this.isAuthHeadersRedacted
+            this.isAuthHeadersRedacted,
+            this.selectedAuthSchemes
         ).build();
     }
 
@@ -133,7 +170,8 @@ export class PlaygroundCodeSnippetResolver {
             formState,
             this.authState,
             this.baseUrl,
-            this.isAuthHeadersRedacted
+            this.isAuthHeadersRedacted,
+            this.selectedAuthSchemes
         ).build();
     }
 
@@ -144,7 +182,8 @@ export class PlaygroundCodeSnippetResolver {
             formState,
             this.authState,
             this.baseUrl,
-            this.isAuthHeadersRedacted
+            this.isAuthHeadersRedacted,
+            this.selectedAuthSchemes
         ).build();
     }
 

@@ -71,9 +71,42 @@ function AuthSchemeVariant({ auth, lang }: { auth: ApiDefinition.AuthScheme; lan
     );
 }
 
-export function EndpointAuthSection({ auths, lang }: { auths: ApiDefinition.AuthScheme[]; lang: string }) {
-    if (auths.length === 0) {
+export function EndpointAuthSection({
+    authOptions,
+    auths,
+    lang
+}: {
+    authOptions?: ApiDefinition.AuthScheme[][];
+    auths?: ApiDefinition.AuthScheme[];
+    lang: string;
+}) {
+    const hasAuthOptions = authOptions != null && authOptions.length > 0;
+    const hasAuths = auths != null && auths.length > 0;
+
+    if (!hasAuthOptions && !hasAuths) {
         return null;
+    }
+
+    if (hasAuthOptions) {
+        const totalMethods = authOptions.reduce((sum, group) => sum + group.length, 0);
+        return (
+            <EndpointSection title={t(lang).apiReference.authentication}>
+                <FernCollapseWithButtonUncontrolled
+                    showText={`Show ${totalMethods} ${totalMethods === 1 ? "method" : "methods"}`}
+                    hideText={`Hide ${totalMethods} ${totalMethods === 1 ? "method" : "methods"}`}
+                >
+                    <WithSeparator separatorText={authOptions.length > 1 ? "OR" : undefined}>
+                        {authOptions.map((group, groupIndex) => (
+                            <div key={groupIndex}>
+                                {group.map((auth, authIndex) => (
+                                    <AuthSchemeVariant key={authIndex} auth={auth} lang={lang} />
+                                ))}
+                            </div>
+                        ))}
+                    </WithSeparator>
+                </FernCollapseWithButtonUncontrolled>
+            </EndpointSection>
+        );
     }
 
     return (

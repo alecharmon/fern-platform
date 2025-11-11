@@ -22,12 +22,14 @@ export class CurlSnippetBuilder extends PlaygroundCodeSnippetBuilder {
             };
         }
 
+        const hasBasicAuthSelected = this.selectedAuthSchemes?.some((auth) => auth.type === "basicAuth") ?? false;
+
         return convertToCurl({
             method: this.context.endpoint.method,
             url: this.url,
             searchParams: this.formState.queryParameters,
             headers: this.formState.headers,
-            basicAuth: this.context.auths[0]?.type === "basicAuth" ? this.authState.basicAuth : undefined,
+            basicAuth: hasBasicAuthSelected ? this.authState.basicAuth : undefined,
             body: this.#convertFormStateToBody(),
             redacted: this.redacted
         });

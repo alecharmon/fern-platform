@@ -22,7 +22,7 @@ export interface HoveringProps {
 }
 
 export async function EndpointContentLeft({
-    context: { endpoint, types, auths, globalHeaders },
+    context: { endpoint, types, auths, authOptions, globalHeaders },
     showAuth,
     showErrors,
     lang
@@ -37,9 +37,9 @@ export async function EndpointContentLeft({
     return (
         <>
             <TypeDefinitionAnchorPart key="request" part="request">
-                {showAuth && auths.length > 0 && (
+                {showAuth && (authOptions.length > 0 || auths.length > 0) && (
                     <TypeDefinitionAnchorPart part="auth">
-                        <EndpointAuthSection auths={auths} lang={lang} />
+                        <EndpointAuthSection authOptions={authOptions} auths={auths} lang={lang} />
                     </TypeDefinitionAnchorPart>
                 )}
                 {endpoint.pathParameters && endpoint.pathParameters.length > 0 && (

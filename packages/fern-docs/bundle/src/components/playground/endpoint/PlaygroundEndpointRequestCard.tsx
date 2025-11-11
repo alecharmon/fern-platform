@@ -79,32 +79,41 @@ export function PlaygroundEndpointRequestCard({
     const dynamicPreviewRef = useRef<PlaygroundDynamicRequestPreviewRef>(null);
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
 
-    // Determine which auth to use based on the selected auth type, and get its key
-    const { selectedAuth, authKey } = useMemo(() => {
-        if (context.authsWithKeys.length === 0) {
-            return { selectedAuth: undefined, authKey: undefined };
+    const { selectedAuth, authKey, selectedAuthSchemes, selectedAuthKeys } = useMemo(() => {
+        const authEntries =
+            context.authOptionEntries.length > 0
+                ? context.authOptionEntries
+                : context.authsWithKeys.map((authWithKey) => ({
+                      key: getAuthKey(authWithKey),
+                      schemeIds: [authWithKey.key],
+                      schemes: [authWithKey.scheme],
+                      label: String(authWithKey.key)
+                  }));
+
+        if (authEntries.length === 0) {
+            return {
+                selectedAuth: undefined,
+                authKey: undefined,
+                selectedAuthSchemes: undefined,
+                selectedAuthKeys: undefined
+            };
         }
 
-        // If a specific auth type is selected, find it
+        let selectedEntry = authEntries[0];
         if (selectedAuthType) {
-            const selectedAuthWithKey = context.authsWithKeys.find(
-                (authWithKey) => getAuthKey(authWithKey) === selectedAuthType
-            );
-            if (selectedAuthWithKey) {
-                return {
-                    selectedAuth: selectedAuthWithKey.scheme,
-                    authKey: getAuthKey(selectedAuthWithKey)
-                };
+            const entry = authEntries.find((e) => e.key === selectedAuthType);
+            if (entry) {
+                selectedEntry = entry;
             }
         }
 
-        // Default to the first auth
-        const firstAuth = context.authsWithKeys[0];
         return {
-            selectedAuth: firstAuth?.scheme,
-            authKey: firstAuth ? getAuthKey(firstAuth) : undefined
+            selectedAuth: selectedEntry.schemes[0],
+            authKey: String(selectedEntry.schemeIds[0]),
+            selectedAuthSchemes: selectedEntry.schemes,
+            selectedAuthKeys: selectedEntry.schemeIds.map((id) => String(id))
         };
-    }, [context.authsWithKeys, selectedAuthType]);
+    }, [context.authOptionEntries, context.authsWithKeys, selectedAuthType]);
 
     const hasDynamicIr = Object.keys(dynamicIRsByLanguage ?? {}).length > 0;
     const isHeadRequest = context.endpoint.method === "HEAD";
@@ -173,7 +182,6 @@ export function PlaygroundEndpointRequestCard({
                                 return dynamicPreviewRef.current.getCurrentCode();
                             }
 
-                            // otherwise, use the fallback resolver
                             const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
                             const resolver = new PlaygroundCodeSnippetResolverBuilder(context, true).create(
                                 authState,
@@ -181,7 +189,9 @@ export function PlaygroundEndpointRequestCard({
                                 baseUrl,
                                 setOAuthValue,
                                 selectedAuth,
-                                authKey
+                                authKey,
+                                selectedAuthSchemes,
+                                selectedAuthKeys
                             );
                             return resolver.resolve(getFallbackRequestType());
                         }}
