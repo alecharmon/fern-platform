@@ -69,6 +69,7 @@ export type Translations = {
         resetToTheDefaultValue: string;
         generate: string;
         retry: string;
+        edit: string;
     };
 
     search: {
@@ -138,6 +139,13 @@ export type Translations = {
         authType: string;
         deprecated: string;
         required: string;
+        allowedValues: string;
+        any: string;
+        orNull: string;
+        format: string;
+        optional: string;
+        statusLower: string;
+        timeLower: string;
     };
 
     playground: {
@@ -177,6 +185,7 @@ export type Translations = {
         reloading: string;
         unknownError: string;
         pdfPreview: string;
+        switchingProtocols: string;
     };
 
     feedback: {
@@ -206,6 +215,10 @@ export type Translations = {
         whatIsWrongWithThisCodeExample: string;
         helpUsImproveByReportingCodeExample: string;
         weHaveBeenNotified: string;
+        helpful: string;
+        notHelpful: string;
+        feedbackReceived: string;
+        thankYouForImprovingDocs: string;
     };
 
     feedbackQuality: {

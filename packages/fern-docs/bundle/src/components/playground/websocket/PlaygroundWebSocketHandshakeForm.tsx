@@ -2,8 +2,8 @@
 
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import { FernCard } from "@fern-docs/components/FernCard";
+import { t } from "@fern-docs/i18n";
 import { type Dispatch, type FC, type SetStateAction, useCallback } from "react";
-
 import { Callout } from "@/mdx/components/callout";
 
 import { PlaygroundObjectPropertiesForm } from "../form/PlaygroundObjectPropertyForm";
@@ -85,7 +85,7 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
                 {headers.length > 0 && (
                     <div>
                         <div className="mb-4 px-4">
-                            <h5 className="text-(color:--grayscale-a11) m-0">Headers</h5>
+                            <h5 className="text-(color:--grayscale-a11) m-0">{t(lang).apiReference.headers}</h5>
                         </div>
                         <FernCard className="rounded-3 p-4">
                             <PlaygroundObjectPropertiesForm
@@ -104,7 +104,7 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
                 {channel.pathParameters && channel.pathParameters.length > 0 && (
                     <div>
                         <div className="mb-4 px-4">
-                            <h5 className="text-(color:--grayscale-a11) m-0">Path Parameters</h5>
+                            <h5 className="text-(color:--grayscale-a11) m-0">{t(lang).apiReference.pathParameters}</h5>
                         </div>
                         <FernCard className="rounded-3 p-4">
                             <PlaygroundObjectPropertiesForm
@@ -123,7 +123,7 @@ export const PlaygroundWebSocketHandshakeForm: FC<PlaygroundWebSocketHandshakeFo
                 {channel.queryParameters && channel.queryParameters.length > 0 && (
                     <div>
                         <div className="mb-4 px-4">
-                            <h5 className="text-(color:--grayscale-a11) m-0">Query Parameters</h5>
+                            <h5 className="text-(color:--grayscale-a11) m-0">{t(lang).apiReference.queryParameters}</h5>
                         </div>
                         <FernCard className="rounded-3 p-4">
                             <PlaygroundObjectPropertiesForm

@@ -67,7 +67,8 @@
     "submitting": "提交中...",
     "resetToTheDefaultValue": "重置为默认值",
     "generate": "生成",
-    "retry": "重试"
+    "retry": "重试",
+    "edit": "编辑"
   },
   "search": {
     "search": "搜索",
@@ -134,7 +135,14 @@
     "failed": "失败",
     "authType": "认证类型",
     "deprecated": "已弃用",
-    "required": "必需"
+    "required": "必需",
+    "allowedValues": "允许的值",
+    "any": "任何",
+    "orNull": "或 null",
+    "format": "格式",
+    "optional": "可选",
+    "statusLower": "状态",
+    "timeLower": "时间"
   },
   "playground": {
     "cannotSendToLocalhost": "无法向 localhost 发送请求",
@@ -170,7 +178,8 @@
     "loading": "加载中...",
     "reloading": "重新加载中...",
     "unknownError": "未知错误",
-    "pdfPreview": "PDF 预览"
+    "pdfPreview": "PDF 预览",
+    "switchingProtocols": "101 切换协议"
   },
   "feedback": {
     "feedback": "反馈",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "报告错误代码",
     "whatIsWrongWithThisCodeExample": "此代码示例有什么问题？",
     "helpUsImproveByReportingCodeExample": "通过报告此代码示例的问题来帮助我们改进文档。",
-    "weHaveBeenNotified": "我们已收到通知，以便下次修复此问题。"
+    "weHaveBeenNotified": "我们已收到通知，以便下次修复此问题。",
+    "helpful": "帮助",
+    "notHelpful": "不帮助",
+    "feedbackReceived": "反馈收到！",
+    "thankYouForImprovingDocs": "感谢您改进文档。"
   },
   "feedbackQuality": {
     "accurate": "准确",

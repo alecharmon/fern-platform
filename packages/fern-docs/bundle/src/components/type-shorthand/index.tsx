@@ -58,19 +58,21 @@ export function renderTypeShorthandRoot({
         <span className="fern-api-property-meta">
             <span>
                 {!isResponse && nullableDropdown != null ? nullableDropdown : typeShorthand}
-                {isResponse && unwrapped.isOptional && !unwrapped.isNullable && !hideAllModifiers ? " or null" : false}
+                {isResponse && unwrapped.isOptional && !unwrapped.isNullable && !hideAllModifiers
+                    ? " " + t(lang).apiReference.orNull
+                    : false}
             </span>
             {isResponse || hideAllModifiers ? (
                 false
             ) : !unwrapped.isOptional ? (
-                <span className="text-(color:--red-a11)">Required</span>
+                <span className="text-(color:--red-a11)">{t(lang).apiReference.required}</span>
             ) : hideOptional ? (
                 false
             ) : (
-                <span>Optional</span>
+                <span>{t(lang).apiReference.optional}</span>
             )}
             {unwrapped.shape.type === "primitive" &&
-                toPrimitiveTypeLabels({ primitive: unwrapped.shape.value }).map((label, index) => (
+                toPrimitiveTypeLabels({ primitive: unwrapped.shape.value, lang }).map((label, index) => (
                     <code key={index}>{label}</code>
                 ))}
             {unwrapped.default != null && !hideAllModifiers && (
@@ -83,14 +85,14 @@ export function renderTypeShorthandRoot({
     );
 }
 
-function toPrimitiveTypeLabels({ primitive }: { primitive: PrimitiveType }): string[] {
+function toPrimitiveTypeLabels({ primitive, lang }: { primitive: PrimitiveType; lang: string }): string[] {
     switch (primitive.type) {
         case "integer":
         case "long":
         case "double":
             return toPrimitiveTypeLabelsNumeric(primitive, primitive.type === "double");
         case "string":
-            return toPrimitiveTypeLabelsString(primitive);
+            return toPrimitiveTypeLabelsString({ ...primitive, lang });
         default:
             return [];
     }
@@ -133,17 +135,19 @@ function toPrimitiveTypeLabelsString({
     format,
     minLength,
     maxLength,
-    regex
+    regex,
+    lang
 }: {
     format: string | undefined;
     minLength: number | undefined;
     maxLength: number | undefined;
     regex: string | undefined;
+    lang: string;
 }): string[] {
     const labels = [];
 
     if (format != null || regex != null) {
-        labels.push(`format: "${format ?? regex}"`);
+        labels.push(`${t(lang).apiReference.format}: "${format ?? regex}"`);
     }
 
     if (minLength != null && maxLength != null && minLength === maxLength) {

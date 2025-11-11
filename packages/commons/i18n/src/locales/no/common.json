@@ -67,7 +67,8 @@
     "submitting": "Sender inn...",
     "resetToTheDefaultValue": "Tilbakestill til standardverdi",
     "generate": "Generer",
-    "retry": "Prøv igjen"
+    "retry": "Prøv igjen",
+    "edit": "Rediger"
   },
   "search": {
     "search": "Søk",
@@ -134,7 +135,14 @@
     "failed": "Mislyktes",
     "authType": "Autentiseringstype",
     "deprecated": "Utdatert",
-    "required": "Påkrevd"
+    "required": "Påkrevd",
+    "allowedValues": "Tillatte verdier",
+    "any": "hvilken som helst",
+    "orNull": "eller null",
+    "format": "format",
+    "optional": "Valgfri",
+    "statusLower": "status",
+    "timeLower": "tid"
   },
   "playground": {
     "cannotSendToLocalhost": "Kan ikke sende forespørsler til localhost",
@@ -170,7 +178,8 @@
     "loading": "Laster...",
     "reloading": "Laster på nytt...",
     "unknownError": "Ukjent feil",
-    "pdfPreview": "PDF-forhåndsvisning"
+    "pdfPreview": "PDF-forhåndsvisning",
+    "switchingProtocols": "101 Bytteprotokoller"
   },
   "feedback": {
     "feedback": "Tilbakemelding",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "Rapporter feil kode",
     "whatIsWrongWithThisCodeExample": "Hva er galt med dette kodeeksemplet?",
     "helpUsImproveByReportingCodeExample": "Hjelp oss med å forbedre dokumentasjonen ved å rapportere hva som er galt med dette kodeeksemplet.",
-    "weHaveBeenNotified": "Vi har blitt varslet slik at vi kan fikse det til neste gang."
+    "weHaveBeenNotified": "Vi har blitt varslet slik at vi kan fikse det til neste gang.",
+    "helpful": "Nyttig",
+    "notHelpful": "Ikke nyttig",
+    "feedbackReceived": "Feedback mottatt!",
+    "thankYouForImprovingDocs": "Takk for at du hjalp oss med å forbedre dokumentasjonen."
   },
   "feedbackQuality": {
     "accurate": "Nøyaktig",

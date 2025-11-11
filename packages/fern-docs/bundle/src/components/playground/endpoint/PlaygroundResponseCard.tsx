@@ -31,7 +31,7 @@ export function PlaygroundResponseCard({
     return (
         <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
             <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
-                <span className="text-(color:--grayscale-a11) text-xs uppercase">Response</span>
+                <span className="text-(color:--grayscale-a11) text-xs uppercase">{t(lang).apiReference.response}</span>
 
                 {response.type === "loaded" && (
                     <div className="flex items-center gap-2 text-xs">
@@ -42,14 +42,14 @@ export function PlaygroundResponseCard({
                                 ["bg-(color:--red-a3) text-(color:--red-a11)"]: response.value.response.status > 300
                             })}
                         >
-                            status: {response.value.response.status}
+                            {t(lang).apiReference.statusLower}: {response.value.response.status}
                         </span>
                         <span
                             className={
                                 "bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono"
                             }
                         >
-                            time: {round(response.value.time, 2)}ms
+                            {t(lang).apiReference.timeLower}: {round(response.value.time, 2)}ms
                         </span>
                         {response.value.type === "json" &&
                             response.value.size != null &&
@@ -59,7 +59,7 @@ export function PlaygroundResponseCard({
                                         "bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono"
                                     }
                                 >
-                                    size: {response.value.size}b
+                                    {t(lang).apiReference.size}: {response.value.size}b
                                 </span>
                             )}
                     </div>
@@ -99,7 +99,7 @@ export function PlaygroundResponseCard({
                         ),
                     failed: () => (
                         <span className="bg-(color:--red-a3) text-(color:--red-a11) rounded-1 flex items-center p-1 font-mono text-xs uppercase leading-none">
-                            Failed
+                            Failed {t(lang).apiReference.failed}
                         </span>
                     )
                 })}
@@ -115,7 +115,7 @@ export function PlaygroundResponseCard({
                             />
                         </div>
                     ) : (
-                        <div className="flex flex-1 items-center justify-center">Loading...</div>
+                        <div className="flex flex-1 items-center justify-center">{t(lang).status.loading}</div>
                     ),
                 loaded: (response) => {
                     // Handle text-based content

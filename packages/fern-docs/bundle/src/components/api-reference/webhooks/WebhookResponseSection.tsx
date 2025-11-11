@@ -7,7 +7,7 @@ export const WebhookResponseSection: React.FC<{ lang: string }> = ({ lang }) => 
             <div className="flex flex-col items-start p-3">
                 <div className="flex items-baseline space-x-2">
                     <div className="rounded-1 bg-green-500/20 p-1 text-xs text-green-400">{200}</div>
-                    <div className="text-(color:--grayscale-a11) text-xs">any</div>
+                    <div className="text-(color:--grayscale-a11) text-xs">{t(lang).apiReference.any}</div>
                 </div>
 
                 <Markdown

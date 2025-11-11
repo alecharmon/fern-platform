@@ -67,7 +67,8 @@
     "submitting": "Отправка...",
     "resetToTheDefaultValue": "Сбросить к значению по умолчанию",
     "generate": "Сгенерировать",
-    "retry": "Повторить попытку"
+    "retry": "Повторить попытку",
+    "edit": "Редактировать"
   },
   "search": {
     "search": "Поиск",
@@ -134,7 +135,14 @@
     "failed": "Не удалось",
     "authType": "Тип аутентификации",
     "deprecated": "Устарело",
-    "required": "Обязательный"
+    "required": "Обязательный",
+    "allowedValues": "Допустимые значения",
+    "any": "любой",
+    "orNull": "или null",
+    "format": "format",
+    "optional": "Опциональный",
+    "statusLower": "статус",
+    "timeLower": "время"
   },
   "playground": {
     "cannotSendToLocalhost": "Невозможно отправить запросы на localhost",
@@ -170,7 +178,8 @@
     "loading": "Загрузка...",
     "reloading": "Перезагрузка...",
     "unknownError": "Неизвестная ошибка",
-    "pdfPreview": "Предпросмотр PDF"
+    "pdfPreview": "Предпросмотр PDF",
+    "switchingProtocols": "101 протокол коммутации"
   },
   "feedback": {
     "feedback": "Отзыв",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "Сообщить о неправильном коде",
     "whatIsWrongWithThisCodeExample": "Что не так с этим примером кода?",
     "helpUsImproveByReportingCodeExample": "Помогите нам улучшить документацию, сообщив, что не так с этим примером кода.",
-    "weHaveBeenNotified": "Мы были уведомлены, чтобы исправить это в следующий раз."
+    "weHaveBeenNotified": "Мы были уведомлены, чтобы исправить это в следующий раз.",
+    "helpful": "Полезно",
+    "notHelpful": "Не полезно",
+    "feedbackReceived": "Отзыв получен!",
+    "thankYouForImprovingDocs": "Спасибо за улучшение документации."
   },
   "feedbackQuality": {
     "accurate": "Точно",

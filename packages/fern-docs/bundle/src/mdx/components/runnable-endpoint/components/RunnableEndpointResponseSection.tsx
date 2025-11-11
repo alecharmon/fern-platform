@@ -52,10 +52,10 @@ export function RunnableEndpointResponseSection({
                                 "bg-(color:--red-a3) text-(color:--red-a11)": response.value.response.status >= 300
                             })}
                         >
-                            {t(lang).apiReference.status}: {response.value.response.status}
+                            {t(lang).apiReference.statusLower}: {response.value.response.status}
                         </span>
                         <span className="bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
-                            {t(lang).apiReference.time}: {round(response.value.time, 2)}ms
+                            {t(lang).apiReference.timeLower}: {round(response.value.time, 2)}ms
                         </span>
                         {response.value.type === "json" &&
                             response.value.size != null &&

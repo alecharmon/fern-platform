@@ -67,7 +67,8 @@
     "submitting": "Wird gesendet...",
     "resetToTheDefaultValue": "Auf Standardwert zurücksetzen",
     "generate": "Generieren",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "edit": "Bearbeiten"
   },
   "search": {
     "search": "Suchen",
@@ -134,7 +135,14 @@
     "failed": "Fehlgeschlagen",
     "authType": "Auth-Typ",
     "deprecated": "Veraltet",
-    "required": "Erforderlich"
+    "required": "Erforderlich",
+    "allowedValues": "Erlaubte Werte",
+    "any": "beliebig",
+    "orNull": "oder null",
+    "format": "Format",
+    "optional": "Optional",
+    "statusLower": "Status",
+    "timeLower": "Zeit"
   },
   "playground": {
     "cannotSendToLocalhost": "Anfragen an localhost können nicht gesendet werden",
@@ -170,7 +178,8 @@
     "loading": "Wird geladen...",
     "reloading": "Wird neu geladen...",
     "unknownError": "Unbekannter Fehler",
-    "pdfPreview": "PDF-Vorschau"
+    "pdfPreview": "PDF-Vorschau",
+    "switchingProtocols": "101 Switching-Protokolle"
   },
   "feedback": {
     "feedback": "Feedback",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "Fehlerhaften Code melden",
     "whatIsWrongWithThisCodeExample": "Was ist falsch mit diesem Codebeispiel?",
     "helpUsImproveByReportingCodeExample": "Helfen Sie uns, unsere Dokumentation zu verbessern, indem Sie melden, was mit diesem Codebeispiel nicht stimmt.",
-    "weHaveBeenNotified": "Wir wurden benachrichtigt, damit wir dies beim nächsten Mal beheben können."
+    "weHaveBeenNotified": "Wir wurden benachrichtigt, damit wir dies beim nächsten Mal beheben können.",
+    "helpful": "Hilfreich",
+    "notHelpful": "Nicht hilfreich",
+    "feedbackReceived": "Feedback erhalten!",
+    "thankYouForImprovingDocs": "Vielen Dank für die Verbesserung der Dokumentation."
   },
   "feedbackQuality": {
     "accurate": "Genau",

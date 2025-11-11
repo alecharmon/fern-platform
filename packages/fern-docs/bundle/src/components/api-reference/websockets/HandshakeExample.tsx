@@ -36,7 +36,7 @@ export function HandshakeExample({
                     </tr>
                     <tr>
                         <td className="text-left align-top">{t(lang).apiReference.status}</td>
-                        <td className="text-left align-top">101 Switching Protocols</td>
+                        <td className="text-left align-top">{t(lang).status.switchingProtocols}</td>
                     </tr>
                 </tbody>
             </table>

@@ -2,12 +2,12 @@
 
 import { cn } from "@fern-docs/components/cn";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
+import { t } from "@fern-docs/i18n";
 import { Check, ThumbsDown, ThumbsUp } from "lucide-react";
 import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
 import { forwardRef, useCallback, useMemo, useState } from "react";
 import * as Selection from "selection-popover";
-
 import { track } from "../analytics";
 import { useSelection } from "../hooks/useSelection";
 import { FeedbackForm } from "./FeedbackForm";
@@ -149,7 +149,7 @@ const FeedbackPopover = forwardRef<SelectionTextToolbarElement, SelectionTextToo
                         className={cn({ "w-full": isHelpful !== undefined })}
                         transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                     >
-                        Helpful
+                        {t(lang).feedback.helpful}
                     </MotionFernButton>
                     <MotionFernButton
                         layoutId="thumbs-down"
@@ -167,11 +167,11 @@ const FeedbackPopover = forwardRef<SelectionTextToolbarElement, SelectionTextToo
                         className={cn({ "w-full": isHelpful !== undefined })}
                         transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                     >
-                        Not Helpful
+                        {t(lang).feedback.notHelpful}
                     </MotionFernButton>
                 </>
             ),
-            [handleThumbsDown, handleThumbsUp, isHelpful]
+            [handleThumbsDown, handleThumbsUp, isHelpful, lang]
         );
 
         return (
@@ -218,13 +218,13 @@ const FeedbackPopover = forwardRef<SelectionTextToolbarElement, SelectionTextToo
                                             <Check />
                                         </m.div>
                                         <m.p layoutId="success-title" className="text-md text-center font-semibold">
-                                            Feedback received!
+                                            {t(lang).feedback.feedbackReceived}
                                         </m.p>
                                         <m.p
                                             layoutId="success-description"
                                             className="text-(color:--grayscale-a11) text-center text-sm"
                                         >
-                                            Thank you for improving the docs.
+                                            {t(lang).feedback.thankYouForImprovingDocs}
                                         </m.p>
                                     </m.div>
                                 ) : (

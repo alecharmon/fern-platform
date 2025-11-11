@@ -67,7 +67,8 @@
     "submitting": "送信中...",
     "resetToTheDefaultValue": "デフォルト値にリセット",
     "generate": "生成",
-    "retry": "再試行"
+    "retry": "再試行",
+    "edit": "編集"
   },
   "search": {
     "search": "検索",
@@ -134,7 +135,14 @@
     "failed": "失敗",
     "authType": "認証タイプ",
     "deprecated": "非推奨",
-    "required": "必須"
+    "required": "必須",
+    "allowedValues": "許可された値",
+    "any": "任意",
+    "orNull": "または null",
+    "format": "形式",
+    "optional": "オプション",
+    "statusLower": "ステータス",
+    "timeLower": "時間"
   },
   "playground": {
     "cannotSendToLocalhost": "localhostにリクエストを送信できません",
@@ -170,7 +178,8 @@
     "loading": "読み込み中...",
     "reloading": "再読み込み中...",
     "unknownError": "不明なエラー",
-    "pdfPreview": "PDFプレビュー"
+    "pdfPreview": "PDFプレビュー",
+    "switchingProtocols": "101 スイッチングプロトコル"
   },
   "feedback": {
     "feedback": "フィードバック",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "誤ったコードを報告",
     "whatIsWrongWithThisCodeExample": "このコード例の何が間違っていますか？",
     "helpUsImproveByReportingCodeExample": "このコード例の何が間違っているかを報告して、ドキュメントの改善にご協力ください。",
-    "weHaveBeenNotified": "通知を受け取りましたので、次回修正いたします。"
+    "weHaveBeenNotified": "通知を受け取りましたので、次回修正いたします。",
+    "helpful": "役に立ちました",
+    "notHelpful": "役に立たない",
+    "feedbackReceived": "フィードバックを受け取りました！",
+    "thankYouForImprovingDocs": "ドキュメントの改善にご協力ください。"
   },
   "feedbackQuality": {
     "accurate": "正確",

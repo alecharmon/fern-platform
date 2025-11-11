@@ -214,7 +214,7 @@ export function PlaygroundCardTriggerManual({
                         className="ml-auto flex flex-1 items-center justify-end"
                         disabled={disabled}
                     >
-                        <SemanticBadge intent={authed ? "success" : "danger"}>Edit</SemanticBadge>
+                        <SemanticBadge intent={authed ? "success" : "danger"}>{t(lang).buttons.edit}</SemanticBadge>
                     </button>
                 </div>
             </Button>
@@ -233,7 +233,7 @@ export function PlaygroundCardTriggerManual({
             <Key />
             {authButtonCopy}
             <SemanticBadge intent={authed ? "success" : "danger"} className="ml-auto">
-                Edit
+                {t(lang).buttons.edit}
             </SemanticBadge>
         </Button>
     );

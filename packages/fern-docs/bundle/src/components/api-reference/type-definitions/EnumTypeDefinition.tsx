@@ -50,7 +50,7 @@ export function EnumTypeDefinition({
         <>
             {elements.length < 6 ? (
                 <div className="text-(color:--grayscale-a11) flex items-baseline gap-2">
-                    <span className="shrink-0 text-sm">Allowed values:</span>
+                    <span className="shrink-0 text-sm">{t(lang).apiReference.allowedValues}:</span>
                     <FernTooltipProvider>
                         <ChipSizeProvider size="sm">
                             <span className="inline-flex flex-wrap gap-2">

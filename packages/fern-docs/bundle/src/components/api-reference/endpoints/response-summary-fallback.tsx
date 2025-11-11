@@ -45,11 +45,7 @@ function getResponseSummary({
             return t(lang).responses.thisEndpointReturnsNothing;
         case "fileDownload": {
             if (isAudioFileDownloadSpanSummary) {
-                return (
-                    <span>
-                        This endpoint returns an <code>audio/mpeg</code> file.
-                    </span>
-                );
+                return <span>{t(lang).responses.thisEndpointReturnsAudio}</span>;
             }
             return t(lang).responses.thisEndpointReturnsFile;
         }

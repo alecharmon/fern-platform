@@ -67,7 +67,8 @@
     "submitting": "제출 중...",
     "resetToTheDefaultValue": "기본값으로 재설정",
     "generate": "생성",
-    "retry": "재시도"
+    "retry": "재시도",
+    "edit": "편집"
   },
   "search": {
     "search": "검색",
@@ -134,7 +135,14 @@
     "failed": "실패",
     "authType": "인증 유형",
     "deprecated": "더 이상 사용되지 않음",
-    "required": "필수"
+    "required": "필수",
+    "allowedValues": "허용된 값",
+    "any": "모든",
+    "orNull": "또는 null",
+    "format": "형식",
+    "optional": "선택 사항",
+    "statusLower": "상태",
+    "timeLower": "시간"
   },
   "playground": {
     "cannotSendToLocalhost": "localhost로 요청을 보낼 수 없습니다",
@@ -170,7 +178,8 @@
     "loading": "로딩 중...",
     "reloading": "다시 로딩 중...",
     "unknownError": "알 수 없는 오류",
-    "pdfPreview": "PDF 미리보기"
+    "pdfPreview": "PDF 미리보기",
+    "switchingProtocols": "101 스위칭 프로토콜"
   },
   "feedback": {
     "feedback": "피드백",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "잘못된 코드 신고",
     "whatIsWrongWithThisCodeExample": "이 코드 예제의 문제점은 무엇인가요?",
     "helpUsImproveByReportingCodeExample": "이 코드 예제의 문제점을 신고하여 문서 개선에 도움을 주세요.",
-    "weHaveBeenNotified": "다음번에 수정할 수 있도록 알림을 받았습니다."
+    "weHaveBeenNotified": "다음번에 수정할 수 있도록 알림을 받았습니다.",
+    "helpful": "도움이 됨",
+    "notHelpful": "도움이 되지 않음",
+    "feedbackReceived": "피드백을 받았습니다!",
+    "thankYouForImprovingDocs": "문서 개선에 도움을 주셔서 감사합니다."
   },
   "feedbackQuality": {
     "accurate": "정확함",

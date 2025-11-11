@@ -67,7 +67,8 @@
     "submitting": "Skickar in...",
     "resetToTheDefaultValue": "Återställ till standardvärdet",
     "generate": "Generera",
-    "retry": "Försök igen"
+    "retry": "Försök igen",
+    "edit": "Redigera"
   },
   "search": {
     "search": "Sök",
@@ -134,7 +135,14 @@
     "failed": "Misslyckades",
     "authType": "Autentiseringstyp",
     "deprecated": "Föråldrad",
-    "required": "Obligatorisk"
+    "required": "Obligatorisk",
+    "allowedValues": "Tillåtna värden",
+    "any": "vilken som helst",
+    "orNull": "eller null",
+    "format": "format",
+    "optional": "Valfri",
+    "statusLower": "status",
+    "timeLower": "tid"
   },
   "playground": {
     "cannotSendToLocalhost": "Kan inte skicka förfrågningar till localhost",
@@ -170,7 +178,8 @@
     "loading": "Laddar...",
     "reloading": "Laddar om...",
     "unknownError": "Okänt fel",
-    "pdfPreview": "PDF-förhandsgranskning"
+    "pdfPreview": "PDF-förhandsgranskning",
+    "switchingProtocols": "101 Byte av protokoll"
   },
   "feedback": {
     "feedback": "Feedback",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "Rapportera felaktig kod",
     "whatIsWrongWithThisCodeExample": "Vad är fel med detta kodexempel?",
     "helpUsImproveByReportingCodeExample": "Hjälp oss att förbättra vår dokumentation genom att rapportera vad som är fel med detta kodexempel.",
-    "weHaveBeenNotified": "Vi har blivit meddelade så att vi kan åtgärda detta till nästa gång."
+    "weHaveBeenNotified": "Vi har blivit meddelade så att vi kan åtgärda detta till nästa gång.",
+    "helpful": "Hjälpsam",
+    "notHelpful": "Inte hjälpsam",
+    "feedbackReceived": "Feedback mottaget!",
+    "thankYouForImprovingDocs": "Tack för att du hjälper oss att förbättra dokumentationen."
   },
   "feedbackQuality": {
     "accurate": "Korrekt",

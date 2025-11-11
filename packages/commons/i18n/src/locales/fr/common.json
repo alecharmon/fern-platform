@@ -67,7 +67,8 @@
     "submitting": "Soumission en cours...",
     "resetToTheDefaultValue": "Réinitialiser à la valeur par défaut",
     "generate": "Générer",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "edit": "Modifier"
   },
   "search": {
     "search": "Rechercher",
@@ -134,7 +135,14 @@
     "failed": "Échoué",
     "authType": "Type d'authentification",
     "deprecated": "Obsolète",
-    "required": "Requis"
+    "required": "Requis",
+    "allowedValues": "Valeurs autorisées",
+    "any": "n'importe quel",
+    "orNull": "ou null",
+    "format": "format",
+    "optional": "Optionnel",
+    "statusLower": "statut",
+    "timeLower": "temps"
   },
   "playground": {
     "cannotSendToLocalhost": "Impossible d'envoyer des requêtes à localhost",
@@ -170,7 +178,8 @@
     "loading": "Chargement...",
     "reloading": "Rechargement...",
     "unknownError": "Erreur inconnue",
-    "pdfPreview": "Aperçu PDF"
+    "pdfPreview": "Aperçu PDF",
+    "switchingProtocols": "101 Protocole de changement"
   },
   "feedback": {
     "feedback": "Commentaires",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "Signaler un code incorrect",
     "whatIsWrongWithThisCodeExample": "Qu'est-ce qui ne va pas avec cet exemple de code ?",
     "helpUsImproveByReportingCodeExample": "Aidez-nous à améliorer notre documentation en signalant ce qui ne va pas avec cet exemple de code.",
-    "weHaveBeenNotified": "Nous avons été notifiés afin de pouvoir corriger cela la prochaine fois."
+    "weHaveBeenNotified": "Nous avons été notifiés afin de pouvoir corriger cela la prochaine fois.",
+    "helpful": "Utile",
+    "notHelpful": "Non utile",
+    "feedbackReceived": "Commentaire reçu !",
+    "thankYouForImprovingDocs": "Merci pour améliorer la documentation."
   },
   "feedbackQuality": {
     "accurate": "Précis",

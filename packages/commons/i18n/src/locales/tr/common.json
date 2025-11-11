@@ -67,7 +67,8 @@
     "submitting": "Gönderiliyor...",
     "resetToTheDefaultValue": "Varsayılan değere sıfırla",
     "generate": "Oluştur",
-    "retry": "Tekrar dene"
+    "retry": "Tekrar dene",
+    "edit": "Düzenlemek"
   },
   "search": {
     "search": "Ara",
@@ -134,7 +135,14 @@
     "failed": "Başarısız",
     "authType": "Kimlik doğrulama türü",
     "deprecated": "Kullanımdan kaldırıldı",
-    "required": "Zorunlu"
+    "required": "Zorunlu",
+    "allowedValues": "İzin verilen değerler",
+    "any": "herhangi bir",
+    "orNull": "veya null",
+    "format": "format",
+    "optional": "İsteğe bağlı",
+    "statusLower": "durum",
+    "timeLower": "zaman"
   },
   "playground": {
     "cannotSendToLocalhost": "Localhost'a istek gönderilemez",
@@ -170,7 +178,8 @@
     "loading": "Yükleniyor...",
     "reloading": "Yeniden yükleniyor...",
     "unknownError": "Bilinmeyen hata",
-    "pdfPreview": "PDF önizlemesi"
+    "pdfPreview": "PDF önizlemesi",
+    "switchingProtocols": "101 Protokolleri Değiştirme"
   },
   "feedback": {
     "feedback": "Geri bildirim",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "Hatalı kodu bildir",
     "whatIsWrongWithThisCodeExample": "Bu kod örneğinde ne yanlış?",
     "helpUsImproveByReportingCodeExample": "Bu kod örneğinde neyin yanlış olduğunu bildirerek dokümantasyonumuzu iyileştirmemize yardımcı olun.",
-    "weHaveBeenNotified": "Bir dahaki sefere düzeltebilmemiz için bilgilendirilmiş olduk."
+    "weHaveBeenNotified": "Bir dahaki sefere düzeltebilmemiz için bilgilendirilmiş olduk.",
+    "helpful": "Yararlı",
+    "notHelpful": "Yararlı değil",
+    "feedbackReceived": "Geri bildirim alındı!",
+    "thankYouForImprovingDocs": "Dokümantasyonumuzu iyileştirmemize yardık."
   },
   "feedbackQuality": {
     "accurate": "Doğru",

@@ -67,7 +67,8 @@
     "submitting": "Υποβάλλεται...",
     "resetToTheDefaultValue": "Επαναφορά στην προεπιλεγμένη τιμή",
     "generate": "Δημιουργία",
-    "retry": "Επανάληψη"
+    "retry": "Επανάληψη",
+    "edit": "Εκδίδω"
   },
   "search": {
     "search": "Αναζήτηση",
@@ -134,7 +135,14 @@
     "failed": "Απέτυχε",
     "authType": "Τύπος ελέγχου ταυτότητας",
     "deprecated": "Παρωχημένο",
-    "required": "Απαιτούμενο"
+    "required": "Απαιτούμενο",
+    "allowedValues": "Επιτρεπόμενες τιμές",
+    "any": "οποιοσδήποτε",
+    "orNull": "ή null",
+    "format": "Μορφή",
+    "optional": "Προαιρετικό",
+    "statusLower": "κατάσταση",
+    "timeLower": "χρόνος"
   },
   "playground": {
     "cannotSendToLocalhost": "Δεν είναι δυνατή η αποστολή αιτημάτων στο localhost",
@@ -170,7 +178,8 @@
     "loading": "Φόρτωση...",
     "reloading": "Επαναφόρτωση...",
     "unknownError": "Άγνωστο σφάλμα",
-    "pdfPreview": "Προεπισκόπηση PDF"
+    "pdfPreview": "Προεπισκόπηση PDF",
+    "switchingProtocols": "101 Πρωτόκολλα μεταγωγής"
   },
   "feedback": {
     "feedback": "Σχόλια",
@@ -198,7 +207,11 @@
     "reportIncorrectCode": "Αναφορά εσφαλμένου κώδικα",
     "whatIsWrongWithThisCodeExample": "Τι είναι λάθος με αυτό το παράδειγμα κώδικα;",
     "helpUsImproveByReportingCodeExample": "Βοηθήστε μας να βελτιώσουμε την τεκμηρίωσή μας αναφέροντας τι είναι λάθος με αυτό το παράδειγμα κώδικα.",
-    "weHaveBeenNotified": "Έχουμε ενημερωθεί ώστε να το διορθώσουμε για την επόμενη φορά."
+    "weHaveBeenNotified": "Έχουμε ενημερωθεί ώστε να το διορθώσουμε για την επόμενη φορά.",
+    "helpful": "Χρήσιμο",
+    "notHelpful": "Μη χρήσιμο",
+    "feedbackReceived": "Λήφθηκε το σχόλιο!",
+    "thankYouForImprovingDocs": "Ευχαριστούμε που βελτιώσετε την τεκμηρίωση."
   },
   "feedbackQuality": {
     "accurate": "Ακριβής",
