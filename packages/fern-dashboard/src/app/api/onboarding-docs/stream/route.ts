@@ -3,6 +3,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { NextRequest } from "next/server";
+import { extract } from "tar";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import postGitRepository from "@/app/services/dal/github/postGitRepository";
@@ -97,62 +98,41 @@ export async function GET(req: NextRequest) {
                     ? data.docsSiteUrl
                     : `${data.docsSiteUrl}.docs.buildwithfern.com`;
 
-                // Clone docs-starter repo
+                // Download docs-starter repo as tarball
                 sendEvent({
                     type: "log",
                     message: "Cloning docs-starter repository...",
                     timestamp: new Date().toISOString()
                 });
 
-                // Git clone the docs-starter repo
-                const gitClone = spawn(
-                    "git",
-                    ["clone", "--depth", "1", "https://github.com/fern-api/docs-starter.git", tempDir],
-                    { cwd: process.cwd() }
-                );
+                // Download from GitHub tarball API (faster and doesn't require git)
+                const tarballUrl = "https://github.com/fern-api/docs-starter/archive/refs/heads/main.tar.gz";
+                const response = await fetch(tarballUrl);
 
-                // Stream git clone output
-                gitClone.stdout.on("data", (data) => {
-                    const lines = data
-                        .toString()
-                        .split("\n")
-                        .filter((line: string) => line.trim());
-                    for (const line of lines) {
-                        sendEvent({
-                            type: "log",
-                            message: line,
-                            timestamp: new Date().toISOString()
-                        });
-                    }
+                if (!response.ok) {
+                    throw new Error(`Failed to download docs-starter: ${response.statusText}`);
+                }
+
+                // Save tarball to temp file
+                const tarballPath = path.join(tempDir, "docs-starter.tar.gz");
+                const tarballBuffer = Buffer.from(await response.arrayBuffer());
+                await fs.writeFile(tarballPath, tarballBuffer);
+
+                sendEvent({
+                    type: "log",
+                    message: "Extracting repository...",
+                    timestamp: new Date().toISOString()
                 });
 
-                gitClone.stderr.on("data", (data) => {
-                    const lines = data
-                        .toString()
-                        .split("\n")
-                        .filter((line: string) => line.trim());
-                    for (const line of lines) {
-                        sendEvent({
-                            type: "log",
-                            message: line,
-                            timestamp: new Date().toISOString()
-                        });
-                    }
+                // Extract tarball using tar npm package (pure JavaScript, works in Vercel)
+                await extract({
+                    file: tarballPath,
+                    cwd: tempDir,
+                    strip: 1
                 });
 
-                // Wait for git clone to complete
-                await new Promise<void>((resolve, reject) => {
-                    gitClone.on("close", (code) => {
-                        if (code === 0) {
-                            resolve();
-                        } else {
-                            reject(new Error(`Git clone exited with code ${code}`));
-                        }
-                    });
-                    gitClone.on("error", (error) => {
-                        reject(error);
-                    });
-                });
+                // Clean up tarball
+                await fs.unlink(tarballPath);
 
                 sendEvent({
                     type: "log",
