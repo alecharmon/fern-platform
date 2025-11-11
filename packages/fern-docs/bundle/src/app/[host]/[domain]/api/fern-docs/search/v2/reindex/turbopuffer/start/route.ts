@@ -29,7 +29,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             : `https://fai.buildwithfern.com/settings/reindex-preview-callback`;
     }
 
-    const deleteExisting = req.nextUrl.searchParams.get("deleteExisting") === "true";
+    const deleteExisting = req.nextUrl.searchParams.get("deleteExisting") !== "false";
 
     const docs = await loadWithUrl(domain);
     const { basePath } = docs.baseUrl;

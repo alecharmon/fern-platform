@@ -20,7 +20,7 @@ export const queueTurbopufferReindex = async (
         host,
         domain,
         basepath,
-        endpoint: "/api/fern-docs/search/v2/reindex/turbopuffer",
+        endpoint: "/api/fern-docs/search/v2/reindex/turbopuffer?deleteExisting=true",
         method: "GET",
         timeoutSeconds,
         failureCallback: process.env.FAI_SERVER_URL

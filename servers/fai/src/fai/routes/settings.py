@@ -203,7 +203,9 @@ async def enable_ask_ai(
 
             LOGGER.info(f"Starting reindex for domain {stripped_domain}")
             async with httpx.AsyncClient(follow_redirects=True) as client:
-                response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
+                response = await client.get(
+                    f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start?deleteExisting=true"
+                )
                 if response.status_code == 200:
                     job_id = response.json().get("job_id", None)
                     LOGGER.info(
@@ -265,7 +267,9 @@ async def toggle_ask_ai(
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
                 async with httpx.AsyncClient(follow_redirects=True) as client:
-                    response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
+                    response = await client.get(
+                        f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start?deleteExisting=true"
+                    )
                     if response.status_code == 200:
                         job_id = response.json().get("job_id", None)
                         LOGGER.info(
@@ -358,7 +362,9 @@ async def reindex_ask_ai(
         job_id = None
         try:
             async with httpx.AsyncClient(follow_redirects=True) as client:
-                response = await client.get(f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start")
+                response = await client.get(
+                    f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start?deleteExisting=true"
+                )
                 if response.status_code == 200:
                     job_id = response.json().get("job_id", None)
                     LOGGER.info(

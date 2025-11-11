@@ -30,7 +30,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
     const domain = getDocsDomainEdge(req);
-    const deleteExisting = req.nextUrl.searchParams.get("deleteExisting") === "true";
+    const deleteExisting = req.nextUrl.searchParams.get("deleteExisting") !== "false";
 
     const fernDocsIndexName = getFernDocsIndexName();
     const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
