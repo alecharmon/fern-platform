@@ -237,6 +237,36 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
         );
     }
 
+    function mathElementHandler(state: ToHastState, node: any, parents?: MdastParents) {
+        const { type } = getNodeInfo(node);
+
+        const latex = node.value || "";
+
+        if (type === "inlineMath") {
+            return {
+                type: "element",
+                tagName: "span",
+                properties: {
+                    "data-type": "inline-math",
+                    "data-latex": latex
+                },
+                children: []
+            };
+        } else if (type === "math") {
+            return {
+                type: "element",
+                tagName: "div",
+                properties: {
+                    "data-type": "block-math",
+                    "data-latex": latex
+                },
+                children: []
+            };
+        }
+
+        return node;
+    }
+
     // Default handler for custom elements
     function customElementHandler(state: ToHastState, node: any, parents?: MdastParents) {
         const { type, name, positionStart, positionEnd } = getNodeInfo(node);
@@ -304,8 +334,8 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
                 mdxFlowExpression: customElementHandler,
                 mdxTextExpression: customElementHandler,
                 mdxjsEsm: customElementHandler,
-                math: customElementHandler,
-                inlineMath: customElementHandler,
+                math: mathElementHandler,
+                inlineMath: mathElementHandler,
                 html: customElementHandler,
                 image: customElementHandler,
                 imageReference: customElementHandler,
@@ -356,8 +386,19 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
 
     // Default handler for base elements
     const baseElementHandler: ToMdastHandle = (state, element) => {
+        // Handle math nodes (inline and block)
+        const dataType = element?.properties?.["data-type"] || element?.properties?.dataType;
+        const dataLatex = element?.properties?.["data-latex"] || element?.properties?.dataLatex;
+
+        if (dataType === "inline-math" && typeof dataLatex === "string") {
+            return { type: "inlineMath", value: dataLatex } as any;
+        }
+
+        if (dataType === "block-math" && typeof dataLatex === "string") {
+            return { type: "math", value: dataLatex } as any;
+        }
+
         // Handle image-upload and video-upload custom elements separately
-        const dataType = element?.properties?.dataType;
         if (dataType === "image-upload" || dataType === "video-upload") {
             return { type: "html", value: `<div data-type="${dataType}" />` } as any;
         }

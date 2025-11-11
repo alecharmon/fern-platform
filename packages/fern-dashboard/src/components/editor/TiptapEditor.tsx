@@ -2,6 +2,7 @@
 
 import CodeBlock from "@tiptap/extension-code-block";
 import Link from "@tiptap/extension-link";
+import Mathematics from "@tiptap/extension-mathematics";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Table, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
 import {
@@ -71,6 +72,11 @@ const extensions = [
         linkOnPaste: true,
         HTMLAttributes: {
             class: "fern-mdx-link"
+        }
+    }),
+    Mathematics.configure({
+        katexOptions: {
+            throwOnError: false
         }
     }),
     FVEAttributesExtension.configure({

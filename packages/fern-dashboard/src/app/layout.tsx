@@ -17,6 +17,7 @@ import { cn } from "@/utils/utils";
 
 import { gtPlanar } from "./fonts";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { getCurrentSession } from "./services/auth0/getCurrentSession";
 
 export const metadata: Metadata = {

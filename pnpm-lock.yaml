@@ -1268,6 +1268,9 @@ importers:
       '@tiptap/extension-link':
         specifier: ^3.6.5
         version: 3.6.5(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))(@tiptap/pm@3.4.4)
+      '@tiptap/extension-mathematics':
+        specifier: 3.4.4
+        version: 3.4.4(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))(@tiptap/pm@3.4.4)(katex@0.16.21)
       '@tiptap/extension-placeholder':
         specifier: ^3.0.5
         version: 3.0.5(@tiptap/extensions@3.0.5(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))(@tiptap/pm@3.4.4))
@@ -1364,6 +1367,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
+      katex:
+        specifier: 0.16.21
+        version: 0.16.21
       libsodium-wrappers:
         specifier: ^0.7.15
         version: 0.7.15
@@ -10523,6 +10529,13 @@ packages:
     peerDependencies:
       '@tiptap/core': ^3.0.5
       '@tiptap/pm': ^3.0.5
+
+  '@tiptap/extension-mathematics@3.4.4':
+    resolution: {integrity: sha512-IkrsuJavXVmQZjv97pJnGDKAsAss1xJKYDKdrLUdQRZnbtogTxFeAJADvVYkQ0dLwIYxOUidpy0mCgQcSgQvww==}
+    peerDependencies:
+      '@tiptap/core': ^3.4.4
+      '@tiptap/pm': ^3.4.4
+      katex: 0.16.21
 
   '@tiptap/extension-node-range@3.0.9':
     resolution: {integrity: sha512-lSnQs8SgvJ612w6b90gfrS0BpSDoWRuyudwomKZKrUJpuw7sDaFy2A4I/KHJKFOZ3oKkpSgkSxxtZAlhNxDK3A==}
@@ -31707,6 +31720,12 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.4.4(@tiptap/pm@3.4.4)
       '@tiptap/pm': 3.4.4
+
+  '@tiptap/extension-mathematics@3.4.4(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))(@tiptap/pm@3.4.4)(katex@0.16.21)':
+    dependencies:
+      '@tiptap/core': 3.4.4(@tiptap/pm@3.4.4)
+      '@tiptap/pm': 3.4.4
+      katex: 0.16.21
 
   '@tiptap/extension-node-range@3.0.9(@tiptap/core@3.4.4(@tiptap/pm@3.4.4))(@tiptap/pm@3.4.4)':
     dependencies:
