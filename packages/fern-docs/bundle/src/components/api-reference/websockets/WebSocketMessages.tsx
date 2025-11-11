@@ -1,7 +1,7 @@
 "use client";
 
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
-import { t } from "@fern-docs/i18n/t";
+import { t } from "@fern-docs/i18n";
 import * as Accordion from "@radix-ui/react-accordion";
 import type { FC } from "react";
 import { Virtuoso } from "react-virtuoso";
