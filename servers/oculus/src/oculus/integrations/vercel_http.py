@@ -46,11 +46,11 @@ class VercelHTTPIntegration:
                         "parts": [{"type": "text", "text": question}],
                     }
                 ],
-                "source": "OCULUS_EVAL",
                 "filters": [],
                 "conversationId": conversation_id,
                 "queryId": query_id,
                 "documentUrls": [],
+                "skipSaveQuery": True,
             }
 
             response = requests.post(

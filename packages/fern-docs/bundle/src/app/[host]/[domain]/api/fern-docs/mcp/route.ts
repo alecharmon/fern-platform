@@ -59,6 +59,7 @@ async function createHandler(host: string, domain: string): Promise<McpHandler> 
                             queryId: crypto.randomUUID(),
                             filters: [],
                             documentUrls: [],
+                            source: "MCP",
                             id: crypto.randomUUID(),
                             messages: [
                                 {
