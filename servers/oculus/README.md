@@ -31,16 +31,33 @@ Oculus supports multiple integration types for generating answers:
 
 ### Selecting Integration
 
+Integration type can be specified in multiple ways with the following priority (highest to lowest):
+
+1. **CLI argument** (highest priority)
+2. **Suite config file**
+3. **Environment variable**
+4. **Default** (`fai-local`)
+
+**Via suite config (recommended for consistent suite behavior):**
+```json
+{
+  "domain": "buildwithfern.com",
+  "integration": "fai-http",
+  "generators": ["markdown"],
+  "evaluators": ["correctness"]
+}
+```
+
+**Via CLI argument (overrides suite config):**
+```bash
+oculus answer --suite simple --integration fai-http
+oculus run --suite simple --integration vercel-http
+```
+
 **Via environment variable:**
 ```bash
 export OCULUS_INTEGRATION=vercel-http
 oculus answer --suite simple
-```
-
-**Via CLI argument:**
-```bash
-oculus answer --suite simple --integration fai-http
-oculus run --suite simple --integration vercel-http
 ```
 
 **Comparison workflow:**
@@ -71,7 +88,7 @@ done
     oculus evaluate --suite {suite_name} --run-id {id} [--judge-model {model}]
 
 **Options:**
-- `--integration`: One of `fai-local`, `fai-http`, `vercel-http` (defaults to `OCULUS_INTEGRATION` env var or `fai-local`)
+- `--integration`: One of `fai-local`, `fai-http`, `vercel-http` (defaults to suite config, then `OCULUS_INTEGRATION` env var, or `fai-local`)
 - `--model`: One of `claude-4-sonnet-20250514`, `command-a-03-2025` (default: `claude-4-sonnet-20250514`)
 - `--judge-model`: Claude model for evaluation judging (default: `claude-opus-4-20250514`)
 - `--output-dir`: Directory to save results and GitHub-formatted outputs

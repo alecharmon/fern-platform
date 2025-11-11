@@ -105,7 +105,14 @@ def generate_answers_command(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        integration_type = args.integration if hasattr(args, "integration") else get_default_integration_type()
+        integration_type = None
+        if hasattr(args, "integration") and args.integration:
+            integration_type = args.integration
+        elif suite_config.integration:
+            integration_type = suite_config.integration
+        else:
+            integration_type = get_default_integration_type()
+
         print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
         integration = create_integration(
             integration_type=integration_type, domain=suite_config.domain, model=args.model
@@ -315,7 +322,14 @@ def run_evaluation(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        integration_type = args.integration if hasattr(args, "integration") else get_default_integration_type()
+        integration_type = None
+        if hasattr(args, "integration") and args.integration:
+            integration_type = args.integration
+        elif suite_config.integration:
+            integration_type = suite_config.integration
+        else:
+            integration_type = get_default_integration_type()
+
         print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
         integration = create_integration(
             integration_type=integration_type, domain=suite_config.domain, model=args.model
