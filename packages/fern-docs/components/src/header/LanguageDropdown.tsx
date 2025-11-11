@@ -61,24 +61,6 @@ function getLanguageLabel(language: string): string {
         tr: "Türkçe"
     };
 
-    // const languageFlags: Record<string, string> = {
-    //     en: "🇺🇸",
-    //     es: "🇪🇸",
-    //     fr: "🇫🇷",
-    //     de: "🇩🇪",
-    //     it: "🇮🇹",
-    //     pt: "🇵🇹",
-    //     ja: "🇯🇵",
-    //     zh: "🇨🇳",
-    //     ko: "🇰🇷",
-    //     el: "🇬🇷",
-    //     no: "🇳🇴",
-    //     pl: "🇵🇱",
-    //     ru: "🇷🇺",
-    //     sv: "🇸🇪",
-    //     tr: "🇹🇷"
-    // };
-
     return languageLabels[language] ?? language.toUpperCase();
 }
 

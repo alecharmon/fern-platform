@@ -331,7 +331,7 @@ function FernDropdownItemValue({
     function renderButtonContent() {
         return (
             <div className="flex w-full items-start gap-2">
-                <span className="mt-1">{option.icon}</span>
+                <span className="my-auto">{option.icon}</span>
 
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <div className={option.labelClassName}>{option.label ?? option.value}</div>

@@ -1,16 +1,43 @@
 "use client";
 
 import { useIsDesktop } from "@fern-ui/react-commons";
-import { ChevronDown, ChevronsUpDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { cn } from "../cn";
 import { FernDropdown } from "../FernDropdown";
-import { FernSelectionItem } from "../FernSelectionItem";
 
 export interface LanguageDropdownItem {
     language: string;
     label: string;
     slug: string;
+}
+
+const FLAG_SVGS: Record<string, string> = {
+    en: new URL("./flag-assets/us.svg", import.meta.url).toString(),
+    es: new URL("./flag-assets/es.svg", import.meta.url).toString(),
+    fr: new URL("./flag-assets/fr.svg", import.meta.url).toString(),
+    de: new URL("./flag-assets/de.svg", import.meta.url).toString(),
+    it: new URL("./flag-assets/it.svg", import.meta.url).toString(),
+    pt: new URL("./flag-assets/pt.svg", import.meta.url).toString(),
+    ja: new URL("./flag-assets/jp.svg", import.meta.url).toString(),
+    zh: new URL("./flag-assets/cn.svg", import.meta.url).toString(),
+    ko: new URL("./flag-assets/kr.svg", import.meta.url).toString(),
+    el: new URL("./flag-assets/gr.svg", import.meta.url).toString(),
+    no: new URL("./flag-assets/no.svg", import.meta.url).toString(),
+    pl: new URL("./flag-assets/pl.svg", import.meta.url).toString(),
+    ru: new URL("./flag-assets/ru.svg", import.meta.url).toString(),
+    sv: new URL("./flag-assets/se.svg", import.meta.url).toString(),
+    tr: new URL("./flag-assets/tr.svg", import.meta.url).toString()
+};
+
+function FlagIcon({ src }: { src: string | undefined }) {
+    if (!src) {
+        return null;
+    }
+    return (
+        <div className="inline-flex h-3 w-4 items-center justify-center overflow-hidden rounded-sm border border-border-default">
+            <img src={src} className="h-full w-full object-cover" alt="" aria-hidden loading="lazy" />
+        </div>
+    );
 }
 
 export function LanguageDropdownClient({
@@ -35,11 +62,14 @@ export function LanguageDropdownClient({
         <FernDropdown
             value={currentLanguage}
             options={languages.map(({ language, label, slug }) => {
+                const flagSrc = FLAG_SVGS[language];
+                const icon = <FlagIcon src={flagSrc} key={`${language}-flag`} />;
                 return {
                     type: "value" as const,
                     label,
                     value: language,
-                    href: slug
+                    href: slug,
+                    icon: flagSrc ? icon : undefined
                 };
             })}
             contentProps={{
@@ -48,7 +78,7 @@ export function LanguageDropdownClient({
             side="bottom"
             align={isDesktop ? "start" : "center"}
             triggerAsChild={false}
-            className="fern-language-selector w-full lg:w-auto"
+            className="fern-language-selector w-full justify-center lg:w-auto"
             radioGroupProps={{
                 className: "fern-language-selector-radio-group"
             }}
@@ -61,25 +91,13 @@ export function LanguageDropdownClient({
             }}
             lang={lang}
         >
-            <div
-                className={cn("language-dropdown-trigger hidden h-9", {
-                    "lg:flex": !useDenseLayout
-                })}
-                data-testid="language-dropdown"
-            >
-                <p className="language-item-title w-fit">{currentLanguageItem.label}</p>
+            <div className="language-dropdown-trigger h-9" data-testid="language-dropdown">
+                <div className="inline-flex items-center gap-2">
+                    <FlagIcon src={FLAG_SVGS[currentLanguageItem.language]} />
+                    <p className="language-item-title w-fit">{currentLanguageItem.label}</p>
+                </div>
                 <ChevronDown className="size-icon" />
             </div>
-
-            <FernSelectionItem
-                title={currentLanguageItem.label}
-                dense
-                endIcon={<ChevronsUpDown className="size-icon" />}
-                className={cn("language-dropdown-trigger", {
-                    "lg:hidden!": !useDenseLayout
-                })}
-                testId="language-dropdown"
-            />
         </FernDropdown>
     );
 }
