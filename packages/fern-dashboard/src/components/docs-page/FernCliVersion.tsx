@@ -4,7 +4,9 @@ import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
+import { getFernVersionUpdateInfo } from "@/app/services/dal/github/getFernVersionUpdateInfo";
 import type { DocsUrl } from "@/utils/types";
+import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { FernCliVersionDisplay } from "./FernCliVersionDisplay";
 
 /**
@@ -25,5 +27,25 @@ export async function FernCliVersion({ orgName, docsUrl }: { orgName: Auth0OrgNa
     const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
     const baseBranch = "sourceRepo" in githubAuthStateResult ? githubAuthStateResult.sourceRepo?.baseBranch : undefined;
 
-    return <FernCliVersionDisplay orgName={orgName} docsUrl={docsUrl} githubUrl={githubUrl} baseBranch={baseBranch} />;
+    if (githubUrl == null || baseBranch == null) {
+        return null;
+    }
+
+    const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
+
+    if (!fernVersionInfoResult.ok) {
+        return null;
+    }
+
+    return (
+        <DocsSiteAttribute name="Fern CLI Version">
+            <FernCliVersionDisplay
+                orgName={orgName}
+                docsUrl={docsUrl}
+                githubUrl={githubUrl}
+                baseBranch={baseBranch}
+                fernVersionInfo={fernVersionInfoResult.result}
+            />
+        </DocsSiteAttribute>
+    );
 }

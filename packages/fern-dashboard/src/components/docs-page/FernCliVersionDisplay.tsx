@@ -1,31 +1,22 @@
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getFernVersionUpdateInfo } from "@/app/services/dal/github/getFernVersionUpdateInfo";
+import type { GetFernVersionUpdateInfoResult } from "@/app/services/dal/github/getFernVersionUpdateInfo";
 import type { DocsUrl } from "@/utils/types";
 import { FernIcon } from "../theme/FernIcon";
 import { UpgradeFernButton } from "./UpgradeFernButton";
 
-export async function FernCliVersionDisplay({
+export function FernCliVersionDisplay({
     githubUrl,
     docsUrl,
     baseBranch,
-    orgName
+    orgName,
+    fernVersionInfo
 }: {
-    githubUrl?: string;
+    githubUrl: string;
     docsUrl: DocsUrl;
-    baseBranch?: string;
+    baseBranch: string;
     orgName: Auth0OrgName;
+    fernVersionInfo: GetFernVersionUpdateInfoResult;
 }) {
-    if (githubUrl == null || baseBranch == null) {
-        return null;
-    }
-    const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
-
-    if (!fernVersionInfoResult.ok) {
-        return null;
-    }
-
-    const fernVersionInfo = fernVersionInfoResult.result;
-
     return (
         <div className="text-gray-1100 flex items-center gap-2">
             <FernIcon className="size-5" fill="fill-gray-800" /> {fernVersionInfo?.current}

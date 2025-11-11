@@ -45,11 +45,17 @@ export async function DocsSiteOverviewCard({
                                 <GithubSource docsUrl={docsUrl} />
                             </Suspense>
                         </DocsSiteAttribute>
-                        <DocsSiteAttribute name="Fern CLI Version">
-                            <Suspense fallback={<Skeleton className="h-6 w-24" />}>
-                                <FernCliVersion orgName={orgName} docsUrl={docsUrl} />
-                            </Suspense>
-                        </DocsSiteAttribute>
+                        <Suspense
+                            fallback={
+                                // Create a skeleton that matches DocsSiteAttribute layout
+                                <div className="flex w-fit flex-col gap-2">
+                                    <Skeleton className="h-5 w-32" />
+                                    <Skeleton className="h-6 w-24" />
+                                </div>
+                            }
+                        >
+                            <FernCliVersion orgName={orgName} docsUrl={docsUrl} />
+                        </Suspense>
                         <DownloadFernDocsButton docsUrl={docsUrl} />
                         <PublishToGitHubButton docsUrl={docsUrl} docsSiteName={docsSite.title ?? "Docs"} />
                     </div>
