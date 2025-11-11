@@ -53,10 +53,64 @@ export default async function checkGitRepository(request: { docsSiteUrl: string 
     }
 
     try {
-        // Paginate through all repositories for the authenticated bot user
+        // First check if the owner is an organization the bot has access to
+        // If so, check org repos directly (more reliable than /user/repos)
+        try {
+            const orgResponse = await octokit.request("GET /users/{username}", {
+                username: demoCreationBotOwner
+            });
+
+            // If it's an organization, use org repos endpoint
+            if (orgResponse.data.type === "Organization") {
+                let page = 1;
+                const perPage = 100;
+
+                while (true) {
+                    const response = await octokit.request("GET /orgs/{org}/repos", {
+                        org: demoCreationBotOwner,
+                        per_page: perPage,
+                        page,
+                        type: "all", // Include both public and private repos
+                        sort: "created",
+                        direction: "desc" // Most recent first
+                    });
+
+                    const repos = response.data;
+
+                    // Check if our expected repo name is in this page
+                    const matchingRepo = repos.find((repo) => repo.name === expectedRepoName);
+
+                    if (matchingRepo) {
+                        return {
+                            success: true,
+                            exists: true,
+                            repoUrl: matchingRepo.html_url,
+                            owner: matchingRepo.owner.login,
+                            repoName: matchingRepo.name
+                        };
+                    }
+
+                    // If we got fewer repos than perPage, we've reached the last page
+                    if (repos.length < perPage) {
+                        break;
+                    }
+
+                    page++;
+                }
+
+                // Repo not found in org
+                return {
+                    success: true,
+                    exists: false
+                };
+            }
+        } catch (orgError) {
+            console.warn("Failed to check org repos, falling back to user repos:", orgError);
+        }
+
+        // Fallback: Paginate through all repositories for the authenticated bot user
         // Use GET /user/repos (authenticated) instead of GET /users/{username}/repos (public only)
         // This is required to see private repositories
-        // We paginate through all pages until we find our repo or exhaust all pages
         let page = 1;
         const perPage = 100;
 

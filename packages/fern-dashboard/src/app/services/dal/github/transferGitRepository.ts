@@ -42,8 +42,10 @@ export default async function transferGitRepository(request: {
     const octokit = octokitResult.octokit;
 
     try {
-        // Transfer the repository to the new owner
-        const transferResponse = await octokit.request("POST /repos/{owner}/{repo}/transfer", {
+        // Direct transfer from current owner to new owner
+        console.log(`Transferring from ${request.currentOwner} to ${request.newOwner}`);
+
+        const response = await octokit.request("POST /repos/{owner}/{repo}/transfer", {
             owner: request.currentOwner,
             repo: request.repoName,
             new_owner: request.newOwner,
@@ -52,7 +54,8 @@ export default async function transferGitRepository(request: {
             }
         });
 
-        const newRepoUrl = transferResponse.data.html_url;
+        const newRepoUrl = response.data.html_url;
+        console.log(`Transfer complete - repo now at ${newRepoUrl}`);
 
         return {
             success: true,

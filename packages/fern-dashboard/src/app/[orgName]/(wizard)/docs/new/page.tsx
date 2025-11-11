@@ -18,6 +18,7 @@ import {
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import ConfirmScreen from "./ConfirmScreen";
+import LoaderScreen from "./LoaderScreen";
 import UploadForm from "./UploadForm";
 
 export interface WizardFormData {
@@ -37,6 +38,7 @@ export default function NewDocsWizardPage() {
     const [showExitDialog, setShowExitDialog] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [sessionId, setSessionId] = useState<string | null>(null);
     const [fernDocsDownloadUrl, setFernDocsDownloadUrl] = useState<string | undefined>(undefined);
     const [githubRepoUrl, setGithubRepoUrl] = useState<string | undefined>(undefined);
     const [formData, setFormData] = useState<WizardFormData>({
@@ -59,13 +61,21 @@ export default function NewDocsWizardPage() {
             setIsLoading(true);
             setError(null);
 
+            // Generate a unique session ID for streaming
+            const newSessionId = `session-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+            setSessionId(newSessionId);
+
             try {
                 const response = await fetch("/api/onboarding-docs", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ ...formData, orgName })
+                    body: JSON.stringify({
+                        ...formData,
+                        orgName,
+                        sessionId: newSessionId
+                    })
                 });
 
                 if (!response.ok) {
@@ -73,26 +83,28 @@ export default function NewDocsWizardPage() {
                     throw new Error(errorData.message || "Failed to create documentation");
                 }
 
-                const result = await response.json();
-
-                // Store the download URL if available
-                if (result.fernDocsDownloadUrl) {
-                    setFernDocsDownloadUrl(result.fernDocsDownloadUrl);
-                }
-
-                // Store the GitHub repo URL if available
-                if (result.githubRepoUrl) {
-                    setGithubRepoUrl(result.githubRepoUrl);
-                }
-
-                setCurrentStep("confirmation");
+                // Response will just confirm streaming started
+                // Actual results come through the LoaderScreen's onComplete callback
             } catch (err) {
                 console.error("Error creating docs:", err);
                 setError(err instanceof Error ? err.message : "An unexpected error occurred");
-            } finally {
                 setIsLoading(false);
             }
         }
+    }
+
+    function handleStreamComplete(result: { url: string; fernDocsDownloadUrl?: string; githubRepoUrl?: string }) {
+        // Store the results from the stream
+        if (result.fernDocsDownloadUrl) {
+            setFernDocsDownloadUrl(result.fernDocsDownloadUrl);
+        }
+        if (result.githubRepoUrl) {
+            setGithubRepoUrl(result.githubRepoUrl);
+        }
+
+        // Navigate to confirmation screen
+        setIsLoading(false);
+        setCurrentStep("confirmation");
     }
 
     async function handlePublishToGithub() {
@@ -188,7 +200,24 @@ export default function NewDocsWizardPage() {
                 </div>
             </div>
             <AnimatePresence mode="wait">
-                {currentStep === "docsSiteInfo" && (
+                {isLoading ? (
+                    <motion.div
+                        key="loaderScreen"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative z-10 flex w-full flex-1 items-center justify-center"
+                    >
+                        <LoaderScreen
+                            wizardFormData={formData}
+                            orgName={orgName}
+                            showLogs={true}
+                            sessionId={sessionId || undefined}
+                            onComplete={handleStreamComplete}
+                        />
+                    </motion.div>
+                ) : currentStep === "docsSiteInfo" ? (
                     <motion.div
                         key="uploadForm"
                         initial={{ opacity: 0 }}
@@ -205,8 +234,7 @@ export default function NewDocsWizardPage() {
                             error={error}
                         />
                     </motion.div>
-                )}
-                {currentStep === "confirmation" && (
+                ) : currentStep === "confirmation" ? (
                     <motion.div
                         key="confirmScreen"
                         initial={{ opacity: 0 }}
@@ -223,7 +251,7 @@ export default function NewDocsWizardPage() {
                             onPublishToGithub={handlePublishToGithub}
                         />
                     </motion.div>
-                )}
+                ) : null}
             </AnimatePresence>
 
             {/* Exit confirmation dialog */}
@@ -231,7 +259,7 @@ export default function NewDocsWizardPage() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Exit wizard?</DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="pb-10">
                             Are you sure you want to exit? Your progress will not be saved.
                         </DialogDescription>
                     </DialogHeader>

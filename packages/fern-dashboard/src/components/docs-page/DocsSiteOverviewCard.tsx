@@ -8,12 +8,10 @@ import Card from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { DocsSiteLink } from "./DocsSiteLink";
-import { DownloadFernDocsButton } from "./DownloadFernDocsButton";
 import { DocsSiteImageServer } from "./docs-site-image/DocsSiteImageServer";
 import { SkeletonDocsSiteImage } from "./docs-site-image/SkeletonDocsSiteImage";
 import { FernCliVersion } from "./FernCliVersion";
 import { GithubSource } from "./GithubSource";
-import { PublishToGitHubButton } from "./PublishToGitHubButton";
 
 export async function DocsSiteOverviewCard({
     docsSite,
@@ -56,8 +54,6 @@ export async function DocsSiteOverviewCard({
                         >
                             <FernCliVersion orgName={orgName} docsUrl={docsUrl} />
                         </Suspense>
-                        <DownloadFernDocsButton docsUrl={docsUrl} />
-                        <PublishToGitHubButton docsUrl={docsUrl} docsSiteName={docsSite.title ?? "Docs"} />
                     </div>
                 </div>
             </Card>
