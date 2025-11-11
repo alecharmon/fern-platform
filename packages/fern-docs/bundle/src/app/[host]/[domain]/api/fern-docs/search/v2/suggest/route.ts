@@ -116,7 +116,22 @@ export async function POST(req: NextRequest): Promise<Response> {
         throw new Error(`Ask AI is not enabled for ${domain}`);
     }
 
-    const body = await req.json();
+    let body;
+    let rawBody: string | undefined;
+    try {
+        // Read the raw body first so we can log it if parsing fails
+        rawBody = await req.text();
+        body = JSON.parse(rawBody);
+    } catch (error) {
+        console.error(`[${domain}] Failed to parse request body - possible injection attempt:`, {
+            error: error instanceof Error ? error.message : String(error),
+            headers: Object.fromEntries(req.headers.entries()),
+            url: req.url,
+            rawBody: rawBody?.substring(0, 1000) ?? "[Unable to read body]" // Limit to first 1000 chars to avoid logging huge payloads
+        });
+        return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
+    }
+
     const { algoliaSearchKey } = BodySchema.parse(body);
 
     const isAuthenticated = cookieJar.has(COOKIE_FERN_TOKEN);
