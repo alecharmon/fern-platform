@@ -12,6 +12,7 @@ import { Fragment, useState } from "react";
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { useIsAskAiEnabled } from "@/state/search";
 import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
+import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow } from "./PageActionsDropdownAssets";
 import { OpenAISearchOption, Separator } from "./PageActionsDropdownOptions";
 
 export function PageActionsDropdown({
@@ -109,7 +110,26 @@ export function PageActionsDropdown({
             const { value, label, href } = option;
 
             const baseClassName =
-                "px-2 py-1 rounded-2 text-(color:--grayscale-a11) whitespace-nowrap hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors";
+                "px-2 py-1 rounded-2 text-(color:--grayscale-a11) whitespace-nowrap hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center gap-1.5";
+
+            const getIcon = (optionValue: string) => {
+                switch (optionValue) {
+                    case "copy-page":
+                        return <Copy className="size-icon" />;
+                    case "open-ai-search":
+                        return <SparklesIconHollow />;
+                    case "view-as-markdown":
+                        return <MarkdownIcon />;
+                    case "open-claude":
+                        return <ClaudeIcon />;
+                    case "open-chatgpt":
+                        return <OpenAIIcon />;
+                    case "open-cursor":
+                        return <CursorIcon />;
+                    default:
+                        return null;
+                }
+            };
 
             if (value === "copy-page") {
                 return (
@@ -125,6 +145,7 @@ export function PageActionsDropdown({
                         className={baseClassName}
                         title={t(lang).tooltips?.copyPageMarkdown ?? "Copy this page as Markdown for LLMs"}
                     >
+                        {getIcon(value)}
                         {showCopied ? t(lang).buttons.copied : t(lang).buttons.copyPage}
                     </button>
                 );
@@ -138,6 +159,7 @@ export function PageActionsDropdown({
                         className={baseClassName}
                         title={t(lang).tooltips?.askQuestion ?? "Ask a question about this page"}
                     >
+                        {getIcon(value)}
                         {label}
                     </button>
                 );
@@ -159,6 +181,7 @@ export function PageActionsDropdown({
                         className={baseClassName}
                         title={t(lang).tooltips?.viewMarkdown ?? "View this page as plain text"}
                     >
+                        {getIcon(value)}
                         {label}
                     </a>
                 );
@@ -180,6 +203,7 @@ export function PageActionsDropdown({
                         className={baseClassName}
                         title={t(lang).tooltips?.openClaude ?? "Ask questions about this page"}
                     >
+                        {getIcon(value)}
                         {label}
                     </a>
                 );
@@ -201,6 +225,7 @@ export function PageActionsDropdown({
                         className={baseClassName}
                         title={label}
                     >
+                        {getIcon(value)}
                         {label}
                     </a>
                 );
@@ -218,6 +243,7 @@ export function PageActionsDropdown({
                     className={baseClassName}
                     title={label}
                 >
+                    {getIcon(value)}
                     {label}
                 </button>
             );
@@ -265,8 +291,8 @@ export function PageActionsDropdown({
         return (
             <div
                 className={cn(
-                    "fern-page-actions flex flex-wrap items-center text-sm mt-4 -ml-2",
-                    style === "toolbar" && "fern-toolbar"
+                    "fern-page-actions flex flex-wrap items-center text-sm py-4 -ml-2",
+                    style === "toolbar" && "fern-toolbar mb-0"
                 )}
             >
                 {visibleItems.map((item, i) => (
@@ -302,8 +328,9 @@ export function PageActionsDropdown({
                         >
                             <button
                                 aria-label={t(lang).buttons.moreActions}
-                                className="size-6 rounded-2 text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center justify-center"
+                                className="px-2 py-1 rounded-2 text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center gap-1"
                             >
+                                <span>{t(lang).buttons.moreActions}</span>
                                 <ChevronDown className="size-icon" />
                             </button>
                         </FernDropdown>

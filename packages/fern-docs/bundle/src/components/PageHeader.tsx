@@ -4,6 +4,7 @@ import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { FernBreadcrumbs } from "@fern-docs/components/FernBreadcrumbs";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernLink } from "@fern-docs/components/FernLink";
+import { Separator } from "@fern-docs/components/Separator";
 import { ChevronLeft } from "lucide-react";
 import React from "react";
 import { MdxServerComponent } from "@/mdx/components/server-component";
@@ -124,14 +125,15 @@ export function PageHeader({
             )}
 
             {pageActionOptions && pageActionsStyle === "toolbar" && (
-                <div className="flex">
+                <>
                     <PageActionsDropdown
                         markdownPromise={markdownPromise}
                         pageActionOptions={pageActionOptions}
                         lang={lang}
                         style={pageActionsStyle}
                     />
-                </div>
+                    <Separator />
+                </>
             )}
 
             {children}
