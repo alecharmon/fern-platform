@@ -3,6 +3,7 @@
 import { t } from "@fern-docs/i18n";
 import { X } from "lucide-react";
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 
 import { CopyToClipboardButton } from "./CopyToClipboardButton";
 import { Button } from "./FernButtonV2";
@@ -28,6 +29,11 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
 }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [codeContent, setCodeContent] = useState<string>("");
+    const [mounted, setMounted] = useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
 
     React.useEffect(() => {
         if (open && code) {
@@ -59,11 +65,11 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
         }
     };
 
-    if (!open) {
+    if (!open || !mounted) {
         return null;
     }
 
-    return (
+    const modalContent = (
         <div className="fixed inset-0 top-[var(--header-height)] z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/50" onClick={handleBackdropClick} />
             <div
@@ -98,4 +104,6 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 };
