@@ -4,7 +4,6 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
-import { DocsSiteNavBarItem } from "@/components/docs-page/DocsSiteNavBarItem";
 import { DocsSiteNavBarWithOverflow, type NavItem } from "@/components/docs-page/DocsSiteNavBarWithOverflow";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
@@ -60,23 +59,10 @@ export default async function DocsSiteNavbar({
     }
 
     return (
-        <>
-            <div className="hidden md:flex">
-                {navItems.map((item) => (
-                    <DocsSiteNavBarItem
-                        key={item.title}
-                        title={item.title}
-                        href={item.href}
-                        siteHasGitHubAppInstalled={siteHasGitHubAppInstalled}
-                        siteHasConnectedRepo={siteHasConnectedRepo}
-                    />
-                ))}
-            </div>
-            <DocsSiteNavBarWithOverflow
-                items={navItems}
-                siteHasGitHubAppInstalled={siteHasGitHubAppInstalled}
-                siteHasConnectedRepo={siteHasConnectedRepo}
-            />
-        </>
+        <DocsSiteNavBarWithOverflow
+            items={navItems}
+            siteHasGitHubAppInstalled={siteHasGitHubAppInstalled}
+            siteHasConnectedRepo={siteHasConnectedRepo}
+        />
     );
 }

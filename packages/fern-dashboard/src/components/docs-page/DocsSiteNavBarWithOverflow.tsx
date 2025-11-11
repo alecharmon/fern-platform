@@ -111,7 +111,7 @@ export function DocsSiteNavBarWithOverflow({
     };
 
     return (
-        <div className="relative md:hidden">
+        <div className="relative">
             <div ref={containerRef} className="flex items-center overflow-x-auto">
                 {items.map((item, index) => renderNavItem(item, index))}
             </div>

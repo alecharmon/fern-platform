@@ -52,14 +52,14 @@ export function DocsSiteNavBarItem({
     }, [isSelected, posthog, title, siteHasGitHubAppInstalled, siteHasConnectedRepo]);
 
     const className = cn(
-        "flex flex-col pl-4 pr-4 transition first:pl-0 last:pr-0",
+        "flex flex-col shrink-0 pl-4 pr-4 transition first:pl-0 last:pr-0",
         isSelected ? "text-gray-1100" : "text-gray-900",
         isClickable && "hover:text-gray-1100"
     );
 
     const children = (
         <>
-            <div className="flex pb-3">{title}</div>
+            <div className="flex pb-3 whitespace-nowrap">{title}</div>
             {isSelected && <div className="bg-gray-1100 h-0.5 rounded-full dark:bg-gray-700" />}
         </>
     );
