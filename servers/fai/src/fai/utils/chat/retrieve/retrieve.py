@@ -117,4 +117,4 @@ async def retrieve(
             else:
                 fused = _rrf(bm25_rows, semantic_rows, k=60)
 
-            return fused
+            return fused[:top_k]
