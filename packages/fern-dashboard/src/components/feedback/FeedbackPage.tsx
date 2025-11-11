@@ -82,7 +82,7 @@ export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
         <div className="flex w-full flex-col gap-4">
             <Tabs defaultValue="all">
                 <TabsList>
-                    <TabsTrigger value="all">All Feedback</TabsTrigger>
+                    <TabsTrigger value="all">On-Page Feedback</TabsTrigger>
                     <TabsTrigger value="code-issues">Code Issues</TabsTrigger>
                 </TabsList>
                 <TabsContent value="all">
