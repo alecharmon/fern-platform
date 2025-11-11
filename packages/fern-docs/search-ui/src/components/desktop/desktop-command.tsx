@@ -208,7 +208,7 @@ function DesktopBackButton({
                         <TooltipContent className="shrink-0">
                             <p>
                                 <Kbd className="me-1">Del</Kbd>
-                                <span>{" "}{t(lang).search.toGoBack}</span>
+                                <span> {t(lang).search.toGoBack}</span>
                                 {additionalCommand}
                             </p>
                         </TooltipContent>

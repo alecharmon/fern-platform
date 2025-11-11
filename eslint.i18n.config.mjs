@@ -98,12 +98,12 @@ export default tseslint.config(
                             "^\\/$",
                             // Typographic characters (both HTML entities and actual Unicode chars)
                             "^&mdash;$",
-                            "^\u2014$",  // em dash (—)
+                            "^\u2014$", // em dash (—)
                             "^&ldquo;$",
                             "^&rdquo;$",
-                            "^\u201c$",  // left double quotation mark (")
-                            "^\u201d$",  // right double quotation mark (")
-                            "^\u201d\\.$",  // right quote followed by period
+                            "^\u201c$", // left double quotation mark (")
+                            "^\u201d$", // right double quotation mark (")
+                            "^\u201d\\.$", // right quote followed by period
                             "^\\.\\.\\.$",
                             "^\\.\\.\\..*",
                             "^ctrl\\+.*",

@@ -34,7 +34,9 @@ export const CodeBlockWithClipboardButton: React.FC<PropsWithChildren<CodeBlockW
         >
             {children}
             <div className="absolute right-2 top-2 z-20 flex items-center gap-1 opacity-0 backdrop-blur transition group-hover:opacity-100">
-                {expandable && <ExpandCodeButton className="fern-expand-button" content={code} language={language} lang={lang} />}
+                {expandable && (
+                    <ExpandCodeButton className="fern-expand-button" content={code} language={language} lang={lang} />
+                )}
                 {showFeedbackButton && feedbackButton}
                 <CopyToClipboardButton className="fern-copy-button" content={code} />
             </div>

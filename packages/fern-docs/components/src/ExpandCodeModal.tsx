@@ -1,9 +1,8 @@
 "use client";
 
+import { t } from "@fern-docs/i18n";
 import { X } from "lucide-react";
 import React, { useState } from "react";
-
-import { t } from "@fern-docs/i18n";
 
 import { CopyToClipboardButton } from "./CopyToClipboardButton";
 import { Button } from "./FernButtonV2";
@@ -74,7 +73,7 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
                 <div className="flex-1 overflow-scroll">
                     {isLoading ? (
                         <div className="flex h-32 items-center justify-center">
-                            <div className="text-muted-foreground text-sm">{t(lang).apiReference.loading}</div>
+                            <div className="text-muted-foreground text-sm">{t(lang).status.loading}</div>
                         </div>
                     ) : (
                         <div>
